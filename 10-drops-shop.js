@@ -3,14 +3,20 @@
 
 /* % rơi cơ bản cho từng quái (slot 0-4 của vùng) và boss, với quái bậc Thường */
 const DROP_BASE={
- //        tinh  thuoc qua  dan  huyet
- 0:{tinh:30,thuoc:12,qua:14,dan:3 ,huyet:.3 ,mong:10,vay:8 ,nanh:7 ,nhan:5 },  /* quái 1: nhiều Tinh Hoa */
- 1:{tinh:14,thuoc:30,qua:10,dan:3 ,huyet:.3 ,mong:7 ,vay:10,nanh:8 ,nhan:5 },  /* quái 2: nhiều Linh Thảo */
- 2:{tinh:14,thuoc:12,qua:30,dan:4 ,huyet:.3 ,mong:8 ,vay:8 ,nanh:10,nhan:5 },  /* quái 3: nhiều Linh Quả */
- 3:{tinh:16,thuoc:14,qua:10,dan:10,huyet:.5 ,mong:7 ,vay:7 ,nanh:8 ,nhan:9 },  /* quái 4: nhiều Linh Đan */
- 4:{tinh:18,thuoc:14,qua:8 ,dan:6 ,huyet:1.2,mong:8 ,vay:8 ,nanh:8 ,nhan:10},  /* quái 5: hiếm, dễ ra Huyết */
- boss:{tinh:60,thuoc:45,qua:30,dan:25,huyet:8,mong:30,vay:30,nanh:30,nhan:30}   /* mong/vay/nanh/nhan: nguyên liệu rèn trang bị (xem 12-equip.js) */
+ //        tinh  thuoc qua  dan  huyet   (Tinh Hoa hệ k + Linh Thảo/Quả/Đan/Huyết: dùng cho huyết mạch & balo)
+ 0:{tinh:30,thuoc:12,qua:14,dan:3 ,huyet:.3},  /* quái 1: nhiều Tinh Hoa */
+ 1:{tinh:14,thuoc:30,qua:10,dan:3 ,huyet:.3},  /* quái 2: nhiều Linh Thảo */
+ 2:{tinh:14,thuoc:12,qua:30,dan:4 ,huyet:.3},  /* quái 3: nhiều Linh Quả */
+ 3:{tinh:16,thuoc:14,qua:10,dan:10,huyet:.5},  /* quái 4: nhiều Linh Đan */
+ 4:{tinh:18,thuoc:14,qua:8 ,dan:6 ,huyet:1.2}, /* quái 5: hiếm, dễ ra Huyết */
+ boss:{tinh:60,thuoc:45,qua:30,dan:25,huyet:8}
 };
+/* ===== Nguyên liệu rèn trang bị (xem 12-equip.js) =====
+   Mỗi vùng có 5 quái + 1 boss => 5 nguyên liệu riêng + 1 "Tinh Hoa [tên boss]".
+   Quái thứ s của vùng z chỉ rơi đúng nguyên liệu của nó: id 'zm'+z+'_'+s. Boss rơi 'zb'+z. */
+const ZM_ID=(z,s)=>'zm'+z+'_'+s, ZB_ID=z=>'zb'+z;
+const DROP_MAT=[38,38,38,38,34];   /* % rơi nguyên liệu riêng của quái 1..5 (quái bậc Thường, cấp thấp nhất của vùng) */
+const DROP_BOSS_MAT=65;            /* % rơi Tinh Hoa [boss] khi hạ boss (Trấn Thủ) */
 const DROP_LV=[.85,.95,1.05,1.15,1.25,1.35];  /* nhân theo cấp 1..6 trong vùng (cấp cao rơi tốt hơn) */
 const DROP_ZONE_ITEMS={dan:.04,huyet:.04};     /* Đan, Huyết tăng thêm mỗi vùng sâu (+4%/vùng) */
 const DROP_TIER_NORMAL=[.7,1,1.3,1.7];         /* Yếu / Thường / Tinh Anh / Thống Lĩnh */
@@ -31,6 +37,9 @@ function dropRates(e,bonus){
   if(m.boss){if(k==='tinh')q=1+ti;else if(k==='thuoc'&&ti>=1)q=2}
   out.push({id:k==='tinh'?'mat'+z:k,p,q})
  }
+ /* nguyên liệu rèn trang bị: quái rơi nguyên liệu của chính nó, boss rơi Tinh Hoa của boss */
+ if(m.boss)out.push({id:ZB_ID(z),p:Math.min(95,DROP_BOSS_MAT*DROP_LV[off]*tm*bonus),q:ti>=2?2:1});
+ else out.push({id:ZM_ID(z,slot),p:Math.min(95,DROP_MAT[slot]*DROP_LV[off]*tm*bonus),q:1});
  return out}
 function rollDrops(e,bonus){
  return dropRates(e,bonus).filter(d=>Math.random()*100<d.p).map(d=>({id:d.id,q:d.q}))}

@@ -280,3 +280,15 @@ details.bagbox{margin-left:2px}
 details.bagbox{flex:0 1 auto}
 .bagrow{padding-left:0}
 details.bagbox summary{padding:1px 2px;letter-spacing:-.3px}
+
+/* ===== Chọn bộ rèn ngay trong game (thay cho danh sách của trình duyệt) + khung chỉ số trang bị ===== */
+.eqzone{width:100%;box-sizing:border-box;padding:4px 3px!important;font-size:13px;color:#f6e9e4;border:2px solid #75613b!important;background-color:#20373a!important;background-image:none!important;box-shadow:0 -2px 0 0 #071117,0 2px 0 0 #071117,-2px 0 0 0 #071117,2px 0 0 0 #071117,inset 0 2px 0 0 #92a78f,inset 0 -2px 0 0 #17292d,0 4px 0 0 #03080c!important}
+.eqzlist{max-height:170px;overflow-y:auto;overflow-x:hidden;margin:6px 0 4px;border:3px solid #75613b;background-color:#14272d;scrollbar-width:thin;scrollbar-color:#e8c36d #12262e}
+.eqzlist::-webkit-scrollbar{width:8px}.eqzlist::-webkit-scrollbar-track{background:#12262e}.eqzlist::-webkit-scrollbar-thumb{background:#e8c36d;border:1px solid #071117}
+.eqz{display:flex;justify-content:space-between;gap:6px;padding:5px 8px;border-bottom:2px solid #465044;font-size:12px;cursor:pointer;color:#f6e9e4}
+.eqz.on{background:rgba(114,228,176,.16);color:#72e4b0;font-weight:800}
+.eqsum{text-align:left}
+.eqstat{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:12.5px}
+.eqstat div{display:flex;justify-content:space-between;gap:4px;border-bottom:1px solid rgba(88,62,69,.55)}
+.eqstat div.z{opacity:.4}
+.eqstat b{color:var(--jade)}

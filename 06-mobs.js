@@ -1953,27 +1953,31 @@ function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv
  P.r=relMul(pet.bl,e.m.bl);Q.r=relMul(e.m.bl,pet.bl);P.n='Thú';Q.n=e.m.n;P.w='p';Q.w='m';
  [[P,Q],[Q,P]].forEach(([a,d])=>{if(kv(a,0))d.spd*=1-kv(a,0)*rs(d)/100;if(kv(a,1))d.atk*=1-kv(a,1)/100});
  [P,Q].forEach(c=>{c.sh=kv(c,9)?Math.round(c.mx*kv(c,9)/100):0;c.rv=!!kv(c,14);c.stn=0});
+ if(window.EQFX)EQFX.init(P,Q);
  const first=P.spd>=Q.spd?P:Q,
  push=(c,k,d,t,r)=>ev.push({w:c.w,k,d,r:r||1,hp:Math.max(0,P.hp),mh:Math.max(0,Q.hp),t}),
-  revive=c=>{if(c.hp<=0&&c.rv){c.rv=false;c.hp=Math.round(c.mx*kv(c,14)/100);push(c,'heal',c.hp,'✨ Hồi sinh +'+c.hp+' HP')}},
+  revive=c=>{if(c.hp<=0&&c.rv){c.rv=false;c.hp=Math.round(c.mx*kv(c,14)/100);push(c,'heal',c.hp,'✨ Hồi sinh +'+c.hp+' HP')}else if(c.hp<=0&&c.eqRv){c.eqRv=0;c.hp=Math.max(1,Math.round(c.mx*c.eqRvP/100));push(c,'heal',c.hp,'✨ Hồi sinh +'+c.hp+' HP (Ngọc Hộ Mệnh)')}},
  lo=c=>c.hp<c.mx*.25&&kv(c,16)?1+kv(c,16)/100:1,
  act=(a,d)=>{if(a.hp<=0||d.hp<=0)return;
-  if(a.stn){a.stn=0;push(a,'stun',0,a.n+' bị choáng, mất lượt!');return}
-  if(acc(d,'_em',d.eva)){push(a,'miss',0,d.n+' né được đòn!');return}
-  const cr=acc(a,'_cm',a.crit+kv(a,4)),ig=kv(a,8)/100;
+  if(a.stn){const fz=a.stn===2;a.stn=0;push(a,'stun',0,a.n+(fz?' bị đóng băng, mất lượt!':' bị choáng, mất lượt!'));return}
+  if(window.EQFX&&EQFX.pre(a,d,push))return;
+   if(acc(d,'_em',d.eva)){push(a,'miss',0,d.n+' né được đòn!');if(window.EQFX)EQFX.dodge(a,d,push);return}
+  const cr=(a.eqAC?(a.eqAC=0,true):false)||acc(a,'_cm',a.crit+kv(a,4)),ig=kv(a,8)/100;
    let dm=Math.max(1,Math.round((a.atk*lo(a)+a.mag*.3)*1.6*100/(100+d.def*lo(d)*(1-ig))*a.r*(cr?1.5+kv(a,4)*3/100:1))),guarded=false;
+    if(window.EQFX)dm=EQFX.mod(a,d,dm,cr);
    if(has(d,2)){const cap=Math.round(d.mx*(60-40*Math.min(1,d.e))/100);if(dm>cap){dm=cap;guarded=true}}
    let absorbed=0;if(d.sh>0){absorbed=Math.min(d.sh,dm);d.sh-=absorbed;dm-=absorbed;if(absorbed>0)push(d,'block',absorbed,'🛡️ Khiên hấp thụ '+absorbed+' sát thương')}
-   d.hp-=dm;push(a,cr?'crit':'hit',dm,(cr?'💥 Chí mạng! ':'')+a.n+(dm?' đánh -'+dm:absorbed?' bị khiên chặn hoàn toàn':' đánh -0')+(guarded?' · 🛡️ Chắn đòn':'')+(a.r>1?' (khắc hệ '+BL[a.w==='p'?e.m.bl:pet.bl].h+')':a.r<1?' (bị hệ '+BL[a.w==='p'?e.m.bl:pet.bl].h+' khắc)':''),a.r);
+   d.hp-=dm;push(a,cr?'crit':'hit',dm,(cr?'💥 Chí mạng! ':'')+a.n+(dm?' đánh -'+dm:absorbed?' bị khiên chặn hoàn toàn':' đánh -0')+(guarded?' · 🛡️ Chắn đòn':'')+(window.EQFX?EQFX.note():'')+(a.r>1?' (khắc hệ '+BL[a.w==='p'?e.m.bl:pet.bl].h+')':a.r<1?' (bị hệ '+BL[a.w==='p'?e.m.bl:pet.bl].h+' khắc)':''),a.r);
   if(kv(a,12)){const heal=Math.min(a.mx-a.hp,Math.round(dm*kv(a,12)/100));if(heal>0){a.hp+=heal;push(a,'heal',heal,'🩸 Hút máu +'+heal+' HP')}}
   if(kv(a,3)&&dm>0&&d.hp>0&&acc(a,'_lm',kv(a,3))){const x=Math.round(dm*.5);d.hp-=x;push(a,'hit',x,'⚡ Liên kích -'+x)}
   if(kv(d,7)&&dm){const x=Math.max(1,Math.round(dm*kv(d,7)/100));a.hp-=x;push(d,'hit',x,'↩ Phản đòn -'+x)}
+  if(window.EQFX)EQFX.after(a,d,dm,cr,push);
   revive(d);revive(a);
   if(d.hp>0&&acc(a,'_sm',a.stun*rs(d)))d.stn=1};
  for(let r=1;r<=14&&P.hp>0&&Q.hp>0;r++){
   act(first,first===P?Q:P);act(first===P?Q:P,first);
   [[P,Q],[Q,P]].forEach(([a,d])=>{if(a.hp>0&&d.hp>0&&kv(a,11)){const b=Math.max(1,Math.round(a.atk*kv(a,11)*rs(d)/100));d.hp-=b;push(a,'hit',b,'🔥 Thiêu đốt -'+b);revive(d)}});
-  [P,Q].forEach(c=>{if(c.hp>0&&P.hp>0&&Q.hp>0&&c.regen){const heal=Math.min(c.mx-c.hp,Math.round(c.mx*c.regen/100));if(heal>0){c.hp+=heal;push(c,'heal',heal,c.n+' hồi sức +'+heal+' HP')}}})}
+  [P,Q].forEach(c=>{if(c.hp>0&&P.hp>0&&Q.hp>0&&c.regen){const heal=Math.min(c.mx-c.hp,Math.round(c.mx*c.regen/100));if(heal>0){c.hp+=heal;push(c,'heal',heal,c.n+' hồi sức +'+heal+' HP')}}});if(window.EQFX&&P.hp>0&&Q.hp>0)EQFX.round(P,Q,r,push)}
  return{ev,win:Q.hp<=0||(P.hp>0&&P.hp/P.mx>Q.hp/Q.mx),maxP:P.mx,maxM:Q.mx,first:first===P}}/*@@E*/
 
 /* ===== Màu độc quyền 17 vùng + hiệu ứng đòn theo hệ ===== */
