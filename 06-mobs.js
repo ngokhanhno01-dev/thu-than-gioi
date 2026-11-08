@@ -1839,7 +1839,7 @@ function drawMobDetails(ctx,m,T){
  function getMobSprite(m){
   const url=VAN_KIEP_MOB_SPRITE_DATA[m.n];if(!url)return null;
   let entry=mobSpriteCache.get(m.n);if(entry)return entry;
-  entry={state:'loading',image:new Image(),bounds:null};mobSpriteCache.set(m.n,entry);
+  entry={state:'loading',image:new Image(),bounds:null,t0:Date.now()};mobSpriteCache.set(m.n,entry);
   entry.image.onload=()=>{try{entry.bounds=measureMobBounds(entry.image);entry.state=entry.bounds?'ready':'error'}catch(_){entry.state='error'}};
   entry.image.onerror=()=>{entry.state='error'};entry.image.src=url;return entry;
  }
@@ -1857,6 +1857,7 @@ function drawMobDetails(ctx,m,T){
    const boss=!!m.boss,tier=rank&&rank.n,leader=!boss&&tier==='Thống Lĩnh',elite=!boss&&tier==='Tinh Anh';
    const target=Math.round((boss?150:leader?140:elite?124:tier==='Yếu'?108:116)*MOB_DRAW_SCALE);
    const entry=getMobSprite(m),useSprite=!!entry&&entry.state==='ready';
+   if(entry&&entry.state==='loading'&&Date.now()-entry.t0<3000)return;
    mobCtx.clearRect(0,0,128,128);mobCtx.imageSmoothingEnabled=false;
    if(!useSprite)drawCreatureBody(mobCtx,m,T);
    const source=useSprite?entry.image:mobLayer;
@@ -2106,7 +2107,7 @@ async function explore(){busy=true;stopReq=false;let iv=0;
   let k=0;iv=setInterval(()=>{const d=$('xd');if(d)d.textContent='.'.repeat(1+(++k%3))},400);
   $('xp-stop').onclick=()=>{stopReq=true;$('xp-stop').disabled=true;$('xp-stop').textContent='Đang dừng...'};
   await waitS(3200);clearInterval(iv);if(stopReq)break;
-  const e=spawn(),why=WHY[e.m.n]||'Thú đụng độ một con quái hoang dã.';
+  const e=spawn(),why=WHY[e.m.n]||'Thú đụng độ một con quái hoang dã.';try{getMobSprite(e.m)}catch(_){}
   xp.innerHTML='<div style="font-size:30px">'+(e.m.boss?'👑':'⚠️')+'</div><div style="font-weight:800;font-size:15px;margin:4px 0">Gặp '+nm(e)+' · '+VAN_KIEP_ZONES[e.m.zone].name+' · Cấp '+e.lv+'!</div><div style="max-width:300px;line-height:1.5;color:#ffc978">'+why+'</div>';
   xp.style.boxShadow=e.tr.n==='Thường'?'':'inset 0 0 0 3px '+e.tr.c;
   await wait(1700);xp.style.display='none';xp.style.boxShadow='';

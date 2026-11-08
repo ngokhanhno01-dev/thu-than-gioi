@@ -162,7 +162,8 @@ function battleHudExtra(e){
  const pb=_heBadge('mob-pt','mob-pe'),mb=_heBadge('mob-mt','mob-me');
  if(pb)pb.innerHTML=ph?_chip(ph,HE_COL[ph]||'#fff').replace('margin-right:3px;',''):'';
  if(mb)mb.innerHTML=mh?_chip(mh,HE_COL[mh]||'#fff').replace('margin-right:3px;',''):'';
- const rb=document.getElementById('mob-run');if(rb)rb.style.top='60px'}
+ const rb=document.getElementById('mob-run');if(rb)rb.style.top='60px';
+ try{if(window.VanKiepSprites&&pet)VanKiepSprites.getSheet(pet.bl,pet.sp)}catch(e){}}
 
 /* ===== Tô màu chữ quan trọng (tên vùng, hệ, vật phẩm, loài, Xu/EXP...) =====
    Tự quét các khung chữ (nhật ký, bảng chỉ số, kết quả trận, thông báo...) và tô màu từ khóa.
@@ -236,3 +237,16 @@ const _hlObs=new MutationObserver(ms=>{
 _hlObs.observe(document.body,{childList:true,subtree:true,characterData:true});
 document.querySelectorAll(HL_SEL).forEach(e=>_hlQueue.add(e));
 _hlTimer=setTimeout(hlFlush,30);
+
+/* ===== Sửa lỗi nháy "ngoại hình cũ" lúc nở trứng / vào trận =====
+   Nguyên nhân: game vẽ thú bằng sheet theo bậc tuổi (VanKiepSprites.getSheet). Sheet này cần tải xong ảnh mới dựng được,
+   trong lúc chờ thì code cũ vẽ tạm ảnh dự phòng (spriteFor = ảnh trưởng thành tĩnh) -> hiện đúng 1 khoảnh khắc rồi mới
+   đổi sang ngoại hình thật. Ở đây: khi sheet chưa sẵn sàng thì KHÔNG trả ảnh dự phòng nữa (chờ sheet thật). */
+const _spriteFor0=spriteFor,_SPRITE_WAIT={complete:false,naturalWidth:0};
+spriteFor=function(bl,ei){
+ const api=window.VanKiepSprites;
+ if(api){
+  let sh=null,ok=true;
+  try{sh=api.getSheet(bl,ei)}catch(e){ok=false}   /* getSheet cũng là lệnh bắt đầu tải ảnh */
+  if(ok&&!sh)return _SPRITE_WAIT}
+ return _spriteFor0(bl,ei)};
