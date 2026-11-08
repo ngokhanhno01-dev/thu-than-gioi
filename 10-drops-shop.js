@@ -52,37 +52,73 @@ function buffLine(){
  const o=Object.keys(buffs).filter(k=>buffs[k]>0).map(k=>BUFF_NAME[k]+' ×'+BUFF_MUL[k]+' ('+buffs[k]+' trận thắng)');
  return o.length?o.join(' · '):'Chưa có thuốc nào đang dùng'}
 for(const P of POTIONS){
- ITEMS[P.id]={n:P.n,i:P.i,d:P.d,use:()=>{buffs[P.buff]+=POTION_TURNS;log('🧪 Dùng <b>'+P.n+'</b>: '+BUFF_NAME[P.buff]+' ×'+BUFF_MUL[P.buff]+', còn <b>'+buffs[P.buff]+'</b> trận thắng.')}};
+ ITEMS[P.id]={n:P.n,i:P.i,d:P.d,use:()=>{buffs[P.buff]+=POTION_TURNS;log('🧪 Dùng <b>'+P.n+'</b>: '+BUFF_NAME[P.buff]+' ×'+BUFF_MUL[P.buff]+', còn <b>'+buffs[P.buff]+'</b> trận thắng.');
+  popToast('🧪 ĐÃ DÙNG THUỐC',P.i+' <b>'+P.n+'</b><br>'+BUFF_NAME[P.buff]+' ×'+BUFF_MUL[P.buff]+' · còn <b>'+buffs[P.buff]+'</b> trận thắng','ok')}};
  SELL_PRICE[P.id]=Math.round(P.price/4)}
 
-/* ===== Cửa hàng ===== */
-function shopList(){return POTIONS.map(P=>({id:P.id,p:P.price}))}
+/* ===== Thông báo nổi (toast) dùng chung cho cửa hàng + balo ===== */
+let _ptEl=null,_ptTimer=0;
+function popToast(title,body,type,ms){
+ if(!_ptEl){
+  const st=document.createElement('style');
+  st.textContent='#pop-toast{position:fixed;left:50%;top:14%;transform:translate(-50%,-12px) scale(.96);width:min(84vw,300px);box-sizing:border-box;padding:10px 12px;text-align:center;background:#0d1d22;border:3px solid #e8c36d;border-radius:10px;box-shadow:0 0 0 2px #071117,0 8px 26px rgba(0,0,0,.7);z-index:100000;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;color:#f6e9e4}'+
+   '#pop-toast.show{opacity:1;transform:translate(-50%,0) scale(1)}'+
+   '#pop-toast.ok{border-color:#72e4b0}#pop-toast.bad{border-color:#ff7654}'+
+   '#pop-toast .tt{font-size:15px;font-weight:800;margin-bottom:4px}#pop-toast.ok .tt{color:#72e4b0}#pop-toast.bad .tt{color:#ff7654}'+
+   '#pop-toast .tb{font-size:13px;line-height:1.4}';
+  document.head.appendChild(st);
+  _ptEl=document.createElement('div');_ptEl.id='pop-toast';document.body.appendChild(_ptEl)}
+ _ptEl.className='show '+(type||'ok');
+ _ptEl.innerHTML='<div class="tt">'+title+'</div><div class="tb">'+body+'</div>';
+ clearTimeout(_ptTimer);_ptTimer=setTimeout(()=>_ptEl.classList.remove('show'),ms||2600)}
+
+/* ===== Cửa hàng: hàng giới hạn + làm mới theo thời gian ===== */
+const SHOP_REFRESH_MIN=30;                          /* cứ bao nhiêu PHÚT thì cửa hàng nhập lại hàng — sửa tại đây */
+const SHOP_STOCK={bt_exp:3,bt_xu:5,bt_drop:3};      /* số lượng tối đa mỗi lần nhập của từng món — sửa tại đây */
+const SHOP_REFRESH_MS=SHOP_REFRESH_MIN*60000;
+const shopStock={};
+let shopNextAt=Date.now()+SHOP_REFRESH_MS;
+function shopRestock(){for(const P of POTIONS)shopStock[P.id]=SHOP_STOCK[P.id]||0}
+shopRestock();
+function shopCountdown(){
+ const s=Math.max(0,Math.ceil((shopNextAt-Date.now())/1000));
+ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
+function shopList(){return POTIONS.map(P=>({id:P.id,p:P.price,s:shopStock[P.id],m:SHOP_STOCK[P.id]||0}))}
 let shopEl=null;
-function shopMsg(h){const d=document.getElementById('shop-msg');if(d)d.innerHTML=h}
+function shopIsOpen(){return !!shopEl&&shopEl.style.display!=='none'}
+setInterval(()=>{
+ if(Date.now()>=shopNextAt){
+  shopRestock();shopNextAt=Date.now()+SHOP_REFRESH_MS;
+  log('🏪 Cửa hàng vừa <b>nhập hàng mới</b>!');
+  if(shopIsOpen()){renderShop();popToast('🔄 CỬA HÀNG ĐÃ LÀM MỚI','Hàng đã được nhập lại đầy đủ!','ok')}}
+ const cd=document.getElementById('shop-cd');if(cd)cd.textContent=shopCountdown()},1000);
+
 function shopBuy(id,p,n){
- if(gold<p){shopMsg('<span style="color:#ff7654">Không đủ xu (cần '+p+').</span>');return}
- n=Math.min(n,Math.floor(gold/p));
+ const st=shopStock[id]||0,I=ITEMS[id];
+ if(st<=0){popToast('❌ HẾT HÀNG','<b>'+I.n+'</b> đã bán hết.<br>Chờ làm mới sau <b>'+shopCountdown()+'</b>.','bad');return}
+ if(gold<p){popToast('⚠️ KHÔNG ĐỦ XU','Cần <b>'+p+'</b> xu, bạn đang có <b>'+gold+'</b> xu.','bad');return}
+ n=Math.min(n,st,Math.floor(gold/p));
  const a=addItem(id,n);
- if(!a){shopMsg('<span style="color:#ff7654">Balo đầy.</span>');return}
- gold-=a*p;stats();
- log('🏪 Mua <b>'+ITEMS[id].n+'</b> ×'+a+' (−'+a*p+' xu).');
- shopMsg('<span style="color:#72e4b0">Đã mua '+ITEMS[id].n+' ×'+a+' (−'+a*p+' xu). Mở 🎒 Balo để dùng.'+(a<n?' Balo chỉ còn chỗ cho '+a+'.':'')+'</span>');
+ if(!a){popToast('🎒 BALO ĐẦY','Không còn chỗ để cất <b>'+I.n+'</b>.','bad');return}
+ gold-=a*p;shopStock[id]=st-a;stats();
+ log('🏪 Mua <b>'+I.n+'</b> ×'+a+' (−'+a*p+' xu).');
+ popToast('✅ MUA THÀNH CÔNG',I.i+' <b>'+I.n+'</b> ×'+a+'<br>−'+a*p+' xu · còn '+shopStock[id]+' trong cửa hàng<br><span style="font-size:11px;color:#cdbfc4">Mở 🎒 Balo để dùng.'+(a<n?' (Balo chỉ đủ chỗ cho '+a+')':'')+'</span>','ok');
  renderShop()}
 function renderShop(){
  if(!shopEl)return;
  const cnt2=id=>bag.reduce((x,s)=>x+(s.id===id?s.n:0),0);
  let h='<div style="font-size:15px;font-weight:900;color:#ffd24a">🏪 Cửa hàng</div>'+
   '<div style="font-size:11.5px;margin:2px 0">🪙 <b style="color:#ffd24a">'+gold+'</b> xu · 🎒 '+bag.length+'/'+BAG_SLOTS+' ô</div>'+
-  '<div style="font-size:10.5px;color:#72e4b0;margin-bottom:6px">'+buffLine()+'</div>';
- h+=shopList().map(it=>{const I=ITEMS[it.id];
-  return'<div style="padding:6px 8px;margin:4px 0;border:1px solid rgba(168,92,78,.4);border-radius:9px;background:rgba(40,26,34,.7);text-align:left">'+
+  '<div style="font-size:10.5px;color:#72e4b0;margin-bottom:2px">'+buffLine()+'</div>'+
+  '<div style="font-size:11px;color:#8fd0ff;margin-bottom:6px">🔄 Làm mới hàng sau <b id="shop-cd">'+shopCountdown()+'</b></div>';
+ h+=shopList().map(it=>{const I=ITEMS[it.id],out=it.s<=0,dis=out?' disabled':'';
+  return'<div style="padding:6px 8px;margin:4px 0;border:1px solid rgba(168,92,78,.4);border-radius:9px;background:rgba(40,26,34,.7);text-align:left'+(out?';opacity:.6':'')+'">'+
   '<div style="display:flex;align-items:center;gap:7px"><span style="font-size:22px;flex:none">'+I.i+'</span>'+
   '<div style="flex:1;min-width:0;line-height:1.3"><b style="font-size:12.5px;color:#f6e9e4">'+I.n+'</b> <span style="font-size:10.5px;color:#9a8a90">(có '+cnt2(it.id)+')</span><div style="font-size:10.5px;color:#cdbfc4">'+I.d+'</div></div></div>'+
-  '<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:5px"><span style="flex:1;font-size:12px;font-weight:800;color:#ffd24a">'+it.p+' xu</span>'+
-  '<button class="shop-b" onclick="shopBuy(\''+it.id+'\','+it.p+',1)">×1</button>'+
-  '<button class="shop-b" onclick="shopBuy(\''+it.id+'\','+it.p+',5)">×5</button></div></div>'}).join('');
- h+='<div id="shop-msg" style="font-size:10.5px;min-height:14px;margin:4px 0"></div>'+
-  '<button class="shop-b" style="width:100%;padding:7px;border-color:#ff7654;background:#a72f42" onclick="closeShop()">Đóng</button>';
+  '<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:5px"><span style="flex:1;font-size:12px;font-weight:800;color:#ffd24a">'+it.p+' xu <span style="font-size:10.5px;font-weight:700;color:'+(out?'#ff7654':'#72e4b0')+'">· '+(out?'Hết hàng':'Còn '+it.s+'/'+it.m)+'</span></span>'+
+  '<button class="shop-b"'+dis+' onclick="shopBuy(\''+it.id+'\','+it.p+',1)">×1</button>'+
+  '<button class="shop-b"'+dis+' onclick="shopBuy(\''+it.id+'\','+it.p+',5)">×5</button></div></div>'}).join('');
+ h+='<button class="shop-b" style="width:100%;padding:7px;margin-top:6px;border-color:#ff7654;background:#a72f42" onclick="closeShop()">Đóng</button>';
  shopEl.innerHTML=h}
 function openShop(){
  if(!hatched||!pet)return;
@@ -90,7 +126,31 @@ function openShop(){
   shopEl=document.createElement('div');shopEl.id='shop-ov';
   shopEl.style.cssText='position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;background:#100a11;color:#f6e9e4;text-align:center;padding:12px 10px;box-sizing:border-box';
   const st=document.createElement('style');
-  st.textContent='.shop-b{width:54px;flex:none;padding:5px 0;margin:0;font-size:13px;font-weight:800;line-height:1.1}#shop-ov>*{width:100%;max-width:360px;box-sizing:border-box}';
+  st.textContent='.shop-b{width:54px;flex:none;padding:5px 0;margin:0;font-size:13px;font-weight:800;line-height:1.1}.shop-b:disabled{opacity:.4;cursor:not-allowed}#shop-ov>*{width:100%;max-width:360px;box-sizing:border-box}';
   document.head.appendChild(st);document.body.appendChild(shopEl)}
  shopEl.style.display='flex';renderShop()}
 function closeShop(){if(shopEl)shopEl.style.display='none'}
+
+/* ===== HUD trong trận: buff (trái) + hệ (phải), nằm dưới thanh máu ===== */
+const HE_COL={Kim:'#f2d06a','Mộc':'#5be07a','Thủy':'#5bb8ff','Hỏa':'#ff6a3a','Thổ':'#d9a05a','Huyễn':'#c08aff'};
+const BUFF_HUD={exp:['EXP','#72e4b0'],xu:['Xu','#ffd24a'],drop:['Rơi','#c08aff']};
+function _hudRow(anchorId,rowId){
+ let r=document.getElementById(rowId);
+ if(!r){
+  const a=document.getElementById(anchorId);if(!a)return null;
+  r=document.createElement('div');r.id=rowId;
+  r.style.cssText="display:flex;justify-content:space-between;align-items:center;gap:4px;margin-top:1px;min-height:13px;font-family:'VT323',monospace;font-size:13px;line-height:1;white-space:nowrap;overflow:hidden;text-shadow:1px 1px 0 #071117";
+  r.innerHTML='<span class="hl" style="min-width:0;overflow:hidden"></span><span class="hr" style="flex:none"></span>';
+  a.parentNode.appendChild(r)}
+ return r}
+function battleHudExtra(e){
+ const heTag=h=>h?'<b style="color:'+(HE_COL[h]||'#fff')+'">Hệ '+h+'</b>':'';
+ const pr=_hudRow('mob-pt','mob-pbar2'),mr=_hudRow('mob-mt','mob-mbar2');
+ if(pr){
+  const bs=Object.keys(buffs).filter(k=>buffs[k]>0).map(k=>'<b style="color:'+BUFF_HUD[k][1]+'">'+BUFF_HUD[k][0]+'×'+BUFF_MUL[k]+'</b>').join(' ');
+  pr.querySelector('.hl').innerHTML=bs;
+  pr.querySelector('.hr').innerHTML=heTag(pet&&BL[pet.bl]?BL[pet.bl].h:'')}
+ if(mr){
+  mr.querySelector('.hl').innerHTML='';
+  mr.querySelector('.hr').innerHTML=heTag(e&&e.m&&BL[e.m.bl]?BL[e.m.bl].h:'')}
+ const rb=document.getElementById('mob-run');if(rb)rb.style.top='60px'}

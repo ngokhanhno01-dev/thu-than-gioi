@@ -2033,7 +2033,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const o=$('mob'),g=$('
  ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))*buffMul('exp')),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))*buffMul('xu')),
  lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=e.tr.fw,fL=Math.min(Math.floor(fame),e.tr.fl),TE=1.6+n*.9,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false;
  o.style.display='block';const rb=$('mob-run');rb.style.display='block';
- $('mob-pn').textContent=pn+' · Cấp '+level;const RP=REG[pet.sp],RM=REG[e.m.sp];paintUI(RP,RM);$('mob-mn').innerHTML=(e.m.boss?'👑 ':'')+nm(e)+' · Cấp '+e.lv;if(e.tr.n!=='Thường')$('mob-mh').parentNode.style.borderColor=e.tr.c;
+ $('mob-pn').textContent=pn+' · Cấp '+level;const RP=REG[pet.sp],RM=REG[e.m.sp];paintUI(RP,RM);$('mob-mn').innerHTML=(e.m.boss?'👑 ':'')+nm(e)+' · Cấp '+e.lv;if(e.tr.n!=='Thường')$('mob-mh').parentNode.style.borderColor=e.tr.c;if(window.battleHudExtra)battleHudExtra(e);
  function fin(flee){if(done)return;done=true;o.style.display='none';rb.style.display='none';
   const res={e,type:flee?'flee':R.win?'win':'lose',drops:[],lv0:level,exp:0,fame:0,gold:0};
   if(flee){const c=Math.min(gold,Math.round((6+e.lv*.4)*e.tr.rw*.6));gold-=c;res.gold=-c;
