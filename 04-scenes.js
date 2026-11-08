@@ -424,7 +424,7 @@ function sceneDraw(t,k){
 }
 
 /* ===== Balo ===== */
-const BAG_SLOTS=20,STACK=99;
+const BAG_SLOTS=100,STACK=99;
 const SELL_PRICE={qua:3,thuoc:5,dan:10,huyet:150},SELL_MAT=6; /* giá bán tạm, sửa ở đây */
 function sellPrice(id){return SELL_PRICE[id]!==undefined?SELL_PRICE[id]:SELL_MAT}
 const ITEMS={
@@ -441,7 +441,7 @@ function addItem(id,n=1){let left=n;
  renderBag();return n-left}
 function takeSlot(i,n=1){const s=bag[i];if(!s)return;s.n-=n;if(s.n<=0){bag.splice(i,1);bagSel=-1}renderBag()}
 function renderBag(){
- $('bag-sum').textContent='🎒 Balo ('+bag.length+'/'+BAG_SLOTS+' ô)';
+ $('bag-sum').textContent='🎒 '+bag.length+'/'+BAG_SLOTS;
  let h='';for(let i=0;i<BAG_SLOTS;i++){const s=bag[i];
   if(!s){h+='<button class="slot" disabled style="opacity:.35"></button>';continue}
   const it=ITEMS[s.id];h+='<button class="slot'+(i==bagSel?' sel':'')+'" onclick="bagPick('+i+')"><span style="color:'+(it.col||'inherit')+'">'+it.i+'</span><b>'+s.n+'</b></button>'}

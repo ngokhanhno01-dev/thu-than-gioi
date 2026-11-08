@@ -1946,7 +1946,7 @@ function spawn(f){
  tot=tr.tot*easeScale,k=tot/5*(1+3*petGrow(lv)),ps=m.pr.reduce((a,b)=>a+b,0)/5,pr=m.pr.map(v=>v/ps);
  return{m,lv,tr,sec,sc,eased,st:[Math.round(k*pr[0]*8),Math.round(k*pr[1]),Math.round(k*pr[2]),Math.round(k*pr[3]),Math.round(k*pr[4])]}
 } function mkP(){const s=statsOf(pet.bl,pet.pi,pet.base,level),sp=spOfPet(),k={};k[pet.sp]=sp.v;
- return{hp:s.hp,mx:s.hp,atk:s.atk,def:s.def,spd:s.spd,mag:s.mag,eva:s.eva,stun:s.stun,regen:s.regen,crit:0,k,e:sp.e}}
+ return{hp:s.hp,mx:s.hp,atk:s.atk,def:s.def,spd:s.spd,mag:s.mag,eva:s.eva,stun:s.stun,regen:s.regen,crit:s.crit||0,k,e:sp.e}}
 function mkM(e){const m=e.m,x=MX[m.n],me=Math.min(1.1,(m.boss?1:.7)*e.sec),k={},sc=e.sec;x.ks.forEach(i=>k[i]=Math.round(SP17[i].m*me*10)/10);
  return{hp:e.st[0],mx:e.st[0],atk:e.st[1],def:e.st[2],spd:e.st[3],mag:e.st[4],eva:Math.min(45,Math.round(x.eva*sc*10)/10),stun:Math.round(x.stun*sc*10)/10,regen:Math.round(x.regen*sc*10)/10,crit:Math.round(x.crit*sc*10)/10,k,e:me}}
 function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv=(c,i)=>c.k[i]||0,has=(c,i)=>Object.prototype.hasOwnProperty.call(c.k,i),rs=c=>1-kv(c,10)/100;

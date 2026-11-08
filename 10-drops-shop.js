@@ -4,12 +4,12 @@
 /* % rơi cơ bản cho từng quái (slot 0-4 của vùng) và boss, với quái bậc Thường */
 const DROP_BASE={
  //        tinh  thuoc qua  dan  huyet
- 0:{tinh:30,thuoc:12,qua:14,dan:3 ,huyet:.3},  /* quái 1: nhiều Tinh Hoa */
- 1:{tinh:14,thuoc:30,qua:10,dan:3 ,huyet:.3},  /* quái 2: nhiều Linh Thảo */
- 2:{tinh:14,thuoc:12,qua:30,dan:4 ,huyet:.3},  /* quái 3: nhiều Linh Quả */
- 3:{tinh:16,thuoc:14,qua:10,dan:10,huyet:.5},  /* quái 4: nhiều Linh Đan */
- 4:{tinh:18,thuoc:14,qua:8 ,dan:6 ,huyet:1.2}, /* quái 5: hiếm, dễ ra Huyết */
- boss:{tinh:60,thuoc:45,qua:30,dan:25,huyet:8}
+ 0:{tinh:30,thuoc:12,qua:14,dan:3 ,huyet:.3 ,mong:10,vay:8 ,nanh:7 ,nhan:5 },  /* quái 1: nhiều Tinh Hoa */
+ 1:{tinh:14,thuoc:30,qua:10,dan:3 ,huyet:.3 ,mong:7 ,vay:10,nanh:8 ,nhan:5 },  /* quái 2: nhiều Linh Thảo */
+ 2:{tinh:14,thuoc:12,qua:30,dan:4 ,huyet:.3 ,mong:8 ,vay:8 ,nanh:10,nhan:5 },  /* quái 3: nhiều Linh Quả */
+ 3:{tinh:16,thuoc:14,qua:10,dan:10,huyet:.5 ,mong:7 ,vay:7 ,nanh:8 ,nhan:9 },  /* quái 4: nhiều Linh Đan */
+ 4:{tinh:18,thuoc:14,qua:8 ,dan:6 ,huyet:1.2,mong:8 ,vay:8 ,nanh:8 ,nhan:10},  /* quái 5: hiếm, dễ ra Huyết */
+ boss:{tinh:60,thuoc:45,qua:30,dan:25,huyet:8,mong:30,vay:30,nanh:30,nhan:30}   /* mong/vay/nanh/nhan: nguyên liệu rèn trang bị (xem 12-equip.js) */
 };
 const DROP_LV=[.85,.95,1.05,1.15,1.25,1.35];  /* nhân theo cấp 1..6 trong vùng (cấp cao rơi tốt hơn) */
 const DROP_ZONE_ITEMS={dan:.04,huyet:.04};     /* Đan, Huyết tăng thêm mỗi vùng sâu (+4%/vùng) */

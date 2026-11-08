@@ -261,7 +261,7 @@ function renderInfo(){
   const q=pet?pet.q:eggQ,qs='<b style="color:rgb('+QC[q]+')">'+QN[q]+' phẩm</b>';
   if(!src){el.innerHTML='Phẩm chất trứng: '+qs+'<br><small>Huyết mạch được giấu đến lúc trứng nở...</small>';return}
   const B=BL[src.bl],s=statsOf(src.bl,src.pi,src.base,src.a),L=PL[src.pi],upN=(!pv.on&&pet?pet.up||0:0),pe=pur(src.pi+upN*.03),r=x=>Math.round(x*10)/10;
-  const cells=cbAttrs(s,(()=>{const k={};k[src.sp]=spInfo(src.sp,src.pi+upN*.03,q).v;return k})());
+  const cells=cbAttrs(s,(()=>{const k={};k[src.sp]=spInfo(src.sp,src.pi+upN*.03,q).v;return k})(),s.crit);
   el.innerHTML='Trứng '+qs+(pv.on?' <small>(đang xem thử)</small>':'')+'<br>Huyết mạch: <b style="color:rgb('+B.au+')">'+B.n+'</b> · hệ <b>'+B.h+'</b><br>Loài: <b>'+genOf(src.bl,src.sp).name+'</b><br>Độ đậm: <b style="color:var(--gold)">'+L[1]+(upN?' +'+upN:'')+' ('+Math.round(pe*100)+'%)</b><br><small>'+B.tip+' khi Phản Tổ</small><div class="stg">'+cells.map(x=>'<div>'+x[0]+'<b>'+x[1]+'</b></div>').join('')+'</div>';
 }
 function pvSet(k,v){pv.on=true;pv[k]=v;

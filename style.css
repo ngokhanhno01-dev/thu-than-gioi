@@ -252,3 +252,31 @@ body>div[style*="max-width:88vw"]{color:var(--ink)!important;padding:6px 10px!im
 #up-toast.ok{border-color:#3fbf8a}#up-toast.ok .tt{color:#72e4b0}
 #up-toast.bad{border-color:#e34e48}#up-toast.bad .tt{color:#ff8a7a}
 #up-toast.warn{border-color:#e8c36d}#up-toast.warn .tt{color:#f2c76a}
+
+/* ===== Balo 100 ô có thanh cuộn + Trang bị ===== */
+#bag{max-height:38vh;overflow-y:auto;overflow-x:hidden;padding-right:4px}
+.eqbag{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:170px;overflow-y:auto;overflow-x:hidden;padding-right:4px}
+#bag,.eqbag{scrollbar-width:thin;scrollbar-color:#e8c36d #12262e}
+#bag::-webkit-scrollbar,.eqbag::-webkit-scrollbar{width:8px}
+#bag::-webkit-scrollbar-track,.eqbag::-webkit-scrollbar-track{background:#12262e}
+#bag::-webkit-scrollbar-thumb,.eqbag::-webkit-scrollbar-thumb{background:#e8c36d;border:1px solid #071117}
+.eqbag .slot b{font-size:11px}
+.eqhead{display:flex;align-items:center;justify-content:space-between;font-size:12px;margin-bottom:3px;gap:4px}
+.eqhead button{width:auto;padding:2px 6px;font-size:12px}
+.eqtabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px}
+.eqbtns{display:flex;gap:4px;margin-top:5px}.eqbtns button{flex:1}
+.eqslotbtn{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:4px}
+.eqslotbtn button{font-size:16px;padding:3px 0}
+.eqs b{color:var(--gold)!important;font-size:11px}
+.eqs.sel{box-shadow:0 0 0 2px var(--gold)}
+.eqsel{width:100%;box-sizing:border-box;padding:4px;font-size:13px;background:#183036;color:#f6e9e4;border:2px solid #4d533b;border-radius:0}
+.upmsg .ok,.upnote .ok{color:var(--jade)}.upmsg .bad,.upnote .bad,.infobox .bad{color:#ff8a7a}
+/* 4 nút trên cùng vừa màn hình điện thoại */
+.bagrow{flex-wrap:nowrap}
+details.bagbox{margin-left:3px;min-width:0}
+details.bagbox summary{font-size:12px;padding:1px 5px;white-space:nowrap}
+details.bagbox summary{font-size:11px;padding:1px 3px;letter-spacing:-.2px}
+details.bagbox{margin-left:2px}
+details.bagbox{flex:0 1 auto}
+.bagrow{padding-left:0}
+details.bagbox summary{padding:1px 2px;letter-spacing:-.3px}
