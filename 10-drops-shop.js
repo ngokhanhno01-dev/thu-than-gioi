@@ -153,7 +153,7 @@ function _heBadge(anchorId,id){
   b=document.createElement('span');b.id=id;
   b.style.cssText="position:absolute;right:0;font-family:'VT323',monospace;line-height:1;white-space:nowrap";
   a.parentNode.style.position='relative';a.parentNode.appendChild(b)}
- b.style.top=Math.max(0,a.offsetTop-1)+'px';
+ b.style.top=(a.offsetTop+2)+'px';
  return b}
 function battleHudExtra(e){
  const pr=_buffRow();
@@ -163,3 +163,76 @@ function battleHudExtra(e){
  if(pb)pb.innerHTML=ph?_chip(ph,HE_COL[ph]||'#fff').replace('margin-right:3px;',''):'';
  if(mb)mb.innerHTML=mh?_chip(mh,HE_COL[mh]||'#fff').replace('margin-right:3px;',''):'';
  const rb=document.getElementById('mob-run');if(rb)rb.style.top='60px'}
+
+/* ===== Tô màu chữ quan trọng (tên vùng, hệ, vật phẩm, loài, Xu/EXP...) =====
+   Tự quét các khung chữ (nhật ký, bảng chỉ số, kết quả trận, thông báo...) và tô màu từ khóa.
+   Muốn đổi màu: sửa ZONE_COL / HL_ITEM / HL_BL bên dưới. */
+const ZONE_COL=['#8fd8ff','#7fe0c8','#b9a8ff','#6fe3a8','#ffe86a','#a8b0ff','#ffb84a','#9aa0ff','#ffd24a','#a8ffd8','#7affc0','#ff7a6a','#b69cff','#c06aff','#7fc8ff','#ff9ad8','#fff2a0'];
+const HL_ITEM={qua:'#ff8a7a',thuoc:'#72e4b0',dan:'#ffd24a',huyet:'#ff5a6a',bt_exp:'#72e4b0',bt_xu:'#ffd24a',bt_drop:'#c08aff'};
+const HL_BL={ho:'#aebfe0',vu:'#6fc3e0',long:'#6fe08a',tuoc:'#ff8a5a',lan:'#f0c04a',hu:'#d6a8ff'};
+const HL_SEL='#log,#info,#bag-info,#xp,#rates,#pick-desc,#mission,#btn-zone,#zone-list,#pop-toast,#shop-ov,#up-wrap';
+const HL_KW={'Xu':'#ffd24a','EXP':'#72e4b0','Uy danh':'#ffb86b','uy danh':'#ffb86b'};
+let _hlRE=null,_hlMap=null,_hlSpecies=null;
+function _hlEsc(x){return x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+function hlBuild(){
+ const map=Object.assign({},HL_KW);
+ const add=(t,c)=>{if(t&&t.length>1&&!map[t])map[t]=c};
+ try{VAN_KIEP_ZONES.forEach((z,i)=>add(z.name,ZONE_COL[i]))}catch(e){}
+ for(const id in ITEMS){const m=/^mat(\d+)$/.exec(id);add(ITEMS[id].n,m?ZONE_COL[+m[1]]:(HL_ITEM[id]||null))}
+ for(const k in BL)add(BL[k].n,HL_BL[k]||'#fff');
+ if(!_hlSpecies){_hlSpecies={};try{for(let sp=0;sp<EPI.length;sp++)for(const k in BL){const n=genOf(k,sp).name;if(n)_hlSpecies[n]=ZONE_COL[sp]}}catch(e){}}
+ for(const n in _hlSpecies)add(n,_hlSpecies[n]);
+ try{VAN_KIEP_ZONES.forEach((z,i)=>{(z.mobs||[]).forEach(n=>add(n,ZONE_COL[i]));(z.bosses||[]).forEach(n=>add(n,ZONE_COL[i]))})}catch(e){}
+ const names=Object.keys(map).filter(k=>map[k]).sort((a,b)=>b.length-a.length).map(_hlEsc).join('|');
+ const he=Object.keys(HE_COL).join('|'),zs=EPI.map(x=>x[0]).join('|'),qn=QN.join('|');
+ _hlMap=map;
+ _hlRE=new RegExp('(?<![\\p{L}])('+names+')(?![\\p{L}])|(?<=(?:hệ|Khắc|khắc|Bị|bị) )('+he+')(?![\\p{L}])|(?<=Vùng )('+zs+')(?![\\p{L}])|(?<![\\p{L}])('+qn+')(?= \\d)|(?<=trứng )('+qn+')(?=\\))','gu')}
+function _hlPrevText(n){
+ let s=n.previousSibling;
+ if(s&&s.nodeType===3)return s.nodeValue;
+ if(!s&&n.parentNode&&/^(B|SPAN|STRONG)$/.test(n.parentNode.nodeName)){s=n.parentNode.previousSibling;if(s&&s.nodeType===3)return s.nodeValue}
+ return ''}
+function _hlPaint(n,c){
+ const p=n.parentNode;
+ if(p.nodeName==='B'&&p.childNodes.length===1){p.style.color=c;p.classList.add('kw');return}
+ const sp=document.createElement('span');sp.className='kw';sp.style.cssText='color:'+c+';font-weight:700';
+ p.replaceChild(sp,n);sp.appendChild(n)}
+function hlNode(n){
+ const t=n.nodeValue;if(!t||!t.trim())return;
+ const tr=t.trim(),prev=_hlPrevText(n);
+ if(prev){
+  if(HE_COL[tr]&&/(hệ|Khắc|khắc|Bị|bị)\s$/.test(prev)){_hlPaint(n,HE_COL[tr]);return}
+  const zi=EPI.findIndex(x=>x[0]===tr);
+  if(zi>=0&&/Vùng\s$/.test(prev)){_hlPaint(n,ZONE_COL[zi]);return}}
+ const frag=document.createDocumentFragment();let last=0,hit=false;
+ for(const m of t.matchAll(_hlRE)){
+  const c=m[1]?_hlMap[m[1]]:m[2]?HE_COL[m[2]]:m[3]?ZONE_COL[EPI.findIndex(x=>x[0]===m[3])]:'rgb('+QC[QN.indexOf(m[4]||m[5])]+')';
+  if(!c)continue;
+  hit=true;
+  frag.appendChild(document.createTextNode(t.slice(last,m.index)));
+  const sp=document.createElement('span');sp.className='kw';sp.style.cssText='color:'+c+';font-weight:700';sp.textContent=m[0];
+  frag.appendChild(sp);last=m.index+m[0].length}
+ if(!hit)return;
+ frag.appendChild(document.createTextNode(t.slice(last)));
+ n.parentNode.replaceChild(frag,n)}
+function hlProcess(root){
+ let list=[];
+ if(root.nodeType===3)list=[root];
+ else if(root.nodeType===1){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentNode;
+   return(!p||/^(SCRIPT|STYLE|TEXTAREA|INPUT|CANVAS)$/.test(p.nodeName)||(p.classList&&p.classList.contains('kw')))?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT}});
+  while(w.nextNode())list.push(w.currentNode)}
+ for(const n of list)if(n.parentNode&&!(n.parentNode.classList&&n.parentNode.classList.contains('kw')))hlNode(n)}
+const _hlQueue=new Set();let _hlTimer=0;
+function hlFlush(){
+ _hlTimer=0;const q=[..._hlQueue];_hlQueue.clear();
+ try{hlBuild();for(const n of q)if(n.isConnected)hlProcess(n)}catch(e){console.warn('hl',e)}
+ _hlObs.takeRecords()}
+const _hlObs=new MutationObserver(ms=>{
+ for(const m of ms){
+  if(m.type==='characterData'){const p=m.target.parentNode;if(p&&p.closest&&p.closest(HL_SEL))_hlQueue.add(m.target)}
+  else m.addedNodes.forEach(n=>{const e=n.nodeType===1?n:n.parentNode;if(e&&e.closest&&e.closest(HL_SEL))_hlQueue.add(n)})}
+ if(_hlQueue.size&&!_hlTimer)_hlTimer=setTimeout(hlFlush,30)});
+_hlObs.observe(document.body,{childList:true,subtree:true,characterData:true});
+document.querySelectorAll(HL_SEL).forEach(e=>_hlQueue.add(e));
+_hlTimer=setTimeout(hlFlush,30);
