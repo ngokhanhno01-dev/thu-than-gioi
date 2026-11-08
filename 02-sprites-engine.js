@@ -98,13 +98,13 @@
     ctx.imageSmoothingEnabled = false;
 
     if (stage === 0) {
-      ctx.drawImage(baby, 0, 0, baby.naturalWidth, baby.naturalHeight, 10 + sway, 11 + bob, 44, 44);
+      ctx.drawImage(baby, 0, 0, baby.naturalWidth || baby.width, baby.naturalHeight || baby.height, 10 + sway, 11 + bob, 44, 44);
       return;
     }
 
     if (stage === 1) {
       // Keep the juvenile base opaque and crisp; stage anatomy adds the growing features.
-      ctx.drawImage(baby, 0, 0, baby.naturalWidth, baby.naturalHeight, 4 + sway, 7 + bob, 56, 54);
+      ctx.drawImage(baby, 0, 0, baby.naturalWidth || baby.width, baby.naturalHeight || baby.height, 4 + sway, 7 + bob, 56, 54);
       return;
     }
 
@@ -112,7 +112,7 @@
     const x = Math.round((FRAME_SIZE - size) / 2 + sway);
     const y = stage === 3 ? 2 + bob : 5 + bob;
     const height = stage === 3 ? 60 : 57;
-    ctx.drawImage(adult, 0, 0, adult.naturalWidth, adult.naturalHeight, x, y, size, height);
+    ctx.drawImage(adult, 0, 0, adult.naturalWidth || adult.width, adult.naturalHeight || adult.height, x, y, size, height);
   }
 
   function drawBloodlineShape(ctx, key, color, dark, stage, frame) {
@@ -368,6 +368,28 @@
     return record.image.complete && record.image.naturalWidth > 0;
   }
 
+  // Ngưỡng alpha: >= SOLID_ALPHA thì thành đặc (255), thấp hơn thì xóa. Tăng số này để viền gọn hơn, giảm để giữ nhiều chi tiết mờ hơn.
+  const SOLID_ALPHA = 110;
+  const solidCache = new WeakMap();
+  function solidify(image) {
+    if (solidCache.has(image)) return solidCache.get(image);
+    let out = image;
+    try {
+      const w = image.naturalWidth || image.width, h = image.naturalHeight || image.height;
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      const cx = c.getContext("2d", { willReadFrequently: true });
+      cx.imageSmoothingEnabled = false;
+      cx.drawImage(image, 0, 0);
+      const data = cx.getImageData(0, 0, w, h), d = data.data;
+      for (let i = 3; i < d.length; i += 4) d[i] = d[i] >= SOLID_ALPHA ? 255 : 0;
+      cx.putImageData(data, 0, 0);
+      out = c;
+    } catch (e) { out = image; }
+    solidCache.set(image, out);
+    return out;
+  }
+
   function getSheet(key, elementIndex) {
     if (!BLOODLINES.includes(key) || !Number.isInteger(elementIndex) || elementIndex < 0 || elementIndex >= ELEMENTS.length) {
       throw new Error("Unknown bloodline or element index");
@@ -379,21 +401,31 @@
     const adult = imageRecord(`${key}-${elementIndex}.png`);
     const baby = imageRecord(`baby-${key}.png`);
     if (!imageIsReady(adult) || !imageIsReady(baby)) return null;
+    // Làm đặc ảnh thú: pixel bán trong suốt (viền mờ, hào quang) -> đặc hoặc xóa, để thú nét như quái.
+    const adultSolid = solidify(adult.image);
+    const babySolid = solidify(baby.image);
 
     const canvas = document.createElement("canvas");
     canvas.width = SHEET_SIZE;
     canvas.height = SHEET_SIZE;
-    const ctx = canvas.getContext("2d", { alpha: true });
+    const ctx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
     ctx.imageSmoothingEnabled = false;
 
     for (let stage = 0; stage < STAGE_COUNT; stage += 1) {
       for (let frame = 0; frame < FRAME_COUNT; frame += 1) {
         ctx.save();
         ctx.translate(frame * FRAME_SIZE, stage * FRAME_SIZE);
-        drawFrame(ctx, key, elementIndex, stage, frame, adult.image, baby.image);
+        drawFrame(ctx, key, elementIndex, stage, frame, adultSolid, babySolid);
         ctx.restore();
       }
     }
+
+    // Làm đặc nốt các hiệu ứng nhỏ do code tự vẽ (alpha thấp) để toàn bộ thú nét đều.
+    try {
+      const sd = ctx.getImageData(0, 0, SHEET_SIZE, SHEET_SIZE), dd = sd.data;
+      for (let i = 3; i < dd.length; i += 4) dd[i] = dd[i] >= SOLID_ALPHA ? 255 : 0;
+      ctx.putImageData(sd, 0, 0);
+    } catch (e) { /* giữ nguyên nếu trình duyệt không cho đọc pixel */ }
 
     sheets.set(id, canvas);
     return canvas;
