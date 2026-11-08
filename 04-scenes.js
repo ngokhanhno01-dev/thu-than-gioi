@@ -424,7 +424,9 @@ function sceneDraw(t,k){
 }
 
 /* ===== Balo ===== */
-const BAG_SLOTS=12,STACK=20;
+const BAG_SLOTS=20,STACK=99;
+const SELL_PRICE={qua:3,thuoc:5,dan:10,huyet:150},SELL_MAT=6; /* giá bán tạm, sửa ở đây */
+function sellPrice(id){return SELL_PRICE[id]!==undefined?SELL_PRICE[id]:SELL_MAT}
 const ITEMS={
   qua:{n:'Linh Quả',i:'🍎',d:'Quả chứa linh khí. Thú ăn vào no bụng, uy danh +2.',use:()=>{const f=addFame(2);stats();log('🍎 Thú ăn Linh Quả, uy danh +'+f+'.')}},
  thuoc:{n:'Thảo Dược',i:'🌿',d:'Dùng chữa bệnh cho thú (áp dụng khi có yêu cầu bệnh).',use:null},
@@ -444,17 +446,28 @@ function renderBag(){
   if(!s){h+='<button class="slot" disabled style="opacity:.35"></button>';continue}
   const it=ITEMS[s.id];h+='<button class="slot'+(i==bagSel?' sel':'')+'" onclick="bagPick('+i+')"><span style="color:'+(it.col||'inherit')+'">'+it.i+'</span><b>'+s.n+'</b></button>'}
  $('bag').innerHTML=h;
- const s=bag[bagSel];$('bag-info').innerHTML=s?'<b style="color:var(--gold)">'+ITEMS[s.id].n+'</b> ×'+s.n+'<br><small>'+ITEMS[s.id].d+'</small>':'<small>Chạm vào ô để xem vật phẩm.</small>'}
+ const s=bag[bagSel];$('bag-info').innerHTML=s?'<b style="color:var(--gold)">'+ITEMS[s.id].n+'</b> ×'+s.n+'<br><small>'+ITEMS[s.id].d+'</small><br><small>Giá bán: '+sellPrice(s.id)+' xu/cái</small>':'<small>Chạm vào ô để xem vật phẩm.</small>'}
 function bagPick(i){bagSel=i;renderBag()}
 function bagUse(){const s=bag[bagSel];if(!s)return;const it=ITEMS[s.id];
  if(!it.use){log('🎒 <b>'+it.n+'</b> chưa dùng được lúc này.');return}
  if(!hatched){log('🎒 Cần nở thú trước.');return}
  it.use();takeSlot(bagSel)}
-function bagDrop(){if(bag[bagSel])takeSlot(bagSel,1)}
+function bagDrop(){const s=bag[bagSel];if(!s){log('🎒 Hãy chạm vào một ô vật phẩm trước.');return}
+ const inp=$('sell-qty');let q=Math.floor(Number(inp.value));
+ if(!q||q<1){log('🗑️ Hãy nhập số lượng lớn hơn 0.');return}
+ if(q>s.n)q=s.n;
+ const it=ITEMS[s.id];takeSlot(bagSel,q);
+ log('🗑️ Vứt <b>'+it.n+'</b> ×'+q+'.');inp.value=1}
+function bagSell(){const s=bag[bagSel];if(!s){log('🎒 Hãy chạm vào một ô vật phẩm trước.');return}
+ const inp=$('sell-qty');let q=Math.floor(Number(inp.value));
+ if(!q||q<1){log('💰 Hãy nhập số lượng lớn hơn 0.');return}
+ if(q>s.n)q=s.n;
+ const it=ITEMS[s.id],g=q*sellPrice(s.id);
+ takeSlot(bagSel,q);gold+=g;stats();
+ log('💰 Bán <b>'+it.n+'</b> ×'+q+', nhận <b style="color:var(--gold)">'+g+'</b> xu.');
+ inp.value=1}
 function dropRand(){const sp=pet?pet.sp:Math.floor(Math.random()*17),r=Math.random();
  return r<.02?'huyet':r<.35?'qua':r<.6?'thuoc':r<.8?'dan':'mat'+sp}
-function bagTest(){const id=dropRand(),a=addItem(id,1+Math.floor(Math.random()*3));
- log(a?'🎒 Nhặt được <b>'+ITEMS[id].n+'</b> ×'+a+'.':'🎒 Balo đầy!')}
 window.arena=function(){if(!hatched)return;
   if(Math.random()<.55){gold+=12;const f=addFame(5);log('⚔️ Thắng trận! Xu +12, uy danh +'+f+'.');
   if(Math.random()<.4){const id=dropRand();log(addItem(id,1)?'🎒 Nhặt được <b>'+ITEMS[id].n+'</b>.':'🎒 Balo đầy, bỏ lại <b>'+ITEMS[id].n+'</b>!')}}
