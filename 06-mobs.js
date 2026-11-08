@@ -1905,7 +1905,7 @@ function drawPet(g,cx,by,size,T,dx,al){const api=window.VanKiepSprites,frame=api
  const clean=PET_CLEAN&&api&&stage>=2&&api.getAdultImage?api.getAdultImage(pet.bl,pet.sp):null;
  if(clean)spriteCtx.drawImage(clean,0,0,128,128);else if(sh&&fr)spriteCtx.drawImage(sh,fr.sx,fr.sy,fr.sw,fr.sh,0,0,128,128);else{const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)spriteCtx.drawImage(im,0,0,128,128)}
   const key=pet.bl+':'+pet.sp+':'+stage+':'+(clean?'c':frame);let box=petBoundsCache.get(key);if(!box){const measured=measurePetAlphaBounds(spriteLayer);if(measured){box=measured;petBoundsCache.set(key,box)}else box={x:0,y:0,w:128,h:128}}
- const drawSize=size*PET_DRAW_SCALE,unit=drawSize/128,bob=Math.round(Math.sin(T*3)*1.5*PET_DRAW_SCALE);
+ const bodySpan=Math.max(box.w,box.h,1),drawSize=size*PET_DRAW_SCALE*128/bodySpan,unit=drawSize/128,bob=Math.round(Math.sin(T*3)*1.5*PET_DRAW_SCALE);
  g.fillStyle='rgba(0,0,0,.4)';g.beginPath();g.ellipse(cx,by+1,size*.36*PET_DRAW_SCALE,6*PET_DRAW_SCALE,0,0,7);g.fill();
   g.save();g.globalAlpha=al;g.imageSmoothingEnabled=false;g.filter='drop-shadow(0 0 1px rgba(10,6,14,.9))';g.translate(cx+dx*PET_DRAW_SCALE,by+bob);g.scale(PFLIP,1);g.drawImage(spriteLayer,-(box.x+box.w/2)*unit,-(box.y+box.h)*unit,drawSize,drawSize);g.restore()}
 const PFLIP=-1;
