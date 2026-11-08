@@ -1898,13 +1898,16 @@ function drawMobDetails(ctx,m,T){
   }catch(_){/* A single malformed sprite must never stop the battle animation loop. */}
  }
 
+/* PET_CLEAN=true: ở bậc trưởng thành, vẽ thẳng ảnh gốc của thú (nét như quái, không có hoa văn bậc). Đặt false để quay về kiểu cũ. */
+const PET_CLEAN=true;
 function drawPet(g,cx,by,size,T,dx,al){const api=window.VanKiepSprites,frame=api?Math.floor(T*5)%api.frameCount:0,stage=stageOf(level),sh=api?api.getSheet(pet.bl,pet.sp):null,fr=api?api.frameRect(stage,frame):null;
  spriteCtx.clearRect(0,0,128,128);spriteCtx.imageSmoothingEnabled=false;
- if(sh&&fr)spriteCtx.drawImage(sh,fr.sx,fr.sy,fr.sw,fr.sh,0,0,128,128);else{const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)spriteCtx.drawImage(im,0,0,128,128)}
-  const key=pet.bl+':'+pet.sp+':'+stage+':'+frame;let box=petBoundsCache.get(key);if(!box){const measured=measurePetAlphaBounds(spriteLayer);if(measured){box=measured;petBoundsCache.set(key,box)}else box={x:0,y:0,w:128,h:128}}
+ const clean=PET_CLEAN&&api&&stage>=2&&api.getAdultImage?api.getAdultImage(pet.bl,pet.sp):null;
+ if(clean)spriteCtx.drawImage(clean,0,0,128,128);else if(sh&&fr)spriteCtx.drawImage(sh,fr.sx,fr.sy,fr.sw,fr.sh,0,0,128,128);else{const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)spriteCtx.drawImage(im,0,0,128,128)}
+  const key=pet.bl+':'+pet.sp+':'+stage+':'+(clean?'c':frame);let box=petBoundsCache.get(key);if(!box){const measured=measurePetAlphaBounds(spriteLayer);if(measured){box=measured;petBoundsCache.set(key,box)}else box={x:0,y:0,w:128,h:128}}
  const drawSize=size*PET_DRAW_SCALE,unit=drawSize/128,bob=Math.round(Math.sin(T*3)*1.5*PET_DRAW_SCALE);
  g.fillStyle='rgba(0,0,0,.4)';g.beginPath();g.ellipse(cx,by+1,size*.36*PET_DRAW_SCALE,6*PET_DRAW_SCALE,0,0,7);g.fill();
-  g.save();g.globalAlpha=al;g.imageSmoothingEnabled=false;g.filter='saturate(1.3) contrast(1.12) drop-shadow(0 0 1.5px rgba(10,6,14,.95))';g.translate(cx+dx*PET_DRAW_SCALE,by+bob);g.scale(PFLIP,1);g.drawImage(spriteLayer,-(box.x+box.w/2)*unit,-(box.y+box.h)*unit,drawSize,drawSize);g.restore()}
+  g.save();g.globalAlpha=al;g.imageSmoothingEnabled=false;g.filter='drop-shadow(0 0 1px rgba(10,6,14,.9))';g.translate(cx+dx*PET_DRAW_SCALE,by+bob);g.scale(PFLIP,1);g.drawImage(spriteLayer,-(box.x+box.w/2)*unit,-(box.y+box.h)*unit,drawSize,drawSize);g.restore()}
 const PFLIP=-1;
 /*@@S*/const MX=Object.fromEntries(M.map(m=>[m.n,{eva:m.eva,crit:m.crit,stun:m.stun,regen:m.regen,ks:m.ks,t:m.t}])); const TRQ=[{n:'Yếu',c:'#8fd0ff',tot:50,sec:.85,p:45,rw:.6,lm:.6,fl:0,fw:1},{n:'Thường',c:'#f6e9e4',tot:60,sec:1,p:30,rw:1,lm:1,fl:1,fw:3},{n:'Tinh Anh',c:'#ffb020',tot:72,sec:1.15,p:15,rw:1.5,lm:1.5,fl:2,fw:5},{n:'Thống Lĩnh',c:'#ff4055',tot:86,sec:1.35,p:7,rw:2.5,lm:2.5,fl:3,fw:8}],
 TRB=[{n:'Trấn Thủ',c:'#c9a0ff',tot:100,sec:.875,p:50,rw:1.5,lm:1.5,fl:3,fw:12},{n:'Chúa Tể',c:'#ff5a6a',tot:110,sec:1,p:35,rw:4,lm:2.5,fl:6,fw:25},{n:'Thiên Ma',c:'#ffd24a',tot:132,sec:1.175,p:15,rw:7,lm:4,fl:10,fw:45}];

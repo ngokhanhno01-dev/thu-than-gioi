@@ -408,7 +408,7 @@
     const canvas = document.createElement("canvas");
     canvas.width = SHEET_SIZE;
     canvas.height = SHEET_SIZE;
-    const ctx = canvas.getContext("2d", { alpha: true, willReadFrequently: true });
+    const ctx = canvas.getContext("2d", { alpha: true });
     ctx.imageSmoothingEnabled = false;
 
     for (let stage = 0; stage < STAGE_COUNT; stage += 1) {
@@ -419,13 +419,6 @@
         ctx.restore();
       }
     }
-
-    // Làm đặc nốt các hiệu ứng nhỏ do code tự vẽ (alpha thấp) để toàn bộ thú nét đều.
-    try {
-      const sd = ctx.getImageData(0, 0, SHEET_SIZE, SHEET_SIZE), dd = sd.data;
-      for (let i = 3; i < dd.length; i += 4) dd[i] = dd[i] >= SOLID_ALPHA ? 255 : 0;
-      ctx.putImageData(sd, 0, 0);
-    } catch (e) { /* giữ nguyên nếu trình duyệt không cho đọc pixel */ }
 
     sheets.set(id, canvas);
     return canvas;
@@ -510,6 +503,12 @@
     frameCount: FRAME_COUNT,
     stageCount: STAGE_COUNT,
     getSheet,
+    // Ảnh gốc 128x128 của thú trưởng thành (đã làm đặc) để vẽ trực tiếp, nét như quái. Trả về null nếu ảnh chưa tải xong.
+    getAdultImage(key, elementIndex) {
+      if (!BLOODLINES.includes(key) || !Number.isInteger(elementIndex) || elementIndex < 0 || elementIndex >= ELEMENTS.length) return null;
+      const rec = imageRecord(`${key}-${elementIndex}.png`);
+      return imageIsReady(rec) ? solidify(rec.image) : null;
+    },
     waitForSheet,
     frameRect,
     buildAtlas,
