@@ -71,25 +71,26 @@ function shopBuy(id,p,n){
 function renderShop(){
  if(!shopEl)return;
  const cnt2=id=>bag.reduce((x,s)=>x+(s.id===id?s.n:0),0);
- let h='<div style="font-size:16px;font-weight:900;color:#ffd24a;margin-bottom:2px">🏪 Cửa hàng</div>'+
-  '<div style="font-size:12px;margin-bottom:4px">🪙 Xu: <b style="color:#ffd24a">'+gold+'</b> · 🎒 '+bag.length+'/'+BAG_SLOTS+' ô</div>'+
-  '<div style="font-size:11px;color:#72e4b0;margin-bottom:8px">'+buffLine()+'</div>';
+ let h='<div style="font-size:15px;font-weight:900;color:#ffd24a">🏪 Cửa hàng</div>'+
+  '<div style="font-size:11.5px;margin:2px 0">🪙 <b style="color:#ffd24a">'+gold+'</b> xu · 🎒 '+bag.length+'/'+BAG_SLOTS+' ô</div>'+
+  '<div style="font-size:10.5px;color:#72e4b0;margin-bottom:6px">'+buffLine()+'</div>';
  h+=shopList().map(it=>{const I=ITEMS[it.id];
-  return'<div style="display:flex;align-items:center;gap:6px;padding:7px;margin:4px 0;border:1px solid rgba(168,92,78,.4);border-radius:9px;background:rgba(16,10,18,.5);text-align:left">'+
-  '<div style="font-size:24px;width:30px;text-align:center">'+I.i+'</div>'+
-  '<div style="flex:1;min-width:0;font-size:11px;line-height:1.35"><b style="font-size:12.5px;color:#f6e9e4">'+I.n+'</b> <span style="color:#9a8a90">(có '+cnt2(it.id)+')</span><br>'+I.d+'<br><span style="color:#ffd24a">'+it.p+' xu</span></div>'+
+  return'<div style="padding:6px 8px;margin:4px 0;border:1px solid rgba(168,92,78,.4);border-radius:9px;background:rgba(40,26,34,.7);text-align:left">'+
+  '<div style="display:flex;align-items:center;gap:7px"><span style="font-size:22px;flex:none">'+I.i+'</span>'+
+  '<div style="flex:1;min-width:0;line-height:1.3"><b style="font-size:12.5px;color:#f6e9e4">'+I.n+'</b> <span style="font-size:10.5px;color:#9a8a90">(có '+cnt2(it.id)+')</span><div style="font-size:10.5px;color:#cdbfc4">'+I.d+'</div></div></div>'+
+  '<div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-top:5px"><span style="flex:1;font-size:12px;font-weight:800;color:#ffd24a">'+it.p+' xu</span>'+
   '<button class="shop-b" onclick="shopBuy(\''+it.id+'\','+it.p+',1)">×1</button>'+
-  '<button class="shop-b" onclick="shopBuy(\''+it.id+'\','+it.p+',5)">×5</button></div>'}).join('');
- h+='<div id="shop-msg" style="font-size:11px;min-height:16px;margin:6px 0"></div>'+
-  '<button class="shop-b" style="width:100%;padding:9px;border-color:#ff7654;background:#a72f42" onclick="closeShop()">Đóng</button>';
+  '<button class="shop-b" onclick="shopBuy(\''+it.id+'\','+it.p+',5)">×5</button></div></div>'}).join('');
+ h+='<div id="shop-msg" style="font-size:10.5px;min-height:14px;margin:4px 0"></div>'+
+  '<button class="shop-b" style="width:100%;padding:7px;border-color:#ff7654;background:#a72f42" onclick="closeShop()">Đóng</button>';
  shopEl.innerHTML=h}
 function openShop(){
  if(!hatched||!pet)return;
  if(!shopEl){
   shopEl=document.createElement('div');shopEl.id='shop-ov';
-  shopEl.style.cssText='position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;background:rgba(16,10,17,.95);color:#f6e9e4;text-align:center;padding:14px 12px;box-sizing:border-box';
+  shopEl.style.cssText='position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;background:#100a11;color:#f6e9e4;text-align:center;padding:12px 10px;box-sizing:border-box';
   const st=document.createElement('style');
-  st.textContent='.shop-b{padding:7px 12px;border-radius:9px;border:1px solid #72e4b0;background:#2a1e26;color:#fff;font-weight:800;font-size:13px;cursor:pointer}#shop-ov>*{width:100%;max-width:360px;box-sizing:border-box}';
+  st.textContent='.shop-b{width:54px;flex:none;padding:5px 0;margin:0;font-size:13px;font-weight:800;line-height:1.1}#shop-ov>*{width:100%;max-width:360px;box-sizing:border-box}';
   document.head.appendChild(st);document.body.appendChild(shopEl)}
  shopEl.style.display='flex';renderShop()}
 function closeShop(){if(shopEl)shopEl.style.display='none'}
