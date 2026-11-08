@@ -2030,7 +2030,7 @@ function impact(g,fx,tt){
  for(let i=0;i<9;i++){const a=rd()*6.28,r=(14+q*(34+rd()*30))*pw;sigP(g,R[2],tx+Math.cos(a)*r,ty+Math.sin(a)*r-q*12,2.6+rd()*2,a+q*3,B,A)}
  g.restore()}
 function battle(e){return new Promise(resolve=>{busy=true;const o=$('mob'),g=$('mob-c').getContext('2d'),R=sim(e),n=R.ev.length,sp=spOfPet(),b=e.tr.rw,
- ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))),
+ ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))*buffMul('exp')),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))*buffMul('xu')),
  lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=e.tr.fw,fL=Math.min(Math.floor(fame),e.tr.fl),TE=1.6+n*.9,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false;
  o.style.display='block';const rb=$('mob-run');rb.style.display='block';
  $('mob-pn').textContent=pn+' · Cấp '+level;const RP=REG[pet.sp],RM=REG[e.m.sp];paintUI(RP,RM);$('mob-mn').innerHTML=(e.m.boss?'👑 ':'')+nm(e)+' · Cấp '+e.lv;if(e.tr.n!=='Thường')$('mob-mh').parentNode.style.borderColor=e.tr.c;
@@ -2039,10 +2039,9 @@ function battle(e){return new Promise(resolve=>{busy=true;const o=$('mob'),g=$('
   if(flee){const c=Math.min(gold,Math.round((6+e.lv*.4)*e.tr.rw*.6));gold-=c;res.gold=-c;
    log('🏃 Chạy khỏi <b>'+nm(e)+'</b> (Cấp '+e.lv+'), mất '+c+' xu.')}
   else if(R.win){gold+=gd;addExp(ex);lossStreak=0;res.gold=gd;res.exp=ex;log('🗡️ Thắng <b>'+nm(e)+'</b> (Cấp '+e.lv+')! Xu +'+gd+', EXP +'+ex+'.');
-   const dc=Math.min(.95,(e.m.boss?.2:.3)*e.tr.rw*(1+(pet.sp===13?sp.v/100:0)));let nd=(Math.random()<dc?1:0)+(e.m.boss&&e.tr.rw>=4&&Math.random()<dc?1:0);
-   for(let i=0;i<nd;i++){const id=dropRand(),ok=addItem(id,1);res.drops.push({n:ITEMS[id].n,ok});log(ok?'🎒 Nhặt được <b>'+ITEMS[id].n+'</b>.':'🎒 Balo đầy, bỏ lại <b>'+ITEMS[id].n+'</b>!')}}
+   rollDrops(e,(1+(pet.sp===13?sp.v/100:0))*buffMul('drop')).forEach(d=>{const a=addItem(d.id,d.q),ok=a>0,nn=ITEMS[d.id].n+(a>1?' ×'+a:'');res.drops.push({n:nn,ok});log(ok?'🎒 Nhặt được <b>'+nn+'</b>.':'🎒 Balo đầy, bỏ lại <b>'+ITEMS[d.id].n+'</b>!')})}
   else{lossStreak++;res.streak=lossStreak;log('💥 Thua <b>'+nm(e)+'</b> (Cấp '+e.lv+').'+(lossStreak>=2?' 🍀 Lần sau đối thủ sẽ yếu hơn.':''))}
-  res.lv1=level;stats();resolve(res)}
+  res.lv1=level;if(R.win&&!flee)buffTick();stats();resolve(res)}
  rb.onclick=ev=>{ev.stopPropagation();fin(true)};
  o.onclick=()=>{const T=(performance.now()-t0)/1000;if(T<TE)t0-=(TE-T)*1000;else fin()};
  (function L(){if(done)return;const T0=performance.now(),T=(T0-t0)/1000,tt=T0/1000;
@@ -2140,6 +2139,6 @@ renderZones();ratesLine();
 {const gr=$('btn-train').parentNode,hb=document.createElement('button');hb.id='btn-hunt';hb.style.cssText='display:block;width:100%;margin-top:6px;padding:6px;border-radius:9px;border:1px solid #ffd24a;background:#3a2a33;color:#ffd24a;font-weight:700;font-size:12px;cursor:pointer';
  const up=()=>hb.textContent='👑 Săn boss: '+(hunt?'BẬT':'TẮT');up();hb.onclick=()=>{hunt=!hunt;ratesLine();up();log('👑 Săn boss '+(hunt?'bật: có thể gặp boss theo uy danh.':'tắt: sẽ không gặp boss.'))};gr.parentNode.insertBefore(hb,gr.nextSibling)}
 window.train=function(){if(!hatched||busy)return;explore()};
-window.arena=function(){if(!busy)_a()};window.shop=function(){if(!busy)_s()};
+window.arena=function(){if(!busy)_a()};window.shop=function(){if(!busy)openShop()};window.TRQ_=TRQ;window.TRB_=TRB;
 })();
 
