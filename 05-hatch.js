@@ -60,9 +60,9 @@ const SP17=[
  {n:'Hồi sinh',m:40,c:.22,t:v=>'Hồi sinh 1 lần mỗi trận với '+v+'% HP'},
  {n:'Ngộ tính',m:60,c:0,t:v=>'Thám hiểm hiệu quả +'+v+'%'},
  {n:'Bất khuất',m:50,c:.22,t:v=>'HP dưới 25%: Công và Thủ +'+v+'%'}];
-function spInfo(sp,pi,q){const e=Math.min(1.2,PL[pi][0]*(1+q*.05)),d=SP17[sp],v=Math.round(d.m*e*10)/10;
+function spInfo(sp,pi,q){const e=Math.min(1.2,pur(pi)*(1+q*.05)),d=SP17[sp],v=Math.round(d.m*e*10)/10;
   return{e,v,name:d.n,text:d.t(v,e),c:d.c*e}}
-function spOfPet(){return pet?spInfo(pet.sp,pet.pi,pet.q):null}
+function spOfPet(){return pet?spInfo(pet.sp,pet.pi+(pet.up||0)*.03,pet.q):null}
 function addFame(n){const bonus=pet&&pet.sp===6?spOfPet().v:0,earned=Math.round(n*(1+bonus/100));fame+=earned;return earned}
 
 /* --- ngũ hành khắc chế (Hồ trung lập) --- */
@@ -102,10 +102,10 @@ const _rp=renderPick;renderPick=function(){_rp();
 const _ri=renderInfo;renderInfo=function(){_ri();
   const q=pet?pet.q:eggQ;let bl,sp,pi;
   if(pv.on){bl=pv.bl;sp=pv.sp;pi=pv.pi}else if(pet){bl=pet.bl;sp=pet.sp;pi=pet.pi}else return;
-  const s=spInfo(sp,pi,q),el=$('info');
-  {const B=BL[bl],p=PL[pi][0],NM={atk:'Công',def:'Thủ',hp:'Sinh Lực',spd:'Tốc',mag:'Linh',eva:'Né tránh',stun:'Choáng',regen:'Hồi/lượt'};
+  const pe=pi+(!pv.on&&pet?(pet.up||0)*.03:0),s=spInfo(sp,pe,q),el=$('info');
+  {const B=BL[bl],p=pur(pe),NM={atk:'Công',def:'Thủ',hp:'Sinh Lực',spd:'Tốc',mag:'Linh',eva:'Né tránh',stun:'Choáng',regen:'Hồi/lượt'};
    const cur=Object.keys(B.b).map(k=>NM[k]+' <b style="color:var(--jade)">+'+Math.round(B.b[k]*p*10)/10+'%</b>').join(', ');
-   el.innerHTML=el.innerHTML.replace('<small>'+B.tip+' khi Phản Tổ</small>','<div style="margin-top:4px">Thưởng huyết mạch hiện tại ('+PL[pi][1]+' '+Math.round(p*100)+'%): '+cur+'<br><small>Tối đa '+B.tip+' khi Phản Tổ 100%</small></div>')}
+   el.innerHTML=el.innerHTML.replace('<small>'+B.tip+' khi Phản Tổ</small>','<div style="margin-top:4px">Thưởng huyết mạch hiện tại ('+PL[pi][1]+(!pv.on&&pet&&pet.up?' +'+pet.up:'')+' '+Math.round(p*100)+'%): '+cur+'<br><small>Tối đa '+B.tip+' khi Phản Tổ 100%</small></div>')}
   el.insertAdjacentHTML('beforeend','<div style="margin-top:10px;padding-top:8px;border-top:1px dashed rgba(168,92,78,.4)">'+
    'Vùng <b>'+EPI[sp][0]+'</b> · <b style="color:'+TIERC[TIER[sp]]+'">'+TIERN[TIER[sp]]+'</b><br>'+
    '✨ <b style="color:var(--gold)">'+s.name+'</b>: '+s.text+(s.c>0?'<br><small>🎖️ Đấu trường: chiến lực +'+Math.round(s.c*1000)/10+'%</small>':'')+'<br>'+

@@ -246,8 +246,10 @@ function rollPet(){
   ['hp','atk','def','spd','mag'].forEach(k=>base[k]=tot/5*(.85+Math.random()*.3));
   return{bl,pi,q:eggQ,base,sp:Math.floor(Math.pow(Math.random(),1/(1+eggQ*.5))*17)};
 }
+function pur(pi){const t=Math.floor(pi);return Math.min(1,PL[t][0]+(pi-t))}
 function statsOf(bl,pi,base,a){
-  const p=PL[pi][0],b=BL[bl].b,m=1+3*petGrow(a),f=k=>1+(b[k]||0)*p/100;
+  if(pet&&!pv.on&&bl===pet.bl&&base===pet.base&&pi===pet.pi)pi+=(pet.up||0)*.03;
+  const p=pur(pi),b=BL[bl].b,m=1+3*petGrow(a),f=k=>1+(b[k]||0)*p/100;
   return{hp:Math.round(base.hp*8*m*f('hp')),atk:Math.round(base.atk*m*f('atk')),def:Math.round(base.def*m*f('def')),spd:Math.round(base.spd*m*f('spd')),mag:Math.round(base.mag*m*f('mag')),
     eva:Math.min(45,5+(b.eva||0)*p),stun:Math.min(35,(b.stun||0)*p),regen:Math.min(8,(b.regen||0)*p)};
 }
@@ -258,9 +260,9 @@ function renderInfo(){
   const src=pv.on?{bl:pv.bl,sp:pv.sp,pi:pv.pi,a:pv.age,base:pet?pet.base:{hp:12,atk:12,def:12,spd:12,mag:12}}:(pet?{bl:pet.bl,sp:pet.sp,pi:pet.pi,a:level,base:pet.base}:null);
   const q=pet?pet.q:eggQ,qs='<b style="color:rgb('+QC[q]+')">'+QN[q]+' phẩm</b>';
   if(!src){el.innerHTML='Phẩm chất trứng: '+qs+'<br><small>Huyết mạch được giấu đến lúc trứng nở...</small>';return}
-  const B=BL[src.bl],s=statsOf(src.bl,src.pi,src.base,src.a),L=PL[src.pi],r=x=>Math.round(x*10)/10;
-  const cells=cbAttrs(s,(()=>{const k={};k[src.sp]=spInfo(src.sp,src.pi,q).v;return k})());
-  el.innerHTML='Trứng '+qs+(pv.on?' <small>(đang xem thử)</small>':'')+'<br>Huyết mạch: <b style="color:rgb('+B.au+')">'+B.n+'</b> · hệ <b>'+B.h+'</b><br>Loài: <b>'+genOf(src.bl,src.sp).name+'</b><br>Độ đậm: <b style="color:var(--gold)">'+L[1]+' ('+Math.round(L[0]*100)+'%)</b><br><small>'+B.tip+' khi Phản Tổ</small><div class="stg">'+cells.map(x=>'<div>'+x[0]+'<b>'+x[1]+'</b></div>').join('')+'</div>';
+  const B=BL[src.bl],s=statsOf(src.bl,src.pi,src.base,src.a),L=PL[src.pi],upN=(!pv.on&&pet?pet.up||0:0),pe=pur(src.pi+upN*.03),r=x=>Math.round(x*10)/10;
+  const cells=cbAttrs(s,(()=>{const k={};k[src.sp]=spInfo(src.sp,src.pi+upN*.03,q).v;return k})());
+  el.innerHTML='Trứng '+qs+(pv.on?' <small>(đang xem thử)</small>':'')+'<br>Huyết mạch: <b style="color:rgb('+B.au+')">'+B.n+'</b> · hệ <b>'+B.h+'</b><br>Loài: <b>'+genOf(src.bl,src.sp).name+'</b><br>Độ đậm: <b style="color:var(--gold)">'+L[1]+(upN?' +'+upN:'')+' ('+Math.round(pe*100)+'%)</b><br><small>'+B.tip+' khi Phản Tổ</small><div class="stg">'+cells.map(x=>'<div>'+x[0]+'<b>'+x[1]+'</b></div>').join('')+'</div>';
 }
 function pvSet(k,v){pv.on=true;pv[k]=v;
   document.querySelectorAll('[data-k]').forEach(b=>b.classList.toggle('sel',String(pv[b.dataset.k])===b.dataset.v));pvLabel();renderInfo()}
