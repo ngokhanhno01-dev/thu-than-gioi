@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thú Thần Giới</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <div class="bagrow">
+  <details class="bagbox infobtn">
+    <summary>🧬 Chỉ số</summary>
+    <div class="bagpanel infopanel frame">
+    <div class="infobox" id="info"></div>
+    </div>
+  </details>
+  <details class="bagbox">
+    <summary id="bag-sum">🎒 Balo</summary>
+    <div class="bagpanel frame">
+    <div class="bag" id="bag" style="margin-top:4px"></div>
+    <div class="infobox" id="bag-info" style="margin-top:4px;text-align:center;min-height:28px"></div>
+    <div class="g3"><button class="mini jade" onclick="bagUse()">Dùng</button><button class="mini" onclick="bagDrop()">Vứt 1</button><button class="mini" onclick="bagTest()">🎁 Nhặt thử</button></div>
+    </div>
+  </details>
+  </div>
+  <header class="frame">
+    <div>
+      <div class="age"><small>Năm</small> <span id="h-age">0</span> <small>· Cấp <b id="h-lv" style="color:var(--jade)">1</b></small></div>
+      <div class="status" id="h-status">Ấm Trứng Thần Thú</div>
+      <div class="tb-track" style="height:6px;margin-top:3px;width:130px"><div class="tb-fill" id="exp-fill" style="background:linear-gradient(90deg,#2f8f69,#72e4b0);box-shadow:none"></div></div><div style="font-size:10px;color:var(--mute);margin-top:1px;line-height:1" id="exp-txt">EXP 0/60</div>
+    </div>
+    <div class="stats">
+      <span class="seal">Thú Thần Giới</span>
+      <div>Xu: <b id="h-gold">50</b> &nbsp; Uy danh: <b id="h-fame">0</b></div>
+    </div>
+  </header>
+
+  <div class="frame timebar">
+    <div class="tb-top"><span>⏳ Năm mới sau</span><b id="tb-text">3s</b></div>
+    <div class="tb-track"><div class="tb-fill" id="tb-fill"></div></div>
+  </div>
+
+  <div class="stage-wrap">
+    <div class="frame stage">
+      <canvas id="cv" width="360" height="250"></canvas>
+      <div id="mob" style="position:absolute;inset:0;z-index:5;display:none;cursor:pointer"><canvas id="mob-c" width="360" height="250"></canvas><div style="position:absolute;top:8px;left:8px;right:8px;display:flex;gap:16px"><div style="flex:1;min-width:0"><div id="mob-pn" style="font-size:11px;font-weight:700;color:#f6e9e4;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden"></div><div style="height:8px;background:#100a12;border:1px solid #72e4b0;border-radius:5px;overflow:hidden"><div id="mob-ph" style="height:100%;width:100%;background:linear-gradient(90deg,#2f8f69,#72e4b0)"></div></div><div id="mob-pt" style="font-size:10px;color:#f6e9e4;text-shadow:0 1px 2px #000"></div></div><div style="flex:1;min-width:0"><div id="mob-mn" style="font-size:11px;font-weight:700;color:#f6e9e4;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden"></div><div style="height:8px;background:#100a12;border:1px solid #e34e48;border-radius:5px;overflow:hidden"><div id="mob-mh" style="height:100%;width:100%;background:linear-gradient(90deg,#a72f42,#ff7654)"></div></div><div id="mob-mt" style="font-size:10px;color:#f6e9e4;text-shadow:0 1px 2px #000"></div></div></div><button id="mob-run" style="position:absolute;top:44px;left:0;right:0;margin:0 auto!important;width:64px!important;height:22px;padding:0!important;z-index:2;border-radius:11px;border:1px solid #ff7654;background:rgba(190,40,52,.92)!important;box-shadow:none!important;color:#fff;font-weight:800;font-size:11px;line-height:1;cursor:pointer">🏃 Chạy</button><div id="mob-r" style="position:absolute;bottom:0;left:0;right:0;padding:6px 8px;text-align:center;font-size:12px;font-weight:700;color:#fff2ec;background:linear-gradient(transparent,rgba(16,10,18,.85));text-shadow:0 1px 3px #000"></div></div>
+      <div class="banner" id="banner">Ấm Quả Trứng Thần Thú</div>
+    </div>
+  </div>
+
+  <section class="frame card" id="s-pick">
+    <h3>Chọn Linh Trứng</h3>
+    <div class="mission" id="pick-desc"></div>
+    <button class="jade" id="btn-reroll" onclick="rerollEgg()"><span class="ic">🎲</span>Gieo Quẻ (còn 3 lượt)</button>
+    <div style="font-size:11px;color:var(--mute);text-align:center;margin-top:4px">Lượt quay gần nhất, bấm để đổi lại:</div>
+    <div class="g3" id="pick-hist"></div>
+    <button onclick="confirmEgg()"><span class="ic">🥚</span>Ấp Trứng Này</button>
+    <div id="rates" style="font-size:11px;color:var(--mute);text-align:center;margin-top:4px;line-height:1.15"></div>
+  </section>
+
+  <section class="frame card" id="s-egg" style="display:none">
+    <h3>Phá Vỏ Trứng</h3>
+    <div class="mission" id="mission">Chạm liên tục để làm vỡ vỏ trứng!</div>
+    <div class="beads" id="beads"></div>
+    <button id="btn-tap" onclick="tapEgg()"><span class="ic">👊</span>Chạm vỡ trứng</button>
+  </section>
+
+  <section class="frame card" id="s-main">
+    <h3 id="main-title">Tu Luyện Đường (Đang Khóa)</h3>
+    <div class="grid">
+      <button class="locked jade" disabled id="btn-train" onclick="train()"><span class="ic">🧭</span>Thám hiểm</button>
+      <button class="locked jade" disabled id="btn-arena" onclick="arena()"><span class="ic">⚔️</span>Đấu trường</button>
+      <button class="locked jade" disabled id="btn-shop" onclick="shop()"><span class="ic">🏪</span>Cửa hàng</button>
+    </div>
+  </section>
+
+
+
+
+  <div id="lib-stub" style="display:none" aria-hidden="true"><div id="pv-bl"></div><div id="pv-spn"></div><div id="pv-pi"></div><div id="pv-age"></div><div id="spd"></div></div>
+
+  <section class="frame card">
+    <h3>Nhật Ký Nuôi Thú</h3>
+    <div class="log" id="log"><div>[Hệ thống] Bạn nhận được một quả linh trứng. Thời gian bắt đầu trôi...</div></div>
+  </section>
+</div>
+
+<script src="01-assets.js"></script>
+<script src="02-sprites-engine.js"></script>
+<script src="03-game-core.js"></script>
+<script src="04-scenes.js"></script>
+
+<script src="05-hatch.js"></script>
+<script src="06-mobs.js"></script>
+<script src="07-bag-toggle.js"></script>
+<script src="08-eggs.js"></script>
+
+</body>
+</html>
