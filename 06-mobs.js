@@ -2036,9 +2036,10 @@ function impact(g,fx,tt){
  g.restore()}
 /* Nhịp trận đấu: BST = số giây cho MỖI đòn (càng lớn càng chậm, bản cũ 0.9) · BT0 = số giây chờ trước đòn đầu (bản cũ 1.6) */
 const BST=1.9,BT0=2.4;
-function battle(e){return new Promise(resolve=>{busy=true;const o=$('mob'),g=$('mob-c').getContext('2d'),R=sim(e),n=R.ev.length,sp=spOfPet(),b=e.tr.rw,
+window.BSPD=1; /* hệ số tăng tốc thám hiểm + trận đấu (x1..x4), chỉ đổi được từ bảng Admin */
+function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=$('mob'),g=$('mob-c').getContext('2d'),R=sim(e),n=R.ev.length,sp=spOfPet(),b=e.tr.rw,
  ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))*buffMul('exp')),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))*buffMul('xu')),
- lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=e.tr.fw,fL=Math.min(Math.floor(fame),e.tr.fl),TE=BT0+n*BST,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false;
+ lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=e.tr.fw,fL=Math.min(Math.floor(fame),e.tr.fl),TE=(BT0+n*BST)/SP,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false;
  o.style.display='block';const rb=$('mob-run');rb.style.display='block';
  $('mob-pn').textContent=pn+' · Cấp '+level;const RP=REG[pet.sp],RM=REG[e.m.sp];paintUI(RP,RM);$('mob-mn').innerHTML=(e.m.boss?'👑 ':'')+nm(e)+' · Cấp '+e.lv;if(e.tr.n!=='Thường')$('mob-mh').parentNode.style.borderColor=e.tr.c;if(window.battleHudExtra)battleHudExtra(e);
  function fin(flee){if(done)return;done=true;o.style.display='none';rb.style.display='none';
@@ -2054,7 +2055,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const o=$('mob'),g=$('
  (function L(){if(done)return;const T0=performance.now(),T=(T0-t0)/1000,tt=T0/1000;
   sceneDraw(tt,e.m.zone);g.drawImage(cv,0,0,360,250,0,0,360,250);
     let hp=R.maxP,mh=R.maxM,msg='Tốc: Thú '+ps.spd+' · '+e.m.n+' '+e.st[3]+' → '+(R.first?'Thú':e.m.n)+' ra đòn trước',dp=0,dmx=0,ap=1,am=1,fl=null,fx=null;
-  R.ev.forEach((x,i)=>{const s=BT0+i*BST,u=(T-s)/BST;if(u<0)return;if(u>=.35){hp=x.hp;mh=x.mh}
+  R.ev.forEach((x,i)=>{const s=(BT0+i*BST)/SP,u=(T-s)/(BST/SP);if(u<0)return;if(u>=.35){hp=x.hp;mh=x.mh}
    if(u<.9){msg=x.t;const lg=Math.sin(Math.min(1,u/.35)*Math.PI)*(x.k==='hit'||x.k==='crit'?46:x.k==='miss'?-10:0);
     if(x.w==='p')dp=lg;else dmx=-lg;
      if(u>=.35&&u<.8&&x.d&&x.k!=='heal'&&x.k!=='block'&&(Math.floor(T*18)%2)){if(x.w==='m')ap=.35;else am=.35}
@@ -2076,7 +2077,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const o=$('mob'),g=$('
    g.font='bold 12px monospace';g.lineWidth=3;fl.tags.forEach((tg,i)=>{const yy=fl.y-24-i*14;g.strokeText(tg[0],fl.x,yy);g.fillStyle=tg[1];g.fillText(tg[0],fl.x,yy)});g.restore()}
   $('mob-ph').style.width=Math.round(hp/R.maxP*100)+'%';$('mob-mh').style.width=Math.round(mh/R.maxM*100)+'%';
   $('mob-pt').textContent=hp+'/'+R.maxP;$('mob-mt').textContent=mh+'/'+R.maxM;$('mob-r').textContent=msg;
-  if(T>TE+2.4)fin();else requestAnimationFrame(L)})()
+  if(T>TE+2.4/SP)fin();else requestAnimationFrame(L)})()
 })}
 const _t=window.train,_a=window.arena,_s=window.shop;
 
@@ -2112,13 +2113,13 @@ async function explore(){busy=true;stopReq=false;let iv=0;
   xp.innerHTML='<div class="hg">⏳</div><div style="margin-top:8px;font-weight:700;font-size:14px">Đang thám hiểm<span id="xd">.</span></div><div style="font-size:11px;color:#ffc978;margin-top:4px">'+VAN_KIEP_ZONES[zoneSel].name+' · Uy danh '+fame+'</div><div style="font-size:10.5px;margin-top:5px;line-height:1.5">'+ratesHtml2()+'</div><button id="xp-stop" style="flex:none;margin-top:12px;padding:8px 18px;border-radius:9px;border:1px solid #ff7654;background:#a72f42;color:#fff;font-weight:800;font-size:13px;cursor:pointer">⏹ Dừng thám hiểm</button>';
   let k=0;iv=setInterval(()=>{const d=$('xd');if(d)d.textContent='.'.repeat(1+(++k%3))},400);
   $('xp-stop').onclick=()=>{stopReq=true;$('xp-stop').disabled=true;$('xp-stop').textContent='Đang dừng...'};
-  await waitS(3200);clearInterval(iv);if(stopReq)break;
+  await waitS(3200/BSPD);clearInterval(iv);if(stopReq)break;
   const e=spawn(),why=WHY[e.m.n]||'Thú đụng độ một con quái hoang dã.';try{getMobSprite(e.m)}catch(_){}
   xp.innerHTML='<div style="font-size:30px">'+(e.m.boss?'👑':'⚠️')+'</div><div style="font-weight:800;font-size:15px;margin:4px 0">Gặp '+nm(e)+' · '+VAN_KIEP_ZONES[e.m.zone].name+' · Cấp '+e.lv+'!</div><div style="max-width:300px;line-height:1.5;color:#ffc978">'+why+'</div>';
   xp.style.boxShadow=e.tr.n==='Thường'?'':'inset 0 0 0 3px '+e.tr.c;
-  await wait(1700);xp.style.display='none';xp.style.boxShadow='';
+  await wait(1700/BSPD);xp.style.display='none';xp.style.boxShadow='';
   const r=await battle(e);
-  showResult(r);let sk=false;xp.onclick=()=>{sk=true};const t0=Date.now();while(Date.now()-t0<3500&&!sk)await wait(80);xp.onclick=null;
+  showResult(r);let sk=false;xp.onclick=()=>{sk=true};const t0=Date.now();while(Date.now()-t0<3500/BSPD&&!sk)await wait(80);xp.onclick=null;
  }}finally{clearInterval(iv);xp.onclick=null;xp.style.display='none';xp.style.boxShadow='';busy=false;if(stopReq)log('⏹ Đã dừng thám hiểm.')}}
 /* --- chọn vùng thám hiểm --- */
 const zoneName=i=>VAN_KIEP_ZONES[i].name,zoneRange=i=>'Cấp '+VAN_KIEP_ZONE_BOUNDS[i].start+'–'+VAN_KIEP_ZONE_BOUNDS[i].end;
