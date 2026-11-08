@@ -131,26 +131,35 @@ function openShop(){
  shopEl.style.display='flex';renderShop()}
 function closeShop(){if(shopEl)shopEl.style.display='none'}
 
-/* ===== HUD trong trận: buff (trái) + hệ (phải), nằm dưới thanh máu ===== */
+/* ===== HUD trong trận: buff (trái, dưới thanh máu) + hệ (phải, ngang dòng số máu) ===== */
 const HE_COL={Kim:'#f2d06a','Mộc':'#5be07a','Thủy':'#5bb8ff','Hỏa':'#ff6a3a','Thổ':'#d9a05a','Huyễn':'#c08aff'};
 const BUFF_HUD={exp:['EXP','#72e4b0'],xu:['Xu','#ffd24a'],drop:['Rơi','#c08aff']};
-function _hudRow(anchorId,rowId){
- let r=document.getElementById(rowId);
+/* ô nhỏ có nền màu, chữ nằm trong */
+function _chip(t,c){return '<span style="display:inline-block;margin-right:3px;padding:1px 4px;border-radius:3px;background:'+c+';color:#101018;font-weight:700;font-size:12px;line-height:1;box-shadow:0 0 0 1px #071117;text-shadow:none">'+t+'</span>'}
+/* dòng buff: nằm ngay dưới số máu của thú mình */
+function _buffRow(){
+ let r=document.getElementById('mob-pbar2');
  if(!r){
-  const a=document.getElementById(anchorId);if(!a)return null;
-  r=document.createElement('div');r.id=rowId;
-  r.style.cssText="display:flex;justify-content:space-between;align-items:center;gap:4px;margin-top:1px;min-height:13px;font-family:'VT323',monospace;font-size:13px;line-height:1;white-space:nowrap;overflow:hidden;text-shadow:1px 1px 0 #071117";
-  r.innerHTML='<span class="hl" style="min-width:0;overflow:hidden"></span><span class="hr" style="flex:none"></span>';
+  const a=document.getElementById('mob-pt');if(!a)return null;
+  r=document.createElement('div');r.id='mob-pbar2';
+  r.style.cssText="margin-top:2px;font-family:'VT323',monospace;line-height:1;white-space:nowrap;overflow:hidden";
   a.parentNode.appendChild(r)}
  return r}
+/* ô hệ: nằm bên phải, ngang dòng số máu */
+function _heBadge(anchorId,id){
+ const a=document.getElementById(anchorId);if(!a)return null;
+ let b=document.getElementById(id);
+ if(!b){
+  b=document.createElement('span');b.id=id;
+  b.style.cssText="position:absolute;right:0;font-family:'VT323',monospace;line-height:1;white-space:nowrap";
+  a.parentNode.style.position='relative';a.parentNode.appendChild(b)}
+ b.style.top=Math.max(0,a.offsetTop-1)+'px';
+ return b}
 function battleHudExtra(e){
- const heTag=h=>h?'<b style="color:'+(HE_COL[h]||'#fff')+'">Hệ '+h+'</b>':'';
- const pr=_hudRow('mob-pt','mob-pbar2'),mr=_hudRow('mob-mt','mob-mbar2');
- if(pr){
-  const bs=Object.keys(buffs).filter(k=>buffs[k]>0).map(k=>'<b style="color:'+BUFF_HUD[k][1]+'">'+BUFF_HUD[k][0]+'×'+BUFF_MUL[k]+'</b>').join(' ');
-  pr.querySelector('.hl').innerHTML=bs;
-  pr.querySelector('.hr').innerHTML=heTag(pet&&BL[pet.bl]?BL[pet.bl].h:'')}
- if(mr){
-  mr.querySelector('.hl').innerHTML='';
-  mr.querySelector('.hr').innerHTML=heTag(e&&e.m&&BL[e.m.bl]?BL[e.m.bl].h:'')}
+ const pr=_buffRow();
+ if(pr){pr.innerHTML=Object.keys(buffs).filter(k=>buffs[k]>0).map(k=>_chip(BUFF_HUD[k][0]+'×'+BUFF_MUL[k],BUFF_HUD[k][1])).join('')}
+ const ph=pet&&BL[pet.bl]?BL[pet.bl].h:'',mh=e&&e.m&&BL[e.m.bl]?BL[e.m.bl].h:'';
+ const pb=_heBadge('mob-pt','mob-pe'),mb=_heBadge('mob-mt','mob-me');
+ if(pb)pb.innerHTML=ph?_chip(ph,HE_COL[ph]||'#fff').replace('margin-right:3px;',''):'';
+ if(mb)mb.innerHTML=mh?_chip(mh,HE_COL[mh]||'#fff').replace('margin-right:3px;',''):'';
  const rb=document.getElementById('mob-run');if(rb)rb.style.top='60px'}
