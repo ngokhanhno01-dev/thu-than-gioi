@@ -24,6 +24,11 @@ function upPutIn(){if(!pet||!upSel)return;const k=upKey(upSel);if(!k)return;
  if(q<=0){upMsg='<span class="bad">Bạn không còn '+ITEMS[upSel].n+' để bỏ vào.</span>';renderBlood();return}
  upPut[k]+=q;upMsg='';upSelQty=1;renderBlood()}
 function upTake(k){upPut[k]=0;upMsg='';renderBlood()}
+function upToast(type,title,body){
+ let t=document.getElementById('up-toast');
+ if(!t){t=document.createElement('div');t.id='up-toast';t.onclick=()=>t.classList.remove('show');document.body.appendChild(t)}
+ t.className='show '+type;t.innerHTML='<div class="tt">'+title+'</div><div class="tb">'+body+'</div><small>(chạm để đóng)</small>';
+ clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),4500)}
 function upDo(){
  if(!hatched||!pet)return;
  const ids=upIds(),n=pet.up||0;
@@ -31,17 +36,19 @@ function upDo(){
  const need=upNeed(n);
  for(const k of['huyet','thuoc','tinh'])upPut[k]=Math.min(upPut[k],cnt(ids[k]));
  const miss=['huyet','thuoc','tinh'].filter(k=>upPut[k]<need[k]).map(k=>ITEMS[ids[k]].n+' ('+upPut[k]+'/'+need[k]+')');
- if(miss.length){upMsg='<span class="bad">Chưa đủ nguyên liệu: '+miss.join(', ')+'.</span>';renderBlood();return}
- if(gold<need.xu){upMsg='<span class="bad">Không đủ xu: cần '+need.xu+', bạn có '+gold+'.</span>';renderBlood();return}
+ if(miss.length){upMsg='<span class="bad">Chưa đủ nguyên liệu: '+miss.join(', ')+'.</span>';upToast('warn','⚠️ CHƯA ĐỦ NGUYÊN LIỆU','Còn thiếu: '+miss.join(', ')+'.<br>Hãy bỏ đủ vào 3 ô trong vòng tròn.');renderBlood();return}
+ if(gold<need.xu){upMsg='<span class="bad">Không đủ xu: cần '+need.xu+', bạn có '+gold+'.</span>';upToast('warn','⚠️ KHÔNG ĐỦ XU','Cần '+need.xu+' xu, bạn đang có '+gold+' xu.');renderBlood();return}
  for(const k of['huyet','thuoc','tinh']){removeItem(ids[k],need[k]);upPut[k]-=need[k]}
  gold-=need.xu;stats();
  const p0=pur(pet.pi+n*UP_GAIN),p1=pur(pet.pi+(n+1)*UP_GAIN);
  if(Math.random()*100<UP_RATE[n]){
   pet.up=n+1;
   upMsg='<span class="ok">✨ Nâng cấp THÀNH CÔNG! Huyết mạch +'+(n+1)+': '+pc(p0)+'% → '+pc(p1)+'% (+'+pc(p1-p0)+'%).</span>';
+  upToast('ok','✨ NÂNG CẤP THÀNH CÔNG!','Huyết mạch <b>+'+(n+1)+'</b><br>'+pc(p0)+'% → <b>'+pc(p1)+'%</b> (+'+pc(p1-p0)+'%)');
   log('🩸 <b style="color:var(--jade)">Nâng cấp huyết mạch thành công!</b> +'+(n+1)+', huyết mạch '+pc(p0)+'% → '+pc(p1)+'%.');
  }else{
   upMsg='<span class="bad">💥 Nâng cấp THẤT BẠI! Nguyên liệu và xu đã mất, huyết mạch giữ nguyên +'+n+' ('+pc(p0)+'%).</span>';
+  upToast('bad','💥 NÂNG CẤP THẤT BẠI!','Mất nguyên liệu và <b>'+need.xu+' xu</b>.<br>Huyết mạch giữ nguyên <b>+'+n+'</b> ('+pc(p0)+'%).');
   log('🩸 <b style="color:#ff8a7a">Nâng cấp huyết mạch thất bại</b>, mất nguyên liệu và '+need.xu+' xu. Vẫn giữ +'+n+'.');
  }
  renderInfo();renderBlood()}
