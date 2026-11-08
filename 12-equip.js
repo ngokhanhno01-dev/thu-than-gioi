@@ -5,14 +5,73 @@
    - Phẩm cao: MỌI chỉ số và buff bộ cộng thêm % (xem EQ_QBONUS).
    - Trang bị KHÔNG rơi từ quái, chỉ rèn được. Mọi con số sửa ở khối cấu hình ngay bên dưới. */
 
+/* ===== Pixel art icon 16x16 (vẽ bằng code, không cần file ảnh) =====
+   Mỗi icon là lưới 16x16 ký tự. Viền đen được tự thêm quanh hình.
+   m/l/d = màu vùng (chính / sáng / tối) · w trắng · g,G thép sáng/tối · y,Y vàng · n,N xương · r,R nâu · p đồng tử */
+const PX_NEUT={w:'#ffffff',g:'#d3dce6',G:'#7f8c9c',s:'#eef3f8',y:'#ffd24a',Y:'#b8841c',n:'#f6eedc',N:'#c4b394',r:'#9a6238',R:'#5a3820',p:'#1a1022',k:'#150d1c'};
+function pxMix(h,t,a){const c=[1,3,5].map(i=>parseInt(h.substr(i,2),16)),T=t?255:0;return'#'+c.map(v=>('0'+Math.round(v+(T-v)*a).toString(16)).slice(-2)).join('')}
+function pxPal(col){return Object.assign({m:col,l:pxMix(col,1,.5),d:pxMix(col,0,.45)},PX_NEUT)}
+function pxGrid(rows){const g=[];for(let y=0;y<16;y++){const r=(rows[y]||'');g.push((r+'................').slice(0,16).split(''))}return g}
+function pxMirror(half,vert){ /* half: các hàng 8 cột trái → soi gương sang phải; vert=true thì soi cả trên/dưới */
+ const rows=half.map(r=>{r=(r+'........').slice(0,8);return r+r.split('').reverse().join('')});
+ if(!vert)return pxGrid(rows);
+ const out=rows.slice(0,8);while(out.length<8)out.push('.'.repeat(16));
+ return pxGrid(out.concat(out.slice().reverse()))}
+function pxOutline(g){const o=g.map(r=>r.slice());
+ for(let y=0;y<16;y++)for(let x=0;x<16;x++){if(g[y][x]!=='.')continue;
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<16&&Y<16&&g[Y][X]!=='.'){o[y][x]='k';break}}}
+ return o}
+const PX_DRAW={
+ claw:()=>pxGrid(['','......mmmmmm','....mmllmmmmmm','...mmlmmmmmmmmm','..mmlmmm....dmm','..mlmmm......dmm','..mmmm........dm','..dmmm.........d','...dmm','....dmm','.....dm','......d']),
+ scale:()=>pxMirror(['','....mmmm','..mmllll','.mlllmmm','.mlmmmmm','mmlmmmdd','mmmlmmmd','mmmmdddm','.mmmmmmd','.dmmddmd','..dmmmmd','...ddmmd','.....ddd']),
+ fang:()=>pxGrid(['','..mmmmmmmmmm','..mlmmmmmmdm','..nnnnnnnnnN','..nwnnnnnnNN','...nwnnnnnN','...nwnnnnNN','....nnnnnNN','....nnnnnN','.....nnnNN','.....nnnN','......nNN','......nN','.......N']),
+ eye:()=>{const g=pxGrid([]);for(let y=0;y<16;y++)for(let x=0;x<16;x++){const dx=x-7.5,dy=y-7.5,d=Math.hypot(dx,dy);
+   if(d>6.4)continue;let c=(dx+dy>3.5)?'N':'n';
+   if(d<4){c=(dx+dy<-1)?'l':(dx+dy>2)?'d':'m'}
+   if(d<1.9)c='p';
+   g[y][x]=c}
+  g[5][5]='w';g[5][6]='w';g[6][5]='w';g[10][10]='l';return g},
+ bone:()=>{const g=pxGrid([]);const P=(x,y,c)=>{if(x>=0&&y>=0&&x<16&&y<16)g[y][x]=c};
+  for(let i=0;i<=7;i++){const x=4+i,y=12-i;P(x,y,'n');P(x,y-1,'n');P(x+1,y,'N');P(x+1,y-1,'N')}
+  [[3,11],[3,12],[2,11],[2,12],[4,13],[5,13],[4,14],[5,14]].forEach(([x,y])=>P(x,y,'n')); /* đầu xương dưới-trái: 2 cục */
+  [[10,2],[11,2],[10,3],[11,3],[12,4],[13,4],[12,5],[13,5]].forEach(([x,y])=>P(x,y,'n')); /* đầu xương trên-phải */
+  [[3,12],[5,14],[11,3],[13,5],[2,12],[4,14],[10,3],[12,5]].forEach(([x,y])=>P(x,y,'N'));
+  [[7,9],[8,8],[9,7]].forEach(([x,y])=>P(x,y,'m'));return g},
+ essence:()=>pxMirror(['.......m','.......l','......ml','......ml','.....mml','...mmmll','.mlllllw','.mllwwww'],true),
+ sword:()=>{const g=pxGrid([]);const P=(x,y,c)=>{if(x>=0&&y>=0&&x<16&&y<16)g[y][x]=c};
+  P(14,1,'s');for(let i=1;i<=8;i++){P(14-i+0,1+i,'s');P(15-i,1+i,'g');P(15-i,2+i,'G')}
+  P(15,2,'G');
+  /* tay chắn (vàng) vuông góc lưỡi + cán nâu */
+  [[2,8],[3,9],[4,10],[5,11],[6,12],[7,13],[3,8],[4,9],[5,10],[6,11],[7,12]].forEach(([x,y])=>P(x,y,'y'));
+  [[2,9],[3,10],[4,11],[5,12],[6,13]].forEach(([x,y])=>P(x,y,'Y'));
+  P(3,8,'m');P(7,12,'m');
+  [[3,12],[2,13],[1,14]].forEach(([x,y])=>P(x,y,'r'));[[2,12],[1,13],[0,14]].forEach(([x,y])=>P(x,y,'R'));P(0,15,'m');P(1,15,'m');
+  return g},
+ armor:()=>pxMirror(['','.gggg','gwwgggg','gwggggmm','ggggggml','.gggmmml','.gggmlll','..ggmmlm','..gggmmm','...gggmm','...ggggm','....gggm','....ggdd','.....GGG']),
+ ring:()=>{const g=pxGrid([]);for(let y=0;y<16;y++)for(let x=0;x<16;x++){const dx=x-7.5,dy=y-8.5,d=Math.hypot(dx,dy);
+   if(d>=3.7&&d<=6.6)g[y][x]=(dx+dy<-2)?'s':(dx+dy>3)?'Y':'y'}
+  [[7,1],[8,1],[6,2],[7,2],[8,2],[9,2],[7,3],[8,3]].forEach(([x,y])=>g[y][x]='m');
+  g[2][7]='w';g[1][7]='l';g[1][8]='l';g[3][8]='d';return g},
+ gem:()=>pxMirror(['','...lllll','..llwlmm','.lwwlmmm','lllllllm','.lmlmmmd','..lmmmdd','..lmmddd','...lmddd','....lmdd','.....lmd','......ld','.......d']),
+};
+const PX_CACHE={};
+function pxData(kind,col){const k=kind+col;if(PX_CACHE[k])return PX_CACHE[k];
+ const g=pxOutline(PX_DRAW[kind]()),P=pxPal(col);
+ if(typeof document==='undefined')return g.map(r=>r.map(c=>c==='.'?null:P[c]||'#f0f'));
+ const cv=document.createElement('canvas');cv.width=cv.height=16;const x=cv.getContext('2d');
+ for(let j=0;j<16;j++)for(let i=0;i<16;i++){const c=g[j][i];if(c==='.')continue;x.fillStyle=P[c]||'#f0f';x.fillRect(i,j,1,1)}
+ return PX_CACHE[k]=cv.toDataURL()}
+/* trả về thẻ <img> pixel art để chèn vào HTML */
+function pxImg(kind,col){return'<img class="pxi" alt="" src="'+pxData(kind,col||'#ffd24a')+'">'}
+
 /* ---------- Cấu hình ---------- */
 const EQ_CAT=[                       /* loại nguyên liệu = quái thứ 1..5 của vùng (tên vật phẩm = loại + tên quái) */
- {n:'Móng Vuốt',i:'🐾'},{n:'Vảy Giáp',i:'🐟'},{n:'Nanh Thú',i:'🦷'},{n:'Nhãn Châu',i:'👁️'},{n:'Linh Cốt',i:'🦴'}];
+ {n:'Móng Vuốt',i:'🐾',px:'claw'},{n:'Vảy Giáp',i:'🐟',px:'scale'},{n:'Nanh Thú',i:'🦷',px:'fang'},{n:'Nhãn Châu',i:'👁️',px:'eye'},{n:'Linh Cốt',i:'🦴',px:'bone'}];
 const EQ_SLOTS=[                     /* cat = loại nguyên liệu chính của ô; Linh Cốt (loại 5) dùng chung cho mọi ô */
- {n:'Vũ Khí',i:'⚔️',cat:0},
- {n:'Giáp',  i:'🛡️',cat:1},
- {n:'Vòng',  i:'📿',cat:2},
- {n:'Ngọc',  i:'💎',cat:3}];
+ {n:'Vũ Khí',i:'⚔️',px:'sword',cat:0},
+ {n:'Giáp',  i:'🛡️',px:'armor',cat:1},
+ {n:'Vòng',  i:'📿',px:'ring',cat:2},
+ {n:'Ngọc',  i:'💎',px:'gem',cat:3}];
 const EQ_SHARED=4;
 const EQ_BAG=100;                    /* số ô kho trang bị */
 const EQ_QW=[55,28,12,4,1];          /* tỉ lệ gacha phẩm: Phàm / Linh / Địa / Thiên / Thần */
@@ -62,17 +121,18 @@ for(let z=0;z<17;z++){
  const Z=VAN_KIEP_ZONES[z],col=ZONE_COL[z];
  Z.mobs.forEach((mn,s)=>{
   const id=ZM_ID(z,s),c=EQ_CAT[s];
-  ITEMS[id]={n:c.n+' '+mn,i:c.i,col,d:'Nguyên liệu bộ '+Z.name+', chỉ rơi từ '+mn+'. '+(s<EQ_SHARED?'Dùng rèn '+EQ_SLOTS[s].n+'.':'Dùng chung để rèn mọi món của bộ.')+' (mục 🛡️ Trang bị → Rèn)',use:null};
+  ITEMS[id]={n:c.n+' '+mn,i:pxImg(c.px,col),e:c.i,col,d:'Nguyên liệu bộ '+Z.name+', chỉ rơi từ '+mn+'. '+(s<EQ_SHARED?'Dùng rèn '+EQ_SLOTS[s].n+'.':'Dùng chung để rèn mọi món của bộ.')+' (mục 🛡️ Trang bị → Rèn)',use:null};
   SELL_PRICE[id]=6+z*2;HL_ITEM[id]=col});
  const bn=Z.bosses[0],bid=ZB_ID(z);
- ITEMS[bid]={n:'Tinh Hoa '+bn,i:'✨',col,d:'Tinh hoa của chủ vùng '+Z.name+', chỉ rơi từ boss '+bn+'. Dùng rèn mọi món của bộ. (mục 🛡️ Trang bị → Rèn)',use:null};
+ ITEMS[bid]={n:'Tinh Hoa '+bn,i:pxImg('essence',col),e:'✨',col,d:'Tinh hoa của chủ vùng '+Z.name+', chỉ rơi từ boss '+bn+'. Dùng rèn mọi món của bộ. (mục 🛡️ Trang bị → Rèn)',use:null};
  SELL_PRICE[bid]=30+z*5;HL_ITEM[bid]=col}
 for(let k=0;k<17;k++)ITEMS['mat'+k].d='Chỉ dùng nâng cấp huyết mạch cho thú vùng '+EPI[k][0]+' (mở mục 🩸 Huyết mạch).';
 const eqIsMat=id=>/^z[mb]\d/.test(id);
 {const _bu2=bagUse;bagUse=function(){const s=bag[bagSel];if(s&&eqIsMat(s.id)){log('🛡️ <b>'+ITEMS[s.id].n+'</b> dùng ở mục <b>Trang bị → Rèn</b>.');return}_bu2()}}
 
 /* ---------- Dữ liệu ---------- */
-let eqWorn=[null,null,null,null],ebag=[],eqUid=1,eqTab='wear',eqSel=null,fgSlot=0,fgZone=-1,fgLast=null,fgOpen=false,eqMsg='',eqRaf=0;
+let fgInfo=false,eqWorn=[null,null,null,null],ebag=[],eqUid=1,eqTab='wear',eqSel=null,fgSlot=0,fgZone=-1,fgLast=null,fgOpen=false,eqMsg='',eqRaf=0;
+const eqIco=(s,z)=>pxImg(EQ_SLOTS[s].px,z==null?'#8a95a0':ZONE_COL[z]);
 const eqRgb=it=>'rgb('+QC[it.q]+')';
 const eqName=it=>EQ_SLOTS[it.s].n+' '+VAN_KIEP_ZONES[it.z].name;
 const eqLine=l=>{const d=EQ_STATS[l[0]];return d.n+' +'+l[1]+(d.t==='p'?'%':'')};
@@ -85,6 +145,26 @@ function eqRoll(z,s,q){
   const d=EQ_STATS[k],r=EQ_ROLL[0]+Math.random()*(EQ_ROLL[1]-EQ_ROLL[0]),pct=d.b*(1+EQ_QBONUS[q])*r;
   return[k,d.t==='f'?Math.max(1,Math.round(ref*(k==='hp'?8:1)*pct/100)):Math.round(pct*10)/10]});
  return{uid:eqUid++,z,s,q,lv:VAN_KIEP_ZONE_BOUNDS[z].start,L}}
+
+/* Khoảng giá trị 1 dòng chỉ số k của bộ vùng z ở phẩm q (hiển thị ở mục Rèn; công thức khớp eqRoll) */
+function eqRange(z,k,q){
+ const ref=eqRef(z),d=EQ_STATS[k];
+ return EQ_ROLL.map(r=>{const pct=d.b*(1+EQ_QBONUS[q])*r;
+  return d.t==='f'?Math.max(1,Math.round(ref*(k==='hp'?8:1)*pct/100)):Math.round(pct*10)/10})}
+function eqInfoHtml(z,s,need){
+ const Z=VAN_KIEP_ZONES[z],S=EQ_SETS[z],col=ZONE_COL[z],ids=fgIds(z,s),zb=VAN_KIEP_ZONE_BOUNDS[z];
+ const fmt=(r,p)=>r[0]===r[1]?r[0]+p:r[0]+'–'+r[1]+p;
+ const rows=Object.keys(EQ_STATS).map(k=>{const d=EQ_STATS[k],p=d.t==='p'?'%':'',lo=eqRange(z,k,0),hi=eqRange(z,k,4);
+  return'<div><span>'+d.n+'</span><b>Phàm +'+fmt(lo,p)+' · Thần +'+fmt(hi,p)+'</b></div>'}).join('');
+ const head='<button class="eqinfo-h" onclick="fgInfoToggle()" style="color:'+col+'">'+eqIco(s,z)+' <b>Thông tin '+EQ_SLOTS[s].n+' '+Z.name+'</b><span>'+(fgInfo?'▴ Thu gọn':'▾ Xem thêm')+'</span></button>';
+ if(!fgInfo)return'<div class="infobox upnote" style="margin-top:5px">'+head+'<small>Bộ '+S.name+' · mặc được từ cấp '+zb.start+' · '+EQ_LINES+' dòng chỉ số ngẫu nhiên</small></div>';
+ return'<div class="infobox upnote" style="margin-top:5px">'+head+
+  '<small>• Thuộc bộ <b style="color:'+col+'">'+S.i+' '+S.name+'</b> (mặc 2 hoặc 4 món cùng bộ để có buff bộ)<br>'+
+  '• Cấp yêu cầu để mặc: <b>'+zb.start+'</b><br>'+
+  '• Nguyên liệu: '+ITEMS[ids.boss].n+' ×'+need.boss+', '+ITEMS[ids.main].n+' ×'+need.main+', '+ITEMS[ids.shared].n+' ×'+need.shared+', '+need.xu+' xu<br>'+
+  '• Mỗi món rèn ra có <b>'+EQ_LINES+' dòng chỉ số</b> bốc ngẫu nhiên trong '+Object.keys(EQ_STATS).length+' loại dưới đây (mọi ô bốc như nhau, loại ô chỉ khác nguyên liệu và hình dáng). Mỗi dòng roll từ '+Math.round(EQ_ROLL[0]*100)+'% đến '+Math.round(EQ_ROLL[1]*100)+'% giá trị tối đa của phẩm.</small>'+
+  '<div class="eqstat eqrange" style="margin-top:4px">'+rows+'</div>'+
+  '<small style="color:var(--mute)">Sinh Lực/Công/Thủ/Tốc/Linh là số cố định theo cấp vùng; Né tránh/Choáng/Hồi/Chí mạng là % và có trần tổng ('+Object.keys(EQ_CAP).map(k=>EQ_STAT_NAME[k]+' '+EQ_CAP[k]+'%').join(', ')+').</small></div>'}
 
 /* ---------- Tổng chỉ số + buff bộ ---------- */
 function eqTotals(){
@@ -185,6 +265,7 @@ function eqSell(){
 /* ---------- Rèn ---------- */
 function fgSetSlot(s){fgSlot=s;eqMsg='';renderEquip()}
 function fgSetZone(z){fgZone=+z;fgOpen=false;eqMsg='';renderEquip()}
+function fgInfoToggle(){fgInfo=!fgInfo;renderEquip()}
 function fgToggle(){fgOpen=!fgOpen;renderEquip()}
 function fgIds(z,s){return{boss:ZB_ID(z),main:ZM_ID(z,EQ_SLOTS[s].cat),shared:ZM_ID(z,EQ_SHARED)}}
 function fgDo(){
@@ -231,14 +312,14 @@ function eqWearHtml(){
  for(let s=0;s<4;s++){
   const it=eqWorn[s],sel=eqSel&&eqSel.w&&eqSel.i===s;
   circ+='<button class="upslot eqs'+(sel?' sel':'')+'" style="left:'+pos[s][0]+'%;top:'+pos[s][1]+'%;border-color:'+(it?eqRgb(it):'#4d533b')+'!important" onclick="eqPick(true,'+s+')" title="'+EQ_SLOTS[s].n+'">'+
-   '<span style="opacity:'+(it?1:.35)+'">'+EQ_SLOTS[s].i+'</span>'+(it?'<b>'+(it.z+1)+'</b>':'')+'</button>'}
+   '<span style="opacity:'+(it?1:.4)+'">'+eqIco(s,it?it.z:null)+'</span>'+(it?'<b>'+(it.z+1)+'</b>':'')+'</button>'}
  circ+='</div>';
  let bagH='<div class="eqbag" id="eq-bag">';
  for(let i=0;i<EQ_BAG;i++){
   const it=ebag[i];
   if(!it){bagH+='<button class="slot" disabled style="opacity:.3"></button>';continue}
   const sel=eqSel&&!eqSel.w&&eqSel.i===i;
-  bagH+='<button class="slot'+(sel?' sel':'')+'" style="border-color:'+(sel?'var(--gold)':eqRgb(it))+'" onclick="eqPick(false,'+i+')" title="'+eqName(it)+'"><span>'+EQ_SLOTS[it.s].i+'</span><b>'+(it.z+1)+'</b></button>'}
+  bagH+='<button class="slot'+(sel?' sel':'')+'" style="border-color:'+(sel?'var(--gold)':eqRgb(it))+'" onclick="eqPick(false,'+i+')" title="'+eqName(it)+'"><span>'+eqIco(it.s,it.z)+'</span><b>'+(it.z+1)+'</b></button>'}
  bagH+='</div>';
  const it=eqSelItem();
  let btns='';
@@ -259,8 +340,8 @@ function eqForgeHtml(){
   const isXu=id==='xu',have=isXu?gold:cnt(id),it=isXu?{i:'🪙',col:'#ffd24a'}:ITEMS[id],full=have>=n;
   if(isXu){continue}
   circ+='<div class="upslot'+(full?' full':'')+'" style="left:'+x+'%;top:'+y+'%" title="'+it.n+'"><span style="color:'+(it.col||'inherit')+'">'+it.i+'</span><b>'+Math.min(have,999)+'/'+n+'</b></div>'}
- circ+='<div class="uppet" style="font-size:30px;background:radial-gradient(circle,rgba(255,200,110,.35),rgba(255,200,110,.05) 70%)">'+EQ_SLOTS[s].i+'</div></div>';
- const slotBtns=EQ_SLOTS.map((o,i)=>'<button class="mini'+(i===s?' jade':'')+'" onclick="fgSetSlot('+i+')" title="'+o.n+'">'+o.i+'</button>').join('');
+ circ+='<div class="uppet" style="font-size:30px;background:radial-gradient(circle,rgba(255,200,110,.35),rgba(255,200,110,.05) 70%)">'+eqIco(s,z)+'</div></div>';
+ const slotBtns=EQ_SLOTS.map((o,i)=>'<button class="mini'+(i===s?' jade':'')+'" onclick="fgSetSlot('+i+')" title="'+o.n+'">'+eqIco(i,z)+'</button>').join('');
  const zoneBtn='<button class="eqzone" onclick="fgToggle()">🗺️ Bộ '+Z.name+' · cấp '+zb.start+'+'+(fgOpen?' ▴':' ▾')+'</button>';
  const zoneList=fgOpen?'<div class="eqzlist">'+VAN_KIEP_ZONES.map((q,i)=>'<div class="eqz'+(i===z?' on':'')+'" onclick="fgSetZone('+i+')"><span>'+(i===z?'✅ ':'🗺️ ')+q.name+'</span><span>cấp '+VAN_KIEP_ZONE_BOUNDS[i].start+'+</span></div>').join('')+'</div>':'';
  const tot=EQ_QW.reduce((a,b)=>a+b,0),odds=EQ_QW.map((w,i)=>'<span style="color:rgb('+QC[i]+')">'+QN[i]+' '+Math.round(w/tot*1000)/10+'% (+'+Math.round(EQ_QBONUS[i]*100)+'%)</span>').join(' · ');
@@ -270,6 +351,7 @@ function eqForgeHtml(){
  return'<div class="infobox" style="text-align:center;margin-bottom:4px">'+zoneBtn+'</div>'+zoneList+
   '<div class="upgrid"><div>'+circ+'</div><div><div class="infobox" style="margin-bottom:4px"><small>Chọn ô trang bị:</small></div><div class="eqslotbtn">'+slotBtns+'</div>'+
   '<div class="infobox upinfo"><b style="color:'+ZONE_COL[z]+'">'+EQ_SLOTS[s].n+' '+Z.name+'</b><br><small>Cấp yêu cầu '+zb.start+'</small></div></div></div>'+
+  eqInfoHtml(z,s,need)+
   '<div class="infobox upnote" style="margin-top:5px">📦 <b>Nguyên liệu cần:</b>'+src(ids.boss,z,'boss')+src(ids.main,z,'main')+src(ids.shared,z,'shared')+'<div>🪙 Xu ×<b>'+gold+'/'+need.xu+'</b></div></div>'+
   '<div class="infobox upnote" style="margin-top:5px"><b style="color:'+ZONE_COL[z]+'">'+S.i+' Buff bộ: '+S.name+'</b><br><small>2 món: '+S.t(eqScale(S.v2,0))+'<br>4 món: '+S.t(eqScale(S.v4,0))+'</small></div>'+
   '<div class="infobox upnote" style="margin-top:5px">🎲 Phẩm ngẫu nhiên: '+odds+'<br><small>Phẩm cao cộng thêm % cho mọi chỉ số và buff bộ. Mỗi món có '+EQ_LINES+' dòng chỉ số ngẫu nhiên.</small></div>'+
@@ -292,3 +374,4 @@ function eqLoop(t){
  eqRaf=requestAnimationFrame(eqLoop)}
 document.getElementById('equip-box').addEventListener('toggle',e=>{if(e.target.open)renderEquip()});
 renderEquip();
+if(typeof renderBag==='function')renderBag();

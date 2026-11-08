@@ -44,7 +44,7 @@ function adminShow(){
   const st=document.createElement('style');
   st.textContent='.ad-b{width:74px;flex:none;padding:5px 0;margin:0;font-size:12px;font-weight:800;line-height:1.1}#admin-ov>*{width:100%;max-width:360px;box-sizing:border-box}';
   document.head.appendChild(st);document.body.appendChild(adminEl)}
- const opts=Object.keys(ITEMS).map(id=>'<option value="'+id+'">'+ITEMS[id].i+' '+ITEMS[id].n+'</option>').join('');
+ const opts=Object.keys(ITEMS).map(id=>'<option value="'+id+'">'+(ITEMS[id].e||ITEMS[id].i)+' '+ITEMS[id].n+'</option>').join('');
  adminEl.innerHTML='<div style="font-size:15px;font-weight:900;color:#ffd24a">🛠️ Admin</div>'+
   '<div id="ad-buffs" style="font-size:10.5px;color:#72e4b0;margin:2px 0 6px"></div>'+
   adRow('🪙 Xu','ad-gold',1000,'+ Xu','adGold')+

@@ -292,3 +292,16 @@ details.bagbox summary{padding:1px 2px;letter-spacing:-.3px}
 .eqstat div{display:flex;justify-content:space-between;gap:4px;border-bottom:1px solid rgba(88,62,69,.55)}
 .eqstat div.z{opacity:.4}
 .eqstat b{color:var(--jade)}
+
+.eqrange{grid-template-columns:1fr!important;font-size:12px}
+
+/* icon pixel art */
+.pxi{width:1.35em;height:1.35em;image-rendering:pixelated;vertical-align:-.3em}
+.slot>span,.upslot>span{display:flex;justify-content:center;align-items:center;width:100%}
+.slot .pxi{width:72%;max-width:44px;height:auto;aspect-ratio:1}
+.upslot .pxi{width:30px;height:30px}
+.uppet .pxi{width:56px;height:56px;vertical-align:middle}
+.mini .pxi{width:1.6em;height:1.6em;vertical-align:middle}
+.eqinfo-h{display:flex;align-items:center;gap:5px;width:100%;padding:3px 2px;margin-bottom:3px;background:none;border:0;border-bottom:1px solid #3a4a44;font-size:13px;text-align:left;cursor:pointer;box-shadow:none}
+.eqinfo-h b{flex:1}
+.eqinfo-h span{font-size:11px;color:var(--mute);white-space:nowrap}

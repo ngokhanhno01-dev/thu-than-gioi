@@ -2034,9 +2034,11 @@ function impact(g,fx,tt){
   g.save();g.translate(tx,ty);g.rotate(q*3);g.strokeStyle=A;g.beginPath();g.moveTo(0,-16*pw);g.lineTo(11*pw,0);g.lineTo(0,16*pw);g.lineTo(-11*pw,0);g.closePath();g.stroke();g.restore()}
  for(let i=0;i<9;i++){const a=rd()*6.28,r=(14+q*(34+rd()*30))*pw;sigP(g,R[2],tx+Math.cos(a)*r,ty+Math.sin(a)*r-q*12,2.6+rd()*2,a+q*3,B,A)}
  g.restore()}
+/* Nhịp trận đấu: BST = số giây cho MỖI đòn (càng lớn càng chậm, bản cũ 0.9) · BT0 = số giây chờ trước đòn đầu (bản cũ 1.6) */
+const BST=1.9,BT0=2.4;
 function battle(e){return new Promise(resolve=>{busy=true;const o=$('mob'),g=$('mob-c').getContext('2d'),R=sim(e),n=R.ev.length,sp=spOfPet(),b=e.tr.rw,
  ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))*buffMul('exp')),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))*buffMul('xu')),
- lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=e.tr.fw,fL=Math.min(Math.floor(fame),e.tr.fl),TE=1.6+n*.9,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false;
+ lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=e.tr.fw,fL=Math.min(Math.floor(fame),e.tr.fl),TE=BT0+n*BST,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false;
  o.style.display='block';const rb=$('mob-run');rb.style.display='block';
  $('mob-pn').textContent=pn+' · Cấp '+level;const RP=REG[pet.sp],RM=REG[e.m.sp];paintUI(RP,RM);$('mob-mn').innerHTML=(e.m.boss?'👑 ':'')+nm(e)+' · Cấp '+e.lv;if(e.tr.n!=='Thường')$('mob-mh').parentNode.style.borderColor=e.tr.c;if(window.battleHudExtra)battleHudExtra(e);
  function fin(flee){if(done)return;done=true;o.style.display='none';rb.style.display='none';
@@ -2052,7 +2054,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const o=$('mob'),g=$('
  (function L(){if(done)return;const T0=performance.now(),T=(T0-t0)/1000,tt=T0/1000;
   sceneDraw(tt,e.m.zone);g.drawImage(cv,0,0,360,250,0,0,360,250);
     let hp=R.maxP,mh=R.maxM,msg='Tốc: Thú '+ps.spd+' · '+e.m.n+' '+e.st[3]+' → '+(R.first?'Thú':e.m.n)+' ra đòn trước',dp=0,dmx=0,ap=1,am=1,fl=null,fx=null;
-  R.ev.forEach((x,i)=>{const s=1.6+i*.9,u=(T-s)/.9;if(u<0)return;if(u>=.35){hp=x.hp;mh=x.mh}
+  R.ev.forEach((x,i)=>{const s=BT0+i*BST,u=(T-s)/BST;if(u<0)return;if(u>=.35){hp=x.hp;mh=x.mh}
    if(u<.9){msg=x.t;const lg=Math.sin(Math.min(1,u/.35)*Math.PI)*(x.k==='hit'||x.k==='crit'?46:x.k==='miss'?-10:0);
     if(x.w==='p')dp=lg;else dmx=-lg;
      if(u>=.35&&u<.8&&x.d&&x.k!=='heal'&&x.k!=='block'&&(Math.floor(T*18)%2)){if(x.w==='m')ap=.35;else am=.35}
