@@ -1843,7 +1843,7 @@ function drawMobDetails(ctx,m,T){
   entry.image.onload=()=>{try{entry.bounds=measureMobBounds(entry.image);entry.state=entry.bounds?'ready':'error'}catch(_){entry.state='error'}};
   entry.image.onerror=()=>{entry.state='error'};entry.image.src=url;return entry;
  }
-  const MOB_DRAW_SCALE=0.78,PET_DRAW_SCALE=0.8,petBoundsCache=new Map();
+  const MOB_DRAW_SCALE=0.78,PET_DRAW_SCALE=0.84,petBoundsCache=new Map();
   function measurePetAlphaBounds(canvas){
    try{
     const ctx=canvas.getContext('2d',{willReadFrequently:true}),w=canvas.width,h=canvas.height;
@@ -1900,14 +1900,53 @@ function drawMobDetails(ctx,m,T){
 
 /* PET_CLEAN=true: ở bậc trưởng thành, vẽ thẳng ảnh gốc của thú (nét như quái, không có hoa văn bậc). Đặt false để quay về kiểu cũ. */
 const PET_CLEAN=true;
+/* ===== PET_FX: hào quang / hạt sáng / vòng chân / quầng thần theo HỆ và BẬC, để thú có "đất diễn" ngang quái. Đặt PET_FX=false để tắt. ===== */
+const PET_FX=true;
+const PET_STAGE_SCALE=[.74,.86,.95,1.03]; /* tỉ lệ theo bậc: con -> thiếu niên -> trưởng thành -> thần thú */
+function petFxBack(g,cx,by,h,T,al,el,stage){
+ const col=el.color,cy=by-h*.52,rad=h*(.58+.1*stage);
+ g.save();g.globalAlpha=al;
+ const rg=g.createRadialGradient(cx,cy,4,cx,cy,rad);
+ rg.addColorStop(0,col+(stage>=3?'66':'44'));rg.addColorStop(.55,col+'1f');rg.addColorStop(1,col+'00');
+ g.fillStyle=rg;g.fillRect(cx-rad,cy-rad,rad*2,rad*2);
+ const pulse=.5+.5*Math.sin(T*2.4);
+ g.strokeStyle=col;g.lineWidth=2;
+ g.globalAlpha=al*(.45+.35*pulse);g.beginPath();g.ellipse(cx,by+2,h*.44,h*.1,0,0,7);g.stroke();
+ if(stage>=2){g.globalAlpha=al*.35;g.beginPath();g.ellipse(cx,by+2,h*.56+pulse*3,h*.14+pulse,0,0,7);g.stroke()}
+ if(stage>=3){ /* quầng thần phía sau + 8 tia xoay */
+  g.globalAlpha=al*.5;g.lineWidth=2.5;g.beginPath();g.ellipse(cx,cy-h*.1,h*.46,h*.46,0,0,7);g.stroke();
+  g.globalAlpha=al*.32;g.save();g.translate(cx,cy-h*.1);g.rotate(T*.35);
+  for(let k=0;k<8;k++){g.rotate(Math.PI/4);g.fillStyle=col;g.beginPath();g.moveTo(h*.46,-2);g.lineTo(h*.62,0);g.lineTo(h*.46,2);g.closePath();g.fill()}
+  g.restore()}
+ g.restore()}
+function petFxFront(g,cx,by,h,T,al,el,stage){
+ const col=el.color,dk=el.dark,form=el.form,cy=by-h*.52,n=2+stage*2;
+ g.save();g.imageSmoothingEnabled=false;
+ for(let i=0;i<n;i++){
+  const ph=T*(.9+(i%3)*.25)+i*Math.PI*2/n,rise=((T*.35+i*.37)%1);
+  let x,y,sz=2+((i+stage)%3);
+  if(form==='flame'||form==='bolt'||form==='sun'||form==='wind'){x=cx+Math.sin(ph*1.3)*h*.34;y=by-h*.1-rise*h*.8;g.globalAlpha=al*(1-rise)*.9}
+  else if(form==='leaf'||form==='petal'||form==='feather'||form==='cloud'||form==='mist'){x=cx+Math.sin(T*.8+i*2)*h*.4+Math.sin(rise*6+i)*5;y=by-h*.95+rise*h*.9;g.globalAlpha=al*Math.sin(rise*Math.PI)*.9}
+  else{x=cx+Math.cos(ph)*h*(.36+(i%3)*.05);y=cy+Math.sin(ph*1.25)*h*.3;g.globalAlpha=al*(.4+.5*(.5+.5*Math.sin(T*3+i)))}
+  x=Math.round(x/2)*2;y=Math.round(y/2)*2;sz=1+((i+stage)%2);
+  g.fillStyle=(i%2)?col:'#ffffff';g.fillRect(x-sz,y-sz,sz*2,sz*2);
+  if(i%2===0){g.globalAlpha*=.8;g.fillStyle=col;g.fillRect(x-1,y-sz*2-2,2,sz*4+4);g.fillRect(x-sz*2-2,y-1,sz*4+4,2)} /* tia lấp lánh */
+ }
+ g.restore()}
 function drawPet(g,cx,by,size,T,dx,al){const api=window.VanKiepSprites,frame=api?Math.floor(T*5)%api.frameCount:0,stage=stageOf(level),sh=api?api.getSheet(pet.bl,pet.sp):null,fr=api?api.frameRect(stage,frame):null;
  spriteCtx.clearRect(0,0,128,128);spriteCtx.imageSmoothingEnabled=false;
  const clean=PET_CLEAN&&api&&stage>=2&&api.getAdultImage?api.getAdultImage(pet.bl,pet.sp):null;
  if(clean)spriteCtx.drawImage(clean,0,0,128,128);else if(sh&&fr)spriteCtx.drawImage(sh,fr.sx,fr.sy,fr.sw,fr.sh,0,0,128,128);else{const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)spriteCtx.drawImage(im,0,0,128,128)}
   const key=pet.bl+':'+pet.sp+':'+stage+':'+(clean?'c':frame);let box=petBoundsCache.get(key);if(!box){const measured=measurePetAlphaBounds(spriteLayer);if(measured){box=measured;petBoundsCache.set(key,box)}else box={x:0,y:0,w:128,h:128}}
- const bodySpan=Math.max(box.w,box.h,1),drawSize=size*PET_DRAW_SCALE*128/bodySpan,unit=drawSize/128,bob=Math.round(Math.sin(T*3)*1.5*PET_DRAW_SCALE);
- g.fillStyle='rgba(0,0,0,.4)';g.beginPath();g.ellipse(cx,by+1,size*.36*PET_DRAW_SCALE,6*PET_DRAW_SCALE,0,0,7);g.fill();
-  g.save();g.globalAlpha=al;g.imageSmoothingEnabled=false;g.filter='drop-shadow(0 0 1px rgba(10,6,14,.9))';g.translate(cx+dx*PET_DRAW_SCALE,by+bob);g.scale(PFLIP,1);g.drawImage(spriteLayer,-(box.x+box.w/2)*unit,-(box.y+box.h)*unit,drawSize,drawSize);g.restore()}
+ const grow=PET_FX?PET_STAGE_SCALE[stage]:1,drawSize=size*PET_DRAW_SCALE*grow,unit=drawSize/128,bob=Math.round(Math.sin(T*3)*1.5*PET_DRAW_SCALE),breathe=1+Math.sin(T*2.2)*.014;
+ const el=PET_FX&&api&&api.elements&&api.elements[pet.sp]&&api.elements[pet.sp].color?api.elements[pet.sp]:null;
+ const bodyH=Math.max(box.h*unit,30);
+ g.fillStyle='rgba(0,0,0,.4)';g.beginPath();g.ellipse(cx,by+1,size*.36*PET_DRAW_SCALE*grow,6*PET_DRAW_SCALE,0,0,7);g.fill();
+ if(el)petFxBack(g,cx,by,bodyH,T,al,el,stage);
+  g.save();g.globalAlpha=al;g.imageSmoothingEnabled=false;
+  g.filter=el?('drop-shadow(0 0 1px rgba(10,6,14,.95)) drop-shadow(0 0 '+(stage>=3?5:stage>=2?3:2)+'px '+el.color+(stage>=3?'ee':'aa')+')'):'drop-shadow(0 0 1px rgba(10,6,14,.9))';
+  g.translate(cx+dx*PET_DRAW_SCALE,by+bob);g.scale(PFLIP,breathe);g.drawImage(spriteLayer,-(box.x+box.w/2)*unit,-(box.y+box.h)*unit,drawSize,drawSize);g.restore();
+ if(el)petFxFront(g,cx,by,bodyH,T,al,el,stage)}
 const PFLIP=-1;
 /*@@S*/const MX=Object.fromEntries(M.map(m=>[m.n,{eva:m.eva,crit:m.crit,stun:m.stun,regen:m.regen,ks:m.ks,t:m.t}])); const TRQ=[{n:'Yếu',c:'#8fd0ff',tot:50,sec:.85,p:45,rw:.6,lm:.6,fl:0,fw:1},{n:'Thường',c:'#f6e9e4',tot:60,sec:1,p:30,rw:1,lm:1,fl:1,fw:3},{n:'Tinh Anh',c:'#ffb020',tot:72,sec:1.15,p:15,rw:1.5,lm:1.5,fl:2,fw:5},{n:'Thống Lĩnh',c:'#ff4055',tot:86,sec:1.35,p:7,rw:2.5,lm:2.5,fl:3,fw:8}],
 TRB=[{n:'Trấn Thủ',c:'#c9a0ff',tot:100,sec:.875,p:50,rw:1.5,lm:1.5,fl:3,fw:12},{n:'Chúa Tể',c:'#ff5a6a',tot:110,sec:1,p:35,rw:4,lm:2.5,fl:6,fw:25},{n:'Thiên Ma',c:'#ffd24a',tot:132,sec:1.175,p:15,rw:7,lm:4,fl:10,fw:45}];

@@ -513,7 +513,7 @@
     frameRect,
     buildAtlas,
     bloodlineNames: BLOODLINE_NAMES,
-    elements: ELEMENTS.map(({ name }, index) => ({ name, index })),
+    elements: ELEMENTS.map(({ name, color, dark, form }, index) => ({ name, index, color, dark, form })),
     stages: STAGE_NAMES,
   };
 })();
