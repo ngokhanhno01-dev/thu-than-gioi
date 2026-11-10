@@ -33,7 +33,8 @@ const FB_CONFIG={
   projectId:'thu-than-gioi',
   appId:'1:422450444342:web:95516a9cdf2f50c0f28097'
 };
-const CLOUD_MS=15000;         /* đẩy lên máy chủ tối đa mỗi 15 giây */
+const CLOUD_MS=300000;        /* đẩy lên máy chủ tối đa mỗi 5 phút (tiết kiệm quota Firestore). Bản lưu trên máy vẫn ghi mỗi 10 giây; nút 💾 Lưu ngay, ẩn tab, đóng trang sẽ đẩy ngay */
+const NOTICE_ON=true;          /* bật bảng thông báo khẩn nhắc lưu game khi vừa vào game */
 
 /* ====================== KHO LƯU TRỮ (thay khối này khi có máy chủ) ====================== */
 const LS={
@@ -80,6 +81,10 @@ function cloudPush(force){
   pushAt=now;
   return docRef(KEYU).set({raw,t:d.t,name:user.name||'',st:firebase.firestore.FieldValue.serverTimestamp()}).then(()=>{if(cloudBad){cloudBad=false;warn('')}})
     .catch(e=>{console.warn('[cloud]',e);if(!cloudBad){cloudBad=true;warn('⚠️ Chưa đồng bộ được lên máy chủ (mất mạng?). Tiến trình vẫn được lưu trên máy này.')}})}
+function flushCloud(minGap){   /* đẩy ngay lên máy chủ (dùng khi ẩn tab / đóng trang / bấm Lưu ngay); minGap = khoảng cách tối thiểu so với lần đẩy trước */
+  if(!db||!user||user.key===GUEST||!KEYU)return Promise.resolve();
+  if(Date.now()-pushAt<(minGap||0))return Promise.resolve();
+  return cloudPush(true)}
 function watch(){             /* thiết bị khác vừa lưu bản mới hơn -> tab này tự khóa để khỏi ghi đè */
   if(unsub)unsub();
   unsub=docRef(KEYU).onSnapshot(sn=>{
@@ -91,7 +96,7 @@ const authErr=e=>({
   'auth/email-already-in-use':'Tên này đã có người dùng.','auth/weak-password':'Mật khẩu cần ít nhất 6 ký tự.',
   'auth/network-request-failed':'Không kết nối được mạng.','auth/too-many-requests':'Thử quá nhiều lần, hãy đợi một lát.',
   'auth/operation-not-allowed':'Chưa bật đăng nhập Email/Mật khẩu trong Firebase.',
-  'permission-denied':'Chưa mở quyền hồ sơ/biệt danh trên máy chủ (xem FIRESTORE_RULES.txt).','unavailable':'Không kết nối được máy chủ, thử lại.'}[e&&e.code]||'Có lỗi, thử lại.');
+  'permission-denied':'Chưa mở quyền hồ sơ/biệt danh trên máy chủ (xem FIRESTORE_RULES.txt).','unavailable':'Không kết nối được máy chủ, thử lại.','resource-exhausted':'Máy chủ đã hết lượt dùng trong ngày, hãy thử lại sau (khoảng 15h chiều).'}[e&&e.code]||'Có lỗi, thử lại.');
 /* ---------- BIỆT DANH (Firestore) ----------
    nicks/{nickKey}  = {uid, nick}   -> giữ chỗ để KHÔNG ai trùng biệt danh (nickKey = bỏ dấu, bỏ cách, chữ thường)
    profiles/{uid}   = {nick, nickKey, t} -> hồ sơ công khai: chat, bảng xếp hạng dùng cái này thay cho tên tài khoản */
@@ -123,8 +128,8 @@ const num=(v,d)=>{v=Number(v);return isFinite(v)?v:(d||0)};
 /* ---------- CSS ---------- */
 {const s=document.createElement('style');
  s.textContent=
- '#ttg-login,#ttg-accp,#ttg-nick,#ttg-nc{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,10,14,.86);padding:12px;box-sizing:border-box}'+
- '#ttg-login.show,#ttg-accp.show,#ttg-nick.show,#ttg-nc.show{display:flex}'+
+ '#ttg-login,#ttg-accp,#ttg-nick,#ttg-nc,#ttg-notice{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,10,14,.86);padding:12px;box-sizing:border-box}'+
+ '#ttg-login.show,#ttg-accp.show,#ttg-nick.show,#ttg-nc.show,#ttg-notice.show{display:flex}'+
  '.ttg-bx{width:min(90vw,340px);max-height:90vh;overflow-y:auto;box-sizing:border-box;text-align:center;padding:12px 14px 14px;border:3px solid #f6c66a;background:#14272d;box-shadow:0 3px 0 0 #040a0e,0 0 0 2px #040a0e,inset 0 0 0 2px #78613a;font-family:"VT323",monospace;color:#f5edcf}'+
  '.ttg-bx .t{font-size:30px;color:#f6c66a;text-shadow:1px 1px 0 #071116;line-height:1.1}'+
  '.ttg-bx .s{font-size:18px;color:#b7bda9;margin:2px 0 8px}'+
@@ -325,11 +330,16 @@ function buildAcc(){
    '<button class="bad" id="ap-del">🗑️ Xóa dữ liệu & chơi lại</button>'+
    '<button class="dim" id="ap-close">Đóng</button>'+
    '<input type="file" id="ap-file" accept=".json,application/json" style="display:none">'+
-   '<div class="n">Tài khoản tự đồng bộ lên máy chủ. Chơi khách thì chỉ lưu trên máy này (dùng Xuất/Nhập file để chuyển).</div></div>';
+   '<div class="n">Tiến trình luôn lưu trên máy này; lên máy chủ tự động khoảng mỗi 5 phút. <b>Hãy bấm 💾 Lưu ngay trước khi thoát game hoặc đổi máy.</b> Chơi khách thì chỉ lưu trên máy này (dùng Xuất/Nhập file để chuyển).</div></div>';
   document.body.appendChild(p);
   p.addEventListener('click',e=>{if(e.target===p)closePanel()});
   $s('ap-close').onclick=closePanel;
-  $s('ap-save').onclick=()=>{msg(save()?'✅ Đã lưu.':'⚠️ Chưa lưu được (xem thông báo trên cùng).')};
+  $s('ap-save').onclick=()=>{
+    if(!save()){msg('⚠️ Chưa lưu được (xem thông báo trên cùng).');return}
+    if(!db||!user||user.key===GUEST){msg('✅ Đã lưu trên máy này.');return}
+    if(Date.now()-pushAt<8000){msg('✅ Đã lưu lên máy chủ.');return}   /* bấm dồn dập: không ghi lặp */
+    const b=$s('ap-save');b.disabled=true;msg('Đang lưu lên máy chủ...');
+    flushCloud(0).then(()=>{msg(cloudBad?'⚠️ Đã lưu trên máy, nhưng CHƯA lên được máy chủ (mất mạng hoặc máy chủ hết lượt hôm nay).':'✅ Đã lưu lên máy chủ.')}).then(()=>{b.disabled=false})};
   $s('ap-nick').onclick=openNickChange;
   $s('ap-exp').onclick=exportSave;
   $s('ap-imp').onclick=()=>$s('ap-file').click();
@@ -460,7 +470,12 @@ function askNick(u){   /* bước bắt buộc: đặt biệt danh (tài khoản
     o.classList.add('show');setTimeout(()=>{try{inp.focus()}catch(_){}},50)})}
 async function enter(u){
   lmsg('Đang tải hồ sơ...');
-  let nick=await loadNick(u.uid);                       /* lỗi (mất mạng / chưa mở quyền) -> ném ra để hiện ở màn đăng nhập */
+  let nick='';
+  try{nick=await loadNick(u.uid);if(nick)LS.set(P+'nick_'+u.uid,nick)}
+  catch(e){   /* máy chủ hết lượt trong ngày -> vẫn cho vào game bằng biệt danh đã nhớ trên máy */
+    const c=e&&e.code==='resource-exhausted'?LS.get(P+'nick_'+u.uid):'';
+    if(!c)throw e;
+    nick=c;console.warn('[nick] máy chủ hết lượt, dùng biệt danh đã nhớ',e)}                       /* lỗi (mất mạng / chưa mở quyền) -> ném ra để hiện ở màn đăng nhập */
   if(!nick){const ov=$s('ttg-login');if(ov)ov.classList.remove('show');lmsg('');nick=await askNick(u)}
   lmsg('Đang tải tiến trình...');
   srv=null;
@@ -484,6 +499,19 @@ async function doRegister(){
     await enter(cr.user)}catch(e){lmsg(authErr(e))}}
 
 /* ====================== KHỞI ĐỘNG ====================== */
+function showSaveNotice(){   /* bảng thông báo khẩn khi vừa vào game: nhắc lưu trước khi thoát. Sửa chữ ngay dưới đây. */
+  if(!NOTICE_ON||$s('ttg-notice'))return;
+  const guest=!user||user.key===GUEST;
+  const body=guest
+    ?'Bạn đang chơi <b style="color:#f6c66a">KHÁCH</b>: tiến trình chỉ lưu trên trình duyệt này, xóa dữ liệu trình duyệt là <b style="color:#ff8a7a">MẤT HẾT</b>.<br><br>👉 Hãy <b>đăng ký tài khoản</b> hoặc bấm 👤 → 📤 Xuất file để giữ tiến trình.'
+    :'Game tự đồng bộ lên máy chủ <b>khoảng mỗi 5 phút</b>.<br><br>👉 Hãy bấm nút <b>👤</b> (góc trái dưới) → <b style="color:#f6c66a">💾 Lưu ngay</b> <b>TRƯỚC KHI THOÁT GAME</b> hoặc đổi sang máy khác, để không mất <b>tiến trình / thú / xu / vật phẩm vừa nhận gần nhất</b>.<br><br>Trên máy này, game vẫn tự lưu liên tục.';
+  const o=document.createElement('div');o.id='ttg-notice';
+  o.innerHTML='<div class="ttg-bx"><div class="t">📢 THÔNG BÁO KHẨN</div><div class="s">Đọc trước khi chơi</div>'+
+    '<div style="font-size:21px;line-height:1.2;text-align:left;margin:6px 0 10px">'+body+'</div>'+
+    '<button class="alt" id="nt-ok">Đã hiểu</button></div>';
+  document.body.appendChild(o);
+  $s('nt-ok').onclick=()=>o.remove();
+  setTimeout(()=>{if(o.parentNode)o.classList.add('show')},700)}
 function begin(key,name){
   user={key,name};KEYU=key;LS.set(P+'session',key);
   const ov=$s('ttg-login');if(ov)ov.classList.remove('show');
@@ -500,13 +528,14 @@ function begin(key,name){
   try{fbInit();if(db&&window.TTGNET)TTGNET.start({db,uid:key,name,guest:key===GUEST})}catch(e){console.warn('[online]',e)}   /* chat + số người online (20-online.js) */
   const _st=stats;stats=function(){_st.apply(this,arguments);sched()};      /* xu/uy danh đổi -> lưu sau 2 giây */
   setInterval(save,AUTO_MS);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
-  window.addEventListener('pagehide',save);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){save();flushCloud(60000)}});
+  window.addEventListener('pagehide',()=>{save();flushCloud(60000)});
   window.addEventListener('storage',e=>{ /* tab khác vừa ghi/xóa bản lưu của tài khoản này */
     if(e.key!==kSave(KEYU)||locked)return;
     const d=e.newValue?parseSave(e.newValue):null;
     if(!d||d.tab!==TAB)conflict()});
-  window.addEventListener('beforeunload',save)}
+  window.addEventListener('beforeunload',()=>{save();flushCloud(60000)});
+  showSaveNotice()}
 
 window.TTGSAVE={save,snap,get user(){return user},exportSave,wipe,logout};
 const ses=LS.get(P+'session');

@@ -10,7 +10,7 @@
 (()=>{
 'use strict';
 const CACHE_MS=60000;       /* xem lại cùng 1 người trong 60 giây: không đọc lại Firestore */
-const ONLINE_MS=150000;     /* giống 20-online.js: có nhịp tim trong 150 giây gần nhất = đang online */
+const ONLINE_MS=300000;     /* giống 20-online.js: có nhịp tim trong 5 phút gần nhất = đang online */
 const VIEW_COOLDOWN=800;    /* giãn cách giữa 2 lần bấm xem */
 
 const $=id=>document.getElementById(id);

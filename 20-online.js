@@ -10,9 +10,9 @@
    Mọi con số chỉnh ngay dưới đây. Luật Firestore cần thiết: xem file FIRESTORE_RULES.txt. */
 (()=>{
 'use strict';
-const HB_MS=45000;            /* gửi nhịp tim mỗi 45 giây */
-const ONLINE_MS=150000;       /* có nhịp tim trong 150 giây gần nhất = đang online */
-const COUNT_MS=30000;         /* cập nhật số online mỗi 30 giây */
+const HB_MS=120000;           /* gửi nhịp tim mỗi 2 phút (tab ẩn thì không gửi) */
+const ONLINE_MS=300000;       /* có nhịp tim trong 5 phút gần nhất = đang online */
+const COUNT_MS=120000;        /* cập nhật số online mỗi 2 phút */
 const CHAT_LIMIT=50;          /* hiện tối đa bao nhiêu tin gần nhất */
 const MAX_LEN=200;            /* tối đa ký tự mỗi tin */
 const COOLDOWN_MS=2000;       /* giãn cách giữa 2 tin (chống spam) */
@@ -85,14 +85,18 @@ const SV=()=>firebase.firestore.FieldValue.serverTimestamp();
 function setCount(n){online=n;if(cntEl)cntEl.textContent='🟢 '+n+' online';const h=$('ol-hc');if(h)h.textContent=n+' online'}
 
 function heartbeat(){
-  if(!db||!me||me.guest)return;
+  if(!db||!me||me.guest||document.hidden)return;   /* tab ẩn: khỏi ghi (tiết kiệm lượt ghi) */
   db.collection('presence').doc(me.uid).set({name:me.name,t:SV()}).catch(e=>console.warn('[online] hb',e))}
 function countOnline(){
   if(!db||document.hidden)return;   /* tab đang ẩn thì khỏi đếm (tiết kiệm lượt đọc) */
   const cut=TS().fromMillis(Date.now()-ONLINE_MS);
-  db.collection('presence').where('t','>',cut).get().then(sn=>{
-    let n=sn.size;
-    if(me&&!me.guest&&!sn.docs.some(d=>d.id===me.uid))n++;     /* chính mình luôn tính (nhịp tim vừa gửi có thể chưa kịp về) */
+  const q=db.collection('presence').where('t','>',cut);
+  const viaGet=()=>q.get().then(sn=>({n:sn.size,mine:sn.docs.some(d=>d.id===(me&&me.uid))}));
+  /* count() chỉ tính ~1 lượt đọc cho mỗi 1000 người online (thay vì 1 lượt/người); SDK cũ không có thì quay về get() */
+  const p=(typeof q.count==='function')?q.count().get().then(s=>({n:s.data().count,mine:true})).catch(viaGet):viaGet();
+  p.then(r=>{
+    let n=r.n;
+    if(me&&!me.guest&&!r.mine)n++;     /* chính mình luôn tính (nhịp tim vừa gửi có thể chưa kịp về) */
     setCount(Math.max(n,1))
   }).catch(e=>{console.warn('[online] count',e);if(cntEl)cntEl.textContent='🟢 ?'})}
 function goOffline(){
