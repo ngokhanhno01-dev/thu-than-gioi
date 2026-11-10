@@ -4,6 +4,7 @@
    - "🟢 N online": số người đang chơi. Mỗi người đã đăng nhập ghi 1 "nhịp tim" vào Firestore presence/{uid} = {name,t}
      mỗi HB_MS; ai có nhịp tim trong ONLINE_MS gần nhất thì tính là đang online.
    - Nút "💬" góc phải dưới: mở khung chat chung. Tin nhắn nằm ở Firestore chat/{id} = {uid,name,text,t}.
+   - Chỉ hiện tin nhắn từ lúc người chơi vào game (không có lịch sử cũ). Khung chat đóng mà có tin mới của người khác -> hiện số đỏ (1, 2, 3... tối đa 99+) trên nút 💬; mở chat thì số về 0.
    - Khách (chưa đăng nhập) xem được số online + đọc chat nhưng không gửi được.
    Móc vào game qua 19-save.js: sau khi vào game, 19-save gọi TTGNET.start({db,uid,name,guest}). File này phải được nạp TRƯỚC 19-save.js.
    Mọi con số chỉnh ngay dưới đây. Luật Firestore cần thiết: xem file FIRESTORE_RULES.txt. */
@@ -77,7 +78,7 @@ function buildTopBar(){
 buildTopBar();
 
 /* ---------- ONLINE + CHAT ---------- */
-let db=null,me=null,started=false,hbT=0,cntT=0,unsubChat=null,lastSend=0,open=false,unread=0,firstSnap=true,online=null;
+let joinAt=Date.now(),db=null,me=null,started=false,hbT=0,cntT=0,unsubChat=null,lastSend=0,open=false,unread=0,firstSnap=true,online=null;
 const TS=()=>firebase.firestore.Timestamp;
 const SV=()=>firebase.firestore.FieldValue.serverTimestamp();
 
@@ -87,7 +88,7 @@ function heartbeat(){
   if(!db||!me||me.guest)return;
   db.collection('presence').doc(me.uid).set({name:me.name,t:SV()}).catch(e=>console.warn('[online] hb',e))}
 function countOnline(){
-  if(!db)return;
+  if(!db||document.hidden)return;   /* tab đang ẩn thì khỏi đếm (tiết kiệm lượt đọc) */
   const cut=TS().fromMillis(Date.now()-ONLINE_MS);
   db.collection('presence').where('t','>',cut).get().then(sn=>{
     let n=sn.size;
@@ -117,14 +118,14 @@ function toggle(v){
   $('ol-chat').classList.toggle('show',open);
   if(open){unread=0;badge();const m=$('ol-msgs');m.scrollTop=m.scrollHeight;
     if(me&&!me.guest)setTimeout(()=>{try{$('ol-in').focus()}catch(_){}},50)}}
-function badge(){const f=$('ol-fab');if(!f)return;f.classList.toggle('has',unread>0);f.querySelector('b').textContent=unread>99?'99+':unread}
+function badge(){const f=$('ol-fab');if(!f)return;f.classList.toggle('has',unread>0);f.querySelector('b').textContent=unread>99?'99+':String(unread)}
 
 function fmtT(ms){const d=new Date(ms);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function render(docs){
   const m=$('ol-msgs');if(!m)return;
   const near=m.scrollHeight-m.scrollTop-m.clientHeight<60;
   m.innerHTML='';
-  if(!docs.length){m.innerHTML='<div class="sys">Chưa có tin nhắn nào. Hãy nói lời chào!</div>';return}
+  if(!docs.length){m.innerHTML='<div class="sys">Chưa có tin nhắn mới. Hãy nói lời chào!</div>';return}
   docs.forEach(d=>{
     const x=d.data(),ts=x.t&&x.t.toMillis?x.t.toMillis():Date.now();
     const row=document.createElement('div');if(me&&x.uid===me.uid)row.className='me';
@@ -133,7 +134,9 @@ function render(docs){
   if(near||open&&firstSnap)m.scrollTop=m.scrollHeight}
 function listenChat(){
   if(unsubChat)unsubChat();firstSnap=true;
-  unsubChat=db.collection('chat').orderBy('t','desc').limit(CHAT_LIMIT).onSnapshot(sn=>{
+  /* Chỉ nghe tin nhắn từ lúc vào game trở đi -> vào lại sẽ không thấy lịch sử cũ, và cũng không tốn lượt đọc tải 50 tin cũ */
+  const since=TS().fromMillis(joinAt);
+  unsubChat=db.collection('chat').where('t','>',since).orderBy('t','desc').limit(CHAT_LIMIT).onSnapshot(sn=>{
     const docs=sn.docs.slice().reverse();
     render(docs);
     if(!firstSnap&&!open){   /* tin mới của người khác khi đang đóng khung chat -> báo chấm đỏ */
