@@ -1899,10 +1899,11 @@ function drawMobDetails(ctx,m,T){
  }
 
 /* PET_CLEAN=true: ở bậc trưởng thành, vẽ thẳng ảnh gốc của thú (nét như quái, không có hoa văn bậc). Đặt false để quay về kiểu cũ. */
-const PET_CLEAN=true;
+const PET_CLEAN=true; /* (không còn dùng: mọi bậc đều vẽ từ ảnh trưởng thành giảm chi tiết) */
 /* ===== PET_FX: hào quang / hạt sáng / vòng chân / quầng thần theo HỆ và BẬC, để thú có "đất diễn" ngang quái. Đặt PET_FX=false để tắt. ===== */
 const PET_FX=true;
-const PET_STAGE_SCALE=[.74,.86,.95,1.03]; /* tỉ lệ theo bậc: con -> thiếu niên -> trưởng thành -> thần thú */
+const PET_GROW_MAX=1.03; /* kích thước thú trong trận ở bậc 10; bậc thấp nhỏ hơn theo VanKiepSprites.stageScale (bảng trong 02-sprites-engine.js) */
+function fxTier(s){return s<3?0:s<6?1:s<9?2:3} /* tạm: quy 10 bậc về 4 mức hiệu ứng cũ cho petFxBack/petFxFront; bước làm aura theo bậc/vùng sẽ thay thế */
 function petFxBack(g,cx,by,h,T,al,el,stage){
  const col=el.color,cy=by-h*.52,rad=h*(.58+.1*stage);
  g.save();g.globalAlpha=al;
@@ -1933,20 +1934,18 @@ function petFxFront(g,cx,by,h,T,al,el,stage){
   if(i%2===0){g.globalAlpha*=.8;g.fillStyle=col;g.fillRect(x-1,y-sz*2-2,2,sz*4+4);g.fillRect(x-sz*2-2,y-1,sz*4+4,2)} /* tia lấp lánh */
  }
  g.restore()}
-function drawPet(g,cx,by,size,T,dx,al){const api=window.VanKiepSprites,frame=api?Math.floor(T*5)%api.frameCount:0,stage=stageOf(level),sh=api?api.getSheet(pet.bl,pet.sp):null,fr=api?api.frameRect(stage,frame):null;
- spriteCtx.clearRect(0,0,128,128);spriteCtx.imageSmoothingEnabled=false;
- const clean=PET_CLEAN&&api&&stage>=2&&api.getAdultImage?api.getAdultImage(pet.bl,pet.sp):null;
- if(clean)spriteCtx.drawImage(clean,0,0,128,128);else if(sh&&fr)spriteCtx.drawImage(sh,fr.sx,fr.sy,fr.sw,fr.sh,0,0,128,128);else{const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)spriteCtx.drawImage(im,0,0,128,128)}
-  const key=pet.bl+':'+pet.sp+':'+stage+':'+(clean?'c':frame);let box=petBoundsCache.get(key);if(!box){const measured=measurePetAlphaBounds(spriteLayer);if(measured){box=measured;petBoundsCache.set(key,box)}else box={x:0,y:0,w:128,h:128}}
- const grow=PET_FX?PET_STAGE_SCALE[stage]:1,drawSize=size*PET_DRAW_SCALE*grow,unit=drawSize/128,bob=Math.round(Math.sin(T*3)*1.5*PET_DRAW_SCALE),breathe=1+Math.sin(T*2.2)*.014;
- const el=PET_FX&&api&&api.elements&&api.elements[pet.sp]&&api.elements[pet.sp].color?api.elements[pet.sp]:null;
+function drawPet(g,cx,by,size,T,dx,al){const api=window.VanKiepSprites,stage=stageOf(level),im=api?api.getStageImage(pet.bl,pet.sp,stage):null;
+ if(!im)return; /* ảnh gốc chưa tải xong: vẽ ở khung sau */
+ const ft=fxTier(stage),box=im.bb;
+ const grow=PET_GROW_MAX*api.stageScale(stage),drawSize=size*PET_DRAW_SCALE*grow,unit=drawSize/128,bob=Math.round(Math.sin(T*3)*1.5*PET_DRAW_SCALE),breathe=1+Math.sin(T*2.2)*.014;
+ const el=PET_FX&&api.elements&&api.elements[pet.sp]&&api.elements[pet.sp].color?api.elements[pet.sp]:null;
  const bodyH=Math.max(box.h*unit,30);
  g.fillStyle='rgba(0,0,0,.4)';g.beginPath();g.ellipse(cx,by+1,size*.36*PET_DRAW_SCALE*grow,6*PET_DRAW_SCALE,0,0,7);g.fill();
- if(el)petFxBack(g,cx,by,bodyH,T,al,el,stage);
+ if(el)petFxBack(g,cx,by,bodyH,T,al,el,ft);
   g.save();g.globalAlpha=al;g.imageSmoothingEnabled=false;
-  g.filter=el?('drop-shadow(0 0 1px rgba(10,6,14,.95)) drop-shadow(0 0 '+(stage>=3?5:stage>=2?3:2)+'px '+el.color+(stage>=3?'ee':'aa')+')'):'drop-shadow(0 0 1px rgba(10,6,14,.9))';
-  g.translate(cx+dx*PET_DRAW_SCALE,by+bob);g.scale(PFLIP,breathe);g.drawImage(spriteLayer,-(box.x+box.w/2)*unit,-(box.y+box.h)*unit,drawSize,drawSize);g.restore();
- if(el)petFxFront(g,cx,by,bodyH,T,al,el,stage)}
+  g.filter=el?('drop-shadow(0 0 1px rgba(10,6,14,.95)) drop-shadow(0 0 '+(ft>=3?5:ft>=2?3:2)+'px '+el.color+(ft>=3?'ee':'aa')+')'):'drop-shadow(0 0 1px rgba(10,6,14,.9))';
+  g.translate(cx+dx*PET_DRAW_SCALE,by+bob);g.scale(PFLIP,breathe);g.drawImage(im,-(box.x+box.w/2)*unit,-(box.y+box.h)*unit,drawSize,drawSize);g.restore();
+ if(el)petFxFront(g,cx,by,bodyH,T,al,el,ft)}
 const PFLIP=-1;
 /*@@S*/const MX=Object.fromEntries(M.map(m=>[m.n,{eva:m.eva,crit:m.crit,stun:m.stun,regen:m.regen,ks:m.ks,t:m.t}])); const TRQ=[{n:'Yếu',c:'#8fd0ff',tot:50,sec:.85,p:45,rw:.6,lm:.6,fl:0,fw:1},{n:'Thường',c:'#f6e9e4',tot:60,sec:1,p:30,rw:1,lm:1,fl:1,fw:3},{n:'Tinh Anh',c:'#ffb020',tot:72,sec:1.15,p:15,rw:1.5,lm:1.5,fl:2,fw:5},{n:'Thống Lĩnh',c:'#ff4055',tot:86,sec:1.35,p:7,rw:2.5,lm:2.5,fl:3,fw:8}],
 TRB=[{n:'Trấn Thủ',c:'#c9a0ff',tot:100,sec:.875,p:50,rw:1.5,lm:1.5,fl:3,fw:12},{n:'Chúa Tể',c:'#ff5a6a',tot:110,sec:1,p:35,rw:4,lm:2.5,fl:6,fw:25},{n:'Thiên Ma',c:'#ffd24a',tot:132,sec:1.175,p:15,rw:7,lm:4,fl:10,fw:45}];

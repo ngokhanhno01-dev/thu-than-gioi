@@ -1,9 +1,5 @@
 
 (() => {
-  const FRAME_SIZE = 64;
-  const FRAME_COUNT = 4;
-  const STAGE_COUNT = 4;
-  const SHEET_SIZE = FRAME_SIZE * FRAME_COUNT;
   const BLOODLINES = ["ho", "vu", "long", "tuoc", "lan", "hu"];
   const BLOODLINE_NAMES = {
     ho: "Bạch Hổ",
@@ -32,16 +28,22 @@
     { name: "Linh", color: "#ffd0f0", dark: "#a44b84", form: "petal" },
     { name: "Thần", color: "#fff2a0", dark: "#a77a22", form: "crown" },
   ];
-  const STAGE_NAMES = ["baby", "juvenile", "adult", "mythic"];
+  /* ===== 10 BẬC: mỗi bậc = 10 cấp. Mỗi bậc là bản "giảm chi tiết" của CHÍNH ảnh trưởng thành (không còn ảnh baby riêng) =====
+     Muốn chỉnh độ thô / độ nhỏ của thú con: chỉ cần sửa 3 mảng bên dưới.
+       STAGE_BLOCK : cỡ khối pixel (1 = nguyên gốc, 4 = rất thô)
+       STAGE_COLORS: số màu tối đa (0 = đủ màu gốc)
+       STAGE_SCALE : kích thước tương đối so với bậc 10 (bậc 10 = 1) */
+  const STAGE_NAMES = ["Sơ Sinh", "Ấu Thú", "Thiếu Thú", "Linh Thú", "Yêu Thú", "Hung Thú", "Trưởng Thú", "Đại Thú", "Chí Tôn", "Thần Thú"];
+  const STAGE_COUNT = STAGE_NAMES.length;
+  const STAGE_BLOCK = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+  const STAGE_COLORS = [4, 5, 6, 8, 10, 12, 16, 22, 32, 0];
+  const STAGE_SCALE = STAGE_BLOCK.map((_, i) => 0.3 + 0.7 * Math.pow(i / (STAGE_COUNT - 1), 0.8));
   const SCRIPT_URL = document.currentScript && document.currentScript.src
     ? document.currentScript.src
     : document.baseURI;
   const SPRITE_BASE = new URL("./sprites/", SCRIPT_URL);
   const imageRecords = new Map();
-  const sheets = new Map();
-  const stageGrowth = [0.42, 0.72, 1, 1.28];
-  const frameBob = [0, -1, 0, 1];
-  const frameSway = [0, 1, 0, -1];
+  const stageCache = new Map();
 
   function imageRecord(path) {
     if (!imageRecords.has(path)) {
@@ -61,314 +63,15 @@
     return imageRecords.get(path);
   }
 
-  function pixel(ctx, x, y, width, height, color, alpha = 1) {
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = color;
-    ctx.fillRect(Math.round(x), Math.round(y), Math.max(1, Math.round(width)), Math.max(1, Math.round(height)));
-    ctx.globalAlpha = 1;
-  }
-
-  function diamond(ctx, x, y, size, color, dark, alpha = 1) {
-    const rows = Math.max(2, Math.round(size));
-    for (let row = 0; row < rows; row += 1) {
-      const half = Math.max(1, Math.floor((row < rows / 2 ? row + 1 : rows - row) / 2));
-      pixel(ctx, x - half, y + row, half * 2, 1, dark, alpha);
-      if (half > 1) pixel(ctx, x - half + 1, y + row, half * 2 - 2, 1, color, alpha);
-    }
-  }
-
-  function star(ctx, x, y, color, dark, size = 1, alpha = 1) {
-    const unit = Math.max(1, Math.round(size));
-    pixel(ctx, x - unit, y, unit * 3, unit, dark, alpha);
-    pixel(ctx, x, y - unit, unit, unit * 3, dark, alpha);
-    pixel(ctx, x, y, unit, unit, color, alpha);
-  }
-
-  function cloud(ctx, x, y, color, dark, scale = 1, alpha = 1) {
-    const s = Math.max(1, Math.round(scale));
-    pixel(ctx, x + s * 2, y, s * 3, s, dark, alpha);
-    pixel(ctx, x, y + s, s * 8, s * 2, dark, alpha);
-    pixel(ctx, x + s, y + s, s * 6, s, color, alpha);
-    pixel(ctx, x + s * 2, y + s * 3, s * 5, s, dark, alpha);
-  }
-
-  function drawAgeBase(ctx, key, stage, adult, baby, frame) {
-    const bob = frameBob[frame];
-    const sway = frameSway[frame];
-    ctx.imageSmoothingEnabled = false;
-
-    if (stage === 0) {
-      ctx.drawImage(baby, 0, 0, baby.naturalWidth || baby.width, baby.naturalHeight || baby.height, 10 + sway, 11 + bob, 44, 44);
-      return;
-    }
-
-    if (stage === 1) {
-      // Keep the juvenile base opaque and crisp; stage anatomy adds the growing features.
-      ctx.drawImage(baby, 0, 0, baby.naturalWidth || baby.width, baby.naturalHeight || baby.height, 4 + sway, 7 + bob, 56, 54);
-      return;
-    }
-
-    const size = stage === 3 ? 48 : 54;
-    const x = Math.round((FRAME_SIZE - size) / 2 + sway);
-    const y = stage === 3 ? 2 + bob : 5 + bob;
-    const height = stage === 3 ? 60 : 57;
-    ctx.drawImage(adult, 0, 0, adult.naturalWidth || adult.width, adult.naturalHeight || adult.height, x, y, size, height);
-  }
-
-  function drawBloodlineShape(ctx, key, color, dark, stage, frame) {
-    const growth = stageGrowth[stage];
-    const sway = frameSway[frame];
-    const extra = stage === 0 ? 0.5 : stage === 1 ? 0.8 : stage === 2 ? 1 : 1.35;
-
-    if (key === "ho") {
-      for (let i = 0; i < 2 + stage; i += 1) {
-        pixel(ctx, 31 + i * 5 + sway, 24 + (i % 2), 2, 6, dark, 0.9);
-        pixel(ctx, 32 + i * 5 + sway, 24 + (i % 2), 1, 4, color);
-      }
-      pixel(ctx, 14, 19, 4 * growth, 3, color);
-    } else if (key === "vu") {
-      diamond(ctx, 41 + sway, 29, 9 * extra, color, dark, 0.82);
-      pixel(ctx, 36, 34, 2, 5 * growth, color, 0.9);
-      pixel(ctx, 44, 34, 2, 5 * growth, color, 0.9);
-    } else if (key === "long") {
-      const hornHeight = 4 + stage * 2;
-      pixel(ctx, 19, 11 - hornHeight / 2, 3, hornHeight, dark);
-      pixel(ctx, 20, 10 - hornHeight / 2, 1, hornHeight - 1, color);
-      pixel(ctx, 11, 25 + sway, 8 * growth, 1, color, 0.9);
-      pixel(ctx, 11, 28 + sway, 6 * growth, 1, color, 0.75);
-    } else if (key === "tuoc") {
-      const flap = frame === 1 ? -2 : frame === 3 ? 2 : 0;
-      for (let i = 0; i < 2 + stage; i += 1) {
-        const px = 44 + i * 2;
-        pixel(ctx, px, 24 + flap + i * 3, 4, 2, dark, 0.92);
-        pixel(ctx, px + 1, 24 + flap + i * 3, 2, 1, color);
-      }
-      pixel(ctx, 25, 8 - stage, 3, 5 + stage, color);
-    } else if (key === "lan") {
-      const horn = 3 + stage * 2;
-      pixel(ctx, 21, 10 - horn, 2, horn + 3, dark);
-      pixel(ctx, 22, 9 - horn, 1, horn + 2, color);
-      pixel(ctx, 17, 14 - horn, 5, 2, color);
-      pixel(ctx, 22, 16 - horn, 5, 2, color);
-    } else if (key === "hu") {
-      const tails = stage === 0 ? 1 : stage === 1 ? 2 : stage === 2 ? 4 : 6;
-      for (let i = 0; i < tails; i += 1) {
-        const tailX = 47 + i * 2;
-        const tailY = 37 - i * 3 + sway * ((i % 2) + 1);
-        pixel(ctx, tailX, tailY, 8 + stage, 2, dark, 0.82);
-        pixel(ctx, tailX + 2, tailY - 1, 5 + stage, 1, color, 0.95);
-      }
-    }
-  }
-
-  function drawMaturityShape(ctx, key, color, dark, stage, frame) {
-    if (stage === 0) return;
-    const sway = frameSway[frame];
-
-    if (key === "ho") {
-      for (let i = 0; i < stage + 1; i += 1) {
-        const y = 31 + i * 2 + sway;
-        const inset = i * 3;
-        pixel(ctx, 7 + inset, y, 5, 3, dark, 0.94);
-        pixel(ctx, 9 + inset, y - 1, 3, 2, color);
-        pixel(ctx, 52 - inset, y, 5, 3, dark, 0.94);
-        pixel(ctx, 52 - inset, y - 1, 3, 2, color);
-      }
-    } else if (key === "vu") {
-      for (let i = 0; i < stage + 1; i += 1) {
-        const y = 31 + i * 3 + sway;
-        pixel(ctx, 7 + i * 2, y, 5, 3, dark, 0.9);
-        pixel(ctx, 8 + i * 2, y - 1, 3, 2, color);
-        pixel(ctx, 52 - i * 2, y, 5, 3, dark, 0.9);
-        pixel(ctx, 53 - i * 2, y - 1, 3, 2, color);
-      }
-    } else if (key === "long") {
-      for (let i = 0; i < stage; i += 1) {
-        const y = 26 + i * 3 + sway;
-        pixel(ctx, 7, y, 9 + i * 2, 1, dark, 0.86);
-        pixel(ctx, 48, y - 1, 9 + i * 2, 1, dark, 0.86);
-        pixel(ctx, 8, y - 1, 7 + i * 2, 1, color, 0.9);
-        pixel(ctx, 49, y - 2, 7 + i * 2, 1, color, 0.9);
-      }
-    } else if (key === "tuoc") {
-      const flap = frame === 1 ? -1 : frame === 3 ? 1 : 0;
-      for (let i = 0; i < stage + 1; i += 1) {
-        const y = 23 + i * 3 + flap;
-        const length = 5 + stage - i;
-        pixel(ctx, 4 + i * 3, y, length, 2, dark, 0.88);
-        pixel(ctx, 5 + i * 3, y - 1, Math.max(2, length - 2), 1, color);
-        pixel(ctx, 55 - i * 3 - length, y, length, 2, dark, 0.88);
-        pixel(ctx, 56 - i * 3 - length, y - 1, Math.max(2, length - 2), 1, color);
-      }
-    } else if (key === "lan") {
-      for (let i = 0; i < stage; i += 1) {
-        const branch = 16 + i * 3;
-        const height = 3 + stage + i;
-        pixel(ctx, branch, 10 - height, 2, height + 4, dark);
-        pixel(ctx, branch + 1, 9 - height, 1, height + 3, color);
-        pixel(ctx, 46 - i * 3, 10 - height, 2, height + 4, dark);
-        pixel(ctx, 46 - i * 3, 9 - height, 1, height + 3, color);
-      }
-    }
-  }
-
-  function drawElementShape(ctx, element, stage, frame, keyIndex) {
-    const { color, dark, form } = element;
-    const growth = stageGrowth[stage];
-    const sway = frameSway[frame];
-    const phase = (frame + keyIndex) % 2;
-    const alpha = stage === 0 ? 0.72 : 0.92;
-
-    switch (form) {
-      case "ice":
-        diamond(ctx, 42 + sway, 18, 5 + stage * 2, color, dark, alpha);
-        diamond(ctx, 48 + sway, 25, 3 + stage, color, dark, alpha);
-        pixel(ctx, 28, 20, 2, 3 + stage, color);
-        break;
-      case "mist":
-        cloud(ctx, 40 + sway, 19 + phase, color, dark, growth, 0.75);
-        cloud(ctx, 8 - sway, 35 - phase, color, dark, growth * 0.75, 0.55);
-        break;
-      case "cloud":
-        cloud(ctx, 42 + sway, 15 + phase, color, dark, growth, alpha);
-        cloud(ctx, 7 - sway, 29 + phase, color, dark, growth * 0.8, 0.68);
-        break;
-      case "wind":
-        for (let i = 0; i < 3; i += 1) {
-          pixel(ctx, 42 + sway * (i + 1), 17 + i * 5, 11 - i * 2, 1, color, alpha - i * 0.15);
-          pixel(ctx, 5 - sway, 43 + i * 3, 7 + i, 1, dark, 0.55);
-        }
-        break;
-      case "bolt":
-        pixel(ctx, 43 + sway, 15, 4, 3, color);
-        pixel(ctx, 40 + sway, 18, 4, 3, dark);
-        pixel(ctx, 44 + sway, 21, 4, 3, color);
-        pixel(ctx, 41 + sway, 24, 3, 4, dark);
-        break;
-      case "moon":
-        pixel(ctx, 43, 13, 3, 10, color, alpha);
-        pixel(ctx, 46, 16, 3, 7, color, alpha);
-        pixel(ctx, 47, 16, 2, 6, dark, 0.95);
-        star(ctx, 38 + sway, 23, color, dark, 1, alpha);
-        break;
-      case "sun":
-        for (let i = 0; i < 5; i += 1) {
-          pixel(ctx, 35 + i * 3, 15 - (i % 2) * 2, 2, 5 + stage, color, alpha);
-        }
-        pixel(ctx, 38, 14, 7, 2, dark, 0.7);
-        break;
-      case "void":
-        pixel(ctx, 42 + sway, 17, 8, 2, dark, 0.9);
-        pixel(ctx, 46 + sway, 19, 6, 3, color, 0.65);
-        pixel(ctx, 50 + sway, 22, 4, 3, dark, 0.8);
-        star(ctx, 38, 27 + phase, color, dark, 1, 0.75);
-        break;
-      case "crystal":
-        for (let i = 0; i < 2 + stage; i += 1) {
-          diamond(ctx, 35 + i * 4 + sway, 23 - (i % 2) * 2, 4 + stage, color, dark, alpha);
-        }
-        break;
-      case "gem":
-        diamond(ctx, 30 + sway, 35, 7 + stage, color, dark, alpha);
-        diamond(ctx, 46, 27 + phase, 4 + stage, color, dark, 0.9);
-        break;
-      case "leaf":
-        for (let i = 0; i < 3 + stage; i += 1) {
-          const x = 38 + i * 3 + sway;
-          pixel(ctx, x, 17 + (i % 2) * 4, 2, 5, dark, alpha);
-          pixel(ctx, x + 1, 17 + (i % 2) * 4, 4, 2, color, alpha);
-          pixel(ctx, x + 2, 19 + (i % 2) * 4, 3, 2, color, alpha);
-        }
-        break;
-      case "flame":
-        pixel(ctx, 44 + sway, 33, 3, 7 + stage, dark, 0.9);
-        pixel(ctx, 46 + sway, 29, 3, 7 + stage, color, alpha);
-        pixel(ctx, 49 + sway, 26, 3, 7 + stage, dark, 0.85);
-        pixel(ctx, 50 + sway, 24, 2, 4, color, alpha);
-        break;
-      case "shadow":
-        for (let i = 0; i < 3 + stage; i += 1) {
-          pixel(ctx, 32 + i * 4, 17 - (i % 2) * 2, 3, 7 + stage, dark, 0.95);
-          pixel(ctx, 33 + i * 4, 18 - (i % 2) * 2, 1, 4 + stage, color, 0.8);
-        }
-        break;
-      case "star":
-        star(ctx, 45 + sway, 17 + phase, color, dark, 2, alpha);
-        star(ctx, 36 - sway, 28 - phase, color, dark, 1, alpha);
-        star(ctx, 51 + sway, 34, color, dark, 1, 0.78);
-        break;
-      case "feather":
-        for (let i = 0; i < 3 + stage; i += 1) {
-          pixel(ctx, 40 + i * 2 + sway, 18 + i * 3, 7 - i, 2, dark, 0.9);
-          pixel(ctx, 41 + i * 2 + sway, 18 + i * 3, 5 - i, 1, color, alpha);
-        }
-        break;
-      case "petal":
-        diamond(ctx, 44 + sway, 18, 4 + stage, color, dark, alpha);
-        diamond(ctx, 39, 22 + phase, 4 + stage, color, dark, 0.9);
-        diamond(ctx, 49, 22 - phase, 4 + stage, color, dark, 0.9);
-        pixel(ctx, 43, 24, 6, 2, dark, 0.8);
-        break;
-      case "crown":
-        pixel(ctx, 39, 17, 12, 2, dark, 0.95);
-        pixel(ctx, 40, 14 - stage, 2, 5 + stage, color);
-        pixel(ctx, 44, 12 - stage, 2, 7 + stage, color);
-        pixel(ctx, 48, 14 - stage, 2, 5 + stage, color);
-        pixel(ctx, 41, 18, 8, 2, color);
-        break;
-    }
-  }
-
-  function drawIdleEffects(ctx, element, frame, keyIndex, stage) {
-    const { color, dark, form } = element;
-    const sway = frameSway[frame];
-    const growth = stageGrowth[stage];
-    const points = [
-      [8 + ((frame + keyIndex) % 3), 18],
-      [53 - ((frame + keyIndex + 1) % 4), 27 + (frame % 2) * 2],
-      [14 + ((frame + 2) % 4), 46 - frame % 2],
-    ];
-    points.forEach(([x, y], index) => {
-      const px = x + sway * (index % 2 ? -1 : 1);
-      if (form === "cloud" || form === "mist") {
-        cloud(ctx, px, y, color, dark, Math.max(1, growth * 0.6), 0.74);
-      } else if (form === "flame" || form === "bolt" || form === "wind") {
-        pixel(ctx, px, y, 2, 3 + (frame % 2), color, 0.84);
-        pixel(ctx, px + 2, y - 2, 2, 2, dark, 0.78);
-      } else {
-        star(ctx, px, y, color, dark, index === frame % 3 ? 2 : 1, 0.86);
-      }
-    });
-  }
-
-  function drawFrame(ctx, key, elementIndex, stage, frame, adult, baby) {
-    const element = ELEMENTS[elementIndex];
-    const keyIndex = BLOODLINES.indexOf(key);
-    ctx.clearRect(0, 0, FRAME_SIZE, FRAME_SIZE);
-    ctx.imageSmoothingEnabled = false;
-    ctx.save();
-    ctx.translate(0, frameBob[frame]);
-    drawAgeBase(ctx, key, stage, adult, baby, frame);
-
-    ctx.save();
-    ctx.globalCompositeOperation = "source-atop";
-    ctx.globalAlpha = stage === 0 ? 0.12 : 0.16;
-    ctx.fillStyle = element.color;
-    ctx.fillRect(0, 0, FRAME_SIZE, FRAME_SIZE);
-    ctx.restore();
-
-    drawBloodlineShape(ctx, key, element.color, element.dark, stage, frame);
-    drawMaturityShape(ctx, key, element.color, element.dark, stage, frame);
-    drawElementShape(ctx, element, stage, frame, keyIndex);
-    drawIdleEffects(ctx, element, frame, keyIndex, stage);
-    ctx.restore();
-  }
-
   function imageIsReady(record) {
     return record.image.complete && record.image.naturalWidth > 0;
   }
 
-  // Ngưỡng alpha: >= SOLID_ALPHA thì thành đặc (255), thấp hơn thì xóa. Tăng số này để viền gọn hơn, giảm để giữ nhiều chi tiết mờ hơn.
+  function validPet(key, elementIndex) {
+    return BLOODLINES.includes(key) && Number.isInteger(elementIndex) && elementIndex >= 0 && elementIndex < ELEMENTS.length;
+  }
+
+  // Ngưỡng alpha: >= SOLID_ALPHA thì thành đặc (255), thấp hơn thì xóa -> viền gọn, nét như quái.
   const SOLID_ALPHA = 110;
   const solidCache = new WeakMap();
   function solidify(image) {
@@ -390,131 +93,135 @@
     return out;
   }
 
-  function getSheet(key, elementIndex) {
-    if (!BLOODLINES.includes(key) || !Number.isInteger(elementIndex) || elementIndex < 0 || elementIndex >= ELEMENTS.length) {
-      throw new Error("Unknown bloodline or element index");
+  // Gom màu bằng k-means (k màu) trên các ô pixel: thú con ít màu hơn, thú lớn nhiều màu hơn.
+  function quantize(cells, k) {
+    const lum = cells.map(p => 0.3 * p[2] + 0.59 * p[3] + 0.11 * p[4]);
+    const order = cells.map((_, i) => i).sort((a, b) => lum[a] - lum[b]);
+    let centers = [];
+    for (let j = 0; j < k; j += 1) {
+      const p = cells[order[Math.floor((j + 0.5) * cells.length / k)]];
+      centers.push([p[2], p[3], p[4]]);
     }
+    const assign = new Array(cells.length);
+    for (let iter = 0; iter < 6; iter += 1) {
+      cells.forEach((p, i) => {
+        let best = 0, bestD = 1e9;
+        centers.forEach((q, j) => {
+          const e = (p[2] - q[0]) ** 2 + (p[3] - q[1]) ** 2 + (p[4] - q[2]) ** 2;
+          if (e < bestD) { bestD = e; best = j; }
+        });
+        assign[i] = best;
+      });
+      const sums = centers.map(() => [0, 0, 0, 0]);
+      cells.forEach((p, i) => { const s = sums[assign[i]]; s[0] += p[2]; s[1] += p[3]; s[2] += p[4]; s[3] += 1; });
+      centers = centers.map((q, j) => sums[j][3] ? [sums[j][0] / sums[j][3], sums[j][1] / sums[j][3], sums[j][2] / sums[j][3]] : q);
+    }
+    cells.forEach((p, i) => { const q = centers[assign[i]]; p[2] = q[0]; p[3] = q[1]; p[4] = q[2]; });
+  }
 
-    const id = `${key}-${elementIndex}`;
-    if (sheets.has(id)) return sheets.get(id);
-
-    const adult = imageRecord(`${key}-${elementIndex}.png`);
-    const baby = imageRecord(`baby-${key}.png`);
-    if (!imageIsReady(adult) || !imageIsReady(baby)) return null;
-    // Làm đặc ảnh thú: pixel bán trong suốt (viền mờ, hào quang) -> đặc hoặc xóa, để thú nét như quái.
-    const adultSolid = solidify(adult.image);
-    const babySolid = solidify(baby.image);
-
-    const canvas = document.createElement("canvas");
-    canvas.width = SHEET_SIZE;
-    canvas.height = SHEET_SIZE;
-    const ctx = canvas.getContext("2d", { alpha: true });
-    ctx.imageSmoothingEnabled = false;
-
-    for (let stage = 0; stage < STAGE_COUNT; stage += 1) {
-      for (let frame = 0; frame < FRAME_COUNT; frame += 1) {
-        ctx.save();
-        ctx.translate(frame * FRAME_SIZE, stage * FRAME_SIZE);
-        drawFrame(ctx, key, elementIndex, stage, frame, adultSolid, babySolid);
-        ctx.restore();
+  // Giảm chi tiết ảnh trưởng thành 128x128: gộp khối pixel b x b, giảm còn k màu. Trả canvas 128x128 có thuộc tính .bb (khung chứa thú).
+  function reduceImage(src, b, k) {
+    const W = 128;
+    const out = document.createElement("canvas");
+    out.width = out.height = W;
+    const ox = out.getContext("2d");
+    ox.imageSmoothingEnabled = false;
+    try {
+      const sc = document.createElement("canvas");
+      sc.width = sc.height = W;
+      const sx = sc.getContext("2d", { willReadFrequently: true });
+      sx.imageSmoothingEnabled = false;
+      sx.drawImage(src, 0, 0, W, W);
+      const d = sx.getImageData(0, 0, W, W).data;
+      const g = Math.ceil(W / b), cells = [];
+      let x0 = W, y0 = W, x1 = 0, y1 = 0;
+      for (let gy = 0; gy < g; gy += 1) {
+        for (let gx = 0; gx < g; gx += 1) {
+          let r = 0, gr = 0, bl = 0, n = 0, tot = 0;
+          for (let y = gy * b; y < Math.min(W, gy * b + b); y += 1) {
+            for (let x = gx * b; x < Math.min(W, gx * b + b); x += 1) {
+              tot += 1;
+              const i = (y * W + x) * 4;
+              if (d[i + 3]) { r += d[i]; gr += d[i + 1]; bl += d[i + 2]; n += 1; }
+            }
+          }
+          if (n && n / tot >= 0.5) {
+            cells.push([gx, gy, r / n, gr / n, bl / n]);
+            x0 = Math.min(x0, gx * b); y0 = Math.min(y0, gy * b);
+            x1 = Math.max(x1, Math.min(W, gx * b + b)); y1 = Math.max(y1, Math.min(W, gy * b + b));
+          }
+        }
       }
+      if (k > 0 && cells.length > k) quantize(cells, k);
+      for (const c of cells) {
+        ox.fillStyle = "rgb(" + Math.round(c[2]) + "," + Math.round(c[3]) + "," + Math.round(c[4]) + ")";
+        ox.fillRect(c[0] * b, c[1] * b, b, b);
+      }
+      out.bb = cells.length ? { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } : { x: 0, y: 0, w: W, h: W };
+    } catch (e) {
+      // Trình duyệt chặn đọc pixel (vd. mở file://): vẽ nguyên ảnh gốc, vẫn thu nhỏ theo bậc.
+      ox.drawImage(src, 0, 0, W, W);
+      out.bb = { x: 0, y: 0, w: W, h: W };
     }
+    return out;
+  }
 
-    sheets.set(id, canvas);
-    return canvas;
+  // Ảnh thú ở bậc `stage` (0..9). Trả null nếu ảnh gốc chưa tải xong (gọi lại ở khung hình sau).
+  function getStageImage(key, elementIndex, stage) {
+    if (!validPet(key, elementIndex)) return null;
+    const s = Math.max(0, Math.min(STAGE_COUNT - 1, stage | 0));
+    const id = key + "-" + elementIndex + "-" + s;
+    if (stageCache.has(id)) return stageCache.get(id);
+    const rec = imageRecord(`${key}-${elementIndex}.png`);
+    if (!imageIsReady(rec)) return null;
+    const out = reduceImage(solidify(rec.image), STAGE_BLOCK[s], STAGE_COLORS[s]);
+    stageCache.set(id, out);
+    return out;
+  }
+
+  // Vẽ thú: chân đặt tại (cx, by), `size` = cạnh khung 128px sau khi phóng (đã nhân kích thước bậc nếu cần). Trả false nếu ảnh chưa sẵn sàng.
+  function drawStage(ctx, key, elementIndex, stage, cx, by, size) {
+    const im = getStageImage(key, elementIndex, stage);
+    if (!im) return false;
+    const u = size / 128, bb = im.bb;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(im, bb.x, bb.y, bb.w, bb.h, Math.round(cx - bb.w * u / 2), Math.round(by - bb.h * u), Math.max(1, Math.round(bb.w * u)), Math.max(1, Math.round(bb.h * u)));
+    ctx.restore();
+    return true;
+  }
+
+  function stageScale(stage) {
+    return STAGE_SCALE[Math.max(0, Math.min(STAGE_COUNT - 1, stage | 0))];
+  }
+
+  function getAdultImage(key, elementIndex) {
+    if (!validPet(key, elementIndex)) return null;
+    const rec = imageRecord(`${key}-${elementIndex}.png`);
+    return imageIsReady(rec) ? solidify(rec.image) : null;
   }
 
   async function waitForSheet(key, elementIndex) {
-    const existing = getSheet(key, elementIndex);
-    if (existing) return existing;
-    const adult = imageRecord(`${key}-${elementIndex}.png`);
-    const baby = imageRecord(`baby-${key}.png`);
-    await Promise.all([adult.promise, baby.promise]);
-    const sheet = getSheet(key, elementIndex);
-    if (!sheet) throw new Error(`Sprite sheet ${key}-${elementIndex} is not ready`);
-    return sheet;
-  }
-
-  function frameRect(stage, frame) {
-    return {
-      sx: frame * FRAME_SIZE,
-      sy: stage * FRAME_SIZE,
-      sw: FRAME_SIZE,
-      sh: FRAME_SIZE,
-    };
-  }
-
-  async function buildAtlas(onProgress = () => {}) {
-    const columns = 10;
-    const count = BLOODLINES.length * ELEMENTS.length;
-    const rows = Math.ceil(count / columns);
-    const atlas = document.createElement("canvas");
-    atlas.width = columns * SHEET_SIZE;
-    atlas.height = rows * SHEET_SIZE;
-    const ctx = atlas.getContext("2d", { alpha: true });
-    ctx.imageSmoothingEnabled = false;
-    const manifest = {
-      format: "PNG sprite atlas; 10 columns of 4x4 sprite sheets",
-      sheetWidth: SHEET_SIZE,
-      sheetHeight: SHEET_SIZE,
-      frameWidth: FRAME_SIZE,
-      frameHeight: FRAME_SIZE,
-      framesPerStage: FRAME_COUNT,
-      stageRows: STAGE_COUNT,
-      animation: ["idle-0", "idle-1", "idle-2", "idle-3"],
-      stages: STAGE_NAMES,
-      elements: ELEMENTS.map((element, index) => ({ index, name: element.name })),
-      sprites: [],
-    };
-
-    let index = 0;
-    for (const key of BLOODLINES) {
-      for (let elementIndex = 0; elementIndex < ELEMENTS.length; elementIndex += 1) {
-        const sheet = await waitForSheet(key, elementIndex);
-        const column = index % columns;
-        const row = Math.floor(index / columns);
-        const x = column * SHEET_SIZE;
-        const y = row * SHEET_SIZE;
-        ctx.drawImage(sheet, x, y);
-        manifest.sprites.push({
-          id: `${key}-${elementIndex}`,
-          bloodline: key,
-          bloodlineName: BLOODLINE_NAMES[key],
-          elementIndex,
-          elementName: ELEMENTS[elementIndex].name,
-          x,
-          y,
-          width: SHEET_SIZE,
-          height: SHEET_SIZE,
-        });
-        index += 1;
-        onProgress(index, count);
-        if (index % 4 === 0) {
-          await new Promise((resolve) => requestAnimationFrame(resolve));
-        }
-      }
-    }
-
-    return { canvas: atlas, manifest };
+    if (!validPet(key, elementIndex)) throw new Error("Unknown bloodline or element index");
+    const rec = imageRecord(`${key}-${elementIndex}.png`);
+    await rec.promise;
+    return solidify(rec.image);
   }
 
   window.VanKiepSprites = {
-    frameSize: FRAME_SIZE,
-    frameCount: FRAME_COUNT,
     stageCount: STAGE_COUNT,
-    getSheet,
-    // Ảnh gốc 128x128 của thú trưởng thành (đã làm đặc) để vẽ trực tiếp, nét như quái. Trả về null nếu ảnh chưa tải xong.
-    getAdultImage(key, elementIndex) {
-      if (!BLOODLINES.includes(key) || !Number.isInteger(elementIndex) || elementIndex < 0 || elementIndex >= ELEMENTS.length) return null;
-      const rec = imageRecord(`${key}-${elementIndex}.png`);
-      return imageIsReady(rec) ? solidify(rec.image) : null;
+    stages: STAGE_NAMES,
+    stageScale,
+    getStageImage,
+    drawStage,
+    getAdultImage,
+    // Giữ tên cũ để 10-drops-shop.js (preload / chờ ảnh) vẫn chạy: trả ảnh gốc khi đã tải xong, null nếu chưa.
+    getSheet(key, elementIndex) {
+      if (!validPet(key, elementIndex)) throw new Error("Unknown bloodline or element index");
+      return getAdultImage(key, elementIndex);
     },
     waitForSheet,
-    frameRect,
-    buildAtlas,
     bloodlineNames: BLOODLINE_NAMES,
     elements: ELEMENTS.map(({ name, color, dark, form }, index) => ({ name, index, color, dark, form })),
-    stages: STAGE_NAMES,
   };
 })();
-

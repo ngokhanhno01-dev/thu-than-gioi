@@ -269,7 +269,7 @@ function pvSet(k,v){pv.on=true;pv[k]=v;
 function pvOff(){pv.on=false;document.querySelectorAll('[data-k]').forEach(b=>b.classList.remove('sel'));renderInfo()}
 $('pv-bl').innerHTML=Object.keys(BL).map(k=>`<button class="mini jade" data-k="bl" data-v="${k}" onclick="pvSet('bl','${k}')">${BL[k].n}</button>`).join('');
 $('pv-pi').innerHTML=PL.map((l,i)=>`<button class="mini" data-k="pi" data-v="${i}" onclick="pvSet('pi',${i})">${l[1]}</button>`).join('');
-$('pv-age').innerHTML=[1,10,30,60].map(a=>`<button class="mini" data-k="age" data-v="${a}" onclick="pvSet('age',${a})">Cấp ${a}</button>`).join('');
+$('pv-age').innerHTML=[1,11,21,31,41,51,61,71,81,91].map(a=>`<button class="mini" data-k="age" data-v="${a}" onclick="pvSet('age',${a})">Cấp ${a}</button>`).join('');
 
 const SPD=[['Chậm',10000,30000],['Vừa',5000,10000],['Nhanh',1500,3000]];
 function setSpeed(i){TICK.egg=SPD[i][1];TICK.hatched=SPD[i][2];document.querySelectorAll('[data-s]').forEach(b=>b.classList.toggle('sel',b.dataset.s==i));log('⏱ Tốc độ thời gian: <b>'+SPD[i][0]+'</b> ('+SPD[i][2]/1000+'s mỗi năm).')}
@@ -289,8 +289,10 @@ function confirmEgg(){
   log('🥚 Bạn chọn linh trứng <b style="color:rgb('+QC[eggQ]+')">'+QN[eggQ]+' phẩm</b>. Thời gian bắt đầu trôi...');
   renderInfo();
 }
-let gs=0,curStage=-1;
-const STAGES=[[0,'Thú Sơ Sinh (Bậc 1)'],[10,'Ấu Thú (Bậc 2)'],[30,'Trưởng Thú (Bậc 3)'],[60,'Thần Thú (Bậc 4)']];
+let gs=0,curStage=-1,vs=0; /* vs = kích thước thú đang hiển thị (mượt dần tới kích thước của bậc) */
+/* 10 bậc, mỗi bậc 10 cấp: bậc 1 = cấp 1-10, bậc 2 = cấp 11-20 ... bậc 10 = cấp 91-100. Mốc [cấp bắt đầu, tên]. */
+const STAGES=[[0,'Sơ Sinh (Bậc 1)'],[11,'Ấu Thú (Bậc 2)'],[21,'Thiếu Thú (Bậc 3)'],[31,'Linh Thú (Bậc 4)'],[41,'Yêu Thú (Bậc 5)'],[51,'Hung Thú (Bậc 6)'],[61,'Trưởng Thú (Bậc 7)'],[71,'Đại Thú (Bậc 8)'],[81,'Chí Tôn (Bậc 9)'],[91,'Thần Thú (Bậc 10)']];
+const PET_STAGE_MAX_SIZE=130; /* cạnh khung thú (px) ở bậc 10 trên màn chính; bậc thấp nhỏ hơn theo VanKiepSprites.stageScale */
 function stageOf(a){let r=0;STAGES.forEach((q,i)=>{if(a>=q[0])r=i});return r}
 function growthOf(a){return Math.min(1,Math.max(0,(a-1)/99))}
 function petGrow(a){return growthOf(a)+.25*(1-Math.exp(-(a-1)/7))} /* thú: tuyến tính + bonus đầu game (cấp 9 x1,75; cấp 100 x4,75) */
@@ -360,10 +362,15 @@ function beast(t){
   gs+=(growthOf(liveAge)-gs)*.035;
   const key=pv.on?pv.bl:pet.bl,sp=pv.on?pv.sp:pet.sp,G=genOf(key,sp),B=BL[key];
   const g=gs,p=PL[purity][0],au=B.au,elementColor=G.ep[1],motif=G.ep[2];
-  const size=100*G.sz*(.72+.58*g),x=180,y=194+Math.sin(t*3.8)*1.7;
+  // Kích thước theo bậc (bảng STAGE_SCALE trong 02-sprites-engine.js), mượt dần khi lên bậc.
+  const spriteApi=window.VanKiepSprites;
+  const tgt=spriteApi?spriteApi.stageScale(st):.5;vs=vs?vs+(tgt-vs)*.035:tgt;
+  const size=PET_STAGE_MAX_SIZE*G.sz*vs,x=180,y=194+Math.sin(t*3.8)*1.7;
+  const stImg=spriteApi?spriteApi.getStageImage(key,sp,st):null;
+  const bodyH=stImg?stImg.bb.h*size/128:size*.8;
   const tierAura=['176,162,151','101,220,181','99,158,255','199,115,255','255,202,73'][purity];
   const tierAlpha=[.12,.2,.27,.34,.43][purity],ringCount=[0,1,2,2,3][purity];
-  const haloY=y-size*.53,haloR=56+purity*11+22*g;
+  const haloY=y-bodyH*.55,haloR=56+purity*11+22*g;
   const glow=c.createRadialGradient(x,haloY,4,x,haloY,haloR);
   glow.addColorStop(0,'rgba('+tierAura+','+tierAlpha+')');
   glow.addColorStop(.55,'rgba('+au+','+(tierAlpha*.4)+')');
@@ -381,32 +388,12 @@ function beast(t){
     for(let i=0;i<12;i++){const a=i*Math.PI/6,rr=54+(i%2)*7;c.fillRect(Math.cos(a)*rr-1.5,Math.sin(a)*rr-1.5,3,3)}
   }
   c.restore();
-  // Render dáng riêng theo bậc tuổi; tuổi và các mốc tiến hóa vẫn do game hiện tại quản lý.
-  const sprite=spriteFor(key,sp);
-  const spriteApi=window.VanKiepSprites;
-  const growthSheet=spriteApi?spriteApi.getSheet(key,sp):null;
-  const growthFrame=spriteApi?spriteApi.frameRect(st,Math.floor(t*5)%spriteApi.frameCount):null;
-  spriteCtx.clearRect(0,0,128,128);spriteCtx.imageSmoothingEnabled=false;
-  let hasSprite=false;
-  // Bậc trưởng thành trở lên: vẽ thẳng ảnh gốc 128px (nét như màn chiến đấu), không qua sheet 64px + phù hiệu bậc.
-  const cleanAdult=(spriteApi&&st>=2&&spriteApi.getAdultImage)?spriteApi.getAdultImage(key,sp):null;
-  if(cleanAdult){
-    spriteCtx.drawImage(cleanAdult,0,0,128,128);
-    hasSprite=true;
-  }else if(growthSheet&&growthFrame){
-    spriteCtx.drawImage(growthSheet,growthFrame.sx,growthFrame.sy,growthFrame.sw,growthFrame.sh,0,0,128,128);
-    hasSprite=true;
-  }else if(sprite.complete&&sprite.naturalWidth){
-    spriteCtx.globalAlpha=1;
-    spriteCtx.drawImage(sprite,0,0,128,128);
-    hasSprite=true;
-  }
-  spriteCtx.globalAlpha=1;spriteCtx.globalCompositeOperation='source-over';
-  if(hasSprite){
+  // Mỗi bậc là bản giảm chi tiết của ảnh trưởng thành (getStageImage), chân thú đặt đúng mặt đất.
+  if(stImg){
+    const bb=stImg.bb,u=size/128,beat=(key==='tuoc'||G.wing>0)?Math.sin(t*8)*.035:Math.sin(t*3)*.012;
+    const dw=Math.max(1,Math.round(bb.w*u)),dh=Math.max(1,Math.round(bb.h*u*(1+beat)));
     c.save();c.translate(Math.round(x),Math.round(y));c.imageSmoothingEnabled=false;
-    const beat=(key==='tuoc'||G.wing>0)?Math.sin(t*8)*.035:Math.sin(t*3)*.012;
-    const drawSize=Math.round(size),drawHeight=Math.round(size*(1+beat));
-    c.drawImage(spriteLayer,-Math.round(drawSize/2),-drawHeight,drawSize,drawHeight);c.restore();
+    c.drawImage(stImg,bb.x,bb.y,bb.w,bb.h,-Math.round(dw/2),-dh,dw,dh);c.restore();
   }
   // Mỗi tên thú trong 17 hệ có sắc tố, hoa văn hạt sáng và phù hiệu riêng.
   for(let i=0;i<8;i++){
@@ -416,30 +403,6 @@ function beast(t){
     drawPixelMotif(px,py,motifType,elementColor,1.6+(i%2)*.5);
   }
   c.globalAlpha=1;
-  // Biến thể theo seed từng loài: sừng, cánh, gai và dấu trán.
-  const unit=size/100;
-  if(!cleanAdult){ // ảnh gốc đã có sừng/cánh/gai riêng; chỉ vẽ phù hiệu giả cho dạng sheet nhỏ (trứng/thú con)
-  c.save();c.translate(x-size/2,y-size);c.scale(unit,unit);
-  for(let i=0;i<G.horn;i++){
-    const hx=43+(i-(G.horn-1)/2)*8;
-    c.fillStyle='#241721';c.fillRect(hx-2,5,6,10);c.fillRect(hx,1,4,7);
-    c.fillStyle=elementColor;c.fillRect(hx,4,3,7);c.fillRect(hx+1,1,2,5);
-  }
-  for(const side of[-1,1]){
-    const flap=Math.round(Math.sin(t*8+side)*2);
-    for(let i=0;i<G.wing;i++){
-      const wx=side<0?7-i*3:86+i*3,wy=47+flap+i*5;
-      c.fillStyle='#241721';c.fillRect(wx,wy,7,5);
-      c.fillStyle=elementColor;c.fillRect(wx+(side<0?1:0),wy+1,5,3);
-    }
-    for(let i=0;i<G.ext;i++){
-      const ex=side<0?6:88,ey=59-i*7;
-      c.fillStyle='#241721';c.fillRect(ex,ey,6,6);
-      c.fillStyle=elementColor;c.fillRect(ex+2,ey-2,3,6);
-    }
-  }
-  c.restore();
-  }
   if(G.mark>0)drawPixelMotif(x,y-size*.68,motif,elementColor,2+G.mark*.35);
   // Hào quang bậc cao quyện với hiệu ứng riêng của hệ thú.
   if(G.orb||purity>=3){

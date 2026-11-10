@@ -368,9 +368,8 @@ function eqLoop(t){
  const cv=document.getElementById('eq-pet');
  if(!cv||!pet||!document.getElementById('equip-box').open){eqRaf=0;return}
  const x=cv.getContext('2d'),api=window.VanKiepSprites;x.clearRect(0,0,128,128);x.imageSmoothingEnabled=false;
- const sh=api?api.getSheet(pet.bl,pet.sp):null,r=api?api.frameRect(stageOf(level),Math.floor(t/200)%api.frameCount):null;
- if(sh&&r)x.drawImage(sh,r.sx,r.sy,r.sw,r.sh,0,0,128,128);
- else{const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)x.drawImage(im,0,0,128,128)}
+ const stg=stageOf(level);
+ if(!(api&&api.drawStage(x,pet.bl,pet.sp,stg,64,122,128*api.stageScale(stg)))){const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)x.drawImage(im,0,0,128,128)}
  eqRaf=requestAnimationFrame(eqLoop)}
 document.getElementById('equip-box').addEventListener('toggle',e=>{if(e.target.open)renderEquip()});
 renderEquip();
