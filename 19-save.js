@@ -106,6 +106,12 @@ async function claimNick(uid,nick){
   b.set(db.collection('profiles').doc(uid),{nick,nickKey:key,t:firebase.firestore.FieldValue.serverTimestamp()});
   await b.commit();
   try{await auth.currentUser.updateProfile({displayName:nick})}catch(_){}}
+async function changeNick(uid,nick){   /* đổi biệt danh: giữ chỗ tên mới, rồi cố nhả tên cũ cho người khác dùng */
+  let oldKey='';
+  try{const ps=await db.collection('profiles').doc(uid).get();oldKey=ps.exists?String(ps.data().nickKey||''):''}catch(_){}
+  await claimNick(uid,nick);
+  const nk=nickKey(nick);
+  if(oldKey&&oldKey!==nk){try{await db.collection('nicks').doc(oldKey).delete()}catch(e){console.warn('[nick] không nhả được tên cũ (xem FIRESTORE_RULES_NICK.txt)',e)}}}
 /* ======================================================================================= */
 
 const $s=id=>document.getElementById(id);
@@ -117,8 +123,8 @@ const num=(v,d)=>{v=Number(v);return isFinite(v)?v:(d||0)};
 /* ---------- CSS ---------- */
 {const s=document.createElement('style');
  s.textContent=
- '#ttg-login,#ttg-accp,#ttg-nick{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,10,14,.86);padding:12px;box-sizing:border-box}'+
- '#ttg-login.show,#ttg-accp.show,#ttg-nick.show{display:flex}'+
+ '#ttg-login,#ttg-accp,#ttg-nick,#ttg-nc{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,10,14,.86);padding:12px;box-sizing:border-box}'+
+ '#ttg-login.show,#ttg-accp.show,#ttg-nick.show,#ttg-nc.show{display:flex}'+
  '.ttg-bx{width:min(90vw,340px);max-height:90vh;overflow-y:auto;box-sizing:border-box;text-align:center;padding:12px 14px 14px;border:3px solid #f6c66a;background:#14272d;box-shadow:0 3px 0 0 #040a0e,0 0 0 2px #040a0e,inset 0 0 0 2px #78613a;font-family:"VT323",monospace;color:#f5edcf}'+
  '.ttg-bx .t{font-size:30px;color:#f6c66a;text-shadow:1px 1px 0 #071116;line-height:1.1}'+
  '.ttg-bx .s{font-size:18px;color:#b7bda9;margin:2px 0 8px}'+
@@ -132,9 +138,9 @@ const num=(v,d)=>{v=Number(v);return isFinite(v)?v:(d||0)};
  '.ttg-bx .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}'+
  '.ttg-bx .n{font-size:15px;color:#b7bda9;margin-top:8px;line-height:1.15}'+
  '.ttg-bx label{display:block;font-size:16px;margin:4px 0;text-align:left}'+
- '#lg-msg,#ap-msg,#nk-msg{min-height:20px;font-size:17px;color:#ff8a7a;margin:2px 0}'+
+ '#lg-msg,#ap-msg,#nk-msg,#nc-msg{min-height:20px;font-size:17px;color:#ff8a7a;margin:2px 0}'+
  '#ap-msg{color:#72e4b0}'+
- '#nk-msg{color:#ff8a7a}'+
+ '#nk-msg,#nc-msg{color:#ff8a7a}'+
  '#ttg-acc{position:fixed;left:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:60;display:none;font-family:"VT323",monospace;font-size:18px;color:#f5edcf;background:#14272d;border:2px solid #f6c66a;padding:3px 9px;cursor:pointer;box-shadow:0 2px 0 #040a0e;border-radius:0;max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
  '#ttg-warn{position:fixed;left:0;right:0;top:0;z-index:210;display:none;padding:8px 12px;text-align:center;font-family:"VT323",monospace;font-size:19px;color:#fff;background:#a72f42;border-bottom:2px solid #040a0e}'+
  '#ttg-warn button{font:inherit;margin-left:8px;padding:1px 8px;cursor:pointer}';
@@ -161,6 +167,12 @@ const nameOk=n=>/^[\p{L}\p{N}_ ]{3,20}$/u.test(normName(n));   /* chỉ dùng ch
 const ACC_MIN=4,ACC_MAX=16;      /* tài khoản MỚI: a-z, 0-9, _ ; không dấu, không dấu cách */
 const PW_MIN=6,PW_MAX=32;        /* mật khẩu MỚI */
 const NICK_MIN=3,NICK_MAX=16;    /* biệt danh: chữ cái Latin (có dấu tiếng Việt), số 0-9, dấu cách */
+/* ===== ĐỔI BIỆT DANH: GIÁ TĂNG DẦN (sửa số ở đây) =====
+   Lần đổi thứ n (n bắt đầu từ 0) tốn  NC_BASE * NC_MULT^n  xu, tối đa NC_MAX.  Mặc định: 1.000 -> 2.000 -> 4.000 -> 8.000 -> 16.000 ... */
+const NC_BASE=1000,NC_MULT=2,NC_MAX=50000000;
+const ncCost=n=>Math.min(NC_MAX,Math.round(NC_BASE*Math.pow(NC_MULT,n)));
+const fmtN=n=>Number(n).toLocaleString('vi-VN');
+let nickChanges=0;           /* số lần đã đổi biệt danh (lưu trong bản lưu: g.nc) */
 const NICK_BAD=/admin|qtv|gamemaster|hethong|system|moderator|thuthangioi/;   /* chặn mạo danh (chỉ chặn ở phía game) */
 const accErr=n=>{n=n.trim();
   if(!/^[A-Za-z0-9_]*$/.test(n))return 'Tài khoản chỉ dùng a-z, 0-9 và _ (không dấu, không dấu cách).';
@@ -191,7 +203,7 @@ function snap(){
     eqWorn,ebag,eqUid,
     buffs:Object.assign({},buffs),
     shop:{stock:Object.assign({},shopStock),next:shopNextAt},
-    zone:zoneIdx(),hunt:huntOn(),off:{t0:offSt.t0,used:offSt.used}
+    zone:zoneIdx(),hunt:huntOn(),off:{t0:offSt.t0,used:offSt.used},nc:nickChanges
   };
   return{v:VER,t:Date.now(),tab:TAB,g}}
 const validPet=p=>p&&BL[p.bl]&&Number.isInteger(p.sp)&&p.sp>=0&&p.sp<17&&p.pi>=0&&p.pi<5&&p.q>=0&&p.q<5&&p.base&&['hp','atk','def','spd','mag'].every(k=>isFinite(p.base[k]));
@@ -206,6 +218,7 @@ function parseSave(raw){
 
 function restore(d){
   const g=d.g;
+  nickChanges=clampI(g.nc,0,999);
   level=clampI(g.level,1,MAXLV);exp=Math.max(0,num(g.exp));age=Math.max(0,clampI(g.age,0,1e9));
   gold=Math.max(0,Math.floor(num(g.gold,50)));fame=Math.max(0,Math.floor(num(g.fame)));
   rolls=clampI(g.rolls,0,1e9);rerollLeft=clampI(g.rerollLeft,0,99);
@@ -306,6 +319,7 @@ function buildAcc(){
   const p=document.createElement('div');p.id='ttg-accp';
   p.innerHTML='<div class="ttg-bx"><div class="t" id="ap-name"></div><div class="s" id="ap-last"></div><div id="ap-msg"></div>'+
    '<button class="alt" id="ap-save">💾 Lưu ngay</button>'+
+   '<button id="ap-nick">✏️ Đổi biệt danh</button>'+
    '<div class="row"><button id="ap-exp">📤 Xuất file</button><button id="ap-imp">📥 Nhập file</button></div>'+
    '<button class="dim" id="ap-out">🚪 Đổi tài khoản / Đăng xuất</button>'+
    '<button class="bad" id="ap-del">🗑️ Xóa dữ liệu & chơi lại</button>'+
@@ -316,14 +330,62 @@ function buildAcc(){
   p.addEventListener('click',e=>{if(e.target===p)closePanel()});
   $s('ap-close').onclick=closePanel;
   $s('ap-save').onclick=()=>{msg(save()?'✅ Đã lưu.':'⚠️ Chưa lưu được (xem thông báo trên cùng).')};
+  $s('ap-nick').onclick=openNickChange;
   $s('ap-exp').onclick=exportSave;
   $s('ap-imp').onclick=()=>$s('ap-file').click();
   $s('ap-file').onchange=importSave;
   $s('ap-out').onclick=logout;
   $s('ap-del').onclick=wipe;
   refreshAcc()}
+function openNickChange(){
+  if(!user||user.key===GUEST||!db)return;
+  closePanel();
+  let o=$s('ttg-nc');
+  if(!o){
+    o=document.createElement('div');o.id='ttg-nc';
+    o.innerHTML='<div class="ttg-bx"><div class="t">Đổi biệt danh</div><div class="s" id="nc-cur"></div>'+
+     '<input type="text" id="nc-in" placeholder="Biệt danh mới" maxlength="'+NICK_MAX+'" autocomplete="off" autocapitalize="words" spellcheck="false">'+
+     '<div class="n" id="nc-cnt"></div><div id="nc-msg"></div>'+
+     '<div class="n" id="nc-fee" style="font-size:18px;color:#f6c66a;margin:4px 0 8px"></div>'+
+     '<button class="alt" id="nc-ok">Xác nhận đổi</button><button class="dim" id="nc-x">Hủy</button>'+
+     '<div class="n">'+NICK_MIN+'–'+NICK_MAX+' ký tự: chữ (có dấu được), số, dấu cách. Không được trùng người khác. Mỗi lần đổi, giá lần sau sẽ tăng.</div></div>';
+    document.body.appendChild(o);
+    o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('show')});
+    $s('nc-x').onclick=()=>o.classList.remove('show');
+    o.addEventListener('keydown',e=>e.stopPropagation());o.addEventListener('keyup',e=>e.stopPropagation())}
+  const inp=$s('nc-in'),ok=$s('nc-ok'),nm=h=>{$s('nc-msg').textContent=h},cnt=()=>{$s('nc-cnt').textContent=nickNorm(inp.value).length+'/'+NICK_MAX};
+  const fee=()=>{const c=ncCost(nickChanges);$s('nc-fee').innerHTML='Phí: <b>'+fmtN(c)+' xu</b> · Bạn có: <b>'+fmtN(gold)+' xu</b>'};
+  $s('nc-cur').textContent='Hiện tại: '+user.name;
+  inp.value='';nm('');cnt();fee();
+  inp.oninput=()=>{nm('');cnt()};
+  inp.onkeydown=e=>{if(e.key==='Enter')ok.click()};
+  ok.onclick=async()=>{
+    const n=nickNorm(inp.value),er=nickErr(n);if(er){nm(er);return}
+    if(n===user.name){nm('Trùng với biệt danh hiện tại.');return}
+    const cost=ncCost(nickChanges);fee();
+    if(gold<cost){nm('Không đủ xu: cần '+fmtN(cost)+', bạn có '+fmtN(gold)+'.');return}
+    ok.disabled=true;nm('Đang kiểm tra...');
+    gold-=cost;stats();                       /* trừ trước, lỗi thì hoàn lại -> tắt giữa chừng cũng không đổi được miễn phí */
+    try{
+      await changeNick(user.key,n);
+      nickChanges++;user.name=n;
+      if(window.TTGNET&&TTGNET.setName)TTGNET.setName(n);
+      refreshAcc();save();cloudPush(true);
+      o.classList.remove('show');
+      log('✏️ Đã đổi biệt danh thành <b>'+esc2(n)+'</b> (−'+fmtN(cost)+' xu). Lần đổi sau: '+fmtN(ncCost(nickChanges))+' xu.');
+      if(typeof popToast==='function')popToast('✏️ ĐỔI BIỆT DANH','Biệt danh mới: <b>'+esc2(n)+'</b><br>Xu <b>−'+fmtN(cost)+'</b>','ok')
+    }catch(e){
+      gold+=cost;stats();
+      nm(e&&e.message==='taken'?'Biệt danh này đã có người dùng, chọn tên khác. (Chưa bị trừ xu)':e&&e.code==='permission-denied'?'Biệt danh vừa bị người khác lấy, hoặc chưa mở quyền trên máy chủ (xem FIRESTORE_RULES_NICK.txt). Chưa bị trừ xu.':'Không kết nối được, thử lại. (Chưa bị trừ xu)')}
+    ok.disabled=false};
+  o.classList.add('show');setTimeout(()=>{try{inp.focus()}catch(_){}},50)}
+const esc2=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const msg=h=>{const m=$s('ap-msg');if(m)m.innerHTML=h};
-function openPanel(){save();$s('ap-name').textContent=user.name+(user.key===GUEST?' (khách)':'');msg('');refreshAcc();$s('ttg-accp').classList.add('show')}
+function refreshNickBtn(){
+  const b=$s('ap-nick');if(!b||!user)return;
+  b.style.display=user.key===GUEST?'none':'block';
+  b.textContent='✏️ Đổi biệt danh · '+fmtN(ncCost(nickChanges))+' xu'}
+function openPanel(){save();$s('ap-name').textContent=user.name+(user.key===GUEST?' (khách)':'');msg('');refreshAcc();refreshNickBtn();$s('ttg-accp').classList.add('show')}
 function closePanel(){$s('ttg-accp').classList.remove('show')}
 
 function exportSave(){

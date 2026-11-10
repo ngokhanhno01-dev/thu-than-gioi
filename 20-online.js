@@ -157,7 +157,7 @@ function flash(t){
   const d=document.createElement('div');d.className='sys';d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight;setTimeout(()=>d.remove(),2500)}
 
 /* ---------- 19-save.js gọi hàm này khi người chơi vào game ---------- */
-window.TTGNET={start(o){
+window.TTGNET={setName(n){if(me){me.name=String(n).slice(0,20);heartbeat()}},start(o){
   if(started||!o||!o.db)return;started=true;
   db=o.db;me={uid:o.uid,name:(o.name||'Người chơi').slice(0,20),guest:!!o.guest};
   buildTopBar();buildChat();
