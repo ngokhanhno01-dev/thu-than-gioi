@@ -377,6 +377,7 @@ function begin(key,name){
   }else if(readSave(key)){noSave=true;warn('⚠️ Bản lưu bị hỏng và không có bản dự phòng. Tab này sẽ KHÔNG ghi đè. Bạn có thể Nhập file từ bản xuất trước đó.')}
   else log('👋 Chào <b>'+name+'</b>! Tiến trình sẽ tự động lưu.');
   buildAcc();refreshAcc();if(db&&key!==GUEST)watch();
+  try{fbInit();if(db&&window.TTGNET)TTGNET.start({db,uid:key,name,guest:key===GUEST})}catch(e){console.warn('[online]',e)}   /* chat + số người online (20-online.js) */
   const _st=stats;stats=function(){_st.apply(this,arguments);sched()};      /* xu/uy danh đổi -> lưu sau 2 giây */
   setInterval(save,AUTO_MS);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
