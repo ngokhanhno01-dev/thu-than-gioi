@@ -81,7 +81,8 @@ function floor(t){
   for(let i=-10;i<=10;i++){c.beginPath();c.moveTo(180+i*8,vy);c.lineTo(180+i*55,H);c.stroke()}
   for(let j=0;j<8;j++){const p=((j+t*.15)%8)/8,y=vy+(H-vy)*p*p;c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke()}
 }
-function formation(t){
+function formation(t,sp){
+  if(window.PLAT&&PLAT.ok&&PLAT.draw(c,t,sp===undefined?-1:sp))return; /* 15-platform.js: bệ pixel art theo 17 vùng (nếu lỗi/không có file thì dùng bệ vector cũ bên dưới) */
   const cx=180,cy=190;
   c.save();c.translate(cx,cy);c.scale(1,.3);
   const gl=c.createRadialGradient(0,0,10,0,0,100);gl.addColorStop(0,'rgba(242,199,106,.45)');gl.addColorStop(1,'rgba(242,199,106,0)');
@@ -472,7 +473,7 @@ function frame(ms){
     c.fillStyle='#24131d';c.fillRect(px-5,78,10,105);c.fillStyle='rgba(207,113,81,.42)';c.fillRect(px-7,74,14,4);c.fillRect(px-7,181,14,4);
     c.fillStyle='rgba(255,220,200,.08)';c.fillRect(px-3,78,2,105)}
   lanterns.forEach(l=>lantern(l[0],l[1],l[2],t));}
-  formation(t);
+  formation(t,SE);
   if(window.EVO)EVO.pre(c,ms); /* EVO: màn tối + tia sáng, chạy trước khi vẽ thú */
   try{(hatched||pv.on)?beast(t):egg(t)}catch(e){console.error(e)}
   // Hào quang nở rộng khi trứng đổi trạng thái, nở hoặc tiến hóa.
