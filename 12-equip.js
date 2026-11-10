@@ -342,8 +342,8 @@ function eqForgeHtml(){
   circ+='<div class="upslot'+(full?' full':'')+'" style="left:'+x+'%;top:'+y+'%" title="'+it.n+'"><span style="color:'+(it.col||'inherit')+'">'+it.i+'</span><b>'+Math.min(have,999)+'/'+n+'</b></div>'}
  circ+='<div class="uppet" style="font-size:30px;background:radial-gradient(circle,rgba(255,200,110,.35),rgba(255,200,110,.05) 70%)">'+eqIco(s,z)+'</div></div>';
  const slotBtns=EQ_SLOTS.map((o,i)=>'<button class="mini'+(i===s?' jade':'')+'" onclick="fgSetSlot('+i+')" title="'+o.n+'">'+eqIco(i,z)+'</button>').join('');
- const zoneBtn='<button class="eqzone" onclick="fgToggle()">🗺️ Bộ '+Z.name+' · cấp '+zb.start+'+'+(fgOpen?' ▴':' ▾')+'</button>';
- const zoneList=fgOpen?'<div class="eqzlist">'+VAN_KIEP_ZONES.map((q,i)=>'<div class="eqz'+(i===z?' on':'')+'" onclick="fgSetZone('+i+')"><span>'+(i===z?'✅ ':'🗺️ ')+q.name+'</span><span>cấp '+VAN_KIEP_ZONE_BOUNDS[i].start+'+</span></div>').join('')+'</div>':'';
+ const zoneBtn='<button class="eqzone" onclick="fgToggle()">🗺️ Bộ <span style="color:'+ZONE_COL[z]+'">'+Z.name+'</span> · cấp '+zb.start+'+'+(fgOpen?' ▴':' ▾')+'</button>';
+ const zoneList=fgOpen?'<div class="eqzlist">'+VAN_KIEP_ZONES.map((q,i)=>'<div class="eqz'+(i===z?' on':'')+'" onclick="fgSetZone('+i+')"><span>'+(i===z?'✅ ':'🗺️ ')+'<b style="color:'+ZONE_COL[i]+'">'+q.name+'</b></span><span>cấp '+VAN_KIEP_ZONE_BOUNDS[i].start+'+</span></div>').join('')+'</div>':'';
  const tot=EQ_QW.reduce((a,b)=>a+b,0),odds=EQ_QW.map((w,i)=>'<span style="color:rgb('+QC[i]+')">'+QN[i]+' '+Math.round(w/tot*1000)/10+'% (+'+Math.round(EQ_QBONUS[i]*100)+'%)</span>').join(' · ');
  let last='';
  if(fgLast)last='<div class="infobox upnote" style="margin-top:5px"><small>Món vừa rèn (đã vào kho):</small><br>'+eqItemHtml(fgLast,false)+'</div>';
