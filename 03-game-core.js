@@ -372,14 +372,18 @@ function beast(t){
   const bodyH=stImg?stImg.bb.h*size/128:size*.8;
   const tierAura=['176,162,151','101,220,181','99,158,255','199,115,255','255,202,73'][purity];
   const tierAlpha=[.12,.2,.27,.34,.43][purity],ringCount=[0,1,2,2,3][purity];
+  const AX=window.PETAURA,axOn=!!(AX&&AX.ok),bodyW=stImg?stImg.bb.w*size/128:size*.7; /* AURA (14-aura.js): hào quang theo bậc + hệ */
   const haloY=y-bodyH*.55,haloR=56+purity*11+22*g;
+  if(axOn)AX.back(c,x,y,bodyW,bodyH,t,'main',st,sp,purity,pv.on); /* AURA hook 1: quầng, tia, cột sáng, vòng chân (phía sau thú) */
+  else{
   const glow=c.createRadialGradient(x,haloY,4,x,haloY,haloR);
   glow.addColorStop(0,'rgba('+tierAura+','+tierAlpha+')');
   glow.addColorStop(.55,'rgba('+au+','+(tierAlpha*.4)+')');
   glow.addColorStop(1,'rgba('+tierAura+',0)');
-  c.fillStyle=glow;c.fillRect(x-haloR,y-size*1.3,haloR*2,size*1.5);
+  c.fillStyle=glow;c.fillRect(x-haloR,y-size*1.3,haloR*2,size*1.5);}
   c.fillStyle='rgba(0,0,0,.42)';c.beginPath();c.ellipse(x,y+1,size*.38,7,0,0,Math.PI*2);c.fill();
-  // Năm cấp huyết mạch có màu, số vòng và độ sáng khác nhau.
+  // Năm cấp huyết mạch có màu, số vòng và độ sáng khác nhau. (chỉ còn dùng khi không có 14-aura.js)
+  if(!axOn){
   c.save();c.translate(x,haloY);c.scale(1,.28);c.rotate(t*(.08+purity*.045));
   for(let r=0;r<ringCount;r++){
     c.strokeStyle='rgba('+tierAura+','+(.38+purity*.1)+')';c.lineWidth=purity>=3?2:1.3;
@@ -389,26 +393,27 @@ function beast(t){
     c.fillStyle='rgba(255,231,153,.9)';
     for(let i=0;i<12;i++){const a=i*Math.PI/6,rr=54+(i%2)*7;c.fillRect(Math.cos(a)*rr-1.5,Math.sin(a)*rr-1.5,3,3)}
   }
-  c.restore();
+  c.restore();}
   // Mỗi bậc là bản giảm chi tiết của ảnh trưởng thành (getStageImage), chân thú đặt đúng mặt đất.
   if(stImg){
     const bb=stImg.bb,u=size/128,beat=(key==='tuoc'||G.wing>0)?Math.sin(t*8)*.035:Math.sin(t*3)*.012;
     const dw=Math.max(1,Math.round(bb.w*u)),dh=Math.max(1,Math.round(bb.h*u*(1+beat)));
     if(!(window.EVO&&EVO.petDraw(c,stImg,bb,x,y,dw,dh))){ /* EVO: rung/bóng trắng/hiện hình khi đang tiến hóa */
-    c.save();c.translate(Math.round(x),Math.round(y));c.imageSmoothingEnabled=false;
+    c.save();c.translate(Math.round(x),Math.round(y));c.imageSmoothingEnabled=false;if(axOn)c.filter=AX.rim(st,purity,false); /* AURA: viền sáng theo phẩm */
     c.drawImage(stImg,bb.x,bb.y,bb.w,bb.h,-Math.round(dw/2),-dh,dw,dh);c.restore();}
   }
   // Mỗi tên thú trong 17 hệ có sắc tố, hoa văn hạt sáng và phù hiệu riêng.
-  for(let i=0;i<8;i++){
+  if(axOn)AX.front(c,x,y,bodyW,bodyH,t,'main',st,sp,purity,pv.on); /* AURA hook 2: hạt, vệ tinh, vành sáng (phía trước thú) */
+  else for(let i=0;i<8;i++){
     const u=(t*.17+i/8)%1,px=x+Math.sin(i*2.4+t*.6)*(size*.5),py=y-size*.2-u*size*.75;
     const motifType=i%2?['petal','flame','crystal','bolt'][G.fx]:motif;
     c.globalAlpha=Math.sin(u*Math.PI)*(.45+purity*.1);
     drawPixelMotif(px,py,motifType,elementColor,1.6+(i%2)*.5);
   }
   c.globalAlpha=1;
-  if(G.mark>0)drawPixelMotif(x,y-size*.68,motif,elementColor,2+G.mark*.35);
-  // Hào quang bậc cao quyện với hiệu ứng riêng của hệ thú.
-  if(G.orb||purity>=3){
+  if(G.mark>0&&(!axOn||st>=2))drawPixelMotif(x,y-size*.68,motif,elementColor,2+G.mark*.35);
+  // Hào quang bậc cao quyện với hiệu ứng riêng của hệ thú. (cũ, chỉ dùng khi không có 14-aura.js)
+  if(!axOn&&(G.orb||purity>=3)){
     const ox=x+Math.cos(t*1.1)*size*.48,oy=y-size*.72+Math.sin(t*1.7)*7;
     const og=c.createRadialGradient(ox,oy,0,ox,oy,10);
     og.addColorStop(0,'rgba(255,255,255,.98)');og.addColorStop(.4,elementColor);og.addColorStop(1,'rgba('+tierAura+',0)');
