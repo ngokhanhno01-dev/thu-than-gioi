@@ -2172,6 +2172,7 @@ async function explore(){busy=true;stopReq=false;let iv=0;
   await wait(1700/BSPD);xp.style.display='none';xp.style.boxShadow='';
   const r=await battle(e);
   showResult(r);let sk=false;xp.onclick=()=>{sk=true};const t0=Date.now();while(Date.now()-t0<3500/BSPD&&!sk)await wait(80);xp.onclick=null;
+  if(window.EVO)await EVO.flush(); /* EVO: dừng vòng thám hiểm cho tới khi tiến hóa chạy xong */
  }}finally{clearInterval(iv);xp.onclick=null;xp.style.display='none';xp.style.boxShadow='';busy=false;if(stopReq)log('⏹ Đã dừng thám hiểm.')}}
 /* --- chọn vùng thám hiểm --- */
 const zoneName=i=>VAN_KIEP_ZONES[i].name,zoneRange=i=>'Cấp '+VAN_KIEP_ZONE_BOUNDS[i].start+'–'+VAN_KIEP_ZONE_BOUNDS[i].end;

@@ -299,8 +299,10 @@ function petGrow(a){return growthOf(a)+.25*(1-Math.exp(-(a-1)/7))} /* thú: tuy�
 function updateStage(){
   if(!hatched)return;
   const i=stageOf(level);
-  $('h-status').textContent=STAGES[i][1];
-  if(curStage>=0&&i!==curStage){
+  /* EVO (13-evolve.js): hiệu ứng tiến hóa ~5s tiếp quản log/banner/tên bậc; nếu không có EVO thì chạy như cũ */
+  const evo=!!(window.EVO&&curStage>=0&&i!==curStage&&EVO.onStage(curStage,i));
+  if(!evo&&!(window.EVO&&EVO.holdStatus()))$('h-status').textContent=STAGES[i][1];
+  if(curStage>=0&&i!==curStage&&!evo){
     log('🌟 <b>[Tiến hóa]</b> Thú đã lớn thành <b style="color:var(--gold)">'+STAGES[i][1]+'</b>!');
     $('banner').textContent=STAGES[i][1];burst=Math.max(burst,1);
   }
@@ -357,7 +359,7 @@ function spriteFor(bl,elementIndex){
   return SPRITE_CACHE[id];
 }
 function beast(t){
-  const A=pv.on?pv.age:level,st=stageOf(A),purity=pv.on?pv.pi:pet.pi;
+  const A=pv.on?pv.age:level,st=window.EVO?EVO.dispStage(stageOf(A),pv.on):stageOf(A),purity=pv.on?pv.pi:pet.pi; /* EVO: giữ sprite cũ tới lúc flash */
   const liveAge=pv.on?A:level+Math.min(1,exp/expNeed(level));
   gs+=(growthOf(liveAge)-gs)*.035;
   const key=pv.on?pv.bl:pet.bl,sp=pv.on?pv.sp:pet.sp,G=genOf(key,sp),B=BL[key];
@@ -392,8 +394,9 @@ function beast(t){
   if(stImg){
     const bb=stImg.bb,u=size/128,beat=(key==='tuoc'||G.wing>0)?Math.sin(t*8)*.035:Math.sin(t*3)*.012;
     const dw=Math.max(1,Math.round(bb.w*u)),dh=Math.max(1,Math.round(bb.h*u*(1+beat)));
+    if(!(window.EVO&&EVO.petDraw(c,stImg,bb,x,y,dw,dh))){ /* EVO: rung/bóng trắng/hiện hình khi đang tiến hóa */
     c.save();c.translate(Math.round(x),Math.round(y));c.imageSmoothingEnabled=false;
-    c.drawImage(stImg,bb.x,bb.y,bb.w,bb.h,-Math.round(dw/2),-dh,dw,dh);c.restore();
+    c.drawImage(stImg,bb.x,bb.y,bb.w,bb.h,-Math.round(dw/2),-dh,dw,dh);c.restore();}
   }
   // Mỗi tên thú trong 17 hệ có sắc tố, hoa văn hạt sáng và phù hiệu riêng.
   for(let i=0;i<8;i++){
@@ -465,6 +468,7 @@ function frame(ms){
     c.fillStyle='rgba(255,220,200,.08)';c.fillRect(px-3,78,2,105)}
   lanterns.forEach(l=>lantern(l[0],l[1],l[2],t));}
   formation(t);
+  if(window.EVO)EVO.pre(c,ms); /* EVO: màn tối + tia sáng, chạy trước khi vẽ thú */
   try{(hatched||pv.on)?beast(t):egg(t)}catch(e){console.error(e)}
   // Hào quang nở rộng khi trứng đổi trạng thái, nở hoặc tiến hóa.
   if(burst>0){
@@ -482,6 +486,7 @@ function frame(ms){
   // Viền tối kiểu màn hình arcade.
   const v=c.createRadialGradient(180,125,90,180,125,230);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.55)');
   c.fillStyle=v;c.fillRect(0,0,W,H);
+  if(window.EVO)EVO.top(c); /* EVO: hạt, sóng xung kích, flash trắng (vẽ sau viền tối) */
   requestAnimationFrame(frame);
 }
 // thanh thời gian tới tuổi mới
