@@ -90,7 +90,22 @@ const authErr=e=>({
   'auth/invalid-credential':'Sai tên hoặc mật khẩu.','auth/wrong-password':'Sai tên hoặc mật khẩu.','auth/user-not-found':'Sai tên hoặc mật khẩu.',
   'auth/email-already-in-use':'Tên này đã có người dùng.','auth/weak-password':'Mật khẩu cần ít nhất 6 ký tự.',
   'auth/network-request-failed':'Không kết nối được mạng.','auth/too-many-requests':'Thử quá nhiều lần, hãy đợi một lát.',
-  'auth/operation-not-allowed':'Chưa bật đăng nhập Email/Mật khẩu trong Firebase.'}[e&&e.code]||'Có lỗi, thử lại.');
+  'auth/operation-not-allowed':'Chưa bật đăng nhập Email/Mật khẩu trong Firebase.',
+  'permission-denied':'Chưa mở quyền hồ sơ/biệt danh trên máy chủ (xem FIRESTORE_RULES.txt).','unavailable':'Không kết nối được máy chủ, thử lại.'}[e&&e.code]||'Có lỗi, thử lại.');
+/* ---------- BIỆT DANH (Firestore) ----------
+   nicks/{nickKey}  = {uid, nick}   -> giữ chỗ để KHÔNG ai trùng biệt danh (nickKey = bỏ dấu, bỏ cách, chữ thường)
+   profiles/{uid}   = {nick, nickKey, t} -> hồ sơ công khai: chat, bảng xếp hạng dùng cái này thay cho tên tài khoản */
+async function loadNick(uid){
+  const sn=await db.collection('profiles').doc(uid).get();
+  return sn.exists&&sn.data().nick?String(sn.data().nick):''}
+async function claimNick(uid,nick){
+  const key=nickKey(nick),nref=db.collection('nicks').doc(key),ex=await nref.get();
+  if(ex.exists&&ex.data().uid!==uid)throw new Error('taken');
+  const b=db.batch();
+  if(!ex.exists)b.set(nref,{uid,nick});
+  b.set(db.collection('profiles').doc(uid),{nick,nickKey:key,t:firebase.firestore.FieldValue.serverTimestamp()});
+  await b.commit();
+  try{await auth.currentUser.updateProfile({displayName:nick})}catch(_){}}
 /* ======================================================================================= */
 
 const $s=id=>document.getElementById(id);
@@ -102,8 +117,8 @@ const num=(v,d)=>{v=Number(v);return isFinite(v)?v:(d||0)};
 /* ---------- CSS ---------- */
 {const s=document.createElement('style');
  s.textContent=
- '#ttg-login,#ttg-accp{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,10,14,.86);padding:12px;box-sizing:border-box}'+
- '#ttg-login.show,#ttg-accp.show{display:flex}'+
+ '#ttg-login,#ttg-accp,#ttg-nick{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,10,14,.86);padding:12px;box-sizing:border-box}'+
+ '#ttg-login.show,#ttg-accp.show,#ttg-nick.show{display:flex}'+
  '.ttg-bx{width:min(90vw,340px);max-height:90vh;overflow-y:auto;box-sizing:border-box;text-align:center;padding:12px 14px 14px;border:3px solid #f6c66a;background:#14272d;box-shadow:0 3px 0 0 #040a0e,0 0 0 2px #040a0e,inset 0 0 0 2px #78613a;font-family:"VT323",monospace;color:#f5edcf}'+
  '.ttg-bx .t{font-size:30px;color:#f6c66a;text-shadow:1px 1px 0 #071116;line-height:1.1}'+
  '.ttg-bx .s{font-size:18px;color:#b7bda9;margin:2px 0 8px}'+
@@ -117,8 +132,9 @@ const num=(v,d)=>{v=Number(v);return isFinite(v)?v:(d||0)};
  '.ttg-bx .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}'+
  '.ttg-bx .n{font-size:15px;color:#b7bda9;margin-top:8px;line-height:1.15}'+
  '.ttg-bx label{display:block;font-size:16px;margin:4px 0;text-align:left}'+
- '#lg-msg,#ap-msg{min-height:20px;font-size:17px;color:#ff8a7a;margin:2px 0}'+
+ '#lg-msg,#ap-msg,#nk-msg{min-height:20px;font-size:17px;color:#ff8a7a;margin:2px 0}'+
  '#ap-msg{color:#72e4b0}'+
+ '#nk-msg{color:#ff8a7a}'+
  '#ttg-acc{position:fixed;left:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:60;display:none;font-family:"VT323",monospace;font-size:18px;color:#f5edcf;background:#14272d;border:2px solid #f6c66a;padding:3px 9px;cursor:pointer;box-shadow:0 2px 0 #040a0e;border-radius:0;max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
  '#ttg-warn{position:fixed;left:0;right:0;top:0;z-index:210;display:none;padding:8px 12px;text-align:center;font-family:"VT323",monospace;font-size:19px;color:#fff;background:#a72f42;border-bottom:2px solid #040a0e}'+
  '#ttg-warn button{font:inherit;margin-left:8px;padding:1px 8px;cursor:pointer}';
@@ -139,7 +155,24 @@ async function hpw(pw,salt,alg){
 const bestAlg=()=>(window.crypto&&crypto.subtle)?'s':'c';
 const normName=n=>n.trim().replace(/\s+/g,' ');
 const keyOf=n=>normName(n).toLowerCase();
-const nameOk=n=>/^[\p{L}\p{N}_ ]{3,20}$/u.test(normName(n));
+const nameOk=n=>/^[\p{L}\p{N}_ ]{3,20}$/u.test(normName(n));   /* chỉ dùng cho ĐĂNG NHẬP: giữ tương thích tài khoản cũ */
+
+/* ---------- GIỚI HẠN KÝ TỰ (sửa số ở đây) ---------- */
+const ACC_MIN=4,ACC_MAX=16;      /* tài khoản MỚI: a-z, 0-9, _ ; không dấu, không dấu cách */
+const PW_MIN=6,PW_MAX=32;        /* mật khẩu MỚI */
+const NICK_MIN=3,NICK_MAX=16;    /* biệt danh: chữ cái Latin (có dấu tiếng Việt), số 0-9, dấu cách */
+const NICK_BAD=/admin|qtv|gamemaster|hethong|system|moderator|thuthangioi/;   /* chặn mạo danh (chỉ chặn ở phía game) */
+const accErr=n=>{n=n.trim();
+  if(!/^[A-Za-z0-9_]*$/.test(n))return 'Tài khoản chỉ dùng a-z, 0-9 và _ (không dấu, không dấu cách).';
+  if(n.length<ACC_MIN||n.length>ACC_MAX)return 'Tài khoản dài '+ACC_MIN+'–'+ACC_MAX+' ký tự.';return ''};
+const nickNorm=n=>n.trim().replace(/\s+/g,' ');
+const nickKey=n=>nickNorm(n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]/g,'');
+const nickErr=n=>{n=nickNorm(n);
+  if(n.length<NICK_MIN||n.length>NICK_MAX)return 'Biệt danh dài '+NICK_MIN+'–'+NICK_MAX+' ký tự.';
+  if(!/^[\p{Script=Latin}0-9 ]+$/u.test(n))return 'Biệt danh chỉ dùng chữ cái, số và dấu cách (không ký tự đặc biệt/emoji).';
+  const k=nickKey(n);
+  if(k.length<NICK_MIN)return 'Biệt danh cần ít nhất '+NICK_MIN+' chữ hoặc số.';
+  if(NICK_BAD.test(k))return 'Biệt danh này không được dùng.';return ''};
 
 /* ====================== CHỤP / KHÔI PHỤC TRẠNG THÁI ====================== */
 function zoneIdx(){
@@ -327,13 +360,13 @@ function showLogin(){
   if(!o){
     o=document.createElement('div');o.id='ttg-login';
     o.innerHTML='<div class="ttg-bx"><div class="t">Thú Thần Giới</div><div class="s">Đăng nhập để lưu tiến trình</div>'+
-     '<input type="text" id="lg-name" placeholder="Tên tài khoản" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false">'+
-     '<input type="password" id="lg-pw" placeholder="Mật khẩu (từ 6 ký tự)" autocomplete="current-password">'+
+     '<input type="text" id="lg-name" placeholder="Tài khoản (a-z, 0-9, _)" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false">'+
+     '<input type="password" id="lg-pw" placeholder="Mật khẩu (6–32 ký tự)" autocomplete="current-password">'+
      '<div id="lg-msg"></div>'+
      '<label id="lg-mig" style="display:none"><input type="checkbox" id="lg-mg" checked> Mang tiến trình chơi khách sang tài khoản mới</label>'+
      '<div class="row"><button id="lg-in">Đăng nhập</button><button class="alt" id="lg-reg">Đăng ký</button></div>'+
      '<button class="dim" id="lg-guest">Chơi khách</button>'+
-     '<div class="n">Tiến trình lưu trên máy chủ: đăng nhập ở máy nào cũng chơi tiếp được. Chơi khách chỉ lưu trên máy này.</div></div>';
+     '<div class="n">Đăng ký mới: tài khoản '+ACC_MIN+'–'+ACC_MAX+' ký tự a-z, 0-9, _ (không dấu, không cách); sau đó bạn sẽ đặt biệt danh. Chơi khách chỉ lưu trên máy này.</div></div>';
     document.body.appendChild(o);
     const go=fn=>()=>{const b=[$s('lg-in'),$s('lg-reg'),$s('lg-guest')];b.forEach(x=>x.disabled=true);fn().catch(e=>lmsg(e&&e.message==='nosubtle'?'Trình duyệt cần https/localhost để kiểm tra mật khẩu.':'Có lỗi, thử lại.')).finally(()=>b.forEach(x=>x.disabled=false))};
     $s('lg-in').onclick=go(doLogin);$s('lg-reg').onclick=go(doRegister);$s('lg-guest').onclick=go(async()=>{begin(GUEST,'Khách')});
@@ -341,12 +374,37 @@ function showLogin(){
   $s('lg-mig').style.display=parseSave(readSave(GUEST))?'block':'none';
   o.classList.add('show');setTimeout(()=>{try{$s('lg-name').focus()}catch(_){}},50)}
 const lmsg=h=>{const m=$s('lg-msg');if(m)m.textContent=h};
+function askNick(u){   /* bước bắt buộc: đặt biệt danh (tài khoản mới, hoặc tài khoản cũ chưa có) */
+  return new Promise(res=>{
+    let o=$s('ttg-nick');
+    if(!o){
+      o=document.createElement('div');o.id='ttg-nick';
+      o.innerHTML='<div class="ttg-bx"><div class="t">Đặt biệt danh</div><div class="s">Tên hiển thị khi chat & xếp hạng</div>'+
+       '<input type="text" id="nk-in" placeholder="Biệt danh" maxlength="'+NICK_MAX+'" autocomplete="off" autocapitalize="words" spellcheck="false">'+
+       '<div class="n" id="nk-cnt"></div><div id="nk-msg"></div>'+
+       '<button class="alt" id="nk-ok">Xác nhận</button><button class="dim" id="nk-out">Đăng xuất</button>'+
+       '<div class="n">'+NICK_MIN+'–'+NICK_MAX+' ký tự: chữ (có dấu được), số, dấu cách. Không được trùng người khác. Đã đặt thì chưa đổi được, hãy chọn kỹ.</div></div>';
+      document.body.appendChild(o)}
+    const inp=$s('nk-in'),ok=$s('nk-ok'),nm=h=>{$s('nk-msg').textContent=h},cnt=()=>{$s('nk-cnt').textContent=nickNorm(inp.value).length+'/'+NICK_MAX};
+    inp.value='';nm('');cnt();inp.oninput=()=>{nm('');cnt()};
+    inp.onkeydown=e=>{if(e.key==='Enter')ok.click()};
+    ok.onclick=async()=>{
+      const n=nickNorm(inp.value),er=nickErr(n);if(er){nm(er);return}
+      ok.disabled=true;nm('Đang kiểm tra...');
+      try{await claimNick(u.uid,n);o.classList.remove('show');res(n)}
+      catch(e){nm(e&&e.message==='taken'?'Biệt danh này đã có người dùng, chọn tên khác.':e&&e.code==='permission-denied'?'Biệt danh vừa bị người khác lấy, hoặc chưa mở quyền trên máy chủ (xem FIRESTORE_RULES.txt).':'Không kết nối được, thử lại.')}
+      ok.disabled=false};
+    $s('nk-out').onclick=async()=>{LS.del(P+'session');try{await auth.signOut()}catch(_){}location.reload()};
+    o.classList.add('show');setTimeout(()=>{try{inp.focus()}catch(_){}},50)})}
 async function enter(u){
+  lmsg('Đang tải hồ sơ...');
+  let nick=await loadNick(u.uid);                       /* lỗi (mất mạng / chưa mở quyền) -> ném ra để hiện ở màn đăng nhập */
+  if(!nick){const ov=$s('ttg-login');if(ov)ov.classList.remove('show');lmsg('');nick=await askNick(u)}
   lmsg('Đang tải tiến trình...');
   srv=null;
   try{srv=await srvTime(u.uid)}catch(e){console.warn('[cloud] time',e)}   /* phải lấy TRƯỚC pull (pull có thể đẩy lên và ghi đè mốc cũ) */
   try{await pull(u.uid)}catch(e){console.warn('[cloud] pull',e);warn('⚠️ Không tải được từ máy chủ, đang dùng bản lưu trên máy này.')}
-  user=null;KEYU='';begin(u.uid,u.displayName||'Người chơi')}
+  user=null;KEYU='';begin(u.uid,nick)}
 async function doLogin(){
   const n=$s('lg-name').value,pw=$s('lg-pw').value;lmsg('');
   if(!nameOk(n)){lmsg('Tên 3–20 ký tự (chữ, số, gạch dưới, dấu cách).');return}
@@ -354,12 +412,12 @@ async function doLogin(){
   try{const cr=await auth.signInWithEmailAndPassword(await emailOf(n),pw);await enter(cr.user)}catch(e){lmsg(authErr(e))}}
 async function doRegister(){
   const n=$s('lg-name').value,pw=$s('lg-pw').value;lmsg('');
-  if(!nameOk(n)){lmsg('Tên 3–20 ký tự (chữ, số, gạch dưới, dấu cách).');return}
-  if(pw.length<6){lmsg('Mật khẩu cần ít nhất 6 ký tự.');return}
+  const ae=accErr(n);if(ae){lmsg(ae);return}
+  if(pw.length<PW_MIN||pw.length>PW_MAX){lmsg('Mật khẩu dài '+PW_MIN+'–'+PW_MAX+' ký tự.');return}
+  if(pw.toLowerCase()===n.trim().toLowerCase()){lmsg('Mật khẩu không được trùng tên tài khoản.');return}
   if(!fbInit()){lmsg('Chưa cấu hình máy chủ (FB_CONFIG). Bạn vẫn có thể Chơi khách.');return}
   try{
     const cr=await auth.createUserWithEmailAndPassword(await emailOf(n),pw);
-    await cr.user.updateProfile({displayName:normName(n)});
     if($s('lg-mig').style.display!=='none'&&$s('lg-mg').checked){const g0=readSave(GUEST);if(g0){LS.set(kSave(cr.user.uid),g0);LS.del(kSave(GUEST));LS.del(kBak(GUEST))}}
     await enter(cr.user)}catch(e){lmsg(authErr(e))}}
 
@@ -391,6 +449,6 @@ function begin(key,name){
 window.TTGSAVE={save,snap,get user(){return user},exportSave,wipe,logout};
 const ses=LS.get(P+'session');
 if(ses===GUEST)begin(GUEST,'Khách');
-else if(fbInit()){let first=true;auth.onAuthStateChanged(u=>{if(!first||user)return;first=false;if(u)enter(u).catch(()=>showLogin());else showLogin()})}
+else if(fbInit()){let first=true;auth.onAuthStateChanged(u=>{if(!first||user)return;first=false;if(u)enter(u).catch(e=>{showLogin();lmsg(authErr(e))});else showLogin()})}
 else{showLogin();lmsg('Chưa cấu hình máy chủ — chỉ Chơi khách được.')}
 })();
