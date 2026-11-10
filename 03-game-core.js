@@ -388,7 +388,12 @@ function beast(t){
   const growthFrame=spriteApi?spriteApi.frameRect(st,Math.floor(t*5)%spriteApi.frameCount):null;
   spriteCtx.clearRect(0,0,128,128);spriteCtx.imageSmoothingEnabled=false;
   let hasSprite=false;
-  if(growthSheet&&growthFrame){
+  // Bậc trưởng thành trở lên: vẽ thẳng ảnh gốc 128px (nét như màn chiến đấu), không qua sheet 64px + phù hiệu bậc.
+  const cleanAdult=(spriteApi&&st>=2&&spriteApi.getAdultImage)?spriteApi.getAdultImage(key,sp):null;
+  if(cleanAdult){
+    spriteCtx.drawImage(cleanAdult,0,0,128,128);
+    hasSprite=true;
+  }else if(growthSheet&&growthFrame){
     spriteCtx.drawImage(growthSheet,growthFrame.sx,growthFrame.sy,growthFrame.sw,growthFrame.sh,0,0,128,128);
     hasSprite=true;
   }else if(sprite.complete&&sprite.naturalWidth){
@@ -413,6 +418,7 @@ function beast(t){
   c.globalAlpha=1;
   // Biến thể theo seed từng loài: sừng, cánh, gai và dấu trán.
   const unit=size/100;
+  if(!cleanAdult){ // ảnh gốc đã có sừng/cánh/gai riêng; chỉ vẽ phù hiệu giả cho dạng sheet nhỏ (trứng/thú con)
   c.save();c.translate(x-size/2,y-size);c.scale(unit,unit);
   for(let i=0;i<G.horn;i++){
     const hx=43+(i-(G.horn-1)/2)*8;
@@ -433,6 +439,7 @@ function beast(t){
     }
   }
   c.restore();
+  }
   if(G.mark>0)drawPixelMotif(x,y-size*.68,motif,elementColor,2+G.mark*.35);
   // Hào quang bậc cao quyện với hiệu ứng riêng của hệ thú.
   if(G.orb||purity>=3){
