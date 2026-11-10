@@ -25,18 +25,19 @@ const clamp=(v,a,b)=>v<a?a:v>b?b:v, frac=v=>v-Math.floor(v);
    pillar độ đậm cột sáng                    crown 1 = vành sáng trên đầu    pulse chu kỳ sóng xung từ chân (giây, 0 = tắt)
    mf     tỉ lệ hạt dùng hình motif của hệ (còn lại là hạt vuông)           pu    cỡ pixel của motif (1 hoặc 2)
    rim    độ rộng viền sáng quanh thân (px, màu theo phẩm; 0 = không)       ★ = mốc nhảy vọt (đổi hẳn kiểu hiệu ứng)
+   pz     (tuỳ chọn) cỡ hạt vuông tính bằng px, ghi đè mặc định          rt  (tuỳ chọn) độ dày vòng chân: 1 = mảnh, 2 = dày (mặc định 1)
    ============================================================ */
 const STAGE_FX=[
  /* B1  */{name:'Sơ Sinh',  kind:'Không có (chỉ bóng dưới chân)',                          n:0, orbs:0,halo:0,  hr:0,   ring:0,rays:0,   rays2:0,pillar:0,   crown:0,pulse:0,  mf:0,  pu:1,rim:0},
- /* B2  */{name:'Ấu Thú',   kind:'Vài đốm sáng li ti',                                    n:4, orbs:0,halo:0,  hr:0,   ring:0,rays:0,   rays2:0,pillar:0,   crown:0,pulse:0,  mf:0,  pu:1,rim:0},
- /* B3 ★*/{name:'Thiếu Thú',kind:'MỐC 1: vòng chân + hạt hình của hệ bắt đầu bay',        n:8, orbs:0,halo:.24,hr:.85, ring:1,rays:0,   rays2:0,pillar:0,   crown:0,pulse:0,  mf:.35,pu:1,rim:1},
- /* B4  */{name:'Linh Thú', kind:'Vòng chân + nhiều hạt hơn, quầng nhẹ',                  n:12,orbs:0,halo:.30,hr:.90, ring:1,rays:0,   rays2:0,pillar:0,   crown:0,pulse:0,  mf:.40,pu:1,rim:1},
- /* B5  */{name:'Yêu Thú',  kind:'Quầng sáng rõ, viền sáng quanh thân',                   n:15,orbs:0,halo:.38,hr:.95, ring:1,rays:0,   rays2:0,pillar:0,   crown:0,pulse:0,  mf:.40,pu:1,rim:2},
- /* B6 ★*/{name:'Hung Thú', kind:'MỐC 2: tia xoay phía sau + 2 vòng chân + hạt motif lớn',n:20,orbs:0,halo:.46,hr:1.00,ring:2,rays:.42, rays2:0,pillar:0,   crown:0,pulse:0,  mf:.45,pu:2,rim:2},
- /* B7  */{name:'Trưởng Thú',kind:'Tia xoay đậm hơn, hạt dày',                            n:23,orbs:0,halo:.52,hr:1.05,ring:2,rays:.50, rays2:0,pillar:0,   crown:0,pulse:0,  mf:.45,pu:2,rim:3},
- /* B8  */{name:'Đại Thú',  kind:'Thêm 2 vệ tinh quay quanh + cột sáng mờ',               n:26,orbs:2,halo:.46,hr:1.10,ring:2,rays:.32, rays2:0,pillar:.10, crown:0,pulse:0,  mf:.50,pu:2,rim:3},
- /* B9  */{name:'Chí Tôn',  kind:'3 vệ tinh, cột sáng, sóng xung chậm',                   n:28,orbs:3,halo:.52,hr:1.12,ring:2,rays:.38, rays2:0,pillar:.16, crown:0,pulse:3.4,mf:.50,pu:2,rim:4},
- /* B10★*/{name:'Thần Thú', kind:'MỐC 3: vành sáng trên đầu + 2 lớp tia + cột sáng + 4 vệ tinh + sóng xung',n:27,orbs:4,halo:.72,hr:1.18,ring:2,rays:.76,rays2:1,pillar:.38,crown:1,pulse:2.4,mf:.50,pu:2,rim:5}
+ /* B2  */{name:'Ấu Thú',   kind:'Quầng sáng + 1 vòng chân MẢNH + vài hạt vuông',          n:6, orbs:0,halo:.60,hr:1.15,ring:1,rays:0,   rays2:0,pillar:0,   crown:0,pulse:0,  mf:0,  pu:1,rim:2,pz:3,rt:1},
+ /* B3 ★*/{name:'Thiếu Thú',kind:'MỚI: vòng chân DÀY + hạt hình riêng của hệ + viền sáng', n:10,orbs:0,halo:.76,hr:1.28,ring:1,rays:0,   rays2:0,pillar:0,   crown:0,pulse:0,  mf:.55,pu:1,rim:3,pz:4,rt:2},
+ /* B4  */{name:'Linh Thú', kind:'MỚI: thêm vòng chân thứ 2 (màu hệ) + hạt dày',          n:15,orbs:0,halo:.88,hr:1.40,ring:2,rays:0,   rays2:0,pillar:0,   crown:0,pulse:0,  mf:.55,pu:1,rim:3,pz:4,rt:2},
+ /* B5  */{name:'Yêu Thú',  kind:'MỚI: sóng xung lan từ chân + hạt motif lớn + viền đậm', n:21,orbs:0,halo:.96,hr:1.52,ring:2,rays:0,   rays2:0,pillar:0,   crown:0,pulse:4.2,mf:.55,pu:2,rim:4,pz:4,rt:2},
+ /* B6 ★*/{name:'Hung Thú', kind:'MỐC 2: tia xoay phía sau + 2 vòng chân + hạt motif lớn',n:20,orbs:0,halo:.90,hr:1.60,ring:2,rays:.42, rays2:0,pillar:0,   crown:0,pulse:0,  mf:.45,pu:2,rim:2},
+ /* B7  */{name:'Trưởng Thú',kind:'Tia xoay đậm hơn, hạt dày',                            n:23,orbs:0,halo:.92,hr:1.68,ring:2,rays:.50, rays2:0,pillar:0,   crown:0,pulse:0,  mf:.45,pu:2,rim:3},
+ /* B8  */{name:'Đại Thú',  kind:'Thêm 2 vệ tinh quay quanh + cột sáng mờ',               n:26,orbs:2,halo:.94,hr:1.76,ring:2,rays:.32, rays2:0,pillar:.10, crown:0,pulse:0,  mf:.50,pu:2,rim:3},
+ /* B9  */{name:'Chí Tôn',  kind:'3 vệ tinh, cột sáng, sóng xung chậm',                   n:28,orbs:3,halo:.96,hr:1.84,ring:2,rays:.38, rays2:0,pillar:.16, crown:0,pulse:3.4,mf:.50,pu:2,rim:4},
+ /* B10★*/{name:'Thần Thú', kind:'MỐC 3: vành sáng trên đầu + 2 lớp tia + cột sáng + 4 vệ tinh + sóng xung',n:27,orbs:4,halo:1.00,hr:1.96,ring:2,rays:.76,rays2:1,pillar:.38,crown:1,pulse:2.4,mf:.50,pu:2,rim:5}
 ];
 const MAX_N={main:30,battle:20};
 
@@ -119,12 +120,12 @@ function pillarSpr(sp){
  s=mk(16,64);const g=s.getContext('2d'),E=ELEMENT_FX[sp];
  for(let y=0;y<64;y++){const lv=Math.ceil((y/64)*5)/5;for(let x=0;x<16;x++){const e=Math.abs(x-7.5)/8,a=lv*(1-e*e);if(a<.05)continue;g.globalAlpha=a;g.fillStyle=(Math.abs(x-7.5)<2.5&&lv>.6)?E.a:E.c;g.fillRect(x,y,1,1)}}
  return cPillar[sp]=s}
-function ringPts(g,rx,ry,col,ph){ /* elip pixel nét đứt, ph = pha nét đứt (đổi pha = "kiến bò") */
+function ringPts(g,rx,ry,col,ph,th){ /* elip pixel nét đứt, ph = pha nét đứt (đổi pha = "kiến bò") */
  g.fillStyle=col;const seen={};let k=0;
  for(let i=0;i<240;i++){const a=i*TAU/240,x=Math.round(32+COS(a)*rx),y=Math.round(8+SIN(a)*ry),key=x*100+y;if(seen[key])continue;seen[key]=1;
-  if(((k+ph*3)%6)<4)g.fillRect(x,y,1,1);k++}}
-function ringO(pi,ph){const a=cRingO[pi]||(cRingO[pi]=[]);if(a[ph])return a[ph];const s=mk(64,16);ringPts(s.getContext('2d'),31,7,PI_COL[pi],ph);return a[ph]=s}
-function ringI(sp,ph){const a=cRingI[sp]||(cRingI[sp]=[]);if(a[ph])return a[ph];const s=mk(64,16);ringPts(s.getContext('2d'),22,5,ELEMENT_FX[sp].c,ph);return a[ph]=s}
+  if(((k+ph*3)%6)<4)g.fillRect(x,y,th>1?2:1,th>1?2:1);k++}}
+function ringO(pi,ph,th){th=th>1?1:0;const a=cRingO[pi*2+th]||(cRingO[pi*2+th]=[]);if(a[ph])return a[ph];const s=mk(64,16);ringPts(s.getContext('2d'),31,7,PI_COL[pi],ph,th+1);return a[ph]=s}
+function ringI(sp,ph,th){th=th>1?1:0;const a=cRingI[sp*2+th]||(cRingI[sp*2+th]=[]);if(a[ph])return a[ph];const s=mk(64,16);ringPts(s.getContext('2d'),22,5,ELEMENT_FX[sp].c,ph,th+1);return a[ph]=s}
 function motifSpr(sp,unit,ci){ /* ci: 0 màu chính, 1 màu nhấn, 2 màu tối */
  const key=sp*6+(unit-1)*3+ci;let s=cMotif[key];if(s)return s;
  const E=ELEMENT_FX[sp],pts=MOTIF_PIXELS[EPI[sp][2]]||MOTIF_PIXELS.star,col=ci===1?E.a:ci===2?E.d:E.c;
@@ -171,6 +172,17 @@ function prep(stage,sp,mode){
 }
 
 /* ---------- nhường EVO: ẩn aura khi đang tiến hóa, hiện dần sau đó (chỉ màn chính) ---------- */
+/* ---------- HIỆU ỨNG LÊN BẬC: khi bậc tăng (màn chính, không phải xem thử) → bùng sáng ~2 giây ----------
+   Chờ EVO xong (aura hiện lại) rồi mới chạy. Mạnh dần theo bậc đích. */
+let prevSt=-1,burstT=-1,burstPend=false,burstSt=0;
+function trackStage(T,mode,stage,pv,f){
+ if(mode!=='main'||pv)return;
+ stage=clamp(stage|0,0,9);
+ if(prevSt>=0&&stage>prevSt&&stage>=1){burstPend=true;burstSt=stage;burstT=-1}
+ prevSt=stage;
+ if(burstPend&&f>.35){burstPend=false;burstT=T}
+}
+const BURST_LEN=2.4;
 let fade=1,lastT=-1;
 function gate(T,mode,pv){
  if(mode!=='main'||pv)return 1;
@@ -186,7 +198,7 @@ function drawPart(g,i,px,py,al,sp,unit,sz){
  if(MOTIF_ID[i]<curMF*10){
   const sp2=motifSpr(sp,unit,CI>2?2:CI),h=(7*unit)>>1;g.drawImage(sp2,px-h,py-h);
  }else{
-  const z=Math.max(1,Math.round((curCfg.n<=4?1:curCfg.pu===2?3:2)*sz*curEl.sz*(Z>1.8?1.8:Z)));
+  const z=Math.max(1,Math.round((curCfg.pz||(curCfg.n<=4?1:curCfg.pu===2?3:2))*sz*curEl.sz*(Z>1.8?1.8:Z)));
   g.fillStyle=curEl[COLN[CI>2?2:CI]];g.fillRect(px-(z>>1),py-(z>>1),z,z);
   if(KX&&al>.45){g.fillStyle=curEl.a;g.fillRect(px-1,py-4,2,8);g.fillRect(px-4,py-1,8,2)}
  }}
@@ -216,7 +228,7 @@ const API=window.PETAURA={
  ok:true, STAGE_FX, ELEMENT_FX, PI_COL, PI_BRI, MAX_N, stat, timing:false,
  back(g,cx,by,w,h,T,mode,stage,sp,pi,pv,al){
   const t0=API.timing?performance.now():0;
-  if(al==null)al=1;const f=gate(T,mode,pv);stat.particles=0;stat.layers=0;
+  if(al==null)al=1;const f=gate(T,mode,pv);stat.particles=0;stat.layers=0;trackStage(T,mode,stage,pv,f);
   if(f<=.01||!A.on)return;
   prep(stage,sp,mode);const c=curCfg;if(c.n<=0)return;
   pi=clamp(pi|0,0,4);al*=f;const bri=PI_BRI[pi],bat=mode==='battle';
@@ -234,11 +246,21 @@ const API=window.PETAURA={
    g.globalAlpha=clamp(c.pillar*bri*al*fl,0,1);g.drawImage(pillarSpr(sp),cx-pw/2,by-ph,pw,ph);stat.layers++}
   if(c.ring>0){ /* vòng chân: ngoài = màu phẩm, trong = màu hệ */
    const ph=(Math.floor(T*5)&1),rw=W2*2.15,rh=rw*.25,pz=.5+.5*SIN(T*2.2);
-   g.globalAlpha=clamp((.5+.3*pz)*bri*al,0,1);g.drawImage(ringO(pi,ph),cx-rw/2,by-rh/2+1,rw,rh);stat.layers++;
-   if(c.ring>1){g.globalAlpha=clamp((.4+.35*(1-pz))*bri*al,0,1);const r2=rw*.78;g.drawImage(ringI(sp,ph),cx-r2/2,by-r2*.125+1,r2,r2*.25);stat.layers++}}
+   g.globalAlpha=clamp((.62+.3*pz)*bri*al,0,1);g.drawImage(ringO(pi,ph,c.rt),cx-rw/2,by-rh/2+1,rw,rh);stat.layers++;
+   if(c.ring>1){g.globalAlpha=clamp((.4+.35*(1-pz))*bri*al,0,1);const r2=rw*.78;g.drawImage(ringI(sp,ph,c.rt),cx-r2/2,by-r2*.125+1,r2,r2*.25);stat.layers++}}
   if(c.pulse>0){ /* sóng xung lan ra từ chân */
    const p=frac(T/c.pulse),rw=W2*2.15*(.6+p*1.3),rh=rw*.25;
    g.globalAlpha=clamp((1-p)*.55*bri*al,0,1);g.drawImage(ringO(pi,0),cx-rw/2,by-rh/2+1,rw,rh);stat.layers++}
+  if(burstT>=0&&mode==='main'&&!pv){ /* sóng vòng bùng ra + quầng chớp khi vừa lên bậc */
+   const bt=T-burstT,pw=.8+burstSt*.1;
+   if(bt>=0&&bt<BURST_LEN){
+    const fl=clamp(1-bt/1.1,0,1),d2=Math.max(h*1.9,W2*2.4)*(1.5+bt*.5);
+    if(fl>0){g.globalAlpha=clamp(fl*.95*al,0,1);g.drawImage(haloSpr(sp),cx-d2/2,cy-d2/2,d2,d2)}
+    for(let k=0;k<3;k++){const p=(bt-k*.38)/1.5;if(p<0||p>=1)continue;
+     const rw=W2*2.15*(.4+p*(2.2+burstSt*.12)),rh=rw*.25;
+     g.globalAlpha=clamp((1-p)*pw*al,0,1);g.drawImage(ringO(pi,0,2),cx-rw/2,by-rh/2+1,rw,rh);
+     if(k===1){g.globalAlpha=clamp((1-p)*.8*al,0,1);g.drawImage(ringI(sp,0,2),cx-rw*.39,by-rw*.0975+1,rw*.78,rw*.195)}}
+    stat.layers+=3}}
   layerParticles(g,-1,cx,by,W2,h,T,sp,c.pu,bri,al);
   g.restore();
   if(t0){stat.ms+=performance.now()-t0}
@@ -258,6 +280,15 @@ const API=window.PETAURA={
    g.globalAlpha=clamp(bri*al,0,1);g.fillStyle=curEl.a;
    for(let k=0;k<3;k++){const a=T*1.4+k*TAU/3;g.fillRect(Math.round((cx+COS(a)*rw*.48)/2)*2,Math.round((hy+SIN(a)*rh*.48)/2)*2,2,2)}
    stat.layers++;stat.particles+=3}
+  if(burstT>=0&&mode==='main'&&!pv){ /* tia lửa toả ra từ thân */
+   const bt=T-burstT;
+   if(bt>=0&&bt<BURST_LEN-.6){
+    const nn=12+burstSt*2,sz=burstSt>=4?6:4;
+    for(let i=0;i<nn;i++){
+     const a=i*TAU/nn+SEED[i&31]*.6,v=.55+SEED[(i+9)&31]*.8,r=bt*v*h*.9,q=bt/(BURST_LEN-.6),al2=clamp(1.15-q*q*1.15,0,1)*al;
+     const px=Math.round((cx+COS(a)*r*1.25)/2)*2,py=Math.round((by-h*.5-SIN(a)*r*.85+bt*bt*h*.25)/2)*2;
+     g.globalAlpha=clamp(al2,0,1);g.fillStyle=(i&1)?curEl.a:curEl.c;g.fillRect(px-(sz>>1),py-(sz>>1),sz,sz)}
+    stat.particles+=nn}}
   g.restore();
   g.globalAlpha=1;
   if(t0){stat.ms+=performance.now()-t0;stat.frames++}
