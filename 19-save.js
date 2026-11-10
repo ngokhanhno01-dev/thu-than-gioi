@@ -26,6 +26,14 @@ const OFF_DAILY_H=6;          /* tổng số giờ ngoại tuyến được tín
 const OFF_WINDOW_MS=24*3600*1000;
 const GUEST='__guest';
 const P='ttg_';
+/* ===== DÁN CẤU HÌNH FIREBASE CỦA BẠN VÀO ĐÂY (Project settings -> Your apps -> Web app) ===== */
+const FB_CONFIG={
+  apiKey:'AIzaSyB_LfMna798-9lpK8m205F3sKtUQwTlyQo',
+  authDomain:'thu-than-gioi.firebaseapp.com',
+  projectId:'thu-than-gioi',
+  appId:'1:422450444342:web:95516a9cdf2f50c0f28097'
+};
+const CLOUD_MS=15000;         /* đẩy lên máy chủ tối đa mỗi 15 giây */
 
 /* ====================== KHO LƯU TRỮ (thay khối này khi có máy chủ) ====================== */
 const LS={
@@ -39,6 +47,43 @@ const readBak=u=>LS.get(kBak(u));
 const writeSave=(u,s)=>{const prev=LS.get(kSave(u));if(prev)LS.set(kBak(u),prev);return LS.set(kSave(u),s)};
 const accounts=()=>{try{return JSON.parse(LS.get(P+'acc')||'{}')||{}}catch(_){return{}}};
 const putAccounts=a=>LS.set(P+'acc',JSON.stringify(a));
+
+/* ---------- ĐỒNG BỘ ĐÁM MÂY (Firebase Auth + Firestore) ----------
+   Bản lưu vẫn ghi vào localStorage như cũ (làm bộ nhớ đệm, chạy cả khi mất mạng),
+   rồi được đẩy lên Firestore: saves/{uid} = {raw, t, name}. Vào máy khác -> kéo bản MỚI HƠN về. */
+let fbOk=false,auth=null,db=null,unsub=null,pushAt=0,pushQ=0,cloudBad=false;
+function fbInit(){
+  if(fbOk)return true;
+  if(!window.firebase||!FB_CONFIG.apiKey||FB_CONFIG.apiKey.indexOf('DIEN_')===0)return false;
+  try{firebase.initializeApp(FB_CONFIG);auth=firebase.auth();db=firebase.firestore();fbOk=true}catch(e){console.error('[cloud]',e)}
+  return fbOk}
+const docRef=uid=>db.collection('saves').doc(uid);
+async function emailOf(n){   /* tên có dấu/khoảng trắng -> email giả hợp lệ (không gửi mail nào cả) */
+  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('ttg:'+keyOf(n)));
+  return 'u'+Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('').slice(0,30)+'@thuthangioi.app'}
+async function pull(uid){    /* lấy bản mới hơn giữa máy này và máy chủ */
+  const snap=await docRef(uid).get(),c=snap.exists?snap.data():null,l=parseSave(readSave(uid));
+  if(c&&c.raw&&parseSave(c.raw)&&(!l||num(c.t)>num(l.t))){LS.set(kSave(uid),c.raw);return}
+  if(l&&(!c||num(l.t)>num(c.t))){KEYU=uid;user={key:uid,name:''};await cloudPush(true)}}
+function cloudPush(force){
+  if(!db||!user||user.key===GUEST||!KEYU)return Promise.resolve();
+  const now=Date.now();
+  if(!force&&now-pushAt<CLOUD_MS){clearTimeout(pushQ);pushQ=setTimeout(()=>cloudPush(true),CLOUD_MS-(now-pushAt));return Promise.resolve()}
+  const raw=readSave(KEYU),d=parseSave(raw);if(!d)return Promise.resolve();
+  pushAt=now;
+  return docRef(KEYU).set({raw,t:d.t,name:user.name||''}).then(()=>{if(cloudBad){cloudBad=false;warn('')}})
+    .catch(e=>{console.warn('[cloud]',e);if(!cloudBad){cloudBad=true;warn('⚠️ Chưa đồng bộ được lên máy chủ (mất mạng?). Tiến trình vẫn được lưu trên máy này.')}})}
+function watch(){             /* thiết bị khác vừa lưu bản mới hơn -> tab này tự khóa để khỏi ghi đè */
+  if(unsub)unsub();
+  unsub=docRef(KEYU).onSnapshot(sn=>{
+    if(!sn.exists||sn.metadata.hasPendingWrites)return;
+    const c=sn.data(),d=parseSave(c.raw);
+    if(d&&d.tab!==TAB&&num(c.t)>knownT)conflict()},e=>console.warn('[cloud] watch',e))}
+const authErr=e=>({
+  'auth/invalid-credential':'Sai tên hoặc mật khẩu.','auth/wrong-password':'Sai tên hoặc mật khẩu.','auth/user-not-found':'Sai tên hoặc mật khẩu.',
+  'auth/email-already-in-use':'Tên này đã có người dùng.','auth/weak-password':'Mật khẩu cần ít nhất 6 ký tự.',
+  'auth/network-request-failed':'Không kết nối được mạng.','auth/too-many-requests':'Thử quá nhiều lần, hãy đợi một lát.',
+  'auth/operation-not-allowed':'Chưa bật đăng nhập Email/Mật khẩu trong Firebase.'}[e&&e.code]||'Có lỗi, thử lại.');
 /* ======================================================================================= */
 
 const $s=id=>document.getElementById(id);
@@ -200,7 +245,7 @@ function warn(html){
 /* Chống 2 tab cùng ghi đè: mỗi bản lưu mang mã tab + thời điểm. Tab nào thấy bản lưu MỚI HƠN do tab khác ghi thì tự khóa (không ghi nữa). */
 function conflict(){
   if(locked)return;locked=true;
-  warn('⚠️ Tài khoản này vừa được lưu từ tab/cửa sổ khác nên tab này đã NGỪNG lưu (tránh ghi đè). <button onclick="location.reload()">Tải lại</button>')}
+  warn('⚠️ Tài khoản này vừa được lưu từ tab/thiết bị khác nên tab này đã NGỪNG lưu (tránh ghi đè). <button onclick="location.reload()">Tải lại</button>')}
 function save(){
   if(!user||noSave||locked||!eligible())return false;
   const cur=parseSave(readSave(KEYU));
@@ -208,7 +253,7 @@ function save(){
   let sn,s;try{sn=snap();s=JSON.stringify(sn)}catch(e){console.error('[save]',e);return false}
   if(!writeSave(KEYU,s)){if(!storageBad){storageBad=true;warn('⚠️ Trình duyệt không cho lưu (đầy bộ nhớ hoặc đang ở chế độ ẩn danh). Hãy dùng 📤 Xuất file để giữ tiến trình.')}return false}
   if(storageBad){storageBad=false;warn('')}
-  knownT=sn.t;lastSave=sn.t;refreshAcc();return true}
+  knownT=sn.t;lastSave=sn.t;cloudPush();refreshAcc();return true}
 function sched(){clearTimeout(saveT);saveT=setTimeout(save,2000)}
 
 /* ====================== GIAO DIỆN TÀI KHOẢN ====================== */
@@ -226,7 +271,7 @@ function buildAcc(){
    '<button class="bad" id="ap-del">🗑️ Xóa dữ liệu & chơi lại</button>'+
    '<button class="dim" id="ap-close">Đóng</button>'+
    '<input type="file" id="ap-file" accept=".json,application/json" style="display:none">'+
-   '<div class="n">Dữ liệu lưu trên trình duyệt của thiết bị này. Muốn chuyển máy: Xuất file rồi Nhập file ở máy kia.</div></div>';
+   '<div class="n">Tài khoản tự đồng bộ lên máy chủ. Chơi khách thì chỉ lưu trên máy này (dùng Xuất/Nhập file để chuyển).</div></div>';
   document.body.appendChild(p);
   p.addEventListener('click',e=>{if(e.target===p)closePanel()});
   $s('ap-close').onclick=closePanel;
@@ -245,7 +290,7 @@ function exportSave(){
   save();const raw=readSave(KEYU);
   if(!raw){msg('<span style="color:#ff8a7a">Chưa có gì để xuất (hãy chọn trứng trước).</span>');return}
   const blob=new Blob([raw],{type:'application/json'}),a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download='thu-than-gioi-'+(user.key===GUEST?'khach':user.key.replace(/[^\p{L}\p{N}_-]+/gu,'-'))+'.json';
+  a.href=URL.createObjectURL(blob);a.download='thu-than-gioi-'+(user.key===GUEST?'khach':keyOf(user.name).replace(/[^\p{L}\p{N}_-]+/gu,'-'))+'.json';
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);msg('✅ Đã tải file lưu.')}
 function importSave(ev){
   const f=ev.target.files&&ev.target.files[0];ev.target.value='';if(!f)return;
@@ -255,14 +300,19 @@ function importSave(ev){
     if(!d){msg('<span style="color:#ff8a7a">File không hợp lệ hoặc từ bản game mới hơn.</span>');return}
     if(!confirm('Nhập file sẽ GHI ĐÈ tiến trình hiện tại của "'+user.name+'". Tiếp tục?'))return;
     noSave=true;const prev=readSave(KEYU);if(prev)LS.set(P+'undo_'+KEYU,prev);
-    if(!LS.set(kSave(KEYU),String(r.result))){noSave=false;msg('<span style="color:#ff8a7a">Không ghi được vào bộ nhớ trình duyệt.</span>');return}
+    if(!LS.set(kSave(KEYU),JSON.stringify(Object.assign(d,{t:Date.now()})))){noSave=false;msg('<span style="color:#ff8a7a">Không ghi được vào bộ nhớ trình duyệt.</span>');return}
     location.reload()};
   r.onerror=()=>msg('<span style="color:#ff8a7a">Không đọc được file.</span>');
   r.readAsText(f)}
-function logout(){save();noSave=true;LS.del(P+'session');location.reload()}
-function wipe(){
+async function logout(){
+  save();noSave=true;LS.del(P+'session');
+  try{if(unsub)unsub();await Promise.race([cloudPush(true),new Promise(r=>setTimeout(r,4000))]);if(auth)await auth.signOut()}catch(_){}
+  location.reload()}
+async function wipe(){
   if(!confirm('XÓA toàn bộ tiến trình của "'+user.name+'"? Không thể hoàn tác.'))return;
-  noSave=true;LS.del(kSave(KEYU));LS.del(kBak(KEYU));location.reload()}
+  noSave=true;LS.del(kSave(KEYU));LS.del(kBak(KEYU));
+  try{if(unsub)unsub();if(db&&user.key!==GUEST)await docRef(KEYU).delete()}catch(_){}
+  location.reload()}
 
 /* ====================== MÀN ĐĂNG NHẬP ====================== */
 function showLogin(){
@@ -271,12 +321,12 @@ function showLogin(){
     o=document.createElement('div');o.id='ttg-login';
     o.innerHTML='<div class="ttg-bx"><div class="t">Thú Thần Giới</div><div class="s">Đăng nhập để lưu tiến trình</div>'+
      '<input type="text" id="lg-name" placeholder="Tên tài khoản" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false">'+
-     '<input type="password" id="lg-pw" placeholder="Mật khẩu (từ 4 ký tự)" autocomplete="current-password">'+
+     '<input type="password" id="lg-pw" placeholder="Mật khẩu (từ 6 ký tự)" autocomplete="current-password">'+
      '<div id="lg-msg"></div>'+
      '<label id="lg-mig" style="display:none"><input type="checkbox" id="lg-mg" checked> Mang tiến trình chơi khách sang tài khoản mới</label>'+
      '<div class="row"><button id="lg-in">Đăng nhập</button><button class="alt" id="lg-reg">Đăng ký</button></div>'+
      '<button class="dim" id="lg-guest">Chơi khách</button>'+
-     '<div class="n">Dữ liệu lưu trên trình duyệt của thiết bị này. Mật khẩu chỉ để phân tách người chơi chung máy.</div></div>';
+     '<div class="n">Tiến trình lưu trên máy chủ: đăng nhập ở máy nào cũng chơi tiếp được. Chơi khách chỉ lưu trên máy này.</div></div>';
     document.body.appendChild(o);
     const go=fn=>()=>{const b=[$s('lg-in'),$s('lg-reg'),$s('lg-guest')];b.forEach(x=>x.disabled=true);fn().catch(e=>lmsg(e&&e.message==='nosubtle'?'Trình duyệt cần https/localhost để kiểm tra mật khẩu.':'Có lỗi, thử lại.')).finally(()=>b.forEach(x=>x.disabled=false))};
     $s('lg-in').onclick=go(doLogin);$s('lg-reg').onclick=go(doRegister);$s('lg-guest').onclick=go(async()=>{begin(GUEST,'Khách')});
@@ -284,23 +334,25 @@ function showLogin(){
   $s('lg-mig').style.display=parseSave(readSave(GUEST))?'block':'none';
   o.classList.add('show');setTimeout(()=>{try{$s('lg-name').focus()}catch(_){}},50)}
 const lmsg=h=>{const m=$s('lg-msg');if(m)m.textContent=h};
+async function enter(u){
+  lmsg('Đang tải tiến trình...');
+  try{await pull(u.uid)}catch(e){console.warn('[cloud] pull',e);warn('⚠️ Không tải được từ máy chủ, đang dùng bản lưu trên máy này.')}
+  user=null;KEYU='';begin(u.uid,u.displayName||'Người chơi')}
 async function doLogin(){
   const n=$s('lg-name').value,pw=$s('lg-pw').value;lmsg('');
   if(!nameOk(n)){lmsg('Tên 3–20 ký tự (chữ, số, gạch dưới, dấu cách).');return}
-  const a=accounts()[keyOf(n)];
-  if(!a||await hpw(pw,a.salt,a.alg)!==a.hash){lmsg('Sai tên hoặc mật khẩu.');return}
-  begin(keyOf(n),a.name)}
+  if(!fbInit()){lmsg('Chưa cấu hình máy chủ (FB_CONFIG). Bạn vẫn có thể Chơi khách.');return}
+  try{const cr=await auth.signInWithEmailAndPassword(await emailOf(n),pw);await enter(cr.user)}catch(e){lmsg(authErr(e))}}
 async function doRegister(){
   const n=$s('lg-name').value,pw=$s('lg-pw').value;lmsg('');
   if(!nameOk(n)){lmsg('Tên 3–20 ký tự (chữ, số, gạch dưới, dấu cách).');return}
-  if(pw.length<4){lmsg('Mật khẩu cần ít nhất 4 ký tự.');return}
-  const acc=accounts(),k=keyOf(n);
-  if(acc[k]){lmsg('Tên này đã có người dùng.');return}
-  const salt=Math.random().toString(36).slice(2)+Date.now().toString(36),alg=bestAlg();
-  acc[k]={name:normName(n),salt,alg,hash:await hpw(pw,salt,alg),created:Date.now()};
-  if(!putAccounts(acc)){lmsg('Trình duyệt không cho lưu tài khoản (chế độ ẩn danh?).');return}
-  if($s('lg-mig').style.display!=='none'&&$s('lg-mg').checked){const gs0=readSave(GUEST);if(gs0){LS.set(kSave(k),gs0);LS.del(kSave(GUEST));LS.del(kBak(GUEST))}}
-  begin(k,acc[k].name)}
+  if(pw.length<6){lmsg('Mật khẩu cần ít nhất 6 ký tự.');return}
+  if(!fbInit()){lmsg('Chưa cấu hình máy chủ (FB_CONFIG). Bạn vẫn có thể Chơi khách.');return}
+  try{
+    const cr=await auth.createUserWithEmailAndPassword(await emailOf(n),pw);
+    await cr.user.updateProfile({displayName:normName(n)});
+    if($s('lg-mig').style.display!=='none'&&$s('lg-mg').checked){const g0=readSave(GUEST);if(g0){LS.set(kSave(cr.user.uid),g0);LS.del(kSave(GUEST));LS.del(kBak(GUEST))}}
+    await enter(cr.user)}catch(e){lmsg(authErr(e))}}
 
 /* ====================== KHỞI ĐỘNG ====================== */
 function begin(key,name){
@@ -315,7 +367,7 @@ function begin(key,name){
     catch(e){console.error('[save] khôi phục lỗi',e);noSave=true;warn('⚠️ Không đọc được bản lưu (có thể bị hỏng). Tab này sẽ KHÔNG ghi đè. <button onclick="location.reload()">Thử lại</button>')}
   }else if(readSave(key)){noSave=true;warn('⚠️ Bản lưu bị hỏng và không có bản dự phòng. Tab này sẽ KHÔNG ghi đè. Bạn có thể Nhập file từ bản xuất trước đó.')}
   else log('👋 Chào <b>'+name+'</b>! Tiến trình sẽ tự động lưu.');
-  buildAcc();refreshAcc();
+  buildAcc();refreshAcc();if(db&&key!==GUEST)watch();
   const _st=stats;stats=function(){_st.apply(this,arguments);sched()};      /* xu/uy danh đổi -> lưu sau 2 giây */
   setInterval(save,AUTO_MS);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
@@ -329,6 +381,6 @@ function begin(key,name){
 window.TTGSAVE={save,snap,get user(){return user},exportSave,wipe,logout};
 const ses=LS.get(P+'session');
 if(ses===GUEST)begin(GUEST,'Khách');
-else if(ses&&accounts()[ses])begin(ses,accounts()[ses].name);
-else showLogin();
+else if(fbInit()){let first=true;auth.onAuthStateChanged(u=>{if(!first||user)return;first=false;if(u)enter(u).catch(()=>showLogin());else showLogin()})}
+else{showLogin();lmsg('Chưa cấu hình máy chủ — chỉ Chơi khách được.')}
 })();
