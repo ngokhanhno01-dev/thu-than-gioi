@@ -89,7 +89,7 @@ function upLoop(t){const cv=document.getElementById('up-pet');
  if(!cv||!pet||!document.getElementById('blood-box').open){upRaf=0;return}
  const x=cv.getContext('2d'),api=window.VanKiepSprites;x.clearRect(0,0,128,128);x.imageSmoothingEnabled=false;
  const stg=stageOf(level);
- if(!(api&&api.drawStage(x,pet.bl,pet.sp,stg,64,122,128*api.stageScale(stg)))){const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)x.drawImage(im,0,0,128,128)}
+ if(!(api&&api.drawStageCentered(x,pet.bl,pet.sp,stg,64,64,128*api.stageScale(stg)))){const im=spriteFor(pet.bl,pet.sp);if(im.complete&&im.naturalWidth)x.drawImage(im,0,0,128,128)}
  upRaf=requestAnimationFrame(upLoop)}
 document.getElementById('blood-box').addEventListener('toggle',e=>{if(e.target.open)renderBlood()});
 renderBlood();

@@ -191,6 +191,19 @@
     return true;
   }
 
+  // Vẽ thú nằm GIỮA điểm (cx, cy) cả ngang lẫn dọc: dùng cho ảnh chân dung trong vòng (Huyết mạch, Trang bị).
+  function drawStageCentered(ctx, key, elementIndex, stage, cx, cy, size) {
+    const im = getStageImage(key, elementIndex, stage);
+    if (!im) return false;
+    const u = size / 128, bb = im.bb;
+    const w = Math.max(1, Math.round(bb.w * u)), h = Math.max(1, Math.round(bb.h * u));
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(im, bb.x, bb.y, bb.w, bb.h, Math.round(cx - w / 2), Math.round(cy - h / 2), w, h);
+    ctx.restore();
+    return true;
+  }
+
   function stageScale(stage) {
     return STAGE_SCALE[Math.max(0, Math.min(STAGE_COUNT - 1, stage | 0))];
   }
@@ -214,6 +227,7 @@
     stageScale,
     getStageImage,
     drawStage,
+    drawStageCentered,
     getAdultImage,
     // Giữ tên cũ để 10-drops-shop.js (preload / chờ ảnh) vẫn chạy: trả ảnh gốc khi đã tải xong, null nếu chưa.
     getSheet(key, elementIndex) {
