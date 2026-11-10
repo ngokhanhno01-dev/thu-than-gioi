@@ -59,12 +59,14 @@
   </div>
 
   <section class="frame card" id="s-pick">
-    <h3>Chọn Linh Trứng</h3>
+    <h3 id="pick-title">Chọn Linh Trứng</h3>
     <div class="mission" id="pick-desc"></div>
     <button class="jade" id="btn-reroll" onclick="rerollEgg()"><span class="ic">🎲</span>Gieo Quẻ (còn 3 lượt)</button>
+    <div id="rb-top"><button class="jade" id="rb-roll"><span class="ic">🎲</span>Quay (500 xu)</button><button class="rebirth" id="rb-go"><span class="ic">♻️</span>Tái Sinh</button></div>
     <div style="font-size:11px;color:var(--mute);text-align:center;margin-top:4px">Lượt quay gần nhất, bấm để đổi lại:</div>
     <div class="g3" id="pick-hist"></div>
-    <button onclick="confirmEgg()"><span class="ic">🥚</span>Ấp Trứng Này</button>
+    <button id="btn-confirm" onclick="confirmEgg()"><span class="ic">🥚</span>Ấp Trứng Này</button>
+    <button id="rb-back" style="display:none"><span class="ic">↩</span>Quay lại</button>
     <div id="rates" style="font-size:11px;color:var(--mute);text-align:center;margin-top:4px;line-height:1.15"></div>
   </section>
 
@@ -82,6 +84,7 @@
       <button class="locked jade" disabled id="btn-arena" onclick="arena()"><span class="ic">⚔️</span>Đấu trường</button>
       <button class="locked jade" disabled id="btn-shop" onclick="shop()"><span class="ic">🏪</span>Cửa hàng</button>
     </div>
+    <button class="rebirth locked" disabled id="btn-rebirth" style="margin-top:8px" onclick="rebirthOpen()"><span class="ic">♻️</span>Tái Sinh</button>
   </section>
 
 
@@ -113,6 +116,7 @@
 <script src="15-platform.js"></script>
 <script src="16-notify.js"></script>
 <script src="17-audio.js"></script>
+<script src="18-rebirth.js"></script>
 
 </body>
 </html>
