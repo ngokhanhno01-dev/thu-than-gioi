@@ -23,7 +23,7 @@ PAL = {
  5: ((0.625, 0.78, 0.30, 0.70), (0.52, 0.38), (0.56, 0.15)),   # Nguyệt: xanh đêm, nhấn bạc-lam
  6: ((0.050, 0.88, 0.40, 0.90), (0.125, 0.85), (0.12, 0.25)),  # Dương: cam lửa, nhấn vàng
  7: ((0.705, 0.72, 0.24, 0.58), (0.55, 0.75), (0.55, 0.30)),   # Huyền: tím-đen, nhấn lam điện
- 8: ((0.105, 0.85, 0.34, 0.78), (0.14, 0.45), (0.14, 0.20)),   # Kim: đồng, nhấn vàng trắng
+ 8: ((0.105, 0.88, 0.26, 0.66), (0.14, 0.45), (0.14, 0.20)),   # Kim: đồng, nhấn vàng trắng
  9: ((0.495, 0.82, 0.24, 0.62), (0.345, 0.55), (0.40, 0.20)),  # Ngọc: lục lam, nhấn ngọc
  10: ((0.330, 0.85, 0.24, 0.62), (0.185, 0.88), (0.20, 0.25)), # Thanh: lục rừng, nhấn vàng chanh
  11: ((0.985, 0.90, 0.30, 0.72), (0.075, 0.92), (0.07, 0.25)), # Xích: đỏ thẫm, nhấn cam vàng
@@ -31,7 +31,7 @@ PAL = {
  13: ((0.700, 0.82, 0.30, 0.72), (0.935, 0.85), (0.80, 0.20)), # Tử: chàm, nhấn hồng (mẫu)
  14: ((0.565, 0.80, 0.34, 0.82), (0.47, 0.50), (0.50, 0.20)),  # Thiên: xanh trời, nhấn lam ngọc
  15: ((0.900, 0.62, 0.40, 0.84), (0.965, 0.28), (0.95, 0.12)), # Linh: hồng sen, nhấn hồng trắng
- 16: ((0.100, 0.80, 0.30, 0.72), (0.135, 0.48), (0.13, 0.25)), # Thần: vàng đồng, nhấn vàng sáng
+ 16: ((0.100, 0.85, 0.24, 0.62), (0.135, 0.48), (0.13, 0.25)), # Thần: vàng đồng, nhấn vàng sáng
 }
 
 def path(d, s, i):
@@ -55,13 +55,13 @@ def accent_mask(rgb, mask):
     off = np.abs(((H - dom + 0.5) % 1.0) - 0.5)               # lệch hue so với thân
     score = 0.9 * np.clip(detail / 0.22, 0, 1) + 0.55 * np.clip((n - 0.78) / 0.2, 0, 1) \
           + 0.8 * np.clip((off - 0.05) / 0.10, 0, 1) * np.clip((S - 0.2) / 0.3, 0, 1)
-    thr = np.percentile(score[mask], 88)                       # ~12% diện tích
-    acc = (score >= max(thr, 0.55)) & mask
+    thr = np.percentile(score[mask], 85)                       # ~15% diện tích, nét mảnh theo đường lông/vảy/sọc
+    acc = (score >= max(thr, 0.50)) & mask
     acc = ndi.binary_closing(acc, iterations=1) & mask
     lab, k = ndi.label(acc, structure=np.ones((3, 3)))        # bỏ đốm lẻ
     if k:
         sizes = ndi.sum(acc, lab, range(1, k + 1))
-        keep = np.isin(lab, 1 + np.nonzero(sizes >= 7)[0])
+        keep = np.isin(lab, 1 + np.nonzero(sizes >= 6)[0])
         acc = keep
     return acc, n
 
@@ -88,29 +88,28 @@ def process(src_rgb, alpha, e, seed):
     acc, n = accent_mask(src_rgb, mask)
     er1 = ndi.binary_erosion(mask, iterations=1)
     inner = er1
-    # --- thân: bậc sáng-tối (posterize 6 bậc) giữ đúng hình khối của ảnh gốc
-    ns = ndi.gaussian_filter(n * mask, 0.8) / np.maximum(ndi.gaussian_filter(mask.astype(np.float32), 0.8), 1e-3)
-    q = np.round(ns * 7) / 7
-    Vb = vlo + (vhi - vlo) * q ** 1.15
-    Sb = np.clip(bs + (1 - q) * 0.12, 0, 1)
-    Hb = bh + (q - 0.5) * 0.015
-    body = hsv2rgb(np.dstack([Hb % 1.0, Sb, Vb]))
-    # --- điểm nhấn: sáng rực, vẫn có 3 bậc để có khối
+    # --- thân: gradient mượt, bão hòa cao, đủ sáng để nổi (mẫu: S~1.0, V 0.47-1.0)
+    mf = mask.astype(np.float32)
+    ns = ndi.gaussian_filter(n * mask, 0.6) / np.maximum(ndi.gaussian_filter(mf, 0.6), 1e-3)
+    soft = ndi.gaussian_filter(n * mask, 1.6) / np.maximum(ndi.gaussian_filter(mf, 1.6), 1e-3)
+    line = np.clip((soft - n - 0.03) / 0.14, 0, 1) * er1        # đường tối nội bộ (khe lông, vảy, sọc)
+    Vb = (vlo + 0.12) + (vhi + 0.10 - vlo - 0.12) * ns ** 1.05
+    Sb = np.clip(bs + 0.22 - ns * 0.10, 0, 1)
+    Hb = bh + (ns - 0.5) * 0.03
+    body = hsv2rgb(np.dstack([Hb % 1.0, Sb, np.clip(Vb, 0, 1)]))
+    # --- điểm nhấn: sáng rực, 3 bậc để có khối
     qa = np.round(ns * 2) / 2
-    Va = 0.82 + 0.18 * qa
-    Sa = np.clip(as_ * (1.0 - 0.18 * qa), 0, 1)
+    Va = 0.86 + 0.14 * qa
+    Sa = np.clip(as_ * (1.0 - 0.15 * qa), 0, 1)
     accimg = hsv2rgb(np.dstack([np.full_like(n, ah), Sa, Va]))
-    out = np.where(acc[..., None], accimg, body)
-    # --- viền mỏng 1px đậm cùng tông thân; lớp sát viền tối nhẹ => nét
+    body = body * (1 - 0.55 * line[..., None])
+    out = np.where(acc[..., None], accimg * (1 - 0.30 * line[..., None]), body)
+    # --- viền 1px rất đậm cùng tông thân; lớp sát viền sáng nhẹ (rim light) => nổi khối như mẫu
     edge = mask & ~er1
     ring2 = er1 & ~ndi.binary_erosion(mask, iterations=2)
-    out[edge] = hsv(bh, min(1, bs + 0.1), 0.10)
-    out[ring2 & ~acc] *= 0.78
-    # viền sáng góc trên-trái (bóng)
-    up = np.zeros_like(mask); up[1:, :] = er1[:-1, :]
-    lf = np.zeros_like(mask); lf[:, 1:] = er1[:, :-1]
-    tl = er1 & ~ndi.binary_erosion(mask, iterations=2) & (~up | ~lf) & ~acc
-    out[tl] = np.clip(out[tl] * 1.25 + 0.06, 0, 1)
+    out[edge] = hsv(bh, 1.0, 0.09)
+    rim = hsv(ah, min(1, as_ * 0.8), 0.95)
+    out[ring2 & ~acc] = out[ring2 & ~acc] * 0.55 + rim * 0.45
     # --- điểm sáng dấu cộng
     sc = np.clip(hsv(sh, ss, 1.0) * 0.55 + 0.45, 0, 1)
     sparkles(out, mask, acc, np.random.RandomState(seed), sc)
