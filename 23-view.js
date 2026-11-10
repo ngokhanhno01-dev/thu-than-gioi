@@ -2,13 +2,15 @@
    Trong khung Bạn bè (22-friends.js), mỗi người bạn có nút 👁. Bấm vào -> mở khung "thẻ thú" của người đó:
    hình thú (đúng loài, đúng bậc), biệt danh, cấp + bậc, phẩm, huyết mạch, loài, độ đậm, chỉ số tổng và 4 món trang bị (kèm dòng chỉ số + buff bộ).
    Dữ liệu đọc từ Firestore cards/{uid} (công khai, do 21-card.js đăng). KHÔNG đọc bản lưu saves/{uid}.
-   Tiết kiệm quota: mỗi lần bấm xem = 1 lượt đọc; xem lại cùng 1 người trong CACHE_MS thì dùng bản nhớ trong máy, không đọc lại.
+   Trạng thái 🟢 online / ⚪ offline lấy từ presence/{uid} (công khai, do 20-online.js ghi nhịp tim).
+   Tiết kiệm quota: mỗi lần bấm xem = 2 lượt đọc (thẻ + nhịp tim); xem lại cùng 1 người trong CACHE_MS thì dùng bản nhớ trong máy, không đọc lại.
    Không cần thêm luật Firestore (cards đã cho đọc công khai ở bước 1).
    Không sửa file cũ: bọc TTGNET.start của 20-online.js để lấy kết nối db, rồi gán TTGFRIENDS.onView.
    Nạp SAU 22-friends.js, TRƯỚC 19-save.js. */
 (()=>{
 'use strict';
 const CACHE_MS=60000;       /* xem lại cùng 1 người trong 60 giây: không đọc lại Firestore */
+const ONLINE_MS=150000;     /* giống 20-online.js: có nhịp tim trong 150 giây gần nhất = đang online */
 const VIEW_COOLDOWN=800;    /* giãn cách giữa 2 lần bấm xem */
 
 const $=id=>document.getElementById(id);
@@ -34,6 +36,8 @@ const cache={};     /* uid -> {t, card} */
  '#cv-body canvas{flex:none;width:112px;height:112px;image-rendering:pixelated;border:2px solid #78613a;background:#0b1a20}'+
  '#cv-body .inf{min-width:0;font-size:17px!important;line-height:1.2}'+
  '#cv-body .inf div{font-size:17px!important}'+
+ '#cv-body .on{color:#72e4b0;font-weight:700}'+
+ '#cv-body .off{color:#b7bda9}'+
  '#cv-body .inf small{font-size:14px!important;color:#b7bda9}'+
  '#cv-body .s{margin:6px 0 3px;font-size:16px!important;color:#f6c66a;border-bottom:1px solid #78613a}'+
  '#cv-body .sg{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px}'+
@@ -95,7 +99,13 @@ function ago(t){
     if(m<2)return'vừa xong';if(m<60)return m+' phút trước';
     const h=Math.floor(m/60);if(h<48)return h+' giờ trước';return Math.floor(h/24)+' ngày trước'}catch(_){return''}}
 
-function render(c,uid,fallbackNick){
+function onlineHtml(pt){
+  let ms=null;try{if(pt&&pt.toMillis)ms=Date.now()-pt.toMillis()}catch(_){}
+  if(ms!==null&&ms<ONLINE_MS)return'<div class="on">🟢 Đang online</div>';
+  return'<div class="off">⚪ Offline'+(ms!==null&&ms>=0?' <small>(hoạt động '+agoMs(ms)+')</small>':'')+'</div>'}
+function agoMs(ms){const m=Math.floor(ms/60000);if(m<2)return'vừa xong';if(m<60)return m+' phút trước';const h=Math.floor(m/60);if(h<48)return h+' giờ trước';return Math.floor(h/24)+' ngày trước'}
+
+function render(c,uid,fallbackNick,pt){
   const BLK=['ho','vu','long','tuoc','lan','hu'];
   const bl=BLK.includes(c.bl)?c.bl:'ho',sp=Math.floor(num(c.sp,0,16,0)),pi=Math.floor(num(c.pi,0,4,0)),up=Math.floor(num(c.up,0,10,0)),q=Math.floor(num(c.q,0,4,0));
   const lv=Math.floor(num(c.lv,1,100,1)),st=Math.floor(num(c.st,0,9,0));
@@ -109,7 +119,7 @@ function render(c,uid,fallbackNick){
   const upd=ago(c.t);
   $('cv-body').innerHTML=
    '<div class="top"><canvas id="cv-cv" width="128" height="128"></canvas><div class="inf">'+
-   '<div><b style="color:var(--jade)">Cấp '+lv+'</b></div><div>'+esc(STAGES[st][1])+'</div>'+
+   onlineHtml(pt)+'<div><b style="color:var(--jade)">Cấp '+lv+'</b></div><div>'+esc(STAGES[st][1])+'</div>'+
    '<div>Phẩm: <b style="color:rgb('+QC[q]+')">'+QN[q]+'</b></div>'+
    '<div>Huyết mạch: <b style="color:rgb('+B.au+')">'+esc(B.n)+'</b> <small>(hệ '+esc(B.h)+')</small></div>'+
    '<div>Độ đậm: <b style="color:var(--gold)">'+esc(PL[pi][1])+(up?' +'+up:'')+'</b> <small>('+pe+'%)</small></div></div></div>'+
@@ -136,15 +146,17 @@ async function load(uid,nick){
   curUid=uid;const my=++seq;
   const c0=cache[uid];
   $('cv-nm').textContent='🐾 '+(nick||'Thẻ thú');$('cv-nm').dataset.nick=nick||'';
-  if(c0&&Date.now()-c0.t<CACHE_MS){render(c0.card,uid,nick);return}
+  if(c0&&Date.now()-c0.t<CACHE_MS){render(c0.card,uid,nick,c0.pt);return}
   $('cv-body').innerHTML='<div class="e">Đang tải thẻ...</div>';
   if(!db){$('cv-body').innerHTML='<div class="e">Chưa kết nối máy chủ. Hãy đăng nhập rồi thử lại.</div>';return}
   try{
-    const d=await db.collection('cards').doc(uid).get();
+    const [d,pr]=await Promise.all([db.collection('cards').doc(uid).get(),
+      db.collection('presence').doc(uid).get().catch(()=>null)]);   /* lỗi nhịp tim thì chỉ hiện offline, không chặn thẻ */
+    const pt=pr&&pr.exists?pr.data().t:null;
     if(my!==seq)return;                          /* đã đóng / đã chuyển sang người khác */
     if(!d.exists){$('cv-body').innerHTML='<div class="e">'+esc(nick||'Người này')+' chưa có thẻ thú.<br><small>Cần vào game bản mới một lần (và đã nở trứng) thì thẻ mới xuất hiện.</small></div>';return}
-    const card=d.data();cache[uid]={t:Date.now(),card};
-    render(card,uid,nick);
+    const card=d.data();cache[uid]={t:Date.now(),card,pt};
+    render(card,uid,nick,pt);
   }catch(e){
     if(my!==seq)return;
     console.warn('[view] tải thẻ lỗi',e);
