@@ -1,0 +1,334 @@
+
+/* ===== 19-save.js — LƯU GAME · TÀI KHOẢN · THƯỞNG NGOẠI TUYẾN =====
+   Luồng:
+   1. Mở game -> nếu đã đăng nhập từ lần trước thì vào thẳng, không thì hiện bảng Đăng nhập / Đăng ký / Chơi khách.
+   2. Tiến trình tự lưu: mỗi AUTO_MS, sau khi xu/uy danh đổi (stats), khi ẩn tab / đóng trang.
+   3. Vào lại game: khôi phục thú, cấp, xu, balo, trang bị, thuốc, cửa hàng, vùng thám hiểm + tính thưởng ngoại tuyến.
+   4. Nút 👤 góc trái dưới: Lưu ngay · Xuất file · Nhập file · Đăng xuất · Xóa dữ liệu.
+
+   LƯU Ý QUAN TRỌNG: hiện tài khoản & dữ liệu nằm trong localStorage của TRÌNH DUYỆT trên thiết bị này.
+   - Mật khẩu chỉ là "khóa" giữa nhiều người dùng chung một máy, KHÔNG phải bảo mật thật.
+   - Muốn đăng nhập ở nhiều thiết bị cần máy chủ: chỉ cần thay 3 hàm ở khối "KHO LƯU TRỮ" bên dưới (readSave/writeSave/...) bằng gọi API.
+   Mọi con số sửa ngay dưới đây. */
+(()=>{
+'use strict';
+const VER=1;                  /* phiên bản định dạng file lưu */
+const AUTO_MS=10000;          /* tự lưu mỗi 10 giây */
+const OFF_ON=true;            /* bật thưởng ngoại tuyến */
+/* Thiết kế chống "tắt game -> canh giờ vào nhận -> tắt tiếp":
+   - Hiệu suất thấp: chơi thật ~15-20 giây/trận, ngoại tuyến 120 giây/trận => chỉ ~15% hiệu quả, không bao giờ lợi hơn chơi thật.
+   - Vắng dưới OFF_MIN_SEC thì KHÔNG có gì (và thời gian đó mất luôn, không dồn lại).
+   - Mỗi lần nhận tối đa OFF_MAX_H giờ; cộng dồn trong 24 giờ chỉ được OFF_DAILY_H giờ => chia nhỏ lần nhận cũng không nhận thêm. */
+const OFF_SEC_PER_WIN=120;    /* bao nhiêu giây ngoại tuyến thì tương đương 1 trận thắng (càng lớn càng ít thưởng) */
+const OFF_MIN_SEC=600;        /* vắng dưới 10 phút: không tính */
+const OFF_MAX_H=4;            /* mỗi lần nhận tối đa tính bao nhiêu giờ vắng */
+const OFF_DAILY_H=6;          /* tổng số giờ ngoại tuyến được tính trong mỗi chu kỳ 24 giờ */
+const OFF_WINDOW_MS=24*3600*1000;
+const GUEST='__guest';
+const P='ttg_';
+
+/* ====================== KHO LƯU TRỮ (thay khối này khi có máy chủ) ====================== */
+const LS={
+  get(k){try{return localStorage.getItem(k)}catch(_){return null}},
+  set(k,v){try{localStorage.setItem(k,v);return true}catch(_){return false}},
+  del(k){try{localStorage.removeItem(k)}catch(_){}}
+};
+const kSave=u=>P+'save_'+u, kBak=u=>P+'bak_'+u;
+const readSave=u=>LS.get(kSave(u));
+const readBak=u=>LS.get(kBak(u));
+const writeSave=(u,s)=>{const prev=LS.get(kSave(u));if(prev)LS.set(kBak(u),prev);return LS.set(kSave(u),s)};
+const accounts=()=>{try{return JSON.parse(LS.get(P+'acc')||'{}')||{}}catch(_){return{}}};
+const putAccounts=a=>LS.set(P+'acc',JSON.stringify(a));
+/* ======================================================================================= */
+
+const $s=id=>document.getElementById(id);
+const TAB=Math.random().toString(36).slice(2);
+let user=null,KEYU='',noSave=false,locked=false,lastSave=0,saveT=0,storageBad=false,knownT=0,offSt={t0:Date.now(),used:0}; /* knownT = thời điểm bản lưu mới nhất mà tab NÀY biết */
+const clampI=(v,a,b)=>{v=Math.floor(Number(v));return isFinite(v)?Math.max(a,Math.min(b,v)):a};
+const num=(v,d)=>{v=Number(v);return isFinite(v)?v:(d||0)};
+
+/* ---------- CSS ---------- */
+{const s=document.createElement('style');
+ s.textContent=
+ '#ttg-login,#ttg-accp{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(4,10,14,.86);padding:12px;box-sizing:border-box}'+
+ '#ttg-login.show,#ttg-accp.show{display:flex}'+
+ '.ttg-bx{width:min(90vw,340px);max-height:90vh;overflow-y:auto;box-sizing:border-box;text-align:center;padding:12px 14px 14px;border:3px solid #f6c66a;background:#14272d;box-shadow:0 3px 0 0 #040a0e,0 0 0 2px #040a0e,inset 0 0 0 2px #78613a;font-family:"VT323",monospace;color:#f5edcf}'+
+ '.ttg-bx .t{font-size:30px;color:#f6c66a;text-shadow:1px 1px 0 #071116;line-height:1.1}'+
+ '.ttg-bx .s{font-size:18px;color:#b7bda9;margin:2px 0 8px}'+
+ '.ttg-bx input[type=text],.ttg-bx input[type=password]{display:block;width:100%;box-sizing:border-box;margin:6px 0;padding:7px 9px;font:inherit;font-size:20px;color:#f5edcf;background:#0b1a20;border:2px solid #78613a;outline:none;border-radius:0}'+
+ '.ttg-bx input:focus{border-color:#72e4b0}'+
+ '.ttg-bx button{font-family:"VT323",monospace;font-size:20px;padding:7px 10px;margin:4px 0;width:100%;cursor:pointer;color:#14272d;background:#72e4b0;border:2px solid #040a0e;box-shadow:inset 0 -3px 0 #397858;border-radius:0}'+
+ '.ttg-bx button.alt{background:#f6c66a;box-shadow:inset 0 -3px 0 #a07a2a}'+
+ '.ttg-bx button.dim{background:#3b4a4f;color:#f5edcf;box-shadow:inset 0 -3px 0 #232e32}'+
+ '.ttg-bx button.bad{background:#e34e48;color:#fff;box-shadow:inset 0 -3px 0 #741e2b}'+
+ '.ttg-bx button:disabled{opacity:.5}'+
+ '.ttg-bx .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}'+
+ '.ttg-bx .n{font-size:15px;color:#b7bda9;margin-top:8px;line-height:1.15}'+
+ '.ttg-bx label{display:block;font-size:16px;margin:4px 0;text-align:left}'+
+ '#lg-msg,#ap-msg{min-height:20px;font-size:17px;color:#ff8a7a;margin:2px 0}'+
+ '#ap-msg{color:#72e4b0}'+
+ '#ttg-acc{position:fixed;left:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:60;display:none;font-family:"VT323",monospace;font-size:18px;color:#f5edcf;background:#14272d;border:2px solid #f6c66a;padding:3px 9px;cursor:pointer;box-shadow:0 2px 0 #040a0e;border-radius:0;max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+ '#ttg-warn{position:fixed;left:0;right:0;top:0;z-index:210;display:none;padding:8px 12px;text-align:center;font-family:"VT323",monospace;font-size:19px;color:#fff;background:#a72f42;border-bottom:2px solid #040a0e}'+
+ '#ttg-warn button{font:inherit;margin-left:8px;padding:1px 8px;cursor:pointer}';
+ document.head.appendChild(s)}
+
+/* ---------- băm mật khẩu ---------- */
+async function hpw(pw,salt,alg){
+  const s=salt+':'+pw;
+  if(alg==='s'){
+    if(!(window.crypto&&crypto.subtle))throw new Error('nosubtle');
+    const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+    return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+  let h1=0xdeadbeef,h2=0x41c6ce57;
+  for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return(4294967296*(2097151&h2)+(h1>>>0)).toString(16)}
+const bestAlg=()=>(window.crypto&&crypto.subtle)?'s':'c';
+const normName=n=>n.trim().replace(/\s+/g,' ');
+const keyOf=n=>normName(n).toLowerCase();
+const nameOk=n=>/^[\p{L}\p{N}_ ]{3,20}$/u.test(normName(n));
+
+/* ====================== CHỤP / KHÔI PHỤC TRẠNG THÁI ====================== */
+function zoneIdx(){
+  const t=($s('btn-zone')||{}).textContent||'';
+  const i=VAN_KIEP_ZONES.findIndex(z=>t.includes(z.name));return i<0?0:i}
+function huntOn(){const b=$s('btn-hunt');return b?/BẬT/.test(b.textContent):true}
+function eligible(){
+  if(!chosen)return false;                                            /* chưa chọn trứng: chưa có gì để lưu */
+  if(window.REBIRTH&&(REBIRTH.on||REBIRTH.fx))return false;           /* đang trong màn Tái Sinh: giữ bản lưu trước đó */
+  return true}
+function snap(){
+  const g={
+    level,exp,age,gold,fame,hatched,hatchAge,chosen,eggQ,rolls,rerollLeft,hist:hist.slice(),
+    taps,tapsNeed,pet:hatched?pet:null,
+    bag:bag.map(s=>({id:s.id,n:s.n})),
+    eqWorn,ebag,eqUid,
+    buffs:Object.assign({},buffs),
+    shop:{stock:Object.assign({},shopStock),next:shopNextAt},
+    zone:zoneIdx(),hunt:huntOn(),off:{t0:offSt.t0,used:offSt.used}
+  };
+  return{v:VER,t:Date.now(),tab:TAB,g}}
+const validPet=p=>p&&BL[p.bl]&&Number.isInteger(p.sp)&&p.sp>=0&&p.sp<17&&p.pi>=0&&p.pi<5&&p.q>=0&&p.q<5&&p.base&&['hp','atk','def','spd','mag'].every(k=>isFinite(p.base[k]));
+const validEq=it=>(it&&Number.isInteger(it.z)&&it.z>=0&&it.z<VAN_KIEP_ZONES.length&&Number.isInteger(it.s)&&it.s>=0&&it.s<4&&Number.isInteger(it.q)&&it.q>=0&&it.q<5&&Array.isArray(it.L)&&isFinite(it.uid))?it:null;
+
+function parseSave(raw){
+  if(!raw)return null;
+  try{const d=JSON.parse(raw);
+    if(!d||typeof d!=='object'||!d.g||typeof d.g!=='object')return null;
+    if(d.v>VER)return null;               /* file từ bản game mới hơn */
+    return d}catch(_){return null}}
+
+function restore(d){
+  const g=d.g;
+  level=clampI(g.level,1,MAXLV);exp=Math.max(0,num(g.exp));age=Math.max(0,clampI(g.age,0,1e9));
+  gold=Math.max(0,Math.floor(num(g.gold,50)));fame=Math.max(0,Math.floor(num(g.fame)));
+  rolls=clampI(g.rolls,0,1e9);rerollLeft=clampI(g.rerollLeft,0,99);
+  hist=Array.isArray(g.hist)?g.hist.filter(q=>q>=0&&q<5).slice(0,3):[];
+  eggQ=clampI(g.eggQ,0,4);
+  $s('h-age').textContent=age;
+
+  if(g.hatched&&validPet(g.pet)){
+    chosen=true;hatched=true;hatchAge=clampI(g.hatchAge,0,1e9);pet=g.pet;pet.up=clampI(pet.up,0,UP_MAX);
+    gs=growthOf(level);lastTick=Date.now();
+    $s('s-pick').style.display='none';$s('s-egg').style.display='none';
+    $s('main-title').textContent='Tu Luyện Đường';
+    ['train','arena','shop'].forEach(k=>{const b=$s('btn-'+k);b.disabled=false;b.classList.remove('locked')});
+    const rb=$s('btn-rebirth');if(rb){rb.disabled=false;rb.classList.remove('locked')}
+    updateStage();$s('banner').textContent=STAGES[stageOf(level)][1];
+  }else if(g.chosen){
+    chosen=false;hatched=false;confirmEgg();                           /* sang màn ấp trứng như bình thường */
+    tapsNeed=clampI(g.tapsNeed,5,8);taps=clampI(g.taps,0,tapsNeed-1);
+    prog=Math.min(CRK.length,Math.ceil(taps/tapsNeed*CRK.length));
+    $s('beads').innerHTML=Array.from({length:tapsNeed},(_,i)=>'<div class="bead'+(i<taps?' on':'')+'"></div>').join('');
+    if(taps>0)$s('mission').textContent='Vỏ trứng nứt thêm... ('+taps+'/'+tapsNeed+')';
+    age=Math.max(0,age)}
+  renderExp();stats();
+
+  try{ /* balo */
+    if(Array.isArray(g.bag)){
+      bag=g.bag.filter(s=>s&&typeof s.id==='string'&&ITEMS[s.id]&&num(s.n)>0).map(s=>({id:s.id,n:Math.min(STACK,Math.floor(s.n))})).slice(0,BAG_SLOTS);
+      bagSel=-1;renderBag()}
+  }catch(e){console.warn('[save] balo',e)}
+  try{ /* trang bị */
+    const w=Array.isArray(g.eqWorn)?g.eqWorn:[];
+    eqWorn=[0,1,2,3].map(i=>{const it=validEq(w[i]);return it&&it.s===i?it:null});
+    ebag=(Array.isArray(g.ebag)?g.ebag:[]).map(validEq).filter(Boolean).slice(0,EQ_BAG);
+    const mx=[].concat(eqWorn,ebag).reduce((a,it)=>it?Math.max(a,it.uid):a,0);
+    eqUid=Math.max(clampI(g.eqUid,1,1e9),mx+1);eqSel=null;renderEquip();
+  }catch(e){console.warn('[save] trang bị',e)}
+  try{ /* thuốc buff */
+    Object.keys(buffs).forEach(k=>{buffs[k]=Math.max(0,clampI(g.buffs&&g.buffs[k],0,9999))})
+  }catch(e){console.warn('[save] buff',e)}
+  try{ /* cửa hàng */
+    if(g.shop){Object.keys(shopStock).forEach(k=>{if(g.shop.stock&&isFinite(g.shop.stock[k]))shopStock[k]=clampI(g.shop.stock[k],0,999)});
+      if(isFinite(g.shop.next))shopNextAt=g.shop.next}
+  }catch(e){console.warn('[save] shop',e)}
+  try{ /* vùng + săn boss (nằm trong IIFE của 06-mobs nên đi qua giao diện) */
+    if(hatched){
+      const el=document.querySelector('#zone-list [data-z="'+clampI(g.zone,0,VAN_KIEP_ZONES.length-1)+'"]');if(el)el.click();
+      if(huntOn()!==!!g.hunt){const hb=$s('btn-hunt');if(hb)hb.click()}}
+  }catch(e){console.warn('[save] vùng',e)}
+}
+
+/* ====================== THƯỞNG NGOẠI TUYẾN ====================== */
+const fmtDur=s=>{s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+' giờ '+m+' phút':m?m+' phút':s+' giây'};
+function offline(sec){
+  if(!OFF_ON||!hatched||!pet||sec<OFF_MIN_SEC)return;
+  const now=Date.now();
+  if(now-offSt.t0>=OFF_WINDOW_MS){offSt.t0=now;offSt.used=0}   /* sang chu kỳ 24 giờ mới (đồng hồ bị chỉnh lùi thì KHÔNG reset) */
+  const left=Math.max(0,OFF_DAILY_H*3600-offSt.used),s=Math.min(sec,OFF_MAX_H*3600,left);
+  const resetIn=Math.max(0,offSt.t0+OFF_WINDOW_MS-now)/1000;
+  if(s<OFF_MIN_SEC){
+    log('🌙 Bạn vắng <b>'+fmtDur(sec)+'</b> nhưng thú đã tu luyện đủ hạn mức ngoại tuyến hôm nay. Làm mới sau <b>'+fmtDur(resetIn)+'</b>.');return}
+  offSt.used+=s;
+  const wins=Math.floor(s/OFF_SEC_PER_WIN);
+  const zb=VAN_KIEP_ZONE_BOUNDS[zoneIdx()],lv=zb.start+1,sp=spOfPet();
+  const ex=Math.round(wins*(14+lv*.9)*(1+(pet.sp===15?sp.v/100:0)));
+  const gd=Math.round(wins*(6+lv*.4)*(1+(pet.sp===5?sp.v/100:0)));
+  age+=Math.floor(s/(TICK.hatched/1000));$s('h-age').textContent=age;
+  gold+=gd;stats();
+  const rest=Math.max(0,OFF_DAILY_H*3600-offSt.used),why=sec>s?' (tính '+fmtDur(s)+')':'';
+  log('🌙 Bạn vắng mặt <b>'+fmtDur(sec)+'</b>'+why+'. Thú tự tu luyện ~'+wins+' trận, Xu +'+gd+', EXP +'+ex+'. Hạn mức ngoại tuyến còn <b>'+fmtDur(rest)+'</b>.');
+  if(typeof popToast==='function')popToast('🌙 CHÀO MỪNG TRỞ LẠI','Vắng <b>'+fmtDur(sec)+'</b>'+why+' · thú tự tu luyện ~'+wins+' trận<br>Xu <b>+'+gd+'</b> · EXP <b>+'+ex+'</b><br><small>Hạn mức ngoại tuyến còn '+fmtDur(rest)+'</small>','ok');
+  addExp(ex)}
+
+/* ====================== LƯU ====================== */
+function warn(html){
+  let w=$s('ttg-warn');if(!w){w=document.createElement('div');w.id='ttg-warn';document.body.appendChild(w)}
+  w.innerHTML=html;w.style.display=html?'block':'none'}
+/* Chống 2 tab cùng ghi đè: mỗi bản lưu mang mã tab + thời điểm. Tab nào thấy bản lưu MỚI HƠN do tab khác ghi thì tự khóa (không ghi nữa). */
+function conflict(){
+  if(locked)return;locked=true;
+  warn('⚠️ Tài khoản này vừa được lưu từ tab/cửa sổ khác nên tab này đã NGỪNG lưu (tránh ghi đè). <button onclick="location.reload()">Tải lại</button>')}
+function save(){
+  if(!user||noSave||locked||!eligible())return false;
+  const cur=parseSave(readSave(KEYU));
+  if(cur&&cur.tab&&cur.tab!==TAB&&num(cur.t)>knownT){conflict();return false}
+  let sn,s;try{sn=snap();s=JSON.stringify(sn)}catch(e){console.error('[save]',e);return false}
+  if(!writeSave(KEYU,s)){if(!storageBad){storageBad=true;warn('⚠️ Trình duyệt không cho lưu (đầy bộ nhớ hoặc đang ở chế độ ẩn danh). Hãy dùng 📤 Xuất file để giữ tiến trình.')}return false}
+  if(storageBad){storageBad=false;warn('')}
+  knownT=sn.t;lastSave=sn.t;refreshAcc();return true}
+function sched(){clearTimeout(saveT);saveT=setTimeout(save,2000)}
+
+/* ====================== GIAO DIỆN TÀI KHOẢN ====================== */
+function refreshAcc(){
+  const b=$s('ttg-acc');if(b)b.textContent='👤 '+(user?user.name:'');
+  const t=$s('ap-last');if(t)t.textContent=lastSave?'Lưu lần cuối: '+new Date(lastSave).toLocaleTimeString('vi-VN'):'Chưa lưu lần nào trong phiên này'}
+function buildAcc(){
+  if($s('ttg-acc'))return;
+  const b=document.createElement('button');b.id='ttg-acc';b.type='button';b.onclick=openPanel;document.body.appendChild(b);b.style.display='block';
+  const p=document.createElement('div');p.id='ttg-accp';
+  p.innerHTML='<div class="ttg-bx"><div class="t" id="ap-name"></div><div class="s" id="ap-last"></div><div id="ap-msg"></div>'+
+   '<button class="alt" id="ap-save">💾 Lưu ngay</button>'+
+   '<div class="row"><button id="ap-exp">📤 Xuất file</button><button id="ap-imp">📥 Nhập file</button></div>'+
+   '<button class="dim" id="ap-out">🚪 Đổi tài khoản / Đăng xuất</button>'+
+   '<button class="bad" id="ap-del">🗑️ Xóa dữ liệu & chơi lại</button>'+
+   '<button class="dim" id="ap-close">Đóng</button>'+
+   '<input type="file" id="ap-file" accept=".json,application/json" style="display:none">'+
+   '<div class="n">Dữ liệu lưu trên trình duyệt của thiết bị này. Muốn chuyển máy: Xuất file rồi Nhập file ở máy kia.</div></div>';
+  document.body.appendChild(p);
+  p.addEventListener('click',e=>{if(e.target===p)closePanel()});
+  $s('ap-close').onclick=closePanel;
+  $s('ap-save').onclick=()=>{msg(save()?'✅ Đã lưu.':'⚠️ Chưa lưu được (xem thông báo trên cùng).')};
+  $s('ap-exp').onclick=exportSave;
+  $s('ap-imp').onclick=()=>$s('ap-file').click();
+  $s('ap-file').onchange=importSave;
+  $s('ap-out').onclick=logout;
+  $s('ap-del').onclick=wipe;
+  refreshAcc()}
+const msg=h=>{const m=$s('ap-msg');if(m)m.innerHTML=h};
+function openPanel(){save();$s('ap-name').textContent=user.name+(user.key===GUEST?' (khách)':'');msg('');refreshAcc();$s('ttg-accp').classList.add('show')}
+function closePanel(){$s('ttg-accp').classList.remove('show')}
+
+function exportSave(){
+  save();const raw=readSave(KEYU);
+  if(!raw){msg('<span style="color:#ff8a7a">Chưa có gì để xuất (hãy chọn trứng trước).</span>');return}
+  const blob=new Blob([raw],{type:'application/json'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='thu-than-gioi-'+(user.key===GUEST?'khach':user.key.replace(/[^\p{L}\p{N}_-]+/gu,'-'))+'.json';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);msg('✅ Đã tải file lưu.')}
+function importSave(ev){
+  const f=ev.target.files&&ev.target.files[0];ev.target.value='';if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    const d=parseSave(String(r.result));
+    if(!d){msg('<span style="color:#ff8a7a">File không hợp lệ hoặc từ bản game mới hơn.</span>');return}
+    if(!confirm('Nhập file sẽ GHI ĐÈ tiến trình hiện tại của "'+user.name+'". Tiếp tục?'))return;
+    noSave=true;const prev=readSave(KEYU);if(prev)LS.set(P+'undo_'+KEYU,prev);
+    if(!LS.set(kSave(KEYU),String(r.result))){noSave=false;msg('<span style="color:#ff8a7a">Không ghi được vào bộ nhớ trình duyệt.</span>');return}
+    location.reload()};
+  r.onerror=()=>msg('<span style="color:#ff8a7a">Không đọc được file.</span>');
+  r.readAsText(f)}
+function logout(){save();noSave=true;LS.del(P+'session');location.reload()}
+function wipe(){
+  if(!confirm('XÓA toàn bộ tiến trình của "'+user.name+'"? Không thể hoàn tác.'))return;
+  noSave=true;LS.del(kSave(KEYU));LS.del(kBak(KEYU));location.reload()}
+
+/* ====================== MÀN ĐĂNG NHẬP ====================== */
+function showLogin(){
+  let o=$s('ttg-login');
+  if(!o){
+    o=document.createElement('div');o.id='ttg-login';
+    o.innerHTML='<div class="ttg-bx"><div class="t">Thú Thần Giới</div><div class="s">Đăng nhập để lưu tiến trình</div>'+
+     '<input type="text" id="lg-name" placeholder="Tên tài khoản" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false">'+
+     '<input type="password" id="lg-pw" placeholder="Mật khẩu (từ 4 ký tự)" autocomplete="current-password">'+
+     '<div id="lg-msg"></div>'+
+     '<label id="lg-mig" style="display:none"><input type="checkbox" id="lg-mg" checked> Mang tiến trình chơi khách sang tài khoản mới</label>'+
+     '<div class="row"><button id="lg-in">Đăng nhập</button><button class="alt" id="lg-reg">Đăng ký</button></div>'+
+     '<button class="dim" id="lg-guest">Chơi khách</button>'+
+     '<div class="n">Dữ liệu lưu trên trình duyệt của thiết bị này. Mật khẩu chỉ để phân tách người chơi chung máy.</div></div>';
+    document.body.appendChild(o);
+    const go=fn=>()=>{const b=[$s('lg-in'),$s('lg-reg'),$s('lg-guest')];b.forEach(x=>x.disabled=true);fn().catch(e=>lmsg(e&&e.message==='nosubtle'?'Trình duyệt cần https/localhost để kiểm tra mật khẩu.':'Có lỗi, thử lại.')).finally(()=>b.forEach(x=>x.disabled=false))};
+    $s('lg-in').onclick=go(doLogin);$s('lg-reg').onclick=go(doRegister);$s('lg-guest').onclick=go(async()=>{begin(GUEST,'Khách')});
+    [$s('lg-name'),$s('lg-pw')].forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')$s('lg-in').click()}))}
+  $s('lg-mig').style.display=parseSave(readSave(GUEST))?'block':'none';
+  o.classList.add('show');setTimeout(()=>{try{$s('lg-name').focus()}catch(_){}},50)}
+const lmsg=h=>{const m=$s('lg-msg');if(m)m.textContent=h};
+async function doLogin(){
+  const n=$s('lg-name').value,pw=$s('lg-pw').value;lmsg('');
+  if(!nameOk(n)){lmsg('Tên 3–20 ký tự (chữ, số, gạch dưới, dấu cách).');return}
+  const a=accounts()[keyOf(n)];
+  if(!a||await hpw(pw,a.salt,a.alg)!==a.hash){lmsg('Sai tên hoặc mật khẩu.');return}
+  begin(keyOf(n),a.name)}
+async function doRegister(){
+  const n=$s('lg-name').value,pw=$s('lg-pw').value;lmsg('');
+  if(!nameOk(n)){lmsg('Tên 3–20 ký tự (chữ, số, gạch dưới, dấu cách).');return}
+  if(pw.length<4){lmsg('Mật khẩu cần ít nhất 4 ký tự.');return}
+  const acc=accounts(),k=keyOf(n);
+  if(acc[k]){lmsg('Tên này đã có người dùng.');return}
+  const salt=Math.random().toString(36).slice(2)+Date.now().toString(36),alg=bestAlg();
+  acc[k]={name:normName(n),salt,alg,hash:await hpw(pw,salt,alg),created:Date.now()};
+  if(!putAccounts(acc)){lmsg('Trình duyệt không cho lưu tài khoản (chế độ ẩn danh?).');return}
+  if($s('lg-mig').style.display!=='none'&&$s('lg-mg').checked){const gs0=readSave(GUEST);if(gs0){LS.set(kSave(k),gs0);LS.del(kSave(GUEST));LS.del(kBak(GUEST))}}
+  begin(k,acc[k].name)}
+
+/* ====================== KHỞI ĐỘNG ====================== */
+function begin(key,name){
+  user={key,name};KEYU=key;LS.set(P+'session',key);
+  const ov=$s('ttg-login');if(ov)ov.classList.remove('show');
+  let d=parseSave(readSave(key));
+  if(!d){const b=parseSave(readBak(key));if(b){d=b;log('⚠️ Bản lưu chính bị lỗi, đã khôi phục từ bản dự phòng.')}}
+  knownT=num(d&&d.t,0);
+  if(d&&d.g&&d.g.off&&isFinite(d.g.off.t0)&&isFinite(d.g.off.used))offSt={t0:d.g.off.t0,used:Math.max(0,d.g.off.used)};
+  if(d){
+    try{restore(d);log('💾 Đã tải tiến trình của <b>'+name+'</b>.');offline((Date.now()-num(d.t,Date.now()))/1000)}
+    catch(e){console.error('[save] khôi phục lỗi',e);noSave=true;warn('⚠️ Không đọc được bản lưu (có thể bị hỏng). Tab này sẽ KHÔNG ghi đè. <button onclick="location.reload()">Thử lại</button>')}
+  }else if(readSave(key)){noSave=true;warn('⚠️ Bản lưu bị hỏng và không có bản dự phòng. Tab này sẽ KHÔNG ghi đè. Bạn có thể Nhập file từ bản xuất trước đó.')}
+  else log('👋 Chào <b>'+name+'</b>! Tiến trình sẽ tự động lưu.');
+  buildAcc();refreshAcc();
+  const _st=stats;stats=function(){_st.apply(this,arguments);sched()};      /* xu/uy danh đổi -> lưu sau 2 giây */
+  setInterval(save,AUTO_MS);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+  window.addEventListener('pagehide',save);
+  window.addEventListener('storage',e=>{ /* tab khác vừa ghi/xóa bản lưu của tài khoản này */
+    if(e.key!==kSave(KEYU)||locked)return;
+    const d=e.newValue?parseSave(e.newValue):null;
+    if(!d||d.tab!==TAB)conflict()});
+  window.addEventListener('beforeunload',save)}
+
+window.TTGSAVE={save,snap,get user(){return user},exportSave,wipe,logout};
+const ses=LS.get(P+'session');
+if(ses===GUEST)begin(GUEST,'Khách');
+else if(ses&&accounts()[ses])begin(ses,accounts()[ses].name);
+else showLogin();
+})();
