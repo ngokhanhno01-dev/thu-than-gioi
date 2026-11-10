@@ -3,7 +3,7 @@
    Luồng:
    1. Nút ♻️ Tái Sinh (Tu Luyện Đường) -> về giao diện roll trứng. Mỗi lượt Quay tốn RB_COST xu (không còn 3 lượt miễn phí).
    2. Giao diện roll có 3 nút: Quay · Tái Sinh · Quay lại (nút "Ấp Trứng Này" và "Gieo Quẻ" bị ẩn).
-   3. Tái Sinh -> bảng xác nhận (thông tin trứng + cảnh báo) -> Có: hiệu ứng trắng lóe ~5s rồi sang giao diện ấp trứng.
+   3. Tái Sinh -> bảng xác nhận (thông tin trứng + cảnh báo) -> Có: hiệu ứng trắng lóe ~5s (tối dần, hạt hút vào, nhịp sáng nhanh dần, trắng xóa, sóng xung kích) rồi sang giao diện ấp trứng.
       Không: đóng bảng, về lại giao diện roll.
    4. Quay lại -> về game cũ, thú/cấp/EXP giữ nguyên (xu đã tiêu cho lượt quay thì không hoàn).
    Khi Tái Sinh: MẤT thú hiện tại, cấp, EXP, năm tuổi, nâng cấp huyết mạch.
@@ -12,10 +12,9 @@
 (()=>{
 'use strict';
 const RB_COST=500;      /* xu mỗi lượt Quay */
-const FX_IN=3000;       /* ms: màn hình từ từ trắng lóe */
-const FX_OUT=2000;      /* ms: trắng tan dần, lộ giao diện ấp trứng (tổng ≈ 5s) */
+/* mốc thời gian hiệu ứng trắng lóe (ms), kiểu hiệu ứng lên bậc, tổng 5 giây */
+const T={DIM:800,PULSE0:1000,PULSE1:2500,RISE:3200,SWAP:3300,FADE0:3500,END:5000};
 
-/* hidden = vừa vào giao diện roll, chưa tốn xu quay lần nào: trứng bị ẩn (❓) và nút Tái Sinh bị khóa -> không có lượt xem trứng miễn phí */
 const R=window.REBIRTH={on:false,fx:false,hidden:false,stash:null,cost:RB_COST};
 
 /* ---------- tiện ích ---------- */
@@ -100,18 +99,87 @@ function ask(){
   ov.classList.add('show')}
 function closeAsk(){if(ov)ov.classList.remove('show')}
 
-/* ---------- Có: trắng lóe ~5s rồi sang giao diện ấp trứng ---------- */
+/* ---------- Có: trắng lóe chậm từ từ kiểu lên bậc (~5s) rồi sang giao diện ấp trứng ----------
+   0–1.0s   màn tối dần, hạt linh khí xoáy hút vào quả trứng, trứng rung + sáng dần
+   1.0–2.5s quầng trắng đập nhịp nhanh dần, lớp trắng dâng lên từ từ
+   2.5–3.3s trắng xóa toàn màn hình  ->  3.3s ĐỔI sang giao diện ấp trứng (đang trắng nên không thấy)
+   3.5–5.0s trắng tan dần + sóng xung kích, lộ giao diện ấp trứng */
+const c01=v=>v<0?0:v>1?1:v,sm=v=>{v=c01(v);return v*v*(3-2*v)};
 function go(){
   if(!R.on||R.fx||R.hidden)return;
   closeAsk();R.fx=true;
-  const f=document.createElement('div');f.id='rb-flash';document.body.appendChild(f);
-  f.style.transition='opacity '+FX_IN+'ms cubic-bezier(.45,0,.85,.55)';
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{f.style.opacity='1'}));
-  setTimeout(()=>{            /* màn hình đã trắng hoàn toàn: đổi sang ấp trứng phía sau */
-    apply();
-    f.style.transition='opacity '+FX_OUT+'ms ease-out';f.style.opacity='0';
-    setTimeout(()=>{f.remove();R.fx=false},FX_OUT+60)
-  },FX_IN+120)}
+  const rgb=QC[eggQ]; /* màu phẩm trứng đã chọn cho hạt + sóng */
+  const dpr=Math.min(2,window.devicePixelRatio||1),VW=window.innerWidth,VH=window.innerHeight;
+  const cvs=document.createElement('canvas');cvs.id='rb-flash';
+  cvs.width=Math.round(VW*dpr);cvs.height=Math.round(VH*dpr);cvs.style.width=VW+'px';cvs.style.height=VH+'px';
+  document.body.appendChild(cvs);
+  const g=cvs.getContext('2d'),stage=document.querySelector('.stage'),cvE=$('cv');
+  /* tâm hiệu ứng = vị trí quả trứng trên sân khấu (nếu đang cuộn khỏi tầm nhìn thì dùng giữa màn hình) */
+  let cx=VW/2,cy=VH*.45;
+  {const r=cvE.getBoundingClientRect(),ex=r.left+r.width/2,ey=r.top+r.height*133/250;
+   if(r.height>0&&ex>0&&ex<VW&&ey>0&&ey<VH){cx=ex;cy=ey}}
+  const NP=40,far=Math.max(VW,VH)*.5;
+  const mk=()=>({a:Math.random()*6.2832,R:(120+Math.random()*(far-120)),u:0,s:1/(900+Math.random()*600),d:Math.random()<.5?-1:1,m:Math.random()<.6});
+  const P=Array.from({length:NP},()=>{const p=mk();p.u=Math.random();return p});
+  const t0=performance.now();let last=t0,phase=0,swapped=false;
+  function finish(){
+    if(!swapped){apply();swapped=true}
+    stage.style.transform='';cvE.style.filter='';cvs.remove();R.fx=false}
+  function frame(now){
+    const t=now-t0,dt=Math.min(100,now-last);last=now;
+    if(t>=T.END){finish();return}
+    if(!swapped&&t>=T.SWAP){apply();swapped=true;stage.style.transform='';cvE.style.filter=''}
+    g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);
+    /* trứng rung + sáng dần thành bóng trắng */
+    if(!swapped){
+      const a=2.2*sm(t/2400);
+      stage.style.transform='translate('+Math.round(Math.sin(t*.09)*a)+'px,'+Math.round(Math.cos(t*.13)*a*.6)+'px)';
+      cvE.style.filter='brightness('+(1+1.6*sm((t-T.DIM)/1700)).toFixed(2)+')'}
+    /* màn tối */
+    const dim=t<T.PULSE1?.34*sm(t/T.DIM):.34*(1-sm((t-T.PULSE1)/1000));
+    if(dim>.003){g.fillStyle='rgba(8,5,20,'+dim.toFixed(3)+')';g.fillRect(0,0,VW,VH)}
+    /* nhịp sáng nhanh dần */
+    let pulse=0;
+    if(t<T.SWAP){
+      const hz=t<T.PULSE0?1.5:t<T.PULSE1?2+9*Math.pow((t-T.PULSE0)/1500,1.6):11;
+      phase+=dt*hz*.006283;pulse=.5+.5*Math.sin(phase)}
+    /* hạt linh khí xoáy vào tâm */
+    if(t<2300){
+      g.save();
+      for(const p of P){
+        p.u+=dt*p.s;
+        if(p.u>=1){if(t<1900)Object.assign(p,mk());else continue}
+        const e=p.u*p.u,rr=p.R*(1-e)+8,an=p.a+p.d*p.u*1.3,
+          x=Math.round((cx+Math.cos(an)*rr)/2)*2,y=Math.round((cy+Math.sin(an)*rr*.68)/2)*2,
+          al=Math.min(1,p.u*6)*(1-c01((p.u-.88)*8))*(1-sm((t-1900)/400));
+        if(al<=.02)continue;
+        g.globalAlpha=al;g.fillStyle='rgb('+rgb+')';g.fillRect(x-4,y-4,8,8);
+        g.fillStyle=p.m?'#ffe9a8':'#fff';g.fillRect(x-2,y-2,4,4)}
+      g.restore()}
+    /* quầng trắng đập nhịp quanh trứng */
+    if(t<T.SWAP+200){
+      const A=.35*sm(t/T.PULSE0)+.65*sm((t-T.PULSE0)/1500),Rg=70+(Math.max(VW,VH)*.45)*sm(t/T.PULSE1)+30*pulse,
+        al=Math.min(1,A*(.6+.4*pulse)),gr=g.createRadialGradient(cx,cy,2,cx,cy,Rg);
+      gr.addColorStop(0,'rgba(255,255,255,'+al.toFixed(3)+')');
+      gr.addColorStop(.45,'rgba('+rgb+','+(al*.5).toFixed(3)+')');
+      gr.addColorStop(1,'rgba('+rgb+',0)');
+      g.fillStyle=gr;g.fillRect(0,0,VW,VH)}
+    /* lớp trắng phủ toàn màn hình: dâng từ từ, trắng xóa, rồi tan dần */
+    let v;
+    if(t<T.PULSE0)v=0;
+    else if(t<T.PULSE1)v=.4*sm((t-T.PULSE0)/1500)*(.85+.15*pulse);
+    else if(t<T.RISE)v=.4+.6*sm((t-T.PULSE1)/700);
+    else if(t<T.FADE0)v=1;
+    else v=1-sm((t-T.FADE0)/(T.END-T.FADE0));
+    if(v>.003){g.fillStyle='rgba(255,255,255,'+v.toFixed(3)+')';g.fillRect(0,0,VW,VH)}
+    /* sóng xung kích khi trắng bắt đầu tan */
+    for(let n=0;n<2;n++){
+      const u=(t-(T.FADE0+n*140))/950;if(u<=0||u>=1)continue;
+      const Rr=Math.max(VW,VH)*.75*(1-(1-u)*(1-u)),a=(1-u)*(n?.7:1);
+      g.save();g.lineWidth=2+8*(1-u);g.strokeStyle='rgba('+(n?rgb:'255,224,150')+','+a.toFixed(3)+')';
+      g.beginPath();g.ellipse(cx,cy,Rr,Rr*.72,0,0,6.2832);g.stroke();g.restore()}
+    requestAnimationFrame(frame)}
+  requestAnimationFrame(frame)}
 
 function apply(){
   const old=R.stash?R.stash.pet:null,oldLv=level;

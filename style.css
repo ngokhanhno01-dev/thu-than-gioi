@@ -324,5 +324,4 @@ button.rebirth.locked{background-color:#283d41!important;border-color:#071117!im
 .rb-egg b.rb-qn{font-size:15px}
 .rb-warn{font-size:12.5px;line-height:1.45;color:#ffc978;margin-bottom:10px}
 .rb-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-#rb-flash{position:fixed;inset:0;z-index:100300;opacity:0;pointer-events:auto;
-  background:radial-gradient(circle at 50% 40%,#fff 0%,#fffdf0 55%,#fff 100%)}
+#rb-flash{position:fixed;left:0;top:0;z-index:100300;pointer-events:auto}
