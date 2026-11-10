@@ -51,7 +51,7 @@ const putAccounts=a=>LS.set(P+'acc',JSON.stringify(a));
 /* ---------- ĐỒNG BỘ ĐÁM MÂY (Firebase Auth + Firestore) ----------
    Bản lưu vẫn ghi vào localStorage như cũ (làm bộ nhớ đệm, chạy cả khi mất mạng),
    rồi được đẩy lên Firestore: saves/{uid} = {raw, t, name}. Vào máy khác -> kéo bản MỚI HƠN về. */
-let fbOk=false,auth=null,db=null,unsub=null,pushAt=0,pushQ=0,cloudBad=false;
+let fbOk=false,auth=null,db=null,unsub=null,pushAt=0,pushQ=0,cloudBad=false,srv=null; /* srv = {last,now}: giờ MÁY CHỦ lần lưu cuối & hiện tại (chống chỉnh giờ điện thoại) */
 function fbInit(){
   if(fbOk)return true;
   if(!window.firebase||!FB_CONFIG.apiKey||FB_CONFIG.apiKey.indexOf('DIEN_')===0)return false;
@@ -65,13 +65,20 @@ async function pull(uid){    /* lấy bản mới hơn giữa máy này và máy
   const snap=await docRef(uid).get(),c=snap.exists?snap.data():null,l=parseSave(readSave(uid));
   if(c&&c.raw&&parseSave(c.raw)&&(!l||num(c.t)>num(l.t))){LS.set(kSave(uid),c.raw);return}
   if(l&&(!c||num(l.t)>num(c.t))){KEYU=uid;user={key:uid,name:''};await cloudPush(true)}}
+async function srvTime(uid){   /* lấy giờ máy chủ: last = lần đẩy lưu cuối, now = bây giờ (ghi serverTimestamp rồi đọc lại) */
+  const ref=docRef(uid),snap=await ref.get(),c=snap.exists?snap.data():null;
+  const last=c&&c.st&&c.st.toMillis?c.st.toMillis():0;
+  await ref.set({seen:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+  const s2=await ref.get({source:'server'}),d2=s2.data();
+  if(!d2||!d2.seen||!d2.seen.toMillis)throw new Error('notime');
+  return{last,now:d2.seen.toMillis()}}
 function cloudPush(force){
   if(!db||!user||user.key===GUEST||!KEYU)return Promise.resolve();
   const now=Date.now();
   if(!force&&now-pushAt<CLOUD_MS){clearTimeout(pushQ);pushQ=setTimeout(()=>cloudPush(true),CLOUD_MS-(now-pushAt));return Promise.resolve()}
   const raw=readSave(KEYU),d=parseSave(raw);if(!d)return Promise.resolve();
   pushAt=now;
-  return docRef(KEYU).set({raw,t:d.t,name:user.name||''}).then(()=>{if(cloudBad){cloudBad=false;warn('')}})
+  return docRef(KEYU).set({raw,t:d.t,name:user.name||'',st:firebase.firestore.FieldValue.serverTimestamp()}).then(()=>{if(cloudBad){cloudBad=false;warn('')}})
     .catch(e=>{console.warn('[cloud]',e);if(!cloudBad){cloudBad=true;warn('⚠️ Chưa đồng bộ được lên máy chủ (mất mạng?). Tiến trình vẫn được lưu trên máy này.')}})}
 function watch(){             /* thiết bị khác vừa lưu bản mới hơn -> tab này tự khóa để khỏi ghi đè */
   if(unsub)unsub();
@@ -219,9 +226,9 @@ function restore(d){
 /* ====================== THƯỞNG NGOẠI TUYẾN ====================== */
 const fmtDur=s=>{s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?h+' giờ '+m+' phút':m?m+' phút':s+' giây'};
 function offline(sec){
-  if(!OFF_ON||!hatched||!pet||sec<OFF_MIN_SEC)return;
-  const now=Date.now();
-  if(now-offSt.t0>=OFF_WINDOW_MS){offSt.t0=now;offSt.used=0}   /* sang chu kỳ 24 giờ mới (đồng hồ bị chỉnh lùi thì KHÔNG reset) */
+  if(!OFF_ON||!hatched||!pet||!srv||sec<OFF_MIN_SEC)return;   /* khách / không lấy được giờ máy chủ: KHÔNG có thưởng ngoại tuyến */
+  const now=srv.now;                                        /* giờ máy chủ, không phụ thuộc đồng hồ điện thoại */
+  if(now-offSt.t0>=OFF_WINDOW_MS||offSt.t0>now+60000){offSt.t0=now;offSt.used=0}   /* sang chu kỳ 24 giờ mới (đồng hồ bị chỉnh lùi thì KHÔNG reset) */
   const left=Math.max(0,OFF_DAILY_H*3600-offSt.used),s=Math.min(sec,OFF_MAX_H*3600,left);
   const resetIn=Math.max(0,offSt.t0+OFF_WINDOW_MS-now)/1000;
   if(s<OFF_MIN_SEC){
@@ -336,6 +343,8 @@ function showLogin(){
 const lmsg=h=>{const m=$s('lg-msg');if(m)m.textContent=h};
 async function enter(u){
   lmsg('Đang tải tiến trình...');
+  srv=null;
+  try{srv=await srvTime(u.uid)}catch(e){console.warn('[cloud] time',e)}   /* phải lấy TRƯỚC pull (pull có thể đẩy lên và ghi đè mốc cũ) */
   try{await pull(u.uid)}catch(e){console.warn('[cloud] pull',e);warn('⚠️ Không tải được từ máy chủ, đang dùng bản lưu trên máy này.')}
   user=null;KEYU='';begin(u.uid,u.displayName||'Người chơi')}
 async function doLogin(){
@@ -363,7 +372,7 @@ function begin(key,name){
   knownT=num(d&&d.t,0);
   if(d&&d.g&&d.g.off&&isFinite(d.g.off.t0)&&isFinite(d.g.off.used))offSt={t0:d.g.off.t0,used:Math.max(0,d.g.off.used)};
   if(d){
-    try{restore(d);log('💾 Đã tải tiến trình của <b>'+name+'</b>.');offline((Date.now()-num(d.t,Date.now()))/1000)}
+    try{restore(d);log('💾 Đã tải tiến trình của <b>'+name+'</b>.');offline(srv&&srv.last?(srv.now-srv.last)/1000:0)}
     catch(e){console.error('[save] khôi phục lỗi',e);noSave=true;warn('⚠️ Không đọc được bản lưu (có thể bị hỏng). Tab này sẽ KHÔNG ghi đè. <button onclick="location.reload()">Thử lại</button>')}
   }else if(readSave(key)){noSave=true;warn('⚠️ Bản lưu bị hỏng và không có bản dự phòng. Tab này sẽ KHÔNG ghi đè. Bạn có thể Nhập file từ bản xuất trước đó.')}
   else log('👋 Chào <b>'+name+'</b>! Tiến trình sẽ tự động lưu.');
