@@ -9,7 +9,7 @@
    Nút 🔊 góc phải dưới: bật/tắt nhạc nền, hiệu ứng, chỉnh âm lượng (lưu trong localStorage 'ttg_audio'). */
 (()=>{
 'use strict';
-const KEY='ttg_audio',BGM_LEVEL=.2;
+const KEY='ttg_audio',BGM_LEVEL=.3,BOOST=2.4;   /* BOOST: hệ số khuếch đại tổng, thanh âm lượng 100% = BOOST */
 const S={sfx:true,bgm:true,vol:.7};
 try{const j=JSON.parse(localStorage.getItem(KEY)||'null');
   if(j){if('sfx' in j)S.sfx=!!j.sfx;if('bgm' in j)S.bgm=!!j.bgm;if(typeof j.vol==='number')S.vol=Math.min(1,Math.max(0,j.vol))}}catch(_){}
@@ -21,9 +21,14 @@ function ensure(){
   if(ctx)return ctx;
   const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
   try{ctx=new AC()}catch(_){ctx=null;return null}
-  const comp=ctx.createDynamicsCompressor();
+  const comp=ctx.createDynamicsCompressor(),mk=ctx.createGain();
+  comp.threshold.value=-14;comp.knee.value=8;comp.ratio.value=10;comp.attack.value=.002;comp.release.value=.12;
+  mk.gain.value=1.0;                       /* bù lại sau limiter */
+  const sh=ctx.createWaveShaper(),cv=new Float32Array(1024);   /* chặn đỉnh mềm: to nhưng không bị rè/vỡ tiếng */
+  for(let i=0;i<1024;i++){const x=i/1023*2-1;cv[i]=Math.tanh(1.6*x)/Math.tanh(1.6)}
+  sh.curve=cv;sh.oversample='2x';
   master=ctx.createGain();sfxBus=ctx.createGain();bgmBus=ctx.createGain();
-  sfxBus.connect(master);bgmBus.connect(master);master.connect(comp);comp.connect(ctx.destination);
+  sfxBus.connect(master);bgmBus.connect(master);master.connect(comp);comp.connect(mk);mk.connect(sh);sh.connect(ctx.destination);
   /* vọng nhẹ cho nhạc nền */
   echoIn=ctx.createGain();
   const dl=ctx.createDelay(1),fb=ctx.createGain(),wet=ctx.createGain();
@@ -35,8 +40,8 @@ function ensure(){
   return ctx}
 function applyVol(){
   if(!ctx)return;const t=ctx.currentTime;
-  master.gain.setTargetAtTime(S.vol,t,.03);
-  sfxBus.gain.setTargetAtTime(S.sfx?.9:0,t,.03);
+  master.gain.setTargetAtTime(S.vol*BOOST,t,.03);
+  sfxBus.gain.setTargetAtTime(S.sfx?1:0,t,.03);
   bgmBus.gain.setTargetAtTime(S.bgm?BGM_LEVEL*duck:0,t,.15)}
 
 /* mở khóa âm thanh ở lần chạm đầu (iOS/Android/Chrome) */
@@ -82,12 +87,17 @@ const SFX={
     noise({ft:'bandpass',ff:3000,q:.8,d:.18,v:.35});tone({f:120,f2:45,d:.35,v:.4});
     [72,76,79,84,88,91].forEach((m,i)=>tone({t:t+.12+i*.08,f:mt(m),d:.9,v:.1,a:.01,type:'triangle'}));
     [60,64,67].forEach(m=>tone({t:t+.2,f:mt(m),d:1.6,v:.08,a:.05,lp:2500}))},
-  hit(mine){const k=(mine?1.15:.85)*R();
-    noise({ft:'lowpass',ff:3200,ff2:400,d:.1,v:.32});tone({f:210*k,f2:60,d:.14,v:.32,type:'triangle'})},
-  crit(mine){const k=mine?1.1:.9,t=T0();
-    noise({ft:'lowpass',ff:5000,ff2:300,d:.18,v:.4});
-    tone({f:260*k,f2:50,d:.22,v:.4,type:'sawtooth',lp:1500});
-    tone({t:t+.01,f:1320,d:.35,v:.1,type:'square',lp:4000});tone({t:t+.03,f:1980,d:.3,v:.07})},
+  hit(mine){const k=(mine?1.15:.8)*R(),t=T0();
+    noise({ft:'lowpass',ff:4000,ff2:300,d:.14,v:.6});
+    noise({ft:'bandpass',ff:1800,q:1,d:.05,v:.3});
+    tone({f:220*k,f2:55,d:.2,v:.6});
+    tone({f:420*k,f2:120,d:.1,v:.3,type:'triangle'})},
+  crit(mine){const k=mine?1.1:.85,t=T0();
+    noise({ft:'lowpass',ff:6000,ff2:250,d:.28,v:.7});
+    tone({f:300*k,f2:40,d:.32,v:.7});
+    tone({f:330*k,f2:80,d:.26,v:.4,type:'sawtooth',lp:1800});
+    tone({t:t+.01,f:1320,d:.4,v:.16,type:'square',lp:4000});tone({t:t+.03,f:1980,d:.35,v:.1});
+    noise({t:t+.07,ft:'lowpass',ff:3000,ff2:300,d:.14,v:.4});tone({t:t+.07,f:200*k,f2:50,d:.2,v:.45})},
   miss(){noise({ft:'bandpass',ff:500,ff2:2200,q:2,d:.16,v:.18})},
   stun(){const t=T0();for(let i=0;i<4;i++)tone({t:t+i*.07,f:i%2?520:700,d:.09,v:.1,type:'triangle'})},
   block(){tone({f:950*R(),d:.12,v:.14,type:'square',lp:3500});tone({f:1430,d:.18,v:.1,type:'triangle'});
@@ -144,17 +154,19 @@ function stopEvo(){
   evoH=null}
 
 const GAP={levelUp:600,evoReveal:1500,hatch:1500,win:1000,lose:1000,battleStart:800,pickup:80,coin:80,upOk:500,upFail:500,hit:35};
-const lastT={};
+const lastT={},DUCKS={hit:1,crit:1,burn:1,win:1,lose:1,levelUp:1,evoReveal:1};
 function sfx(name,a,b){
   if(!S.sfx)return;
   const c=ensure();if(!c||c.state!=='running')return;
   const n=performance.now();if(n-(lastT[name]||0)<(GAP[name]||30))return;lastT[name]=n;
-  try{SFX[name](a,b)}catch(_){}}
+  try{SFX[name](a,b)}catch(_){}
+  if(DUCKS[name]&&S.bgm){const t=c.currentTime,base=BGM_LEVEL*duck;
+    bgmBus.gain.cancelScheduledValues(t);bgmBus.gain.setTargetAtTime(base*.4,t,.01);bgmBus.gain.setTargetAtTime(base,t+.22,.12)}}
 
 /* ---------- nhạc nền ---------- */
 const POOL=[62,65,67,69,72,74,77,81];            /* Rê thứ ngũ cung: D F G A C */
-const ROOT=[38,41,36,43],PAD=[[50,53,57],[53,57,60],[48,55,60],[55,58,62]],ROOT_B=[38,38,41,36];
-const STEP={calm:60/70/2,battle:60/132/4};
+const ROOT=[38,41,36,43],PAD=[[50,53,57],[53,57,60],[48,55,60],[55,58,62]];
+const STEP={calm:60/70/2,battle:60/156/4};
 const moodG={};let mood='',step=0,nextT=0;
 function moodGain(m){
   if(!moodG[m]){const g=ctx.createGain();g.gain.value=0;g.connect(m==='battle'?bgmBus:echoIn);moodG[m]=g}
@@ -163,7 +175,7 @@ function setMood(m){
   const t=ctx.currentTime;
   if(mood&&moodG[mood])moodG[mood].gain.setTargetAtTime(0,t,.25);
   mood=m;step=0;nextT=t+.08;
-  if(m)moodGain(m).gain.setTargetAtTime(1,t,.25)}
+  if(m)moodGain(m).gain.setTargetAtTime(m==='battle'?.8:1,t,.25)}
 function calmStep(s,t,dest){
   const bar=Math.floor(s/8)%4,k=s%8;
   if(k===0){PAD[bar].forEach(m=>tone({t,f:mt(m),d:3.6,v:.06,a:.7,type:'triangle',lp:1100,dest}));
@@ -172,16 +184,41 @@ function calmStep(s,t,dest){
   if(Math.random()<(k%2===0?.7:.35)){
     const m=POOL[(Math.random()*POOL.length)|0];
     tone({t,f:mt(m),d:1.4,v:.055,a:.008,dest});tone({t,f:mt(m)*2.01,d:.7,v:.02,dest})}}
+/* Nhạc chiến đấu: Rê thứ, 156 BPM, vòng 8 ô nhịp  Dm | Dm | B♭ | C | Dm | Dm | Gm | A (át âm gây căng thẳng, quay về Dm) */
+const BB=[50,50,46,48,50,50,43,45];                                   /* gốc bass mỗi ô nhịp */
+const BCH=[[62,65,69],[62,65,69],[58,62,65],[60,64,67],[62,65,69],[62,65,69],[67,70,74],[69,73,76]]; /* hợp âm chặn */
+const LEAD=[
+ [74,0,0,74,77,0,76,0,74,0,72,0,69,0,0,0],
+ [74,0,0,74,77,0,81,0,79,0,77,0,76,0,74,0],
+ [74,0,0,77,82,0,81,0,79,0,77,0,74,0,0,0],
+ [72,0,0,76,79,0,77,0,76,0,72,0,79,0,0,0],
+ [81,0,0,81,86,0,84,0,81,0,79,0,77,0,0,0],
+ [81,0,77,0,79,0,81,0,82,0,81,0,79,0,77,0],
+ [79,0,0,82,86,0,84,0,82,0,79,0,77,0,74,0],
+ [81,0,0,85,88,0,85,0,81,0,0,0,73,76,81,0]];
+let hot=false;                                                          /* true khi một bên còn < 35% máu: nhạc dồn dập hơn */
 function battleStep(s,t,dest){
-  const bar=Math.floor(s/16)%4,k=s%16;
-  if(k%4===0)tone({t,f:150,f2:45,d:.2,v:.5,dest});
-  if(k===4||k===12)noise({t,ft:'bandpass',ff:1800,q:.8,d:.12,v:.22,dest});
-  if(k%2===1)noise({t,ft:'highpass',ff:7000,d:.04,v:.07,dest});
-  if(k%2===0){const r=ROOT_B[bar],m=(k===6||k===14)?r+12:(k===10?r+7:r);
-    tone({t,f:mt(m),d:.2,v:.17,type:'square',lp:500,dest})}
-  if((k%2===0||Math.random()<.3)&&Math.random()<.55){
-    const m=POOL[(Math.random()*POOL.length)|0];
-    tone({t,f:mt(m),d:.22,v:.05,type:'sawtooth',lp:2200,dest})}}
+  const bar=Math.floor(s/8/2)%8,k=s%16,last=bar===7,r=BB[bar],ch=BCH[bar];
+  /* trống */
+  if(k%4===0||(k===10&&bar%2))tone({t,f:190,f2:48,d:.22,v:.75,dest});
+  if(k%4===0)noise({t,ft:'bandpass',ff:1500,q:1,d:.025,v:.2,dest});
+  if(last&&k>=12)noise({t,ft:'bandpass',ff:2400,q:.8,d:.1,v:.14+(k-12)*.07,dest});          /* trống dồn cuối vòng */
+  else if(k===4||k===12){noise({t,ft:'bandpass',ff:2200,q:.7,d:.14,v:.4,dest});tone({t,f:230,f2:150,d:.1,v:.3,type:'triangle',dest})}
+  if(k%2===1||hot)noise({t,ft:'highpass',ff:8000,d:.04,v:hot?.09:.06,dest});
+  if(k===6||k===14)noise({t,ft:'highpass',ff:6500,d:.12,v:.08,dest});
+  if(s%128===0)noise({t,ft:'highpass',ff:4500,d:1.4,v:.25,dest});                          /* chũm chọe đầu vòng */
+  if(last&&k===0)noise({t,ft:'bandpass',ff:300,ff2:7000,q:1.5,d:1.6,v:.18,a:1.2,dest});    /* tiếng dâng căng thẳng */
+  /* bass dồn 8 */
+  if(k%2===0){const m=(k%8===6)?r+12:(k%8===4)?r+7:r;
+    tone({t,f:mt(m),d:.16,v:.24,type:'sawtooth',lp:900,dest});tone({t,f:mt(m-12),d:.16,v:.2,dest})}
+  /* hợp âm chặn lệch nhịp */
+  if(k===0||k===3||k===6||k===10)ch.forEach(m=>tone({t,f:mt(m),d:.15,v:.07,type:'sawtooth',lp:2600,dest}));
+  /* dây rải 16 */
+  {const n=ch[k%3]+(k%6>=3?12:0);tone({t,f:mt(n),d:.1,v:.035,type:'sawtooth',lp:1600,dest})}
+  /* giai điệu chính */
+  const L=LEAD[bar][k];
+  if(L){tone({t,f:mt(L),d:.3,v:.09,type:'sawtooth',lp:3200,dest});tone({t,f:mt(L),d:.3,v:.05,type:'square',lp:2600,det:9,dest});
+    if(hot)tone({t,f:mt(L+12),d:.22,v:.045,type:'triangle',dest})}}
 
 const battleOn=()=>{const m=document.getElementById('mob');return !!m&&m.style.display==='block'};
 let evoSeen=null,evoTimer=0;
@@ -198,6 +235,7 @@ function tick(){
   if(!ctx||ctx.state!=='running')return;
   const want=S.bgm?(battleOn()?'battle':'calm'):'';
   if(want!==mood){if(want==='battle')sfx('battleStart');setMood(want)}
+  if(mood==='battle'){const w=id=>{const e=document.getElementById(id);return e?parseFloat(e.style.width)||100:100};hot=Math.min(w('mob-ph'),w('mob-mh'))<35}
   if(!mood)return;
   if(nextT<ctx.currentTime-.1)nextT=ctx.currentTime+.05;
   const g=moodGain(mood),fn=mood==='calm'?calmStep:battleStep;
@@ -222,20 +260,18 @@ function onLog(t){
   else if(/^\s*⚔️ Thắng/.test(t))sfx('win');
   else if(/^\s*⚔️ Thua/.test(t))sfx('lose')}
 let lastMsg='';
+/* Chỉ có tiếng khi một bên NHẬN SÁT THƯƠNG (số sát thương > 0). Né, choáng, khiên, hồi máu... im lặng. */
 function onMob(t){
   if(t===lastMsg)return;lastMsg=t;
   if(/^Tốc:/.test(t))return;
   if(t.indexOf('Chiến thắng')>=0){sfx('win');return}
   if(t.indexOf('Bại trận')>=0){sfx('lose');return}
+  const m=t.match(/-(\d+)(?![\d%])/),dmg=m?+m[1]:0;
+  if(dmg<=0)return;
   const mine=/^(?:💥 Chí mạng! )?Thú /.test(t);
   if(/Chí mạng/.test(t))sfx('crit',mine);
-  else if(/né được đòn/.test(t))sfx('miss');
-  else if(/choáng|đóng băng/.test(t))sfx('stun');
-  else if(/Khiên hấp thụ/.test(t))sfx('block');
-  else if(/Hồi sinh/.test(t))sfx('revive');
-  else if(/hồi sức|Hút máu/.test(t))sfx('heal');
   else if(/Thiêu đốt/.test(t))sfx('burn');
-  else if(/-\d/.test(t))sfx('hit',mine)}
+  else sfx('hit',mine)}
 
 function watch(){
   const $=id=>document.getElementById(id);
