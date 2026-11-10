@@ -24,7 +24,8 @@ function addExp(n){if(!hatched)return;exp+=n;const lv0=level;
     const g=lvGain(l0,level);
     log('⬆️ <b style="color:var(--jade)">Lên cấp '+level+'!</b>'+(g?' '+g+'.':''));burst=Math.max(burst,.6)}
   if(level>=MAXLV)exp=0;updateStage();renderExp();
-  if(level>lv0)lvToast(lv0,level)}
+  if(level>lv0){if(window.NOTI)NOTI.level(lv0,level);else lvToast(lv0,level)} /* NOTI (16-notify.js): bảng thông báo lên cấp */
+}
 
 /* --- chạm vỡ trứng --- */
 function setupTap(){tapsNeed=5+Math.floor(Math.random()*4);taps=0;prog=0;

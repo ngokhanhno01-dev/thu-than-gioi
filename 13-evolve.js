@@ -56,14 +56,16 @@ E.onStage=(from,to)=>{                                                   /* gọ
   lock(true);
   return true;
 };
-E.flush=async()=>{                                                       /* gọi từ vòng thám hiểm: chờ tiến hóa xong */
-  if(!E.on&&!E.queue.length)return;
+E.flush=async()=>{                                                       /* gọi từ vòng thám hiểm: chờ tiến hóa xong + chờ người chơi đọc xong bảng thông báo (NOTI) */
+  const nq=()=>!!(window.NOTI&&(NOTI.open||NOTI.q.length));
+  if(!E.on&&!E.queue.length&&!nq())return;
   const x=$e('xp');if(x)x.style.display='none';
-  while(E.on||E.queue.length)await new Promise(r=>setTimeout(r,80));
+  while(E.on||E.queue.length||nq())await new Promise(r=>setTimeout(r,80));
 };
 
 function lock(on){const m=$e('s-main');if(m)m.classList.toggle('evo-lock',on)}
 function canStart(){
+  if(window.NOTI&&NOTI.blocking())return false;       /* NOTI: đang có bảng lên cấp chờ/đang mở thì tiến hóa đợi */
   const m=$e('mob'),x=$e('xp');
   if(m&&m.style.display==='block')return false;
   if(x&&getComputedStyle(x).display!=='none')return false;
@@ -113,7 +115,7 @@ function swap(k){
   burstOut(k);
 }
 function announce(k){
-  k.lg=true;
+  k.lg=true;(E.got=E.got||[]).push(k.to);              /* NOTI: nhớ các bậc đã lên để hiện bảng sau khi xong hết */
   log('🌟 <b>[Tiến hóa]</b> Thú đã lớn thành <b style="color:var(--gold)">'+STAGES[k.to][1]+'</b>!');
   $e('banner').textContent=STAGES[k.to][1];$e('h-status').textContent=STAGES[k.to][1];
   const b=$e('banner');b.classList.remove('evo-pop');void b.offsetWidth;b.classList.add('evo-pop');
@@ -127,8 +129,10 @@ function endStep(){
 function finish(){
   E.on=false;E.cur=null;E.shown=null;lock(false);shakeStage(0,0);showSkip();
   for(let i=0;i<NP;i++)pK[i]=0;
+  if(E.got&&E.got.length&&window.NOTI)NOTI.rank(E.got);   /* NOTI: tiến hóa xong hết -> hiện bảng lên bậc */
+  E.got=[];
 }
-function reset(){E.queue.length=0;finish()}
+function reset(){E.queue.length=0;E.got=[];finish()}
 function skip(){                                   /* bỏ qua: chốt hết các bậc còn lại ngay, vẫn ghi log từng bậc */
   if(!E.on)return;
   const k=E.cur;if(!k.sw)swap(k);if(!k.lg)announce(k);
