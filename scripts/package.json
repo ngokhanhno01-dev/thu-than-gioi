@@ -1,0 +1,9 @@
+{
+  "name": "ttg-finalize-season",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chot mua Dau Truong - Thu Than Gioi Online (chay bang GitHub Actions)",
+  "main": "finalize-season.js",
+  "engines": { "node": ">=18" },
+  "dependencies": { "firebase-admin": "12.7.0" }
+}
