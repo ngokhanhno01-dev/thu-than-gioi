@@ -1,15 +1,20 @@
-/* ===== Bảng Admin tạm thời =====
-   Bấm vào chữ "Thú Thần Giới" cạnh Xu -> nhập mật khẩu -> mở bảng.
-   Mật khẩu KHÔNG nằm trong code, chỉ lưu bản băm SHA-256 (ADMIN_HASH).
-   Đây chỉ là rào chắn sơ sơ chạy ở trình duyệt, ai biết dùng F12 vẫn có thể gọi hàm trực tiếp.
-   Sau này nên thay bằng kiểm tra phía server. */
+/* ===== Bảng Admin =====
+   Chỉ hiện / bấm được khi admins/{uid} = true trên Realtime Database.
+   Mật khẩu SHA-256 vẫn là lớp thứ hai (ADMIN_HASH).
+   Cách thêm admin: Firebase Console → Realtime Database → Data → admins → [uid] = true
+   Lấy uid: sau khi đăng nhập, Console gõ firebase.auth().currentUser.uid
+*/
 const ADMIN_HASH='456ceed90dcb760523a34ba599380cc6c225f2a04eae0d170762c647a0dcd158';
 let adminOn=false,adminFail=0,adminLockUntil=0,adminEl=null;
+let isAdminUser=false;   // true khi admins/{uid} === true
+
 async function adminCheck(pw){
  if(!(window.crypto&&crypto.subtle))return null;
  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('tt-admin:'+pw));
  return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')===ADMIN_HASH}
+
 async function adminOpen(){
+ if(!isAdminUser){log('🔒 Bạn không có quyền admin.');return}
  if(adminOn){adminShow();return}
  const wait=Math.ceil((adminLockUntil-Date.now())/1000);
  if(wait>0){log('🔒 Nhập sai nhiều lần, thử lại sau <b>'+wait+'</b> giây.');return}
@@ -19,6 +24,7 @@ async function adminOpen(){
  if(ok===null){log('🔒 Trình duyệt không hỗ trợ kiểm tra mật khẩu (cần mở bằng https).');return}
  if(!ok){adminFail++;if(adminFail>=3){adminFail=0;adminLockUntil=Date.now()+30000;log('🔒 Sai mật khẩu 3 lần, khóa 30 giây.')}else log('🔒 Sai mật khẩu.');return}
  adminOn=true;adminFail=0;log('🛠️ Đã bật admin.');adminShow()}
+
 const adNum=id=>{const v=Math.floor(Number(document.getElementById(id).value));return v>0?Math.min(v,1e9):0};
 function adMsg(h){const d=document.getElementById('ad-msg');if(d)d.innerHTML=h}
 
@@ -28,7 +34,6 @@ async function adFindUidByNick(nick){
   if(!nick) return null;
   if(!window.db && !(window.firebase && firebase.apps.length)) return null;
   const fs = window.db || firebase.firestore();
-  // Dùng nickKey giống game
   const key = nick.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]/g,'');
   if(!key || key.length < 3) return null;
   try{
@@ -39,6 +44,7 @@ async function adFindUidByNick(nick){
 }
 
 async function adSendMail(){
+  if(!isAdminUser) return adMsg('Không có quyền admin.');
   const nick = (document.getElementById('ad-gift-nick')||{}).value || '';
   const type = (document.getElementById('ad-gift-type')||{}).value || 'gold';
   const qty  = adNum('ad-gift-qty');
@@ -52,7 +58,6 @@ async function adSendMail(){
   const uid = await adFindUidByNick(nick);
   if(!uid) return adMsg('Không tìm thấy biệt danh "<b>'+nick+'</b>".');
 
-  // Lấy Realtime Database
   let rdb = null;
   try{
     if(window.TTGNET && TTGNET.rdb) rdb = TTGNET.rdb;
@@ -60,7 +65,6 @@ async function adSendMail(){
   }catch(_){}
   if(!rdb) return adMsg('Chưa kết nối Realtime Database.');
 
-  // Tạo nội dung thư
   const rewards = {};
   if(type === 'gold'){
     rewards.gold = qty;
@@ -68,7 +72,6 @@ async function adSendMail(){
     rewards.chooseZone = true;
     rewards.zoneQty = qty;
   } else {
-    // item
     rewards.items = [{id: type, q: qty}];
   }
 
@@ -102,7 +105,6 @@ function adItem(){const id=document.getElementById('ad-item').value,n=adNum('ad-
 function adBuff(){const k=document.getElementById('ad-buff').value,n=adNum('ad-bturn');if(!n)return adMsg('Nhập số trận lớn hơn 0.');
  buffs[k]+=n;adMsg(BUFF_NAME[k]+' ×'+BUFF_MUL[k]+': còn '+buffs[k]+' trận thắng.');log('🛠️ Admin: thuốc '+BUFF_NAME[k]+' +'+n+' trận.');adRefresh()}
 function adClearBag(){if(!confirm('Xóa toàn bộ vật phẩm trong balo?'))return;bag.length=0;bagSel=-1;renderBag();adMsg('Đã dọn balo.')}
-/* --- Test trang bị / thú --- */
 function adRefreshAll(){stats();updateStage();renderExp();renderInfo();
  try{if(typeof renderBlood==='function'&&pet)renderBlood()}catch(e){}
  try{if(typeof renderEquip==='function')renderEquip()}catch(e){}}
@@ -177,4 +179,46 @@ function adminShow(){
 '<div id="ad-msg" style="font-size:11px;min-height:15px;margin:6px 0;color:#ffc978"></div>'+
   '<div style="display:flex;gap:6px"><button class="ad-b" style="flex:1;width:auto" onclick="adClearBag()">🗑️ Dọn balo</button><button class="ad-b" style="flex:1;width:auto" onclick="adLock()">🔒 Khóa</button><button class="ad-b" style="flex:1;width:auto;border-color:#ff7654;background:#a72f42" onclick="adClose()">Đóng</button></div>';
  adminEl.style.display='flex';adRefresh()}
-{const s=document.querySelector('.seal');if(s){s.style.cursor='pointer';s.onclick=adminOpen}}
+
+/* ---------- Khóa theo admins/{uid} ---------- */
+function applyAdminSeal(){
+  const s = document.querySelector('.seal');
+  if(!s) return;
+  if(isAdminUser){
+    s.style.cursor = 'pointer';
+    s.style.color = '#ff5a5a';
+    s.title = 'Admin (Thú Thần Giới)';
+    s.onclick = adminOpen;
+  } else {
+    s.style.cursor = '';
+    s.style.color = '';
+    s.title = '';
+    s.onclick = null;
+  }
+}
+
+/** Gọi sau khi đã có uid (sau login / TTGNET.start). */
+async function checkAdminStatus(uid){
+  isAdminUser = false;
+  if(!uid){ applyAdminSeal(); return false; }
+  try{
+    let rdb = null;
+    if(window.TTGNET && TTGNET.rdb) rdb = TTGNET.rdb;
+    else if(window.firebase && firebase.apps.length) rdb = firebase.database();
+    if(!rdb){ applyAdminSeal(); return false; }
+    const sn = await rdb.ref('admins/' + uid).once('value');
+    isAdminUser = sn.val() === true;
+  }catch(e){
+    console.warn('[admin] check', e);
+    isAdminUser = false;
+  }
+  applyAdminSeal();
+  return isAdminUser;
+}
+
+// Xuất để 19-save / 20-online gọi sau khi login
+window.checkAdminStatus = checkAdminStatus;
+window.isAdminUser = function(){ return isAdminUser; };
+
+// Ban đầu ẩn (chưa biết uid)
+{ const s = document.querySelector('.seal'); if(s){ s.onclick = null; s.style.cursor = ''; } }

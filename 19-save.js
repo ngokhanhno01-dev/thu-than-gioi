@@ -23,6 +23,7 @@ const OFF_SEC_PER_WIN=120;    /* bao nhiêu giây ngoại tuyến thì tương �
 const OFF_MIN_SEC=600;        /* vắng dưới 10 phút: không tính */
 const OFF_MAX_H=4;            /* mỗi lần nhận tối đa tính bao nhiêu giờ vắng */
 const OFF_DAILY_H=6;          /* tổng số giờ ngoại tuyến được tính trong mỗi chu kỳ 24 giờ */
+let fameSeason=0;              /* mùa mà uy danh hiện tại thuộc về (0 = chưa set) */
 const OFF_WINDOW_MS=24*3600*1000;
 const GUEST='__guest';
 const P='ttg_';
@@ -204,7 +205,7 @@ function eligible(){
   return true}
 function snap(){
   const g={
-    level,exp,age,gold,fame,hatched,hatchAge,chosen,eggQ,rolls,rerollLeft,hist:hist.slice(),
+    level,exp,age,gold,fame,fameSeason:(typeof fameSeason!=='undefined'?fameSeason:0),hatched,hatchAge,chosen,eggQ,rolls,rerollLeft,hist:hist.slice(),
     taps,tapsNeed,pet:hatched?pet:null,
     bag:bag.map(s=>({id:s.id,n:s.n})),
     eqWorn,ebag,eqUid,
@@ -227,7 +228,7 @@ function restore(d){
   const g=d.g;
   nickChanges=clampI(g.nc,0,999);
   level=clampI(g.level,1,MAXLV);exp=Math.max(0,num(g.exp));age=Math.max(0,clampI(g.age,0,1e9));
-  gold=Math.max(0,Math.floor(num(g.gold,50)));fame=Math.max(0,Math.floor(num(g.fame)));
+  gold=Math.max(0,Math.floor(num(g.gold,50)));fame=Math.max(0,Math.floor(num(g.fame)));fameSeason=Math.max(0,Math.floor(num(g.fameSeason,0)));
   rolls=clampI(g.rolls,0,1e9);rerollLeft=clampI(g.rerollLeft,0,99);
   hist=Array.isArray(g.hist)?g.hist.filter(q=>q>=0&&q<5).slice(0,3):[];
   eggQ=clampI(g.eggQ,0,4);
@@ -528,6 +529,7 @@ function begin(key,name){
   else log('👋 Chào <b>'+name+'</b>! Tiến trình sẽ tự động lưu.');
   buildAcc();refreshAcc();if(db&&key!==GUEST)watch();
   try{fbInit();if(db&&window.TTGNET)TTGNET.start({db,uid:key,name,guest:key===GUEST})}catch(e){console.warn('[online]',e)}   /* chat + số người online (20-online.js) */
+  try{if(window.checkAdminStatus && key!==GUEST)checkAdminStatus(key)}catch(e){console.warn('[admin]',e)}
   try{if(db&&window.TTGMAIL)TTGMAIL.start({db,uid:key,guest:key===GUEST})}catch(e){console.warn('[mail]',e)}   /* hộp thư (24-mail.js) */
   const _st=stats;stats=function(){_st.apply(this,arguments);sched()};      /* xu/uy danh đổi -> lưu sau 2 giây */
   setInterval(save,AUTO_MS);

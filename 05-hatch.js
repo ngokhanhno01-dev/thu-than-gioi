@@ -113,23 +113,11 @@ const _ri=renderInfo;renderInfo=function(){_ri();
    '☯ '+relText(bl)+'</div>')};
 
 /* --- hoạt động: thám hiểm / đấu trường / cửa hàng --- */
-window.train=function(){if(!hatched)return;const s=spOfPet(),ex=10*(1+(pet.sp===15?s.v/100:0)),earned=addFame(3);
-  stats();addExp(ex);log('🧭 Thú thám hiểm, uy danh +'+earned+', EXP +'+Math.round(ex)+'.')};
-window.arena=function(){if(!hatched)return;
-  const s=statsOf(pet.bl,pet.pi,pet.base,level),sp=spOfPet();
-  const P=s.atk+s.def+s.spd+s.mag+s.hp/8,eb=Math.random()<.1?'hu':CYC[Math.floor(Math.random()*5)];
-  const E=P*(.75+Math.random()*.6),rm=relMul(pet.bl,eb),mult=(1+sp.c)*rm;
-  const p=Math.max(.1,Math.min(.9,P*mult/(P*mult+E))),en=genOf(eb,Math.floor(Math.random()*17)).name;
-  const note=rm>1?' (<b style="color:var(--jade)">khắc chế</b>)':rm<1?' (<b style="color:#ff8a7a">bị khắc</b>)':'';
-  if(Math.random()<p){
-    const g=Math.round(12*(1+(pet.sp===5?sp.v/100:0))),f=addFame(5);
-    gold+=g;addExp(18);
-    log('⚔️ Thắng <b>'+en+'</b>'+note+'! Xu +'+g+', uy danh +'+f+', EXP +18.');
-    if(Math.random()<.4*(1+(pet.sp===13?sp.v/100:0))){const id=dropRand();log(addItem(id,1)?'🎒 Nhặt được <b>'+ITEMS[id].n+'</b>.':'🎒 Balo đầy, bỏ lại <b>'+ITEMS[id].n+'</b>!')}
-  }else{fame=Math.max(0,fame-1);addExp(5);log('⚔️ Thua <b>'+en+'</b>'+note+', uy danh -1, EXP +5.')}
-  stats()};
-ITEMS.dan.use=()=>{const f=addFame(6);stats();addExp(40);log('💊 Thú dùng Linh Đan, uy danh +'+f+', EXP +40.')};
-ITEMS.dan.d='Thú tăng tu vi: uy danh +6, EXP +40.';
-ITEMS.qua.use=()=>{const f=addFame(2);stats();addExp(8);log('🍎 Thú ăn Linh Quả, uy danh +'+f+', EXP +8.')};
-ITEMS.qua.d='Quả chứa linh khí: uy danh +2, EXP +8.';
+window.train=function(){if(!hatched)return;const s=spOfPet(),ex=10*(1+(pet.sp===15?s.v/100:0));
+  stats();addExp(ex);log('🧭 Thú thám hiểm, EXP +'+Math.round(ex)+'.')};
+window.arena=function(){if(!hatched)return;log('⚔️ Đấu trường: cập nhật tiếp theo.');};
+ITEMS.dan.use=()=>{stats();addExp(40);log('💊 Thú dùng Linh Đan, EXP +40.')};
+ITEMS.dan.d='Thú tăng tu vi: EXP +40.';
+ITEMS.qua.use=()=>{stats();addExp(8);log('🍎 Thú ăn Linh Quả, EXP +8.')};
+ITEMS.qua.d='Quả chứa linh khí: EXP +8.';
 renderExp();renderPick();
