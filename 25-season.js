@@ -235,12 +235,12 @@
    */
   function writeSeasonRank(opts){
     opts = opts || {};
-    if(_isGuest()) return Promise.resolve();
+    if(_isGuest()) return Promise.resolve({ok:false, error:'guest'});
     const uid = _playerUid();
-    if(!uid) return Promise.resolve();
+    if(!uid) return Promise.resolve({ok:false, error:'no-uid'});
 
     let rdb = null;
-    try{ rdb = firebase.database(); }catch(e){ console.warn('[season] thiếu RTDB', e); return Promise.resolve(); }
+    try{ rdb = firebase.database(); }catch(e){ console.warn('[season] thiếu RTDB', e); return Promise.resolve({ok:false, error:'no-rtdb'}); }
 
     const s = opts.season || currentSeason();
     const nick = (opts.nick || _playerNick()).slice(0, 20);
@@ -269,10 +269,15 @@
         // Giữ wins/foes nếu không truyền mới
         if(opts.wins == null && cur.wins != null) payload.wins = Math.max(0, Math.floor(Number(cur.wins) || 0));
         if(opts.foes == null && cur.foes != null) payload.foes = Math.max(0, Math.floor(Number(cur.foes) || 0));
+        if(opts.addWins) payload.wins += Math.floor(opts.addWins);
+        if(opts.addFoes) payload.foes += Math.floor(opts.addFoes);
       }
       return ref.set(payload);
+    }).then(function(){
+      return {ok:true};
     }).catch(function(e){
       console.warn('[season] ghi seasonRank lỗi', e);
+      return {ok:false, error:String((e && (e.code || e.message)) || e)};
     });
   }
 

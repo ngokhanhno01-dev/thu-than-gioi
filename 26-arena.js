@@ -37,7 +37,7 @@
   let listCache = {t:0, rows:[]};
   let recentFight = {};
   let panelOpen = false;
-  let busy = false;
+  let fighting = false;
   let rankListener = null;
   let topRows = [];
   let myRankNum = null;
@@ -65,8 +65,9 @@
   }
   function myNick(){
     try{
+      // biệt danh hiện tại của người chơi (đổi biệt danh là cập nhật ở đây)
+      if(window.TTGSAVE && TTGSAVE.user && TTGSAVE.user.name) return String(TTGSAVE.user.name).slice(0,20);
       if(window.TTGNET && TTGNET.me && TTGNET.me.name) return String(TTGNET.me.name).slice(0,20);
-      if(typeof nick === 'string') return nick.slice(0,20);
     }catch(_){}
     return 'Người chơi';
   }
@@ -148,7 +149,7 @@
         rows.sort(function(a,b){ return dispFame(b) - dispFame(a); });
         listCache = {t: Date.now(), rows: rows};
         resolve(rows.slice());
-      }, function(){ resolve([]); });
+      }, function(err){ toast('⚠️ Không đọc được danh sách (' + esc((err && (err.code || err.message)) || err) + ').'); resolve([]); });
     });
   }
 
@@ -183,6 +184,8 @@
         }
       }
       if(panelOpen) renderMain();
+    }, function(err){
+      toast('⚠️ Không đọc được bảng xếp hạng (' + esc((err && (err.code || err.message)) || err) + '). Kiểm tra Rules Realtime Database.');
     });
   }
   function stopTopListen(){
@@ -236,6 +239,12 @@
     return out;
   }
 
+  // kỹ năng thú: {chỉ số kỹ năng: giá trị} — giống mkP/mkM của thám hiểm
+  function skillMap(sp, info){
+    const k = {};
+    if(info && typeof info.v === 'number') k[sp] = info.v;
+    return k;
+  }
   function mkFighterFromMe(){
     const s = (typeof statsOf === 'function' && pet)
       ? statsOf(pet.bl, pet.pi, pet.base, level)
@@ -251,7 +260,8 @@
       spd: Math.round(s.spd), mag: Math.round(s.mag),
       eva: +s.eva || 0, stun: +s.stun || 0, regen: +s.regen || 0, crit: +s.crit || 0,
       r: 1, stn: 0, sets: sets,
-      shield: 0, revived: false, nextEvade: false, firstHit: true
+      shield: 0, revived: false, nextEvade: false, firstHit: true,
+      bl: pet.bl, k: skillMap(pet.sp, spOfPet()), e: (spOfPet() || {}).e || 1
     };
   }
   function mkFighterFromCard(card, nameFallback){
@@ -259,6 +269,12 @@
     const eqArr = (card && Array.isArray(card.eq)) ? card.eq : [];
     const sets = activeSetBuffs(countSetsFromEq(eqArr));
     const hp = Math.max(1, Math.round(Number(st.hp) || 80));
+    const oppBl = (card && card.bl) || 'ho';
+    const oppSp = Math.max(0, Math.min(16, Math.floor(Number(card && card.sp) || 0)));
+    let oppInfo = null;
+    try{
+      oppInfo = spInfo(oppSp, (Number(card && card.pi) || 0) + (Number(card && card.up) || 0) * .03, Math.max(0, Math.min(4, Number(card && card.q) || 0)));
+    }catch(_){}
     return {
       n: String((card && card.nick) || nameFallback || 'Đối thủ').slice(0,20),
       hp: hp, mx: hp,
@@ -268,7 +284,8 @@
       mag: Math.max(0, Math.round(Number(st.mag) || 8)),
       eva: +st.eva || 5, stun: +st.stun || 3, regen: +st.regen || 1, crit: +st.crit || 6,
       r: 1, stn: 0, sets: sets,
-      shield: 0, revived: false, nextEvade: false, firstHit: true
+      shield: 0, revived: false, nextEvade: false, firstHit: true,
+      bl: oppBl, k: skillMap(oppSp, oppInfo), e: (oppInfo || {}).e || 1
     };
   }
 
@@ -280,24 +297,43 @@
 
   function simArena(P, Q){
     const ev = [];
-    const push = function(w, k, d, t){
-      ev.push({w:w, k:k, d:d, t:t, hp:Math.max(0,P.hp), mh:Math.max(0,Q.hp)});
-    };
+    let note = '';
+    const kv = function(c, i){ return (c.k && c.k[i]) || 0; };
+    const rs = function(c){ return 1 - kv(c, 10) / 100; };           // Kháng hiệu ứng
+    const lo = function(c){ return (c.hp < c.mx * .25 && kv(c, 16)) ? 1 + kv(c, 16) / 100 : 1; }; // Bất khuất
+    const elem = function(c){ try{ return BL[c.bl].h; }catch(_){ return ''; } };
 
+    // hệ khắc chế (ngũ hành) như thám hiểm
+    try{ P.r = relMul(P.bl, Q.bl); Q.r = relMul(Q.bl, P.bl); }catch(_){ P.r = 1; Q.r = 1; }
+
+    const push = function(w, k, d, t, r){
+      ev.push({w:w, k:k, d:d, r:r || 1, hp:Math.max(0,P.hp), mh:Math.max(0,Q.hp),
+               sp:Math.max(0,P.shield||0), sm:Math.max(0,Q.shield||0), t:t});
+    };
+    const side = function(c){ return c === P ? 'p' : 'm'; };
+
+    // Làm chậm / Suy yếu (đầu trận)
+    [[P, Q], [Q, P]].forEach(function(pr){
+      const a = pr[0], d = pr[1];
+      if(kv(a, 0)) d.spd *= 1 - kv(a, 0) * rs(d) / 100;
+      if(kv(a, 1)) d.atk *= 1 - kv(a, 1) / 100;
+    });
+    // Khiên (kỹ năng + bộ trang bị)
     [P, Q].forEach(function(c){
       const sh = hasSet(c, 'shield');
-      if(sh && sh.v && sh.v.pct){
-        c.shield = Math.round(c.mx * sh.v.pct / 100);
-        if(c.shield > 0) push(c===P?'p':'m', 'shield', c.shield, c.n + ' nhận khiên ' + c.shield);
-      }
+      if(sh && sh.v && sh.v.pct) c.shield += Math.round(c.mx * sh.v.pct / 100);
+      if(kv(c, 9)) c.shield += Math.round(c.mx * kv(c, 9) / 100);
     });
+    const shP0 = P.shield || 0, shM0 = Q.shield || 0;
 
-    const deal = function(a, d, baseDm, tag){
+    const LABEL = {wind:'🌪️ Phong Nhận', thunder:'⚡ Lôi Kích', counter:'🌙 Nguyệt Ảnh phản kích', lava:'🌋 Dung Nham'};
+
+    const deal = function(a, d, baseDm, tag, rr){
       let dm = baseDm;
       const mist = hasSet(d, 'mist');
       if(mist && mist.v && roll(mist.v.ch)){
         dm = Math.max(1, Math.round(dm * 0.5));
-        push(a===P?'p':'m', 'mist', dm, d.n + ' Sương Tán, chỉ nhận nửa');
+        note += ' · ☁️ Sương Tán giảm nửa';
       }
       const sun = hasSet(a, 'sun');
       if(sun && sun.v && d.hp / d.mx > 0.6){
@@ -307,35 +343,55 @@
         const ab = Math.min(d.shield, dm);
         d.shield -= ab;
         dm -= ab;
-        if(ab > 0) push(a===P?'p':'m', 'block', ab, d.n + ' khiên chặn ' + ab);
+        if(ab > 0) push(side(d), 'block', ab, '🛡️ Khiên hấp thụ ' + ab + ' sát thương');
       }
-      if(dm <= 0) return 0;
+      if(dm <= 0){ note = ''; return 0; }
       d.hp -= dm;
-      push(a===P?'p':'m', tag || 'hit', dm, a.n + ' gây ' + dm);
+      const isCrit = (tag === 'crit');
+      const text = LABEL[tag]
+        ? LABEL[tag] + ' -' + dm
+        : (isCrit ? '💥 Chí mạng! ' : '') + a.n + ' đánh -' + dm + note;
+      note = '';
+      push(side(a), isCrit ? 'crit' : 'hit', dm, text, LABEL[tag] ? 1 : (rr || 1));
       const th = hasSet(d, 'thorn');
       if(th && th.v && roll(th.v.ch) && a.hp > 0){
         const ref = Math.max(1, Math.round(dm * th.v.pct / 100));
         a.hp = Math.max(0, a.hp - ref);
-        push(d===P?'p':'m', 'thorn', ref, d.n + ' phản ' + ref);
+        push(side(d), 'hit', ref, '↩ Phản đòn -' + ref);
       }
       const fr = hasSet(d, 'frost');
-      if(fr && fr.v && roll(fr.v.ch) && d.hp > 0){
-        a.stn = 1;
-        push(d===P?'p':'m', 'frost', 0, a.n + ' bị đóng băng');
-      }
+      if(fr && fr.v && roll(fr.v.ch) && d.hp > 0){ a.stn = 1; }
       return dm;
     };
 
+    function checkRevive(c){
+      if(c.hp > 0) return;
+      // Hồi sinh (kỹ năng thú) — 1 lần mỗi trận
+      if(kv(c, 14) && !c.skRevived){
+        c.skRevived = true;
+        c.hp = Math.max(1, Math.round(c.mx * kv(c, 14) / 100));
+        push(side(c), 'heal', c.hp, '✨ Hồi sinh +' + c.hp + ' HP');
+        return;
+      }
+      if(c.revived) return;
+      const rv = hasSet(c, 'revive');
+      if(rv && rv.v){
+        c.revived = true;
+        c.hp = Math.max(1, Math.round(c.mx * rv.v.pct / 100));
+        push(side(c), 'heal', c.hp, '✨ Hồi sinh +' + c.hp + ' HP (Ngọc Hộ Mệnh)');
+      }
+    }
+
     const act = function(a, d){
       if(a.hp <= 0 || d.hp <= 0) return;
-      if(a.stn){ a.stn = 0; push(a===P?'p':'m', 'stun', 0, a.n + ' bị choáng/đóng băng, bỏ lượt'); return; }
+      if(a.stn){ a.stn = 0; push(side(a), 'stun', 0, a.n + ' bị choáng/đóng băng, mất lượt!'); return; }
       if(d.nextEvade){
         d.nextEvade = false;
-        push(a===P?'p':'m', 'miss', 0, a.n + ' đánh trượt (Vân Ẩn)');
+        push(side(a), 'miss', 0, '☁️ ' + d.n + ' ẩn mình trong mây, đòn trượt!');
         return;
       }
       if(roll(d.eva)){
-        push(a===P?'p':'m', 'miss', 0, a.n + ' đánh trượt (né)');
+        push(side(a), 'miss', 0, d.n + ' né được đòn!');
         const ct = hasSet(d, 'counter');
         if(ct && ct.v && roll(ct.v.ch) && d.hp > 0){
           const cdm = Math.max(1, Math.round((d.atk + d.mag * 0.3) * 1.6 * 100 / (100 + a.def) * (ct.v.mul / 100)));
@@ -349,37 +405,45 @@
         if(am && am.v && roll(am.v.ch)) forceCrit = true;
         a.firstHit = false;
       }
-      const cr = forceCrit || roll(a.crit);
-      let dm = Math.max(1, Math.round((a.atk + a.mag * 0.3) * 1.6 * 100 / (100 + d.def) * a.r * (cr ? 1.5 : 1)));
+      const cr = forceCrit || roll(a.crit + kv(a, 4));
+      const ig = kv(a, 8) / 100;                                     // Xuyên giáp
+      let dm = Math.max(1, Math.round((a.atk * lo(a) + a.mag * 0.3) * 1.6 * 100 / (100 + d.def * lo(d) * (1 - ig)) * a.r * (cr ? 1.5 + kv(a, 4) * 3 / 100 : 1)));
       if(cr){
         const st = hasSet(a, 'star');
-        if(st && st.v && st.v.pct){
-          dm = Math.round(dm * (1 + st.v.pct / 100));
-        }
+        if(st && st.v && st.v.pct) dm = Math.round(dm * (1 + st.v.pct / 100));
       }
-      deal(a, d, dm, cr ? 'crit' : 'hit');
+      if(kv(d, 2)){                                                   // Chắn đòn
+        const cap = Math.round(d.mx * (60 - 40 * Math.min(1, d.e)) / 100);
+        if(dm > cap){ dm = cap; note += ' · 🛡️ Chắn đòn'; }
+      }
+      if(a.r > 1) note += ' (khắc hệ ' + elem(d) + ')';
+      else if(a.r < 1) note += ' (bị hệ ' + elem(d) + ' khắc)';
+      const dealt = deal(a, d, dm, cr ? 'crit' : 'hit', a.r);
+
+      if(kv(a, 12) && dealt > 0){                                     // Hút máu
+        const heal = Math.min(a.mx - a.hp, Math.round(dealt * kv(a, 12) / 100));
+        if(heal > 0){ a.hp += heal; push(side(a), 'heal', heal, '🩸 Hút máu +' + heal + ' HP'); }
+      }
+      if(kv(a, 3) && dealt > 0 && d.hp > 0 && roll(kv(a, 3))){        // Liên kích
+        const x = Math.round(dealt * .5);
+        d.hp -= x; push(side(a), 'hit', x, '⚡ Liên kích -' + x);
+      }
+      if(kv(d, 7) && dealt > 0){                                      // Phản đòn
+        const x = Math.max(1, Math.round(dealt * kv(d, 7) / 100));
+        a.hp -= x; push(side(d), 'hit', x, '↩ Phản đòn -' + x);
+      }
+      checkRevive(d); checkRevive(a);
+
       const wi = hasSet(a, 'wind');
       if(wi && wi.v && roll(wi.v.ch) && d.hp > 0){
-        const extra = Math.max(1, Math.round(dm * wi.v.pct / 100));
-        deal(a, d, extra, 'wind');
+        deal(a, d, Math.max(1, Math.round(dm * wi.v.pct / 100)), 'wind');
       }
       const thu = hasSet(a, 'thunder');
       if(thu && thu.v && roll(thu.v.ch) && d.hp > 0){
-        const extra = Math.max(1, Math.round(dm * (1 + thu.v.pct / 100)));
-        deal(a, d, extra, 'thunder');
+        deal(a, d, Math.max(1, Math.round(dm * (1 + thu.v.pct / 100))), 'thunder');
       }
-      if(d.hp > 0 && roll(a.stun)){ d.stn = 1; push(a===P?'p':'m', 'stun', 0, d.n + ' bị choáng'); }
+      if(d.hp > 0 && a.hp > 0 && roll(a.stun * rs(d))){ d.stn = 1; }
     };
-
-    function checkRevive(c){
-      if(c.hp > 0 || c.revived) return;
-      const rv = hasSet(c, 'revive');
-      if(rv && rv.v){
-        c.revived = true;
-        c.hp = Math.max(1, Math.round(c.mx * rv.v.pct / 100));
-        push(c===P?'p':'m', 'revive', c.hp, c.n + ' hồi sinh với ' + c.hp + ' HP');
-      }
-    }
 
     const first = P.spd >= Q.spd ? P : Q;
     for(let r = 1; r <= 14; r++){
@@ -389,6 +453,16 @@
       act(first === P ? Q : P, first);
       checkRevive(P); checkRevive(Q);
 
+      // Thiêu đốt (kỹ năng)
+      [[P, Q], [Q, P]].forEach(function(pr){
+        const a = pr[0], d = pr[1];
+        if(a.hp > 0 && d.hp > 0 && kv(a, 11)){
+          const bd = Math.max(1, Math.round(a.atk * kv(a, 11) * rs(d) / 100));
+          d.hp -= bd; push(side(a), 'hit', bd, '🔥 Thiêu đốt -' + bd);
+          checkRevive(d);
+        }
+      });
+
       [P, Q].forEach(function(c){
         if(c.hp <= 0) return;
         const gr = hasSet(c, 'grove');
@@ -396,11 +470,11 @@
           let pct = gr.v.pct;
           if(c.hp / c.mx < 0.5) pct *= 2;
           const heal = Math.min(c.mx - c.hp, Math.round(c.mx * pct / 100));
-          if(heal > 0){ c.hp += heal; push(c===P?'p':'m', 'heal', heal, c.n + ' Sinh Cơ +' + heal); }
+          if(heal > 0){ c.hp += heal; push(side(c), 'heal', heal, c.n + ' Sinh Cơ +' + heal + ' HP'); }
         }
         if(c.regen){
           const heal = Math.min(c.mx - c.hp, Math.round(c.mx * c.regen / 100));
-          if(heal > 0){ c.hp += heal; push(c===P?'p':'m', 'heal', heal, c.n + ' hồi +' + heal); }
+          if(heal > 0){ c.hp += heal; push(side(c), 'heal', heal, c.n + ' hồi sức +' + heal + ' HP'); }
         }
         const cl = hasSet(c, 'cloud');
         if(cl && cl.v && roll(cl.v.ch)) c.nextEvade = true;
@@ -412,14 +486,14 @@
         if(lv && lv.v && roll(lv.v.ch)){
           const dm = Math.max(1, Math.round(c.atk * lv.v.pct / 100));
           other.hp = Math.max(0, other.hp - dm);
-          push(c===P?'p':'m', 'lava', dm, c.n + ' Dung Nham -' + dm);
+          push(side(c), 'hit', dm, LABEL.lava + ' -' + dm);
           checkRevive(other);
         }
       });
       if(P.hp <= 0 || Q.hp <= 0) break;
     }
-    const win = Q.hp <= 0 || (P.hp > 0 && (Q.hp <= 0 || P.hp / P.mx >= Q.hp / Q.mx));
-    return { win: win, ev: ev, maxP: P.mx, maxM: Q.mx };
+    const win = Q.hp <= 0 || (P.hp > 0 && P.hp / P.mx > Q.hp / Q.mx);
+    return { win: win, ev: ev, maxP: P.mx, maxM: Q.mx, shP: shP0, shM: shM0, first: first === P };
   }
 
   function makeNpcCard(){
@@ -439,13 +513,253 @@
         regen: Math.random() * 3,
         crit: 5 + Math.random() * 10
       },
+      bl: (Object.keys(window.BL || {ho:1,vu:1,long:1,tuoc:1,lan:1,hu:1}))[Math.floor(Math.random()*6)],
+      sp: Math.floor(Math.random()*17),
+      st: Math.max(0, Math.min(9, Math.floor(lv/11))),
+      pi: 1, up: 0, q: 1,
       eq: [],
       _npc: true
     };
   }
 
+  /* =====================================================================
+     GIAO DIỆN CHIẾN ĐẤU ĐẤU TRƯỜNG — dùng lại khung #mob + hiệu ứng của thám hiểm
+     (06-mobs.js), chỉ thay: nền đấu trường riêng, đối thủ là thú của người chơi khác.
+     Kết quả trận đã tính xong từ simArena; phần này chỉ "diễn lại" các sự kiện.
+     ===================================================================== */
+  let _arenaBgCv = null;
+  function buildArenaBg(){
+    const c = document.createElement('canvas'); c.width = 360; c.height = 250;
+    const g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    // trời hoàng hôn
+    const sky = g.createLinearGradient(0,0,0,150);
+    sky.addColorStop(0,'#150d26'); sky.addColorStop(.6,'#3b2240'); sky.addColorStop(1,'#7a4a47');
+    g.fillStyle = sky; g.fillRect(0,0,360,150);
+    // vài ngôi sao
+    g.fillStyle = '#f6e9e4';
+    [[20,12],[70,28],[130,10],[200,22],[250,8],[310,26],[340,14],[100,44],[285,48]].forEach(function(p){ g.fillRect(p[0],p[1],2,2); });
+    // tường đấu trường (3 tầng khán đài)
+    for(let tier=0; tier<3; tier++){
+      const y = 62 + tier*26;
+      g.fillStyle = tier===0 ? '#3a2f3f' : tier===1 ? '#2f2636' : '#261e2c';
+      g.fillRect(0,y,360,26);
+      g.fillStyle = 'rgba(0,0,0,.25)';
+      for(let x=0; x<360; x+=24){ g.fillRect(x, y, 2, 26); }
+      g.fillStyle = 'rgba(255,255,255,.07)'; g.fillRect(0,y,360,2);
+    }
+    // vòm cổng
+    g.fillStyle = '#120a16';
+    [[30,106],[150,106],[270,106]].forEach(function(p){
+      g.fillRect(p[0],p[1]+10,36,34); g.fillRect(p[0]+4,p[1]+4,28,6); g.fillRect(p[0]+10,p[1],16,4);
+    });
+    // đỉnh tường
+    g.fillStyle = '#51405a'; g.fillRect(0,58,360,5);
+    for(let x=0;x<360;x+=18){ g.fillRect(x,52,10,7); }
+    // nền cát
+    const sand = g.createLinearGradient(0,150,0,250);
+    sand.addColorStop(0,'#9b7a4c'); sand.addColorStop(1,'#5d452a');
+    g.fillStyle = sand; g.fillRect(0,150,360,100);
+    g.fillStyle = '#6e5233'; g.fillRect(0,148,360,4);
+    // vòng đấu
+    g.strokeStyle = 'rgba(40,24,12,.55)'; g.lineWidth = 3;
+    g.beginPath(); g.ellipse(180,222,150,26,0,0,7); g.stroke();
+    g.strokeStyle = 'rgba(246,198,106,.35)'; g.lineWidth = 1;
+    g.beginPath(); g.ellipse(180,222,120,19,0,0,7); g.stroke();
+    // đốm cát
+    g.fillStyle = 'rgba(0,0,0,.12)';
+    for(let i=0;i<60;i++){ g.fillRect((i*83)%360, 156+((i*37)%90), 2, 1); }
+    return c;
+  }
+  function arenaBg(g, tt){
+    if(!_arenaBgCv) _arenaBgCv = buildArenaBg();
+    g.drawImage(_arenaBgCv, 0, 0);
+    // khán giả nhấp nhô
+    for(let r=0;r<3;r++){
+      for(let i=0;i<30;i++){
+        const x = 6 + i*12 + (r%2)*5;
+        const y = 80 + r*26 - Math.round(Math.abs(Math.sin(tt*2.2 + i*1.7 + r))*2);
+        const col = ['#c9785a','#6aa7c9','#d9c36a','#8fcf8a','#b98fd9'][(i*3+r*2)%5];
+        g.fillStyle = col; g.fillRect(x, y, 5, 5);
+        g.fillStyle = '#2a1e2c'; g.fillRect(x, y+5, 5, 3);
+      }
+    }
+    // đuốc hai bên
+    [28, 332].forEach(function(x){
+      g.fillStyle = '#4a3a2a'; g.fillRect(x-2, 126, 4, 26);
+      const f = 6 + Math.round(Math.sin(tt*14 + x)*2);
+      g.fillStyle = '#ff7b2e'; g.fillRect(x-4, 120-f/2, 8, 8+f/2);
+      g.fillStyle = '#ffd24a'; g.fillRect(x-2, 122-f/3, 4, 5+f/3);
+      const gl = g.createRadialGradient(x,126,2,x,126,46);
+      gl.addColorStop(0,'rgba(255,170,70,.28)'); gl.addColorStop(1,'rgba(255,170,70,0)');
+      g.fillStyle = gl; g.fillRect(x-46,80,92,92);
+    });
+  }
+
+  // vẽ thú của đối thủ (đứng bên phải, quay mặt sang trái) — theo drawPet của 06-mobs.js
+  function drawOpp(g, card, cx, by, size, T, dx, al, gh){
+    try{
+      const {PET_DRAW_SCALE, PET_GROW_MAX, PET_FX} = window.TTGFX;
+      const api = window.VanKiepSprites;
+      const stage = Math.max(0, Math.min(9, Math.floor(Number(card.st) || 0)));
+      const im = api ? api.getStageImage(card.bl, card.sp, stage) : null;
+      if(!im) return;
+      const box = im.bb;
+      const grow = PET_GROW_MAX * api.stageScale(stage);
+      const drawSize = size * PET_DRAW_SCALE * grow, unit = drawSize / 128;
+      const bob = Math.round(Math.sin(T*3 + 1) * 1.5 * PET_DRAW_SCALE), breathe = 1 + Math.sin(T*2.2 + 1) * .014;
+      const bodyH = Math.max(box.h*unit, 30), bodyW = Math.max(box.w*unit, 24);
+      if(gh){
+        g.save(); g.imageSmoothingEnabled = false; g.translate(cx + dx*PET_DRAW_SCALE, by + bob); g.scale(1, breathe);
+        g.drawImage(im, -(box.x+box.w/2)*unit, -(box.y+box.h)*unit, drawSize, drawSize); g.restore(); return;
+      }
+      g.fillStyle = 'rgba(0,0,0,.4)'; g.beginPath(); g.ellipse(cx, by+1, size*.36*PET_DRAW_SCALE*grow, 6*PET_DRAW_SCALE, 0, 0, 7); g.fill();
+      const AX = (PET_FX && window.PETAURA && window.PETAURA.ok) ? window.PETAURA : null;
+      const pi = Math.max(0, Math.min(4, Number(card.pi) || 0));
+      if(AX){ try{ AX.back(g, cx, by, bodyW, bodyH, T, 'battle', stage, card.sp, pi, true, al); }catch(_){} }
+      g.save(); g.globalAlpha = al; g.imageSmoothingEnabled = false;
+      g.filter = 'drop-shadow(0 0 1px rgba(10,6,14,.9))';
+      g.translate(cx + dx*PET_DRAW_SCALE, by + bob); g.scale(1, breathe);
+      g.drawImage(im, -(box.x+box.w/2)*unit, -(box.y+box.h)*unit, drawSize, drawSize); g.restore();
+      if(AX){ try{ AX.front(g, cx, by, bodyW, bodyH, T, 'battle', stage, card.sp, pi, true, al); }catch(_){} }
+    }catch(_){}
+  }
+
+  /* diễn lại trận. R = kết quả simArena. Trả Promise khi trận kết thúc. */
+  function arenaBattle(R, card, oppName){
+    return new Promise(function(resolve){
+      const SP = (typeof window.BSPD === 'number' && window.BSPD > 0) ? window.BSPD : 1;
+      const o = $('mob'), cvs = $('mob-c');
+      if(!o || !cvs || !window.TTGFX || !window.TTGFX.drawPet){ console.warn('[arena] thiếu TTGFX (cần 06-mobs.js bản mới)'); resolve(); return; }
+      const {drawPet,impact,fxDraw,fxTop,tintDraw,aura,paintUI,evTags,fxClass,fxElem,fxRecoil,lungeAt,FXS,FXRG,REG,BT0,BST,PET_DRAW_SCALE,PET_GROW_MAX,PET_FX} = window.TTGFX;
+      const g = cvs.getContext('2d'), rb = $('mob-run');
+      const n = R.ev.length, TE = (BT0 + n*BST) / SP;
+      const pn = myNick();
+      const ps = (typeof statsOf === 'function') ? statsOf(pet.bl, pet.pi, pet.base, level) : {spd:0};
+      const oppBL = card.bl || 'ho', oppSP = Math.max(0, Math.min(16, Math.floor(Number(card.sp) || 0)));
+      const RP = REG[pet.sp], RM = REG[oppSP];
+      const HN = [fxElem((BL[pet.bl]||{}).h), fxElem((BL[oppBL]||{}).h)];
+      const CL = R.ev.map(fxClass);
+      const REDM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+      let t0 = performance.now(), done = false, holdUntil = 0, lastF = t0, shAmp = 0, shDur = 1, shEnd = 0;
+      const fired = {};
+
+      o.style.display = 'block';
+      rb.style.display = 'block'; rb.textContent = 'Bỏ qua';
+      $('mob-pn').textContent = String(pn).slice(0,14) + ' · Lv.' + level;
+      $('mob-mn').textContent = '⚔ ' + String(oppName).slice(0,12) + ' · Lv.' + (card.lv || '?');
+      paintUI(RP, RM);
+      try{ $('mob-mh').parentNode.style.borderColor = RM[0]; }catch(_){}
+
+      function fin(){
+        if(done) return; done = true;
+        o.style.display = 'none'; rb.style.display = 'none'; rb.textContent = '🏃 Chạy';
+        o.onclick = null; rb.onclick = null;
+        resolve();
+      }
+      function skip(){ const T = (performance.now() - t0) / 1000; if(T < TE) t0 -= (TE - T) * 1000; else fin(); }
+      rb.onclick = function(ev){ ev.stopPropagation(); skip(); };
+      o.onclick = skip;
+
+      (function L(){
+        if(done) return;
+        const T0 = performance.now();
+        if(T0 < holdUntil){ t0 += T0 - lastF; lastF = T0; requestAnimationFrame(L); return; }
+        lastF = T0;
+        const T = (T0 - t0) / 1000, tt = T0 / 1000;
+        let sx = 0, sy = 0;
+        if(T0 < shEnd){ const k = (shEnd - T0) / shDur; sx = Math.round(Math.sin(T0*.11)*shAmp*k); sy = Math.round(Math.cos(T0*.15)*shAmp*.7*k); }
+        g.clearRect(0,0,360,250); g.save(); g.translate(sx, sy);
+        arenaBg(g, tt);
+        let hp = R.maxP, mh = R.maxM, shp = R.shP, shm = R.shM,
+            msg = 'Tốc: ' + pn + ' ' + Math.round(ps.spd) + ' · ' + oppName + ' → ' + (R.first ? pn : oppName) + ' ra đòn trước',
+            dp = 0, dmx = 0, am = 1, fl = null, fx = null, mf = 0, pf = 0, gst = [], sf = 0;
+        FXS.on = 0;
+        R.ev.forEach(function(x, i){
+          const s = (BT0 + i*BST) / SP, u = (T - s) / (BST / SP);
+          if(u < 0) return;
+          if(u >= .35){ hp = x.hp; mh = x.mh; shp = x.sp; shm = x.sm; }
+          if(u < .9){
+            msg = x.t;
+            const dmg = x.k==='hit' || x.k==='crit', dot = /Thiêu đốt/.test(x.t), mis = x.k==='miss', pa = x.w==='p', ms = mis ? .6 : 1,
+              cl = CL[i], rg = FXRG[HN[pa?0:1]] === 1, lu = !rg && cl !== 3 && cl !== 2,
+              lg = dmg && !dot ? (lu ? lungeAt(u) : fxRecoil(u, cl)) : mis ? (lu ? lungeAt(u)*.6 : fxRecoil(u, 0)) : 0;
+            if(pa) dp += lg; else dmx -= lg;
+            if(dmg || mis){ FXS.on = 1; FXS.u = u; FXS.pa = pa; FXS.cl = cl; FXS.cr = x.k==='crit'; FXS.miss = mis; FXS.h = cl===2 ? 'Hỏa' : HN[pa?0:1]; FXS.s = pa ? pet.sp : oppSP; FXS.i = i; }
+            if(lu && lg && u > .12 && u < .37) for(let k=1;k<=5;k++){ const off = lungeAt(u - k*.02)*ms; if(Math.abs(off - lg) > 3) gst.push({pa:pa, off:off, a:.6*(1-(k-1)/5)}); }
+            if(mis){ const dd = 16*Math.sin(Math.PI*Math.max(0, Math.min(1, (u-.28)/.42))); if(pa) dmx += dd; else dp -= dd; }
+            if(dmg && x.d && u >= .35){
+              const hu = u - .35, big = x.k==='crit' ? 1.7 : x.r > 1 ? 1.3 : 1, sc = dot ? .35 : 1, fa = hu < .05 ? 1 : Math.max(0, 1 - (hu-.05)/.17),
+                kb = 24*big*sc*Math.pow(Math.max(0, 1 - hu/.4), 2), jt = hu < .25 ? Math.sin(T*70)*4*big*sc*(1-hu/.25) : 0;
+              if(!dot && (x.k==='crit' || x.r > 1)) sf = Math.max(sf, Math.max(0, 1 - hu/.12)*.5);
+              if(pa){ mf = Math.max(mf, fa); dmx += kb + jt; } else { pf = Math.max(pf, fa); dp -= kb + jt; }
+              if(!fired[i]){ fired[i] = 1; if(hu < .12 && !dot){ holdUntil = T0 + (x.k==='crit' ? 190 : x.r > 1 ? 130 : 90)/SP; if(!REDM){ shAmp = x.k==='crit' ? 14 : x.r > 1 ? 9 : 6; shDur = (x.k==='crit' ? 420 : 300)/SP; shEnd = T0 + shDur; } } }
+            }
+            if(u >= .35){
+              const q = (u-.35)/.55, pp = x.w==='p';
+              fx = {pp:pp, q:q, k:x.k, d:(x.k==='heal'||x.k==='block') ? 0 : x.d, r:x.r, i:i, h:/Thiêu đốt/.test(x.t) ? 'Hỏa' : BL[pp ? pet.bl : oppBL].h, s:pp ? pet.sp : oppSP, cl:CL[i]};
+              if(x.k==='block') fl = {x:pp?90:270, y:130-q*40, t:'🛡️ '+x.d, c:'#8fd0ff', tags:[['KHIÊN HẤP THỤ','#8fd0ff']], q:q, big:1};
+              else if(x.k==='heal') fl = {x:pp?90:270, y:130-q*40, t:x.d>0 ? '+'+x.d+' HP' : 'HỒI SỨC', c:'#72e4b0', tags:evTags(x), q:q, big:1};
+              else if(x.d){
+                const tags = evTags(x), targetH = BL[x.w==='p' ? oppBL : pet.bl].h;
+                const EC = {Kim:'#f2d06a', Mộc:'#5be07a', Thủy:'#5bb8ff', Hỏa:'#ff6a3a', Thổ:'#d9a05a', Huyễn:'#c08aff'};
+                const ec = EC[BL[pp ? pet.bl : oppBL].h] || '#fff';
+                let c = '#fff';
+                if(x.r > 1){ c = ec; tags.push(['KHẮC ' + targetH.toUpperCase() + ' ▲', ec]); }
+                else if(x.r < 1){ c = '#9aa4b8'; tags.push(['BỊ ' + targetH.toUpperCase() + ' KHẮC ▼', '#9aa4b8']); }
+                if(/Chắn đòn/.test(x.t)) tags.unshift(['🛡️ CHẮN ĐÒN', '#8fd0ff']);
+                if(x.k==='crit') c = x.r > 1 ? ec : '#ffd24a';
+                fl = {x:pp?270:90, y:130-q*55, t:'-'+x.d, c:c, tags:tags, q:q, big:x.k==='crit' || x.r > 1, ring:x.r > 1 ? ec : x.k==='crit' ? '#ffd24a' : null};
+              }
+              else if(x.k==='miss') fl = {x:x.w==='p'?270:90, y:130-q*40, t:/ẩn mình/.test(x.t) ? 'TRƯỢT!' : 'NÉ!', c:'#7fe8ff', tags:/ẩn mình/.test(x.t) ? [['VÂN ẨN','#c9d8ff']] : [], q:q, big:1};
+              else if(x.k==='stun') fl = {x:pp?90:270, y:130-q*40, t:/đóng băng/.test(x.t) ? 'ĐÓNG BĂNG!' : 'CHOÁNG!', c:/đóng băng/.test(x.t) ? '#9fe4ff' : '#ffe45a', tags:[[/đóng băng/.test(x.t) ? '❄️' : '💫','#ffe45a']], q:q, big:1};
+            }
+          }
+        });
+        if(T >= TE){
+          rb.style.display = 'none';
+          msg = R.win ? '🏆 Chiến thắng!' : '💥 Bại trận...';
+          if(R.win) am = Math.max(0, 1 - (T-TE)*1.2);
+        }
+        aura(g, RP, 0, 85, tt); aura(g, RM, 180, 272, tt);
+        gst.forEach(function(q){
+          if(q.pa) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, q.off, 1, true); }, RP[0], .75, q.a);
+          else tintDraw(g, function(c){ drawOpp(c, card, 272, 208, 120, tt, -q.off, 1, true); }, RM[0], .75, q.a);
+        });
+        drawPet(g, 85, 208, 120, tt, dp, 1);
+        drawOpp(g, card, 272, 208, 120, tt, dmx, am, false);
+        if(pf > 0) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, dp, 1, true); }, '#ffffff', 1, pf);
+        if(mf > 0) tintDraw(g, function(c){ drawOpp(c, card, 272, 208, 120, tt, dmx, 1, true); }, '#ffffff', 1, mf);
+        if(fx) impact(g, fx, tt);
+        try{ fxDraw(g, tt, dp, dmx); }catch(_){}
+        g.restore();
+        if(sf > 0){ g.save(); g.globalAlpha = sf; g.fillStyle = '#fff'; g.fillRect(0,0,360,250); g.restore(); }
+        if(FXS.on && FXS.cr && !FXS.miss){ try{ fxTop(g, FXS.u, REDM); }catch(_){} }
+        if(fl){
+          g.save(); g.globalAlpha = Math.min(1, 2.2 - fl.q*1.6); g.textAlign = 'center';
+          if(fl.ring){ g.strokeStyle = fl.ring; g.lineWidth = 3; g.globalAlpha *= .8; g.beginPath(); g.arc(fl.x, 150, 10 + fl.q*50, 0, 7); g.stroke(); g.globalAlpha = Math.min(1, 2.2 - fl.q*1.6); }
+          g.font = 'bold ' + (fl.big ? 26 : 20) + 'px monospace'; g.lineWidth = 5; g.strokeStyle = '#160e1c';
+          g.strokeText(fl.t, fl.x, fl.y); g.fillStyle = fl.c; g.fillText(fl.t, fl.x, fl.y);
+          g.font = 'bold 12px monospace'; g.lineWidth = 3;
+          fl.tags.forEach(function(tg, i){ const yy = fl.y - 24 - i*14; g.strokeText(tg[0], fl.x, yy); g.fillStyle = tg[1]; g.fillText(tg[0], fl.x, yy); });
+          g.restore();
+        }
+        $('mob-ph').style.width = Math.round(hp / R.maxP * 100) + '%';
+        $('mob-mh').style.width = Math.round(mh / R.maxM * 100) + '%';
+        $('mob-pt').innerHTML = hp + '/' + R.maxP + (R.shP > 0 ? ' - <span style="color:#8fd0ff;font-size:9px">Giáp ' + shp + '/' + R.shP + '</span>' : '');
+        $('mob-mt').innerHTML = mh + '/' + R.maxM + (R.shM > 0 ? ' - <span style="color:#8fd0ff;font-size:9px">Giáp ' + shm + '/' + R.shM + '</span>' : '');
+        const a = $('mob-ps'), b = $('mob-ms');
+        if(a) a.style.width = (R.shP > 0 ? Math.round(shp / R.shP * 100) : 0) + '%';
+        if(b) b.style.width = (R.shM > 0 ? Math.round(shm / R.shM * 100) : 0) + '%';
+        $('mob-r').textContent = msg;
+        if(T > TE + 2.4/SP) fin(); else requestAnimationFrame(L);
+      })();
+    });
+  }
+
   function doChallenge(targetUid, targetNick, targetFame, isNpc){
-    if(busy) return;
+    if(fighting) return;
+    try{ if(window.TTGFX && TTGFX.getBusy && TTGFX.getBusy()){ toast('⏳ Đang bận (thám hiểm?). Hãy dừng thám hiểm trước khi vào đấu trường.'); return; } }catch(_){}
     if(isGuest()){ toast('🔒 Khách chỉ xem bảng xếp hạng, hãy đăng nhập để khiêu chiến.'); return; }
     if(!hatched || !pet){ toast('🥚 Cần thú đã nở mới khiêu chiến.'); return; }
     if(!window.TTGSEASON || !TTGSEASON.useTicket){ toast('⚠️ Module mùa chưa sẵn sàng.'); return; }
@@ -453,7 +767,7 @@
       toast('🎫 Hết vé Đấu trường. ' + (TTGSEASON.ticketsStr ? TTGSEASON.ticketsStr() : ''));
       return;
     }
-    busy = true;
+    fighting = true;
     const myF = myDispFame();
     const oppF = Math.max(0, Math.floor(targetFame || 0));
 
@@ -463,6 +777,7 @@
       const R = simArena(P, Q);
       const delta = calcFameDelta(myF, oppF, R.win);
 
+      // Kết quả được chốt NGAY (đóng game giữa trận cũng không né được thua)
       fame = Math.max(0, fame + delta);
 
       let winsAdd = 0, foesAdd = 0;
@@ -476,31 +791,38 @@
         try{
           TTGSEASON.writeSeasonRank({
             fame: fame,
-            wins: winsAdd || undefined,
-            foes: foesAdd || undefined,
+            addWins: winsAdd,
+            addFoes: foesAdd,
             lv: (typeof level === 'number' ? level : 1)
+          }).then(function(res){
+            if(res && !res.ok) toast('⚠️ Không ghi được bảng xếp hạng (' + esc(res.error) + '). Kiểm tra đã Publish Rules Realtime Database chưa.');
+            else if(panelOpen) refreshTop();
           });
         }catch(e){ console.warn('[arena] ghi rank', e); }
       }
       try{ if(window.TTGSAVE && TTGSAVE.save) TTGSAVE.save(); }catch(_){}
       try{ if(typeof stats === 'function') stats(); }catch(_){}
 
-      showResult({
-        win: R.win,
-        name: Q.n,
-        delta: delta,
-        myFame: fame,
-        isNpc: !!isNpc
+      const after = function(){
+        try{ if(window.TTGFX) TTGFX.setBusy(false); }catch(_){}
+        fighting = false;
+        showResult({ win: R.win, name: Q.n, delta: delta, myFame: fame, isNpc: !!isNpc });
+      };
+
+      // chuyển sang màn chiến đấu (đóng bảng đấu trường trước)
+      showPanel(false);
+      try{ if(window.TTGFX) TTGFX.setBusy(true); }catch(_){}
+      arenaBattle(R, card, Q.n).then(after).catch(function(e){
+        console.error('[arena] battle', e);
+        after();
       });
-      busy = false;
-      if(panelOpen) renderMain();
     };
 
     const runFight = function(card){
       try{ runFight0(card); }
       catch(e){
         console.error('[arena] lỗi trận', e);
-        busy = false;
+        fighting = false;
         toast('⚠️ Lỗi khi đấu: ' + esc(e && e.message ? e.message : e));
       }
     };
@@ -609,10 +931,31 @@
     $('ar-btn-info').onclick = function(){ openSeasonInfo(); };
   }
 
+  function refreshTop(){
+    loadRankList(true).then(function(rows){
+      if(rows && rows.length){
+        topRows = rows;
+        const uid = myUid();
+        myRankNum = null;
+        if(uid){ for(let i=0;i<rows.length;i++) if(rows[i].uid===uid){ myRankNum=i+1; break; } }
+        if(panelOpen) renderMain();
+      }
+    });
+  }
+
   function showPanel(v){
     ensurePanel();
     if(v){ try{ if(window.TTGSEASON && TTGSEASON.afterLogin) TTGSEASON.afterLogin(); }catch(e){ console.warn('[arena] afterLogin', e); } }
     panelOpen = !!v;
+    if(v && !isGuest() && window.TTGSEASON && TTGSEASON.writeSeasonRank){
+      // đảm bảo tên mình có trên bảng xếp hạng mùa này
+      try{
+        TTGSEASON.writeSeasonRank({ lv: (typeof level === 'number' ? level : 1) }).then(function(res){
+          if(res && !res.ok) toast('⚠️ Không ghi được bảng xếp hạng (' + esc(res.error) + '). Kiểm tra đã Publish Rules Realtime Database chưa.');
+          else if(panelOpen) refreshTop();
+        });
+      }catch(_){}
+    }
     const ov = $('ar-ov');
     if(!ov) return;
     ov.classList.toggle('show', panelOpen);
@@ -878,7 +1221,7 @@
       '<div style="font-size:14px;color:#b7bda9">Hiện tại: '+o.myFame+(myRankNum?(' · Hạng '+myRankNum):'')+'</div>'+
       '<button type="button" id="ar-res-ok">Đóng</button>';
     res.classList.add('show');
-    $('ar-res-ok').onclick = function(){ res.classList.remove('show'); };
+    $('ar-res-ok').onclick = function(){ res.classList.remove('show'); showPanel(true); };
   }
 
   function start(){
@@ -917,7 +1260,8 @@
     NEAR_ABOVE: NEAR_ABOVE,
     NEAR_BELOW: NEAR_BELOW,
     FAME_WIN_BASE: FAME_WIN_BASE,
-    REWARD_TABLE: REWARD_TABLE
+    REWARD_TABLE: REWARD_TABLE,
+    _test:{simArena:simArena, mkFighterFromMe:mkFighterFromMe, mkFighterFromCard:mkFighterFromCard, makeNpcCard:makeNpcCard}
   };
 
 })();

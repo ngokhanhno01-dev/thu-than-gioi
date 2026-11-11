@@ -2309,5 +2309,7 @@ renderZones();ratesLine();
  const up=()=>hb.textContent='👑 Săn boss: '+(hunt?'BẬT':'TẮT');up();hb.onclick=()=>{hunt=!hunt;ratesLine();up();log('👑 Săn boss '+(hunt?'bật.':'tắt.'))};gr.parentNode.insertBefore(hb,gr.nextSibling)}
 window.train=function(){if(!hatched||busy)return;explore()};
 window.arena=function(){if(!busy)_a()};window.shop=function(){if(!busy)openShop()};window.TRQ_=TRQ;window.TRB_=TRB;
+/* [ĐẤU TRƯỜNG] mở các hàm vẽ/hiệu ứng trận đấu cho 26-arena.js dùng lại (chỉ thêm, không đổi gì cũ) */
+window.TTGFX={getBusy:()=>busy,setBusy:v=>{busy=!!v}};
+[['drawPet',()=>drawPet],['impact',()=>impact],['fxDraw',()=>fxDraw],['fxTop',()=>fxTop],['tintDraw',()=>tintDraw],['aura',()=>aura],['paintUI',()=>paintUI],['evTags',()=>evTags],['fxClass',()=>fxClass],['fxElem',()=>fxElem],['fxRecoil',()=>fxRecoil],['lungeAt',()=>lungeAt],['FXS',()=>FXS],['FXRG',()=>FXRG],['REG',()=>REG],['BT0',()=>BT0],['BST',()=>BST],['PET_DRAW_SCALE',()=>PET_DRAW_SCALE],['PET_GROW_MAX',()=>PET_GROW_MAX],['PET_FX',()=>PET_FX]].forEach(([k,f])=>{try{window.TTGFX[k]=f()}catch(e){console.warn('[TTGFX] thiếu',k)}});
 })();
-
