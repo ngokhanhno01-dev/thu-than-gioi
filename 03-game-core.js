@@ -44,15 +44,13 @@ function hatch(){
   $('main-title').textContent='Sảnh Chính';
   ['train','arena','shop'].forEach(k=>{const b=$('btn-'+k);b.disabled=false;b.classList.remove('locked')});
 }
-function train(){const f=addFame(3);stats();log('🧭 Thần thú thám hiểm, uy danh +'+f+'.')}
-function arena(){
-  if(Math.random()<.55){gold+=12;const f=addFame(5);log('⚔️ Thắng trận! Xu +12, uy danh +'+f+'.')}
-  else{fame=Math.max(0,fame-1);log('⚔️ Thua trận, uy danh -1. Hãy luyện thêm!')}
-  stats();
+function train(){stats();log('🧭 Thần thú thám hiểm (uy danh chỉ từ Đấu trường).')}
+function arena(){ /* placeholder, 26-arena.js sẽ ghi đè */
+  log('⚔️ Đấu trường đang tải...');
 }
 function shop(){
   if(gold<20){log('🏪 Không đủ xu mua Linh Đan (20 xu).');return}
-  gold-=20;const f=addFame(6);stats();log('🏪 Mua Linh Đan: thú tăng tu vi, uy danh +'+f+'.');
+  gold-=20;stats();log('🏪 Mua Linh Đan: thú tăng tu vi.');
 }
 
 /* ===== Cảnh giả 3D ===== */

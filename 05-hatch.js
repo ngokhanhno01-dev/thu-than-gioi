@@ -64,7 +64,7 @@ const SP17=[
 function spInfo(sp,pi,q){const e=Math.min(1.2,pur(pi)*(1+q*.05)),d=SP17[sp],v=Math.round(d.m*e*10)/10;
   return{e,v,name:d.n,text:d.t(v,e),c:d.c*e}}
 function spOfPet(){return pet?spInfo(pet.sp,pet.pi+(pet.up||0)*.03,pet.q):null}
-function addFame(n){const bonus=pet&&pet.sp===6?spOfPet().v:0,earned=Math.round(n*(1+bonus/100));fame+=earned;return earned}
+function addFame(n){/* Uy danh chỉ từ Đấu trường (Bước 4). Nguồn cũ (thám hiểm/Linh Đan/Linh Quả) đã tắt. */return 0}
 
 /* --- ngũ hành khắc chế (Hồ trung lập) --- */
 const CYC=['ho','long','lan','vu','tuoc'];

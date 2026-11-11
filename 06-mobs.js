@@ -2176,7 +2176,7 @@ function fxTop(g,u,redm){
 window.BSPD=1; /* hệ số tăng tốc thám hiểm + trận đấu (x1..x4), chỉ đổi được từ bảng Admin */
 function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=$('mob'),g=$('mob-c').getContext('2d'),R=sim(e),n=R.ev.length,sp=spOfPet(),b=e.tr.rw,
  ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))*buffMul('exp')),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))*buffMul('xu')),
- lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=e.tr.fw,fL=Math.min(Math.floor(fame),e.tr.fl),TE=(BT0+n*BST)/SP,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false,holdUntil=0,lastF=t0,shAmp=0,shDur=1,shEnd=0;const fired={},REDM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);const CL=R.ev.map(fxClass),HN=[fxElem((BL[pet.bl]||{}).h),fxElem((BL[e.m.bl]||{}).h)];/* [FX đợt 2] CL: loại đòn từng sự kiện · HN: hệ bên thú / bên quái */
+ lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=0,fL=0,TE=(BT0+n*BST)/SP,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false,holdUntil=0,lastF=t0,shAmp=0,shDur=1,shEnd=0;const fired={},REDM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);const CL=R.ev.map(fxClass),HN=[fxElem((BL[pet.bl]||{}).h),fxElem((BL[e.m.bl]||{}).h)];/* [FX đợt 2] CL: loại đòn từng sự kiện · HN: hệ bên thú / bên quái */
  o.style.display='block';const rb=$('mob-run');rb.style.display='block';
  $('mob-pn').textContent=pn+' · Cấp '+level;const RP=REG[pet.sp],RM=REG[e.m.sp];paintUI(RP,RM);$('mob-mn').innerHTML=(e.m.boss?'👑 ':'')+nm(e)+' · Cấp '+e.lv;if(e.tr.n!=='Thường')$('mob-mh').parentNode.style.borderColor=e.tr.c;if(window.battleHudExtra)battleHudExtra(e);
  function fin(flee){if(done)return;done=true;o.style.display='none';rb.style.display='none';
@@ -2270,7 +2270,7 @@ function showResult(r){const e=r.e,C={win:['🏆','CHIẾN THẮNG!','#72e4b0'],
 async function explore(){busy=true;stopReq=false;let iv=0;
  try{while(!stopReq){
   xp.style.display='flex';xp.style.boxShadow='';
-  xp.innerHTML='<div class="hg">⏳</div><div style="margin-top:8px;font-weight:700;font-size:14px">Đang thám hiểm<span id="xd">.</span></div><div style="font-size:11px;color:#ffc978;margin-top:4px">'+VAN_KIEP_ZONES[zoneSel].name+' · Uy danh '+fame+'</div><div style="font-size:10.5px;margin-top:5px;line-height:1.5">'+ratesHtml2()+'</div><button id="xp-stop" style="flex:none;margin-top:12px;padding:8px 18px;border-radius:9px;border:1px solid #ff7654;background:#a72f42;color:#fff;font-weight:800;font-size:13px;cursor:pointer">⏹ Dừng thám hiểm</button>';
+  xp.innerHTML='<div class="hg">⏳</div><div style="margin-top:8px;font-weight:700;font-size:14px">Đang thám hiểm<span id="xd">.</span></div><div style="font-size:11px;color:#ffc978;margin-top:4px">'+VAN_KIEP_ZONES[zoneSel].name+'</div><div style="font-size:10.5px;margin-top:5px;line-height:1.5">'+ratesHtml2()+'</div><button id="xp-stop" style="flex:none;margin-top:12px;padding:8px 18px;border-radius:9px;border:1px solid #ff7654;background:#a72f42;color:#fff;font-weight:800;font-size:13px;cursor:pointer">⏹ Dừng thám hiểm</button>';
   let k=0;iv=setInterval(()=>{const d=$('xd');if(d)d.textContent='.'.repeat(1+(++k%3))},400);
   $('xp-stop').onclick=()=>{stopReq=true;$('xp-stop').disabled=true;$('xp-stop').textContent='Đang dừng...'};
   await waitS(3200/BSPD);clearInterval(iv);if(stopReq)break;
@@ -2306,7 +2306,7 @@ $('zone-list').onclick=ev=>{const d=ev.target.closest('[data-z]');if(d)pickZone(
  zoneSeen=mx;renderZones()}}
 renderZones();ratesLine();
 {const gr=$('btn-train').parentNode,hb=document.createElement('button');hb.id='btn-hunt';hb.style.cssText='display:block;width:100%;margin-top:6px;padding:6px;border-radius:9px;border:1px solid #ffd24a;background:#3a2a33;color:#ffd24a;font-weight:700;font-size:12px;cursor:pointer';
- const up=()=>hb.textContent='👑 Săn boss: '+(hunt?'BẬT':'TẮT');up();hb.onclick=()=>{hunt=!hunt;ratesLine();up();log('👑 Săn boss '+(hunt?'bật: có thể gặp boss theo uy danh.':'tắt: sẽ không gặp boss.'))};gr.parentNode.insertBefore(hb,gr.nextSibling)}
+ const up=()=>hb.textContent='👑 Săn boss: '+(hunt?'BẬT':'TẮT');up();hb.onclick=()=>{hunt=!hunt;ratesLine();up();log('👑 Săn boss '+(hunt?'bật.':'tắt.'))};gr.parentNode.insertBefore(hb,gr.nextSibling)}
 window.train=function(){if(!hatched||busy)return;explore()};
 window.arena=function(){if(!busy)_a()};window.shop=function(){if(!busy)openShop()};window.TRQ_=TRQ;window.TRB_=TRB;
 })();

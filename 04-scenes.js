@@ -428,9 +428,9 @@ const BAG_SLOTS=100,STACK=99;
 const SELL_PRICE={qua:3,thuoc:5,dan:10,huyet:150},SELL_MAT=6; /* giá bán tạm, sửa ở đây */
 function sellPrice(id){return SELL_PRICE[id]!==undefined?SELL_PRICE[id]:SELL_MAT}
 const ITEMS={
-  qua:{n:'Linh Quả',i:'🍎',d:'Quả chứa linh khí. Thú ăn vào no bụng, uy danh +2.',use:()=>{const f=addFame(2);stats();log('🍎 Thú ăn Linh Quả, uy danh +'+f+'.')}},
+  qua:{n:'Linh Quả',i:'🍎',d:'Quả chứa linh khí. Thú ăn vào no bụng.',use:()=>{stats();log('🍎 Thú ăn Linh Quả.')}},
  thuoc:{n:'Thảo Dược',i:'🌿',d:'Dùng chữa bệnh cho thú (áp dụng khi có yêu cầu bệnh).',use:null},
-  dan:{n:'Linh Đan',i:'💊',d:'Thú tăng tu vi, uy danh +6.',use:()=>{const f=addFame(6);stats();log('💊 Thú dùng Linh Đan, uy danh +'+f+'.')}},
+  dan:{n:'Linh Đan',i:'💊',d:'Thú tăng tu vi.',use:()=>{stats();log('💊 Thú dùng Linh Đan.')}},
  huyet:{n:'Giọt Huyết Mạch',i:'🩸',d:'Cực hiếm. Sau này dùng để tăng nhẹ % huyết mạch (chưa mở).',use:null}
 };
 for(let k=0;k<17;k++)ITEMS['mat'+k]={n:'Tinh Hoa '+EPI[k][0],i:'◆',col:EPI[k][1],d:'Nguyên liệu hệ '+EPI[k][0]+' (dùng để chế tạo, sắp có).',use:null};
@@ -468,11 +468,7 @@ function bagSell(){const s=bag[bagSel];if(!s){log('🎒 Hãy chạm vào một �
  inp.value=1}
 function dropRand(){const sp=pet?pet.sp:Math.floor(Math.random()*17),r=Math.random();
  return r<.02?'huyet':r<.35?'qua':r<.6?'thuoc':r<.8?'dan':'mat'+sp}
-window.arena=function(){if(!hatched)return;
-  if(Math.random()<.55){gold+=12;const f=addFame(5);log('⚔️ Thắng trận! Xu +12, uy danh +'+f+'.');
-  if(Math.random()<.4){const id=dropRand();log(addItem(id,1)?'🎒 Nhặt được <b>'+ITEMS[id].n+'</b>.':'🎒 Balo đầy, bỏ lại <b>'+ITEMS[id].n+'</b>!')}}
- else{fame=Math.max(0,fame-1);log('⚔️ Thua trận, uy danh -1. Hãy luyện thêm!')}
- stats()};
+window.arena=function(){/* placeholder — 26-arena.js ghi đè */log('⚔️ Đấu trường đang tải...');};
 window.shop=function(){
  if(gold<20){log('🏪 Không đủ xu mua Linh Đan (20 xu).');return}
  if(!addItem('dan',1)){log('🎒 Balo đầy, không mua được.');return}
