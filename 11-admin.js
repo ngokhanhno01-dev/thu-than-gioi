@@ -4,7 +4,6 @@
    Đây chỉ là rào chắn sơ sơ chạy ở trình duyệt, ai biết dùng F12 vẫn có thể gọi hàm trực tiếp.
    Sau này nên thay bằng kiểm tra phía server. */
 const ADMIN_HASH='456ceed90dcb760523a34ba599380cc6c225f2a04eae0d170762c647a0dcd158';
-const RTDB_URL='https://thu-than-gioi-default-rtdb.asia-southeast1.firebasedatabase.app';
 let adminOn=false,adminFail=0,adminLockUntil=0,adminEl=null;
 async function adminCheck(pw){
  if(!(window.crypto&&crypto.subtle))return null;
@@ -22,16 +21,6 @@ async function adminOpen(){
  adminOn=true;adminFail=0;log('🛠️ Đã bật admin.');adminShow()}
 const adNum=id=>{const v=Math.floor(Number(document.getElementById(id).value));return v>0?Math.min(v,1e9):0};
 function adMsg(h){const d=document.getElementById('ad-msg');if(d)d.innerHTML=h}
-
-function ensureRtdbSdk(){
-  if(window.firebase&&typeof firebase.database==='function')return Promise.resolve();
-  return new Promise((res,rej)=>{
-    const s=document.createElement('script');
-    s.src='https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js';
-    s.onload=res;s.onerror=()=>rej(new Error('Không tải được SDK Database'));
-    document.head.appendChild(s);
-  });
-}
 
 /* ===== Gửi quà vào Hộp thư người chơi ===== */
 async function adFindUidByNick(nick){
@@ -63,13 +52,12 @@ async function adSendMail(){
   const uid = await adFindUidByNick(nick);
   if(!uid) return adMsg('Không tìm thấy biệt danh "<b>'+nick+'</b>".');
 
-  // Lấy Realtime Database (tự động nạp SDK nếu chưa có)
+  // Lấy Realtime Database
   let rdb = null;
   try{
-    await ensureRtdbSdk();
     if(window.TTGNET && TTGNET.rdb) rdb = TTGNET.rdb;
-    else if(window.firebase && firebase.apps.length) rdb = firebase.app().database(RTDB_URL);
-  }catch(e){ return adMsg('Lỗi kết nối RTDB: '+(e.message||e)); }
+    else if(firebase.apps.length) rdb = firebase.database();
+  }catch(_){}
   if(!rdb) return adMsg('Chưa kết nối Realtime Database.');
 
   // Tạo nội dung thư
