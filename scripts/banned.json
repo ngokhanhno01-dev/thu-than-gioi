@@ -1,0 +1,4 @@
+{
+  "_ghi_chu": "Danh sach uid BI LOAI khoi xep hang / phat thuong khi chot mua. Them uid vao mang uids, vi du: [\"abc123...\", \"xyz789...\"]. Khong can khoa tai khoan o day (khoa that su lam o Rules: banned/{uid}).",
+  "uids": []
+}
