@@ -1016,6 +1016,33 @@
     if(s) s.classList.remove('show');
   }
 
+  function petScene(x,api,bl,sp,st,pi,T){
+    /* Cảnh thú: dùng lại ĐÚNG nền theo vùng (sceneDraw), bệ theo vùng (formation) và cỡ thú theo bậc của màn chính.
+       Vẽ cảnh lên canvas chính rồi cắt vùng quanh thú (giống cách thám hiểm làm). */
+    const im=api&&api.getStageImage(bl,sp,st);if(!im)return false;
+    const mc=document.getElementById('cv'),R=128/180,OX=90,OY=48;   /* cắt khung 180x180 quanh thú (thú đứng ở 180,194 trên màn chính) */
+    let sceneOk=false;
+    try{
+      if(mc&&typeof sceneDraw==='function'){
+        const K=mc.width/360,mx=mc.getContext('2d');
+        mx.save();mx.setTransform(K,0,0,K,0,0);
+        sceneDraw(T,sp);
+        mx.setTransform(K,0,0,K,0,0);
+        if(typeof formation==='function')formation(T,sp);
+        mx.restore();
+        x.save();x.imageSmoothingEnabled=false;x.drawImage(mc,OX*K,OY*K,180*K,180*K,0,0,128,128);x.restore();sceneOk=true}
+    }catch(e){}
+    if(!sceneOk){x.fillStyle='#0b1a20';x.fillRect(0,0,128,128)}
+    let size=84;
+    try{size=PET_STAGE_MAX_SIZE*genOf(bl,sp).sz*api.stageScale(st)*R}catch(e){}   /* cỡ theo bậc: lên bậc thú lớn dần như màn chính */
+    const by=(194-OY)*R+Math.sin(T*3.8)*1.7*R,bb=im.bb,bw=bb.w*size/128,bh=bb.h*size/128,
+      AX=window.PETAURA&&window.PETAURA.ok?window.PETAURA:null;
+    x.fillStyle='rgba(0,0,0,.42)';x.beginPath();x.ellipse(64,by+1,size*.38,5,0,0,7);x.fill();
+    if(AX){try{AX.back(x,64,by,bw,bh,T,'main',st,sp,pi||0,true,1)}catch(_){}}
+    const ok=api.drawStage(x,bl,sp,st,64,by,size);
+    if(AX){try{AX.front(x,64,by,bw,bh,T,'main',st,sp,pi||0,true,1)}catch(_){}}
+    return ok}
+  
   function drawTopPet(canvas, card, T){
     if(!canvas || !card) return;
     const ctx = canvas.getContext('2d');
@@ -1023,10 +1050,8 @@
     try{
       const api = window.VanKiepSprites;
       const stage = cardStage(card);
-      if(api && window.TTGFX && api.getStageImage(card.bl || 'ho', Math.floor(Number(card.sp) || 0), stage)){
-        // cùng cách vẽ với trận đấu: sprite thật + hào quang (aura)
-        drawOpp(ctx, {bl: card.bl || 'ho', sp: card.sp, st: stage, lv: card.lv, pi: card.pi}, 64, 114, 78, T || 0, 0, 1, false);
-        return;
+      if(api && api.getStageImage(card.bl || 'ho', Math.floor(Number(card.sp) || 0), stage)){
+        if(petScene(ctx, api, card.bl || 'ho', Math.floor(Number(card.sp) || 0), stage, Math.max(0, Math.min(4, Number(card.pi) || 0)), T || 0)) return;
       }
     }catch(_){}
     const icons = {ho:'🦊',vu:'🦅',long:'🐉',tuoc:'🐦',lan:'🦌',hu:'✨'};
@@ -1043,7 +1068,7 @@
     if(!panelOpen) return;
     podList = podList.filter(function(p){ return p.cv.isConnected; });
     if(!podList.length) return;
-    if(ts - podLast >= 33){
+    if(ts - podLast >= 55){
       podLast = ts;
       const t = ts / 1000;
       podList.forEach(function(p){ if(p.card) drawTopPet(p.cv, p.card, t); });

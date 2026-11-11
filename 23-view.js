@@ -129,23 +129,41 @@ function render(c,uid,fallbackNick,pt){
   drawPet(bl,sp,st,pi)}
 
 /* Vẽ thú: ảnh có thể chưa tải xong -> thử lại từng khung hình tối đa ~4 giây */
+function petScene(x,api,bl,sp,st,pi,T){
+  /* Cảnh thú: dùng lại ĐÚNG nền theo vùng (sceneDraw), bệ theo vùng (formation) và cỡ thú theo bậc của màn chính.
+     Vẽ cảnh lên canvas chính rồi cắt vùng quanh thú (giống cách thám hiểm làm). */
+  const im=api&&api.getStageImage(bl,sp,st);if(!im)return false;
+  const mc=document.getElementById('cv'),R=128/180,OX=90,OY=48;   /* cắt khung 180x180 quanh thú (thú đứng ở 180,194 trên màn chính) */
+  let sceneOk=false;
+  try{
+    if(mc&&typeof sceneDraw==='function'){
+      const K=mc.width/360,mx=mc.getContext('2d');
+      mx.save();mx.setTransform(K,0,0,K,0,0);
+      sceneDraw(T,sp);
+      mx.setTransform(K,0,0,K,0,0);
+      if(typeof formation==='function')formation(T,sp);
+      mx.restore();
+      x.save();x.imageSmoothingEnabled=false;x.drawImage(mc,OX*K,OY*K,180*K,180*K,0,0,128,128);x.restore();sceneOk=true}
+  }catch(e){}
+  if(!sceneOk){x.fillStyle='#0b1a20';x.fillRect(0,0,128,128)}
+  let size=84;
+  try{size=PET_STAGE_MAX_SIZE*genOf(bl,sp).sz*api.stageScale(st)*R}catch(e){}   /* cỡ theo bậc: lên bậc thú lớn dần như màn chính */
+  const by=(194-OY)*R+Math.sin(T*3.8)*1.7*R,bb=im.bb,bw=bb.w*size/128,bh=bb.h*size/128,
+    AX=window.PETAURA&&window.PETAURA.ok?window.PETAURA:null;
+  x.fillStyle='rgba(0,0,0,.42)';x.beginPath();x.ellipse(64,by+1,size*.38,5,0,0,7);x.fill();
+  if(AX){try{AX.back(x,64,by,bw,bh,T,'main',st,sp,pi||0,true,1)}catch(_){}}
+  const ok=api.drawStage(x,bl,sp,st,64,by,size);
+  if(AX){try{AX.front(x,64,by,bw,bh,T,'main',st,sp,pi||0,true,1)}catch(_){}}
+  return ok}
+
 function drawPet(bl,sp,st,pi){
   cancelAnimationFrame(raf);
   const cv=$('cv-cv');if(!cv)return;
   const x=cv.getContext('2d'),api=window.VanKiepSprites;let n=0;
-  const SZ=84,BY=116;   /* cỡ thú + vị trí chân trong khung 128x128 (chừa chỗ cho hào quang) */
   const step=ts=>{
     if(!open)return;
     x.clearRect(0,0,128,128);
-    let ok=false;
-    try{
-      const im=api&&api.getStageImage(bl,sp,st);
-      if(im){
-        const bb=im.bb,u=SZ/128,w=bb.w*u,h=bb.h*u,T=(ts||performance.now())/1000,
-          AX=window.PETAURA&&window.PETAURA.ok?window.PETAURA:null;
-        if(AX){try{AX.back(x,64,BY,w,h,T,'main',st,sp,pi||0,true,1)}catch(_){}}
-        ok=!!api.drawStage(x,bl,sp,st,64,BY,SZ);
-        if(AX){try{AX.front(x,64,BY,w,h,T,'main',st,sp,pi||0,true,1)}catch(_){}}}}catch(_){}
+    let ok=false;try{ok=!!petScene(x,api,bl,sp,st,pi,(ts||performance.now())/1000)}catch(_){}
     if(ok)raf=requestAnimationFrame(step);        /* vẽ liên tục để hào quang chuyển động; dừng khi đóng thẻ */
     else if(++n<240&&open)raf=requestAnimationFrame(step)};
   step()}
