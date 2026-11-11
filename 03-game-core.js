@@ -41,7 +41,7 @@ function hatch(){
   setTimeout(()=>{if(hatched)$('banner').textContent=STAGES[stageOf(level)][1]},3000);
   log('<b>[Kỳ tích]</b> Vỏ trứng rạn nứt, hào quang vạn trượng! Một tiểu thần thú đã ra đời!');
   $('s-egg').style.display='none';
-  $('main-title').textContent='Tu Luyện Đường';
+  $('main-title').textContent='Sảnh Chính';
   ['train','arena','shop'].forEach(k=>{const b=$('btn-'+k);b.disabled=false;b.classList.remove('locked')});
 }
 function train(){const f=addFame(3);stats();log('🧭 Thần thú thám hiểm, uy danh +'+f+'.')}

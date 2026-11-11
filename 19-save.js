@@ -237,7 +237,7 @@ function restore(d){
     chosen=true;hatched=true;hatchAge=clampI(g.hatchAge,0,1e9);pet=g.pet;pet.up=clampI(pet.up,0,UP_MAX);
     gs=growthOf(level);lastTick=Date.now();
     $s('s-pick').style.display='none';$s('s-egg').style.display='none';
-    $s('main-title').textContent='Tu Luyện Đường';
+    $s('main-title').textContent='Sảnh Chính';
     ['train','arena','shop'].forEach(k=>{const b=$s('btn-'+k);b.disabled=false;b.classList.remove('locked')});
     const rb=$s('btn-rebirth');if(rb){rb.disabled=false;rb.classList.remove('locked')}
     updateStage();$s('banner').textContent=STAGES[stageOf(level)][1];
@@ -528,6 +528,7 @@ function begin(key,name){
   else log('👋 Chào <b>'+name+'</b>! Tiến trình sẽ tự động lưu.');
   buildAcc();refreshAcc();if(db&&key!==GUEST)watch();
   try{fbInit();if(db&&window.TTGNET)TTGNET.start({db,uid:key,name,guest:key===GUEST})}catch(e){console.warn('[online]',e)}   /* chat + số người online (20-online.js) */
+  try{if(db&&window.TTGMAIL)TTGMAIL.start({db,uid:key,guest:key===GUEST})}catch(e){console.warn('[mail]',e)}   /* hộp thư (24-mail.js) */
   const _st=stats;stats=function(){_st.apply(this,arguments);sched()};      /* xu/uy danh đổi -> lưu sau 2 giây */
   setInterval(save,AUTO_MS);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){save();flushCloud(60000)}});

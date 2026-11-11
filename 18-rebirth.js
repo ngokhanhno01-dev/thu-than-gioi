@@ -1,7 +1,7 @@
 
 /* ===== 18-rebirth.js — TÁI SINH =====
    Luồng:
-   1. Nút ♻️ Tái Sinh (Tu Luyện Đường) -> về giao diện roll trứng. Mỗi lượt Quay tốn RB_COST xu (không còn 3 lượt miễn phí).
+   1. Nút ♻️ Tái Sinh (Sảnh Chính) -> về giao diện roll trứng. Mỗi lượt Quay tốn RB_COST xu (không còn 3 lượt miễn phí).
    2. Giao diện roll có 3 nút: Quay · Tái Sinh · Quay lại (nút "Ấp Trứng Này" và "Gieo Quẻ" bị ẩn).
    3. Tái Sinh -> bảng xác nhận (thông tin trứng + cảnh báo) -> Có: hiệu ứng trắng lóe ~5s (tối dần, hạt hút vào, nhịp sáng nhanh dần, trắng xóa, sóng xung kích) rồi sang giao diện ấp trứng.
       Không: đóng bảng, về lại giao diện roll.
@@ -193,7 +193,7 @@ function apply(){
   $('h-age').textContent=0;
   layout();
   $('s-main').style.display='';
-  $('main-title').textContent='Tu Luyện Đường (Đang Khóa)';
+  $('main-title').textContent='Sảnh Chính (Đang Khóa)';
   ['train','arena','shop'].forEach(k=>{const b=$('btn-'+k);b.disabled=true;b.classList.add('locked')});
   lockEntry(true);
   $('mission').textContent='Chạm liên tục để làm vỡ vỏ trứng!';
