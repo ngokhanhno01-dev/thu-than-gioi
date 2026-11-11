@@ -24,6 +24,8 @@ const OFF_MIN_SEC=600;        /* vắng dưới 10 phút: không tính */
 const OFF_MAX_H=4;            /* mỗi lần nhận tối đa tính bao nhiêu giờ vắng */
 const OFF_DAILY_H=6;          /* tổng số giờ ngoại tuyến được tính trong mỗi chu kỳ 24 giờ */
 let fameSeason=0;              /* mùa mà uy danh hiện tại thuộc về (0 = chưa set) */
+let arenaTickets=10;           /* số vé Đấu trường hiện có (0–10), Bước 2 */
+let arenaTicketAt=0;           /* mốc giờ máy chủ (ms) lần tính vé gần nhất; 0 = chưa set */
 const OFF_WINDOW_MS=24*3600*1000;
 const GUEST='__guest';
 const P='ttg_';
@@ -211,7 +213,9 @@ function snap(){
     eqWorn,ebag,eqUid,
     buffs:Object.assign({},buffs),
     shop:{stock:Object.assign({},shopStock),next:shopNextAt},
-    zone:zoneIdx(),hunt:huntOn(),off:{t0:offSt.t0,used:offSt.used},nc:nickChanges
+    zone:zoneIdx(),hunt:huntOn(),off:{t0:offSt.t0,used:offSt.used},nc:nickChanges,
+    arenaTickets:(typeof arenaTickets!=='undefined'?arenaTickets:10),
+    arenaTicketAt:(typeof arenaTicketAt!=='undefined'?arenaTicketAt:0)
   };
   return{v:VER,t:Date.now(),tab:TAB,g}}
 const validPet=p=>p&&BL[p.bl]&&Number.isInteger(p.sp)&&p.sp>=0&&p.sp<17&&p.pi>=0&&p.pi<5&&p.q>=0&&p.q<5&&p.base&&['hp','atk','def','spd','mag'].every(k=>isFinite(p.base[k]));
@@ -229,6 +233,8 @@ function restore(d){
   nickChanges=clampI(g.nc,0,999);
   level=clampI(g.level,1,MAXLV);exp=Math.max(0,num(g.exp));age=Math.max(0,clampI(g.age,0,1e9));
   gold=Math.max(0,Math.floor(num(g.gold,50)));fame=Math.max(0,Math.floor(num(g.fame)));fameSeason=Math.max(0,Math.floor(num(g.fameSeason,0)));
+  arenaTickets=Math.max(0,Math.min(10,Math.floor(num(g.arenaTickets,10))));
+  arenaTicketAt=Math.max(0,Math.floor(num(g.arenaTicketAt,0)));
   rolls=clampI(g.rolls,0,1e9);rerollLeft=clampI(g.rerollLeft,0,99);
   hist=Array.isArray(g.hist)?g.hist.filter(q=>q>=0&&q<5).slice(0,3):[];
   eggQ=clampI(g.eggQ,0,4);
@@ -531,6 +537,7 @@ function begin(key,name){
   try{fbInit();if(db&&window.TTGNET)TTGNET.start({db,uid:key,name,guest:key===GUEST})}catch(e){console.warn('[online]',e)}   /* chat + số người online (20-online.js) */
   try{if(window.checkAdminStatus && key!==GUEST)checkAdminStatus(key)}catch(e){console.warn('[admin]',e)}
   try{if(db&&window.TTGMAIL)TTGMAIL.start({db,uid:key,guest:key===GUEST})}catch(e){console.warn('[mail]',e)}   /* hộp thư (24-mail.js) */
+  try{if(window.TTGSEASON&&typeof TTGSEASON.afterLogin==='function')TTGSEASON.afterLogin({uid:key,name:name,guest:key===GUEST})}catch(e){console.warn('[season]',e)} /* vé + reset mùa (25-season.js) */
   const _st=stats;stats=function(){_st.apply(this,arguments);sched()};      /* xu/uy danh đổi -> lưu sau 2 giây */
   setInterval(save,AUTO_MS);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){save();flushCloud(60000)}});
