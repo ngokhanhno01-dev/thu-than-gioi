@@ -611,6 +611,7 @@
 
   function showPanel(v){
     ensurePanel();
+    if(v){ try{ if(window.TTGSEASON && TTGSEASON.afterLogin) TTGSEASON.afterLogin(); }catch(e){ console.warn('[arena] afterLogin', e); } }
     panelOpen = !!v;
     const ov = $('ar-ov');
     if(!ov) return;
@@ -665,12 +666,16 @@
   }
 
   function renderMain(){
+    try{ renderMain0(); }catch(e){ console.error(e); const b=$('ar-body'); if(b) b.innerHTML='<div class="empty" style="color:#ff9a94">⚠️ Lỗi hiển thị: '+esc(e&&e.message?e.message:e)+'</div>'; }
+  }
+  function renderMain0(){
     const body = $('ar-body');
     if(!body) return;
     const seas = curSeason();
     const meF = myDispFame();
     const rankTxt = myRankNum ? ('Hạng <b>' + myRankNum + '</b>') : 'Chưa có hạng';
-    const tk = (window.TTGSEASON && TTGSEASON.ticketsStr) ? TTGSEASON.ticketsStr() : '';
+    let tk = '';
+    try{ tk = (window.TTGSEASON && TTGSEASON.ticketsStr) ? TTGSEASON.ticketsStr() : ''; }catch(e){ tk = 'Vé: lỗi ' + (e && e.message); }
 
     let podiumHtml = '<div id="ar-podium">';
     for(let i=0;i<3;i++){

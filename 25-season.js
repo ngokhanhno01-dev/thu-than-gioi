@@ -74,6 +74,22 @@
            pad(vn.getUTCHours()) + ':' + pad(vn.getUTCMinutes()) + ' VN';
   }
 
+
+  /* ---------- LỚP TRUY CẬP: chạy được cả khi 19-save.js CŨ chưa khai báo biến vé/mùa ----------
+     Nếu 19-save.js mới có biến toàn cục (arenaTickets, arenaTicketAt, fameSeason) thì dùng chúng
+     (được lưu cùng bản lưu game). Nếu không, dùng bản dự phòng lưu trong localStorage của máy. */
+  const FB_KEY = 'ttg_arena_fb';
+  const FB = (function(){ try{ return JSON.parse(localStorage.getItem(FB_KEY)) || {}; }catch(_){ return {}; } })();
+  function _fbSave(){ try{ localStorage.setItem(FB_KEY, JSON.stringify(FB)); }catch(_){} }
+  function _hasT(){ try{ return typeof arenaTickets !== 'undefined' && typeof arenaTicketAt !== 'undefined'; }catch(_){ return false; } }
+  function _hasS(){ try{ return typeof fameSeason !== 'undefined'; }catch(_){ return false; } }
+  function _gT(){ return _hasT() ? arenaTickets : FB.tix; }
+  function _gAt(){ return _hasT() ? arenaTicketAt : FB.at; }
+  function _gFs(){ return _hasS() ? fameSeason : FB.fs; }
+  function _sT(v){ if(_hasT()) arenaTickets = v; else { FB.tix = v; _fbSave(); } }
+  function _sAt(v){ if(_hasT()) arenaTicketAt = v; else { FB.at = v; _fbSave(); } }
+  function _sFs(v){ if(_hasS()) fameSeason = v; else { FB.fs = v; _fbSave(); } }
+
   /* ---------- VÉ ĐẤU TRƯỜNG ----------
      - Tối đa TICKET_MAX.
      - Hồi 1 vé mỗi TICKET_REGEN_MS (30 phút) theo giờ máy chủ.
@@ -82,14 +98,12 @@
      - arenaTickets + arenaTicketAt nằm trong bản lưu (19-save.js).
   */
   function _getTickets(){
-    return (typeof arenaTickets === 'number' && isFinite(arenaTickets))
-      ? Math.max(0, Math.min(TICKET_MAX, Math.floor(arenaTickets)))
-      : 0;
+    const v = _gT();
+    return (typeof v === 'number' && isFinite(v)) ? Math.max(0, Math.min(TICKET_MAX, Math.floor(v))) : 0;
   }
   function _getTicketAt(){
-    return (typeof arenaTicketAt === 'number' && isFinite(arenaTicketAt) && arenaTicketAt > 0)
-      ? arenaTicketAt
-      : 0;
+    const v = _gAt();
+    return (typeof v === 'number' && isFinite(v) && v > 0) ? v : 0;
   }
 
   /**
@@ -104,19 +118,19 @@
 
     // Lần đầu (chưa có mốc): cho full vé, đặt mốc = now
     if(!at || at <= 0){
-      if(typeof arenaTickets === 'undefined' || arenaTickets === null){
-        arenaTickets = TICKET_MAX;
+      if(_gT() == null){
+        _sT(TICKET_MAX);
       }else{
-        arenaTickets = Math.max(0, Math.min(TICKET_MAX, Math.floor(arenaTickets)));
+        _sT(Math.max(0, Math.min(TICKET_MAX, Math.floor(_gT()))));
       }
-      arenaTicketAt = now;
+      _sAt(now);
       return _getTickets();
     }
 
     if(tix >= TICKET_MAX){
       // Đã full: giữ mốc = now để không "dồn" quá khứ khi dùng 1 vé
-      arenaTicketAt = now;
-      arenaTickets = TICKET_MAX;
+      _sAt(now);
+      _sT(TICKET_MAX);
       return TICKET_MAX;
     }
 
@@ -132,8 +146,8 @@
         tix = TICKET_MAX;
         at = now;
       }
-      arenaTickets = tix;
-      arenaTicketAt = at;
+      _sT(tix);
+      _sAt(at);
     }
     return _getTickets();
   }
@@ -150,10 +164,10 @@
   function useTicket(){
     ensureTickets();
     if(_getTickets() < 1) return false;
-    arenaTickets = _getTickets() - 1;
+    _sT(_getTickets() - 1);
     // Nếu vừa từ full xuống, bắt đầu đếm hồi từ bây giờ
     if(_getTicketAt() <= 0 || _getTickets() + 1 >= TICKET_MAX){
-      arenaTicketAt = nowSrv();
+      _sAt(nowSrv());
     }
     // Lưu sớm để không mất vé khi thoát
     try{ if(window.TTGSAVE && typeof TTGSAVE.save === 'function') TTGSAVE.save(); }catch(_){}
@@ -182,7 +196,7 @@
   /* ---------- RESET UY DANH THEO MÙA ----------
      - Khi đăng nhập / mỗi phút: nếu fameSeason < mùa hiện tại
        → fame = 0, fameSeason = mùa hiện tại, lưu, thông báo, ghi seasonRank.
-     - Máy chủ KHÔNG sửa bản lưu; mỗi máy tự reset.
+     - Máy chủ KHÔNG sửa bản lưu); mỗi máy tự reset.
   */
   function _playerNick(){
     try{
@@ -269,11 +283,12 @@
   function checkSeasonReset(opts){
     opts = opts || {};
     const cur = currentSeason();
-    let fs = (typeof fameSeason === 'number' && isFinite(fameSeason)) ? Math.floor(fameSeason) : 0;
+    const _fv = _gFs();
+    let fs = (typeof _fv === 'number' && isFinite(_fv)) ? Math.floor(_fv) : 0;
 
     // fameSeason = 0 (bản lưu cũ) → coi như mùa hiện tại, gán luôn, không reset uy danh lần đầu
     if(fs <= 0){
-      fameSeason = cur;
+      _sFs(cur);
       ensureTickets();
       // Vẫn ghi seasonRank để xuất hiện trong danh sách khiêu chiến
       writeSeasonRank({ season: cur, fame: (typeof fame === 'number' ? fame : 0) });
@@ -291,7 +306,7 @@
     // Sang mùa mới → reset
     const oldFame = (typeof fame === 'number' ? fame : 0);
     fame = 0;
-    fameSeason = cur;
+    _sFs(cur);
     ensureTickets();
 
     try{
