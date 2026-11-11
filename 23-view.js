@@ -80,9 +80,11 @@ function itemHtml(it){
   if(!slot||!zone)return'<div class="it no">— Không rõ —</div>';
   const col='rgb('+QC[q]+')';
   const lines=(Array.isArray(it.L)?it.L:[]).slice(0,5).map(l=>{
-    if(!Array.isArray(l))return'';
-    const d=EQ_STATS[String(l[0])];if(!d)return'';
-    return'<div>'+esc(d.n)+' +'+r1(l[1])+(d.t==='p'?'%':'')+'</div>'}).join('');
+    /* đọc cả dạng mới {k,v} lẫn dạng cũ [id,giá trị] */
+    let k,v;
+    if(Array.isArray(l)){k=l[0];v=l[1]}else if(l&&typeof l==='object'){k=l.k;v=l.v}else return'';
+    const d=EQ_STATS[String(k)];if(!d)return'';
+    return'<div>'+esc(d.n)+' +'+r1(v)+(d.t==='p'?'%':'')+'</div>'}).join('');
   return'<div class="it" style="border-color:'+col+'"><b style="color:'+col+'">'+slot.i+' ['+QN[q]+'] '+esc(slot.n+' '+zone.name)+'</b>'+lines+'</div>'}
 
 /* buff bộ: đếm số món cùng bộ (>=2 món thì có buff) */

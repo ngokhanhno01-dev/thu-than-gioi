@@ -10,17 +10,30 @@ const CARD_MS=300000;      /* tối thiểu 5 phút giữa 2 lần ghi thẻ */
 const CHECK_MS=60000;      /* mỗi 60 giây kiểm tra xem thẻ có đổi không (chỉ đọc biến trong máy, không tốn lượt Firestore) */
 let db=null,uid='',nick='',last=0,lastHash='',timer=0,busy=false;
 
+/* Chuẩn hóa để Firestore luôn nhận được: không undefined, số hữu hạn, chuỗi có giới hạn.
+   QUAN TRỌNG: Firestore KHÔNG cho mảng nằm trong mảng. Nên mỗi dòng chỉ số lưu dạng object {k:'atk',v:5.2}
+   (mảng các object thì được). 23-view.js đọc được cả dạng cũ [id,giá trị] lẫn dạng mới này. */
+const fin=(x,lo,hi,d)=>{x=+x;if(!isFinite(x))return d;return Math.max(lo,Math.min(hi,x))};
+const R=x=>Math.round(fin(x,-1e9,1e9,0)*10)/10;
+const I=(x,lo,hi,d)=>Math.floor(fin(x,lo,hi,d));
+const BLS=['ho','vu','long','tuoc','lan','hu'];
+
 /* Dựng thẻ từ trạng thái game hiện tại. Trả null nếu chưa có thú (chưa nở). */
 function buildCard(){
   if(typeof hatched==='undefined'||!hatched||!pet)return null;
-  const s=statsOf(pet.bl,pet.pi,pet.base,level),R=x=>Math.round((+x||0)*10)/10;
+  const s=statsOf(pet.bl,pet.pi,pet.base,level);
   const eq=[0,1,2,3].map(i=>{const it=eqWorn[i];
-    return it?{z:it.z,s:it.s,q:it.q,L:(it.L||[]).map(l=>[String(l[0]),R(l[1])])}:null});
+    if(!it||typeof it!=='object')return null;
+    const L=(Array.isArray(it.L)?it.L:[]).slice(0,5).map(l=>{
+      /* chấp nhận l là [id,giá trị] (bản game) hoặc {k,v} */
+      const k=Array.isArray(l)?l[0]:(l&&l.k),v=Array.isArray(l)?l[1]:(l&&l.v);
+      return{k:String(k==null?'':k).slice(0,12),v:R(v)}}).filter(o=>o.k);
+    return{z:I(it.z,0,99,0),s:I(it.s,0,99,0),q:I(it.q,0,4,0),L}});
   return{
-    nick:String(nick).slice(0,20),
-    lv:level,st:stageOf(level),
-    sp:pet.sp,bl:pet.bl,pi:pet.pi,up:pet.up||0,q:pet.q,
-    stats:{hp:Math.round(s.hp),atk:Math.round(s.atk),def:Math.round(s.def),spd:Math.round(s.spd),mag:Math.round(s.mag),
+    nick:String(nick||'').slice(0,20),
+    lv:I(level,1,100,1),st:I(stageOf(level),0,9,0),
+    sp:I(pet.sp,0,16,0),bl:BLS.includes(pet.bl)?pet.bl:'ho',pi:fin(pet.pi,0,4,0),up:I(pet.up,0,10,0),q:I(pet.q,0,4,0),
+    stats:{hp:Math.round(fin(s.hp,0,1e9,0)),atk:Math.round(fin(s.atk,0,1e9,0)),def:Math.round(fin(s.def,0,1e9,0)),spd:Math.round(fin(s.spd,0,1e9,0)),mag:Math.round(fin(s.mag,0,1e9,0)),
            eva:R(s.eva),stun:R(s.stun),regen:R(s.regen),crit:R(s.crit)},
     eq};
 }
