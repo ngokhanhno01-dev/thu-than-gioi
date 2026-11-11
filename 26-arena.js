@@ -514,7 +514,7 @@
     const lv = Math.max(1, Math.min(100, (typeof level==='number'?level:10) + Math.floor(Math.random()*5) - 2));
     const base = 8 + lv * 1.1;
     return {
-      nick: NPC_NAMES[Math.floor(Math.random() * NPC_NAMES.length)],
+      nick: NPC_NAMES[Math.floor(Math.random() * NPC_NAMES.length)],   // đổi tên theo loài ở dưới
       lv: lv,
       stats: {
         hp: Math.round(base * 8 * (0.9 + Math.random() * 0.2)),
@@ -534,6 +534,11 @@
       eq: [],
       _npc: true
     };
+  }
+  function makeNpcCardNamed(){
+    const c = makeNpcCard();
+    try{ const nm = genOf(c.bl, c.sp).name; if(nm) c.nick = String(nm).slice(0,20); }catch(_){}
+    return c;
   }
 
   /* =====================================================================
@@ -611,11 +616,18 @@
   }
 
   // vẽ thú của đối thủ (đứng bên phải, quay mặt sang trái) — theo drawPet của 06-mobs.js
+  /* bậc thú của thẻ: ưu tiên tính từ cấp (thẻ cũ có thể thiếu/sai trường st) */
+  function cardStage(card){
+    let st = Number(card && card.st);
+    const lv = Math.floor(Number(card && card.lv) || 0);
+    if(lv > 0 && typeof stageOf === 'function'){ try{ st = stageOf(lv); }catch(_){} }
+    return Math.max(0, Math.min(9, Math.floor(st) || 0));
+  }
   function drawOpp(g, card, cx, by, size, T, dx, al, gh){
     try{
       const {PET_DRAW_SCALE, PET_GROW_MAX, PET_FX} = window.TTGFX;
       const api = window.VanKiepSprites;
-      const stage = Math.max(0, Math.min(9, Math.floor(Number(card.st) || 0)));
+      const stage = cardStage(card);
       const im = api ? api.getStageImage(card.bl, card.sp, stage) : null;
       if(!im) return;
       const box = im.bb;
@@ -659,7 +671,7 @@
       const fired = {};
 
       o.style.display = 'block';
-      rb.style.display = 'block'; rb.textContent = 'Bỏ qua';
+      rb.style.display = 'none';   // đấu trường: không cho bỏ qua, xem trọn trận
       $('mob-pn').textContent = String(pn).slice(0,14) + ' · Lv.' + level;
       $('mob-mn').textContent = '⚔ ' + String(oppName).slice(0,12) + ' · Lv.' + (card.lv || '?');
       paintUI(RP, RM);
@@ -677,9 +689,7 @@
         o.onclick = null; rb.onclick = null;
         resolve();
       }
-      function skip(){ const T = (performance.now() - t0) / 1000; if(T < TE) t0 -= (TE - T) * 1000; else fin(); }
-      rb.onclick = function(ev){ ev.stopPropagation(); skip(); };
-      o.onclick = skip;
+      rb.onclick = null; o.onclick = null;
 
       (function L(){
         if(done) return;
@@ -848,12 +858,12 @@
     };
 
     if(isNpc){
-      runFight(makeNpcCard());
+      runFight(makeNpcCardNamed());
     }else{
       getCard(targetUid).then(function(card){
         if(!card){
           toast('⚠️ Không đọc được thẻ đối thủ, dùng NPC tạm.');
-          runFight(makeNpcCard());
+          runFight(makeNpcCardNamed());
         }else{
           runFight(card);
         }
@@ -866,6 +876,7 @@
     const css = document.createElement('style');
     css.id = 'ar-css';
     css.textContent =
+      '#cv-ov{z-index:125 !important}'+
       '#ar-ov{position:fixed;inset:0;z-index:120;background:rgba(4,10,14,.95);display:none;align-items:stretch;justify-content:center;font-family:inherit}'+
       '#ar-ov.show{display:flex}'+
       '#ar-box{width:min(100vw,480px);height:100vh;height:100dvh;max-height:none;background:#14272d;border:3px solid #f6c66a;box-shadow:0 4px 0 #040a0e;display:flex;flex-direction:column;color:#f5edcf;font-size:15px;overflow:hidden;position:relative}'+
@@ -1005,28 +1016,41 @@
     if(s) s.classList.remove('show');
   }
 
-  function drawTopPet(canvas, card){
+  function drawTopPet(canvas, card, T){
     if(!canvas || !card) return;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,128,128);
     try{
-      const bl = card.bl || 'ho';
-      const sp = Math.floor(Number(card.sp) || 0);
-      const st = Math.floor(Number(card.st) || 0);
-      const api = window.Sprites || window.SPRITE || window.TTGSPRITE;
-      if(api && typeof api.drawStageCentered === 'function'){
-        api.drawStageCentered(ctx, bl, sp, st, 64, 64, 128);
+      const api = window.VanKiepSprites;
+      const stage = cardStage(card);
+      if(api && window.TTGFX && api.getStageImage(card.bl || 'ho', Math.floor(Number(card.sp) || 0), stage)){
+        // cùng cách vẽ với trận đấu: sprite thật + hào quang (aura)
+        drawOpp(ctx, {bl: card.bl || 'ho', sp: card.sp, st: stage, lv: card.lv, pi: card.pi}, 64, 114, 78, T || 0, 0, 1, false);
         return;
       }
     }catch(_){}
     const icons = {ho:'🦊',vu:'🦅',long:'🐉',tuoc:'🐦',lan:'🦌',hu:'✨'};
-    ctx.fillStyle = '#0b1a20';
-    ctx.fillRect(0,0,128,128);
     ctx.font = '48px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(icons[card.bl] || '🐾', 64, 64);
   }
+
+  /* vòng lặp vẽ động cho 3 ô top (hào quang chuyển động); tự dừng khi đóng bảng */
+  let podList = [], podRaf = 0, podLast = 0;
+  function podLoop(ts){
+    podRaf = 0;
+    if(!panelOpen) return;
+    podList = podList.filter(function(p){ return p.cv.isConnected; });
+    if(!podList.length) return;
+    if(ts - podLast >= 33){
+      podLast = ts;
+      const t = ts / 1000;
+      podList.forEach(function(p){ if(p.card) drawTopPet(p.cv, p.card, t); });
+    }
+    podRaf = requestAnimationFrame(podLoop);
+  }
+  function podStart(){ if(!podRaf) podRaf = requestAnimationFrame(podLoop); }
 
   function renderMain(){
     try{ renderMain0(); }catch(e){ console.error(e); const b=$('ar-body'); if(b) b.innerHTML='<div class="empty" style="color:#ff9a94">⚠️ Lỗi hiển thị: '+esc(e&&e.message?e.message:e)+'</div>'; }
@@ -1082,13 +1106,23 @@
       };
     });
 
+    podList = [];
     body.querySelectorAll('#ar-podium canvas').forEach(function(cv){
       const i = Number(cv.getAttribute('data-i'));
       const r = topRows[i];
       if(!r) return;
-      getCard(r.uid).then(function(card){
-        drawTopPet(cv, card || {bl:'ho', sp:0, st:0});
-      });
+      const ent = {cv: cv, card: null};
+      podList.push(ent);
+      if(r.uid === myUid() && typeof pet !== 'undefined' && pet){
+        // thú của chính mình: lấy trực tiếp từ game, luôn đúng thú đang dùng
+        ent.card = {bl: pet.bl, sp: pet.sp, pi: pet.pi, st: (typeof stageOf === 'function' && typeof level === 'number') ? stageOf(level) : 0};
+        drawTopPet(cv, ent.card, 0); podStart();
+      }else{
+        getCard(r.uid).then(function(card){
+          ent.card = card || {bl:'ho', sp:0, st:0};
+          drawTopPet(cv, ent.card, 0); podStart();
+        });
+      }
     });
 
     const btnC = $('ar-btn-chal');

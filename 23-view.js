@@ -107,7 +107,7 @@ function agoMs(ms){const m=Math.floor(ms/60000);if(m<2)return'vừa xong';if(m<6
 function render(c,uid,fallbackNick,pt){
   const BLK=['ho','vu','long','tuoc','lan','hu'];
   const bl=BLK.includes(c.bl)?c.bl:'ho',sp=Math.floor(num(c.sp,0,16,0)),pi=Math.floor(num(c.pi,0,4,0)),up=Math.floor(num(c.up,0,10,0)),q=Math.floor(num(c.q,0,4,0));
-  const lv=Math.floor(num(c.lv,1,100,1)),st=Math.floor(num(c.st,0,9,0));
+  const lv=Math.floor(num(c.lv,1,100,1)),st=(c.st==null&&typeof stageOf==='function')?Math.max(0,Math.min(9,stageOf(lv))):Math.floor(num(c.st,0,9,0));
   const nick=String(c.nick||fallbackNick||'Ẩn danh').slice(0,20);
   const B=BL[bl],eq=Array.isArray(c.eq)?c.eq.slice(0,4):[];
   let spName=genOf(bl,sp).name,spTxt='';
@@ -126,18 +126,28 @@ function render(c,uid,fallbackNick,pt){
    '<div class="s">📊 Chỉ số tổng (đã gồm huyết mạch + trang bị)</div><div class="sg">'+grid+'</div>'+
    '<div class="s">🛡️ Trang bị đang mang</div>'+setHtml(eq)+[0,1,2,3].map(i=>itemHtml(eq[i])).join('')+
    (upd?'<div class="ft">Thẻ cập nhật '+upd+'</div>':'');
-  drawPet(bl,sp,st)}
+  drawPet(bl,sp,st,pi)}
 
 /* Vẽ thú: ảnh có thể chưa tải xong -> thử lại từng khung hình tối đa ~4 giây */
-function drawPet(bl,sp,st){
+function drawPet(bl,sp,st,pi){
   cancelAnimationFrame(raf);
   const cv=$('cv-cv');if(!cv)return;
   const x=cv.getContext('2d'),api=window.VanKiepSprites;let n=0;
-  const step=()=>{
+  const SZ=84,BY=116;   /* cỡ thú + vị trí chân trong khung 128x128 (chừa chỗ cho hào quang) */
+  const step=ts=>{
     if(!open)return;
     x.clearRect(0,0,128,128);
-    let ok=false;try{ok=!!(api&&api.drawStageCentered(x,bl,sp,st,64,64,128))}catch(_){}
-    if(!ok&&++n<240&&open)raf=requestAnimationFrame(step)};
+    let ok=false;
+    try{
+      const im=api&&api.getStageImage(bl,sp,st);
+      if(im){
+        const bb=im.bb,u=SZ/128,w=bb.w*u,h=bb.h*u,T=(ts||performance.now())/1000,
+          AX=window.PETAURA&&window.PETAURA.ok?window.PETAURA:null;
+        if(AX){try{AX.back(x,64,BY,w,h,T,'main',st,sp,pi||0,true,1)}catch(_){}}
+        ok=!!api.drawStage(x,bl,sp,st,64,BY,SZ);
+        if(AX){try{AX.front(x,64,BY,w,h,T,'main',st,sp,pi||0,true,1)}catch(_){}}}}catch(_){}
+    if(ok)raf=requestAnimationFrame(step);        /* vẽ liên tục để hào quang chuyển động; dừng khi đóng thẻ */
+    else if(++n<240&&open)raf=requestAnimationFrame(step)};
   step()}
 
 /* ---------- Tải thẻ ---------- */
