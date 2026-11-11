@@ -37,7 +37,7 @@ const FB_CONFIG={
   databaseURL:'https://thu-than-gioi-default-rtdb.asia-southeast1.firebasedatabase.app',
   appId:'1:422450444342:web:95516a9cdf2f50c0f28097'
 };
-const CLOUD_MS=300000;        /* đẩy lên máy chủ tối đa mỗi 5 phút (tiết kiệm quota Firestore). Bản lưu trên máy vẫn ghi mỗi 10 giây; nút 💾 Lưu ngay, ẩn tab, đóng trang sẽ đẩy ngay */
+const CLOUD_MS=60000;         /* đẩy lên máy chủ tối đa mỗi 60 giây (tiết kiệm quota Firestore). Bản lưu trên máy vẫn ghi mỗi 10 giây; nút 💾 Lưu ngay, ẩn tab, đóng trang sẽ đẩy ngay */
 const NOTICE_ON=true;          /* bật bảng thông báo khẩn nhắc lưu game khi vừa vào game */
 
 /* ====================== KHO LƯU TRỮ (thay khối này khi có máy chủ) ====================== */
@@ -339,7 +339,7 @@ function buildAcc(){
    '<button class="bad" id="ap-del">🗑️ Xóa dữ liệu & chơi lại</button>'+
    '<button class="dim" id="ap-close">Đóng</button>'+
    '<input type="file" id="ap-file" accept=".json,application/json" style="display:none">'+
-   '<div class="n">Tiến trình luôn lưu trên máy này; lên máy chủ tự động khoảng mỗi 5 phút. <b>Hãy bấm 💾 Lưu ngay trước khi thoát game hoặc đổi máy.</b> Chơi khách thì chỉ lưu trên máy này (dùng Xuất/Nhập file để chuyển).</div></div>';
+   '<div class="n">Tiến trình luôn lưu trên máy này; lên máy chủ tự động khoảng mỗi 1 phút. <b>Hãy bấm 💾 Lưu ngay trước khi thoát game hoặc đổi máy.</b> Chơi khách thì chỉ lưu trên máy này (dùng Xuất/Nhập file để chuyển).</div></div>';
   document.body.appendChild(p);
   p.addEventListener('click',e=>{if(e.target===p)closePanel()});
   $s('ap-close').onclick=closePanel;
@@ -518,7 +518,7 @@ function showSaveNotice(){   /* bảng thông báo khẩn khi vừa vào game: n
   const guest=!user||user.key===GUEST;
   const body=guest
     ?'Bạn đang chơi <b style="color:#f6c66a">KHÁCH</b>: tiến trình chỉ lưu trên trình duyệt này, xóa dữ liệu trình duyệt là <b style="color:#ff8a7a">MẤT HẾT</b>.<br><br>👉 Hãy <b>đăng ký tài khoản</b> hoặc bấm 👤 → 📤 Xuất file để giữ tiến trình.'
-    :'Game tự đồng bộ lên máy chủ <b>khoảng mỗi 5 phút</b>.<br><br>👉 Hãy bấm nút <b>👤</b> (góc trái dưới) → <b style="color:#f6c66a">💾 Lưu ngay</b> <b>TRƯỚC KHI THOÁT GAME</b> hoặc đổi sang máy khác, để không mất <b>tiến trình / thú / xu / vật phẩm vừa nhận gần nhất</b>.<br><br>Trên máy này, game vẫn tự lưu liên tục.';
+    :'Game tự đồng bộ lên máy chủ <b>khoảng mỗi 1 phút</b>.<br><br>👉 Hãy bấm nút <b>👤</b> (góc trái dưới) → <b style="color:#f6c66a">💾 Lưu ngay</b> <b>TRƯỚC KHI THOÁT GAME</b> hoặc đổi sang máy khác, để không mất <b>tiến trình / thú / xu / vật phẩm vừa nhận gần nhất</b>.<br><br>Trên máy này, game vẫn tự lưu liên tục.';
   const o=document.createElement('div');o.id='ttg-notice';
   o.innerHTML='<div class="ttg-bx"><div class="t">📢 THÔNG BÁO KHẨN</div><div class="s">Đọc trước khi chơi</div>'+
     '<div style="font-size:21px;line-height:1.2;text-align:left;margin:6px 0 10px">'+body+'</div>'+

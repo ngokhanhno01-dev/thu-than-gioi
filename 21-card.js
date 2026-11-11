@@ -2,12 +2,12 @@
    Mỗi người chơi đã đăng nhập tự đăng 1 "thẻ" tóm tắt lên Firestore cards/{uid}.
    Bạn bè (bước 2-3) chỉ đọc thẻ này; bản lưu thật saves/{uid} vẫn riêng tư, không ai đọc được.
    Thẻ gồm: biệt danh, cấp + bậc, loài/huyết mạch/độ đậm, chỉ số tổng (đã gồm huyết mạch + trang bị), 4 món trang bị đang mang.
-   Tiết kiệm quota: chỉ ghi khi thẻ THAY ĐỔI và cách lần ghi trước >= CARD_MS (mặc định 5 phút). Khách không đăng thẻ.
+   Tiết kiệm quota: chỉ ghi khi thẻ THAY ĐỔI và cách lần ghi trước >= CARD_MS (mặc định 60 giây). Khách không đăng thẻ.
    Không sửa 19-save.js: file này bọc TTGNET.start/setName của 20-online.js, nên phải nạp SAU 20-online.js và TRƯỚC 19-save.js. */
 (()=>{
 'use strict';
-const CARD_MS=300000;      /* tối thiểu 5 phút giữa 2 lần ghi thẻ */
-const CHECK_MS=60000;      /* mỗi 60 giây kiểm tra xem thẻ có đổi không (chỉ đọc biến trong máy, không tốn lượt Firestore) */
+const CARD_MS=60000;       /* tối thiểu 60 giây giữa 2 lần ghi thẻ */
+const CHECK_MS=30000;      /* mỗi 30 giây kiểm tra xem thẻ có đổi không (chỉ đọc biến trong máy, không tốn lượt Firestore) */
 let db=null,uid='',nick='',last=0,lastHash='',timer=0,busy=false;
 
 /* Chuẩn hóa để Firestore luôn nhận được: không undefined, số hữu hạn, chuỗi có giới hạn.
@@ -61,11 +61,26 @@ function publish(force,manual){
       if(manual||!warned){warned=true;say('⚠️ Không đăng được thẻ thú ('+code+').'+(/permission/i.test(code)?' Kiểm tra Rules Firestore mục cards.':/exhaust|quota/i.test(code)?' Máy chủ miễn phí đã hết lượt hôm nay, thử lại ngày mai.':''))}
       return{ok:false,why:code}})}
 
+/* Tái Sinh xong ra thú mới -> đăng thẻ NGAY (bỏ qua giãn cách). Thú "mới" = đổi loài/huyết mạch/phẩm/độ đậm,
+   hoặc vừa nở trứng; chờ màn Tái Sinh kết thúc rồi mới đăng để khỏi đăng thẻ dở dang. */
+let petSig='',pendNew=false;
+function watchPet(){
+  try{
+    if(typeof hatched==='undefined'||!hatched||!pet){petSig='';return}
+    const sig=[pet.sp,pet.bl,pet.q,pet.pi,pet.up||0].join('|');
+    if(petSig&&sig!==petSig)pendNew=true;
+    petSig=sig;
+    if(!pendNew)return;
+    if(window.REBIRTH&&(REBIRTH.on||REBIRTH.fx))return;      /* đang chạy hiệu ứng Tái Sinh: đợi */
+    publish(true).then(r=>{if(r&&(r.ok||r.why==='chưa đăng nhập'||r.why==='máy chủ đầy'))pendNew=false})
+  }catch(e){}}
+
 function startCard(o){
   if(!o||!o.db||o.guest||timer)return;
   db=o.db;uid=o.uid;nick=o.name||'';
   setTimeout(()=>publish(true),4000);            /* chờ game khôi phục xong rồi đăng thẻ lần đầu */
   timer=setInterval(()=>publish(false),CHECK_MS);
+  setInterval(watchPet,2000);                     /* canh thú mới (sau Tái Sinh): chỉ đọc biến trong máy, không tốn lượt Firestore */
   document.addEventListener('visibilitychange',()=>{if(document.hidden)publish(false)})}
 
 /* Bọc TTGNET (20-online.js) để không phải sửa 19-save.js */
