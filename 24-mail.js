@@ -303,8 +303,9 @@ function watchMails(){
 /* ---------- API ---------- */
 window.TTGMAIL = {
   start({db, uid, guest: g}){
-    if(!db || !uid) return;
-    rdb = db;
+    if(!uid) return;
+    rdb = (window.TTGNET && TTGNET.rdb) ? TTGNET.rdb : (window.firebase && firebase.apps.length ? firebase.database() : null);
+    if(!rdb) return;
     me = uid;
     guest = !!g;
     ensureBtn();
