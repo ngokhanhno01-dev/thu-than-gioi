@@ -366,7 +366,7 @@ function adminShow(){
   '<div style="display:flex;align-items:center;gap:6px;margin:5px 0">'+
     '<select id="ad-gift-type" style="flex:1;min-width:0;width:auto;padding:5px;font-size:12px">'+
       '<option value="gold">🪙 Xu</option>'+
-      '<option value="zone">📦 Rương nguyên liệu (chọn vùng)</option>'+
+      '<option value="hopnl">🎁 Hộp Nguyên Liệu (người nhận tự chọn vùng khi dùng)</option>'+
       '<option value="dan">💊 Linh Đan</option>'+
       '<option value="qua">🍎 Linh Quả</option>'+
     '</select>'+

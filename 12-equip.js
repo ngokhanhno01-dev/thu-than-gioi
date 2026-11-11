@@ -130,6 +130,102 @@ for(let k=0;k<17;k++)ITEMS['mat'+k].d='Chỉ dùng nâng cấp huyết mạch ch
 const eqIsMat=id=>/^z[mb]\d/.test(id);
 {const _bu2=bagUse;bagUse=function(){const s=bag[bagSel];if(s&&eqIsMat(s.id)){log('🛡️ <b>'+ITEMS[s.id].n+'</b> dùng ở mục <b>Trang bị → Rèn</b>.');return}_bu2()}}
 
+
+/* =====================================================================
+   🎁 HỘP NGUYÊN LIỆU — vật phẩm trong balo (id 'hopnl')
+   Nhận từ thư (rewards.items=[{id:'hopnl',q:N}]) -> vào balo như vật phẩm thường.
+   Bấm "Dùng" -> chọn vùng -> trừ 1 hộp, cộng đủ nguyên liệu RÈN TRỌN 1 BỘ (mọi ô EQ_SLOTS) của vùng đó.
+   Công thức (khớp fgDo): mỗi món cần eqNeed(z): boss + main (loại nguyên liệu của ô) + shared (Linh Cốt).
+   => 1 bộ = Tinh Hoa boss × (boss × số ô) + mỗi loại nguyên liệu chính × main + Linh Cốt × (shared × số ô).
+   KHÔNG gồm xu rèn (người chơi tự trả khi rèn).
+   ===================================================================== */
+PX_DRAW.chest=()=>pxGrid([
+ '',
+ '..mmmmmmmmmmmm',
+ '.mlllllllllllmd',
+ '.mlllllyyllllmd',
+ '.mmmmmmyymmmmmd',
+ '.yyyyyyyYyyyyyy',
+ '.mmmmmmyymmmmmd',
+ '.mlllllyyllllmd',
+ '.mlllllYYllllmd',
+ '.mmmmmmykmmmmmd',
+ '.mmmmmmmmmmmmmd',
+ '.mmmmmmmmmmmmmd',
+ '.dddddddddddddd',
+ '..dddddddddddd']);
+ITEMS.hopnl={n:'Hộp Nguyên Liệu',i:pxImg('chest','#c9863a'),e:'🎁',col:'#ffd24a',
+ d:'Bấm Dùng, chọn 1 vùng: nhận đủ nguyên liệu để rèn trọn 1 bộ trang bị (4 món) của vùng đó. (Xu rèn tự trả.)',use:null};
+SELL_PRICE.hopnl=1;
+try{HL_ITEM.hopnl='#ffd24a'}catch(_){}
+
+function hopSetNeed(z){            /* danh sách [{id,q}] nguyên liệu của 1 bộ ở vùng z */
+ const n=eqNeed(z),k=EQ_SLOTS.length,out=[];
+ out.push({id:ZB_ID(z),q:n.boss*k});
+ EQ_SLOTS.forEach(o=>out.push({id:ZM_ID(z,o.cat),q:n.main}));
+ out.push({id:ZM_ID(z,EQ_SHARED),q:n.shared*k});
+ return out}
+
+/* Balo còn đủ chỗ sau khi trừ 1 hộp và cộng items không? (mô phỏng, không đụng balo thật) */
+function hopRoomOk(items){
+ const sim=bag.map(s=>({id:s.id,n:s.n})),bi=sim.findIndex(s=>s.id==='hopnl');
+ if(bi<0)return false;
+ sim[bi].n--;
+ const arr=sim.filter(s=>s.n>0);let slots=arr.length;
+ for(const it of items){let free=0;arr.forEach(s=>{if(s.id===it.id&&s.n<STACK)free+=STACK-s.n});
+  slots+=Math.ceil(Math.max(0,it.q-free)/STACK)}
+ return slots<=BAG_SLOTS}
+
+let hopEl=null,hopZone=-1,hopBusy=false;
+function hopStyle(){
+ if(document.getElementById('hop-css'))return;
+ const st=document.createElement('style');st.id='hop-css';
+ st.textContent='#hop-ov{position:fixed;inset:0;z-index:99000;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:14px}'+
+  '#hop-ov.show{display:flex}#hop-ov .box{width:100%;max-width:340px;max-height:92vh;overflow-y:auto;background:#1a1218;border:3px solid #e8c36d;border-radius:12px;padding:12px;color:#f6e9e4;text-align:center}'+
+  '#hop-ov h4{margin:0 0 2px;color:#ffd24a;font-size:15px}#hop-ov .sub{font-size:11px;color:#c9b8b0;margin-bottom:8px}'+
+  '#hop-ov .zl{display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:200px;overflow-y:auto;margin-bottom:8px}'+
+  '#hop-ov .zl button{padding:7px 3px;border-radius:8px;border:2px solid #75613b;background:#2a1e26;font-size:11.5px;font-weight:800;cursor:pointer}'+
+  '#hop-ov .zl button.on{border-color:#72e4b0;background:#1a3a32}'+
+  '#hop-ov .pv{font-size:11.5px;text-align:left;padding:6px 8px;border-radius:8px;background:#241820;margin-bottom:8px;min-height:34px}'+
+  '#hop-ov .pv .pxi{width:18px;height:18px;vertical-align:middle}'+
+  '#hop-ov .act{display:flex;gap:8px}#hop-ov .act button{flex:1;padding:9px;border-radius:8px;border:2px solid #75613b;background:#2a1e26;color:#f6e9e4;font-weight:800;cursor:pointer}'+
+  '#hop-ov .act button.ok{border-color:#72e4b0;background:#1a3a32;color:#72e4b0}#hop-ov .act button:disabled{opacity:.4;cursor:default}';
+ document.head.appendChild(st)}
+function hopItemsHtml(list){
+ return list.map(it=>{const I=ITEMS[it.id];return'<span style="color:'+(I.col||'#f6e9e4')+'">'+I.i+' '+I.n+'</span> <b>×'+it.q+'</b>'}).join('<br>')}
+function hopRender(){
+ const z=hopZone,has=cnt('hopnl');
+ let zl='';for(let i=0;i<VAN_KIEP_ZONES.length;i++)
+  zl+='<button type="button" class="'+(i===z?'on':'')+'" style="color:'+ZONE_COL[i]+'" onclick="hopPick('+i+')">'+VAN_KIEP_ZONES[i].name+'</button>';
+ hopEl.innerHTML='<div class="box"><h4>🎁 Hộp Nguyên Liệu</h4><div class="sub">Bạn có <b>'+has+'</b> hộp. Chọn vùng để nhận nguyên liệu rèn trọn 1 bộ.</div>'+
+  '<div class="zl">'+zl+'</div>'+
+  '<div class="pv">'+(z<0?'<span style="color:#c9b8b0">Chưa chọn vùng.</span>':'<b style="color:'+ZONE_COL[z]+'">'+VAN_KIEP_ZONES[z].name+'</b> — sẽ nhận:<br>'+hopItemsHtml(hopSetNeed(z)))+'</div>'+
+  '<div class="act"><button type="button" onclick="hopClose()">Hủy</button><button type="button" class="ok" '+(z<0||has<1?'disabled':'')+' onclick="hopConfirm()">Mở hộp</button></div></div>'}
+function hopOpen(){
+ if(cnt('hopnl')<1)return;
+ hopStyle();
+ if(!hopEl){hopEl=document.createElement('div');hopEl.id='hop-ov';
+  hopEl.addEventListener('click',e=>{if(e.target===hopEl)hopClose()});document.body.appendChild(hopEl)}
+ hopZone=-1;hopRender();hopEl.classList.add('show')}
+function hopClose(){if(hopEl)hopEl.classList.remove('show')}
+function hopPick(z){hopZone=z;hopRender()}
+function hopConfirm(){
+ if(hopBusy||hopZone<0)return;hopBusy=true;
+ try{
+  const z=hopZone;
+  if(cnt('hopnl')<1){hopClose();return}
+  const items=hopSetNeed(z);
+  if(!hopRoomOk(items)){popToast('🎒 Balo không đủ chỗ','Hãy dọn bớt balo rồi mở lại. Hộp vẫn còn, bạn không mất gì.','bad',3200);return}
+  removeItem('hopnl',1);                                   /* trừ hộp TRƯỚC, rồi mới cộng để không bao giờ nhận 2 lần */
+  items.forEach(it=>{try{addItem(it.id,it.q)}catch(e){console.warn('[hopnl] addItem',it.id,e)}});
+  try{stats()}catch(_){}
+  hopClose();
+  popToast('🎁 Đã mở Hộp Nguyên Liệu','Vùng <b>'+VAN_KIEP_ZONES[z].name+'</b>, bạn nhận được:<br>'+hopItemsHtml(items)+'<br><small>Đủ rèn trọn 1 bộ (chưa gồm xu).</small>','ok',5200);
+  try{log('🎁 Mở <b>Hộp Nguyên Liệu</b> vùng <b>'+VAN_KIEP_ZONES[z].name+'</b>: nhận nguyên liệu rèn trọn 1 bộ trang bị.')}catch(_){}
+  try{if(window.TTGSAVE&&TTGSAVE.save)TTGSAVE.save()}catch(_){}
+ }finally{hopBusy=false}}
+{const _bu3=bagUse;bagUse=function(){const s=bag[bagSel];if(s&&s.id==='hopnl'){hopOpen();return}_bu3()}}
+
 /* ---------- Dữ liệu ---------- */
 let fgInfo=false,eqWorn=[null,null,null,null],ebag=[],eqUid=1,eqTab='wear',eqSel=null,fgSlot=0,fgZone=-1,fgLast=null,fgOpen=false,eqMsg='',eqRaf=0;
 const eqIco=(s,z)=>pxImg(EQ_SLOTS[s].px,z==null?'#8a95a0':ZONE_COL[z]);
