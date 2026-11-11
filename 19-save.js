@@ -31,6 +31,7 @@ const FB_CONFIG={
   apiKey:'AIzaSyB_LfMna798-9lpK8m205F3sKtUQwTlyQo',
   authDomain:'thu-than-gioi.firebaseapp.com',
   projectId:'thu-than-gioi',
+  databaseURL:'https://thu-than-gioi-default-rtdb.asia-southeast1.firebasedatabase.app',
   appId:'1:422450444342:web:95516a9cdf2f50c0f28097'
 };
 const CLOUD_MS=300000;        /* đẩy lên máy chủ tối đa mỗi 5 phút (tiết kiệm quota Firestore). Bản lưu trên máy vẫn ghi mỗi 10 giây; nút 💾 Lưu ngay, ẩn tab, đóng trang sẽ đẩy ngay */
@@ -75,6 +76,7 @@ async function srvTime(uid){   /* lấy giờ máy chủ: last = lần đẩy l�
   return{last,now:d2.seen.toMillis()}}
 function cloudPush(force){
   if(!db||!user||user.key===GUEST||!KEYU)return Promise.resolve();
+  if(window.TTGNET&&TTGNET.blocked&&TTGNET.blocked())return Promise.resolve();   /* server đầy: chưa có chỗ -> chưa ghi lên máy chủ (bản trên máy vẫn lưu) */
   const now=Date.now();
   if(!force&&now-pushAt<CLOUD_MS){clearTimeout(pushQ);pushQ=setTimeout(()=>cloudPush(true),CLOUD_MS-(now-pushAt));return Promise.resolve()}
   const raw=readSave(KEYU),d=parseSave(raw);if(!d)return Promise.resolve();

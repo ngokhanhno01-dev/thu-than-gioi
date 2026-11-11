@@ -2,7 +2,7 @@
    Trong khung Bạn bè (22-friends.js), mỗi người bạn có nút 👁. Bấm vào -> mở khung "thẻ thú" của người đó:
    hình thú (đúng loài, đúng bậc), biệt danh, cấp + bậc, phẩm, huyết mạch, loài, độ đậm, chỉ số tổng và 4 món trang bị (kèm dòng chỉ số + buff bộ).
    Dữ liệu đọc từ Firestore cards/{uid} (công khai, do 21-card.js đăng). KHÔNG đọc bản lưu saves/{uid}.
-   Trạng thái 🟢 online / ⚪ offline lấy từ presence/{uid} (công khai, do 20-online.js ghi nhịp tim).
+   Trạng thái 🟢 online / ⚪ offline lấy từ Realtime Database: presence/{uid} (đang online) và lastSeen/{uid} (lần cuối hoạt động), do 20-online.js ghi.
    Tiết kiệm quota: mỗi lần bấm xem = 2 lượt đọc (thẻ + nhịp tim); xem lại cùng 1 người trong CACHE_MS thì dùng bản nhớ trong máy, không đọc lại.
    Không cần thêm luật Firestore (cards đã cho đọc công khai ở bước 1).
    Không sửa file cũ: bọc TTGNET.start của 20-online.js để lấy kết nối db, rồi gán TTGFRIENDS.onView.
@@ -10,7 +10,6 @@
 (()=>{
 'use strict';
 const CACHE_MS=60000;       /* xem lại cùng 1 người trong 60 giây: không đọc lại Firestore */
-const ONLINE_MS=300000;     /* giống 20-online.js: có nhịp tim trong 5 phút gần nhất = đang online */
 const VIEW_COOLDOWN=800;    /* giãn cách giữa 2 lần bấm xem */
 
 const $=id=>document.getElementById(id);
@@ -99,9 +98,9 @@ function ago(t){
     if(m<2)return'vừa xong';if(m<60)return m+' phút trước';
     const h=Math.floor(m/60);if(h<48)return h+' giờ trước';return Math.floor(h/24)+' ngày trước'}catch(_){return''}}
 
-function onlineHtml(pt){
-  let ms=null;try{if(pt&&pt.toMillis)ms=Date.now()-pt.toMillis()}catch(_){}
-  if(ms!==null&&ms<ONLINE_MS)return'<div class="on">🟢 Đang online</div>';
+function onlineHtml(p){   /* p = {on:true} đang online | {ls:ms giờ máy chủ} lần cuối hoạt động | null */
+  if(p&&p.on)return'<div class="on">🟢 Đang online</div>';
+  let ms=null;try{if(p&&p.ls)ms=Date.now()+(window.TTGNET&&TTGNET.offset?TTGNET.offset():0)-p.ls}catch(_){}
   return'<div class="off">⚪ Offline'+(ms!==null&&ms>=0?' <small>(hoạt động '+agoMs(ms)+')</small>':'')+'</div>'}
 function agoMs(ms){const m=Math.floor(ms/60000);if(m<2)return'vừa xong';if(m<60)return m+' phút trước';const h=Math.floor(m/60);if(h<48)return h+' giờ trước';return Math.floor(h/24)+' ngày trước'}
 
@@ -150,9 +149,11 @@ async function load(uid,nick){
   $('cv-body').innerHTML='<div class="e">Đang tải thẻ...</div>';
   if(!db){$('cv-body').innerHTML='<div class="e">Chưa kết nối máy chủ. Hãy đăng nhập rồi thử lại.</div>';return}
   try{
-    const [d,pr]=await Promise.all([db.collection('cards').doc(uid).get(),
-      db.collection('presence').doc(uid).get().catch(()=>null)]);   /* lỗi nhịp tim thì chỉ hiện offline, không chặn thẻ */
-    const pt=pr&&pr.exists?pr.data().t:null;
+    let rdb=null;try{rdb=firebase.database()}catch(_){}
+    const [d,pr,ls]=await Promise.all([db.collection('cards').doc(uid).get(),
+      rdb?rdb.ref('presence/'+uid).once('value').catch(()=>null):null,
+      rdb?rdb.ref('lastSeen/'+uid).once('value').catch(()=>null):null]);   /* lỗi đọc online thì chỉ hiện offline, không chặn thẻ */
+    const pt=pr&&pr.exists()?{on:true}:(ls&&ls.exists()?{ls:+ls.val()}:null);
     if(my!==seq)return;                          /* đã đóng / đã chuyển sang người khác */
     if(!d.exists){$('cv-body').innerHTML='<div class="e">'+esc(nick||'Người này')+' chưa có thẻ thú.<br><small>Cần vào game bản mới một lần (và đã nở trứng) thì thẻ mới xuất hiện.</small></div>';return}
     const card=d.data();cache[uid]={t:Date.now(),card,pt};

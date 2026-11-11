@@ -27,6 +27,7 @@ function buildCard(){
 
 function publish(force){
   if(!db||!uid||busy)return;
+  if(window.TTGNET&&TTGNET.blocked&&TTGNET.blocked())return;   /* server đầy */
   let c;try{c=buildCard()}catch(e){console.warn('[card] dựng thẻ lỗi',e);return}
   if(!c)return;
   const h=JSON.stringify(c),now=Date.now();

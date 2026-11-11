@@ -1,21 +1,22 @@
 
-/* ===== 20-online.js — CHAT · SỐ NGƯỜI ONLINE · TOÀN MÀN HÌNH =====
+/* ===== 20-online.js — CHAT · SỐ NGƯỜI ONLINE · TOÀN MÀN HÌNH (dùng Firebase REALTIME DATABASE) =====
    - Nút "⛶" (góc trái hàng nút trên cùng): bật/tắt toàn màn hình.
-   - "🟢 N online": số người đang chơi. Mỗi người đã đăng nhập ghi 1 "nhịp tim" vào Firestore presence/{uid} = {name,t}
-     mỗi HB_MS; ai có nhịp tim trong ONLINE_MS gần nhất thì tính là đang online.
-   - Nút "💬" góc phải dưới: mở khung chat chung. Tin nhắn nằm ở Firestore chat/{id} = {uid,name,text,t}.
-   - Chỉ hiện tin nhắn từ lúc người chơi vào game (không có lịch sử cũ). Khung chat đóng mà có tin mới của người khác -> hiện số đỏ (1, 2, 3... tối đa 99+) trên nút 💬; mở chat thì số về 0.
-   - Khách (chưa đăng nhập) xem được số online + đọc chat nhưng không gửi được.
+   - "🟢 N online": mỗi người đã đăng nhập có 1 mục presence/{uid} = {name,t}. Mục này TỰ BỊ XÓA khi người đó đóng game / mất mạng
+     (onDisconnect) nên KHÔNG cần gửi nhịp tim, và Realtime Database không tính từng lượt đọc/ghi như Firestore.
+   - Giới hạn MAX_ONLINE người cùng lúc: người vào sau thấy màn hình "Server đầy" và game tự thử lại; lúc đó game ngừng ghi lên Firestore.
+   - Nút "💬" góc phải dưới: chat chung, lưu ở chat/{uid} = {name,text,t} (chỉ giữ tin mới nhất của mỗi người nên không phình dữ liệu). Mỗi người chỉ gửi được 1 tin mỗi COOLDOWN_MS (luật máy chủ cũng chặn).
+   - Chỉ hiện tin từ lúc người chơi vào game. Khung chat đóng mà có tin mới -> số đỏ trên nút 💬.
+   - Khách (chưa đăng nhập) xem được số online + đọc chat nhưng không gửi được và không chiếm chỗ.
+   - lastSeen/{uid}: lần cuối hoạt động, để thẻ thú hiện "Offline (hoạt động X phút trước)".
    Móc vào game qua 19-save.js: sau khi vào game, 19-save gọi TTGNET.start({db,uid,name,guest}). File này phải được nạp TRƯỚC 19-save.js.
-   Mọi con số chỉnh ngay dưới đây. Luật Firestore cần thiết: xem file FIRESTORE_RULES.txt. */
+   Luật cần dán: file RTDB_RULES.json (Firebase Console -> Realtime Database -> Rules). */
 (()=>{
 'use strict';
-const HB_MS=120000;           /* gửi nhịp tim mỗi 2 phút (tab ẩn thì không gửi) */
-const ONLINE_MS=300000;       /* có nhịp tim trong 5 phút gần nhất = đang online */
-const COUNT_MS=120000;        /* cập nhật số online mỗi 2 phút */
+const MAX_ONLINE=50;          /* tối đa bao nhiêu người đăng nhập cùng lúc */
+const RETRY_MS=20000;         /* khi server đầy: tự thử vào lại mỗi 20 giây */
 const CHAT_LIMIT=50;          /* hiện tối đa bao nhiêu tin gần nhất */
 const MAX_LEN=200;            /* tối đa ký tự mỗi tin */
-const COOLDOWN_MS=2000;       /* giãn cách giữa 2 tin (chống spam) */
+const COOLDOWN_MS=10000;      /* giãn cách giữa 2 tin: 10 giây */
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -48,7 +49,12 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
  '#ol-in:focus{border-color:#72e4b0}'+
  '#ol-in:disabled{opacity:.6}'+
  '#ol-send{width:auto;margin:0;padding:2px 10px;font-size:19px!important;cursor:pointer;color:#14272d;background:#72e4b0;border:2px solid #040a0e;box-shadow:inset 0 -3px 0 #397858;border-radius:0;min-height:0;height:auto}'+
- '#ol-send:disabled{opacity:.5}';
+ '#ol-send:disabled{opacity:.5}'+
+ '#ol-full{position:fixed;left:0;top:0;right:0;bottom:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(5,12,16,.95)}'+
+ '#ol-full .bx{width:min(88vw,340px);padding:16px;text-align:center;border:3px solid #f6c66a;background:#14272d;box-shadow:0 3px 0 0 #040a0e}'+
+ '#ol-full .t{font-size:24px!important;color:#f6c66a;margin-bottom:8px}'+
+ '#ol-full .s{font-size:18px!important;color:#f5edcf;line-height:1.25;margin-bottom:12px}'+
+ '#ol-full button{width:auto;margin:0;padding:3px 14px;font-size:19px!important;cursor:pointer;color:#14272d;background:#72e4b0;border:2px solid #040a0e;box-shadow:inset 0 -3px 0 #397858;border-radius:0;min-height:0;height:auto}';
  document.head.appendChild(s)}
 
 /* ---------- TOÀN MÀN HÌNH (chạy ngay, không cần đăng nhập) ---------- */
@@ -78,30 +84,42 @@ function buildTopBar(){
 buildTopBar();
 
 /* ---------- ONLINE + CHAT ---------- */
-let joinAt=Date.now(),db=null,me=null,started=false,hbT=0,cntT=0,unsubChat=null,lastSend=0,open=false,unread=0,firstSnap=true,online=null;
-const TS=()=>firebase.firestore.Timestamp;
-const SV=()=>firebase.firestore.FieldValue.serverTimestamp();
+let joinAt=Date.now(),db=null,rdb=null,me=null,started=false,unsubChat=null,lastSend=0,open=false,unread=0,firstSnap=true,online=null;
+let joined=false,full=false,joining=false,retryT=0,offset=0,presRef=null,lastRef=null,list=[],rT=0;
+const ONL=new Set();                                   /* uid những người đang online */
+const SVR=()=>firebase.database.ServerValue.TIMESTAMP;
 
 function setCount(n){online=n;if(cntEl)cntEl.textContent='🟢 '+n+' online';const h=$('ol-hc');if(h)h.textContent=n+' online'}
 
-function heartbeat(){
-  if(!db||!me||me.guest||document.hidden)return;   /* tab ẩn: khỏi ghi (tiết kiệm lượt ghi) */
-  db.collection('presence').doc(me.uid).set({name:me.name,t:SV()}).catch(e=>console.warn('[online] hb',e))}
-function countOnline(){
-  if(!db||document.hidden)return;   /* tab đang ẩn thì khỏi đếm (tiết kiệm lượt đọc) */
-  const cut=TS().fromMillis(Date.now()-ONLINE_MS);
-  const q=db.collection('presence').where('t','>',cut);
-  const viaGet=()=>q.get().then(sn=>({n:sn.size,mine:sn.docs.some(d=>d.id===(me&&me.uid))}));
-  /* count() chỉ tính ~1 lượt đọc cho mỗi 1000 người online (thay vì 1 lượt/người); SDK cũ không có thì quay về get() */
-  const p=(typeof q.count==='function')?q.count().get().then(s=>({n:s.data().count,mine:true})).catch(viaGet):viaGet();
-  p.then(r=>{
-    let n=r.n;
-    if(me&&!me.guest&&!r.mine)n++;     /* chính mình luôn tính (nhịp tim vừa gửi có thể chưa kịp về) */
-    setCount(Math.max(n,1))
-  }).catch(e=>{console.warn('[online] count',e);if(cntEl)cntEl.textContent='🟢 ?'})}
-function goOffline(){
-  if(!db||!me||me.guest)return;
-  try{db.collection('presence').doc(me.uid).delete()}catch(_){}}
+/* ---- số người online: nghe thêm/bớt trong presence (chỉ nhận phần thay đổi, rất nhẹ) ---- */
+function watchPresence(){
+  const r=rdb.ref('presence');
+  r.on('child_added',s=>{ONL.add(s.key);setCount(ONL.size)},e=>{console.warn('[online] watch',e);if(cntEl)cntEl.textContent='🟢 ?'});
+  r.on('child_removed',s=>{ONL.delete(s.key);setCount(ONL.size)});
+  r.once('value',()=>setCount(ONL.size),()=>{})}
+
+/* ---- chiếm chỗ (presence) + tự nhả khi đóng game / mất mạng ---- */
+function claim(){
+  presRef=rdb.ref('presence/'+me.uid);lastRef=rdb.ref('lastSeen/'+me.uid);
+  return Promise.all([presRef.onDisconnect().remove(),lastRef.onDisconnect().set(SVR())])
+    .then(()=>presRef.set({name:me.name,t:SVR()}))
+    .then(()=>{joined=true;return true})
+    .catch(e=>{console.warn('[online] claim (đã dán luật RTDB chưa?)',e);return false})}
+function joinCheck(){
+  if(joining||!rdb||!me||me.guest)return;joining=true;
+  rdb.ref('presence').once('value').then(sn=>{
+    if(!sn.hasChild(me.uid)&&sn.numChildren()>=MAX_ONLINE){setFull(true,sn.numChildren());return}
+    setFull(false);return claim()
+  }).catch(e=>{console.warn('[online] join',e);setFull(false)}).then(()=>{joining=false})}
+function setFull(v,n){
+  full=v;let o=$('ol-full');
+  if(v){
+    if(!o){o=document.createElement('div');o.id='ol-full';
+      o.innerHTML='<div class="bx"><div class="t">🚫 Server đang đầy</div><div class="s" id="ol-full-s"></div><button type="button" id="ol-full-b">Thử lại ngay</button></div>';
+      document.body.appendChild(o);$('ol-full-b').onclick=()=>joinCheck()}
+    $('ol-full-s').textContent='Đã có '+n+'/'+MAX_ONLINE+' người chơi. Game tự thử lại mỗi '+(RETRY_MS/1000)+' giây, bạn cứ để màn hình này mở. Tiến trình của bạn vẫn an toàn trên máy.';
+    o.style.display='flex';clearTimeout(retryT);retryT=setTimeout(joinCheck,RETRY_MS)
+  }else{if(o)o.style.display='none';clearTimeout(retryT)}}
 
 function buildChat(){
   if($('ol-chat'))return;
@@ -125,52 +143,68 @@ function toggle(v){
 function badge(){const f=$('ol-fab');if(!f)return;f.classList.toggle('has',unread>0);f.querySelector('b').textContent=unread>99?'99+':String(unread)}
 
 function fmtT(ms){const d=new Date(ms);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
-function render(docs){
+
+const tOf=x=>(+x.t)||(Date.now()+offset);
+function render(items){
   const m=$('ol-msgs');if(!m)return;
   const near=m.scrollHeight-m.scrollTop-m.clientHeight<60;
   m.innerHTML='';
-  if(!docs.length){m.innerHTML='<div class="sys">Chưa có tin nhắn mới. Hãy nói lời chào!</div>';return}
-  docs.forEach(d=>{
-    const x=d.data(),ts=x.t&&x.t.toMillis?x.t.toMillis():Date.now();
+  if(!items.length){m.innerHTML='<div class="sys">Chưa có tin nhắn mới. Hãy nói lời chào!</div>';return}
+  items.forEach(it=>{
+    const x=it.x,ts=tOf(x)-offset;
     const row=document.createElement('div');if(me&&x.uid===me.uid)row.className='me';
     row.innerHTML='<span class="t">'+fmtT(ts)+'</span><span class="n">'+esc(x.name||'Ẩn danh')+':</span> <span class="tx">'+esc(x.text||'')+'</span>';
     m.appendChild(row)});
   if(near||open&&firstSnap)m.scrollTop=m.scrollHeight}
+function schedRender(){if(rT)return;rT=setTimeout(()=>{rT=0;list.sort((a,b)=>tOf(a.x)-tOf(b.x));if(list.length>CHAT_LIMIT)list=list.slice(-CHAT_LIMIT);render(list)},40)}
 function listenChat(){
-  if(unsubChat)unsubChat();firstSnap=true;
-  /* Chỉ nghe tin nhắn từ lúc vào game trở đi -> vào lại sẽ không thấy lịch sử cũ, và cũng không tốn lượt đọc tải 50 tin cũ */
-  const since=TS().fromMillis(joinAt);
-  unsubChat=db.collection('chat').where('t','>',since).orderBy('t','desc').limit(CHAT_LIMIT).onSnapshot(sn=>{
-    const docs=sn.docs.slice().reverse();
-    render(docs);
-    if(!firstSnap&&!open){   /* tin mới của người khác khi đang đóng khung chat -> báo chấm đỏ */
-      sn.docChanges().forEach(c=>{if(c.type==='added'&&!c.doc.metadata.hasPendingWrites&&(!me||c.doc.data().uid!==me.uid))unread++});badge()}
-    firstSnap=false;
-  },e=>{
+  if(unsubChat)unsubChat();firstSnap=true;list=[];
+  /* chat/{uid} = tin MỚI NHẤT của người đó (ghi đè tin cũ) -> luật máy chủ so với giờ của chính tin trước để chặn gửi dồn.
+     Máy này tự giữ danh sách các tin nhận được. Chỉ lấy tin từ lúc vào game trở đi (giờ máy chủ). */
+  const q=rdb.ref('chat').orderByChild('t').startAt(joinAt+offset).limitToLast(CHAT_LIMIT);
+  const put=s=>{const v=s.val()||{};
+    const x={uid:s.key,name:v.name,text:v.text,t:v.t};
+    /* cùng 1 người, cách nhau <3 giây = cùng 1 tin (giờ ước tính -> giờ máy chủ thật) */
+    list=list.filter(i=>!(i.x.uid===x.uid&&Math.abs(tOf(i.x)-tOf(x))<3000));
+    list.push({x});schedRender();return x};
+  const onNew=s=>{const x=put(s);
+    if(!firstSnap&&!open&&(!me||x.uid!==me.uid)){unread++;badge()}};
+  const onErr=e=>{
     console.warn('[chat]',e);
-    const m=$('ol-msgs');if(m)m.innerHTML='<div class="sys">'+(e&&e.code==='permission-denied'?'Chưa mở quyền chat trên máy chủ (xem FIRESTORE_RULES.txt).':'Không tải được chat (mất mạng?).')+'</div>'})}
+    const m=$('ol-msgs');if(m)m.innerHTML='<div class="sys">'+(e&&String(e.code||e.message).toLowerCase().indexOf('permission')>=0?'Chưa mở quyền chat trên máy chủ (dán RTDB_RULES.json).':'Không tải được chat (mất mạng?).')+'</div>'};
+  q.on('child_added',onNew,onErr);
+  q.on('child_changed',onNew,()=>{});
+  q.once('value',()=>{firstSnap=false;schedRender()},()=>{});
+  unsubChat=()=>{try{q.off()}catch(_){}}}
 
 function send(){
-  if(!me||me.guest||!db)return;
+  if(!me||me.guest||!rdb||full)return;
   const i=$('ol-in');let text=i.value.replace(/\s+/g,' ').trim().slice(0,MAX_LEN);if(!text)return;
-  const now=Date.now();
-  if(now-lastSend<COOLDOWN_MS){flash('Gửi chậm lại một chút nhé...');return}
+  const now=Date.now(),wait=COOLDOWN_MS-(now-lastSend);
+  if(wait>0){flash('Chờ '+Math.ceil(wait/1000)+' giây nữa mới gửi được nhé...');return}
   lastSend=now;i.value='';
-  db.collection('chat').add({uid:me.uid,name:me.name,text,t:SV()}).catch(e=>{
-    console.warn('[chat] send',e);i.value=text;
-    flash(e&&e.code==='permission-denied'?'Không gửi được (chưa mở quyền chat).':'Gửi lỗi, thử lại.')})}
+  rdb.ref('chat/'+me.uid).set({name:me.name,text,t:SVR()}).catch(e=>{
+    console.warn('[chat] send',e);i.value=text;lastSend=Date.now();
+    flash(e&&String(e.code||e.message).toLowerCase().indexOf('permission')>=0?'Không gửi được (gửi quá nhanh hoặc chưa dán luật chat).':'Gửi lỗi, thử lại.')})}
 function flash(t){
   const m=$('ol-msgs');if(!m)return;
   const d=document.createElement('div');d.className='sys';d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight;setTimeout(()=>d.remove(),2500)}
 
+
 /* ---------- 19-save.js gọi hàm này khi người chơi vào game ---------- */
-window.TTGNET={setName(n){if(me){me.name=String(n).slice(0,20);heartbeat()}},start(o){
-  if(started||!o||!o.db)return;started=true;
-  db=o.db;me={uid:o.uid,name:(o.name||'Người chơi').slice(0,20),guest:!!o.guest};
-  buildTopBar();buildChat();
-  heartbeat();countOnline();listenChat();
-  hbT=setInterval(heartbeat,HB_MS);cntT=setInterval(countOnline,COUNT_MS);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){heartbeat();countOnline()}});
-  window.addEventListener('pagehide',goOffline);
-  window.addEventListener('beforeunload',goOffline)}};
+window.TTGNET={
+  blocked(){return full},                 /* true = server đầy: 19-save.js / 21-card.js ngừng ghi lên Firestore */
+  offset(){return offset},                /* chênh lệch giờ máy chủ - giờ máy (ms) */
+  setName(n){if(me){me.name=String(n).slice(0,20);if(joined&&presRef)presRef.set({name:me.name,t:SVR()}).catch(()=>{})}},
+  start(o){
+    if(started||!o||!o.db)return;started=true;
+    db=o.db;me={uid:o.uid,name:(o.name||'Người chơi').slice(0,20),guest:!!o.guest};joinAt=Date.now();
+    buildTopBar();buildChat();
+    try{rdb=firebase.database()}catch(e){console.warn('[online] thiếu thư viện firebase-database hoặc thiếu databaseURL',e);if(cntEl)cntEl.textContent='🟢 ?';return}
+    watchPresence();
+    rdb.ref('.info/serverTimeOffset').once('value').then(s=>{offset=+s.val()||0}).catch(()=>{}).then(listenChat);
+    if(!me.guest){
+      rdb.ref('.info/connected').on('value',s=>{if(s.val()===true)joinCheck()});   /* kết nối (lại) -> vào chỗ */
+      window.addEventListener('pagehide',()=>{try{rdb.goOffline()}catch(_){}});   /* đóng trang -> nhả chỗ ngay */
+      window.addEventListener('pageshow',()=>{try{rdb.goOnline()}catch(_){}})}}};
 })();
