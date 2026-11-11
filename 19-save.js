@@ -346,9 +346,12 @@ function buildAcc(){
   $s('ap-save').onclick=()=>{
     if(!save()){msg('⚠️ Chưa lưu được (xem thông báo trên cùng).');return}
     if(!db||!user||user.key===GUEST){msg('✅ Đã lưu trên máy này.');return}
-    if(Date.now()-pushAt<8000){msg('✅ Đã lưu lên máy chủ.');return}   /* bấm dồn dập: không ghi lặp */
+    /* đăng luôn thẻ thú công khai (để bạn bè xem được); kết quả cũng được báo trong Nhật ký */
+    const cardP=(window.TTGCARD&&TTGCARD.publish)?TTGCARD.publish(true):Promise.resolve(null);
+    const cardNote=r=>!r?'':r.ok?' · Thẻ thú đã đăng.':r.why==='chưa nở trứng'?' · Chưa có thẻ thú (chưa nở trứng).':' · ⚠️ Thẻ thú chưa đăng được ('+r.why+').';
+    if(Date.now()-pushAt<8000){cardP.then(r=>msg('✅ Đã lưu lên máy chủ.'+cardNote(r)));return}   /* bấm dồn dập: không ghi lặp */
     const b=$s('ap-save');b.disabled=true;msg('Đang lưu lên máy chủ...');
-    flushCloud(0).then(()=>{msg(cloudBad?'⚠️ Đã lưu trên máy, nhưng CHƯA lên được máy chủ (mất mạng hoặc máy chủ hết lượt hôm nay).':'✅ Đã lưu lên máy chủ.')}).then(()=>{b.disabled=false})};
+    flushCloud(0).then(()=>cardP).then(r=>{msg((cloudBad?'⚠️ Đã lưu trên máy, nhưng CHƯA lên được máy chủ (mất mạng hoặc máy chủ hết lượt hôm nay).':'✅ Đã lưu lên máy chủ.')+cardNote(r))}).then(()=>{b.disabled=false})};
   $s('ap-nick').onclick=openNickChange;
   $s('ap-exp').onclick=exportSave;
   $s('ap-imp').onclick=()=>$s('ap-file').click();

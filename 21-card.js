@@ -15,7 +15,7 @@ function buildCard(){
   if(typeof hatched==='undefined'||!hatched||!pet)return null;
   const s=statsOf(pet.bl,pet.pi,pet.base,level),R=x=>Math.round((+x||0)*10)/10;
   const eq=[0,1,2,3].map(i=>{const it=eqWorn[i];
-    return it?{z:it.z,s:it.s,q:it.q,L:it.L.map(l=>[String(l[0]),R(l[1])])}:null});
+    return it?{z:it.z,s:it.s,q:it.q,L:(it.L||[]).map(l=>[String(l[0]),R(l[1])])}:null});
   return{
     nick:String(nick).slice(0,20),
     lv:level,st:stageOf(level),
@@ -25,19 +25,28 @@ function buildCard(){
     eq};
 }
 
-function publish(force){
-  if(!db||!uid||busy)return;
-  if(window.TTGNET&&TTGNET.blocked&&TTGNET.blocked())return;   /* server đầy */
-  let c;try{c=buildCard()}catch(e){console.warn('[card] dựng thẻ lỗi',e);return}
-  if(!c)return;
+let warned=false;
+function say(t){try{if(typeof log==='function')log(t)}catch(_){}}
+/* Đăng thẻ. Trả Promise {ok, why}. manual = người chơi bấm Lưu ngay -> báo kết quả trong Nhật ký. */
+function publish(force,manual){
+  if(!db||!uid)return Promise.resolve({ok:false,why:'chưa đăng nhập'});
+  if(busy)return Promise.resolve({ok:false,why:'đang đăng'});
+  if(window.TTGNET&&TTGNET.blocked&&TTGNET.blocked())return Promise.resolve({ok:false,why:'máy chủ đầy'});   /* server đầy */
+  let c;try{c=buildCard()}catch(e){console.warn('[card] dựng thẻ lỗi',e);if(manual||!warned){warned=true;say('⚠️ Không dựng được thẻ thú: '+((e&&e.message)||e))}return Promise.resolve({ok:false,why:'dựng thẻ lỗi'})}
+  if(!c){if(manual)say('⚠️ Chưa có thú (chưa nở trứng) nên chưa có thẻ thú.');return Promise.resolve({ok:false,why:'chưa nở trứng'})}
   const h=JSON.stringify(c),now=Date.now();
-  if(h===lastHash)return;                        /* không đổi gì -> khỏi ghi */
-  if(!force&&now-last<CARD_MS)return;            /* ghi quá dày -> đợi */
+  if(h===lastHash)return Promise.resolve({ok:true,same:true});                  /* không đổi gì -> khỏi ghi */
+  if(!force&&now-last<CARD_MS)return Promise.resolve({ok:false,why:'chờ'});     /* ghi quá dày -> đợi */
   busy=true;
-  c.t=firebase.firestore.FieldValue.serverTimestamp();
-  db.collection('cards').doc(uid).set(c).then(()=>{lastHash=h;last=Date.now()})
-    .catch(e=>console.warn('[card] ghi thẻ lỗi (đã dán luật cards chưa?)',e))
-    .then(()=>{busy=false})}
+  let p;
+  try{
+    c.t=firebase.firestore.FieldValue.serverTimestamp();
+    p=db.collection('cards').doc(uid).set(c)
+  }catch(e){p=Promise.reject(e)}
+  return p.then(()=>{lastHash=h;last=Date.now();busy=false;warned=false;if(manual)say('✅ Đã đăng thẻ thú lên máy chủ. Bạn bè xem được rồi.');return{ok:true}})
+    .catch(e=>{busy=false;const code=String((e&&(e.code||e.message))||e);console.warn('[card] ghi thẻ lỗi (đã dán luật cards chưa?)',e);
+      if(manual||!warned){warned=true;say('⚠️ Không đăng được thẻ thú ('+code+').'+(/permission/i.test(code)?' Kiểm tra Rules Firestore mục cards.':/exhaust|quota/i.test(code)?' Máy chủ miễn phí đã hết lượt hôm nay, thử lại ngày mai.':''))}
+      return{ok:false,why:code}})}
 
 function startCard(o){
   if(!o||!o.db||o.guest||timer)return;
@@ -53,5 +62,5 @@ if(N){
   N.start=function(o){const r=st.apply(this,arguments);try{startCard(o)}catch(e){console.warn('[card]',e)}return r};
   N.setName=function(n){const r=sn.apply(this,arguments);nick=String(n).slice(0,20);lastHash='';publish(true);return r};   /* đổi biệt danh -> đăng thẻ ngay */
 }
-window.TTGCARD={build:buildCard,publish:()=>publish(true)};
+window.TTGCARD={build:buildCard,publish:(manual)=>publish(true,!!manual)};
 })();
