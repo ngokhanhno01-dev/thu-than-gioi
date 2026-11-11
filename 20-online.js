@@ -153,7 +153,8 @@ function render(items){
   items.forEach(it=>{
     const x=it.x,ts=tOf(x)-offset;
     const row=document.createElement('div');if(me&&x.uid===me.uid)row.className='me';
-    row.innerHTML='<span class="t">'+fmtT(ts)+'</span><span class="n">'+esc(x.name||'Ẩn danh')+':</span> <span class="tx">'+esc(x.text||'')+'</span>';
+    const ti=(window.TTGTITLE&&TTGTITLE.icon(x.uid))||'';
+    row.innerHTML='<span class="t">'+fmtT(ts)+'</span><span class="n">'+(ti?ti+' ':'')+esc(x.name||'Ẩn danh')+':</span> <span class="tx">'+esc(x.text||'')+'</span>';
     m.appendChild(row)});
   if(near||open&&firstSnap)m.scrollTop=m.scrollHeight}
 function schedRender(){if(rT)return;rT=setTimeout(()=>{rT=0;list.sort((a,b)=>tOf(a.x)-tOf(b.x));if(list.length>CHAT_LIMIT)list=list.slice(-CHAT_LIMIT);render(list)},40)}
@@ -166,7 +167,9 @@ function listenChat(){
     const x={uid:s.key,name:v.name,text:v.text,t:v.t};
     /* cùng 1 người, cách nhau <3 giây = cùng 1 tin (giờ ước tính -> giờ máy chủ thật) */
     list=list.filter(i=>!(i.x.uid===x.uid&&Math.abs(tOf(i.x)-tOf(x))<3000));
-    list.push({x});schedRender();return x};
+    list.push({x});schedRender();
+    try{if(window.TTGTITLE)TTGTITLE.prefetch(x.uid,schedRender)}catch(_){}
+    return x};
   const onNew=s=>{const x=put(s);
     if(!firstSnap&&!open&&(!me||x.uid!==me.uid)){unread++;badge()}};
   const onErr=e=>{

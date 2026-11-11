@@ -1,13 +1,29 @@
 /* ===== 24-mail.js — HỘP THƯ (Realtime Database)
    - Nút nằm trên thanh trên (cùng hàng số online).
    - mail/{uid}/{mid} = { type, title, body, season?, rewards?, claimed, t }
-   - Người chơi chỉ được đổi claimed: false → true (Rules chặn mọi thứ khác).
+   - Người chơi chỉ được ghi ĐÚNG trường mail/{uid}/{id}/claimed từ false sang true, 1 lần (Rules chặn mọi thứ khác).
+   - Chống nhận đôi + chống mất thưởng: xem doClaim / recoverPending (nhật ký tạm trong máy + mailDone trong bản lưu).
    - Nhận thưởng: ghi claimed = true TRƯỚC, thành công rồi mới cộng vào bản lưu.
    - Hỗ trợ thư thưởng mùa có chọn vùng (chooseZone: true).
    - Móc vào game: gọi TTGMAIL.start({db, uid, guest}) sau khi đăng nhập (19-save.js đã gọi).
 */
 (()=>{
 'use strict';
+
+const CFGV = () => (window.TTGCFG || {});
+const HIDE_CLAIMED_MS = () => (CFGV().MAIL_CLAIMED_HIDE_DAYS || 7) * 86400000;
+const HIDE_UNCLAIMED_MS = () => (CFGV().MAIL_KEEP_DAYS || 60) * 86400000;
+const nowMs = () => (window.TTGSEASON && TTGSEASON.nowSrv) ? TTGSEASON.nowSrv() : Date.now();
+/* thư quá hạn thì ẩn (script chốt mùa sẽ xóa hẳn) */
+function visible(m){
+  const t = Number(m.t) || 0;
+  if(!t) return true;
+  const age = nowMs() - t;
+  return age < (m.claimed ? HIDE_CLAIMED_MS() : HIDE_UNCLAIMED_MS());
+}
+function toList(val){
+  return Object.keys(val || {}).map(id => Object.assign({id}, val[id])).filter(m => m && typeof m === 'object' && visible(m));
+}
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -136,10 +152,16 @@ function renderList(){
       const r = m.rewards;
       const parts = [];
       if(r.gold) parts.push('🪙 '+r.gold+' xu');
-      if(r.items && r.items.length) parts.push(r.items.map(it => (it.n||it.id)+' ×'+(it.q||1)).join(', '));
+      if(r.items && r.items.length) parts.push(r.items.map(it => {
+        let nm = it.n || it.id;
+        try{ if(typeof ITEMS !== 'undefined' && ITEMS[it.id]) nm = ITEMS[it.id].n; }catch(_){}
+        return nm+' ×'+(it.q||1);
+      }).join(', '));
+      if(r.blood) parts.push('🩸 '+(r.blood.huyet||0)+' Giọt Huyết Mạch, '+(r.blood.thuoc||0)+' Thảo Dược, '+(r.blood.tinh||0)+' Tinh Hoa hệ thú');
+      if(r.boxes) parts.push('📦 '+r.boxes+' hộp nguyên liệu chế trang bị (chọn vùng khi nhận)');
+      else if(r.chooseZone) parts.push('📦 Rương nguyên liệu '+(r.zoneQty||'')+' (chọn vùng)');
       if(r.title) parts.push('🏅 '+r.title);
-      if(r.chooseZone) parts.push('📦 Rương nguyên liệu (chọn vùng)');
-      if(parts.length) rewardTxt = '<div class="mf">Phần thưởng: '+parts.join(' · ')+'</div>';
+      if(parts.length) rewardTxt = '<div class="mf">Phần thưởng: '+parts.map(esc).join(' · ')+'</div>';
     }
     h += '<div class="mail-item'+(un?' unread':'')+(m.claimed?' claimed':'')+'" data-id="'+esc(m.id)+'">'+
       '<div class="mt">'+(un?'🔴 ':'')+esc(m.title||'Thư')+'</div>'+
@@ -160,11 +182,27 @@ function renderList(){
   });
 }
 
-/* ---------- Nhận thưởng ---------- */
+/* ---------- Nhận thưởng ----------
+   Chống nhận đôi:  Rules chỉ cho ghi claimed false→true MỘT lần (lần 2 bị từ chối).
+   Chống mất thưởng khi mất mạng / đóng game giữa chừng:
+     1. Trước khi ghi claimed, máy ghi "nhật ký tạm" (localStorage) = {id, vùng}.
+     2. Ghi claimed=true lên máy chủ.
+     3. Cộng thưởng + thêm id vào mailDone (nằm TRONG bản lưu) + lưu ngay.
+     4. Xóa nhật ký tạm.
+   Nếu game đóng giữa bước 2 và 3: lần mở sau, recoverPending() thấy nhật ký tạm, đọc máy chủ thấy claimed=true mà mailDone chưa có id
+   → cộng thưởng bù (đúng 1 lần nhờ mailDone). Nếu máy chủ vẫn claimed=false thì bỏ nhật ký, người chơi nhận lại bình thường. */
+const PEND_KEY = () => 'ttg_mail_pend_' + me;
+function getPend(){ try{ return JSON.parse(localStorage.getItem(PEND_KEY())) || null; }catch(_){ return null; } }
+function setPend(o){ try{ if(o) localStorage.setItem(PEND_KEY(), JSON.stringify(o)); else localStorage.removeItem(PEND_KEY()); }catch(_){} }
+function doneList(){ try{ if(typeof mailDone !== 'undefined' && Array.isArray(mailDone)) return mailDone; }catch(_){} return null; }
+function isDone(id){ const d = doneList(); return !!(d && d.indexOf(id) >= 0); }
+function markDone(id){ const d = doneList(); if(d){ d.push(id); if(d.length > 300) d.splice(0, d.length - 300); } }
+
 function startClaim(mail){
   if(claiming || mail.claimed) return;
-  if(mail.rewards && mail.rewards.chooseZone){
-    // Hiện chọn vùng
+  if(window.TTGGUARD && TTGGUARD.banned && TTGGUARD.banned()){ TTGGUARD.say(); return; }
+  const r = mail.rewards || {};
+  if(r.chooseZone){
     pendingZone = { mail };
     showZonePicker();
     return;
@@ -176,11 +214,10 @@ function showZonePicker(){
   const z = $('mail-zone');
   const zl = $('mail-zl');
   if(!z || !zl) return;
-  // Lấy danh sách vùng từ game nếu có
   let zones = [];
   try{
     if(typeof VAN_KIEP_ZONES !== 'undefined' && VAN_KIEP_ZONES.length){
-      zones = VAN_KIEP_ZONES.map((z,i) => ({id:i, name: z.name || ('Vùng '+i)}));
+      zones = VAN_KIEP_ZONES.map((v,i) => ({id:i, name: v.name || ('Vùng '+i)}));
     } else if(typeof EPI !== 'undefined'){
       zones = EPI.map((e,i) => ({id:i, name: e[0] || ('Vùng '+i)}));
     }
@@ -188,7 +225,7 @@ function showZonePicker(){
   if(!zones.length){
     for(let i=0;i<17;i++) zones.push({id:i, name:'Vùng '+i});
   }
-  zl.innerHTML = zones.map(z => '<button type="button" data-z="'+z.id+'">'+esc(z.name)+'</button>').join('');
+  zl.innerHTML = zones.map(v => '<button type="button" data-z="'+v.id+'">'+esc(v.name)+'</button>').join('');
   let selected = null;
   zl.querySelectorAll('button').forEach(b => {
     b.onclick = () => {
@@ -202,76 +239,160 @@ function showZonePicker(){
   $('mail-zo').onclick = () => {
     if(selected == null || !pendingZone) return;
     z.classList.remove('show');
-    doClaim(pendingZone.mail, selected);
+    const m = pendingZone.mail;
     pendingZone = null;
+    doClaim(m, selected);
   };
   z.classList.add('show');
 }
 
+/* Danh sách vật phẩm sẽ cộng vào balo. Hàm thuần (dễ kiểm thử).
+   Hỗ trợ cả thư cũ của Admin: items[], chooseZone + zoneQty (nguyên liệu mat{vùng}). */
+function buildItems(r, zoneId, env){
+  env = env || {};
+  const out = [];
+  const add = (id, q) => { q = Math.floor(+q || 0); if(id && q > 0) out.push({id, q}); };
+  if(Array.isArray(r.items)) r.items.forEach(it => { if(it && it.id) add(it.id, it.q || 1); });
+  // Nguyên liệu nâng huyết mạch: Giọt Huyết Mạch, Thảo Dược, Tinh Hoa hệ của thú hiện tại
+  if(r.blood && typeof r.blood === 'object'){
+    add('huyet', r.blood.huyet);
+    add('thuoc', r.blood.thuoc);
+    const sp = (env.petSp != null && env.petSp >= 0) ? env.petSp : 0;
+    add('mat' + sp, r.blood.tinh);
+  }
+  // Hộp nguyên liệu chế trang bị: mỗi hộp = Tinh Hoa boss + Linh Cốt dùng chung + nửa số nguyên liệu chính của 4 loại, theo giá rèn của vùng
+  if(r.chooseZone && zoneId != null){
+    if(r.boxes){
+      const need = env.eqNeed ? env.eqNeed(zoneId) : {boss: 1 + Math.floor(zoneId/6), main: 5 + Math.floor(zoneId/4), shared: 3 + Math.floor(zoneId/5)};
+      const n = Math.floor(+r.boxes) || 0;
+      add('zb' + zoneId, need.boss * n);
+      add('zm' + zoneId + '_4', need.shared * n);
+      for(let s = 0; s < 4; s++) add('zm' + zoneId + '_' + s, Math.ceil(need.main / 2) * n);
+    } else if(r.zoneQty){
+      add('mat' + zoneId, r.zoneQty);          // thư Admin kiểu cũ
+    }
+  }
+  return out;
+}
+
+function currentEnv(){
+  let petSp = null, eqNeedFn = null;
+  try{ if(typeof pet !== 'undefined' && pet && Number.isInteger(pet.sp)) petSp = pet.sp; }catch(_){}
+  try{ if(typeof eqNeed === 'function') eqNeedFn = eqNeed; }catch(_){}
+  return { petSp: petSp, eqNeed: eqNeedFn };
+}
+
+/* Balo còn đủ chỗ để nhận danh sách này không? (kiểm tra TRƯỚC khi ghi claimed để không mất thưởng) */
+function bagRoomOk(items){
+  try{
+    if(typeof bag === 'undefined' || typeof BAG_SLOTS === 'undefined' || typeof STACK === 'undefined') return true;
+    let slots = 0;
+    const byId = {};
+    items.forEach(it => { byId[it.id] = (byId[it.id] || 0) + it.q; });
+    Object.keys(byId).forEach(id => {
+      let free = 0;
+      bag.forEach(s => { if(s.id == id && s.n < STACK) free += STACK - s.n; });
+      const need = Math.max(0, byId[id] - free);
+      slots += Math.ceil(need / STACK);
+    });
+    return slots <= BAG_SLOTS - bag.length;
+  }catch(_){ return true; }
+}
+
+function applyOnce(mail, zoneId){
+  if(isDone(mail.id)) return false;
+  const r = mail.rewards || {};
+  const items = buildItems(r, zoneId, currentEnv()).filter(it => {
+    try{ return typeof ITEMS === 'undefined' || !!ITEMS[it.id]; }catch(_){ return true; }
+  });
+  markDone(mail.id);                                   // đánh dấu TRƯỚC khi cộng: lỗi giữa chừng cũng không bao giờ cộng đôi
+  if(r.gold && typeof gold !== 'undefined'){
+    gold = Math.max(0, (gold || 0) + Math.floor(+r.gold || 0));
+  }
+  let lost = 0;
+  items.forEach(it => {
+    try{ const got = addItem(it.id, it.q); if(got < it.q) lost += it.q - got; }catch(e){ console.warn('[mail] addItem', it.id, e); }
+  });
+  try{ if(typeof stats === 'function') stats(); }catch(_){}
+  try{
+    if(typeof log === 'function'){
+      log('📩 Đã nhận thư: <b>'+esc(mail.title)+'</b>.' + (lost ? ' <span style="color:#ff8a7a">(Balo đầy, mất '+lost+' vật phẩm.)</span>' : ''));
+    }
+  }catch(_){}
+  try{ if(window.TTGSAVE && TTGSAVE.save) TTGSAVE.save(); }catch(_){}
+  return true;
+}
+
 function doClaim(mail, zoneId){
   if(claiming || !rdb || !me || mail.claimed) return;
+  if(isDone(mail.id)){ if(typeof popToast === 'function') popToast('ℹ️ Đã nhận rồi','Phần thưởng này đã có trong bản lưu.','ok'); return; }
+  const r = mail.rewards || {};
+  const items = buildItems(r, zoneId, currentEnv());
+  if(!bagRoomOk(items)){
+    if(typeof popToast === 'function') popToast('🎒 Balo không đủ chỗ','Hãy dọn bớt balo rồi nhận lại. Thư vẫn còn đó, bạn không mất gì.','bad');
+    return;
+  }
   claiming = true;
-  const ref = rdb.ref('mail/'+me+'/'+mail.id);
+  const prev = getPend();
+  const hadPrev = !!(prev && prev.id === mail.id);                  // lần bấm trước (mất mạng) có thể đã ghi được lên máy chủ
+  setPend({id: mail.id, zone: hadPrev && prev.zone != null ? prev.zone : zoneId, t: Date.now()});           // bước 1: nhật ký tạm
+  let finished = false;
+  const release = () => { claiming = false; };
+  const timer = setTimeout(() => {                                  // mạng chậm: không khóa nút mãi
+    if(finished) return;
+    release();
+    if(typeof popToast === 'function') popToast('⏳ Mạng chậm','Chưa xác nhận được. Nếu thư đã nhận, phần thưởng sẽ tự cộng khi có mạng. Đừng bấm lại nhiều lần.','bad');
+  }, 15000);
 
-  // 1. Ghi claimed = true trước (Rules chỉ cho phép thao tác này)
-  ref.transaction(cur => {
-    if(!cur || cur.claimed) return;          // đã nhận hoặc không tồn tại → hủy
-    return Object.assign({}, cur, {claimed: true});
-  }).then(res => {
-    if(!res.committed){
-      claiming = false;
-      if(typeof popToast === 'function') popToast('⚠️ Không nhận được','Thư đã được nhận hoặc không còn tồn tại.','bad');
-      loadMails();
-      return;
-    }
-    // 2. Cộng thưởng vào bản lưu
-    try{
-      applyRewards(mail.rewards || {}, zoneId);
-      if(typeof log === 'function') log('📩 Đã nhận thư: <b>'+esc(mail.title)+'</b>.');
-      if(typeof popToast === 'function') popToast('✅ NHẬN THÀNH CÔNG', esc(mail.title),'ok');
-      if(typeof window.TTGSAVE !== 'undefined' && TTGSAVE.save) TTGSAVE.save();
-    }catch(e){
-      console.warn('[mail] apply', e);
-    }
-    claiming = false;
+  // bước 2: ghi claimed=true (Rules: chỉ false→true, 1 lần; lần 2 bị từ chối)
+  rdb.ref('mail/'+me+'/'+mail.id+'/claimed').set(true).then(() => {
+    finished = true; clearTimeout(timer);
+    try{ applyOnce(mail, zoneId); }                                 // bước 3
+    catch(e){ console.warn('[mail] apply', e); }
+    setPend(null);                                                  // bước 4
+    if(typeof popToast === 'function') popToast('✅ NHẬN THÀNH CÔNG', esc(mail.title), 'ok');
+    release();
     loadMails();
   }).catch(e => {
-    claiming = false;
-    console.warn('[mail] claim', e);
-    if(typeof popToast === 'function') popToast('⚠️ Lỗi mạng','Không ghi được trạng thái nhận. Thử lại.','bad');
+    finished = true; clearTimeout(timer);
+    release();
+    const code = String((e && (e.code || e.message)) || e);
+    if(/PERMISSION_DENIED/i.test(code)){
+      // đã nhận rồi (máy khác / lần trước mất mạng) hoặc tài khoản bị khóa
+      if(!hadPrev) setPend(null);        // lần bấm này không ghi được gì → không để lại nhật ký (tránh cộng bù nhầm). Nếu LẦN TRƯỚC mất mạng, giữ nhật ký để cộng bù.
+      if(typeof popToast === 'function') popToast('⚠️ Không nhận được','Thư đã được nhận trước đó, hoặc tài khoản đang bị hạn chế.','bad');
+      loadMails();
+    } else {
+      console.warn('[mail] claim', e);
+      if(typeof popToast === 'function') popToast('⚠️ Lỗi mạng','Không ghi được trạng thái nhận. Thử lại.','bad');
+    }
   });
 }
 
-function applyRewards(r, zoneId){
-  if(r.gold && typeof gold !== 'undefined'){
-    gold = Math.max(0, (gold||0) + (+r.gold||0));
-    if(typeof stats === 'function') stats();
-  }
-  if(r.items && Array.isArray(r.items) && typeof addItem === 'function'){
-    r.items.forEach(it => {
-      const id = it.id;
-      const q = +it.q || 1;
-      if(id) addItem(id, q);
-    });
-  }
-  // Rương chọn vùng → giao nguyên liệu mat{zoneId}
-  if(r.chooseZone && zoneId != null && typeof addItem === 'function'){
-    const matId = 'mat' + zoneId;
-    const qty = r.zoneQty || 5;
-    if(typeof ITEMS !== 'undefined' && ITEMS[matId]){
-      addItem(matId, qty);
-    } else {
-      // fallback: vẫn cố thêm
-      try{ addItem(matId, qty); }catch(_){}
-    }
-  }
-  if(r.title && typeof window !== 'undefined'){
-    // Danh hiệu sẽ được ghi bởi GitHub Actions vào titles/{uid}/{season}
-    // Ở đây chỉ thông báo, không tự ghi
+/* Khôi phục: có nhật ký tạm mà máy chủ đã claimed=true, bản lưu chưa có → cộng bù đúng 1 lần */
+function recoverPending(){
+  if(claiming) return;
+  const p = getPend();
+  if(!p || !p.id) return;
+  const m = list.find(x => x.id === p.id);
+  if(!m){ if(Date.now() - (p.t || 0) > 600000) setPend(null); return; }   // chưa thấy thư (đang tải) → chờ; quá 10 phút thì bỏ
+  if(isDone(p.id)){ setPend(null); return; }
+  if(m.claimed){
+    applyOnce(m, p.zone);
+    setPend(null);
+    if(typeof popToast === 'function') popToast('✅ Đã khôi phục phần thưởng', esc(m.title), 'ok');
+  } else if(Date.now() - (p.t || 0) > 120000){
+    setPend(null);          // máy chủ vẫn claimed=false sau 2 phút → lần ghi trước không thành công, nhận lại bình thường
   }
 }
 
 /* ---------- Load & listen ---------- */
+function setList(val){
+  list = toList(val);
+  setBadge(list.filter(m => !m.claimed).length);
+  if(open) renderList();
+  try{ recoverPending(); }catch(e){ console.warn('[mail] recover', e); }
+}
 function loadMails(){
   if(!rdb || !me || guest){
     list = [];
@@ -279,25 +400,12 @@ function loadMails(){
     if(open) renderList();
     return;
   }
-  rdb.ref('mail/'+me).once('value').then(snap => {
-    const val = snap.val() || {};
-    list = Object.keys(val).map(id => Object.assign({id}, val[id]));
-    const n = list.filter(m => !m.claimed).length;
-    setBadge(n);
-    if(open) renderList();
-  }).catch(e => console.warn('[mail] load', e));
+  rdb.ref('mail/'+me).once('value').then(snap => setList(snap.val())).catch(e => console.warn('[mail] load', e));
 }
 
 function watchMails(){
   if(!rdb || !me || guest) return;
-  const ref = rdb.ref('mail/'+me);
-  ref.on('value', snap => {
-    const val = snap.val() || {};
-    list = Object.keys(val).map(id => Object.assign({id}, val[id]));
-    const n = list.filter(m => !m.claimed).length;
-    setBadge(n);
-    if(open) renderList();
-  }, e => console.warn('[mail] watch', e));
+  rdb.ref('mail/'+me).on('value', snap => setList(snap.val()), e => console.warn('[mail] watch', e));
 }
 
 /* ---------- API ---------- */
@@ -317,6 +425,12 @@ window.TTGMAIL = {
     }
   },
   refresh(){ loadMails(); },
+  _buildItems: buildItems,
+  _startClaim: startClaim,
+  _list: function(){ return list; },
+  _recover: recoverPending,
+  _doClaim: doClaim,
+  _bagRoomOk: bagRoomOk,
   // Dùng khi test: tạo thư giả (chỉ admin / console)
   _debugAdd(title, body, rewards){
     if(!rdb || !me) return Promise.reject('no auth');

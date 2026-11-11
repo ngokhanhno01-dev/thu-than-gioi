@@ -140,6 +140,7 @@ function render(c,uid,fallbackNick,pt){
   const grid=rows.map(x=>'<div>'+x[0]+'<b>'+x[1]+'</b></div>').join('');
   const upd=ago(c.t);
   $('cv-body').innerHTML=
+   '<div class="ti" id="cv-ti"></div>'+
    '<div class="top"><canvas id="cv-cv" width="128" height="128"></canvas><div class="inf">'+
    onlineHtml(pt)+'<div><b style="color:var(--jade)">Cấp '+lv+'</b></div><div>'+esc(STAGES[st][1])+'</div>'+
    '<div>Phẩm: <b style="color:rgb('+QC[q]+')">'+QN[q]+'</b></div>'+
@@ -150,6 +151,7 @@ function render(c,uid,fallbackNick,pt){
    '<div class="s">🛡️ Trang bị đang mang</div>'+setHtml(eq)+[0,1,2,3].map(i=>itemHtml(eq[i])).join('')+
    (upd?'<div class="ft">Thẻ cập nhật '+upd+'</div>':'')+reportBtnHtml(uid);
   bindReport(uid,nick);
+  try{if(window.TTGTITLE)TTGTITLE.fill(uid,$('cv-ti'))}catch(_){}
   drawPet(bl,sp,st,pi)}
 
 /* Vẽ thú: ảnh có thể chưa tải xong -> thử lại từng khung hình tối đa ~4 giây */

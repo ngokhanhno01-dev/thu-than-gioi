@@ -31,13 +31,13 @@
   const PAIR_COOLDOWN_MS = 60 * 60 * 1000;    // cùng 1 cặp A→B: 1 giờ mới đánh lại được
   const LOG_KEEP         = 30;                // nhật ký hiển thị tối đa
 
-  const REWARD_TABLE = [
-    {rank:'Hạng 1',      title:'Chí Tôn Đấu Trường', xu:5000, box:3, blood:5, note:'Danh hiệu + phần thưởng cao nhất'},
-    {rank:'Hạng 2',      title:'Vô Địch Đấu Trường', xu:3000, box:2, blood:3, note:'Danh hiệu'},
-    {rank:'Hạng 3',      title:'Cao Thủ Đấu Trường', xu:2000, box:2, blood:2, note:'Danh hiệu'},
-    {rank:'Hạng 4–10',   title:'—',                  xu:800,  box:1, blood:1, note:'Chỉ phần thưởng'},
-    {rank:'Hạng 11–30',  title:'—',                  xu:300,  box:0, blood:0, note:'Xu khuyến khích'},
-    {rank:'Tham gia',    title:'—',                  xu:100,  box:0, blood:0, note:'Đủ trận + đối thủ khác nhau'}
+  /* Bảng thưởng lấy từ season-config.js (dùng chung với script chốt mùa). Nếu file đó chưa nạp thì dùng bản dự phòng. */
+  const REWARD_TABLE = (window.TTGCFG && TTGCFG.TIERS) ? TTGCFG.TIERS.map(function(t){
+    return { rank: t.name, title: t.title ? TTGCFG.TITLES[t.title] + ' · Mùa N' : '—', xu: t.xu, box: t.box,
+             blood: (t.blood.huyet + t.blood.thuoc + t.blood.tinh) ? (t.blood.huyet + ' huyết · ' + t.blood.thuoc + ' thảo dược · ' + t.blood.tinh + ' tinh hoa') : 0,
+             note: '' };
+  }) : [
+    {rank:'Hạng 1', title:'Chí Tôn Đấu Trường · Mùa N', xu:5000, box:3, blood:0, note:''}
   ];
 
   const NPC_NAMES = ['Hắc Phong Lang','Thanh Mộc Hổ','Lôi Vân Điểu','Huyết Ảnh Xà','Kim Sơn Khải'];
@@ -953,6 +953,7 @@
 
   function doChallenge(targetUid, targetNick, targetFame, isNpc){
     if(fighting) return;
+    if(window.TTGGUARD && TTGGUARD.locked()){ try{ TTGGUARD.say(); }catch(_){} return; }
     if(isNpc || !targetUid){ startFight(targetUid, targetNick, targetFame, isNpc, null); return; }
     if(isGuest()){ toast('🔒 Khách chỉ xem bảng xếp hạng, hãy đăng nhập để khiêu chiến.'); return; }
     fighting = true;      // khóa bấm đúp trong lúc kiểm tra
@@ -1425,13 +1426,13 @@
     const body = $('ar-sub-body');
     if(!sub||!body) return;
     title.textContent = 'Phần thưởng mùa';
-    let h = '<p style="font-size:13px;color:#b7bda9;margin:0 0 8px">Phát vào <b>Hộp thư</b> khi kết thúc mùa. Danh hiệu kèm đuôi « · Mùa N ». Số liệu đề xuất, chốt ở Bước 6.</p>';
-    h += '<table><tr><th>Bậc</th><th>Xu</th><th>Rương</th><th>Huyết</th><th>Danh hiệu</th></tr>';
+    let h = '<p style="font-size:13px;color:#b7bda9;margin:0 0 8px">Phát vào <b>Hộp thư</b> khi kết thúc mùa (tự động, sau 00:00 thứ Hai). Danh hiệu kèm đuôi « · Mùa N ».<br>Điều kiện nhận thưởng: thắng tối thiểu <b>'+((window.TTGCFG&&TTGCFG.MIN_WINS)||3)+'</b> trận với ít nhất <b>'+((window.TTGCFG&&TTGCFG.MIN_FOES)||2)+'</b> đối thủ khác nhau, thú đã nở.</p>';
+    h += '<table><tr><th>Bậc</th><th>Xu</th><th>Hộp NL</th><th>Huyết mạch</th><th>Danh hiệu</th></tr>';
     REWARD_TABLE.forEach(function(r){
       h += '<tr><td>'+esc(r.rank)+'</td><td>'+r.xu+'</td><td>'+(r.box||'—')+'</td><td>'+(r.blood||'—')+'</td><td>'+esc(r.title)+'</td></tr>';
     });
     h += '</table>';
-    h += '<p style="font-size:12px;color:#78864f;margin-top:8px">Rương = hộp nguyên liệu chế trang bị (chọn vùng khi nhận). Huyết = nguyên liệu nâng huyết mạch.</p>';
+    h += '<p style="font-size:12px;color:#78864f;margin-top:8px">Hộp NL = hộp nguyên liệu chế trang bị (chọn vùng khi nhận). Huyết mạch = nguyên liệu nâng huyết mạch (Giọt Huyết Mạch, Thảo Dược, Tinh Hoa hệ thú).</p>';
     body.innerHTML = h;
     sub.classList.add('show');
   }

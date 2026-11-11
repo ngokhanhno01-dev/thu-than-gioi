@@ -26,6 +26,7 @@ const OFF_DAILY_H=6;          /* tổng số giờ ngoại tuyến được tín
 let fameSeason=0;              /* mùa mà uy danh hiện tại thuộc về (0 = chưa set) */
 let arenaTickets=10;           /* số vé Đấu trường hiện có (0–10), Bước 2 */
 let arenaTicketAt=0;           /* mốc giờ máy chủ (ms) lần tính vé gần nhất; 0 = chưa set */
+let mailDone=[];               /* id các thư thưởng đã cộng vào bản lưu này (chống nhận đôi, Bước 6) */
 let fameLost=0;                /* tổng uy danh đã bị trừ do bị thách đấu TRONG MÙA NÀY và đã áp vào bản lưu (Bước 5) */
 const OFF_WINDOW_MS=24*3600*1000;
 const GUEST='__guest';
@@ -217,7 +218,8 @@ function snap(){
     zone:zoneIdx(),hunt:huntOn(),off:{t0:offSt.t0,used:offSt.used},nc:nickChanges,
     arenaTickets:(typeof arenaTickets!=='undefined'?arenaTickets:10),
     arenaTicketAt:(typeof arenaTicketAt!=='undefined'?arenaTicketAt:0),
-    fameLost:(typeof fameLost!=='undefined'?fameLost:0)
+    fameLost:(typeof fameLost!=='undefined'?fameLost:0),
+    mailDone:(typeof mailDone!=='undefined'&&Array.isArray(mailDone)?mailDone.slice(-300):[])
   };
   return{v:VER,t:Date.now(),tab:TAB,g}}
 const validPet=p=>p&&BL[p.bl]&&Number.isInteger(p.sp)&&p.sp>=0&&p.sp<17&&p.pi>=0&&p.pi<5&&p.q>=0&&p.q<5&&p.base&&['hp','atk','def','spd','mag'].every(k=>isFinite(p.base[k]));
@@ -238,6 +240,7 @@ function restore(d){
   arenaTickets=Math.max(0,Math.min(10,Math.floor(num(g.arenaTickets,10))));
   arenaTicketAt=Math.max(0,Math.floor(num(g.arenaTicketAt,0)));
   fameLost=Math.max(0,Math.floor(num(g.fameLost,0)));
+  mailDone=Array.isArray(g.mailDone)?g.mailDone.filter(x=>typeof x==='string'&&x.length<80).slice(-300):[];
   rolls=clampI(g.rolls,0,1e9);rerollLeft=clampI(g.rerollLeft,0,99);
   hist=Array.isArray(g.hist)?g.hist.filter(q=>q>=0&&q<5).slice(0,3):[];
   eggQ=clampI(g.eggQ,0,4);
