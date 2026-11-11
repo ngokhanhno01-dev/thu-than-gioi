@@ -6,6 +6,7 @@
    Tiết kiệm quota: mỗi lần bấm xem = 2 lượt đọc (thẻ + nhịp tim); xem lại cùng 1 người trong CACHE_MS thì dùng bản nhớ trong máy, không đọc lại.
    Không cần thêm luật Firestore (cards đã cho đọc công khai ở bước 1).
    Không sửa file cũ: bọc TTGNET.start của 20-online.js để lấy kết nối db, rồi gán TTGFRIENDS.onView.
+   Nút 🚩 Báo cáo gian lận (27-report.js) hiện ở cuối thẻ của người khác.
    Nạp SAU 22-friends.js, TRƯỚC 19-save.js. */
 (()=>{
 'use strict';
@@ -106,6 +107,16 @@ function onlineHtml(p){   /* p = {on:true} đang online | {ls:ms giờ máy ch�
   return'<div class="off">⚪ Offline'+(ms!==null&&ms>=0?' <small>(hoạt động '+agoMs(ms)+')</small>':'')+'</div>'}
 function agoMs(ms){const m=Math.floor(ms/60000);if(m<2)return'vừa xong';if(m<60)return m+' phút trước';const h=Math.floor(m/60);if(h<48)return h+' giờ trước';return Math.floor(h/24)+' ngày trước'}
 
+/* ---------- Nút báo cáo gian lận (27-report.js) — chỉ hiện khi đã đăng nhập và không phải thẻ của chính mình ---------- */
+function reportBtnHtml(uid){
+  try{
+    if(!(window.TTGREPORT&&TTGREPORT.can(uid)))return'';
+    return'<div class="ft"><button type="button" id="cv-rp" style="width:auto;margin:4px 0 0;padding:4px 10px;font-size:15px!important;cursor:pointer;color:#ffb8aa;background:#3a1a1f;border:2px solid #a72f42">'+(TTGREPORT.done(uid)?'✔ Đã báo cáo':'🚩 Báo cáo gian lận')+'</button></div>'
+  }catch(_){return''}}
+function bindReport(uid,nick){
+  const b=$('cv-rp');
+  if(b)b.onclick=()=>{try{TTGREPORT.open(uid,nick)}catch(e){console.warn('[view] báo cáo',e)}}}
+
 function render(c,uid,fallbackNick,pt){
   const BLK=['ho','vu','long','tuoc','lan','hu'];
   const bl=BLK.includes(c.bl)?c.bl:'ho',sp=Math.floor(num(c.sp,0,16,0)),pi=Math.floor(num(c.pi,0,4,0)),up=Math.floor(num(c.up,0,10,0)),q=Math.floor(num(c.q,0,4,0));
@@ -137,7 +148,8 @@ function render(c,uid,fallbackNick,pt){
    '<div>Loài: <b>'+esc(spName)+'</b></div>'+(spTxt?'<div class="set" style="color:#b7bda9">'+spTxt+'</div>':'')+
    '<div class="s">📊 Chỉ số tổng (huyết mạch + trang bị + kỹ năng loài)</div><div class="sg">'+grid+'</div>'+
    '<div class="s">🛡️ Trang bị đang mang</div>'+setHtml(eq)+[0,1,2,3].map(i=>itemHtml(eq[i])).join('')+
-   (upd?'<div class="ft">Thẻ cập nhật '+upd+'</div>':'');
+   (upd?'<div class="ft">Thẻ cập nhật '+upd+'</div>':'')+reportBtnHtml(uid);
+  bindReport(uid,nick);
   drawPet(bl,sp,st,pi)}
 
 /* Vẽ thú: ảnh có thể chưa tải xong -> thử lại từng khung hình tối đa ~4 giây */
