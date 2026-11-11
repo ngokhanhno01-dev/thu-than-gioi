@@ -116,7 +116,17 @@ function render(c,uid,fallbackNick,pt){
   try{const si=spInfo(sp,pi+up*.03,q);spTxt=si&&si.text?si.text:''}catch(_){}
   const pe=Math.round(pur(pi+up*.03)*100);
   const nm=$('cv-nm');nm.textContent='🐾 '+nick;nm.dataset.nick=nick;
-  const grid=statRows(c.stats).map(x=>'<div>'+x[0]+'<b>'+x[1]+'</b></div>').join('');
+  /* Bảng chỉ số: dùng ĐÚNG hàm cbAttrs của màn chính (03-game-core.js) để khớp bảng ngoài,
+     gồm cả hiệu ứng kỹ năng loài (chí mạng, kháng hiệu ứng, xuyên giáp, hút máu...). Lỗi thì quay về bảng cơ bản. */
+  let rows;
+  try{
+    const k={};k[sp]=spInfo(sp,pi+up*.03,q).v;
+    const g=kk=>num((c.stats&&typeof c.stats==='object')?c.stats[kk]:0,0,1e9,0);
+    const s0={hp:g('hp'),atk:g('atk'),def:g('def'),spd:g('spd'),mag:g('mag'),eva:g('eva'),stun:g('stun'),regen:g('regen'),crit:g('crit')};
+    rows=cbAttrs(s0,k,s0.crit);
+    if(!Array.isArray(rows)||!rows.length)throw 0}
+  catch(_){rows=statRows(c.stats)}
+  const grid=rows.map(x=>'<div>'+x[0]+'<b>'+x[1]+'</b></div>').join('');
   const upd=ago(c.t);
   $('cv-body').innerHTML=
    '<div class="top"><canvas id="cv-cv" width="128" height="128"></canvas><div class="inf">'+
@@ -125,7 +135,7 @@ function render(c,uid,fallbackNick,pt){
    '<div>Huyết mạch: <b style="color:rgb('+B.au+')">'+esc(B.n)+'</b> <small>(hệ '+esc(B.h)+')</small></div>'+
    '<div>Độ đậm: <b style="color:var(--gold)">'+esc(PL[pi][1])+(up?' +'+up:'')+'</b> <small>('+pe+'%)</small></div></div></div>'+
    '<div>Loài: <b>'+esc(spName)+'</b></div>'+(spTxt?'<div class="set" style="color:#b7bda9">'+spTxt+'</div>':'')+
-   '<div class="s">📊 Chỉ số tổng (đã gồm huyết mạch + trang bị)</div><div class="sg">'+grid+'</div>'+
+   '<div class="s">📊 Chỉ số tổng (huyết mạch + trang bị + kỹ năng loài)</div><div class="sg">'+grid+'</div>'+
    '<div class="s">🛡️ Trang bị đang mang</div>'+setHtml(eq)+[0,1,2,3].map(i=>itemHtml(eq[i])).join('')+
    (upd?'<div class="ft">Thẻ cập nhật '+upd+'</div>':'');
   drawPet(bl,sp,st,pi)}
