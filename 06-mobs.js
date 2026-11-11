@@ -2175,7 +2175,7 @@ function fxTop(g,u,redm){
   g.save();g.imageSmoothingEnabled=false;g.globalAlpha=al;g.drawImage(bn,180-w/2,54-h/2,w,h);g.restore()}}
 window.BSPD=1; /* hệ số tăng tốc thám hiểm + trận đấu (x1..x4), chỉ đổi được từ bảng Admin */
 function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=$('mob'),g=$('mob-c').getContext('2d'),R=sim(e),n=R.ev.length,sp=spOfPet(),b=e.tr.rw,
- ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))*buffMul('exp')),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))*buffMul('xu')),
+ ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))*buffMul('exp')*expMul()),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))*buffMul('xu')),
  lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=0,fL=0,TE=(BT0+n*BST)/SP,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false,holdUntil=0,lastF=t0,shAmp=0,shDur=1,shEnd=0;const fired={},REDM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);const CL=R.ev.map(fxClass),HN=[fxElem((BL[pet.bl]||{}).h),fxElem((BL[e.m.bl]||{}).h)];/* [FX đợt 2] CL: loại đòn từng sự kiện · HN: hệ bên thú / bên quái */
  o.style.display='block';const rb=$('mob-run');rb.style.display='block';
  $('mob-pn').textContent=pn+' · Cấp '+level;const RP=REG[pet.sp],RM=REG[e.m.sp];paintUI(RP,RM);$('mob-mn').innerHTML=(e.m.boss?'👑 ':'')+nm(e)+' · Cấp '+e.lv;if(e.tr.n!=='Thường')$('mob-mh').parentNode.style.borderColor=e.tr.c;if(window.battleHudExtra)battleHudExtra(e);

@@ -66,12 +66,17 @@ function spInfo(sp,pi,q){const e=Math.min(1.2,pur(pi)*(1+q*.05)),d=SP17[sp],v=Ma
 function spOfPet(){return pet?spInfo(pet.sp,pet.pi+(pet.up||0)*.03,pet.q):null}
 function addFame(n){/* Uy danh chỉ từ Đấu trường (Bước 4). Nguồn cũ (thám hiểm/Linh Đan/Linh Quả) đã tắt. */return 0}
 
-/* --- ngũ hành khắc chế (Hồ trung lập) --- */
+/* --- ngũ hành khắc chế ---
+   Cửu Vĩ Hồ (hệ Huyễn, tộc hiếm nhất): đánh MỌI hệ còn lại được thêm HU_ATK (không hệ nào khắc được Hồ).
+   Muốn chỉnh độ mạnh chỉ cần đổi số HU_ATK bên dưới (1.20 = +20% sát thương; 1 = trở lại trung lập như cũ). */
+const HU_ATK=1.20;   /* Hồ đánh mọi hệ khác: +20% sát thương */
+const HU_EXP=0.70;   /* CÁI GIÁ: thú Hồ chỉ nhận 70% EXP (−30%). Áp cho thám hiểm, ngoại tuyến, Linh Đan, Linh Quả; Admin cộng EXP không bị giảm */
+function expMul(){return(typeof pet!=='undefined'&&pet&&pet.bl==='hu')?HU_EXP:1}
 const CYC=['ho','long','lan','vu','tuoc'];
-function relMul(a,b){if(a==='hu'||b==='hu')return 1;
+function relMul(a,b){if(a==='hu')return b==='hu'?1:HU_ATK;if(b==='hu')return 1;
   if(CYC[(CYC.indexOf(a)+1)%5]===b)return 1.25;
   if(CYC[(CYC.indexOf(b)+1)%5]===a)return .8;return 1}
- function relText(bl){if(bl==='hu')return'Trung lập: không khắc hệ nào, không bị hệ nào khắc';
+ function relText(bl){if(bl==='hu')return'Hệ hiếm: khắc <b>cả 5 hệ</b> còn lại (+'+Math.round((HU_ATK-1)*100)+'%, ×'+String(HU_ATK).replace('.',',')+') · không hệ nào khắc được<br><small style="color:#ff9a94">Cái giá: EXP nhận được −'+Math.round((1-HU_EXP)*100)+'%</small>';
   const i=CYC.indexOf(bl);return'Khắc <b>'+BL[CYC[(i+1)%5]].h+'</b> (+25%, ×1,25) · Bị <b>'+BL[CYC[(i+4)%5]].h+'</b> khắc (−20%, ×0,8)'}
 
 /* --- tỉ lệ roll --- */
@@ -113,11 +118,11 @@ const _ri=renderInfo;renderInfo=function(){_ri();
    '☯ '+relText(bl)+'</div>')};
 
 /* --- hoạt động: thám hiểm / đấu trường / cửa hàng --- */
-window.train=function(){if(!hatched)return;const s=spOfPet(),ex=10*(1+(pet.sp===15?s.v/100:0));
+window.train=function(){if(!hatched)return;const s=spOfPet(),ex=10*(1+(pet.sp===15?s.v/100:0))*expMul();
   stats();addExp(ex);log('🧭 Thú thám hiểm, EXP +'+Math.round(ex)+'.')};
 window.arena=function(){if(!hatched)return;log('⚔️ Đấu trường: cập nhật tiếp theo.');};
-ITEMS.dan.use=()=>{stats();addExp(40);log('💊 Thú dùng Linh Đan, EXP +40.')};
+ITEMS.dan.use=()=>{stats();{const e=Math.round(40*expMul());addExp(e);log('💊 Thú dùng Linh Đan, EXP +'+e+'.')}};
 ITEMS.dan.d='Thú tăng tu vi: EXP +40.';
-ITEMS.qua.use=()=>{stats();addExp(8);log('🍎 Thú ăn Linh Quả, EXP +8.')};
+ITEMS.qua.use=()=>{stats();{const e=Math.round(8*expMul());addExp(e);log('🍎 Thú ăn Linh Quả, EXP +'+e+'.')}};
 ITEMS.qua.d='Quả chứa linh khí: EXP +8.';
 renderExp();renderPick();

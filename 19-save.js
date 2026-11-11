@@ -296,7 +296,7 @@ function offline(sec){
   offSt.used+=s;
   const wins=Math.floor(s/OFF_SEC_PER_WIN);
   const zb=VAN_KIEP_ZONE_BOUNDS[zoneIdx()],lv=zb.start+1,sp=spOfPet();
-  const ex=Math.round(wins*(14+lv*.9)*(1+(pet.sp===15?sp.v/100:0)));
+  const ex=Math.round(wins*(14+lv*.9)*(1+(pet.sp===15?sp.v/100:0))*expMul());
   const gd=Math.round(wins*(6+lv*.4)*(1+(pet.sp===5?sp.v/100:0)));
   age+=Math.floor(s/(TICK.hatched/1000));$s('h-age').textContent=age;
   gold+=gd;stats();
