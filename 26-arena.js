@@ -214,27 +214,41 @@
     return d;
   }
 
+  /* Đếm số món mỗi bộ + phẩm chất trung bình (giống eqSetInfo() trong 12-equip.js) */
   function countSetsFromEq(eqArr){
-    const cnt = {};
-    if(!Array.isArray(eqArr)) return cnt;
+    const cnt = {}, qs = {};
+    if(!Array.isArray(eqArr)) return {cnt: cnt, qs: qs};
+    const QB = (typeof EQ_QBONUS !== 'undefined' && EQ_QBONUS) ? EQ_QBONUS : [0,.06,.12,.20,.30];
     eqArr.forEach(function(it){
       if(!it || it.z == null) return;
       const z = Math.floor(Number(it.z));
-      if(z >= 0 && z < 17) cnt[z] = (cnt[z] || 0) + 1;
+      if(!(z >= 0 && z < 17)) return;
+      const q = Math.max(0, Math.min(QB.length - 1, Math.floor(Number(it.q) || 0)));
+      cnt[z] = (cnt[z] || 0) + 1;
+      (qs[z] = qs[z] || []).push(QB[q] || 0);
     });
-    return cnt;
+    return {cnt: cnt, qs: qs};
   }
-  function activeSetBuffs(cnt){
+  /* Nhân giá trị bộ theo phẩm chất — cùng công thức eqScale() của game gốc */
+  function scaleSet(v, qb){
+    if(typeof eqScale === 'function') return eqScale(v, qb);
+    const o = {};
+    for(const k in v){ o[k] = Math.round(v[k] * (1 + qb) * 10) / 10; if(k === 'ch') o[k] = Math.min(100, o[k]); }
+    return o;
+  }
+  function activeSetBuffs(info){
     const out = [];
     if(typeof EQ_SETS === 'undefined' || !EQ_SETS) return out;
+    const cnt = info.cnt, qs = info.qs;
     Object.keys(cnt).forEach(function(z){
       const n = cnt[z];
       if(n < 2) return;
       const S = EQ_SETS[z];
       if(!S) return;
       const level = n >= 4 ? 4 : 2;
-      const v = level === 4 ? (S.v4 || S.v2) : S.v2;
-      out.push({k: S.k, level: level, v: v, name: S.name, i: S.i});
+      const base = level === 4 ? (S.v4 || S.v2) : S.v2;
+      const qb = qs[z].reduce(function(a,b){ return a + b; }, 0) / qs[z].length;
+      out.push({k: S.k, level: level, v: scaleSet(base, qb), name: S.name, i: S.i});
     });
     return out;
   }
@@ -650,10 +664,16 @@
       $('mob-mn').textContent = '⚔ ' + String(oppName).slice(0,12) + ' · Lv.' + (card.lv || '?');
       paintUI(RP, RM);
       try{ $('mob-mh').parentNode.style.borderColor = RM[0]; }catch(_){}
+      // Ô hệ cạnh thanh máu + nút Bỏ qua: dùng lại battleHudExtra của thám hiểm (10-drops-shop.js)
+      try{
+        if(typeof window.battleHudExtra === 'function') window.battleHudExtra({m: {bl: oppBL}});
+        const br = $('mob-pbar2'); if(br) br.innerHTML = '';   // hàng buff Exp/Xu không dùng trong đấu trường
+      }catch(e){ console.warn('[arena] hud hệ', e); }
 
       function fin(){
         if(done) return; done = true;
         o.style.display = 'none'; rb.style.display = 'none'; rb.textContent = '🏃 Chạy';
+        ['mob-pe','mob-me','mob-pbar2'].forEach(function(id){ const x = $(id); if(x) x.innerHTML = ''; });
         o.onclick = null; rb.onclick = null;
         resolve();
       }
