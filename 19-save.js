@@ -437,6 +437,7 @@ async function wipe(){
 
 /* ====================== MÀN ĐĂNG NHẬP ====================== */
 function showLogin(){
+  try{window.TTGBOOT&&TTGBOOT.hide()}catch(_){}
   let o=$s('ttg-login');
   if(!o){
     o=document.createElement('div');o.id='ttg-login';
@@ -456,6 +457,7 @@ function showLogin(){
   o.classList.add('show');setTimeout(()=>{try{$s('lg-name').focus()}catch(_){}},50)}
 const lmsg=h=>{const m=$s('lg-msg');if(m)m.textContent=h};
 function askNick(u){   /* bước bắt buộc: đặt biệt danh (tài khoản mới, hoặc tài khoản cũ chưa có) */
+  try{window.TTGBOOT&&TTGBOOT.hide()}catch(_){}
   return new Promise(res=>{
     let o=$s('ttg-nick');
     if(!o){
@@ -547,6 +549,7 @@ function begin(key,name){
     const d=e.newValue?parseSave(e.newValue):null;
     if(!d||d.tab!==TAB)conflict()});
   window.addEventListener('beforeunload',()=>{save();flushCloud(60000)});
+  try{window.TTGBOOT&&TTGBOOT.hide()}catch(_){}   /* tắt màn hình chờ: dữ liệu người chơi đã sẵn sàng */
   showSaveNotice()}
 
 window.TTGSAVE={save,snap,get user(){return user},exportSave,wipe,logout};

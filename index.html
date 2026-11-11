@@ -5,8 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thú Thần Giới</title>
 <link rel="stylesheet" href="style.css">
+<style id="boot-css">
+#ttg-boot{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 38%,#1d3a45 0%,#0c1a21 55%,#050b0f 100%);color:#e8fff4;overflow:hidden;
+  font-family:'VT323',monospace;text-align:center;transition:opacity .55s ease;padding:16px;box-sizing:border-box}
+#ttg-boot.out{opacity:0;pointer-events:none}
+#ttg-boot .rays{position:absolute;left:50%;top:38%;width:170vmax;height:170vmax;margin:-85vmax 0 0 -85vmax;
+  background:repeating-conic-gradient(from 0deg,rgba(242,199,106,.10) 0 6deg,rgba(242,199,106,0) 6deg 18deg);
+  -webkit-mask-image:radial-gradient(circle,#000 0,transparent 42%);mask-image:radial-gradient(circle,#000 0,transparent 42%);
+  animation:tb-spin 40s linear infinite}
+#ttg-boot .stage{position:relative;width:200px;height:200px;margin-bottom:6px}
+#ttg-boot .ring{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%) rotateX(68deg)}
+#ttg-boot .r1{width:190px;height:190px;border:3px dashed #f2c76a;animation:tb-rot 9s linear infinite}
+#ttg-boot .r2{width:140px;height:140px;border:2px solid #6fd1a0;box-shadow:0 0 14px #6fd1a0;animation:tb-rot2 6s linear infinite}
+#ttg-boot .r3{width:100px;height:100px;border:2px dotted #b69cff;animation:tb-rot 4s linear infinite}
+#ttg-boot .egg{position:absolute;left:50%;top:44%;font-size:78px;line-height:1;transform-origin:50% 90%;
+  filter:drop-shadow(0 0 14px rgba(242,199,106,.85));animation:tb-egg 2.2s ease-in-out infinite;margin-left:-.5em;width:1em}
+#ttg-boot .spark{position:absolute;width:5px;height:5px;background:#ffe9a0;box-shadow:0 0 6px #f2c76a;opacity:0;animation:tb-spark 3s linear infinite}
+#ttg-boot h1{margin:0;font-weight:400;font-size:clamp(38px,11vw,64px);letter-spacing:3px;line-height:1;
+  background:linear-gradient(100deg,#b8862a 0%,#ffe9a0 25%,#fff 38%,#ffd24a 50%,#b8862a 75%,#ffe9a0 100%);background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 3px 0 #3a2606) drop-shadow(0 0 12px rgba(242,199,106,.55));animation:tb-shine 3.2s linear infinite,tb-float 3s ease-in-out infinite}
+#ttg-boot .sub{margin-top:6px;font-size:20px;color:#9fd8c4;letter-spacing:2px;opacity:.9}
+#ttg-boot .bar{position:relative;width:min(78vw,300px);height:14px;margin:22px 0 12px;border:2px solid #f2c76a;background:#0a1418;box-shadow:0 0 12px rgba(242,199,106,.35)}
+#ttg-boot .bar i{position:absolute;top:1px;bottom:1px;width:34%;background:repeating-linear-gradient(90deg,#6fd1a0 0 8px,#3f9c74 8px 10px);animation:tb-bar 1.5s ease-in-out infinite}
+#ttg-boot .msg{font-size:24px;line-height:1.15;color:#e8fff4;max-width:92vw;min-height:2.4em}
+#ttg-boot .msg b{font-weight:400;color:#ffd24a;display:inline-block;min-width:6.2em;text-align:left}
+@keyframes tb-spin{to{transform:rotate(360deg)}}
+@keyframes tb-rot{to{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(360deg)}}
+@keyframes tb-rot2{to{transform:translate(-50%,-50%) rotateX(68deg) rotateZ(-360deg)}}
+@keyframes tb-egg{0%,100%{transform:translate(0,-50%) rotate(0) scale(1)}15%{transform:translate(0,-54%) rotate(-9deg) scale(1.04)}30%{transform:translate(0,-50%) rotate(9deg)}45%{transform:translate(0,-54%) rotate(-7deg) scale(1.06)}60%{transform:translate(0,-50%) rotate(0)}}
+@keyframes tb-spark{0%{opacity:0;transform:translateY(0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translateY(-120px) scale(1.2)}}
+@keyframes tb-shine{to{background-position:-250% 0}}
+@keyframes tb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes tb-bar{0%{left:-34%}100%{left:100%}}
+@media (prefers-reduced-motion:reduce){#ttg-boot *{animation-duration:20s!important}}
+</style>
 </head>
 <body>
+<div id="ttg-boot" role="status" aria-live="polite">
+  <div class="rays"></div>
+  <div class="stage"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="egg">🥚</div><div id="tb-sparks"></div></div>
+  <h1>THÚ THẦN GIỚI</h1>
+  <div class="sub">✦ Linh Thú · Huyết Mạch · Đấu Trường ✦</div>
+  <div class="bar"><i></i></div>
+  <div class="msg">Đang tải dữ liệu người chơi, vui lòng chờ<b id="tb-dots">.</b></div>
+</div>
+<script>
+/* Màn hình chờ khi mở/tải lại trang: hiện ngay, tắt khi game sẵn sàng (19-save.js gọi TTGBOOT.hide()) hoặc sau 30 giây */
+(function(){
+  var el=document.getElementById('ttg-boot'),sp=document.getElementById('tb-sparks'),n=0,dots=document.getElementById('tb-dots'),done=false;
+  for(var i=0;i<16;i++){var s=document.createElement('span');s.className='spark';
+    s.style.left=(18+Math.random()*64)+'%';s.style.top=(48+Math.random()*40)+'%';
+    s.style.animationDelay=(Math.random()*3).toFixed(2)+'s';s.style.animationDuration=(2+Math.random()*2).toFixed(2)+'s';sp.appendChild(s)}
+  var iv=setInterval(function(){n=(n+1)%9;if(dots)dots.textContent=new Array(n+2).join('.').slice(0,8)||'.'},350);
+  function hide(){if(done||!el)return;done=true;clearInterval(iv);el.className='out';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},650)}
+  window.TTGBOOT={hide:hide};
+  setTimeout(hide,30000);
+})();
+</script>
 <div class="app">
   <div class="bagrow">
   <details class="bagbox infobtn">
