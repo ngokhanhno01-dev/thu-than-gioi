@@ -85,6 +85,22 @@
     }catch(_){}
     return null;
   }
+  let toastT = null;
+  function toast(msg){
+    try{ if(typeof log === 'function') log(msg); }catch(_){}
+    ensurePanel();
+    const t = $('ar-toast');
+    if(!t) return;
+    t.innerHTML = msg;
+    t.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(function(){ t.classList.remove('show'); }, 4500);
+  }
+  function fmtMs(ms){
+    ms = Math.max(0, Math.floor(Number(ms) || 0));
+    const m = Math.floor(ms / 60000), s = Math.floor((ms % 60000) / 1000);
+    return m + 'p ' + s + 's';
+  }
   function esc(s){
     return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
@@ -430,18 +446,18 @@
 
   function doChallenge(targetUid, targetNick, targetFame, isNpc){
     if(busy) return;
-    if(isGuest()){ log('🔒 Khách chỉ xem bảng xếp hạng, hãy đăng nhập để khiêu chiến.'); return; }
-    if(!hatched || !pet){ log('🥚 Cần thú đã nở mới khiêu chiến.'); return; }
-    if(!window.TTGSEASON || !TTGSEASON.useTicket){ log('⚠️ Module mùa chưa sẵn sàng.'); return; }
+    if(isGuest()){ toast('🔒 Khách chỉ xem bảng xếp hạng, hãy đăng nhập để khiêu chiến.'); return; }
+    if(!hatched || !pet){ toast('🥚 Cần thú đã nở mới khiêu chiến.'); return; }
+    if(!window.TTGSEASON || !TTGSEASON.useTicket){ toast('⚠️ Module mùa chưa sẵn sàng.'); return; }
     if(!TTGSEASON.useTicket()){
-      log('🎫 Hết vé Đấu trường. ' + (TTGSEASON.ticketsStr ? TTGSEASON.ticketsStr() : ''));
+      toast('🎫 Hết vé Đấu trường. ' + (TTGSEASON.ticketsStr ? TTGSEASON.ticketsStr() : ''));
       return;
     }
     busy = true;
     const myF = myDispFame();
     const oppF = Math.max(0, Math.floor(targetFame || 0));
 
-    const runFight = function(card){
+    const runFight0 = function(card){
       const P = mkFighterFromMe();
       const Q = mkFighterFromCard(card, targetNick || (card && card.nick));
       const R = simArena(P, Q);
@@ -480,12 +496,21 @@
       if(panelOpen) renderMain();
     };
 
+    const runFight = function(card){
+      try{ runFight0(card); }
+      catch(e){
+        console.error('[arena] lỗi trận', e);
+        busy = false;
+        toast('⚠️ Lỗi khi đấu: ' + esc(e && e.message ? e.message : e));
+      }
+    };
+
     if(isNpc){
       runFight(makeNpcCard());
     }else{
       getCard(targetUid).then(function(card){
         if(!card){
-          log('⚠️ Không đọc được thẻ đối thủ, dùng NPC tạm.');
+          toast('⚠️ Không đọc được thẻ đối thủ, dùng NPC tạm.');
           runFight(makeNpcCard());
         }else{
           runFight(card);
@@ -499,9 +524,9 @@
     const css = document.createElement('style');
     css.id = 'ar-css';
     css.textContent =
-      '#ar-ov{position:fixed;inset:0;z-index:120;background:rgba(4,10,14,.82);display:none;align-items:flex-end;justify-content:center;font-family:inherit}'+
+      '#ar-ov{position:fixed;inset:0;z-index:120;background:rgba(4,10,14,.95);display:none;align-items:stretch;justify-content:center;font-family:inherit}'+
       '#ar-ov.show{display:flex}'+
-      '#ar-box{width:min(96vw,420px);max-height:88vh;background:#14272d;border:3px solid #f6c66a;box-shadow:0 4px 0 #040a0e;display:flex;flex-direction:column;color:#f5edcf;font-size:15px;overflow:hidden;position:relative}'+
+      '#ar-box{width:min(100vw,480px);height:100vh;height:100dvh;max-height:none;background:#14272d;border:3px solid #f6c66a;box-shadow:0 4px 0 #040a0e;display:flex;flex-direction:column;color:#f5edcf;font-size:15px;overflow:hidden;position:relative}'+
       '#ar-box .hd{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:2px solid #78613a;color:#f6c66a;font-size:17px;flex-shrink:0}'+
       '#ar-box .hd button{width:auto;margin:0;padding:2px 10px;font-size:18px;background:#3b4a4f;border:2px solid #040a0e;color:#f5edcf;cursor:pointer}'+
       '#ar-body{flex:1;overflow-y:auto;padding:8px 10px;min-height:0}'+
@@ -543,6 +568,8 @@
       '#ar-sub th,#ar-sub td{padding:5px 4px;border-bottom:1px solid #2a3c42;text-align:left}'+
       '#ar-sub th{color:#f6c66a}'+
       '#ar-sub .empty{padding:18px;text-align:center;color:#78864f}'+
+      '#ar-toast{position:absolute;left:10px;right:10px;top:54px;z-index:5;display:none;padding:9px 12px;background:#3a1618;border:2px solid #e34e48;color:#ffe2df;font-size:14px;line-height:1.4;text-align:center;word-break:break-word}'+
+      '#ar-toast.show{display:block}'+
       '#ar-res{position:fixed;inset:0;z-index:130;background:rgba(4,10,14,.85);display:none;align-items:center;justify-content:center}'+
       '#ar-res.show{display:flex}'+
       '#ar-res .box{width:min(90vw,340px);background:#14272d;border:3px solid #f6c66a;padding:14px 16px;text-align:center;color:#f5edcf}'+
@@ -556,6 +583,7 @@
     ov.innerHTML =
       '<div id="ar-box">'+
         '<div class="hd"><span>⚔️ Đấu Trường</span><button type="button" id="ar-x">✕</button></div>'+
+        '<div id="ar-toast"></div>'+
         '<div id="ar-body"></div>'+
         '<div id="ar-actions">'+
           '<button type="button" id="ar-btn-reward">Phần thưởng</button>'+
@@ -699,7 +727,7 @@
     if(btnC) btnC.disabled = isGuest();
   }
 
-  function openRewards(){
+  function openRewards0(){
     const sub = $('ar-sub');
     const title = $('ar-sub-title');
     const body = $('ar-sub-body');
@@ -716,7 +744,7 @@
     sub.classList.add('show');
   }
 
-  function openChallenge(){
+  function openChallenge0(){
     const sub = $('ar-sub');
     const title = $('ar-sub-title');
     const body = $('ar-sub-body');
@@ -776,10 +804,13 @@
           doChallenge(u, n, f, false);
         };
       });
+    }).catch(function(e){
+      console.error('[arena] khiêu chiến', e);
+      body.innerHTML = '<div class="empty" style="color:#ff9a94">⚠️ Lỗi tải danh sách: ' + esc(e && e.message ? e.message : e) + '</div>';
     });
   }
 
-  function openSeasonInfo(){
+  function openSeasonInfo0(){
     const sub = $('ar-sub');
     const title = $('ar-sub-title');
     const body = $('ar-sub-body');
@@ -800,7 +831,7 @@
       '<div><b>Kết thúc:</b> '+esc(endVN)+' <small>(còn '+esc(cd)+')</small></div>'+
       '<div style="margin-top:6px"><b>Hạng của bạn:</b> '+rankTxt+'</div>'+
       '<div><b>Uy danh:</b> <span style="color:#f6c66a">'+meF+'</span></div>'+
-      '<div><b>Vé:</b> '+tk+' / '+tkMax+(nextTk ? ' <small>(vé tiếp: '+esc(nextTk)+')</small>' : '')+'</div>'+
+      '<div><b>Vé:</b> '+tk+' / '+tkMax+(nextTk ? ' <small>(vé tiếp sau '+esc(fmtMs(nextTk))+')</small>' : '')+'</div>'+
       '<hr style="border:none;border-top:1px solid #2a3c42;margin:10px 0">'+
       '<div style="font-size:13px;color:#b7bda9">Khi mùa kết thúc:</div>'+
       '<ul style="margin:4px 0 0 18px;padding:0;font-size:13px;color:#b7bda9">'+
@@ -810,6 +841,24 @@
       '</ul></div>';
     sub.classList.add('show');
   }
+
+  function safeOpen(name, fn){
+    return function(){
+      try{ fn(); }
+      catch(e){
+        console.error('[arena] ' + name, e);
+        const sub = $('ar-sub'), body = $('ar-sub-body');
+        if(sub && body){
+          $('ar-sub-title').textContent = 'Lỗi';
+          body.innerHTML = '<div class="empty" style="color:#ff9a94">⚠️ Không mở được: ' + esc(e && e.message ? e.message : e) + '</div>';
+          sub.classList.add('show');
+        }
+      }
+    };
+  }
+  const openRewards = safeOpen('Phần thưởng', openRewards0);
+  const openChallenge = safeOpen('Khiêu chiến', openChallenge0);
+  const openSeasonInfo = safeOpen('Thông tin mùa', openSeasonInfo0);
 
   function showResult(o){
     ensurePanel();
