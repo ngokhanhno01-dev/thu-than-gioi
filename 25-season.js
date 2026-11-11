@@ -4,6 +4,7 @@
    START_MONDAY = mốc Mùa 1 (Thứ Hai 2026-11-09 00:00 VN).
 
    Bước 2: vé + reset uy danh + ghi seasonRank khi vào mùa mới.
+   Bước 5: áp uy danh bị trừ (lost) khi bị thách đấu, nghe node của mình.
 */
 (function(){
   'use strict';
@@ -89,6 +90,10 @@
   function _sT(v){ if(_hasT()) arenaTickets = v; else { FB.tix = v; _fbSave(); } }
   function _sAt(v){ if(_hasT()) arenaTicketAt = v; else { FB.at = v; _fbSave(); } }
   function _sFs(v){ if(_hasS()) fameSeason = v; else { FB.fs = v; _fbSave(); } }
+  /* fameLost = tổng uy danh bị trừ do bị thách đấu đã áp vào bản lưu (Bước 5) */
+  function _hasL(){ try{ return typeof fameLost !== 'undefined'; }catch(_){ return false; } }
+  function _gL(){ const v = _hasL() ? fameLost : FB.fl; return (typeof v === 'number' && isFinite(v)) ? Math.max(0, Math.floor(v)) : 0; }
+  function _sL(v){ v = Math.max(0, Math.floor(v) || 0); if(_hasL()) fameLost = v; else { FB.fl = v; _fbSave(); } }
 
   /* ---------- VÉ ĐẤU TRƯỜNG ----------
      - Tối đa TICKET_MAX.
@@ -230,8 +235,10 @@
 
   /**
    * Ghi / cập nhật mục của mình trên seasonRank/{mùa}/{uid}.
-   * fame ở đây là uy danh "gốc" (chưa trừ lost) — Bước 5 mới xử lý lost.
-   * Gọi khi: vào mùa mới, sau trận (Bước 3), đổi cấp.
+   * BƯỚC 5: node.fame = uy danh trong bản lưu + fameLost (phần đã bị trừ và đã áp vào bản lưu).
+   *         Uy danh hiển thị = max(0, node.fame - node.lost) = uy danh bản lưu - phần bị trừ CHƯA áp.
+   * Chủ node CHỈ ghi các trường của mình (nick, fame, lv, wins, foes, t) bằng update(),
+   * KHÔNG đụng lost / hit / prot / lg (do người tấn công ghi) nên không bao giờ ghi đè mất lượt trừ.
    */
   function writeSeasonRank(opts){
     opts = opts || {};
@@ -244,41 +251,84 @@
 
     const s = opts.season || currentSeason();
     const nick = (opts.nick || _playerNick()).slice(0, 20);
-    const f = Math.max(0, Math.floor(opts.fame != null ? opts.fame : (typeof fame === 'number' ? fame : 0)));
+    const net = Math.max(0, Math.floor(opts.fame != null ? opts.fame : (typeof fame === 'number' ? fame : 0)));
+    const f = net + _gL();
     const lv = Math.max(1, Math.min(100, Math.floor(opts.lv != null ? opts.lv : (typeof level === 'number' ? level : 1))));
-    const wins = Math.max(0, Math.floor(opts.wins != null ? opts.wins : 0));
-    const foes = Math.max(0, Math.floor(opts.foes != null ? opts.foes : 0));
-    // lost chỉ được TĂNG bởi người tấn công (Rules). Chủ chỉ được ghi lost >= giá trị cũ, thường giữ nguyên.
-    // Khi tạo mới: lost = 0. Khi cập nhật sau trận thắng của mình: không đụng lost.
-    const payload = {
-      nick: nick,
-      fame: f,
-      lost: 0,          // tạo mới = 0; khi update sẽ đọc lại (xem dưới)
-      lv: lv,
-      wins: wins,
-      foes: foes,
-      t: firebase.database.ServerValue.TIMESTAMP
-    };
+    let wins = Math.max(0, Math.floor(opts.wins != null ? opts.wins : 0));
+    let foes = Math.max(0, Math.floor(opts.foes != null ? opts.foes : 0));
 
     const ref = rdb.ref('seasonRank/' + s + '/' + uid);
-    // Đọc lost hiện tại để không ghi đè xuống (Rules bắt lost chỉ tăng)
     return ref.once('value').then(function(sn){
+      const T = firebase.database.ServerValue.TIMESTAMP;
       if(sn.exists()){
         const cur = sn.val() || {};
-        payload.lost = Math.max(0, Math.floor(Number(cur.lost) || 0));
-        // Giữ wins/foes nếu không truyền mới
-        if(opts.wins == null && cur.wins != null) payload.wins = Math.max(0, Math.floor(Number(cur.wins) || 0));
-        if(opts.foes == null && cur.foes != null) payload.foes = Math.max(0, Math.floor(Number(cur.foes) || 0));
-        if(opts.addWins) payload.wins += Math.floor(opts.addWins);
-        if(opts.addFoes) payload.foes += Math.floor(opts.addFoes);
+        if(opts.wins == null && cur.wins != null) wins = Math.max(0, Math.floor(Number(cur.wins) || 0));
+        if(opts.foes == null && cur.foes != null) foes = Math.max(0, Math.floor(Number(cur.foes) || 0));
+        if(opts.addWins) wins += Math.floor(opts.addWins);
+        if(opts.addFoes) foes += Math.floor(opts.addFoes);
+        // update() chỉ chạm các trường của chủ → lost/hit/prot/lg của người tấn công được giữ nguyên
+        return ref.update({ nick: nick, fame: f, lv: lv, wins: wins, foes: foes, t: T });
       }
-      return ref.set(payload);
+      if(opts.addWins) wins += Math.floor(opts.addWins);
+      if(opts.addFoes) foes += Math.floor(opts.addFoes);
+      return ref.set({ nick: nick, fame: f, lost: 0, lv: lv, wins: wins, foes: foes, t: T });
     }).then(function(){
       return {ok:true};
     }).catch(function(e){
       console.warn('[season] ghi seasonRank lỗi', e);
       return {ok:false, error:String((e && (e.code || e.message)) || e)};
     });
+  }
+
+  /* ---------- BƯỚC 5: ÁP "UY DANH BỊ TRỪ" KHI BỊ THÁCH ĐẤU ----------
+     Người tấn công cộng dồn node.lost (trên bảng). Máy của chủ nghe node của mình:
+     lost mới > fameLost (đã áp) → trừ phần chênh vào fame trong bản lưu, rồi nhớ fameLost = lost.
+     Nhờ vậy không bao giờ trừ hai lần, dù đăng nhập lại hay đổi máy (fameLost nằm trong bản lưu). */
+  let _myNode = null;       // bản sao node của mình (lost, hit, prot...) để giao diện đọc
+  let _ownRef = null, _ownCb = null, _ownSeason = 0;
+
+  function applyLost(L){
+    L = Math.max(0, Math.floor(Number(L) || 0));
+    const applied = _gL();
+    if(L <= applied) return 0;
+    const d = L - applied;
+    const before = (typeof fame === 'number' ? fame : 0);
+    fame = Math.max(0, before - d);
+    _sL(L);
+    try{
+      if(typeof log === 'function') log('🛡️ Bạn bị thách đấu khi vắng mặt/đang chơi: uy danh <b>-' + (before - fame) + '</b> (còn ' + fame + ').');
+      if(typeof stats === 'function') stats();
+    }catch(_){}
+    try{ if(window.TTGSAVE && typeof TTGSAVE.save === 'function') TTGSAVE.save(); }catch(_){}
+    return before - fame;
+  }
+
+  function stopOwnListen(){
+    if(_ownRef && _ownCb){ try{ _ownRef.off('value', _ownCb); }catch(_){} }
+    _ownRef = null; _ownCb = null; _ownSeason = 0; _myNode = null;
+  }
+
+  function startOwnListen(){
+    if(_isGuest()) return;
+    const uid = _playerUid();
+    if(!uid) return;
+    let rdb = null;
+    try{ rdb = firebase.database(); }catch(_){ return; }
+    const s = currentSeason();
+    if(_ownRef && _ownSeason === s) return;
+    stopOwnListen();
+    _ownSeason = s;
+    _ownRef = rdb.ref('seasonRank/' + s + '/' + uid);
+    _ownCb = _ownRef.on('value', function(sn){
+      _myNode = sn.exists() ? (sn.val() || {}) : null;
+      if(_myNode) applyLost(_myNode.lost);
+    }, function(err){ console.warn('[season] nghe node mình lỗi', err); });
+  }
+
+  /** hết hạn bảo vệ lúc nào (ms giờ máy chủ), 0 nếu không có */
+  function myProtUntil(){
+    const p = _myNode ? Number(_myNode.prot) : 0;
+    return (p && p > nowSrv()) ? p : 0;
   }
 
   /**
@@ -311,6 +361,7 @@
     // Sang mùa mới → reset
     const oldFame = (typeof fame === 'number' ? fame : 0);
     fame = 0;
+    _sL(0);                 // mùa mới: phần bị trừ cũ không còn liên quan
     _sFs(cur);
     ensureTickets();
 
@@ -342,12 +393,17 @@
     // 2) Reset uy danh nếu sang mùa (hoặc gán fameSeason lần đầu)
     checkSeasonReset();
 
+    // 2b) Bước 5: nghe node của mình để áp uy danh bị trừ; nghe nhật ký bị thách đấu
+    try{ startOwnListen(); }catch(e){ console.warn('[season] own listen', e); }
+    try{ if(window.TTGARENA && TTGARENA.startLogListen) TTGARENA.startLogListen(); }catch(e){ console.warn('[season] log listen', e); }
+
     // 3) Kiểm tra mỗi phút khi đang chơi (đổi mùa đúng lúc 00:00 thứ Hai)
     if(_tickTimer) clearInterval(_tickTimer);
     _tickTimer = setInterval(function(){
       try{
         ensureTickets();
         checkSeasonReset();
+        startOwnListen();   // sang mùa mới thì nghe node của mùa mới
       }catch(e){ console.warn('[season] tick', e); }
     }, SEASON_CHECK_MS);
 
@@ -380,7 +436,13 @@
     // Mùa + xếp hạng
     checkSeasonReset: checkSeasonReset,
     writeSeasonRank: writeSeasonRank,
-    afterLogin: afterLogin
+    afterLogin: afterLogin,
+    // Bước 5
+    applyLost: applyLost,
+    startOwnListen: startOwnListen,
+    myProtUntil: myProtUntil,
+    myNode: function(){ return _myNode; },
+    getFameLost: _gL
   };
 
   // Tiện lợi gọi tắt

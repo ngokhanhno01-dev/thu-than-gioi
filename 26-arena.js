@@ -1,7 +1,7 @@
 /* ===== 26-arena.js — Bước 3+4: Đối thủ bóng, Khiêu Chiến, mô phỏng full set, GIAO DIỆN ĐẤU TRƯỜNG
    Nạp SAU 25-season.js (TTGSEASON) và 23-view.js (TTGVIEW / drawPet).
    Uy danh CHỈ thay đổi ở đây. Nguồn cũ (thám hiểm / Linh Đan / Linh Quả) đã tắt ở 05-hatch.js.
-   Attacker cộng lost + arenaLog = Bước 5.
+   Bước 5: người thắng TRỪ uy danh người bị đánh (cộng lost), ghi nhật ký arenaLog, khiên bảo vệ.
 */
 (function(){
   'use strict';
@@ -9,7 +9,6 @@
   /* ---------- HẰNG SỐ ---------- */
   const NEAR_ABOVE = 5;
   const NEAR_BELOW = 5;
-  const RECENT_MS  = 5 * 60 * 1000;
   const CARD_CACHE_MS = 5 * 60 * 1000;
   const LIST_CACHE_MS = 45 * 1000;
   const TOP_LISTEN_LIMIT = 30;
@@ -21,6 +20,16 @@
   const FAME_LOSE_RATIO = 0.45;
   const FAME_LOSE_MIN   = 3;
   const FAME_LOSE_MAX   = 14;
+
+  /* ----- BƯỚC 5: bị thách đấu (đổi số ở đây; Rules đã cho dư biên để không phải sửa Rules) ----- */
+  const VICTIM_RATIO     = 0.5;               // người bị đánh thua mất = 1/2 uy danh gốc người thắng nhận (không tính % Danh vọng)
+  const VICTIM_MIN       = 1;                 // mất ít nhất
+  const VICTIM_MAX       = 14;                // mất nhiều nhất mỗi trận (Rules cho tối đa 20)
+  const PROT_MS          = 5 * 60 * 1000;     // bị đánh thua xong: 5 phút không ai thách đấu được
+  const SHIELD_AFTER     = 3;                 // thua liên tiếp 3 lần (chưa thủ thành công lần nào) → khiên
+  const SHIELD_MS        = 60 * 60 * 1000;    // khiên nghỉ 60 phút
+  const PAIR_COOLDOWN_MS = 60 * 60 * 1000;    // cùng 1 cặp A→B: 1 giờ mới đánh lại được
+  const LOG_KEEP         = 30;                // nhật ký hiển thị tối đa
 
   const REWARD_TABLE = [
     {rank:'Hạng 1',      title:'Chí Tôn Đấu Trường', xu:5000, box:3, blood:5, note:'Danh hiệu + phần thưởng cao nhất'},
@@ -35,7 +44,16 @@
 
   let cardCache = {};
   let listCache = {t:0, rows:[]};
-  let recentFight = {};
+  const RF_KEY = 'ttg_arena_rf';
+  let recentFight = (function(){ try{ return JSON.parse(localStorage.getItem(RF_KEY)) || {}; }catch(_){ return {}; } })();
+  function saveRecent(){
+    try{
+      const now = Date.now();
+      Object.keys(recentFight).forEach(function(k){ if(now - recentFight[k] > PAIR_COOLDOWN_MS) delete recentFight[k]; });
+      localStorage.setItem(RF_KEY, JSON.stringify(recentFight));
+    }catch(_){}
+  }
+  let logRef = null, logCb = null, logRows = [], logReady = false, lastToastT = 0, unreadN = 0;
   let panelOpen = false;
   let fighting = false;
   let rankListener = null;
@@ -143,7 +161,8 @@
             lv: Math.max(1, Math.floor(Number(v.lv) || 1)),
             wins: Math.max(0, Math.floor(Number(v.wins) || 0)),
             foes: Math.max(0, Math.floor(Number(v.foes) || 0)),
-            t: Number(v.t) || 0
+            t: Number(v.t) || 0,
+            prot: Number(v.prot) || 0
           });
         });
         rows.sort(function(a,b){ return dispFame(b) - dispFame(a); });
@@ -171,7 +190,8 @@
           lv: Math.max(1, Math.floor(Number(v.lv) || 1)),
           wins: Math.max(0, Math.floor(Number(v.wins) || 0)),
           foes: Math.max(0, Math.floor(Number(v.foes) || 0)),
-          t: Number(v.t) || 0
+          t: Number(v.t) || 0,
+            prot: Number(v.prot) || 0
         });
       });
       rows.sort(function(a,b){ return dispFame(b) - dispFame(a); });
@@ -195,12 +215,18 @@
     rankListener = null;
   }
 
+  function baseWinFame(myF, oppF){
+    const d = FAME_WIN_BASE + Math.round((oppF - myF) / FAME_DIFF_DIV);
+    return Math.max(FAME_WIN_MIN, Math.min(FAME_WIN_MAX, d));
+  }
+  /* uy danh người bị đánh thua mất (chưa chặn theo số uy danh họ còn) */
+  function victimLoss(myF, oppF){
+    return Math.max(VICTIM_MIN, Math.min(VICTIM_MAX, Math.round(baseWinFame(myF, oppF) * VICTIM_RATIO)));
+  }
   function calcFameDelta(myF, oppF, win){
     let d;
     if(win){
-      const diff = oppF - myF;
-      d = FAME_WIN_BASE + Math.round(diff / FAME_DIFF_DIV);
-      d = Math.max(FAME_WIN_MIN, Math.min(FAME_WIN_MAX, d));
+      d = baseWinFame(myF, oppF);
     }else{
       d = -Math.round(FAME_WIN_BASE * FAME_LOSE_RATIO);
       d = Math.max(-FAME_LOSE_MAX, Math.min(-FAME_LOSE_MIN, d));
@@ -787,7 +813,7 @@
     });
   }
 
-  function doChallenge(targetUid, targetNick, targetFame, isNpc){
+  function startFight(targetUid, targetNick, targetFame, isNpc, vrow){
     if(fighting) return;
     try{ if(window.TTGFX && TTGFX.getBusy && TTGFX.getBusy()){ toast('⏳ Đang bận (thám hiểm?). Hãy dừng thám hiểm trước khi vào đấu trường.'); return; } }catch(_){}
     if(isGuest()){ toast('🔒 Khách chỉ xem bảng xếp hạng, hãy đăng nhập để khiêu chiến.'); return; }
@@ -798,6 +824,7 @@
       return;
     }
     fighting = true;
+    const seasonAtFight = curSeason();
     const myF = myDispFame();
     const oppF = Math.max(0, Math.floor(targetFame || 0));
 
@@ -806,6 +833,11 @@
       const Q = mkFighterFromCard(card, targetNick || (card && card.nick));
       const R = simArena(P, Q);
       const delta = calcFameDelta(myF, oppF, R.win);
+      // BƯỚC 5: người bị đánh thua mất uy danh (không trừ quá số họ còn)
+      let vLoss = 0;
+      if(R.win && !isNpc && targetUid){
+        vLoss = Math.min(victimLoss(myF, oppF), oppF);
+      }
 
       // Kết quả được chốt NGAY (đóng game giữa trận cũng không né được thua)
       fame = Math.max(0, fame + delta);
@@ -815,7 +847,7 @@
         winsAdd = 1;
         if(!recentFight[targetUid]) foesAdd = 1;
       }
-      if(targetUid) recentFight[targetUid] = Date.now();
+      if(targetUid){ recentFight[targetUid] = Date.now(); saveRecent(); }
 
       if(window.TTGSEASON && TTGSEASON.writeSeasonRank){
         try{
@@ -833,10 +865,17 @@
       try{ if(window.TTGSAVE && TTGSAVE.save) TTGSAVE.save(); }catch(_){}
       try{ if(typeof stats === 'function') stats(); }catch(_){}
 
+      // BƯỚC 5: ghi nhật ký cho người bị thách đấu + trừ uy danh họ (chạy nền, không chặn trận)
+      if(!isNpc && targetUid){
+        sendDefenderResult(targetUid, R.win, vLoss, seasonAtFight).then(function(r){
+          if(r && r.warn) toast(r.warn);
+        });
+      }
+
       const after = function(){
         try{ if(window.TTGFX) TTGFX.setBusy(false); }catch(_){}
         fighting = false;
-        showResult({ win: R.win, name: Q.n, delta: delta, myFame: fame, isNpc: !!isNpc });
+        showResult({ win: R.win, name: Q.n, delta: delta, myFame: fame, isNpc: !!isNpc, vLoss: vLoss });
       };
 
       // chuyển sang màn chiến đấu (đóng bảng đấu trường trước)
@@ -871,6 +910,224 @@
     }
   }
 
+  /* ---------- BƯỚC 5: KIỂM TRA ĐỐI THỦ TRƯỚC KHI TRỪ VÉ ---------- */
+  function fmtAgo(ms){
+    ms = Math.max(0, ms);
+    const m = Math.floor(ms / 60000);
+    if(m < 1) return 'vừa xong';
+    if(m < 60) return m + ' phút trước';
+    const h = Math.floor(m / 60);
+    if(h < 24) return h + ' giờ trước';
+    return Math.floor(h / 24) + ' ngày trước';
+  }
+
+  /* Đọc node đối thủ (đang được bảo vệ?) + mốc lần đánh gần nhất của mình vào họ (cùng cặp 1 giờ).
+     Chưa trừ vé, nên bị từ chối thì không mất gì. */
+  function precheck(vUid){
+    return new Promise(function(resolve){
+      const db = rtdb(), me = myUid();
+      if(!db || !me){ resolve({ok:false, msg:'⚠️ Chưa kết nối máy chủ.'}); return; }
+      const s = curSeason();
+      Promise.all([
+        db.ref('seasonRank/' + s + '/' + vUid).once('value'),
+        db.ref('arenaLog/' + vUid + '/' + me + '/t').once('value')
+      ]).then(function(r){
+        const vn = r[0], lt = Number(r[1].val()) || 0;
+        if(!vn.exists()){ resolve({ok:false, msg:'⚠️ Đối thủ không còn trong bảng xếp hạng mùa này.'}); return; }
+        const v = vn.val() || {};
+        const now = nowSrv();
+        const prot = Number(v.prot) || 0;
+        if(prot > now){ resolve({ok:false, msg:'🛡️ Đối thủ đang được bảo vệ, còn ' + fmtMs(prot - now) + '.'}); return; }
+        if(lt && (now - lt) < PAIR_COOLDOWN_MS){
+          resolve({ok:false, msg:'⏳ Bạn vừa thách đấu người này. Chờ ' + fmtMs(PAIR_COOLDOWN_MS - (now - lt)) + ' nữa.'}); return;
+        }
+        resolve({ok:true, row:{
+          fame: Math.max(0, Math.floor(Number(v.fame) || 0)),
+          lost: Math.max(0, Math.floor(Number(v.lost) || 0))
+        }});
+      }).catch(function(e){
+        resolve({ok:false, msg:'⚠️ Không kiểm tra được đối thủ (' + esc((e && (e.code || e.message)) || e) + '). Đã Publish Rules Realtime Database bản mới chưa?'});
+      });
+    });
+  }
+
+  function doChallenge(targetUid, targetNick, targetFame, isNpc){
+    if(fighting) return;
+    if(isNpc || !targetUid){ startFight(targetUid, targetNick, targetFame, isNpc, null); return; }
+    if(isGuest()){ toast('🔒 Khách chỉ xem bảng xếp hạng, hãy đăng nhập để khiêu chiến.'); return; }
+    fighting = true;      // khóa bấm đúp trong lúc kiểm tra
+    precheck(targetUid).then(function(pc){
+      fighting = false;
+      if(!pc.ok){ toast(pc.msg); try{ if(panelOpen) refreshTop(); }catch(_){} return; }
+      // dùng uy danh MỚI NHẤT của đối thủ (đã trừ lost), không dùng số cũ trong danh sách
+      startFight(targetUid, targetNick, Math.max(0, pc.row.fame - pc.row.lost), false, pc.row);
+    });
+  }
+
+  /* ---------- BƯỚC 5: GỬI KẾT QUẢ CHO NGƯỜI BỊ THÁCH ĐẤU ----------
+     1) ghi arenaLog/{B}/{A}  (Rules: A chỉ ghi dưới tên mình, cùng cặp cách nhau >= 1 giờ)
+     2) nếu A thắng và loss > 0: cộng seasonRank/{mùa}/{B}/lost (+ hit, prot, lg) trong VÀI GIÂY sau khi ghi nhật ký
+        (Rules đối chiếu số trừ với nhật ký vừa ghi nên không trừ tùy tiện được)
+     3) nếu A thua: B thủ thành công → xóa chuỗi "bị đánh liên tiếp" của B (hit = 0) */
+  function sendDefenderResult(vUid, win, loss, season){
+    const db = rtdb(), me = myUid();
+    if(!db || !me || !vUid) return Promise.resolve({});
+    const lref = db.ref('arenaLog/' + vUid + '/' + me);
+    return lref.set({
+      name: myNick(),
+      result: win ? 'win' : 'lose',
+      lost: win ? Math.max(0, Math.floor(loss)) : 0,
+      season: season,
+      t: firebase.database.ServerValue.TIMESTAMP
+    }).then(function(){
+      if(win && loss > 0){
+        return lref.child('t').once('value').then(function(sn){
+          return applyHit(db, vUid, me, season, loss, Number(sn.val()) || 0, 0);
+        });
+      }
+      if(!win) return resetHit(db, vUid, season);
+      return {};
+    }).catch(function(e){
+      console.warn('[arena] gửi kết quả cho người bị thách đấu lỗi', e);
+      const code = String((e && (e.code || e.message)) || e);
+      if(/PERMISSION_DENIED/i.test(code)) return { warn: '⚠️ Không ghi được nhật ký/trừ uy danh đối thủ (Rules từ chối). Đối thủ có thể vừa được bảo vệ, hoặc bạn đã đánh người này trong 1 giờ qua.' };
+      return { warn: '⚠️ Không gửi được kết quả cho đối thủ (' + esc(code) + ').' };
+    });
+  }
+
+  function applyHit(db, vUid, me, season, loss, logT, tries){
+    const vref = db.ref('seasonRank/' + season + '/' + vUid);
+    return vref.once('value').then(function(sn){
+      if(!sn.exists()) return {};
+      const v = sn.val() || {};
+      const now = nowSrv();
+      if((Number(v.prot) || 0) > now) return { warn: '🛡️ Đối thủ vừa được người khác đánh nên đang được bảo vệ, lần này không bị trừ uy danh.' };
+      const curLost = Math.max(0, Math.floor(Number(v.lost) || 0));
+      const curHit  = Math.max(0, Math.floor(Number(v.hit) || 0));
+      const shield  = (curHit + 1 >= SHIELD_AFTER);
+      const upd = {
+        lost: curLost + loss,
+        hit:  shield ? 0 : curHit + 1,
+        prot: now + (shield ? SHIELD_MS : PROT_MS)
+      };
+      upd['lg/' + me] = logT;
+      return vref.update(upd).then(function(){ return {}; }).catch(function(e){
+        // thường do người khác vừa cộng lost cùng lúc → đọc lại và thử lần nữa
+        if(tries < 2) return applyHit(db, vUid, me, season, loss, logT, tries + 1);
+        throw e;
+      });
+    });
+  }
+
+  function resetHit(db, vUid, season){
+    const href = db.ref('seasonRank/' + season + '/' + vUid + '/hit');
+    return href.once('value').then(function(sn){
+      if((Number(sn.val()) || 0) > 0) return href.set(0).then(function(){ return {}; });
+      return {};
+    });
+  }
+
+  /* ---------- BƯỚC 5: NHẬT KÝ BỊ THÁCH ĐẤU (mình là người bị đánh) ---------- */
+  function seenKey(){ return 'ttg_arena_seen_' + (myUid() || ''); }
+  function getSeen(){ try{ return Number(localStorage.getItem(seenKey())) || 0; }catch(_){ return 0; } }
+  function setSeen(t){ try{ localStorage.setItem(seenKey(), String(t)); }catch(_){} }
+
+  function updateBadge(){
+    const btn = $('btn-arena');
+    if(btn){
+      let dot = $('ar-dot');
+      if(!dot){
+        dot = document.createElement('span');
+        dot.id = 'ar-dot';
+        dot.style.cssText = 'position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;line-height:18px;padding:0 4px;border-radius:9px;background:#e34e48;color:#fff;font-size:11px;font-weight:700;text-align:center;box-sizing:border-box;pointer-events:none;display:none;z-index:3';
+        if(getComputedStyle(btn).position === 'static') btn.style.position = 'relative';
+        btn.appendChild(dot);
+      }
+      dot.textContent = unreadN > 9 ? '9+' : String(unreadN);
+      dot.style.display = unreadN > 0 ? 'block' : 'none';
+    }
+    const lb = $('ar-btn-log');
+    if(lb) lb.textContent = unreadN > 0 ? ('Nhật ký (' + unreadN + ')') : 'Nhật ký';
+  }
+
+  function stopLogListen(){
+    if(logRef && logCb){ try{ logRef.off('value', logCb); }catch(_){} }
+    logRef = null; logCb = null; logReady = false;
+  }
+
+  function startLogListen(){
+    if(logRef) return;
+    if(isGuest()) return;
+    const db = rtdb(), uid = myUid();
+    if(!db || !uid) return;
+    logRef = db.ref('arenaLog/' + uid).orderByChild('t').limitToLast(LOG_KEEP);
+    logCb = logRef.on('value', function(snap){
+      const rows = [];
+      snap.forEach(function(ch){
+        const v = ch.val() || {};
+        rows.push({
+          uid: ch.key,
+          name: String(v.name || '?').slice(0, 20),
+          result: v.result === 'win' ? 'win' : 'lose',   // 'win' = NGƯỜI THÁCH ĐẤU thắng (mình thua)
+          lost: Math.max(0, Math.floor(Number(v.lost) || 0)),
+          season: Math.floor(Number(v.season) || 0),
+          t: Number(v.t) || 0
+        });
+      });
+      rows.sort(function(a,b){ return b.t - a.t; });
+      logRows = rows;
+      // lần tải đầu: chỉ đếm chưa đọc; các lần sau: báo mục mới
+      if(logReady){
+        rows.forEach(function(r){
+          if(r.t > lastToastT){
+            toast(r.result === 'win'
+              ? ('⚔️ <b>' + esc(r.name) + '</b> thách đấu bạn và thắng' + (r.lost ? (', bạn mất <b>' + r.lost + '</b> uy danh') : '') + '.')
+              : ('🛡️ Bạn thủ thành công trước <b>' + esc(r.name) + '</b>.'));
+          }
+        });
+      }
+      rows.forEach(function(r){ if(r.t > lastToastT) lastToastT = r.t; });
+      const seen = getSeen();
+      unreadN = rows.filter(function(r){ return r.t > seen; }).length;
+      logReady = true;
+      updateBadge();
+      const sub = $('ar-sub');
+      if(sub && sub.classList.contains('show') && $('ar-sub-title') && $('ar-sub-title').textContent === 'Nhật ký') openLog0(true);
+    }, function(err){
+      console.warn('[arena] nghe nhật ký lỗi', err);
+    });
+  }
+
+  function openLog0(keepScroll){
+    const sub = $('ar-sub'), title = $('ar-sub-title'), body = $('ar-sub-body');
+    if(!sub || !body) return;
+    title.textContent = 'Nhật ký';
+    const cur = curSeason();
+    let head = '';
+    try{
+      const pu = (window.TTGSEASON && TTGSEASON.myProtUntil) ? TTGSEASON.myProtUntil() : 0;
+      if(pu) head = '<div style="padding:6px 8px;margin-bottom:6px;background:#1a3335;border:1px solid #72e4b0;border-radius:6px;font-size:13px;text-align:center">🛡️ Bạn đang được bảo vệ, còn <b>' + esc(fmtMs(pu - nowSrv())) + '</b> (không ai thách đấu được)</div>';
+    }catch(_){}
+    if(isGuest()){
+      body.innerHTML = '<div class="empty">Khách không có nhật ký. Hãy đăng nhập.</div>';
+    }else if(!logRows.length){
+      body.innerHTML = head + '<div class="empty">Chưa có ai thách đấu bạn.<br><small>Thú của bạn vẫn đứng gác đấu trường cả khi bạn offline.</small></div>';
+    }else{
+      const now = nowSrv();
+      body.innerHTML = head + logRows.map(function(r){
+        const old = (r.season && r.season !== cur) ? ' <span style="color:#78864f">(mùa ' + r.season + ')</span>' : '';
+        const txt = r.result === 'win'
+          ? ('<b>' + esc(r.name) + '</b> thách đấu bạn · <span style="color:#e34e48">bạn THUA</span>' + (r.lost ? (', <b style="color:#f6c66a">-' + r.lost + '</b> uy danh') : ', không mất thêm uy danh'))
+          : ('<b>' + esc(r.name) + '</b> thách đấu bạn · <span style="color:#72e4b0">bạn THỦ THÀNH CÔNG</span>');
+        return '<div class="row" style="display:block;line-height:1.4"><div>' + txt + old + '</div>' +
+          '<div style="font-size:12px;color:#b7bda9">' + esc(fmtAgo(now - r.t)) + '</div></div>';
+      }).join('');
+    }
+    sub.classList.add('show');
+    // mở nhật ký = đã đọc
+    if(logRows.length){ setSeen(logRows[0].t); unreadN = 0; updateBadge(); }
+  }
+
   function ensurePanel(){
     if($('ar-ov')) return;
     const css = document.createElement('style');
@@ -903,7 +1160,7 @@
       '#ar-me{padding:6px 8px;background:#1a3335;border:1px solid #78613a;border-radius:6px;margin-bottom:8px;font-size:14px;text-align:center}'+
       '#ar-me b{color:#f6c66a}'+
       '#ar-actions{display:flex;gap:6px;padding:8px 10px;border-top:2px solid #78613a;flex-shrink:0}'+
-      '#ar-actions button{flex:1;padding:8px 4px;font-size:13px;font-weight:700;cursor:pointer;background:#3b4a4f;border:2px solid #040a0e;color:#f5edcf;border-radius:4px}'+
+      '#ar-actions button{flex:1;padding:8px 2px;font-size:12px;font-weight:700;cursor:pointer;background:#3b4a4f;border:2px solid #040a0e;color:#f5edcf;border-radius:4px}'+
       '#ar-actions button.pri{background:#1e5c45;border-color:#72e4b0;color:#e8fff4}'+
       '#ar-actions button:disabled{opacity:.45;cursor:not-allowed}'+
       '#ar-sub{display:none;position:absolute;inset:0;background:#14272d;z-index:2;flex-direction:column}'+
@@ -941,6 +1198,7 @@
         '<div id="ar-actions">'+
           '<button type="button" id="ar-btn-reward">Phần thưởng</button>'+
           '<button type="button" id="ar-btn-chal" class="pri">Khiêu chiến</button>'+
+          '<button type="button" id="ar-btn-log">Nhật ký</button>'+
           '<button type="button" id="ar-btn-info">Thông tin mùa</button>'+
         '</div>'+
         '<div id="ar-sub">'+
@@ -960,6 +1218,8 @@
     $('ar-btn-reward').onclick = function(){ openRewards(); };
     $('ar-btn-chal').onclick = function(){ openChallenge(); };
     $('ar-btn-info').onclick = function(){ openSeasonInfo(); };
+    $('ar-btn-log').onclick = function(){ openLog(); };
+    updateBadge();
   }
 
   function refreshTop(){
@@ -1086,6 +1346,11 @@
     const seas = curSeason();
     const meF = myDispFame();
     const rankTxt = myRankNum ? ('Hạng <b>' + myRankNum + '</b>') : 'Chưa có hạng';
+    let meShield = '';
+    try{
+      const pu = (window.TTGSEASON && TTGSEASON.myProtUntil) ? TTGSEASON.myProtUntil() : 0;
+      if(pu) meShield = '<br><small style="color:#72e4b0">🛡️ Đang được bảo vệ, còn ' + esc(fmtMs(pu - nowSrv())) + '</small>';
+    }catch(_){}
     let tk = '';
     try{ tk = (window.TTGSEASON && TTGSEASON.ticketsStr) ? TTGSEASON.ticketsStr() : ''; }catch(e){ tk = 'Vé: lỗi ' + (e && e.message); }
 
@@ -1121,7 +1386,7 @@
     body.innerHTML =
       podiumHtml +
       rest +
-      '<div id="ar-me">Mùa <b>'+seas+'</b> · '+rankTxt+' · Uy danh <b>'+meF+'</b><br><small style="color:#b7bda9">'+esc(tk)+'</small></div>';
+      '<div id="ar-me">Mùa <b>'+seas+'</b> · '+rankTxt+' · Uy danh <b>'+meF+'</b><br><small style="color:#b7bda9">'+esc(tk)+'</small>'+meShield+'</div>';
 
     body.querySelectorAll('[data-uid]').forEach(function(el){
       el.onclick = function(){
@@ -1186,7 +1451,8 @@
       const now = Date.now();
       let filtered = rows.filter(function(r){
         if(r.uid === uid) return false;
-        if(recentFight[r.uid] && (now - recentFight[r.uid]) < RECENT_MS) return false;
+        if(recentFight[r.uid] && (now - recentFight[r.uid]) < PAIR_COOLDOWN_MS) return false;   // cùng cặp: 1 giờ
+        if(r.prot && r.prot > nowSrv()) return false;                                            // đang được bảo vệ → không hiện
         return true;
       });
       filtered.sort(function(a,b){
@@ -1286,6 +1552,7 @@
   const openRewards = safeOpen('Phần thưởng', openRewards0);
   const openChallenge = safeOpen('Khiêu chiến', openChallenge0);
   const openSeasonInfo = safeOpen('Thông tin mùa', openSeasonInfo0);
+  const openLog = safeOpen('Nhật ký', openLog0);
 
   function showResult(o){
     ensurePanel();
@@ -1297,6 +1564,7 @@
       '<div style="font-size:15px;color:#b7bda9;margin-bottom:6px">'+esc(o.name)+(o.isNpc?' (NPC)':'')+'</div>'+
       '<b class="'+(o.win?'win':'lose')+'">'+(o.win?'THẮNG':'THUA')+'</b>'+
       '<div style="margin-top:8px;font-size:16px">Uy danh <b style="color:#f6c66a">'+sign+'</b></div>'+
+      ((o.win && !o.isNpc) ? ('<div style="font-size:13px;color:#b7bda9">'+(o.vLoss > 0 ? ('Đối thủ mất <b style="color:#e34e48">-'+o.vLoss+'</b> uy danh') : 'Đối thủ đã hết uy danh nên không mất thêm')+'</div>') : '')+
       '<div style="font-size:14px;color:#b7bda9">Hiện tại: '+o.myFame+(myRankNum?(' · Hạng '+myRankNum):'')+'</div>'+
       '<button type="button" id="ar-res-ok">Đóng</button>';
     res.classList.add('show');
@@ -1335,6 +1603,15 @@
     doChallenge: doChallenge,
     loadRankList: loadRankList,
     getCard: getCard,
+    startLogListen: startLogListen,
+    stopLogListen: stopLogListen,
+    victimLoss: victimLoss,
+    sendDefenderResult: sendDefenderResult,
+    precheck: precheck,
+    PAIR_COOLDOWN_MS: PAIR_COOLDOWN_MS,
+    PROT_MS: PROT_MS,
+    SHIELD_AFTER: SHIELD_AFTER,
+    SHIELD_MS: SHIELD_MS,
     calcFameDelta: calcFameDelta,
     NEAR_ABOVE: NEAR_ABOVE,
     NEAR_BELOW: NEAR_BELOW,
