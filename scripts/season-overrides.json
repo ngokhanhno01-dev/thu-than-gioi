@@ -1,0 +1,5 @@
+{
+  "_ghi_chu": "exclude = uid bi loai khoi mua nay (khong xep hang, khong thuong). approve = uid DUOC DUYET du bi nghi ngo (se duoc xep hang va thuong binh thuong). Dung sau khi doc nhat ky chot mua. Sau khi sua, chay lai workflow (nhap so mua) de ap dung cho nguoi bi giu lai.",
+  "exclude": [],
+  "approve": []
+}
