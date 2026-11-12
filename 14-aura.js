@@ -225,7 +225,7 @@ function layerParticles(g,side,cx,by,W2,H,T,sp,unit,bright,al){ /* side: -1 = ph
 }
 
 /* ---------- BẬC 10 ĐỘC QUYỀN: dấu + bốn cánh lấp lánh, nhảy chỗ và chớp (màu theo 17 hệ) ---------- */
-const TW_COL=['#cfeaff','#6fe0c8','#c9b0ff','#5cff9a','#ffd400','#9a9aff','#ff8a1a','#7a66ff','#ff9d00','#3affb8','#6aff3a','#ff4a2a','#d04aff','#b040ff','#5cc0ff','#ff6ac8','#ffe45a'];
+const TW_COL=new Array(17).fill('#ffffff');   /* 17 hệ đều dấu + trắng */
 function twinkle(g,cx,by,W2,H,T,sp,mode,bright,al){
  const n=21,col=TW_COL[clamp(sp|0,0,16)];let cnt=0;g.globalCompositeOperation='source-over';
  for(let i=0;i<n;i++){
