@@ -1969,6 +1969,7 @@ function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv
  [[P,Q],[Q,P]].forEach(([a,d])=>{if(kv(a,0))d.spd*=1-kv(a,0)*rs(d)/100;if(kv(a,1))d.atk*=1-kv(a,1)/100});
  [P,Q].forEach(c=>{c.sh=kv(c,9)?Math.round(c.mx*kv(c,9)/100):0;c.rv=!!kv(c,14);c.stn=0});
  if(window.EQFX)EQFX.init(P,Q);
+ const startBuffs=window.TTGCombatFX?TTGCombatFX.getStartBuffs(P,Q):[];
  const sh0P=P.sh||0,sh0M=Q.sh||0;
  const first=P.spd>=Q.spd?P:Q,
  push=(c,k,d,t,r)=>ev.push({w:c.w,k,d,r:r||1,hp:Math.max(0,P.hp),mh:Math.max(0,Q.hp),sp:Math.max(0,P.sh||0),sm:Math.max(0,Q.sh||0),t}),
@@ -1993,8 +1994,9 @@ function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv
  for(let r=1;r<=14&&P.hp>0&&Q.hp>0;r++){
   act(first,first===P?Q:P);act(first===P?Q:P,first);
   [[P,Q],[Q,P]].forEach(([a,d])=>{if(a.hp>0&&d.hp>0&&kv(a,11)){const b=Math.max(1,Math.round(a.atk*kv(a,11)*rs(d)/100));d.hp-=b;push(a,'hit',b,'🔥 Thiêu đốt -'+b);revive(d)}});
-  [P,Q].forEach(c=>{if(c.hp>0&&P.hp>0&&Q.hp>0&&c.regen){const heal=Math.min(c.mx-c.hp,Math.round(c.mx*c.regen/100));if(heal>0){c.hp+=heal;push(c,'heal',heal,c.n+' hồi sức +'+heal+' HP')}}});if(window.EQFX&&P.hp>0&&Q.hp>0)EQFX.round(P,Q,r,push)}
- return{ev,win:Q.hp<=0||(P.hp>0&&P.hp/P.mx>Q.hp/Q.mx),maxP:P.mx,maxM:Q.mx,shP:sh0P,shM:sh0M,first:first===P}}/*@@E*/
+  [P,Q].forEach(c=>{if(c.hp>0&&P.hp>0&&Q.hp>0&&c.regen){const heal=Math.min(c.mx-c.hp,Math.round(c.mx*c.regen/100));if(heal>0){c.hp+=heal;push(c,'heal',heal,c.n+' hồi sức +'+heal+' HP')}}});if(window.EQFX&&P.hp>0&&Q.hp>0)EQFX.round(P,Q,r,push);
+ }
+ return{ev,win:Q.hp<=0||(P.hp>0&&P.hp/P.mx>Q.hp/Q.mx),maxP:P.mx,maxM:Q.mx,shP:sh0P,shM:sh0M,first:first===P,zone:e.m.zone,zoneBuff:e.m.buff,startBuffs,bqP:kv(P,16),bqM:kv(Q,16)}}/*@@E*/
 
 /* ===== Màu độc quyền 17 vùng + hiệu ứng đòn theo hệ ===== */
 const REG=[['#9fe4ff','#ffffff','flake'],['#9fd9c8','#e6fff8','mist'],['#c9a8ff','#fff0ff','puff'],['#a0ffd0','#e8fff4','streak'],['#ffe53a','#ffffff','bolt'],['#a8b8ff','#f0f2ff','moon'],['#ffa030','#fff0b0','ray'],['#5a6cff','#c04aff','void'],['#e0b038','#fff2b8','diamond'],['#18e0b0','#d8fff0','gem'],['#8be04a','#f0ffc0','leaf'],['#ff5a1e','#ffc070','ember'],['#b0206a','#ff4a6a','wisp'],['#b45cff','#ffd0ff','star'],['#6ac4ff','#ffffff','feather'],['#ff7ac0','#ffe0f0','petal'],['#fff0a0','#ffffff','crown']];
@@ -2022,7 +2024,7 @@ function paintUI(RP,RM){const set=(n,f,b)=>{const a=$(n);if(a)a.style.background
  $('mob-pn').style.color=RP[1];$('mob-mn').style.color=RM[1];
  $('mob-ph').parentNode.style.borderColor=RP[0];$('mob-mh').parentNode.style.borderColor=RM[0]}
 function impact(g,fx,tt){
- if(window.TTGFXART&&window.TTGFXART.drawImpact(g,fx,tt))return;
+ if(window.TTGCombatFX){try{if(TTGCombatFX.drawImpact(g,fx,tt))return}catch(_){}}
  const R=REG[fx.s],A=R[0],B=R[1],q=fx.q,p=fx.pp,pw=(fx.k==='crit'?1.5:1)*(fx.r>1?1.25:1),
   tx=p?272:90,ty=150,dir=p?1:-1,rd=rng(fx.i*977+fx.s*31+7),fa=Math.max(0,1-q),h=fx.h;
  g.save();g.globalAlpha=Math.min(1,fa*1.6);
@@ -2086,7 +2088,7 @@ const FXS={on:0,u:0,pa:true,cl:0,cr:false,miss:false,h:'Huyễn',s:0,i:0};/* tr�
 let FXPX=0,FXPY=0,FXBN=null;
 function fxElem(h){return FXRG[h]===undefined?'Huyễn':h}
 /* loại đòn: 0 thường · 1 Liên kích · 2 sát thương theo thời gian (Thiêu đốt, Dung Nham) · 3 phản đòn (Phản đòn, Phản Chấn) */
-function fxClass(x){const t=x.t||'';return /Thiêu đốt -|Dung Nham Phun Trào/.test(t)?2:/Phản đòn -|Phản Chấn -|Nguyệt Ảnh phản kích/.test(t)?3:/Liên kích -/.test(t)?1:0}
+function fxClass(x){const t=x.t||'';return /Thiêu đốt -|Dung Nham Phun Trào/.test(t)?2:/Phản đòn -|Phản Chấn -/.test(t)?3:/Liên kích -/.test(t)?1:0}
 function fxHash(a,b){let x=Math.imul((a*374761393+b*668265263+1013904223)|0,1274126177);x^=x>>>13;return((x>>>0)%1000)/1000}
 /* bên ra đòn (đánh xa / phản đòn) giật lùi nhẹ khi bắn: <0 = lùi ra sau. Thay cho cú lao tới */
 function fxRecoil(u,cl){const s=cl===3?.5:1;if(u<.05)return 0;
@@ -2133,8 +2135,8 @@ function fxBeam(g,cx,cy,dir,env,A,B){if(env<=0)return;g.save();g.globalAlpha=Mat
  fxLine(g,x0,y0,x1,y1,14+14*env,6,FXOL);fxLine(g,x0,y0,x1,y1,8+14*env,3,A);fxLine(g,x0,y0,x1,y1,3+9*env,3,B);fxLine(g,x0,y0,x1,y1,3+3*env,3,'#ffffff');g.restore()}
 /* phần chính: vẽ trong không gian bị rung (sau sprite, trước/sau impact) */
 function fxDraw(g,T,dp,dmx){const S=FXS;if(!S.on)return;
- if(window.TTGFXART&&window.TTGFXART.drawAttack(g,S,T,dp,dmx))return;
- const u=S.u,pa=S.pa,dir=pa?1:-1,cl=S.cl,cr=S.cr,big=cr?1.45:1,rg=FXRG[S.h]===1,RR=REG[S.s]||REG[0];
+ if(window.TTGCombatFX&&window.TTGCombatFX.drawAttack(g,T,S))return;
+ const ZF=window.TTGCombatFX&&window.TTGCombatFX.getZone(),u=S.u,pa=S.pa,dir=pa?1:-1,cl=S.cl,cr=S.cr,big=cr?1.45:1,rg=ZF?ZF.mode==='ranged':FXRG[S.h]===1,RR=REG[S.s]||REG[0];
  let A=RR[0],B=RR[1];if(cl===3){A='#ff8a4a';B='#fff0d0'}else if(cl===2){A='#ff6a3a';B='#ffd070'}
  const ox=pa?85+dp*FXPS:272+dmx*FXMS,tx=pa?272+dmx*FXMS:90+dp*FXPS,ty=150,mx=ox+dir*(pa?30:40),my=pa?180:164;
  g.save();try{
@@ -2178,7 +2180,7 @@ function fxTop(g,u,redm){
 window.BSPD=1; /* hệ số tăng tốc thám hiểm + trận đấu (x1..x4), chỉ đổi được từ bảng Admin */
 function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=$('mob'),g=$('mob-c').getContext('2d'),R=sim(e),n=R.ev.length,sp=spOfPet(),b=e.tr.rw,
  ex=Math.round((14+e.lv*.9)*b*(1+(pet.sp===15?sp.v/100:0))*buffMul('exp')*expMul()),gd=Math.round((6+e.lv*.4)*b*(1+(pet.sp===5?sp.v/100:0))*buffMul('xu')),
- lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=0,fL=0,TE=(BT0+n*BST)/SP,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false,holdUntil=0,lastF=t0,shAmp=0,shDur=1,shEnd=0;const fired={},REDM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);const CL=R.ev.map(fxClass),HN=[fxElem((BL[pet.bl]||{}).h),fxElem((BL[e.m.bl]||{}).h)];/* [FX đợt 2] CL: loại đòn từng sự kiện · HN: hệ bên thú / bên quái */
+ lo=Math.min(Math.round((10+e.lv*.5)*e.tr.lm),Math.max(20,Math.round(expNeed(level)*.3))),fW=0,fL=0,TE=(BT0+n*BST)/SP,pn=genOf(pet.bl,pet.sp).name,ps=statsOf(pet.bl,pet.pi,pet.base,level);let t0=performance.now(),done=false,holdUntil=0,lastF=t0,shAmp=0,shDur=1,shEnd=0;const fired={},REDM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);const CL=R.ev.map(fxClass),HN=[fxElem((BL[pet.bl]||{}).h),fxElem((BL[e.m.bl]||{}).h)],AREA=window.TTGCombatFX&&TTGCombatFX.getZone(e.m.zone);if(window.TTGCombatFX)TTGCombatFX.begin(e.m.zone,R);/* [combat FX] vùng xác định phong cách và buff của trận */
  o.style.display='block';const rb=$('mob-run');rb.style.display='block';
  $('mob-pn').textContent=pn+' · Cấp '+level;const RP=REG[pet.sp],RM=REG[e.m.sp];paintUI(RP,RM);$('mob-mn').innerHTML=(e.m.boss?'👑 ':'')+nm(e)+' · Cấp '+e.lv;if(e.tr.n!=='Thường')$('mob-mh').parentNode.style.borderColor=e.tr.c;if(window.battleHudExtra)battleHudExtra(e);
  function fin(flee){if(done)return;done=true;o.style.display='none';rb.style.display='none';
@@ -2201,10 +2203,10 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
   R.ev.forEach((x,i)=>{const s=(BT0+i*BST)/SP,u=(T-s)/(BST/SP);if(u<0)return;if(u>=.35){hp=x.hp;mh=x.mh;shp=x.sp;shm=x.sm}
    if(u<.9){msg=x.t;
      const dmg=x.k==='hit'||x.k==='crit',dot=/Thiêu đốt/.test(x.t),mis=x.k==='miss',pa=x.w==='p',ms=mis?.6:1,
-      cl=CL[i],rg=FXRG[HN[pa?0:1]]===1,lu=!rg&&cl!==3&&cl!==2,/* [FX đợt 2] lu = cận chiến thì lao tới; đánh xa/phản đòn thì giật lùi nhẹ */
+      cl=CL[i],rg=AREA?AREA.mode==='ranged':FXRG[HN[pa?0:1]]===1,lu=!rg&&cl!==3&&cl!==2,/* [combat FX] cận/xa chọn theo vùng, không chỉ theo hệ thú */
       lg=dmg&&!dot?(lu?lungeAt(u):fxRecoil(u,cl)):mis?(lu?lungeAt(u)*.6:fxRecoil(u,0)):0;
      if(pa)dp+=lg;else dmx-=lg;
-     if(dmg||mis){FXS.on=1;FXS.u=u;FXS.pa=pa;FXS.cl=cl;FXS.cr=x.k==='crit';FXS.miss=mis;FXS.h=cl===2?'Hỏa':HN[pa?0:1];FXS.s=pa?pet.sp:e.m.sp;FXS.i=i}/* [FX đợt 2] */
+     if(dmg||mis){FXS.on=1;FXS.u=u;FXS.pa=pa;FXS.cl=cl;FXS.cr=x.k==='crit';FXS.miss=mis;FXS.h=cl===2?'Hỏa':HN[pa?0:1];FXS.s=pa?pet.sp:e.m.sp;FXS.i=i;FXS.text=x.t}/* [combat FX] sự kiện thực tế điều khiển hiệu ứng nội tại */
      if(lu&&lg&&u>.12&&u<.37)for(let k=1;k<=5;k++){const off=lungeAt(u-k*.02)*ms;if(Math.abs(off-lg)>3)gst.push({pa,off,a:.6*(1-(k-1)/5)})} /* vệt lao tới */
      if(mis){const dd=16*Math.sin(Math.PI*Math.max(0,Math.min(1,(u-.28)/.42)));if(pa)dmx+=dd;else dp-=dd} /* bên bị đánh trượt: nhảy né */
      if(dmg&&x.d&&u>=.35){const hu=u-.35,big=x.k==='crit'?1.7:x.r>1?1.3:1,sc=dot?.35:1,fa=hu<.05?1:Math.max(0,1-(hu-.05)/.17),
@@ -2212,7 +2214,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
       if(!dot&&(x.k==='crit'||x.r>1))sf=Math.max(sf,Math.max(0,1-hu/.12)*.5);
       if(pa){mf=Math.max(mf,fa);dmx+=kb+jt}else{pf=Math.max(pf,fa);dp-=kb+jt}
       if(!fired[i]){fired[i]=1;if(hu<.12&&!dot){holdUntil=T0+(x.k==='crit'?190:x.r>1?130:90)/SP;if(!REDM){shAmp=x.k==='crit'?14:x.r>1?9:6;shDur=(x.k==='crit'?420:300)/SP;shEnd=T0+shDur}}}}
-     if(u>=.35){const q=(u-.35)/.55,pp=x.w==='p',EC={Kim:'#f2d06a',Mộc:'#5be07a',Thủy:'#5bb8ff',Hỏa:'#ff6a3a',Thổ:'#d9a05a',Huyễn:'#c08aff'},ec=EC[BL[pp?pet.bl:e.m.bl].h]||'#fff';fx={pp,q,k:x.k,d:x.k==='heal'||x.k==='block'?0:x.d,r:x.r,i,h:/Thiêu đốt/.test(x.t)?'Hỏa':BL[pp?pet.bl:e.m.bl].h,s:pp?pet.sp:e.m.sp,cl:CL[i]/* [FX đợt 2] */};
+     if(u>=.35){const q=(u-.35)/.55,pp=x.w==='p',EC={Kim:'#f2d06a',Mộc:'#5be07a',Thủy:'#5bb8ff',Hỏa:'#ff6a3a',Thổ:'#d9a05a',Huyễn:'#c08aff'},ec=EC[BL[pp?pet.bl:e.m.bl].h]||'#fff';fx={pp,q,k:x.k,d:x.k==='heal'||x.k==='block'?0:x.d,r:x.r,i,h:/Thiêu đốt/.test(x.t)?'Hỏa':BL[pp?pet.bl:e.m.bl].h,s:pp?pet.sp:e.m.sp,cl:CL[i],text:x.t/* [combat FX] */};
       if(x.k==='block')fl={x:pp?90:270,y:130-q*40,t:'🛡️ '+x.d,c:'#8fd0ff',tags:[['KHIÊN HẤP THỤ','#8fd0ff']],q,big:1};
       else if(x.k==='heal')fl={x:pp?90:270,y:130-q*40,t:x.d>0?'+'+x.d+' HP':x.t.indexOf('Hồi sinh')>=0?'HỒI SINH!':'HỒI SỨC',c:'#72e4b0',tags:evTags(x),q,big:1};
       else if(x.d){const tags=evTags(x),targetH=BL[x.w==='p'?e.m.bl:pet.bl].h;let c='#fff';if(x.r>1){c=ec;tags.push(['KHẮC '+targetH.toUpperCase()+' ▲',ec])}else if(x.r<1){c='#9aa4b8';tags.push(['BỊ '+targetH.toUpperCase()+' KHẮC ▼','#9aa4b8'])}
@@ -2221,20 +2223,15 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
      fl={x:pp?270:90,y:130-q*55,t:'-'+x.d,c,tags,q,big:x.k==='crit'||x.r>1,ring:x.r>1?ec:x.k==='crit'?'#ffd24a':null}}
     else if(x.k==='hit'||x.k==='crit')fl={x:pp?270:90,y:130-q*40,t:'0',c:'#8fd0ff',tags:[['KHIÊN CHẶN','#8fd0ff']],q,big:1}
     else if(x.k==='miss')fl={x:x.w==='p'?270:90,y:130-q*40,t:/ẩn mình/.test(x.t)?'TRƯỢT!':'NÉ!',c:'#7fe8ff',tags:/ẩn mình/.test(x.t)?[['VÂN ẨN','#c9d8ff']]:[],q,big:1}
-    else if(x.k==='stun')fl={x:pp?90:270,y:130-q*40,t:/đóng băng/.test(x.t)?'ĐÓNG BĂNG!':'CHOÁNG!',c:/đóng băng/.test(x.t)?'#9fe4ff':'#ffe45a',tags:[[/đóng băng/.test(x.t)?'❄️':'💫','#ffe45a']],q,big:1}
+  else if(x.k==='stun')fl={x:pp?90:270,y:130-q*40,t:/đóng băng/.test(x.t)?'ĐÓNG BĂNG!':'CHOÁNG!',c:/đóng băng/.test(x.t)?'#9fe4ff':'#ffe45a',tags:[[/đóng băng/.test(x.t)?'❄️':'💫','#ffe45a']],q,big:1}
      }}});
   if(T>=TE){rb.style.display='none';msg=R.win?'🏆 Chiến thắng! +'+gd+' xu · +'+ex+' EXP':'💥 Bại trận...';if(R.win)am=Math.max(0,1-(T-TE)*1.2)}
   aura(g,RP,0,85,tt);aura(g,RM,180,272,tt);
-  if(window.TTGFXART){try{
-   window.TTGFXART.drawBattleZone(g,e.m.zone,tt,272,208);
-   window.TTGFXART.drawSetAura(g,85,208,tt);
-   window.TTGFXART.drawDefiance(g,85,208,tt,hp<R.maxP*.5&&pet.sp===16);
-   window.TTGFXART.drawDefiance(g,272,208,tt,mh<R.maxM*.5&&Array.isArray(e.m.ks)&&e.m.ks.includes(16));
-  }catch(_){}}
   gst.forEach(q=>{if(q.pa)tintDraw(g,c=>drawPet(c,85,208,120,tt,q.off,1,true),RP[0],.75,q.a);else tintDraw(g,c=>drawM(c,e.m,272,208,e.m.boss?6:7,tt,-q.off,1,e.tr,true),RM[0],.75,q.a)});
   drawPet(g,85,208,120,tt,dp,ap);drawM(g,e.m,272,208,e.m.boss?6:7,tt,dmx,am,e.tr);
   if(pf>0)tintDraw(g,c=>drawPet(c,85,208,120,tt,dp,1,true),'#ffffff',1,pf);
   if(mf>0)tintDraw(g,c=>drawM(c,e.m,272,208,e.m.boss?6:7,tt,dmx,1,e.tr,true),'#ffffff',1,mf);
+  if(window.TTGCombatFX){try{TTGCombatFX.drawField(g,tt,(T0-t0)/1000,e.m.zone,R,shp,shm,hp,mh)}catch(_){}}
   if(fx)impact(g,fx,tt);try{fxDraw(g,tt,dp,dmx)}catch(_){}/* [FX đợt 2] lỗi hiệu ứng không được làm đứng trận */g.restore();
   if(sf>0){g.save();g.globalAlpha=sf;g.fillStyle='#ffffff';g.fillRect(0,0,360,250);g.restore()}
   if(FXS.on&&FXS.cr&&!FXS.miss){try{fxTop(g,FXS.u,REDM)}catch(_){}}/* [FX đợt 2] vignette + chữ CHÍ MẠNG */
