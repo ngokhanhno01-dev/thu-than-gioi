@@ -1973,7 +1973,7 @@ function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv
  const first=P.spd>=Q.spd?P:Q,
  push=(c,k,d,t,r)=>ev.push({w:c.w,k,d,r:r||1,hp:Math.max(0,P.hp),mh:Math.max(0,Q.hp),sp:Math.max(0,P.sh||0),sm:Math.max(0,Q.sh||0),t}),
   revive=c=>{if(c.hp<=0&&c.rv){c.rv=false;c.hp=Math.round(c.mx*kv(c,14)/100);push(c,'heal',c.hp,'✨ Hồi sinh +'+c.hp+' HP')}else if(c.hp<=0&&c.eqRv){c.eqRv=0;c.hp=Math.max(1,Math.round(c.mx*c.eqRvP/100));push(c,'heal',c.hp,'✨ Hồi sinh +'+c.hp+' HP (Ngọc Hộ Mệnh)')}},
- lo=c=>c.hp<c.mx*.25&&kv(c,16)?1+kv(c,16)/100:1,
+ lo=c=>c.hp<c.mx*.5&&kv(c,16)?1+kv(c,16)/100:1,
  act=(a,d)=>{if(a.hp<=0||d.hp<=0)return;
   if(a.stn){const fz=a.stn===2;a.stn=0;push(a,'stun',0,a.n+(fz?' bị đóng băng, mất lượt!':' bị choáng, mất lượt!'));return}
   if(window.EQFX&&EQFX.pre(a,d,push))return;

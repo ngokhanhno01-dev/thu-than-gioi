@@ -340,7 +340,7 @@
     let note = '';
     const kv = function(c, i){ return (c.k && c.k[i]) || 0; };
     const rs = function(c){ return 1 - kv(c, 10) / 100; };           // Kháng hiệu ứng
-    const lo = function(c){ return (c.hp < c.mx * .25 && kv(c, 16)) ? 1 + kv(c, 16) / 100 : 1; }; // Bất khuất
+    const lo = function(c){ return (c.hp < c.mx * .5 && kv(c, 16)) ? 1 + kv(c, 16) / 100 : 1; }; // Bất khuất
     const elem = function(c){ try{ return BL[c.bl].h; }catch(_){ return ''; } };
 
     // hệ khắc chế (ngũ hành) như thám hiểm
