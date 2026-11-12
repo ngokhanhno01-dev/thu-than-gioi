@@ -224,21 +224,48 @@ function layerParticles(g,side,cx,by,W2,H,T,sp,unit,bright,al){ /* side: -1 = ph
  stat.particles+=cnt;
 }
 
-/* ---------- BẬC 10 ĐỘC QUYỀN: dấu + bốn cánh lấp lánh, nhảy chỗ và chớp (màu theo 17 hệ) ---------- */
+/* ---------- BẬC 10 ĐỘC QUYỀN: dấu + bốn cánh lấp lánh (màu theo 17 hệ) ----------
+   • Nở NHANH rồi mờ CHẬM (đường cong theo thời gian, không phụ thuộc FPS) + rung sáng nhẹ bằng sin
+   • 4 dấu "chủ lực" to hơn, có lõi sáng + chấm chéo; còn lại là dấu nhỏ làm nền (trong trận: 2 chủ lực + 9 nhỏ, cỡ nhỏ hơn)
+   • Vị trí ưu tiên viền thân và vùng đầu/sừng, hạn chế đè giữa thân
+   • Mỗi ~4,2 giây có một vệt sáng quét chéo qua thân (chỉ màn chính)
+   • Đầu cánh dùng màu nhạt hơn của hệ (TW_LIT) */
 const TW_COL=['#cfeaff','#6fe0c8','#c9b0ff','#5cff9a','#ffd400','#9a9aff','#ff8a1a','#7a66ff','#ff9d00','#3affb8','#6aff3a','#ff4a2a','#d04aff','#b040ff','#5cc0ff','#ff6ac8','#ffe45a'];
+const TW_LIT=TW_COL.map(h=>{const n=parseInt(h.slice(1),16),m=v=>Math.round(v+(255-v)*.6).toString(16).padStart(2,'0');return'#'+m(n>>16)+m(n>>8&255)+m(n&255)});
+const TW_SWEEP=4.2;   /* chu kỳ vệt sáng quét (giây) */
+/* vẽ 1 dấu +: viền dày mờ · thân cánh · đầu cánh nhạt (L>=4) · lõi trắng · big = thêm cánh trong sáng + 4 chấm chéo */
+function twStar(g,px,py,L,a,col,lit,big){
+ g.globalAlpha=a*.45;g.fillStyle=col;g.fillRect(px-2,py-L,4,L*2);g.fillRect(px-L,py-2,L*2,4);
+ g.globalAlpha=a;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);
+ if(L>=4){g.fillStyle=lit;g.fillRect(px-L-2,py-1,2,2);g.fillRect(px+L,py-1,2,2);g.fillRect(px-1,py-L-2,2,2);g.fillRect(px-1,py+L,2,2)}
+ g.fillStyle='#ffffff';
+ if(big){
+  const d=(L>>1)&~1,k=Math.max(2,d);
+  g.globalAlpha=a*.85;g.fillRect(px-1,py-(L>>1),2,L);g.fillRect(px-(L>>1),py-1,L,2);
+  g.globalAlpha=a*.6;g.fillStyle=lit;g.fillRect(px-k-1,py-k-1,2,2);g.fillRect(px+k-1,py-k-1,2,2);g.fillRect(px-k-1,py+k-1,2,2);g.fillRect(px+k-1,py+k-1,2,2);
+  g.fillStyle='#ffffff';g.globalAlpha=a;g.fillRect(px-2,py-2,4,4)}
+ else if(a>.5){g.fillRect(px-1,py-1,2,2)}}
 function twinkle(g,cx,by,W2,H,T,sp,mode,bright,al){
- const n=21,col=TW_COL[clamp(sp|0,0,16)];let cnt=0;g.globalCompositeOperation='source-over';
+ const bat=mode==='battle',n=bat?11:22,nb=bat?2:4,sc=bat?.75:1,ci=clamp(sp|0,0,16),col=TW_COL[ci],lit=TW_LIT[ci];let cnt=0;
+ g.globalCompositeOperation='source-over';
  for(let i=0;i<n;i++){
-  const per=.5+SEED[(i+3)&31]*.6,ph=T/per+SEED[i]*7,q=Math.floor(ph),p=ph-q;   /* mỗi dấu + có chu kỳ riêng, hết chu kỳ thì nhảy sang chỗ mới */
-  const s=SIN(p*PI),fl=(p>.3&&p<.6&&frac(T*17+i*.7)<.4)?.35:1;                /* s: nở rồi thu lại · fl: chớp tắt-sáng */
-  const a=clamp(Math.pow(s,.7)*fl*bright*al,0,1);if(a<.04)continue;
-  const L=Math.max(2,Math.round((3+SEED[(i+11)&31]*5)*s)),
-        px=Math.round((cx+(hash(q,i,1)*2-1)*.95*W2)/2)*2,py=Math.round((by-(.08+hash(q,i,2)*1.05)*H)/2)*2;
-  g.globalAlpha=a*.5;g.fillStyle=col;g.fillRect(px-2,py-L,4,L*2);g.fillRect(px-L,py-2,L*2,4);   /* viền dày cùng màu */
-  g.globalAlpha=a;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);
-  if(L>=4){g.fillRect(px-L-2,py-1,2,2);g.fillRect(px+L,py-1,2,2);g.fillRect(px-1,py-L-2,2,2);g.fillRect(px-1,py+L,2,2)}
-  if(s>.6){g.fillStyle='#ffffff';g.fillRect(px-1,py-1,2,2)}
-  cnt++}
+  const big=i<nb,per=big?.7+SEED[(i+3)&31]*.5:.22+SEED[(i+3)&31]*.3,   /* chủ lực sống lâu hơn, dấu nhỏ chớp nhanh */
+        ph=T/per+SEED[i]*7,q=Math.floor(ph),p=ph-q;                     /* hết chu kỳ thì nhảy sang chỗ mới */
+  const env=p<.14?p/.14:Math.pow(1-(p-.14)/.86,1.7);                    /* nở nhanh (14%) rồi mờ chậm */
+  const a=clamp(env*(.8+.2*SIN(T*38+i*2.1))*bright*al,0,1);if(a<.04)continue;   /* rung sáng mượt theo giây, không theo khung hình */
+  const L=Math.max(2,Math.round((big?9+SEED[(i+11)&31]*4:3+SEED[(i+11)&31]*3)*sc*(.35+.65*Math.sqrt(env))));
+  const h1=hash(q,i,1),h2=hash(q,i,2),h3=hash(q,i,3);let x,y;
+  if(h3<.3){x=cx+(h1*2-1)*.55*W2;y=by-H*(.82+h2*.28)}                  /* quanh đầu / sừng */
+  else{const ang=h1*TAU,r=.8+h2*.4;x=cx+COS(ang)*W2*.95*r;y=by-H*.5+SIN(ang)*H*.55*r}   /* quanh viền thân, tránh giữa thân */
+  if(y>by-H*.06)y=by-H*.06;
+  twStar(g,Math.round(x/2)*2,Math.round(y/2)*2,L,a,col,lit,big);cnt++}
+ if(!bat){   /* vệt sáng quét chéo: 6 dấu nổ nối đuôi nhau dọc một đường chéo */
+  const sw=Math.floor(T/TW_SWEEP),su=T-sw*TW_SWEEP;
+  if(su<1.1){const dir=hash(sw,7,5)<.5?1:-1;
+   for(let j=0;j<6;j++){const u=(su-j*.1)/.35;if(u<0||u>=1)continue;
+    const e=u<.2?u/.2:Math.pow(1-(u-.2)/.8,1.5),a=clamp(e*bright*al,0,1);if(a<.04)continue;
+    const mid=j===2||j===3,t=j/5,L=Math.max(2,Math.round((mid?8:5)*(.4+.6*e)));
+    twStar(g,Math.round((cx+dir*(-.85+1.7*t)*W2)/2)*2,Math.round((by-H*(.12+.78*t))/2)*2,L,a,col,lit,mid);cnt++}}}
  stat.particles+=cnt}
 
 /* ---------- PHÁP TRẬN + CỔNG (bản mới) ---------- */
