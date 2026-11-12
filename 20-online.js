@@ -153,7 +153,7 @@ function render(items){
   items.forEach(it=>{
     const x=it.x,ts=tOf(x)-offset;
     const row=document.createElement('div');if(me&&x.uid===me.uid)row.className='me';
-    const ti=(window.TTGTITLE&&TTGTITLE.icon(x.uid))||'';
+    const ti=(window.TTGTITLE&&TTGTITLE.tag(x.uid))||'';
     row.innerHTML='<span class="t">'+fmtT(ts)+'</span><span class="n">'+(ti?ti+' ':'')+esc(x.name||'Ẩn danh')+':</span> <span class="tx">'+esc(x.text||'')+'</span>';
     m.appendChild(row)});
   if(near||open&&firstSnap)m.scrollTop=m.scrollHeight}

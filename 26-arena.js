@@ -678,7 +678,7 @@
   }
 
   /* diễn lại trận. R = kết quả simArena. Trả Promise khi trận kết thúc. */
-  function arenaBattle(R, card, oppName){
+  function arenaBattle(R, card, oppName, oppUid){
     return new Promise(function(resolve){
       const SP = (typeof window.BSPD === 'number' && window.BSPD > 0) ? window.BSPD : 1;
       const o = $('mob'), cvs = $('mob-c');
@@ -704,7 +704,7 @@
       try{ $('mob-mh').parentNode.style.borderColor = RM[0]; }catch(_){}
       // Ô hệ cạnh thanh máu + nút Bỏ qua: dùng lại battleHudExtra của thám hiểm (10-drops-shop.js)
       try{
-        if(typeof window.battleHudExtra === 'function') window.battleHudExtra({m: {bl: oppBL}});
+        if(typeof window.battleHudExtra === 'function') window.battleHudExtra({m: {bl: oppBL}, uid: oppUid || ''});
         const br = $('mob-pbar2'); if(br) br.innerHTML = '';   // hàng buff Exp/Xu không dùng trong đấu trường
       }catch(e){ console.warn('[arena] hud hệ', e); }
 
@@ -881,7 +881,7 @@
       // chuyển sang màn chiến đấu (đóng bảng đấu trường trước)
       showPanel(false);
       try{ if(window.TTGFX) TTGFX.setBusy(true); }catch(_){}
-      arenaBattle(R, card, Q.n).then(after).catch(function(e){
+      arenaBattle(R, card, Q.n, isNpc ? '' : targetUid).then(after).catch(function(e){
         console.error('[arena] battle', e);
         after();
       });

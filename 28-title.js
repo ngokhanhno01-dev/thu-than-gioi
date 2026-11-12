@@ -59,6 +59,12 @@ function iconOf(x){if(x&&x.manual)return x.icon;const C=CFG();return(C&&x&&C.TIT
 function styleOf(x){return x&&x.manual?'color:'+x.col+(x.glow?';text-shadow:0 0 6px '+x.col+',1px 1px 0 #071116':''):''}
 
 /* biểu tượng của danh hiệu mới nhất, chỉ đọc từ bộ nhớ (không gọi mạng). '' nếu chưa biết/không có */
+/* HTML đầy đủ "icon Tên" có màu của danh hiệu mới nhất (chỉ đọc cache, không gọi mạng). '' nếu chưa biết/không có.
+   Dùng ở chat, đấu trường, màn chiến đấu. Gọi prefetch(uid,cb) trước để nạp. */
+function tag(uid){
+  const c=cache[uid];if(!(c&&c.list&&c.list.length))return'';
+  const x=c.list[0],st=styleOf(x)||'color:#ffd24a';
+  return'<span class="ttg-tag'+(x.manual&&x.id==='admin'?' adm':'')+'" style="'+st+'">'+iconOf(x)+' '+esc(text(x))+'</span>'}
 function icon(uid){const c=cache[uid];return(c&&c.list&&c.list.length)?iconOf(c.list[0]):''}
 function prefetch(uid,cb){if(!uid)return;const c=cache[uid];if(c&&c.list&&Date.now()-c.t<TTL)return;get(uid).then(l=>{if(l.length&&cb)cb()})}
 
@@ -77,7 +83,11 @@ function fill(uid,el){
   '#cv-body .ti{text-align:center;margin:0 0 6px}'+
   '#cv-body .ti .tt1{font-size:17px!important;color:#ffd24a;text-shadow:1px 1px 0 #071116}'+
   '#cv-body .ti .tt2{font-size:13px!important;color:#b7bda9}'+
-  '#ttg-pt{position:absolute;top:6px;left:0;right:0;z-index:4;text-align:center;pointer-events:none;font-size:12px;font-weight:800;color:#ffd24a;text-shadow:0 1px 3px #000,0 0 6px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px}';
+  '#ttg-pt{position:absolute;top:30px;left:0;right:0;z-index:4;text-align:center;pointer-events:none;font-size:13px;font-weight:800;color:#ffd24a;text-shadow:0 1px 3px #000,0 0 6px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px}'+
+  '.ttg-tag{font-weight:800;white-space:nowrap}'+
+  '.ttg-tag.adm{text-shadow:0 0 5px currentColor}'+
+  '#ttg-bt-p,#ttg-bt-m{position:absolute;bottom:4px;z-index:6;pointer-events:none;font-size:11px;font-weight:800;white-space:nowrap;max-width:46%;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000,0 0 5px #000}'+
+  '#ttg-bt-p{left:6px}#ttg-bt-m{right:6px;text-align:right}';
  document.head.appendChild(s)}
 
 /* ---------- Danh hiệu của chính mình, trên đầu thú ---------- */
@@ -96,5 +106,44 @@ function mountOwn(){
 setInterval(()=>{try{mountOwn()}catch(_){}},15000);
 setTimeout(()=>{try{mountOwn()}catch(_){}},4000);
 
-window.TTGTITLE={get,text,icon,prefetch,fill,MANUAL,refresh(uid){delete cache[uid||ownUid];ownT=0}};
+/* ---------- Màn chiến đấu (thám hiểm + đấu trường): danh hiệu dưới thanh máu mỗi bên ---------- */
+function btEl(id){
+  const o=document.getElementById('mob');if(!o)return null;
+  let el=document.getElementById(id);
+  if(!el){el=document.createElement('div');el.id=id;o.appendChild(el)}
+  return el}
+function btSet(id,uid){
+  const el=btEl(id);if(!el)return;
+  el.innerHTML='';if(!uid)return;
+  get(uid).then(l=>{if(l.length&&el.isConnected)el.innerHTML=tag(uid)})}
+function battleTitle(e){
+  btSet('ttg-bt-p',myUid());                    /* bên mình */
+  btSet('ttg-bt-m',e&&e.uid?e.uid:'')}          /* bên đối thủ (chỉ đấu trường truyền uid) */
+if(typeof window.battleHudExtra==='function'){
+  const _h=window.battleHudExtra;
+  window.battleHudExtra=function(e){const r=_h.apply(this,arguments);try{battleTitle(e)}catch(_){}return r}}
+
+/* ---------- Đấu trường: gắn danh hiệu vào tên trong bảng xếp hạng / danh sách đối thủ ---------- */
+function decorate(root){
+  if(!root)return;
+  root.querySelectorAll('[data-uid]').forEach(el=>{
+    const box=(el.classList.contains('slot')||el.classList.contains('tr'))?el:el.closest('.row');
+    if(!box)return;const nm=box.querySelector('.nm');
+    const uid=el.getAttribute('data-uid');
+    if(!nm||!uid||nm.getAttribute('data-tt')===uid)return;
+    nm.setAttribute('data-tt',uid);
+    get(uid).then(l=>{
+      if(!l.length||!nm.isConnected||nm.querySelector('.ttg-tag'))return;
+      const t=document.createElement('span');t.innerHTML=tag(uid)+' ';
+      if(box.classList.contains('slot')){t.style.display='block';t.style.fontSize='10px'}   /* bục top 3: danh hiệu nằm trên tên */
+      nm.insertBefore(t,nm.firstChild)})})}
+let arObs=null,arEl=null;
+setInterval(()=>{
+  const b=document.getElementById('ar-body');
+  if(!b){arObs&&arObs.disconnect();arObs=null;arEl=null;return}
+  if(b!==arEl){arObs&&arObs.disconnect();arEl=b;
+    arObs=new MutationObserver(()=>{try{decorate(b)}catch(_){}});
+    arObs.observe(b,{childList:true,subtree:true});try{decorate(b)}catch(_){}}},1000);
+
+window.TTGTITLE={get,text,icon,tag,decorate,prefetch,fill,MANUAL,refresh(uid){delete cache[uid||ownUid];ownT=0}};
 })();
