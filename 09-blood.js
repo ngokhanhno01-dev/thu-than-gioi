@@ -1,6 +1,6 @@
 /* ===== Nâng cấp huyết mạch ===== */
 const UP_MAX=10,UP_GAIN=.03,UP_RATE=[80,74,68,62,56,50,44,38,32,26]; /* tỉ lệ thành công (%) theo cấp hiện tại 0..9 — sửa tại đây */
-const UP_NM={atk:'Công',def:'Thủ',hp:'Sinh Lực',spd:'Tốc',mag:'Linh',eva:'Né tránh',stun:'Choáng',regen:'Hồi/lượt'};
+const UP_NM={atk:'Công',def:'Thủ',hp:'Sinh Lực',spd:'Tốc',mag:'Pháp Công',eva:'Né tránh',stun:'Choáng',regen:'Hồi/lượt'};
 let upPut={huyet:0,thuoc:0,tinh:0},upSel=null,upMsg='';
 function upNeed(n){return{huyet:1+Math.floor(n/3),thuoc:2+n,tinh:3+n,xu:50*(n+1)}} /* nguyên liệu mỗi lần, tăng theo cấp */
 function isUpItem(id){return id==='huyet'||id==='thuoc'||/^mat\d+$/.test(id)}

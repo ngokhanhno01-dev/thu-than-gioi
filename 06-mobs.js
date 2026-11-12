@@ -4,7 +4,7 @@
 const VAN_KIEP_ZONES = [
   { name:'Tuyết Nguyên', buff:{stat:'def',pct:6,label:'Hàn Giáp',desc:'+6% Thủ'}, mobs:['Băng Vĩ Linh Miêu','Tuyết Giáp Bọ','Băng Tinh Chồn','Lam Vũ Tuyết Điêu','Bạch Sương U Linh'],bosses:['Băng Tủy Tướng Quân'], lore:'Gió tuyết che kín dấu chân, chỉ để lộ những vệt linh lực xanh bạc.' },
   { name:'Sương Cốc', buff:{stat:'regen',pct:4,label:'Sương Tức',desc:'+4% Hồi phục'}, mobs:['Sương Vũ Lộc','Mù Sương Dơi','Vụ Giáp Ngưu','Bạch Thủy Ếch','Sương Nham Thiềm'],bosses:['Vạn Trượng Vụ Thú'], lore:'Làn sương dày làm méo tiếng động và đánh thức linh vật trong khe đá.' },
-  { name:'Vân Đảo', buff:{stat:'mag',pct:6,label:'Vân Linh',desc:'+6% Linh lực'}, mobs:['Vân Miên Phi Điểu','Phù Thạch Thạch Nhân','Vân Tước','Tinh Vân Mộc Linh','Mộng Vân Hạc'],bosses:['Vân Hải Kình Vương'], lore:'Những đảo đá trôi giữa mây gọi các linh thú bay lượn về tụ hội.' },
+  { name:'Vân Đảo', buff:{stat:'mag',pct:6,label:'Vân Linh',desc:'+6% Pháp Công'}, mobs:['Vân Miên Phi Điểu','Phù Thạch Thạch Nhân','Vân Tước','Tinh Vân Mộc Linh','Mộng Vân Hạc'],bosses:['Vân Hải Kình Vương'], lore:'Những đảo đá trôi giữa mây gọi các linh thú bay lượn về tụ hội.' },
   { name:'Phong Nguyên', buff:{stat:'spd',pct:7,label:'Phong Hành',desc:'+7% Tốc độ'}, mobs:['Liệt Phong Ảnh Báo','Bão Cát Sa Tích','Phong Nhận Bọ Ngựa','Hạc Lưu Phong','Phi Diệp Mộc Tinh'],bosses:['Phong Tai Cự Linh'], lore:'Luồng gió xoáy mang theo bụi linh thạch và những sinh vật săn mồi.' },
   { name:'Lôi Vực', buff:{stat:'crit',pct:6,label:'Lôi Kích',desc:'+6% Chí mạng'}, mobs:['Lôi Nha Tê','Sấm Vảy Thằn Lằn','Lôi Tâm Thạch Nhân','Tử Điện Ưng','Lôi Tơ Nhện'],bosses:['Thiên Lôi Đốc Quân'], lore:'Sấm chớp tích tụ trong tầng mây, khiến giáp và móng vuốt phát sáng.' },
   { name:'Nguyệt Cung', buff:{stat:'eva',pct:6,label:'Nguyệt Ảnh',desc:'+6% Né tránh'}, mobs:['Nguyệt Ảnh Miêu','Ngân Quang Dơi','Nguyệt Quế Mộc Tinh','Nguyệt Sa Thủy Xà','Tinh Đăng Cú'],bosses:['Nguyệt Thực Tế Quân'], lore:'Ánh trăng biến bóng cây thành lối đi, còn những chiếc bóng bắt đầu chuyển động.' },
@@ -17,7 +17,7 @@ const VAN_KIEP_ZONES = [
   { name:'Hắc Ám Lâm', buff:{stat:'eva',pct:6,label:'U Ảnh',desc:'+6% Né tránh'}, mobs:["Hắc Diệp Cốt Thú","Bóng Đêm Bọ","Mộng Yểm Mộc Linh","U Hỏa Cự Miêu","Mộ Lâm Thạch Quỷ"],bosses:["Hắc Nhật Tàn Quân"], lore:'Rừng đen không có bình minh; ma ảnh trỗi dậy mỗi khi linh lực chạm đất.' },
   { name:'Tử Tinh Hải', buff:{stat:'crit',pct:7,label:'Tinh Quang',desc:'+7% Chí mạng'}, mobs:["Tử Tinh Hải Ngư","Phấn Tinh Bọ","Tử Tinh Cự Ốc","Hắc Thủy Cá Đao","Thủy Tinh Hạc"],bosses:["Thủy Tinh Hải Vương"], lore:'Ánh sao phản chiếu dưới đáy biển, dẫn những sinh vật cổ xưa trồi lên.' },
   { name:'Thiên Không', buff:{stat:'spd',pct:7,label:'Thiên Vũ',desc:'+7% Tốc độ'}, mobs:["Vân Tầng Phi Mã","Thiên Trụ Thạch Nhân","Lam Vũ Hạc","Tinh Khe Dơi","Cánh Bạc Chim Ưng"],bosses:["Thiên Không Vương"], lore:'Tầng mây mỏng mở ra đường bay đến những cột đá lơ lửng trên cao.' },
-  { name:'Linh Hoa Viên', buff:{stat:'mag',pct:7,label:'Hoa Linh',desc:'+7% Linh lực'}, mobs:['Hồng Liên Phấn Điệp','Mộc Lan Cự Ong','Ngọc Diệp Tinh','Thủy Tiên Thủy Xà','Lục Tán Cự Ếch'],bosses:['Bách Hoa Tiên Chủ'], lore:'Hương hoa làm dịu độc khí, nhưng phấn sáng cũng báo hiệu lãnh địa có chủ.' },
+  { name:'Linh Hoa Viên', buff:{stat:'mag',pct:7,label:'Hoa Linh',desc:'+7% Pháp Công'}, mobs:['Hồng Liên Phấn Điệp','Mộc Lan Cự Ong','Ngọc Diệp Tinh','Thủy Tiên Thủy Xà','Lục Tán Cự Ếch'],bosses:['Bách Hoa Tiên Chủ'], lore:'Hương hoa làm dịu độc khí, nhưng phấn sáng cũng báo hiệu lãnh địa có chủ.' },
   { name:'Thần Điện', buff:{stat:'atk',pct:8,label:'Thần Ân',desc:'+8% Công'}, mobs:['Thần Điện Kim Tượng','Thần Văn Thiên Xà','Thánh Ấn Bạch Hạc','Trụ Đá Khổng Lồ','Thần Quang Mộc Linh'],bosses:['Thập Nhị Quang Tướng'], lore:'Cổ tự phát sáng dưới nền điện, đánh thức những hộ vệ đã ngủ qua nhiều kỷ nguyên.' }
 ];
 
@@ -1973,7 +1973,7 @@ function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv
  const first=P.spd>=Q.spd?P:Q,
  push=(c,k,d,t,r)=>ev.push({w:c.w,k,d,r:r||1,hp:Math.max(0,P.hp),mh:Math.max(0,Q.hp),sp:Math.max(0,P.sh||0),sm:Math.max(0,Q.sh||0),t}),
   revive=c=>{if(c.hp<=0&&c.rv){c.rv=false;c.hp=Math.round(c.mx*kv(c,14)/100);push(c,'heal',c.hp,'✨ Hồi sinh +'+c.hp+' HP')}else if(c.hp<=0&&c.eqRv){c.eqRv=0;c.hp=Math.max(1,Math.round(c.mx*c.eqRvP/100));push(c,'heal',c.hp,'✨ Hồi sinh +'+c.hp+' HP (Ngọc Hộ Mệnh)')}},
- lo=c=>c.hp<c.mx*.5&&kv(c,16)?1+kv(c,16)/100:1,
+ lo=c=>c.hp<c.mx*.25&&kv(c,16)?1+kv(c,16)/100:1,
  act=(a,d)=>{if(a.hp<=0||d.hp<=0)return;
   if(a.stn){const fz=a.stn===2;a.stn=0;push(a,'stun',0,a.n+(fz?' bị đóng băng, mất lượt!':' bị choáng, mất lượt!'));return}
   if(window.EQFX&&EQFX.pre(a,d,push))return;

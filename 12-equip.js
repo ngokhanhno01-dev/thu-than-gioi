@@ -75,19 +75,27 @@ const EQ_SLOTS=[                     /* cat = loại nguyên liệu chính của
 const EQ_SHARED=4;
 const EQ_BAG=100;                    /* số ô kho trang bị */
 const EQ_QW=[55,28,12,4,1];          /* tỉ lệ gacha phẩm: Phàm / Linh / Địa / Thiên / Thần */
-const EQ_QBONUS=[0,.06,.12,.20,.30]; /* phẩm càng cao càng mạnh: Linh +6% · Địa +12% · Thiên +20% · Thần +30% (cộng cho MỌI chỉ số và buff bộ) */
-const EQ_LINES=3;                    /* số dòng chỉ số mỗi món (ngẫu nhiên) */
+const EQ_QBONUS=[0,.10,.22,.38,.60]; /* phẩm càng cao càng mạnh: Linh +10% · Địa +22% · Thiên +38% · Thần +60% (nhân cho MỌI chỉ số của món và buff bộ) */
+const EQ_QBONUS_OLD=[0,.06,.12,.20,.30]; /* công thức cũ: CHỈ dùng để quy đổi trang bị cũ khi tải bản lưu */
+const EQ_LINES=2;                    /* số dòng chỉ số NGẪU NHIÊN mỗi món (ngoài 1 chỉ số mặc định theo ô) */
+const EQ_ZSTEP=.03;                  /* vùng z (0..16) nhân thêm 1+z×0,03: ×1 ở vùng đầu → ×1,48 ở vùng 17 (áp cho chỉ số mặc định, dòng bốc và buff bộ) */
 const EQ_ROLL=[.6,1];                /* mỗi dòng roll từ 60% đến 100% giá trị tối đa */
 const EQ_STATS={                     /* b = giá trị gốc. t:'f' = số cố định (tính theo chỉ số tham chiếu của vùng), t:'p' = % điểm */
  hp:  {n:'Sinh Lực',b:7,  t:'f'},
  atk: {n:'Công',    b:7,  t:'f'},
  def: {n:'Thủ',     b:7,  t:'f'},
  spd: {n:'Tốc',     b:7,  t:'f'},
- mag: {n:'Linh',    b:7,  t:'f'},
- eva: {n:'Né tránh',b:3,  t:'p'},
- stun:{n:'Choáng',  b:2.2,t:'p'},
- regen:{n:'Hồi/lượt',b:.8, t:'p'},
- crit:{n:'Chí mạng',b:2.5,t:'p'}};
+ mag: {n:'Pháp Công',b:7,  t:'f'},
+ eva: {n:'Né tránh',b:4,  t:'p'},
+ stun:{n:'Choáng',  b:3.5,t:'p'},
+ regen:{n:'Hồi/lượt',b:1.4,t:'p'},
+ crit:{n:'Chí mạng',b:4,  t:'p'}};
+/* Chỉ số MẶC ĐỊNH cố định của từng ô (không roll, không đổi): k = chỉ số, b = giá trị gốc (% tham chiếu vùng, cùng thang với EQ_STATS.b).
+   Linh chỉ góp 30% vào sát thương (xem công thức đòn đánh) nên Ngọc được cho b cao gấp đôi. Muốn cân lại thì sửa b ở đây. */
+const EQ_MAIN=[{k:'atk',b:10},{k:'def',b:10},{k:'spd',b:9},{k:'mag',b:20}];
+/* Trọng số bốc dòng ngẫu nhiên: số càng cao càng dễ ra. Linh yếu nên ít ra hơn (hạn chế dòng rác). Chỉ số mặc định của ô không bị bốc trùng. */
+const EQ_W={hp:14,atk:14,def:14,spd:12,mag:8,eva:10,stun:8,regen:8,crit:12};
+const EQ_B_OLD={hp:7,atk:7,def:7,spd:7,mag:7,eva:3,stun:2.2,regen:.8,crit:2.5}; /* b cũ: CHỈ để quy đổi trang bị cũ */
 const EQ_CAP={eva:45,stun:35,regen:8,crit:60};   /* trần tổng (khớp trần sẵn có của game) */
 /* Giá rèn theo vùng z (0..16): boss = Tinh Hoa [boss], main = nguyên liệu chính của ô, shared = Linh Cốt */
 function eqNeed(z){return{boss:1+Math.floor(z/6),main:5+Math.floor(z/4),shared:3+Math.floor(z/5),xu:40*(z+1)}}
@@ -113,7 +121,7 @@ const EQ_SETS=[
  {k:'first',  i:'🪽',name:'Thiên Uy',       v2:{pct:25},         v4:{pct:50},          t:v=>'Luôn ra đòn trước; đòn đầu tiên mỗi trận gây thêm <b>'+v.pct+'%</b> sát thương.'},
  {k:'weaken', i:'🌸',name:'Phấn Hoa Suy Yếu',v2:{pct:8},         v4:{pct:18},          t:v=>'Đầu trận làm kẻ địch suy yếu, giảm <b>'+v.pct+'%</b> Công.'},
  {k:'judge',  i:'⚖️',name:'Thần Phán',      v2:{pct:25},         v4:{pct:50},          t:v=>'Kẻ địch dưới 30% sinh lực chịu thêm <b>'+v.pct+'%</b> sát thương.'}];
-const EQ_STAT_NAME={hp:'Sinh Lực',atk:'Công',def:'Thủ',spd:'Tốc',mag:'Linh',eva:'Né tránh',stun:'Choáng',regen:'Hồi/lượt',crit:'Chí mạng'};
+const EQ_STAT_NAME={hp:'Sinh Lực',atk:'Công',def:'Thủ',spd:'Tốc',mag:'Pháp Công',eva:'Né tránh',stun:'Choáng',regen:'Hồi/lượt',crit:'Chí mạng'};
 const _r1=x=>Math.round(x*10)/10;
 
 /* ---------- Nguyên liệu: 5 quái + 1 boss mỗi vùng ---------- */
@@ -234,38 +242,64 @@ const eqName=it=>EQ_SLOTS[it.s].n+' '+VAN_KIEP_ZONES[it.z].name;
 const eqLine=l=>{const d=EQ_STATS[l[0]];return d.n+' +'+l[1]+(d.t==='p'?'%':'')};
 function eqRef(z){const zb=VAN_KIEP_ZONE_BOUNDS[z];return 72/5*(1+3*petGrow((zb.start+zb.end)/2))}
 
+const eqZM=z=>1+z*EQ_ZSTEP;
+/* Giá trị 1 dòng chỉ số k: b (gốc) × vùng × phẩm × roll r. Loại 'f' tính theo chỉ số tham chiếu của vùng, loại 'p' là % điểm. */
+function eqVal(z,k,q,r,b){
+ const d=EQ_STATS[k],pct=b*eqZM(z)*(1+EQ_QBONUS[q])*r;
+ return d.t==='f'?Math.max(1,Math.round(eqRef(z)*(k==='hp'?8:1)*pct/100)):Math.round(pct*10)/10}
+/* Mọi dòng của 1 món = [chỉ số mặc định] + [2 dòng bốc]. TÍNH LẠI mỗi lần từ z/q/roll nên công thức đổi là đồ cũ tự đổi theo. Trả [[k,giá trị],...] (dòng đầu = mặc định). */
+function eqLines(it){
+ const m=EQ_MAIN[it.s],out=[[m.k,eqVal(it.z,m.k,it.q,1,m.b)]];
+ for(const l of it.L)if(EQ_STATS[l[0]])out.push([l[0],eqVal(it.z,l[0],it.q,l[1],EQ_STATS[l[0]].b)]);
+ return out}
+function eqPickKeys(excl,n){
+ const pool=Object.keys(EQ_STATS).filter(k=>k!==excl).map(k=>[k,EQ_W[k]||1]),out=[];
+ for(let i=0;i<n&&pool.length;i++){
+  let x=Math.random()*pool.reduce((a,p)=>a+p[1],0),j=0;
+  for(;j<pool.length-1;j++){x-=pool[j][1];if(x<0)break}
+  out.push(pool.splice(j,1)[0][0])}
+ return out}
 function eqRoll(z,s,q){
- const ref=eqRef(z),keys=Object.keys(EQ_STATS);
- for(let i=keys.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[keys[i],keys[j]]=[keys[j],keys[i]]}
- const L=keys.slice(0,EQ_LINES).map(k=>{
-  const d=EQ_STATS[k],r=EQ_ROLL[0]+Math.random()*(EQ_ROLL[1]-EQ_ROLL[0]),pct=d.b*(1+EQ_QBONUS[q])*r;
-  return[k,d.t==='f'?Math.max(1,Math.round(ref*(k==='hp'?8:1)*pct/100)):Math.round(pct*10)/10]});
- return{uid:eqUid++,z,s,q,lv:VAN_KIEP_ZONE_BOUNDS[z].start,L}}
+ const L=eqPickKeys(EQ_MAIN[s].k,EQ_LINES).map(k=>[k,Math.round((EQ_ROLL[0]+Math.random()*(EQ_ROLL[1]-EQ_ROLL[0]))*1000)/1000]);
+ return{uid:eqUid++,z,s,q,lv:VAN_KIEP_ZONE_BOUNDS[z].start,ver:2,L}}
+/* Quy đổi trang bị CŨ (L = [[k,giá trị đã cộng sẵn]] ×3, chưa có ver) sang dạng mới L = [[k,roll]] ×2.
+   Giữ nguyên các chỉ số người chơi đã bốc; nếu thừa thì bỏ dòng trùng chỉ số mặc định trước, rồi bỏ dòng roll thấp nhất. Chạy 1 lần rồi gắn ver:2. */
+function eqMigrate(it){
+ if(!it||it.ver>=2)return it;
+ const dk=EQ_MAIN[it.s].k,oq=EQ_QBONUS_OLD[it.q]||0,ref=eqRef(it.z);
+ let L=(Array.isArray(it.L)?it.L:[]).filter(l=>Array.isArray(l)&&EQ_STATS[l[0]]&&isFinite(l[1])).map(l=>{
+  const k=l[0],d=EQ_STATS[k],b=EQ_B_OLD[k]*(1+oq),den=d.t==='f'?b*ref*(k==='hp'?8:1)/100:b;
+  const r=Math.max(EQ_ROLL[0],Math.min(EQ_ROLL[1],+l[1]/den));
+  return[k,Math.round(r*1000)/1000]});
+ while(L.length>EQ_LINES){
+  let x=L.findIndex(l=>l[0]===dk);
+  if(x<0){x=0;for(let i=1;i<L.length;i++)if(L[i][1]<L[x][1])x=i}
+  L.splice(x,1)}
+ it.L=L;it.ver=2;return it}
 
-/* Khoảng giá trị 1 dòng chỉ số k của bộ vùng z ở phẩm q (hiển thị ở mục Rèn; công thức khớp eqRoll) */
-function eqRange(z,k,q){
- const ref=eqRef(z),d=EQ_STATS[k];
- return EQ_ROLL.map(r=>{const pct=d.b*(1+EQ_QBONUS[q])*r;
-  return d.t==='f'?Math.max(1,Math.round(ref*(k==='hp'?8:1)*pct/100)):Math.round(pct*10)/10})}
+/* Khoảng giá trị 1 dòng ngẫu nhiên k của bộ vùng z ở phẩm q (hiển thị ở mục Rèn; khớp eqVal) */
+function eqRange(z,k,q){return EQ_ROLL.map(r=>eqVal(z,k,q,r,EQ_STATS[k].b))}
 function eqInfoHtml(z,s,need){
  const Z=VAN_KIEP_ZONES[z],S=EQ_SETS[z],col=ZONE_COL[z],ids=fgIds(z,s),zb=VAN_KIEP_ZONE_BOUNDS[z];
  const fmt=(r,p)=>r[0]===r[1]?r[0]+p:r[0]+'–'+r[1]+p;
- const rows=Object.keys(EQ_STATS).map(k=>{const d=EQ_STATS[k],p=d.t==='p'?'%':'',lo=eqRange(z,k,0),hi=eqRange(z,k,4);
+ const mk=EQ_MAIN[s].k,md=EQ_STATS[mk],mp=md.t==='p'?'%':'';
+ const mainRow='<div><span>⭐ '+md.n+' (mặc định)</span><b>Phàm +'+eqVal(z,mk,0,1,EQ_MAIN[s].b)+mp+' · Thần +'+eqVal(z,mk,4,1,EQ_MAIN[s].b)+mp+'</b></div>';
+ const rows=mainRow+Object.keys(EQ_STATS).filter(k=>k!==mk).map(k=>{const d=EQ_STATS[k],p=d.t==='p'?'%':'',lo=eqRange(z,k,0),hi=eqRange(z,k,4);
   return'<div><span>'+d.n+'</span><b>Phàm +'+fmt(lo,p)+' · Thần +'+fmt(hi,p)+'</b></div>'}).join('');
  const head='<button class="eqinfo-h" onclick="fgInfoToggle()" style="color:'+col+'">'+eqIco(s,z)+' <b>Thông tin '+EQ_SLOTS[s].n+' '+Z.name+'</b><span>'+(fgInfo?'▴ Thu gọn':'▾ Xem thêm')+'</span></button>';
- if(!fgInfo)return'<div class="infobox upnote" style="margin-top:5px">'+head+'<small>Bộ '+S.name+' · mặc được từ cấp '+zb.start+' · '+EQ_LINES+' dòng chỉ số ngẫu nhiên</small></div>';
+ if(!fgInfo)return'<div class="infobox upnote" style="margin-top:5px">'+head+'<small>Bộ '+S.name+' · mặc được từ cấp '+zb.start+' · mặc định '+EQ_STATS[EQ_MAIN[s].k].n+' + '+EQ_LINES+' dòng ngẫu nhiên</small></div>';
  return'<div class="infobox upnote" style="margin-top:5px">'+head+
   '<small>• Thuộc bộ <b style="color:'+col+'">'+S.i+' '+S.name+'</b> (mặc 2 hoặc 4 món cùng bộ để có buff bộ)<br>'+
   '• Cấp yêu cầu để mặc: <b>'+zb.start+'</b><br>'+
   '• Nguyên liệu: '+ITEMS[ids.boss].n+' ×'+need.boss+', '+ITEMS[ids.main].n+' ×'+need.main+', '+ITEMS[ids.shared].n+' ×'+need.shared+', '+need.xu+' xu<br>'+
-  '• Mỗi món rèn ra có <b>'+EQ_LINES+' dòng chỉ số</b> bốc ngẫu nhiên trong '+Object.keys(EQ_STATS).length+' loại dưới đây (mọi ô bốc như nhau, loại ô chỉ khác nguyên liệu và hình dáng). Mỗi dòng roll từ '+Math.round(EQ_ROLL[0]*100)+'% đến '+Math.round(EQ_ROLL[1]*100)+'% giá trị tối đa của phẩm.</small>'+
+  '• Mỗi món có <b>1 chỉ số mặc định cố định theo ô</b> (Vũ Khí → Công, Giáp → Thủ, Vòng → Tốc, Ngọc → Linh) và <b>'+EQ_LINES+' dòng bốc ngẫu nhiên</b> (dễ ra Sinh Lực/Công/Thủ/Chí mạng hơn Linh). Dòng bốc roll từ '+Math.round(EQ_ROLL[0]*100)+'% đến '+Math.round(EQ_ROLL[1]*100)+'%.<br>• Vùng càng cao mọi chỉ số càng lớn (×'+eqZM(z).toFixed(2)+' ở vùng này). Phẩm cộng % vào toàn bộ chỉ số của món.</small>'+
   '<div class="eqstat eqrange" style="margin-top:4px">'+rows+'</div>'+
-  '<small style="color:var(--mute)">Sinh Lực/Công/Thủ/Tốc/Linh là số cố định theo cấp vùng; Né tránh/Choáng/Hồi/Chí mạng là % và có trần tổng ('+Object.keys(EQ_CAP).map(k=>EQ_STAT_NAME[k]+' '+EQ_CAP[k]+'%').join(', ')+').</small></div>'}
+  '<small style="color:var(--mute)">Sinh Lực/Công/Thủ/Tốc/Pháp Công là số cố định theo cấp vùng (Pháp Công góp 30% vào sát thương đòn đánh); Né tránh/Choáng/Hồi/Chí mạng là % và có trần tổng ('+Object.keys(EQ_CAP).map(k=>EQ_STAT_NAME[k]+' '+EQ_CAP[k]+'%').join(', ')+').</small></div>'}
 
 /* ---------- Tổng chỉ số + buff bộ ---------- */
 function eqTotals(){
  const t={hp:0,atk:0,def:0,spd:0,mag:0,eva:0,stun:0,regen:0,crit:0};
- for(const it of eqWorn){if(!it)continue;for(const[k,v]of it.L)t[k]+=v}
+ for(const it of eqWorn){if(!it)continue;for(const[k,v]of eqLines(it))t[k]+=v}
  return t}
 /* Danh sách buff bộ đang kích hoạt (đã nhân phẩm trung bình của các món cùng bộ) */
 function eqSetInfo(){
@@ -273,9 +307,9 @@ function eqSetInfo(){
  for(const it of eqWorn){if(!it)continue;c[it.z]=(c[it.z]||0)+1;(qs[it.z]=qs[it.z]||[]).push(EQ_QBONUS[it.q])}
  for(const z in c){
   const n=c[z],S=EQ_SETS[z],qb=qs[z].reduce((a,b)=>a+b,0)/qs[z].length,on=n>=2,full=n>=4;
-  out.push({z:+z,n,S,on,full,qb,v:on?eqScale(full?S.v4:S.v2,qb):null})}
+  out.push({z:+z,n,S,on,full,qb,v:on?eqScale(full?S.v4:S.v2,qb,+z):null})}
  return out}
-function eqScale(v,qb){const o={};for(const k in v){o[k]=_r1(v[k]*(1+qb));if(k==='ch')o[k]=Math.min(100,o[k])}return o}
+function eqScale(v,qb,z){const o={},zm=1+(z||0)*EQ_ZSTEP;for(const k in v){o[k]=_r1(v[k]*(1+qb)*zm);if(k==='ch')o[k]=Math.min(100,o[k])}return o}
 function eqApply(s){
  const T=eqTotals();
  for(const k of['hp','atk','def','spd','mag'])s[k]=Math.round(s[k]+T[k]);
@@ -377,7 +411,7 @@ function fgDo(){
  const q=pick(EQ_QW),it=eqRoll(z,s,q);ebag.push(it);fgLast=it;
  const col=eqRgb(it);
  eqMsg='<span class="ok">✨ Rèn ra <b style="color:'+col+'">['+QN[q]+'] '+eqName(it)+'</b>!</span>';
- upToast('ok','🔨 RÈN THÀNH CÔNG','<b style="color:'+col+'">['+QN[q]+' phẩm] '+eqName(it)+'</b><br>'+it.L.map(eqLine).join('<br>')+(q>=3?'<br>🌟 Món hiếm!':''));
+ upToast('ok','🔨 RÈN THÀNH CÔNG','<b style="color:'+col+'">['+QN[q]+' phẩm] '+eqName(it)+'</b><br>'+eqLines(it).map(eqLine).join('<br>')+(q>=3?'<br>🌟 Món hiếm!':''));
  log('🔨 Rèn ra <b style="color:'+col+'">['+QN[q]+'] '+eqName(it)+'</b> (−'+need.xu+' xu).');
  renderEquip()}
 
@@ -385,13 +419,13 @@ function fgDo(){
 function eqItemHtml(it,withCmp){
  if(!it)return'<small>Chạm vào một món trang bị để xem.</small>';
  let h='<b style="color:'+eqRgb(it)+'">['+QN[it.q]+'] '+eqName(it)+'</b><br><small'+(level<it.lv?' class="bad"':'')+'>Cấp yêu cầu '+it.lv+' · Bộ '+VAN_KIEP_ZONES[it.z].name+(it.q?' · Phẩm +'+Math.round(EQ_QBONUS[it.q]*100)+'%':'')+'</small>'+
-  it.L.map(l=>'<div>'+eqLine(l)+'</div>').join('');
+  eqLines(it).map((l,i)=>'<div class="stl">'+(i?'':'⭐ ')+eqLine(l)+(i?'':' <small>(mặc định)</small>')+'</div>').join('');
  const w=withCmp?eqWorn[it.s]:null;
- if(w)h+='<small style="color:var(--mute)">Đang mặc: <span style="color:'+eqRgb(w)+'">['+QN[w.q]+'] '+eqName(w)+'</span><br>'+w.L.map(eqLine).join(' · ')+'</small>';
+ if(w)h+='<small style="color:var(--mute)">Đang mặc: <span style="color:'+eqRgb(w)+'">['+QN[w.q]+'] '+eqName(w)+'</span><br>'+eqLines(w).map(eqLine).join(' · ')+'</small>';
  return h}
 function eqStatBox(){
  const T=eqTotals(),any=Object.keys(T).some(k=>T[k]>0);
- let h='<div style="text-align:center;font-weight:800;color:var(--gold);margin-bottom:3px">📊 Chỉ số trang bị đang mang</div>';
+ let h='<div style="text-align:center;font-weight:800;color:var(--gold);margin-bottom:3px">📊 Chỉ số trang bị đang mang<br><small style="font-weight:400;color:var(--mute)">Bấm vào chỉ số để xem chú thích</small></div>';
  if(!any)return h+'<small>Chưa mang món trang bị nào.</small>';
  h+='<div class="eqstat">'+Object.keys(EQ_STATS).map(k=>{const d=EQ_STATS[k],v=_r1(T[k]);
   return'<div'+(v>0?'':' class="z"')+'><span>'+d.n+'</span><b>'+(v>0?'+'+v+(d.t==='p'?'%':''):'—')+'</b></div>'}).join('')+'</div>';
@@ -449,8 +483,8 @@ function eqForgeHtml(){
   '<div class="infobox upinfo"><b style="color:'+ZONE_COL[z]+'">'+EQ_SLOTS[s].n+' '+Z.name+'</b><br><small>Cấp yêu cầu '+zb.start+'</small></div></div></div>'+
   eqInfoHtml(z,s,need)+
   '<div class="infobox upnote" style="margin-top:5px">📦 <b>Nguyên liệu cần:</b>'+src(ids.boss,z,'boss')+src(ids.main,z,'main')+src(ids.shared,z,'shared')+'<div>🪙 Xu ×<b>'+gold+'/'+need.xu+'</b></div></div>'+
-  '<div class="infobox upnote" style="margin-top:5px"><b style="color:'+ZONE_COL[z]+'">'+S.i+' Buff bộ: '+S.name+'</b><br><small>2 món: '+S.t(eqScale(S.v2,0))+'<br>4 món: '+S.t(eqScale(S.v4,0))+'</small></div>'+
-  '<div class="infobox upnote" style="margin-top:5px">🎲 Phẩm ngẫu nhiên: '+odds+'<br><small>Phẩm cao cộng thêm % cho mọi chỉ số và buff bộ. Mỗi món có '+EQ_LINES+' dòng chỉ số ngẫu nhiên.</small></div>'+
+  '<div class="infobox upnote" style="margin-top:5px"><b style="color:'+ZONE_COL[z]+'">'+S.i+' Buff bộ: '+S.name+'</b><br><small>2 món: '+S.t(eqScale(S.v2,0,z))+'<br>4 món: '+S.t(eqScale(S.v4,0,z))+'</small></div>'+
+  '<div class="infobox upnote" style="margin-top:5px">🎲 Phẩm ngẫu nhiên: '+odds+'<br><small>Phẩm cao cộng thêm % cho mọi chỉ số của món và buff bộ. Mỗi món có 1 chỉ số mặc định + '+EQ_LINES+' dòng ngẫu nhiên.</small></div>'+
   '<button class="jade" style="margin-top:5px" onclick="fgDo()">🔨 Rèn trang bị</button>'+last+
   '<div class="infobox upmsg">'+eqMsg+'</div>'}
 function renderEquip(){

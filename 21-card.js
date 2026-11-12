@@ -24,7 +24,7 @@ function buildCard(){
   const s=statsOf(pet.bl,pet.pi,pet.base,level);
   const eq=[0,1,2,3].map(i=>{const it=eqWorn[i];
     if(!it||typeof it!=='object')return null;
-    const L=(Array.isArray(it.L)?it.L:[]).slice(0,5).map(l=>{
+    const L=(typeof eqLines==='function'?eqLines(it):(Array.isArray(it.L)?it.L:[])).slice(0,5).map(l=>{
       /* chấp nhận l là [id,giá trị] (bản game) hoặc {k,v} */
       const k=Array.isArray(l)?l[0]:(l&&l.k),v=Array.isArray(l)?l[1]:(l&&l.v);
       return{k:String(k==null?'':k).slice(0,12),v:R(v)}}).filter(o=>o.k);

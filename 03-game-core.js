@@ -224,7 +224,7 @@ function egg(t){
 const BL={
  ho:{n:'Bạch Hổ',h:'Kim',c:['#ffffff','#dfe7f2','#8795ab'],ac:'#232833',au:'210,225,255',eye:'#1a0f08',tip:'Công +60%',b:{atk:60}},
  vu:{n:'Huyền Vũ',h:'Thủy',c:['#c4ecf6','#4f9bb8','#1d4a66'],ac:'#f2c76a',au:'90,180,255',eye:'#1a0f08',tip:'Thủ +60%, Sinh Lực +20%',b:{def:60,hp:20}},
- long:{n:'Thanh Long',h:'Mộc',c:['#d6ffdc','#58c878','#1b6a3a'],ac:'#f2c76a',au:'110,230,150',eye:'#1a0f08',mane:['#58c878','#c8ffb0'],tip:'Hồi 6% Sinh Lực/lượt, Linh +20%',b:{regen:6,mag:20}},
+ long:{n:'Thanh Long',h:'Mộc',c:['#d6ffdc','#58c878','#1b6a3a'],ac:'#f2c76a',au:'110,230,150',eye:'#1a0f08',mane:['#58c878','#c8ffb0'],tip:'Hồi 6% Sinh Lực/lượt, Pháp Công +20%',b:{regen:6,mag:20}},
  tuoc:{n:'Chu Tước',h:'Hỏa',c:['#ffe3b8','#ff7a4d','#a8281a'],ac:'#ffd45a',au:'255,140,80',eye:'#7a3a00',mane:['#ff4d2a','#ffd45a'],tip:'Tốc +60%',b:{spd:60}},
  lan:{n:'Kỳ Lân',h:'Thổ',c:['#fff4c8','#f0c04a','#a8741a'],ac:'#c0392b',au:'255,215,110',eye:'#1a0f08',mane:['#f2c76a','#ff9a4d'],tip:'Choáng +25%, Sinh Lực +20%',b:{stun:25,hp:20}},
  hu:{n:'Cửu Vĩ Hồ',h:'Huyễn',c:['#ffffff','#e6ccff','#8a5ad0'],ac:'#ff7ad0',au:'210,150,255',eye:'#a040c0',tip:'Né tránh +30%',b:{eva:30}}
@@ -253,7 +253,7 @@ function statsOf(bl,pi,base,a){
     eva:Math.min(45,5+(b.eva||0)*p),stun:Math.min(35,(b.stun||0)*p),regen:Math.min(8,(b.regen||0)*p)};
 }
 function cbAttrs(s,k,c0){const v=i=>k[i]||0,r=x=>Math.round(x*10)/10,cr=(c0||0)+v(4);
-  return[['Sinh Lực',s.hp],['Công',s.atk],['Thủ',s.def],['Tốc',s.spd],['Linh',s.mag],['Né tránh',r(s.eva)+'%'],['Chí mạng',r(cr)+'%'],['ST chí mạng',cr>0?r(150+v(4)*3)+'%':'0%'],['Choáng',r(s.stun)+'%'],['Hồi/lượt',r(s.regen)+'%'],['Kháng hiệu ứng',r(v(10))+'%'],['Xuyên giáp',r(v(8))+'%'],['Hút máu',r(v(12))+'%'],['Phản đòn',r(v(7))+'%'],['Liên kích',r(v(3))+'%'],['Khiên',r(v(9))+'%']]}
+  return[['Sinh Lực',s.hp],['Công',s.atk],['Thủ',s.def],['Tốc',s.spd],['Pháp Công',s.mag],['Né tránh',r(s.eva)+'%'],['Chí mạng',r(cr)+'%'],['ST chí mạng',cr>0?r(150+v(4)*3)+'%':'0%'],['Choáng',r(s.stun)+'%'],['Hồi/lượt',r(s.regen)+'%'],['Kháng hiệu ứng',r(v(10))+'%'],['Xuyên giáp',r(v(8))+'%'],['Hút máu',r(v(12))+'%'],['Phản đòn',r(v(7))+'%'],['Liên kích',r(v(3))+'%'],['Khiên',r(v(9))+'%']]}
 function renderInfo(){
   const el=$('info');
   const src=pv.on?{bl:pv.bl,sp:pv.sp,pi:pv.pi,a:pv.age,base:pet?pet.base:{hp:12,atk:12,def:12,spd:12,mag:12}}:(pet?{bl:pet.bl,sp:pet.sp,pi:pet.pi,a:level,base:pet.base}:null);

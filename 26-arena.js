@@ -256,10 +256,10 @@
     return {cnt: cnt, qs: qs};
   }
   /* Nhân giá trị bộ theo phẩm chất — cùng công thức eqScale() của game gốc */
-  function scaleSet(v, qb){
-    if(typeof eqScale === 'function') return eqScale(v, qb);
+  function scaleSet(v, qb, z){
+    if(typeof eqScale === 'function') return eqScale(v, qb, z);
     const o = {};
-    for(const k in v){ o[k] = Math.round(v[k] * (1 + qb) * 10) / 10; if(k === 'ch') o[k] = Math.min(100, o[k]); }
+    for(const k in v){ o[k] = Math.round(v[k] * (1 + qb) * (1 + (z || 0) * 0.03) * 10) / 10; if(k === 'ch') o[k] = Math.min(100, o[k]); }
     return o;
   }
   function activeSetBuffs(info){
@@ -274,7 +274,7 @@
       const level = n >= 4 ? 4 : 2;
       const base = level === 4 ? (S.v4 || S.v2) : S.v2;
       const qb = qs[z].reduce(function(a,b){ return a + b; }, 0) / qs[z].length;
-      out.push({k: S.k, level: level, v: scaleSet(base, qb), name: S.name, i: S.i});
+      out.push({k: S.k, level: level, v: scaleSet(base, qb, Number(z)), name: S.name, i: S.i});
     });
     return out;
   }
@@ -340,7 +340,7 @@
     let note = '';
     const kv = function(c, i){ return (c.k && c.k[i]) || 0; };
     const rs = function(c){ return 1 - kv(c, 10) / 100; };           // Kháng hiệu ứng
-    const lo = function(c){ return (c.hp < c.mx * .5 && kv(c, 16)) ? 1 + kv(c, 16) / 100 : 1; }; // Bất khuất
+    const lo = function(c){ return (c.hp < c.mx * .25 && kv(c, 16)) ? 1 + kv(c, 16) / 100 : 1; }; // Bất khuất
     const elem = function(c){ try{ return BL[c.bl].h; }catch(_){ return ''; } };
 
     // hệ khắc chế (ngũ hành) như thám hiểm

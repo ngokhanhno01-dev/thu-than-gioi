@@ -7,7 +7,7 @@
 (()=>{
 'use strict';
 const $n=id=>document.getElementById(id);
-const KEYS=[['hp','Sinh Lực'],['atk','Công'],['def','Thủ'],['spd','Tốc'],['mag','Linh']];
+const KEYS=[['hp','Sinh Lực'],['atk','Công'],['def','Thủ'],['spd','Tốc'],['mag','Pháp Công']];
 
 /* ---- CSS ---- */
 {const s=document.createElement('style');

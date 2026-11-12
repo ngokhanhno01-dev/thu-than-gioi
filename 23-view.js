@@ -71,7 +71,7 @@ function show(v){
 function statRows(st){
   st=st&&typeof st==='object'?st:{};
   const g=k=>num(st[k],0,1e9,0);
-  return[['Sinh Lực',Math.round(g('hp'))],['Công',Math.round(g('atk'))],['Thủ',Math.round(g('def'))],['Tốc',Math.round(g('spd'))],['Linh',Math.round(g('mag'))],
+  return[['Sinh Lực',Math.round(g('hp'))],['Công',Math.round(g('atk'))],['Thủ',Math.round(g('def'))],['Tốc',Math.round(g('spd'))],['Pháp Công',Math.round(g('mag'))],
     ['Né tránh',r1(g('eva'))+'%'],['Chí mạng',r1(g('crit'))+'%'],['Choáng',r1(g('stun'))+'%'],['Hồi/lượt',r1(g('regen'))+'%']]}
 
 function itemHtml(it){
@@ -90,10 +90,24 @@ function itemHtml(it){
 
 /* buff bộ: đếm số món cùng bộ (>=2 món thì có buff) */
 function setHtml(eq){
-  const c={};
-  eq.forEach(it=>{if(it&&typeof it==='object'){const z=Math.floor(num(it.z,0,99,-1));if(VAN_KIEP_ZONES[z])c[z]=(c[z]||0)+1}});
-  return Object.keys(c).filter(z=>c[z]>=2&&EQ_SETS[z]).map(z=>
-    '<div class="set">'+EQ_SETS[z].i+' Bộ '+esc(EQ_SETS[z].name)+' '+c[z]+'/4 — buff bộ '+(c[z]>=4?'đủ 4 món':'2 món')+'</div>').join('')}
+  const c={},qs={};
+  eq.forEach(it=>{if(it&&typeof it==='object'){const z=Math.floor(num(it.z,0,99,-1));
+    if(VAN_KIEP_ZONES[z]){c[z]=(c[z]||0)+1;const q=Math.floor(num(it.q,0,4,0));(qs[z]=qs[z]||[]).push((typeof EQ_QBONUS!=='undefined'&&EQ_QBONUS[q])||0)}}});
+  return Object.keys(c).filter(z=>c[z]>=2&&EQ_SETS[z]).map(z=>{
+    const S=EQ_SETS[z],n=c[z],qb=qs[z].reduce((a,b)=>a+b,0)/qs[z].length;
+    let d='';try{d=S.t(eqScale(n>=4?S.v4:S.v2,qb,+z))}catch(_){}   /* cùng công thức với trận đấu: có nhân phẩm + vùng */
+    return'<div class="set">'+S.i+' Bộ '+esc(S.name)+' '+n+'/4 — buff bộ '+(n>=4?'đủ 4 món':'2 món')+(qb>0?' · phẩm +'+Math.round(qb*100)+'%':'')+'</div>'+
+      (d?'<div style="margin:0 0 5px;font-size:13px!important;line-height:1.3;color:#b7bda9">'+d+'</div>':'')}).join('')}
+
+/* Huyết mạch: thưởng chỉ số hiện tại theo độ đậm + hệ khắc / bị khắc (dùng lại relText của 05-hatch.js) */
+function bloodHtml(bl,pi,up){
+  const B=BL[bl],p=pur(pi+up*.03);
+  const NM={atk:'Công',def:'Thủ',hp:'Sinh Lực',spd:'Tốc',mag:'Pháp Công',eva:'Né tránh',stun:'Choáng',regen:'Hồi/lượt'};
+  const cur=Object.keys(B.b).map(k=>(NM[k]||k)+' <b style="color:#72e4b0">+'+Math.round(B.b[k]*p*10)/10+'%</b>').join(', ');
+  let rel='';try{rel=typeof relText==='function'?relText(bl):''}catch(_){}
+  return'<div class="s">🧬 Huyết mạch &amp; hệ</div>'+
+    '<div style="font-size:14px!important;line-height:1.35">Hệ <b>'+esc(B.h)+'</b> · thưởng hiện tại (độ đậm '+Math.round(p*100)+'%): '+cur+'<br><small style="color:#b7bda9">Tối đa '+esc(B.tip)+' khi độ đậm 100%</small></div>'+
+    (rel?'<div style="margin-top:3px;font-size:14px!important;line-height:1.35">'+rel+'</div>':'')}
 
 function ago(t){
   try{const ms=Date.now()-t.toDate().getTime();if(!(ms>=0))return'';
@@ -146,7 +160,7 @@ function render(c,uid,fallbackNick,pt){
    '<div>Phẩm: <b style="color:rgb('+QC[q]+')">'+QN[q]+'</b></div>'+
    '<div>Huyết mạch: <b style="color:rgb('+B.au+')">'+esc(B.n)+'</b> <small>(hệ '+esc(B.h)+')</small></div>'+
    '<div>Độ đậm: <b style="color:var(--gold)">'+esc(PL[pi][1])+(up?' +'+up:'')+'</b> <small>('+pe+'%)</small></div></div></div>'+
-   '<div>Loài: <b>'+esc(spName)+'</b></div>'+(spTxt?'<div class="set" style="color:#b7bda9">'+spTxt+'</div>':'')+
+   '<div>Loài: <b>'+esc(spName)+'</b></div>'+(spTxt?'<div class="set" style="color:#b7bda9">'+spTxt+'</div>':'')+bloodHtml(bl,pi,up)+
    '<div class="s">📊 Chỉ số tổng (huyết mạch + trang bị + kỹ năng loài)</div><div class="sg">'+grid+'</div>'+
    '<div class="s">🛡️ Trang bị đang mang</div>'+setHtml(eq)+[0,1,2,3].map(i=>itemHtml(eq[i])).join('')+
    (upd?'<div class="ft">Thẻ cập nhật '+upd+'</div>':'')+reportBtnHtml(uid);
