@@ -8,7 +8,7 @@
    Nạp SAU season-config.js. */
 (()=>{
 'use strict';
-const TTL=10*60*1000;
+const TTL=2*60*1000;   /* 2 phút (trước là 10 phút) để danh hiệu mới tới người khác nhanh hơn */
 const cache={};   /* uid -> {t, list:[{s,tier}] (mùa mới nhất trước), p:Promise|null} */
 const CFG=()=>window.TTGCFG||null;
 /* ---- Bảng danh hiệu thủ công (id phải trùng với danh sách trong Rules RTDB adminTitles) ----
@@ -312,5 +312,13 @@ function use(key){
   ttMsg='';const u=myUid();
   if(u){delete cache[u];ttRender();get(u).then(()=>ttRender())}else ttRender()})}
 
-window.TTGTITLE={imgOf,get,text,icon,tag,chatBadge,frame:frameSide,decorate,prefetch,fill,MANUAL,use,refresh(uid){delete cache[uid||ownUid];ownT=0}};
+/* Vừa NHẬN danh hiệu từ hộp thư: tự dùng luôn + vẽ lại NGAY (không chờ vòng 15 giây / TTL) */
+function granted(id){
+  const u=myUid();if(!u)return;
+  delete cache[u];ownT=0;
+  const r=rdb();
+  const done=()=>{delete cache[u];ownT=0;get(u).then(()=>{try{mountOwn()}catch(_){}try{ttRender()}catch(_){}})};
+  if(!r){done();return}
+  r.ref('titleSel/'+u).set({k:'m:'+id,t:firebase.database.ServerValue.TIMESTAMP}).catch(()=>{}).then(done)}
+window.TTGTITLE={imgOf,get,text,icon,tag,chatBadge,frame:frameSide,decorate,prefetch,fill,MANUAL,use,granted,refresh(uid){delete cache[uid||ownUid];ownT=0}};
 })();

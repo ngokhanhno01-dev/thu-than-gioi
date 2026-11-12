@@ -244,10 +244,25 @@ async function adTitleSet(){
   const uid = await adFindUidByNick(nick);
   if(!uid) return adMsg('Không tìm thấy biệt danh "<b>'+adEsc(nick)+'</b>".');
   try{
-    await rdb.ref('adminTitles/'+uid).set({id: id, by: firebase.auth().currentUser.uid, t: firebase.database.ServerValue.TIMESTAMP});
-    try{ TTGTITLE.refresh(uid); }catch(_){}
-    adMsg('✅ Đã gắn <b>'+adTitleName(id)+'</b> cho <b>'+adEsc(nick)+'</b>. Người đó sẽ thấy sau tối đa ~10 phút hoặc khi đăng nhập lại.');
-    log('🛠️ Admin gắn danh hiệu <b>'+adEsc(nick)+'</b>.');
+    if(id === 'admin'){                      /* danh hiệu Quản Trị Viên: gắn thẳng như cũ (chỉ hợp lệ cho tài khoản admin) */
+      await rdb.ref('adminTitles/'+uid).set({id: id, by: firebase.auth().currentUser.uid, t: firebase.database.ServerValue.TIMESTAMP});
+      try{ TTGTITLE.refresh(uid); }catch(_){}
+      adMsg('✅ Đã gắn <b>'+adTitleName(id)+'</b> cho <b>'+adEsc(nick)+'</b>.');
+      return;
+    }
+    /* Các danh hiệu khác: GỬI VÀO HỘP THƯ. Người chơi bấm "Nhận thưởng" thì mới được gắn (xem 24-mail.js + Rules RTDB V3) */
+    const m = ((window.TTGTITLE && TTGTITLE.MANUAL) || []).find(x => x.id === id);
+    const mid = 'ttl_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    await rdb.ref('mail/' + uid + '/' + mid).set({
+      type: 'admin_gift',
+      title: '🏅 Bạn nhận được danh hiệu mới',
+      body: 'Ban Quản Trị trao tặng bạn danh hiệu «' + (m ? m.name : id) + '». Bấm Nhận để sử dụng. Danh hiệu mới sẽ thay thế danh hiệu thủ công cũ (nếu có).',
+      rewards: {titleId: id, title: m ? m.name : id},
+      claimed: false,
+      t: Date.now()
+    });
+    adMsg('✅ Đã gửi thư danh hiệu <b>'+adTitleName(id)+'</b> cho <b>'+adEsc(nick)+'</b>. Người đó nhận ở Hộp thư.');
+    log('🛠️ Admin gửi thư danh hiệu cho <b>'+adEsc(nick)+'</b>.');
   }catch(e){
     console.warn('[admin] gắn danh hiệu', e);
     adMsg('❌ Gắn thất bại: '+adEsc(e.message||e)+(id==='admin'?' (danh hiệu Quản Trị Viên chỉ gắn được cho tài khoản admin)':''));

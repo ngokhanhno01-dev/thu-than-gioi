@@ -160,7 +160,11 @@ function renderList(){
       if(r.blood) parts.push('🩸 '+(r.blood.huyet||0)+' Giọt Huyết Mạch, '+(r.blood.thuoc||0)+' Thảo Dược, '+(r.blood.tinh||0)+' Tinh Hoa hệ thú');
       if(r.boxes) parts.push('📦 '+r.boxes+' hộp nguyên liệu chế trang bị (chọn vùng khi nhận)');
       else if(r.chooseZone) parts.push('📦 Rương nguyên liệu '+(r.zoneQty||'')+' (chọn vùng)');
-      if(r.title) parts.push('🏅 '+r.title);
+      if(r.titleId){
+        let tn = r.title || r.titleId;
+        try{ const mm = (window.TTGTITLE && TTGTITLE.MANUAL || []).find(x => x.id === r.titleId); if(mm) tn = mm.icon+' '+mm.name; }catch(_){}
+        parts.push('🏅 Danh hiệu: '+tn);
+      } else if(r.title) parts.push('🏅 '+r.title);
       if(parts.length) rewardTxt = '<div class="mf">Phần thưởng: '+parts.map(esc).join(' · ')+'</div>';
     }
     h += '<div class="mail-item'+(un?' unread':'')+(m.claimed?' claimed':'')+'" data-id="'+esc(m.id)+'">'+
@@ -345,7 +349,19 @@ function doClaim(mail, zoneId){
   }, 15000);
 
   // bước 2: ghi claimed=true (Rules: chỉ false→true, 1 lần; lần 2 bị từ chối)
-  rdb.ref('mail/'+me+'/'+mail.id+'/claimed').set(true).then(() => {
+  // Thư có DANH HIỆU: ghi claimed=true và adminTitles/{uid} trong CÙNG 1 lệnh (nguyên tử) — Rules kiểm tra thư có đúng titleId đó
+  const tid = (r.titleId && r.titleId !== 'admin' && (window.TTGTITLE && TTGTITLE.MANUAL || []).some(x => x.id === r.titleId)) ? r.titleId : null;
+  let wr;
+  if(tid){
+    const up = {};
+    up['mail/'+me+'/'+mail.id+'/claimed'] = true;
+    up['adminTitles/'+me] = {id: tid, by: me, t: firebase.database.ServerValue.TIMESTAMP, mid: mail.id};
+    wr = rdb.ref().update(up);
+  } else {
+    wr = rdb.ref('mail/'+me+'/'+mail.id+'/claimed').set(true);
+  }
+  wr.then(() => {
+    if(tid){ try{ TTGTITLE.granted(tid); }catch(_){} }       // hiện danh hiệu ngay, không chờ
     finished = true; clearTimeout(timer);
     try{ applyOnce(mail, zoneId); }                                 // bước 3
     catch(e){ console.warn('[mail] apply', e); }
