@@ -123,16 +123,6 @@ function fill(uid,el){
   '#cv-body .ti.hb{position:relative;margin:0;text-align:left}'+
   '#cv-body .ti.hb .tt2{position:absolute;left:132px;top:3px;right:0;text-align:left;white-space:nowrap}'+
   '#cv-body .ti.hb + .top{align-items:flex-start}'+
-  '#mob .ttg-fr{position:relative;container-type:inline-size}'+
-  '#mob .ttg-frm{position:relative;width:100%;pointer-events:none;line-height:0}'+
-  '#mob .ttg-frm img{display:block;width:100%;height:auto;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}'+
-  '#mob .ttg-frm .pl{position:absolute;z-index:1;background:var(--pc);border-radius:2px;box-shadow:inset 0 0 0 1px var(--pd),inset 0 0 5px 1px rgba(0,0,0,.75),0 0 0 1px #000}'+
-  '#mob .ttg-frm i{z-index:2}'+
-  '#mob .ttg-fr .ttg-fn{position:absolute!important;z-index:4;left:calc(var(--px) + 3px);top:calc(var(--py) + 1px);width:calc(var(--pw) - 30px);height:9px;margin:0!important;font-size:11px!important;line-height:9px!important;letter-spacing:-.3px;overflow:hidden!important;text-overflow:ellipsis;white-space:nowrap;text-shadow:-1px 0 0 #000,1px 0 0 #000,0 -1px 0 #000,0 1px 0 #000,-1px -1px 0 #000,1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000!important}'+
-  '#mob .ttg-fr .ttg-fb{position:absolute!important;z-index:4;left:calc(var(--px) + 3px);width:calc(var(--pw) - 6px);height:8px;top:calc(var(--pb) - 10px);box-sizing:border-box;border:2px solid #000!important;border-radius:0!important;background:#050a0d;box-shadow:0 0 0 1px rgba(255,255,255,.28)}'+
-  '#mob .ttg-fr .ttg-fc{z-index:4;top:calc(var(--py) + 0px)!important;right:calc(var(--pr) + 3px)!important}'+
-  '#mob .ttg-fr .ttg-fc span{font-size:9px!important;line-height:9px!important;padding:0 2px!important;margin:0!important}'+
-  '#mob .ttg-fr .ttg-ft{padding-right:0!important;margin-top:2px}'+
   '@keyframes ttgSp{0%,100%{opacity:0;transform:scale(.3) translateY(2px)}40%{opacity:1;transform:scale(1.15) translateY(-1px)}70%{opacity:.7;transform:scale(.6) translateY(-4px)}}'+
   '.ttg-tag.adm{text-shadow:0 0 5px currentColor}'+
   '#ttg-bt-p,#ttg-bt-m{position:absolute;bottom:4px;z-index:6;pointer-events:none;font-size:11px;font-weight:800;white-space:nowrap;max-width:46%;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000,0 0 5px #000}'+
@@ -195,36 +185,25 @@ const PL={
  'img-title-vip5.webp':   {h:92, r:[100,24,176,46],bg:'#6d1006',bd:'#e0a040'},
  'img-title-vip6.webp':   {h:120,r:[110,42,172,44],bg:'#0e2050',bd:'#e0b050'},
  'img-title-vip7.webp':   {h:178,r:[108,62,168,44],bg:'#1c1450',bd:'#e0b8f0'}};
-const SIDE={'mob-pn':['mob-ph','mob-pt','mob-pe'],'mob-mn':['mob-mh','mob-mt','mob-me']};
-function frameClear(S){
-  S.classList.remove('ttg-fr');
-  ['--px','--py','--pw','--pb','--pr','--pc','--pd'].forEach(v=>S.style.removeProperty(v));
-  const f=S.querySelector(':scope > .ttg-frm');if(f)f.remove()}
-/* Màn chiến đấu: ảnh danh hiệu làm khung cho 'biệt danh + thanh máu + hệ' (bảng chữ gốc bị tấm phủ che).
-   Số máu + dòng buff (x2 EXP...) nằm ngay dưới khung. Danh hiệu chưa có ảnh -> HUD cũ. */
+/* Bảng thông tin dùng chung 2 bên (kích thước cố định PWc x PHc, đơn vị cqw của #mob). Người có danh hiệu: ảnh khung vẽ quanh bảng,
+   khung được co giãn sao cho vùng chữ gốc trùng đúng bảng -> bảng 2 bên luôn bằng nhau, chỉ khác phần khung. */
+const PWc=21,PHc=7.2;
 function frameSide(nameId,uid){
   const n=document.getElementById(nameId);if(!n)return;
-  const S=n.parentNode,ids=SIDE[nameId];if(!S||!ids)return;
-  if(!uid){frameClear(S);return}
+  const S=n.closest('.bh-stage');if(!S)return;
+  const f=S.querySelector('.bh-frm');
+  S.dataset.u=uid||'';S.style.removeProperty('--pc');S.style.removeProperty('--pd');if(f)f.innerHTML='';
+  if(!n.children.length)n.textContent=n.textContent.replace(/\s*·\s*(?:Lv\.|Cấp\s*)(\d+)/,' Lv$1');   /* "· Lv.18" -> " Lv18" cho vừa bảng */
+  if(!uid||!f)return;
   get(uid).then(l=>{
-    if(!S.isConnected)return;
-    const x=l[0],src=x&&imgOf(x),M=src&&PL[src];
-    if(!M){frameClear(S);return}
-    const bar=document.getElementById(ids[0]),tx=document.getElementById(ids[1]),ch=document.getElementById(ids[2]);
-    if(!n.children.length)n.textContent=n.textContent.replace(/\s*·\s*(?:Lv\.|Cấp\s*)(\d+)/,' Lv$1');   /* rút gọn "· Lv.18" -> " Lv18" cho vừa bảng tên */
-    n.classList.add('ttg-fn');if(bar&&bar.parentNode)bar.parentNode.classList.add('ttg-fb');
-    if(tx)tx.classList.add('ttg-ft');if(ch)ch.classList.add('ttg-fc');
-    const k=.3125,[rx,ry,rw,rh]=M.r,st=S.style;
-    st.setProperty('--px',(rx*k)+'cqw');st.setProperty('--py',(ry*k)+'cqw');st.setProperty('--pw',(rw*k)+'cqw');
-    st.setProperty('--pb',((ry+rh)*k)+'cqw');st.setProperty('--pr',((320-rx-rw)*k)+'cqw');
-    st.setProperty('--pc',M.bg);st.setProperty('--pd',M.bd);
-    S.classList.add('ttg-fr');
-    let f=S.querySelector(':scope > .ttg-frm');
-    if(!f){f=document.createElement('div');f.className='ttg-frm';S.insertBefore(f,S.firstChild)}
-    f.style.aspectRatio='320/'+M.h;
-    f.innerHTML='<img src="'+src+'" alt="" onerror="var S=this.closest(\'.ttg-fr\');if(S)S.classList.remove(\'ttg-fr\');this.parentNode.remove()">'+
+    if(!S.isConnected||S.dataset.u!==uid)return;
+    const x=l[0],src=x&&imgOf(x),M=src&&PL[src];if(!M)return;
+    const [rx,ry,rw,rh]=M.r,s=PWc/rw;
+    S.style.setProperty('--pc',M.bg);S.style.setProperty('--pd',M.bd);
+    f.style.cssText='left:'+(-rx*s)+'cqw;top:'+(PHc/2-(ry+rh/2)*s)+'cqw;width:'+(320*s)+'cqw;aspect-ratio:320/'+M.h;
+    f.className='bh-frm ttg-frm';
+    f.innerHTML='<img src="'+src+'" alt="" onerror="this.parentNode.innerHTML=\'\'">'+
       '<div class="pl" style="left:'+(rx/3.2)+'%;top:'+(ry/M.h*100)+'%;width:'+(rw/3.2)+'%;height:'+(rh/M.h*100)+'%"></div><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>'})}
-
 function btSet(id,uid){
   const el=btEl(id);if(!el)return;
   el.innerHTML='';if(!uid)return;
@@ -233,7 +212,8 @@ function battleTitle(e){
   const mu=e&&e.uid?e.uid:'';
   btSet('ttg-bt-p',myUid());                    /* bên mình */
   btSet('ttg-bt-m',mu);                         /* bên đối thủ (chỉ đấu trường truyền uid) */
-  frameSide('mob-pn',myUid());frameSide('mob-mn',mu)}
+  frameSide('mob-pn',myUid());frameSide('mob-mn',mu);
+  const o=document.getElementById('mob');if(o)o.style.setProperty('--bd',(-(performance.now()/1000)%2.0944).toFixed(3)+'s')}   /* nhịp thở của bảng khớp nhịp thở sprite (bob = sin(3t)) */
 if(typeof window.battleHudExtra==='function'){
   const _h=window.battleHudExtra;
   window.battleHudExtra=function(e){const r=_h.apply(this,arguments);try{battleTitle(e)}catch(_){}return r}}

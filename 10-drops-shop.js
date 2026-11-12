@@ -155,15 +155,7 @@ function _buffRow(){
   a.parentNode.appendChild(r)}
  return r}
 /* ô hệ: nằm bên phải, ngang dòng số máu */
-function _heBadge(anchorId,id){
- const a=document.getElementById(anchorId);if(!a)return null;
- let b=document.getElementById(id);
- if(!b){
-  b=document.createElement('span');b.id=id;
-  b.style.cssText="position:absolute;right:0;font-family:'VT323',monospace;line-height:1;white-space:nowrap";
-  a.parentNode.style.position='relative';a.parentNode.appendChild(b)}
- b.style.top=(a.offsetTop+2)+'px';
- return b}
+function _heBadge(anchorId,id){return document.getElementById(id)}
 function battleHudExtra(e){
  const pr=_buffRow();
  if(pr){pr.innerHTML=Object.keys(buffs).filter(k=>buffs[k]>0).map(k=>_chip(BUFF_HUD[k][0]+'×'+BUFF_MUL[k],BUFF_HUD[k][1])).join('')}

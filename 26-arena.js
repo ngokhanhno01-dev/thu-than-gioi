@@ -802,8 +802,8 @@
         }
         $('mob-ph').style.width = Math.round(hp / R.maxP * 100) + '%';
         $('mob-mh').style.width = Math.round(mh / R.maxM * 100) + '%';
-        $('mob-pt').innerHTML = hp + '/' + R.maxP + (R.shP > 0 ? ' - <span style="color:#8fd0ff;font-size:9px">Giáp ' + shp + '/' + R.shP + '</span>' : '');
-        $('mob-mt').innerHTML = mh + '/' + R.maxM + (R.shM > 0 ? ' - <span style="color:#8fd0ff;font-size:9px">Giáp ' + shm + '/' + R.shM + '</span>' : '');
+        $('mob-pt').innerHTML = hp + '/' + R.maxP + '';
+        $('mob-mt').innerHTML = mh + '/' + R.maxM + '';
         const a = $('mob-ps'), b = $('mob-ms');
         if(a) a.style.width = (R.shP > 0 ? Math.round(shp / R.shP * 100) : 0) + '%';
         if(b) b.style.width = (R.shM > 0 ? Math.round(shm / R.shM * 100) : 0) + '%';

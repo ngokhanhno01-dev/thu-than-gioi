@@ -2235,7 +2235,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
    g.font='bold '+(fl.big?26:20)+'px monospace';g.lineWidth=5;g.strokeStyle='#160e1c';const FR=fx&&fx.d?REG[fx.s]:null,FC=FR?(fx.k==='crit'?FR[1]:FR[0]):fl.c;g.shadowColor=FR?FR[0]:fl.c;g.shadowBlur=fl.big?12:0;g.strokeText(fl.t,fl.x,fl.y);g.fillStyle=FC;g.fillText(fl.t,fl.x,fl.y);g.shadowBlur=0;
    g.font='bold 12px monospace';g.lineWidth=3;fl.tags.forEach((tg,i)=>{const yy=fl.y-24-i*14;g.strokeText(tg[0],fl.x,yy);g.fillStyle=tg[1];g.fillText(tg[0],fl.x,yy)});g.restore()}
   $('mob-ph').style.width=Math.round(hp/R.maxP*100)+'%';$('mob-mh').style.width=Math.round(mh/R.maxM*100)+'%';
-  $('mob-pt').innerHTML=hp+'/'+R.maxP+(R.shP>0?' - <span style="color:#8fd0ff;font-size:9px">Giáp '+shp+'/'+R.shP+'</span>':'');$('mob-mt').innerHTML=mh+'/'+R.maxM+(R.shM>0?' - <span style="color:#8fd0ff;font-size:9px">Giáp '+shm+'/'+R.shM+'</span>':'');
+  $('mob-pt').innerHTML=hp+'/'+R.maxP+'';$('mob-mt').innerHTML=mh+'/'+R.maxM+'';
   {const a=$('mob-ps'),b=$('mob-ms');if(a)a.style.width=(R.shP>0?Math.round(shp/R.shP*100):0)+'%';if(b)b.style.width=(R.shM>0?Math.round(shm/R.shM*100):0)+'%'}$('mob-r').textContent=msg;
   if(T>TE+2.4/SP)fin();else requestAnimationFrame(L)})()
 })}
