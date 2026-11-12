@@ -43,6 +43,14 @@ function parseManual(val){
   if(!val||typeof val!=='object')return null;
   const m=MBY[val.id];return m?{manual:true,id:m.id,name:m.name,icon:m.icon,col:m.col,glow:!!m.glow,img:m.img}:null}
 
+/* Khóa của 1 danh hiệu: thủ công 'm:id', mùa 's:số mùa' (khớp giá trị titleSel/{uid}/k trong Rules) */
+const keyOf=x=>x.manual?'m:'+x.id:'s:'+x.s;
+/* Áp lựa chọn: danh hiệu được chọn (nếu người này THẬT SỰ đang sở hữu) lên đầu; 'none' = không hiện gì; chưa chọn/lựa chọn không còn hợp lệ = thứ tự mặc định */
+function applySel(all,sel){
+  if(sel==='none')return[];
+  const i=sel?all.findIndex(x=>keyOf(x)===sel):-1;
+  return i<0?all.slice():[all[i]].concat(all.filter((_,j)=>j!==i))}
+
 function get(uid){
   if(!uid)return Promise.resolve([]);
   const c=cache[uid];
@@ -52,12 +60,15 @@ function get(uid){
   const ERR={err:true};
   const p=Promise.all([
      r.ref('titles/'+uid).once('value').then(sn=>sn.val()).catch(()=>ERR),
-     r.ref('adminTitles/'+uid).once('value').then(sn=>sn.val()).catch(()=>ERR)])
-   .then(([sv,mv])=>{
-    const list=parse(sv===ERR?null:sv),m=mv===ERR?null:parseManual(mv);
-    if(m)list.unshift(m);                                  /* danh hiệu thủ công luôn đứng đầu */
-    const bad=(sv===ERR||mv===ERR);                        /* lỗi đọc: thử lại sau 30 giây */
-    cache[uid]={t:bad?Date.now()-TTL+30000:Date.now(),list,p:null};return list})
+     r.ref('adminTitles/'+uid).once('value').then(sn=>sn.val()).catch(()=>ERR),
+     r.ref('titleSel/'+uid).once('value').then(sn=>sn.val()).catch(()=>ERR)])
+   .then(([sv,mv,tv])=>{
+    const all=parse(sv===ERR?null:sv),m=mv===ERR?null:parseManual(mv);
+    if(m)all.unshift(m);                                   /* danh hiệu thủ công luôn đứng đầu (thứ tự mặc định khi chưa chọn) */
+    const sel=(tv!==ERR&&tv&&typeof tv.k==='string')?tv.k:'';   /* lựa chọn của người chơi: 'm:id' | 's:mùa' | 'none' | '' (chưa chọn) */
+    const list=applySel(all,sel);
+    const bad=(sv===ERR||mv===ERR||tv===ERR);              /* lỗi đọc: thử lại sau 30 giây */
+    cache[uid]={t:bad?Date.now()-TTL+30000:Date.now(),list,all,sel,p:null};return list})
   cache[uid]=Object.assign(cache[uid]||{t:0,list:null},{p});
   return p}
 
@@ -89,7 +100,7 @@ function fill(uid,el){
     const first=l[0],more=l.length-1;
     const bn=imgOf(first)?chatBadge(uid,'ttg-hb',"this.parentNode.outerHTML=''"):'';   /* có ảnh -> ảnh treo vắt viền trên khung ảnh thú + hạt lấp lánh; chưa có ảnh -> giữ chữ cũ */
     el.classList.toggle('hb',!!bn);
-    const more_html=(more>0?'<div class="tt2">+ '+more+(first.manual?' danh hiệu mùa':' danh hiệu các mùa trước')+'</div>':'');
+    const more_html=(more>0?'<div class="tt2">+ '+more+' danh hiệu khác'+'</div>':'');
     el.innerHTML=(bn?bn:'<div class="tt1" style="'+styleOf(first)+'">'+iconOf(first)+' <b>'+esc(text(first))+'</b></div>')+more_html})}
 
 /* ---------- CSS ---------- */
@@ -247,5 +258,59 @@ setInterval(()=>{
     arObs=new MutationObserver(()=>{try{decorate(b)}catch(_){}});
     arObs.observe(b,{childList:true,subtree:true});try{decorate(b)}catch(_){}}},1000);
 
-window.TTGTITLE={imgOf,get,text,icon,tag,chatBadge,frame:frameSide,decorate,prefetch,fill,MANUAL,refresh(uid){delete cache[uid||ownUid];ownT=0}};
+/* =====================================================================
+   🏅 NÚT DANH HIỆU (mục "Danh hiệu" ở hàng nút trên cùng)
+   Liệt kê danh hiệu người chơi ĐANG CÓ (danh hiệu Admin trao + danh hiệu Top các mùa) và cho chọn DUY NHẤT 1 cái để dùng.
+   Lựa chọn lưu ở RTDB titleSel/{uid} = {k,t} (Rules kiểm tra người này thật sự sở hữu danh hiệu đó). Mọi nơi hiện danh hiệu
+   (chat, thẻ thú, đấu trường, đầu thú) đều đọc qua get() nên tự đổi theo. Chưa chọn lần nào = tự hiện danh hiệu mạnh nhất như cũ.
+   ===================================================================== */
+{const s=document.createElement('style');
+ s.textContent='#tt-wrap .tt-cur{text-align:center;margin-bottom:4px}'+
+  '#tt-wrap .tt-row{display:flex;align-items:center;gap:6px;padding:4px 2px;border-bottom:1px solid rgba(88,62,69,.55)}'+
+  '#tt-wrap .tt-row.on{background:rgba(114,228,176,.10)}'+
+  '#tt-wrap .tt-row img{display:block;height:30px;width:auto;max-width:92px;flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.65))}'+
+  '#tt-wrap .tt-ic{flex:none;width:30px;text-align:center;font-size:20px}'+
+  '#tt-wrap .tt-nm{flex:1;min-width:0;font-size:13px;font-weight:800;line-height:1.2}'+
+  '#tt-wrap .tt-row button{flex:none;width:auto;margin:0;padding:3px 8px;font-size:12px!important}'+
+  '#tt-wrap .tt-ok{flex:none;font-size:12px;color:var(--jade);font-weight:800}'+
+  '#tt-wrap .tt-msg{min-height:16px;text-align:center;font-size:12px;margin-top:4px}';
+ document.head.appendChild(s)}
+let ttBusy=false,ttMsg='';
+function ttRender(){
+  const el=document.getElementById('tt-wrap');if(!el)return;
+  const u=myUid();
+  if(!u){el.innerHTML='<div class="infobox" style="text-align:center">Hãy đăng nhập tài khoản để xem và dùng danh hiệu.</div>';return}
+  const c=cache[u];
+  if(!c||!c.all){el.innerHTML='<div class="infobox" style="text-align:center">Đang tải danh hiệu...</div>';return}
+  const cur=c.sel==='none'?'none':(c.list[0]?keyOf(c.list[0]):'');
+  const dis=ttBusy?' disabled':'';
+  const nameOfCur=cur==='none'||!c.list[0]?'<b>không dùng danh hiệu</b>':'<b style="'+styleOf(c.list[0])+'">'+iconOf(c.list[0])+' '+esc(text(c.list[0]))+'</b>';
+  let h='<div class="infobox tt-cur">Đang dùng: '+nameOfCur+'<br><small style="color:var(--mute)">Chỉ dùng được 1 danh hiệu cùng lúc. Người khác thấy nó ở chat, thẻ thú và đấu trường.</small></div>';
+  if(!c.all.length)h+='<div class="infobox" style="text-align:center"><small>Bạn chưa có danh hiệu nào. Danh hiệu nhận được khi lọt Top đấu trường cuối mùa hoặc do Admin trao.</small></div>';
+  else{
+    h+=c.all.map(x=>{
+      const k=keyOf(x),on=k===cur,src=imgOf(x);
+      const badge=src?'<img src="'+src+'" alt="" onerror="this.outerHTML=\'\'">':'<span class="tt-ic">'+iconOf(x)+'</span>';
+      return'<div class="tt-row'+(on?' on':'')+'">'+badge+'<span class="tt-nm" style="'+styleOf(x)+'">'+esc(text(x))+'</span>'+
+        (on?'<span class="tt-ok">✔ Đang dùng</span>':'<button type="button" class="mini jade"'+dis+' onclick="TTGTITLE.use(\''+k+'\')">Dùng</button>')+'</div>'}).join('');
+    h+='<div class="tt-row'+(cur==='none'?' on':'')+'"><span class="tt-ic">🚫</span><span class="tt-nm">Không dùng danh hiệu</span>'+
+      (cur==='none'?'<span class="tt-ok">✔ Đang chọn</span>':'<button type="button" class="mini"'+dis+' onclick="TTGTITLE.use(\'none\')">Chọn</button>')+'</div>'}
+  h+='<div class="tt-msg">'+esc(ttMsg)+'</div>';
+  el.innerHTML=h}
+function use(key){
+  const u=myUid();if(!u||ttBusy)return;
+  const r=rdb();if(!r){ttMsg='Chưa kết nối máy chủ.';ttRender();return}
+  ttBusy=true;ttMsg='Đang đổi...';ttRender();
+  r.ref('titleSel/'+u).set({k:String(key),t:firebase.database.ServerValue.TIMESTAMP})
+   .then(()=>{delete cache[u];ownT=0;return get(u)})
+   .then(()=>{ttMsg='Đã đổi danh hiệu.';try{mountOwn()}catch(_){}})
+   .catch(()=>{ttMsg='Chưa đổi được. Đợi vài giây rồi thử lại (mỗi lần đổi cách nhau 3 giây), hoặc danh hiệu này không còn thuộc về bạn.'})
+   .then(()=>{ttBusy=false;ttRender()})}
+{const box=document.getElementById('tt-box');
+ if(box)box.addEventListener('toggle',()=>{
+  if(!box.open)return;
+  ttMsg='';const u=myUid();
+  if(u){delete cache[u];ttRender();get(u).then(()=>ttRender())}else ttRender()})}
+
+window.TTGTITLE={imgOf,get,text,icon,tag,chatBadge,frame:frameSide,decorate,prefetch,fill,MANUAL,use,refresh(uid){delete cache[uid||ownUid];ownT=0}};
 })();
