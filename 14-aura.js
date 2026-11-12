@@ -224,69 +224,23 @@ function layerParticles(g,side,cx,by,W2,H,T,sp,unit,bright,al){ /* side: -1 = ph
  stat.particles+=cnt;
 }
 
-/* ---------- BẬC 10 ĐỘC QUYỀN: dấu + bốn cánh lấp lánh (màu theo 17 hệ) ----------
-   • Nở NHANH rồi mờ CHẬM (theo thời gian, không phụ thuộc FPS) + rung sáng nhẹ bằng sin
-   • 4 dấu "chủ lực" to hơn, có lõi sáng + chấm chéo; còn lại là dấu nhỏ làm nền, KHÔNG có lõi trắng (trong trận: 2 + 9, cỡ nhỏ hơn)
-   • Vị trí ưu tiên viền thân và vùng đầu/sừng; mỗi ~4,2 giây có vệt sáng quét chéo (chỉ màn chính)
-   • MÀU: thân cánh = TW_COL trộn 60% với màu chính của hệ (ELEMENT_FX.c) · đầu cánh = pha trắng chỉ 28% · lõi chủ lực = màu nhấn ELEMENT_FX.a trộn màu hệ
-     dấu ở NỀN TỐI (viền ngoài) dùng màu sáng, dấu ĐÈ LÊN THÂN (quanh đầu / sát thân) dùng màu đậm hơn + viền tối dày hơn
-   • Mỗi dấu vẽ 3 lớp: viền tối (source-over) → quầng màu hệ cộng sáng (lighter, màu ELEMENT_FX.h) → thân cánh (source-over) */
+/* ---------- BẬC 10 ĐỘC QUYỀN: dấu + bốn cánh lấp lánh, nhảy chỗ và chớp (màu theo 17 hệ) ---------- */
 const TW_COL=['#cfeaff','#6fe0c8','#c9b0ff','#5cff9a','#ffd400','#9a9aff','#ff8a1a','#7a66ff','#ff9d00','#3affb8','#6aff3a','#ff4a2a','#d04aff','#b040ff','#5cc0ff','#ff6ac8','#ffe45a'];
-const twMix=(h1,h2,t)=>{const a=parseInt(h1.slice(1),16),b=parseInt(h2.slice(1),16),f=(x,y)=>Math.round(x+(y-x)*t).toString(16).padStart(2,'0');return'#'+f(a>>16,b>>16)+f(a>>8&255,b>>8&255)+f(a&255,b&255)};
-const TW_BODY=TW_COL.map((h,i)=>twMix(ELEMENT_FX[i].c,h,.6));   /* màu thân cánh: hợp màu hệ nhưng vẫn bão hòa */
-const TW_DEEP=TW_BODY.map(h=>twMix(h,'#000000',.2));            /* màu đậm cho dấu đè lên thân thú */
-const TW_LIT=TW_BODY.map(h=>twMix(h,'#ffffff',.28));            /* đầu cánh: chỉ pha trắng 28% */
-const TW_CORE=TW_COL.map((h,i)=>twMix(ELEMENT_FX[i].a,h,.35));  /* lõi chủ lực: màu nhấn của hệ, không trắng tinh */
-const TW_HALO=ELEMENT_FX.map(e=>e.h);                           /* quầng cộng sáng */
-const TW_OUT='#0a0612';                                         /* viền tối */
-const TW_SWEEP=4.2;                                             /* chu kỳ vệt sáng quét (giây) */
-const TWB=new Float32Array(32*6);                               /* bộ đệm cố định: x,y,L,alpha,big,tone (tone 1 = đè lên thân) */
-/* lớp 3: thân cánh + đầu cánh + lõi (chủ lực mới có lõi và chấm chéo) */
-function twStar(g,px,py,L,a,col,lit,core,big){
- g.fillStyle=col;g.globalAlpha=a*.45;g.fillRect(px-2,py-L,4,L*2);g.fillRect(px-L,py-2,L*2,4);
- g.globalAlpha=a;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);
- if(L>=4){g.fillStyle=lit;g.fillRect(px-L-2,py-1,2,2);g.fillRect(px+L,py-1,2,2);g.fillRect(px-1,py-L-2,2,2);g.fillRect(px-1,py+L,2,2)}
- if(big){
-  const k=Math.max(2,(L>>1)&~1);
-  g.fillStyle=core;g.globalAlpha=a*.85;g.fillRect(px-1,py-(L>>1),2,L);g.fillRect(px-(L>>1),py-1,L,2);
-  g.fillStyle=lit;g.globalAlpha=a*.6;g.fillRect(px-k-1,py-k-1,2,2);g.fillRect(px+k-1,py-k-1,2,2);g.fillRect(px-k-1,py+k-1,2,2);g.fillRect(px+k-1,py+k-1,2,2);
-  g.fillStyle=core;g.globalAlpha=a;g.fillRect(px-2,py-2,4,4);
-  if(a>.6){g.fillStyle='#ffffff';g.fillRect(px-1,py-1,2,2)}}}
+const TW_RATE=10;   /* số lần nhảy chỗ mỗi giây (giống nhịp 'jolt' của hệ Lôi: T*10) */
 function twinkle(g,cx,by,W2,H,T,sp,mode,bright,al){
- const bat=mode==='battle',n=bat?11:22,nb=bat?2:4,sc=bat?.75:1,ci=clamp(sp|0,0,16);let m=0;
+ const n=21,col=TW_COL[clamp(sp|0,0,16)];let cnt=0;g.globalCompositeOperation='source-over';
  for(let i=0;i<n;i++){
-  const big=i<nb,per=big?.7+SEED[(i+3)&31]*.5:.22+SEED[(i+3)&31]*.3,   /* chủ lực sống lâu hơn, dấu nhỏ chớp nhanh */
-        ph=T/per+SEED[i]*7,q=Math.floor(ph),p=ph-q;                     /* hết chu kỳ thì nhảy sang chỗ mới */
-  const env=p<.14?p/.14:Math.pow(1-(p-.14)/.86,1.7);                    /* nở nhanh (14%) rồi mờ chậm */
-  const a=clamp(env*(.8+.2*SIN(T*38+i*2.1))*bright*al,0,1);if(a<.04)continue;   /* rung sáng mượt theo giây, không theo khung hình */
-  const L=Math.max(2,Math.round((big?9+SEED[(i+11)&31]*4:3+SEED[(i+11)&31]*3)*sc*(.35+.65*Math.sqrt(env))));
-  const h1=hash(q,i,1),h2=hash(q,i,2),h3=hash(q,i,3);let x,y,tone=0;
-  if(h3<.3){x=cx+(h1*2-1)*.55*W2;y=by-H*(.82+h2*.28);tone=1}            /* quanh đầu / sừng: đè lên thú → màu đậm */
-  else{const ang=h1*TAU,r=.8+h2*.4;let sy=SIN(ang);if(sy>.5)sy=-sy;x=cx+COS(ang)*W2*.95*r;y=by-H*.5+sy*H*.55*r;tone=r<1?1:0}   /* viền ngoài (r>=1) = nền tối → màu sáng */
-  if(y>by-H*.1)y=by-H*.1;
-  const o=m*6;TWB[o]=Math.round(x/2)*2;TWB[o+1]=Math.round(y/2)*2;TWB[o+2]=L;TWB[o+3]=a;TWB[o+4]=big?1:0;TWB[o+5]=tone;m++}
- if(!bat){   /* vệt sáng quét chéo: 6 dấu nổ nối đuôi nhau dọc một đường chéo (nền sáng → tone 0) */
-  const sw=Math.floor(T/TW_SWEEP),su=T-sw*TW_SWEEP;
-  if(su<1.1){const dir=hash(sw,7,5)<.5?1:-1;
-   for(let j=0;j<6;j++){const u=(su-j*.1)/.35;if(u<0||u>=1)continue;
-    const e=u<.2?u/.2:Math.pow(1-(u-.2)/.8,1.5),a=clamp(e*bright*al,0,1);if(a<.04)continue;
-    const mid=j===2||j===3,t=j/5,o=m*6;
-    TWB[o]=Math.round((cx+dir*(-.85+1.7*t)*W2)/2)*2;TWB[o+1]=Math.round((by-H*(.12+.78*t))/2)*2;
-    TWB[o+2]=Math.max(2,Math.round((mid?8:5)*(.4+.6*e)));TWB[o+3]=a;TWB[o+4]=mid?1:0;TWB[o+5]=0;m++}}}
- if(m<=0)return;
- /* lớp 1: viền tối giúp dấu nổi trên cả nền sáng lẫn thân vàng */
- g.globalCompositeOperation='source-over';g.fillStyle=TW_OUT;
- for(let k=0;k<m;k++){const o=k*6,px=TWB[o],py=TWB[o+1],L=TWB[o+2];g.globalAlpha=TWB[o+3]*(TWB[o+5]?.75:.5);g.fillRect(px-3,py-L-1,6,L*2+2);g.fillRect(px-L-1,py-3,L*2+2,6)}
- /* lớp 2: quầng màu hệ cộng sáng (lighter) */
- g.globalCompositeOperation='lighter';g.fillStyle=TW_HALO[ci];
- for(let k=0;k<m;k++){const o=k*6,px=TWB[o],py=TWB[o+1],L=TWB[o+2],a=TWB[o+3],bg=TWB[o+4];
-  g.globalAlpha=a*.22;g.fillRect(px-3,py-L,6,L*2);g.fillRect(px-L,py-3,L*2,6);
-  g.globalAlpha=a*.32;if(bg)g.fillRect(px-5,py-5,10,10);else g.fillRect(px-3,py-3,6,6)}
- /* lớp 3: thân cánh */
- g.globalCompositeOperation='source-over';
- const lit=TW_LIT[ci],core=TW_CORE[ci],bo=TW_BODY[ci],de=TW_DEEP[ci];
- for(let k=0;k<m;k++){const o=k*6;twStar(g,TWB[o],TWB[o+1],TWB[o+2],TWB[o+3],TWB[o+5]?de:bo,lit,core,TWB[o+4]>0)}
- stat.particles+=m}
+  const ph=T*TW_RATE+i*1.37,q=Math.floor(ph),p=ph-q;                           /* giật tia kiểu 'jolt': mỗi 1/TW_RATE giây nhảy sang chỗ mới, mỗi dấu lệch pha nhau */
+  const fl=(p<.6?1:.2)*(SEED[i]>.35?1:.5);                                      /* sáng chói 60% đầu mỗi nhịp rồi mờ còn 20% · khoảng 35% dấu chỉ sáng nửa */
+  const a=clamp(fl*bright*al,0,1);if(a<.04)continue;
+  const L=Math.max(2,Math.round(3+SEED[(i+11)&31]*3))+((i&1)?0:3),            /* một nửa số dấu có cánh dài hơn 3px (giống KX của jolt) */
+        px=Math.round((cx+(hash(q,i,1)*2-1)*.95*W2)/2)*2,py=Math.round((by-(.08+hash(q,i,2)*1.05)*H)/2)*2;
+  g.globalAlpha=a*.5;g.fillStyle=col;g.fillRect(px-2,py-L,4,L*2);g.fillRect(px-L,py-2,L*2,4);   /* viền dày cùng màu */
+  g.globalAlpha=a;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);
+  if(L>=4){g.fillRect(px-L-2,py-1,2,2);g.fillRect(px+L,py-1,2,2);g.fillRect(px-1,py-L-2,2,2);g.fillRect(px-1,py+L,2,2)}
+  if(a>.4){g.fillStyle='#ffffff';g.fillRect(px-1,py-1,2,2)}                     /* lõi trắng khi đang sáng */
+  cnt++}
+ stat.particles+=cnt}
 
 /* ---------- PHÁP TRẬN + CỔNG (bản mới) ---------- */
 const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+clamp(a,0,1)+')'};
