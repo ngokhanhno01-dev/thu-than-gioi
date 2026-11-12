@@ -95,6 +95,134 @@ async function adSendMail(){
   }
 }
 
+/* ===== 🌍 Gửi quà TOÀN SERVER =====
+   Đối tượng: mọi document trong Firestore "cards" (= đã đăng nhập ít nhất 1 lần và có thẻ game), trừ người trong RTDB banned/.
+   Ghi bằng multi-path update vào mail/{uid}/{mid} theo lô; cùng 1 mã đợt (mid = batchId) cho mọi người.
+   Rules RTDB hiện có đã cho admin ghi mail/{uid}/{mid} khi claimed===false nên KHÔNG cần sửa Rules.
+   Lỗi giữa chừng: việc đang dở được lưu (localStorage) để bấm "Gửi tiếp". Lưu ý: admin KHÔNG đọc được hộp thư người khác
+   nên không kiểm tra được lô đã tới chưa; chỉ lô đang gửi dở (chưa nhận ack) mới bị gửi lại, và update của 1 lô là nguyên tử. */
+const AD_ALL_KEY='ttg_adm_alljob', AD_ALL_LOT=150;
+let adAllBusy=false, adAllJob=null;
+
+function adGetRdb(){
+  try{
+    if(window.TTGNET && TTGNET.rdb) return TTGNET.rdb;
+    if(window.firebase && firebase.apps.length) return firebase.database();
+  }catch(_){}
+  return null;
+}
+function adBuildRewards(type, qty){
+  if(type === 'gold') return {gold: qty};
+  return {items: [{id: type, q: qty}]};
+}
+function adAllSave(){ try{ if(adAllJob) localStorage.setItem(AD_ALL_KEY, JSON.stringify(adAllJob)); else localStorage.removeItem(AD_ALL_KEY); }catch(_){} }
+function adAllProg(h){ const d=document.getElementById('ad-all-prog'); if(d) d.innerHTML=h; }
+function adAllBar(done,total){
+  const p=total?Math.floor(done*100/total):100;
+  return 'Đã gửi <b>'+done+'/'+total+'</b> người ('+p+'%)<div style="height:6px;border-radius:4px;background:#2a1e26;margin-top:3px"><div style="height:100%;width:'+p+'%;border-radius:4px;background:#72e4b0"></div></div>';
+}
+
+/* Quét toàn bộ uid có thẻ game, đọc theo trang 300 để không tải 1 lần quá nhiều */
+async function adAllCollect(){
+  const fs = window.db || firebase.firestore();
+  const ID = firebase.firestore.FieldPath.documentId();
+  const out = []; let last = null;
+  for(;;){
+    let q = fs.collection('cards').orderBy(ID).limit(300);
+    if(last) q = q.startAfter(last);
+    const sn = await q.get();
+    if(sn.empty) break;
+    sn.forEach(d => out.push(d.id));
+    last = sn.docs[sn.docs.length-1];
+    adAllProg('Đang quét thẻ game... <b>'+out.length+'</b> người');
+    if(sn.size < 300) break;
+  }
+  return out;
+}
+
+async function adAllStart(){
+  if(!isAdminUser) return adAllProg('Không có quyền admin.');
+  if(adAllBusy) return adAllProg('Đang gửi dở, vui lòng đợi.');
+  const rdb = adGetRdb();
+  if(!rdb) return adAllProg('Chưa kết nối Realtime Database.');
+  const type = (document.getElementById('ad-all-type')||{}).value || 'hopnl';
+  const qty = adNum('ad-all-qty');
+  const title = ((document.getElementById('ad-all-title')||{}).value || '').trim() || 'Quà từ Ban Quản Trị';
+  const body = ((document.getElementById('ad-all-body')||{}).value || '').trim() || 'Ban Quản Trị gửi tặng quà đến toàn thể người chơi.';
+  const self = !!(document.getElementById('ad-all-self')||{}).checked;
+  if(!qty) return adAllProg('Nhập số lượng lớn hơn 0.');
+  if(adAllJob && adAllJob.idx < adAllJob.uids.length && !confirm('Còn một đợt gửi dở ('+adAllJob.idx+'/'+adAllJob.uids.length+'). Bỏ đợt đó và tạo đợt MỚI?')) return;
+
+  adAllBusy = true;
+  try{
+    adAllProg('Đang quét thẻ game...');
+    let uids = await adAllCollect();
+    let banned = {};
+    try{ const b = await rdb.ref('banned').once('value'); banned = b.val() || {}; }
+    catch(e){ console.warn('[admin] đọc banned', e); adAllProg('⚠️ Không đọc được danh sách khóa, vẫn tiếp tục.'); }
+    let me = ''; try{ me = firebase.auth().currentUser.uid; }catch(_){}
+    const total0 = uids.length;
+    uids = uids.filter(u => !banned[u] && (self || u !== me));
+    if(!uids.length){ adAllProg('Không có người nhận nào phù hợp.'); return; }
+
+    const what = type==='gold' ? (qty+' xu') : ((ITEMS[type]?ITEMS[type].n:type)+' ×'+qty);
+    if(!confirm('GỬI QUÀ TOÀN SERVER\n\nQuà: '+what+'\nSố người nhận: '+uids.length+' (đã loại '+(total0-uids.length)+' người bị khóa/chính bạn)\nTiêu đề: '+title+'\n\nKhông thể thu hồi. Chắc chắn gửi?')){
+      adAllProg('Đã hủy, chưa gửi gì.'); return;
+    }
+    adAllJob = {
+      id: 'all_' + Date.now().toString(36),
+      mail: {type:'admin_gift', title: title, body: body, rewards: adBuildRewards(type, qty), claimed:false, t: Date.now()},
+      uids: uids, idx: 0
+    };
+    adAllSave();
+  }catch(e){
+    console.warn('[admin] gửi toàn server', e);
+    adAllBusy = false;
+    adAllProg('❌ Lỗi khi quét: '+adEsc(e.message||e));
+    return;
+  }
+  adAllBusy = false;
+  await adAllRun();
+}
+
+async function adAllRun(){
+  if(adAllBusy) return;
+  const job = adAllJob;
+  if(!job) return adAllProg('Không có đợt gửi nào đang dở.');
+  const rdb = adGetRdb();
+  if(!rdb) return adAllProg('Chưa kết nối Realtime Database.');
+  adAllBusy = true;
+  try{
+    while(job.idx < job.uids.length){
+      const lot = job.uids.slice(job.idx, job.idx + AD_ALL_LOT);
+      const upd = {};
+      lot.forEach(u => { upd[u + '/' + job.id] = job.mail; });
+      await rdb.ref('mail').update(upd);
+      job.idx += lot.length;
+      adAllSave();
+      adAllProg(adAllBar(job.idx, job.uids.length));
+    }
+    adAllProg('✅ Đã gửi xong cho <b>'+job.uids.length+'</b> người chơi (mã đợt '+adEsc(job.id)+'). Người mới tạo thẻ sau này sẽ không nhận đợt này.');
+    log('🛠️ Admin gửi quà toàn server cho <b>'+job.uids.length+'</b> người.');
+    adAllJob = null; adAllSave();
+  }catch(e){
+    console.warn('[admin] gửi lô', e);
+    adAllSave();
+    adAllProg('❌ Dừng ở '+job.idx+'/'+job.uids.length+': '+adEsc(e.message||e)+
+      '<br><button class="ad-b" style="margin-top:4px" onclick="adAllResume()">▶️ Gửi tiếp phần còn lại ('+(job.uids.length-job.idx)+' người)</button>');
+  }finally{
+    adAllBusy = false;
+  }
+}
+
+function adAllResume(){
+  if(!adAllJob){
+    try{ const j = JSON.parse(localStorage.getItem(AD_ALL_KEY)||'null'); if(j && Array.isArray(j.uids) && j.mail && j.id) adAllJob = j; }catch(_){}
+  }
+  if(!adAllJob) return adAllProg('Không có đợt gửi nào đang dở.');
+  adAllRun();
+}
+
 /* ===== 🕵️ Người chơi đáng ngờ =====
    Quét bảng xếp hạng mùa hiện tại + các BÁO CÁO của người chơi (27-report.js), tìm dấu hiệu gian lận.
    Mỗi dấu hiệu có nút Xem: số liệu cụ thể + giải thích + lý do có thể vô tội. Khóa là quyết định của bạn.
@@ -375,6 +503,22 @@ function adminShow(){
   '<div style="display:flex;align-items:center;gap:6px;margin:5px 0"><input id="ad-gift-title" placeholder="Tiêu đề thư (tuỳ chọn)" style="flex:1;min-width:0;padding:5px;font-size:12px"></div>'+
   '<div style="display:flex;align-items:center;gap:6px;margin:5px 0"><input id="ad-gift-body" placeholder="Nội dung thư (tuỳ chọn)" style="flex:1;min-width:0;padding:5px;font-size:12px"></div>'+
   '<div style="margin:6px 0"><button class="ad-b" style="width:100%;border-color:#72e4b0;background:#1a3a32;color:#72e4b0" onclick="adSendMail()">📨 Gửi vào Hộp thư</button></div>'+
+'<div style="margin:12px 0 2px;font-size:12px;color:#ffd24a;border-top:1px solid #3a2a33;padding-top:8px">🌍 Gửi quà TOÀN SERVER</div>'+
+  '<div style="font-size:10.5px;color:#ff9a8a;margin:2px 0 5px">Gửi cho mọi người chơi từng đăng nhập và có thẻ game (trừ người bị khóa). ⚠️ Không thể thu hồi sau khi gửi.</div>'+
+  '<div style="display:flex;align-items:center;gap:6px;margin:5px 0">'+
+    '<select id="ad-all-type" style="flex:1;min-width:0;width:auto;padding:5px;font-size:12px">'+
+      '<option value="hopnl">🎁 Hộp Nguyên Liệu</option>'+
+      '<option value="gold">🪙 Xu</option>'+
+      '<option value="dan">💊 Linh Đan</option>'+
+      '<option value="qua">🍎 Linh Quả</option>'+
+    '</select>'+
+    '<input id="ad-all-qty" type="number" min="1" value="1" inputmode="numeric" style="flex:none;width:60px;padding:5px">'+
+  '</div>'+
+  '<div style="display:flex;align-items:center;gap:6px;margin:5px 0"><input id="ad-all-title" placeholder="Tiêu đề thư (tuỳ chọn)" style="flex:1;min-width:0;padding:5px;font-size:12px"></div>'+
+  '<div style="display:flex;align-items:center;gap:6px;margin:5px 0"><input id="ad-all-body" placeholder="Nội dung thư (tuỳ chọn)" style="flex:1;min-width:0;padding:5px;font-size:12px"></div>'+
+  '<label style="display:flex;align-items:center;gap:6px;font-size:11px;margin:4px 0"><input id="ad-all-self" type="checkbox" style="width:auto"> Gửi cả cho tài khoản của mình</label>'+
+  '<div style="margin:6px 0"><button class="ad-b" style="width:100%;border-color:#ffd24a;background:#3a2f12;color:#ffd24a" onclick="adAllStart()">🌍 Gửi cho toàn server</button></div>'+
+  '<div id="ad-all-prog" style="font-size:11px;min-height:14px;margin:2px 0 6px;color:#ffc978"></div>'+
 '<div style="margin:12px 0 2px;font-size:12px;color:#ff9a8a;border-top:1px solid #3a2a33;padding-top:8px">🕵️ Người chơi đáng ngờ</div>'+
   '<div style="font-size:10.5px;color:#b9a9a2;margin:2px 0 5px">Quét bảng xếp hạng + báo cáo của người chơi. Bấm 👁️ Xem để biết vì sao đáng ngờ trước khi khóa.</div>'+
   '<div style="margin:4px 0"><button class="ad-b" style="width:100%" onclick="adSusScan()">🔍 Quét</button></div>'+
