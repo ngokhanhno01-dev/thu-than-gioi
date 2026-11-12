@@ -225,18 +225,19 @@ function layerParticles(g,side,cx,by,W2,H,T,sp,unit,bright,al){ /* side: -1 = ph
 }
 
 /* ---------- BẬC 10 ĐỘC QUYỀN: dấu + bốn cánh lấp lánh, nhảy chỗ và chớp (màu theo 17 hệ) ---------- */
-const TW_COL=['#e6f6ff','#9fe8d8','#e0d4ff','#8fffc0','#ffe53a','#b8b8ff','#ff9a3a','#8a7aff','#ffb020','#6affc8','#8aef5a','#ff5a3a','#d070e8','#c060ff','#8fd0ff','#ff9ad8','#fff6c0'];
+const TW_COL=['#cfeaff','#6fe0c8','#c9b0ff','#5cff9a','#ffd400','#9a9aff','#ff8a1a','#7a66ff','#ff9d00','#3affb8','#6aff3a','#ff4a2a','#d04aff','#b040ff','#5cc0ff','#ff6ac8','#ffe45a'];
 function twinkle(g,cx,by,W2,H,T,sp,mode,bright,al){
- const n=21,col=TW_COL[clamp(sp|0,0,16)];let cnt=0;
+ const n=21,col=TW_COL[clamp(sp|0,0,16)];let cnt=0;g.globalCompositeOperation='source-over';
  for(let i=0;i<n;i++){
   const per=.5+SEED[(i+3)&31]*.6,ph=T/per+SEED[i]*7,q=Math.floor(ph),p=ph-q;   /* mỗi dấu + có chu kỳ riêng, hết chu kỳ thì nhảy sang chỗ mới */
   const s=SIN(p*PI),fl=(p>.3&&p<.6&&frac(T*17+i*.7)<.4)?.35:1;                /* s: nở rồi thu lại · fl: chớp tắt-sáng */
   const a=clamp(Math.pow(s,.7)*fl*bright*al,0,1);if(a<.04)continue;
   const L=Math.max(2,Math.round((3+SEED[(i+11)&31]*5)*s)),
         px=Math.round((cx+(hash(q,i,1)*2-1)*.95*W2)/2)*2,py=Math.round((by-(.08+hash(q,i,2)*1.05)*H)/2)*2;
-  g.globalAlpha=a;g.fillStyle=col;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);
+  g.globalAlpha=a*.5;g.fillStyle=col;g.fillRect(px-2,py-L,4,L*2);g.fillRect(px-L,py-2,L*2,4);   /* viền dày cùng màu */
+  g.globalAlpha=a;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);
   if(L>=4){g.fillRect(px-L-2,py-1,2,2);g.fillRect(px+L,py-1,2,2);g.fillRect(px-1,py-L-2,2,2);g.fillRect(px-1,py+L,2,2)}
-  if(s>.45){g.fillStyle='#ffffff';g.fillRect(px-1,py-1,2,2)}
+  if(s>.6){g.fillStyle='#ffffff';g.fillRect(px-1,py-1,2,2)}
   cnt++}
  stat.particles+=cnt}
 
