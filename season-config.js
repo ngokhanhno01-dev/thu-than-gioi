@@ -56,7 +56,7 @@
     ],
 
     /* Danh hiệu: giống nhau mọi mùa, game thêm đuôi " · Mùa N" */
-    TITLES: { 1: 'Chí Tôn Đấu Trường', 2: 'Vô Địch Đấu Trường', 3: 'Cao Thủ Đấu Trường' },
+    TITLES: { 1: 'Chí Tôn Đấu Trường', 2: 'Cao Thủ Đấu Trường', 3: 'Vô Địch Đấu Trường' },
     TITLE_ICONS: { 1: '👑', 2: '🥈', 3: '🥉' }
   };
 
