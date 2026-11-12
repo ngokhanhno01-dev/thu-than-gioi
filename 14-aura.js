@@ -226,19 +226,21 @@ function layerParticles(g,side,cx,by,W2,H,T,sp,unit,bright,al){ /* side: -1 = ph
 
 /* ---------- BẬC 10 ĐỘC QUYỀN: dấu + bốn cánh lấp lánh, nhảy chỗ và chớp (màu theo 17 hệ) ---------- */
 const TW_COL=['#cfeaff','#6fe0c8','#c9b0ff','#5cff9a','#ffd400','#9a9aff','#ff8a1a','#7a66ff','#ff9d00','#3affb8','#6aff3a','#ff4a2a','#d04aff','#b040ff','#5cc0ff','#ff6ac8','#ffe45a'];
+const TW_HI=TW_COL.map(h=>{const n=parseInt(h.slice(1),16),m=v=>Math.round(v+(255-v)*.1).toString(16).padStart(2,'0');return'#'+m(n>>16)+m(n>>8&255)+m(n&255)});   /* màu sáng hơn: TW_COL pha thêm 10% trắng (giữ sắc hệ) */
 const TW_RATE=10;   /* số lần nhảy chỗ mỗi giây (giống nhịp 'jolt' của hệ Lôi: T*10) */
 function twinkle(g,cx,by,W2,H,T,sp,mode,bright,al){
- const n=21,col=TW_COL[clamp(sp|0,0,16)];let cnt=0;g.globalCompositeOperation='source-over';
+ const n=21,col=TW_HI[clamp(sp|0,0,16)];let cnt=0;g.globalCompositeOperation='source-over';
  for(let i=0;i<n;i++){
   const ph=T*TW_RATE+i*1.37,q=Math.floor(ph),p=ph-q;                           /* giật tia kiểu 'jolt': mỗi 1/TW_RATE giây nhảy sang chỗ mới, mỗi dấu lệch pha nhau */
   const fl=(p<.6?1:.2)*(SEED[i]>.35?1:.5);                                      /* sáng chói 60% đầu mỗi nhịp rồi mờ còn 20% · khoảng 35% dấu chỉ sáng nửa */
   const a=clamp(fl*bright*al,0,1);if(a<.04)continue;
   const L=Math.max(2,Math.round(3+SEED[(i+11)&31]*3))+((i&1)?0:3),            /* một nửa số dấu có cánh dài hơn 3px (giống KX của jolt) */
         px=Math.round((cx+(hash(q,i,1)*2-1)*.95*W2)/2)*2,py=Math.round((by-(.08+hash(q,i,2)*1.05)*H)/2)*2;
-  g.globalAlpha=a*.5;g.fillStyle=col;g.fillRect(px-2,py-L,4,L*2);g.fillRect(px-L,py-2,L*2,4);   /* viền dày cùng màu */
+  g.globalAlpha=a*.3;g.fillStyle=col;g.fillRect(px-3,py-L-2,6,L*2+4);g.fillRect(px-L-2,py-3,L*2+4,6);   /* quầng tỏa cùng màu */
+  g.globalAlpha=a*.5;g.fillRect(px-2,py-L,4,L*2);g.fillRect(px-L,py-2,L*2,4);   /* viền dày cùng màu */
   g.globalAlpha=a;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);
   if(L>=4){g.fillRect(px-L-2,py-1,2,2);g.fillRect(px+L,py-1,2,2);g.fillRect(px-1,py-L-2,2,2);g.fillRect(px-1,py+L,2,2)}
-  if(a>.4){g.fillStyle='#ffffff';g.fillRect(px-1,py-1,2,2)}                     /* lõi trắng khi đang sáng */
+  if(a>.4){const h=Math.max(1,L>>1);g.fillStyle='#ffffff';g.globalAlpha=a*.9;g.fillRect(px-1,py-h,2,h*2);g.fillRect(px-h,py-1,h*2,2)}   /* tâm trắng nóng khi đang sáng, đầu cánh giữ màu hệ */
   cnt++}
  stat.particles+=cnt}
 
