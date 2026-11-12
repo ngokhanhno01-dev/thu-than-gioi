@@ -223,6 +223,79 @@ function adAllResume(){
   adAllRun();
 }
 
+/* ===== 🏷️ Danh hiệu thủ công (RTDB adminTitles/{uid} = {id, by, t}) =====
+   Bảng danh hiệu nằm ở 28-title.js (TTGTITLE.MANUAL). Rules chỉ cho admin ghi; id 'admin' chỉ hợp lệ cho uid có trong admins/. */
+function adTitleOpts(){
+  const L = (window.TTGTITLE && TTGTITLE.MANUAL) || [];
+  return L.map(m => '<option value="'+m.id+'">'+m.icon+' '+m.name+(m.adminOnly?' (riêng Admin)':'')+'</option>').join('');
+}
+function adTitleName(id){
+  const m = ((window.TTGTITLE && TTGTITLE.MANUAL) || []).find(x => x.id === id);
+  return m ? m.icon+' '+m.name : adEsc(id);
+}
+async function adTitleSet(){
+  if(!isAdminUser) return adMsg('Không có quyền admin.');
+  const nick = (document.getElementById('ad-ti-nick')||{}).value || '';
+  const id = (document.getElementById('ad-ti-id')||{}).value || '';
+  if(!nick.trim()) return adMsg('Nhập biệt danh người chơi.');
+  if(!id) return adMsg('Chưa có danh sách danh hiệu (28-title.js chưa nạp).');
+  const rdb = adGetRdb(); if(!rdb) return adMsg('Chưa kết nối Realtime Database.');
+  adMsg('Đang tìm người chơi...');
+  const uid = await adFindUidByNick(nick);
+  if(!uid) return adMsg('Không tìm thấy biệt danh "<b>'+adEsc(nick)+'</b>".');
+  try{
+    await rdb.ref('adminTitles/'+uid).set({id: id, by: firebase.auth().currentUser.uid, t: firebase.database.ServerValue.TIMESTAMP});
+    try{ TTGTITLE.refresh(uid); }catch(_){}
+    adMsg('✅ Đã gắn <b>'+adTitleName(id)+'</b> cho <b>'+adEsc(nick)+'</b>. Người đó sẽ thấy sau tối đa ~10 phút hoặc khi đăng nhập lại.');
+    log('🛠️ Admin gắn danh hiệu <b>'+adEsc(nick)+'</b>.');
+  }catch(e){
+    console.warn('[admin] gắn danh hiệu', e);
+    adMsg('❌ Gắn thất bại: '+adEsc(e.message||e)+(id==='admin'?' (danh hiệu Quản Trị Viên chỉ gắn được cho tài khoản admin)':''));
+  }
+}
+async function adTitleDel(uid, label){
+  if(!isAdminUser) return adMsg('Không có quyền admin.');
+  if(!/^[A-Za-z0-9]{10,40}$/.test(uid||'')) return adMsg('uid không hợp lệ.');
+  const rdb = adGetRdb(); if(!rdb) return adMsg('Chưa kết nối Realtime Database.');
+  try{
+    await rdb.ref('adminTitles/'+uid).remove();
+    try{ TTGTITLE.refresh(uid); }catch(_){}
+    adMsg('✅ Đã gỡ danh hiệu'+(label?' của <b>'+adEsc(label)+'</b>':'')+'.');
+    const box = document.getElementById('ad-ti-list'); if(box && box.innerHTML) adTitleList();
+  }catch(e){ adMsg('❌ Gỡ thất bại: '+adEsc(e.message||e)); }
+}
+async function adTitleRemoveNick(){
+  const nick = (document.getElementById('ad-ti-nick')||{}).value || '';
+  if(!nick.trim()) return adMsg('Nhập biệt danh cần gỡ danh hiệu.');
+  const uid = await adFindUidByNick(nick);
+  if(!uid) return adMsg('Không tìm thấy biệt danh "<b>'+adEsc(nick)+'</b>".');
+  adTitleDel(uid, nick);
+}
+async function adTitleList(){
+  const box = document.getElementById('ad-ti-list'); if(!box) return;
+  if(!isAdminUser){ box.textContent = 'Không có quyền admin.'; return; }
+  const rdb = adGetRdb(); if(!rdb){ box.textContent = 'Chưa kết nối Realtime Database.'; return; }
+  box.textContent = 'Đang tải...';
+  try{
+    const val = (await rdb.ref('adminTitles').once('value')).val() || {};
+    const uids = Object.keys(val).filter(u => /^[A-Za-z0-9]{10,40}$/.test(u));
+    if(!uids.length){ box.innerHTML = '<span style="color:#b9a9a2">Chưa ai có danh hiệu thủ công.</span>'; return; }
+    const fs = window.db || firebase.firestore();
+    const nicks = await Promise.all(uids.map(u => fs.collection('profiles').doc(u).get().then(d => d.exists ? (d.data().nick||'') : '').catch(()=>'')));
+    box.innerHTML = uids.map((u,i) =>
+      '<div style="display:flex;align-items:center;gap:6px;margin:3px 0;padding:4px 6px;border:1px solid #3a2a33;border-radius:6px">'+
+      '<span style="flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis"><b>'+adEsc(nicks[i]||('uid '+u.slice(0,8)+'…'))+'</b> · '+adTitleName(val[u] && val[u].id)+'</span>'+
+      '<button class="ad-b" style="flex:none;width:auto" onclick="adTitleDel(\''+u+'\')">Gỡ</button></div>').join('');
+  }catch(e){ box.innerHTML = '❌ Không tải được: '+adEsc(e.message||e); }
+}
+/* Admin đăng nhập: tự có danh hiệu Quản Trị Viên (nếu chưa có danh hiệu thủ công nào) */
+async function adEnsureOwnTitle(rdb, uid){
+  try{
+    const sn = await rdb.ref('adminTitles/'+uid).once('value');
+    if(!sn.exists()) await rdb.ref('adminTitles/'+uid).set({id:'admin', by:uid, t:firebase.database.ServerValue.TIMESTAMP});
+  }catch(e){ console.warn('[admin] danh hiệu admin', e); }
+}
+
 /* ===== 🕵️ Người chơi đáng ngờ =====
    Quét bảng xếp hạng mùa hiện tại + các BÁO CÁO của người chơi (27-report.js), tìm dấu hiệu gian lận.
    Mỗi dấu hiệu có nút Xem: số liệu cụ thể + giải thích + lý do có thể vô tội. Khóa là quyết định của bạn.
@@ -519,6 +592,15 @@ function adminShow(){
   '<label style="display:flex;align-items:center;gap:6px;font-size:11px;margin:4px 0"><input id="ad-all-self" type="checkbox" style="width:auto"> Gửi cả cho tài khoản của mình</label>'+
   '<div style="margin:6px 0"><button class="ad-b" style="width:100%;border-color:#ffd24a;background:#3a2f12;color:#ffd24a" onclick="adAllStart()">🌍 Gửi cho toàn server</button></div>'+
   '<div id="ad-all-prog" style="font-size:11px;min-height:14px;margin:2px 0 6px;color:#ffc978"></div>'+
+'<div style="margin:12px 0 2px;font-size:12px;color:#c08aff;border-top:1px solid #3a2a33;padding-top:8px">🏷️ Danh hiệu</div>'+
+  '<div style="font-size:10.5px;color:#b9a9a2;margin:2px 0 5px">Gắn danh hiệu cho người chơi theo biệt danh (mỗi người 1 danh hiệu, hiện trước danh hiệu mùa). "Quản Trị Viên" chỉ gắn được cho tài khoản admin thật.</div>'+
+  '<div style="display:flex;align-items:center;gap:6px;margin:5px 0"><input id="ad-ti-nick" placeholder="Biệt danh người chơi" style="flex:1;min-width:0;padding:5px;font-size:12px"></div>'+
+  '<div style="display:flex;align-items:center;gap:6px;margin:5px 0">'+
+    '<select id="ad-ti-id" style="flex:1;min-width:0;width:auto;padding:5px;font-size:12px">'+adTitleOpts()+'</select>'+
+    '<button class="ad-b" onclick="adTitleSet()">Gắn</button><button class="ad-b" onclick="adTitleRemoveNick()">Gỡ</button>'+
+  '</div>'+
+  '<div style="margin:4px 0"><button class="ad-b" style="width:100%" onclick="adTitleList()">📋 Xem người đang có danh hiệu</button></div>'+
+  '<div id="ad-ti-list" style="font-size:11px"></div>'+
 '<div style="margin:12px 0 2px;font-size:12px;color:#ff9a8a;border-top:1px solid #3a2a33;padding-top:8px">🕵️ Người chơi đáng ngờ</div>'+
   '<div style="font-size:10.5px;color:#b9a9a2;margin:2px 0 5px">Quét bảng xếp hạng + báo cáo của người chơi. Bấm 👁️ Xem để biết vì sao đáng ngờ trước khi khóa.</div>'+
   '<div style="margin:4px 0"><button class="ad-b" style="width:100%" onclick="adSusScan()">🔍 Quét</button></div>'+
@@ -555,6 +637,7 @@ async function checkAdminStatus(uid){
     if(!rdb){ applyAdminSeal(); return false; }
     const sn = await rdb.ref('admins/' + uid).once('value');
     isAdminUser = sn.val() === true;
+    if(isAdminUser) adEnsureOwnTitle(rdb, uid);
   }catch(e){
     console.warn('[admin] check', e);
     isAdminUser = false;
