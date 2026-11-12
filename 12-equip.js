@@ -324,6 +324,7 @@ function eqApply(s){
 const EQFX={
  _n:'',
  note(){const n=EQFX._n;EQFX._n='';return n},
+ visualSets(){return eqSetInfo().filter(x=>x.on).map(x=>({key:x.S.k,count:x.n,full:x.full,z:x.z}))},
  init(P,Q){                                   /* đầu trận */
   EQFX._n='';P.fx=eqSetInfo().filter(x=>x.on).map(x=>({k:x.S.k,v:x.v}));
   for(const f of P.fx){const v=f.v;

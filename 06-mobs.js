@@ -2022,6 +2022,7 @@ function paintUI(RP,RM){const set=(n,f,b)=>{const a=$(n);if(a)a.style.background
  $('mob-pn').style.color=RP[1];$('mob-mn').style.color=RM[1];
  $('mob-ph').parentNode.style.borderColor=RP[0];$('mob-mh').parentNode.style.borderColor=RM[0]}
 function impact(g,fx,tt){
+ if(window.TTGFXART&&window.TTGFXART.drawImpact(g,fx,tt))return;
  const R=REG[fx.s],A=R[0],B=R[1],q=fx.q,p=fx.pp,pw=(fx.k==='crit'?1.5:1)*(fx.r>1?1.25:1),
   tx=p?272:90,ty=150,dir=p?1:-1,rd=rng(fx.i*977+fx.s*31+7),fa=Math.max(0,1-q),h=fx.h;
  g.save();g.globalAlpha=Math.min(1,fa*1.6);
@@ -2085,7 +2086,7 @@ const FXS={on:0,u:0,pa:true,cl:0,cr:false,miss:false,h:'Huyễn',s:0,i:0};/* tr�
 let FXPX=0,FXPY=0,FXBN=null;
 function fxElem(h){return FXRG[h]===undefined?'Huyễn':h}
 /* loại đòn: 0 thường · 1 Liên kích · 2 sát thương theo thời gian (Thiêu đốt, Dung Nham) · 3 phản đòn (Phản đòn, Phản Chấn) */
-function fxClass(x){const t=x.t||'';return /Thiêu đốt -|Dung Nham Phun Trào/.test(t)?2:/Phản đòn -|Phản Chấn -/.test(t)?3:/Liên kích -/.test(t)?1:0}
+function fxClass(x){const t=x.t||'';return /Thiêu đốt -|Dung Nham Phun Trào/.test(t)?2:/Phản đòn -|Phản Chấn -|Nguyệt Ảnh phản kích/.test(t)?3:/Liên kích -/.test(t)?1:0}
 function fxHash(a,b){let x=Math.imul((a*374761393+b*668265263+1013904223)|0,1274126177);x^=x>>>13;return((x>>>0)%1000)/1000}
 /* bên ra đòn (đánh xa / phản đòn) giật lùi nhẹ khi bắn: <0 = lùi ra sau. Thay cho cú lao tới */
 function fxRecoil(u,cl){const s=cl===3?.5:1;if(u<.05)return 0;
@@ -2132,6 +2133,7 @@ function fxBeam(g,cx,cy,dir,env,A,B){if(env<=0)return;g.save();g.globalAlpha=Mat
  fxLine(g,x0,y0,x1,y1,14+14*env,6,FXOL);fxLine(g,x0,y0,x1,y1,8+14*env,3,A);fxLine(g,x0,y0,x1,y1,3+9*env,3,B);fxLine(g,x0,y0,x1,y1,3+3*env,3,'#ffffff');g.restore()}
 /* phần chính: vẽ trong không gian bị rung (sau sprite, trước/sau impact) */
 function fxDraw(g,T,dp,dmx){const S=FXS;if(!S.on)return;
+ if(window.TTGFXART&&window.TTGFXART.drawAttack(g,S,T,dp,dmx))return;
  const u=S.u,pa=S.pa,dir=pa?1:-1,cl=S.cl,cr=S.cr,big=cr?1.45:1,rg=FXRG[S.h]===1,RR=REG[S.s]||REG[0];
  let A=RR[0],B=RR[1];if(cl===3){A='#ff8a4a';B='#fff0d0'}else if(cl===2){A='#ff6a3a';B='#ffd070'}
  const ox=pa?85+dp*FXPS:272+dmx*FXMS,tx=pa?272+dmx*FXMS:90+dp*FXPS,ty=150,mx=ox+dir*(pa?30:40),my=pa?180:164;
@@ -2223,6 +2225,12 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
      }}});
   if(T>=TE){rb.style.display='none';msg=R.win?'🏆 Chiến thắng! +'+gd+' xu · +'+ex+' EXP':'💥 Bại trận...';if(R.win)am=Math.max(0,1-(T-TE)*1.2)}
   aura(g,RP,0,85,tt);aura(g,RM,180,272,tt);
+  if(window.TTGFXART){try{
+   window.TTGFXART.drawBattleZone(g,e.m.zone,tt,272,208);
+   window.TTGFXART.drawSetAura(g,85,208,tt);
+   window.TTGFXART.drawDefiance(g,85,208,tt,hp<R.maxP*.5&&pet.sp===16);
+   window.TTGFXART.drawDefiance(g,272,208,tt,mh<R.maxM*.5&&Array.isArray(e.m.ks)&&e.m.ks.includes(16));
+  }catch(_){}}
   gst.forEach(q=>{if(q.pa)tintDraw(g,c=>drawPet(c,85,208,120,tt,q.off,1,true),RP[0],.75,q.a);else tintDraw(g,c=>drawM(c,e.m,272,208,e.m.boss?6:7,tt,-q.off,1,e.tr,true),RM[0],.75,q.a)});
   drawPet(g,85,208,120,tt,dp,ap);drawM(g,e.m,272,208,e.m.boss?6:7,tt,dmx,am,e.tr);
   if(pf>0)tintDraw(g,c=>drawPet(c,85,208,120,tt,dp,1,true),'#ffffff',1,pf);
