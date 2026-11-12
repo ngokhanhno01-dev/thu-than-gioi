@@ -112,7 +112,9 @@ function infoPanels(g,z,zp,R){
  if(R&&R.startBuffs&&R.startBuffs.length)wrapLines(g,'✦ '+R.startBuffs.map(v=>v.name).join(', '),iw,2).forEach(t=>L.push({t,c:'#ffe8a8'}));
  const M=[{t:z.mark+' '+z.name+' · '+mode(z),c:z.color}];
  if(R&&R.zoneBuff)wrapLines(g,R.zoneBuff.label+': '+R.zoneBuff.desc,iw,2).forEach(t=>M.push({t,c:'#fff0bd'}));
- panel(g,3,2,W,zp.color,L);panel(g,357-W,2,W,z.color,M);g.restore()}
+ const tf=g.getTransform?g.getTransform():null,CW=(tf&&tf.a&&g.canvas?g.canvas.width/tf.a:360)||360,CH=(tf&&tf.d&&g.canvas?g.canvas.height/tf.d:206)||206,lh=9,bot=3;
+ const yL=CH-(L.length*lh+4)-bot,yM=CH-(M.length*lh+4)-bot;
+ panel(g,3,yL,W,zp.color,L);panel(g,CW-3-W,yM,W,z.color,M);g.restore()}
 function drawField(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  const z=zone(i),zp=zone(petSp==null?currentPetZone:petSp),q=clamp(1-Math.max(0,elapsed-(hold||0))/1.35,0,1),pulse=.55+.45*Math.sin(T*5);
  const ring=(cx,color,opacity)=>{
