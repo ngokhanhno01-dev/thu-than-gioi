@@ -21,7 +21,11 @@ const MANUAL=[
  {id:'vip4',  name:'Thánh Thú Hầu Tước', icon:'🦄', col:'#c08aff', img:'img-title-vip4.webp'},
  {id:'vip5',  name:'Long Thần Công Tước',icon:'🐲', col:'#ff8a4a', img:'img-title-vip5.webp'},
  {id:'vip6',  name:'Vạn Thú Quân Vương', icon:'👑', col:'#ffd24a', img:'img-title-vip6.webp'},
- {id:'vip7',  name:'Thần Thú Đế Tôn',    icon:'🌟', col:'#ff7be0', glow:true, img:'img-title-vip7.webp'}];
+ {id:'vip7',  name:'Thần Thú Đế Tôn',    icon:'🌟', col:'#ff7be0', glow:true, img:'img-title-vip7.webp'},
+ /* Danh hiệu Top mùa 1 gắn tay để TEST (ảnh có sẵn chữ "Mùa 1"). Id phải có trong Rules RTDB adminTitles. */
+ {id:'top1',  name:'Chí Tôn Đấu Trường · Mùa 1', icon:'👑', col:'#ffd24a', glow:true, img:'img-title-top1-s1.webp'},
+ {id:'top2',  name:'Vô Địch Đấu Trường · Mùa 1', icon:'🥈', col:'#9fc7ff', img:'img-title-top2-s1.webp'},
+ {id:'top3',  name:'Cao Thủ Đấu Trường · Mùa 1', icon:'🥉', col:'#e0a060', img:'img-title-top3-s1.webp'}];
 /* Ảnh danh hiệu mùa: img-title-top{hạng}-s{mùa}.webp. Làm xong ảnh mùa nào thì thêm số mùa đó vào đây (mùa chưa có ảnh dùng icon + chữ). */
 const TOPIMG={1:1};
 const MBY={};MANUAL.forEach(m=>MBY[m.id]=m);
