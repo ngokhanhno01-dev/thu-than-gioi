@@ -347,3 +347,12 @@ button.rebirth.locked{background-color:#283d41!important;border-color:#071117!im
 #mob .bh-x{position:absolute;z-index:4;top:calc(100% + .6cqw);left:50%;transform:translateX(-50%);white-space:nowrap;line-height:0}
 #mob-pbar2{position:absolute;left:1.6cqw;bottom:8.6cqw;z-index:4;pointer-events:none}
 #mob-run{z-index:7!important}
+
+/* ===== chữ VS giữa 2 bảng thông tin ===== */
+#mob .bh-vs{position:absolute;left:50%;top:9.6cqw;z-index:5;height:7.2cqw;line-height:7.2cqw;transform:translateX(-50%) skewX(-8deg);
+  font-family:'VT323',monospace;font-weight:900;font-size:11cqw;letter-spacing:.4cqw;pointer-events:none;
+  background:linear-gradient(180deg,#fffbd0 0%,#ffd24a 42%,#ff7a1a 72%,#b8200e 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(1px 0 0 #3a0808) drop-shadow(-1px 0 0 #3a0808) drop-shadow(0 1px 0 #3a0808) drop-shadow(0 -1px 0 #3a0808) drop-shadow(0 0 5px rgba(255,120,30,.85));
+  animation:bhVs 1.3s ease-in-out infinite}
+@keyframes bhVs{0%,100%{transform:translateX(-50%) skewX(-8deg) scale(1)}50%{transform:translateX(-50%) skewX(-8deg) scale(1.1)}}
+@media (prefers-reduced-motion:reduce){#mob .bh-vs{animation:none}}

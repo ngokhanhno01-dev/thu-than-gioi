@@ -59,7 +59,7 @@ const ELEMENT_FX=[
  /* 1 Sương  */{c:'#cfe6e0',a:'#ffffff',d:'#6fa89e',h:'#9fd0c6',m:'drift',  ray:'ring',  sp:.50,mf:.8, sz:1.5},
  /* 2 Vân    */{c:'#e9e0ff',a:'#ffffff',d:'#9a86d0',h:'#c9b8ff',m:'puff',   ray:'cloud', sp:.40,mf:1.2,sz:1.5},
  /* 3 Phong  */{c:'#c8ffe0',a:'#ffffff',d:'#3fa070',h:'#8fffc0',m:'helix',  ray:'spiral',sp:1.40,mf:.9, sz:1},
- /* 4 Lôi    */{c:'#ffe86a',a:'#ffffff',d:'#c8901a',h:'#ffd83a',m:'jolt',   ray:'zig',   sp:1.00,mf:.6, sz:1},
+ /* 4 Lôi    */{c:'#ffe86a',a:'#ffffff',d:'#c8901a',h:'#ffd83a',m:'radial', ray:'zig',   sp:1.00,mf:.6, sz:1},
  /* 5 Nguyệt */{c:'#d8d8ff',a:'#ffffff',d:'#7078c8',h:'#a8a8ff',m:'glow',   ray:'ring',  sp:.50,mf:1.0,sz:1},
  /* 6 Dương  */{c:'#ffd28a',a:'#fff2c0',d:'#d8782a',h:'#ffb84a',m:'radial', ray:'line',  sp:.90,mf:.8, sz:1},
  /* 7 Huyền  */{c:'#8c8cae',a:'#d0d0ff',d:'#4a4a7a',h:'#6a5acd',m:'suck',   ray:'spiral',sp:1.00,mf:.9, sz:1},
@@ -145,7 +145,7 @@ function motion(m,i,N,T,sp){
  case 'drift':  X=(u*2-1)*1.05*(s<.5?1:-1);Y=.06+s*.55+SIN(T*.6+s*9)*.04;AL=w*.8;break;
  case 'puff':   X=(s*2-1)*.75+SIN(T*.5+s*7)*.1;Y=.12+u*.85;AL=w*.85;Z=1+u*.8;break;
  case 'helix':{const a=s*TAU+T*2.2+u*6;X=COS(a)*(.55+.12*u);Y=.05+u*1.1;D=SIN(a)<0?-1:1;break}
- case 'jolt':{const q=Math.floor(T*10+i*1.37);X=(hash(q,i,1)*2-1)*.9;Y=.05+hash(q,i,2)*1.0;AL=(frac(T*10+i*1.37)<.6?1:.2)*(s>.35?1:.5);KX=(i&1)?0:1;break}
+ case 'jolt':{const q=Math.floor(T*10+i*1.37);X=(hash(q,i,1)*2-1)*.9;Y=.05+hash(q,i,2)*1.0;AL=(frac(T*10+i*1.37)<.6?1:.2)*(s>.35?1:.5);KX=0;break}
  case 'glow':{X=COS(s*TAU*3.1)*(.35+.55*frac(s*7.7));Y=.12+.85*frac(s*13.7)+SIN(T*.4+s*5)*.02;const p=.5+.5*SIN(T*1.0+s*20);AL=p*p*.9;break}
  case 'radial':{const a=s*TAU+T*.12,r=.2+.95*u;X=COS(a)*r;Y=.5+SIN(a)*r*.8;AL=(1-u)*Math.min(1,u*6);break}
  case 'suck':{const a=s*TAU+T*1.4+u*3.2,r=1.05*(1-u);X=COS(a)*r;Y=.5+SIN(a)*r*.75;D=SIN(a)<0?-1:1;break}
@@ -224,6 +224,22 @@ function layerParticles(g,side,cx,by,W2,H,T,sp,unit,bright,al){ /* side: -1 = ph
  stat.particles+=cnt;
 }
 
+/* ---------- BẬC 10 ĐỘC QUYỀN: dấu + bốn cánh lấp lánh, nhảy chỗ và chớp (màu theo 17 hệ) ---------- */
+const TW_COL=['#e6f6ff','#9fe8d8','#e0d4ff','#8fffc0','#ffe53a','#b8b8ff','#ff9a3a','#8a7aff','#ffb020','#6affc8','#8aef5a','#ff5a3a','#d070e8','#c060ff','#8fd0ff','#ff9ad8','#fff6c0'];
+function twinkle(g,cx,by,W2,H,T,sp,mode,bright,al){
+ const n=mode==='battle'?6:10,col=TW_COL[clamp(sp|0,0,16)];let cnt=0;
+ for(let i=0;i<n;i++){
+  const per=.5+SEED[(i+3)&31]*.6,ph=T/per+SEED[i]*7,q=Math.floor(ph),p=ph-q;   /* mỗi dấu + có chu kỳ riêng, hết chu kỳ thì nhảy sang chỗ mới */
+  const s=SIN(p*PI),fl=(p>.3&&p<.6&&frac(T*17+i*.7)<.4)?.35:1;                /* s: nở rồi thu lại · fl: chớp tắt-sáng */
+  const a=clamp(Math.pow(s,.7)*fl*bright*al,0,1);if(a<.04)continue;
+  const L=Math.max(2,Math.round((3+SEED[(i+11)&31]*5)*s)),
+        px=Math.round((cx+(hash(q,i,1)*2-1)*.95*W2)/2)*2,py=Math.round((by-(.08+hash(q,i,2)*1.05)*H)/2)*2;
+  g.globalAlpha=a;g.fillStyle=col;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);
+  if(L>=4){g.fillRect(px-L-2,py-1,2,2);g.fillRect(px+L,py-1,2,2);g.fillRect(px-1,py-L-2,2,2);g.fillRect(px-1,py+L,2,2)}
+  if(s>.45){g.fillStyle='#ffffff';g.fillRect(px-1,py-1,2,2)}
+  cnt++}
+ stat.particles+=cnt}
+
 /* ---------- PHÁP TRẬN + CỔNG (bản mới) ---------- */
 const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+clamp(a,0,1)+')'};
 function glow(g,x,y,rx,ry,col,a){g.save();g.globalCompositeOperation='lighter';g.translate(x,y);g.scale(1,ry/rx);const gr=g.createRadialGradient(0,0,0,0,0,rx);gr.addColorStop(0,hexA(col,a));gr.addColorStop(.35,hexA(col,a*.45));gr.addColorStop(.7,hexA(col,a*.1));gr.addColorStop(1,hexA(col,0));g.fillStyle=gr;g.fillRect(-rx,-rx,rx*2,rx*2);g.restore()}
@@ -285,6 +301,7 @@ const API=window.PETAURA={
   pi=clamp(pi|0,0,4);al*=f;const bri=PI_BRI[pi],W2=Math.max(w*.55,h*.42);
   g.save();g.imageSmoothingEnabled=false;g.globalCompositeOperation='lighter';
   layerParticles(g,1,cx,by,W2,h,T,sp,c.pu,bri,al);
+  if(clamp(stage|0,0,9)===9)twinkle(g,cx,by,W2,h,T,sp,mode,bri,al);   /* chỉ Thần Thú bậc 10 */
   g.globalCompositeOperation='source-over';
   if(burstT>=0&&mode==='main'&&!pv){ /* tia lửa toả ra từ thân */
    const bt=T-burstT;

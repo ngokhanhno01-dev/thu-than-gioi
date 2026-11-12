@@ -194,6 +194,7 @@ function frameSide(nameId,uid){
   const f=S.querySelector('.bh-frm');
   S.dataset.u=uid||'';S.style.removeProperty('--pc');S.style.removeProperty('--pd');if(f)f.innerHTML='';
   if(!n.children.length)n.textContent=n.textContent.replace(/\s*·\s*(?:Lv\.|Cấp\s*)(\d+)/,' Lv$1');   /* "· Lv.18" -> " Lv18" cho vừa bảng */
+  {const L=[...n.textContent].length;n.style.fontSize=L>12?Math.max(2.5,3.4*12/L)+'cqw':''}   /* tên dài: thu nhỏ chữ thay vì cắt */
   if(!uid||!f)return;
   get(uid).then(l=>{
     if(!S.isConnected||S.dataset.u!==uid)return;

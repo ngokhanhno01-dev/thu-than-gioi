@@ -163,7 +163,7 @@ function battleHudExtra(e){
  const pb=_heBadge('mob-pt','mob-pe'),mb=_heBadge('mob-mt','mob-me');
  if(pb)pb.innerHTML=ph?_chip(ph,HE_COL[ph]||'#fff').replace('margin-right:3px;',''):'';
  if(mb)mb.innerHTML=mh?_chip(mh,HE_COL[mh]||'#fff').replace('margin-right:3px;',''):'';
- const rb=document.getElementById('mob-run');if(rb)rb.style.top='60px';
+ const rb=document.getElementById('mob-run');if(rb)rb.style.top='68px';
  try{if(window.VanKiepSprites&&pet)VanKiepSprites.getSheet(pet.bl,pet.sp)}catch(e){}}
 
 /* ===== Tô màu chữ quan trọng (tên vùng, hệ, vật phẩm, loài, Xu/EXP...) =====

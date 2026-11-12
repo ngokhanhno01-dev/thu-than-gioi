@@ -699,7 +699,7 @@
       o.style.display = 'block';
       rb.style.display = 'none';   // đấu trường: không cho bỏ qua, xem trọn trận
       $('mob-pn').textContent = String(pn).slice(0,14) + ' · Lv.' + level;
-      $('mob-mn').textContent = '⚔ ' + String(oppName).slice(0,12) + ' · Lv.' + (card.lv || '?');
+      $('mob-mn').textContent = String(oppName).slice(0,12) + ' · Lv.' + (card.lv || '?');
       paintUI(RP, RM);
       try{ $('mob-mh').parentNode.style.borderColor = RM[0]; }catch(_){}
       // Ô hệ cạnh thanh máu + nút Bỏ qua: dùng lại battleHudExtra của thám hiểm (10-drops-shop.js)
