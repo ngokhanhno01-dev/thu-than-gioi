@@ -285,6 +285,32 @@
     if(info && typeof info.v === 'number') k[sp] = info.v;
     return k;
   }
+  /* ===== Buff vùng của thú — CHỈ đấu trường (thám hiểm không có). Tính thật vào chỉ số 2 bên ===== */
+  const ZB_NAME = {atk:'Công', def:'Thủ', spd:'Tốc độ', mag:'Pháp Công', eva:'Né tránh', crit:'Chí mạng', regen:'Hồi phục/lượt', hp:'Máu'};
+  function zoneBuffInfo(sp){
+    let z = null;
+    try{ z = VAN_KIEP_ZONES[sp]; }catch(_){}
+    if(!z || !z.buff) return null;
+    const b = z.buff, val = b.stat === 'regen' ? b.pct / 2 : b.pct;   // hồi phục: nửa pct, giống buff vùng của quái
+    return {stat: b.stat, val: val, label: b.label, text: b.label + ': +' + val + '% ' + (ZB_NAME[b.stat] || b.stat)};
+  }
+  function applyZoneBuff(f, sp){
+    const zb = zoneBuffInfo(sp);
+    if(!zb) return f;
+    const m = 1 + zb.val / 100;
+    switch(zb.stat){
+      case 'atk': f.atk = Math.round(f.atk * m); break;
+      case 'def': f.def = Math.round(f.def * m); break;
+      case 'spd': f.spd = Math.round(f.spd * m); break;
+      case 'mag': f.mag = Math.round(f.mag * m); break;
+      case 'hp':  f.hp = Math.round(f.hp * m); f.mx = f.hp; break;
+      case 'eva': f.eva = (+f.eva || 0) + zb.val; break;
+      case 'crit': f.crit = (+f.crit || 0) + zb.val; break;
+      case 'regen': f.regen = (+f.regen || 0) + zb.val; break;
+    }
+    f.zb = zb;
+    return f;
+  }
   function mkFighterFromMe(){
     const s = (typeof statsOf === 'function' && pet)
       ? statsOf(pet.bl, pet.pi, pet.base, level)
@@ -293,7 +319,7 @@
       ? eqWorn.map(function(it){ return it ? {z: it.z, s: it.s, q: it.q} : null; })
       : [];
     const sets = activeSetBuffs(countSetsFromEq(eqArr));
-    return {
+    return applyZoneBuff({
       n: myNick(),
       hp: Math.round(s.hp), mx: Math.round(s.hp),
       atk: Math.round(s.atk), def: Math.round(s.def),
@@ -302,7 +328,7 @@
       r: 1, stn: 0, sets: sets,
       shield: 0, revived: false, nextEvade: false, firstHit: true,
       bl: pet.bl, k: skillMap(pet.sp, spOfPet()), e: (spOfPet() || {}).e || 1
-    };
+    }, pet.sp);
   }
   function mkFighterFromCard(card, nameFallback){
     const st = (card && card.stats) || {};
@@ -315,7 +341,7 @@
     try{
       oppInfo = spInfo(oppSp, (Number(card && card.pi) || 0) + (Number(card && card.up) || 0) * .03, Math.max(0, Math.min(4, Number(card && card.q) || 0)));
     }catch(_){}
-    return {
+    return applyZoneBuff({
       n: String((card && card.nick) || nameFallback || 'Đối thủ').slice(0,20),
       hp: hp, mx: hp,
       atk: Math.max(1, Math.round(Number(st.atk) || 15)),
@@ -326,7 +352,7 @@
       r: 1, stn: 0, sets: sets,
       shield: 0, revived: false, nextEvade: false, firstHit: true,
       bl: oppBl, k: skillMap(oppSp, oppInfo), e: (oppInfo || {}).e || 1
-    };
+    }, oppSp);
   }
 
   function hasSet(c, key){
@@ -690,6 +716,7 @@
       const ps = (typeof statsOf === 'function') ? statsOf(pet.bl, pet.pi, pet.base, level) : {spd:0};
       const oppBL = card.bl || 'ho', oppSP = Math.max(0, Math.min(16, Math.floor(Number(card.sp) || 0)));
       const RP = REG[pet.sp], RM = REG[oppSP];
+      const zbP = zoneBuffInfo(pet.sp), zbM = zoneBuffInfo(oppSP);   // buff vùng hiện trong đấu trường
       const HN = [fxElem((BL[pet.bl]||{}).h), fxElem((BL[oppBL]||{}).h)];
       const CL = R.ev.map(fxClass);
       const REDM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -786,6 +813,7 @@
         drawOpp(g, card, 272, 208, 120, tt, dmx, am, false);
         if(pf > 0) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, dp, 1, true); }, '#ffffff', 1, pf);
         if(mf > 0) tintDraw(g, function(c){ drawOpp(c, card, 272, 208, 120, tt, dmx, 1, true); }, '#ffffff', 1, mf);
+        try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaPanels) TTGCombatFX.drawArenaPanels(g, pet.sp, oppSP, zbP, zbM); }catch(_){}
         if(fx) impact(g, fx, tt);
         try{ fxDraw(g, tt, dp, dmx); }catch(_){}
         g.restore();
