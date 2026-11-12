@@ -234,8 +234,8 @@ function twinkle(g,cx,by,W2,H,T,sp,mode,bright,al){
   const a=clamp(Math.pow(s,.5)*fl*bright*al*1.25,0,1);if(a<.04)continue;
   const L=Math.max(2,Math.round((3+SEED[(i+11)&31]*5)*s)),
         px=Math.round((cx+(hash(q,i,1)*2-1)*.95*W2)/2)*2,py=Math.round((by-(.08+hash(q,i,2)*1.05)*H)/2)*2;
-  g.globalAlpha=a;g.fillStyle=col;g.fillRect(px,py-L,1,L*2+1);g.fillRect(px-L,py,L*2+1,1);   /* dấu + mỏng 1px */
-  if(L>=4){g.fillRect(px-L-2,py,1,1);g.fillRect(px+L+2,py,1,1);g.fillRect(px,py-L-2,1,1);g.fillRect(px,py+L+2,1,1)}
+  g.globalAlpha=a;g.fillStyle=col;g.fillRect(px-1,py-L,2,L*2);g.fillRect(px-L,py-1,L*2,2);   /* dấu + 2px, trắng sáng */
+  if(L>=4){g.fillRect(px-L-2,py-1,2,2);g.fillRect(px+L,py-1,2,2);g.fillRect(px-1,py-L-2,2,2);g.fillRect(px-1,py+L,2,2)}
   cnt++}
  stat.particles+=cnt}
 
