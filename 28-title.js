@@ -120,17 +120,17 @@ function placeOwn(){
   const w=st.clientWidth,h=st.clientHeight,k=Math.max(w/360,h/250);
   const x=(w-360*k)*.5+H.x*k,y=(h-250*k)*.55+H.top*k;
   /* Tỉ lệ cao/rộng của ảnh (mỗi danh hiệu một khổ). Thú càng lớn thì đầu càng sát mép trên: nếu ảnh không đủ chỗ
-     thì THU NHỎ cho vừa (tối thiểu 80px) thay vì bị kẹt cứng ở mép trên và đứng yên khi thú chuyển động. */
+     thì THU NHỎ cho vừa (tối thiểu 70px) thay vì bị kẹt cứng ở mép trên và đứng yên khi thú chuyển động. */
   const im=el.firstChild,ar=(im&&im.naturalWidth)?im.naturalHeight/im.naturalWidth:.5;
   let tw=Math.min(150,w*.42);
-  const room=y+4-2-10;                            /* chừa 10px dư để danh hiệu còn chỗ nhúc nhích theo nhịp thở của thú */                               /* chỗ trống từ mép trên khung tới đầu thú */
-  if(tw*ar>room)tw=Math.max(80,Math.floor(room/ar/12)*12);   /* làm tròn theo nấc 12px: kích thước đứng yên trong nấc nên danh hiệu vẫn nhúc nhích theo thú */
+  const room=y+4-2;                               /* chỗ trống từ mép trên khung tới đầu thú */
+  if(tw*ar>room)tw=Math.max(70,room/ar);
   const th=tw*ar;
   el.style.width=tw+'px';if(im)im.style.width=tw+'px';
   el.style.display='block';el.style.left=Math.round(x-tw/2)+'px';el.style.top=Math.max(2,Math.round(y-th+4))+'px'}
 setInterval(()=>{try{mountOwn()}catch(_){}},15000);
 setTimeout(()=>{try{mountOwn()}catch(_){}},4000);
-(function loop(){try{placeOwn()}catch(_){}requestAnimationFrame(loop)})();   /* mỗi khung hình, để danh hiệu chuyển động mượt cùng thú */
+setInterval(()=>{try{placeOwn()}catch(_){}},120);
 
 /* ---------- Màn chiến đấu (thám hiểm + đấu trường): danh hiệu dưới thanh máu mỗi bên ---------- */
 function btEl(id){
