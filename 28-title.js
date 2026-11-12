@@ -73,6 +73,11 @@ function tag(uid){
   const c=cache[uid];if(!(c&&c.list&&c.list.length))return'';
   const x=c.list[0],st=styleOf(x)||'color:#ffd24a';
   return'<span class="ttg-tag'+(x.manual&&x.id==='admin'?' adm':'')+'" style="'+st+'">'+iconOf(x)+' '+esc(text(x))+'</span>'}
+/* Huy hiệu cho khung chat: CHỈ ảnh danh hiệu + hạt lấp lánh (không icon, không chữ). '' nếu chưa có ảnh / chưa nạp xong. */
+function chatBadge(uid){
+  const c=cache[uid];if(!(c&&c.list&&c.list.length))return'';
+  const x=c.list[0],src=imgOf(x);if(!src)return'';
+  return'<span class="ttg-cb" title="'+esc(text(x))+'"><img src="'+src+'" alt="" onerror="this.parentNode.remove()"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>'}
 function icon(uid){const c=cache[uid];return(c&&c.list&&c.list.length)?iconOf(c.list[0]):''}
 function prefetch(uid,cb){if(!uid)return;const c=cache[uid];if(c&&c.list&&Date.now()-c.t<TTL)return;get(uid).then(l=>{if(l.length&&cb)cb()})}
 
@@ -94,6 +99,19 @@ function fill(uid,el){
   '#ttg-pt{position:absolute;left:0;top:0;z-index:4;pointer-events:none;display:none;width:150px;line-height:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}'+
   '#ttg-pt img{width:150px;height:auto;display:block}'+
   '.ttg-tag{font-weight:800;white-space:nowrap}'+
+  '.ttg-cb{position:relative;display:inline-block;vertical-align:middle;margin-right:5px;height:32px;line-height:0}'+
+  '.ttg-cb img{display:block;height:32px;width:auto;max-width:104px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.65))}'+
+  '.ttg-cb i{position:absolute;width:3px;height:3px;background:#fff;box-shadow:0 0 3px 1px #ffe28a,0 0 7px 2px rgba(255,210,74,.55);opacity:0;pointer-events:none;animation:ttgSp 2.4s ease-in-out infinite}'+
+  '.ttg-cb i:nth-of-type(1){left:6%;top:18%;animation-delay:0s}'+
+  '.ttg-cb i:nth-of-type(2){left:24%;top:72%;width:2px;height:2px;animation-delay:.7s;animation-duration:1.9s}'+
+  '.ttg-cb i:nth-of-type(3){left:42%;top:10%;width:4px;height:4px;animation-delay:1.3s}'+
+  '.ttg-cb i:nth-of-type(4){left:58%;top:64%;animation-delay:.3s;animation-duration:2.8s}'+
+  '.ttg-cb i:nth-of-type(5){left:73%;top:22%;width:2px;height:2px;animation-delay:1.8s;animation-duration:2s}'+
+  '.ttg-cb i:nth-of-type(6){left:88%;top:58%;animation-delay:1s}'+
+  '.ttg-cb i:nth-of-type(7){left:33%;top:42%;width:2px;height:2px;animation-delay:2.1s;animation-duration:2.6s}'+
+  '.ttg-cb i:nth-of-type(8){left:80%;top:84%;animation-delay:.5s;animation-duration:2.2s}'+
+  '@keyframes ttgSp{0%,100%{opacity:0;transform:scale(.3) translateY(2px)}40%{opacity:1;transform:scale(1.15) translateY(-1px)}70%{opacity:.7;transform:scale(.6) translateY(-4px)}}'+
+  '@media (prefers-reduced-motion:reduce){.ttg-cb i{animation:none;opacity:.7}}'+
   '.ttg-tag.adm{text-shadow:0 0 5px currentColor}'+
   '#ttg-bt-p,#ttg-bt-m{position:absolute;bottom:4px;z-index:6;pointer-events:none;font-size:11px;font-weight:800;white-space:nowrap;max-width:46%;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000,0 0 5px #000}'+
   '#ttg-bt-p{left:6px}#ttg-bt-m{right:6px;text-align:right}';
@@ -175,5 +193,5 @@ setInterval(()=>{
     arObs=new MutationObserver(()=>{try{decorate(b)}catch(_){}});
     arObs.observe(b,{childList:true,subtree:true});try{decorate(b)}catch(_){}}},1000);
 
-window.TTGTITLE={imgOf,get,text,icon,tag,decorate,prefetch,fill,MANUAL,refresh(uid){delete cache[uid||ownUid];ownT=0}};
+window.TTGTITLE={imgOf,get,text,icon,tag,chatBadge,decorate,prefetch,fill,MANUAL,refresh(uid){delete cache[uid||ownUid];ownT=0}};
 })();

@@ -153,8 +153,8 @@ function render(items){
   items.forEach(it=>{
     const x=it.x,ts=tOf(x)-offset;
     const row=document.createElement('div');if(me&&x.uid===me.uid)row.className='me';
-    const ti=(window.TTGTITLE&&TTGTITLE.tag(x.uid))||'';
-    row.innerHTML='<span class="t">'+fmtT(ts)+'</span><span class="n">'+(ti?ti+' ':'')+esc(x.name||'Ẩn danh')+':</span> <span class="tx">'+esc(x.text||'')+'</span>';
+    const ti=(window.TTGTITLE&&TTGTITLE.chatBadge&&TTGTITLE.chatBadge(x.uid))||'';   /* chỉ ảnh danh hiệu + hạt lấp lánh */
+    row.innerHTML='<span class="t">'+fmtT(ts)+'</span><span class="n">'+ti+esc(x.name||'Ẩn danh')+':</span> <span class="tx">'+esc(x.text||'')+'</span>';
     m.appendChild(row)});
   if(near||open&&firstSnap)m.scrollTop=m.scrollHeight}
 function schedRender(){if(rT)return;rT=setTimeout(()=>{rT=0;list.sort((a,b)=>tOf(a.x)-tOf(b.x));if(list.length>CHAT_LIMIT)list=list.slice(-CHAT_LIMIT);render(list)},40)}
