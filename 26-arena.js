@@ -1141,13 +1141,13 @@
       '#ar-box .hd{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:2px solid #78613a;color:#f6c66a;font-size:17px;flex-shrink:0}'+
       '#ar-box .hd button{width:auto;margin:0;padding:2px 10px;font-size:18px;background:#3b4a4f;border:2px solid #040a0e;color:#f5edcf;cursor:pointer}'+
       '#ar-body{flex:1;overflow-y:auto;padding:8px 10px;min-height:0}'+
-      '#ar-podium{display:flex;gap:6px;justify-content:center;align-items:flex-end;margin-bottom:10px}'+
+      '#ar-podium{display:flex;gap:6px;justify-content:center;align-items:flex-end;margin-bottom:10px;padding-top:26px}'+
       '#ar-podium .slot{flex:1;max-width:120px;background:#0f1f24;border:2px solid #78613a;border-radius:6px;padding:6px 4px;text-align:center;cursor:pointer}'+
       '#ar-podium .slot.t1{border-color:#f6c66a;order:2}'+
       '#ar-podium .slot.t2{border-color:#c0c8d0;order:1;transform:scale(.92)}'+
       '#ar-podium .slot.t3{border-color:#cd7f32;order:3;transform:scale(.92)}'+
       '#ar-podium .slot canvas{width:72px;height:72px;image-rendering:pixelated;display:block;margin:0 auto 4px;background:#0b1a20;border:1px solid #3a4a44}'+
-      '#ar-podium .slot .rn{font-size:12px;color:#f6c66a;font-weight:700}'+
+      '#ar-podium .slot .rn{font-size:15px;color:#f6c66a;font-weight:700;margin-top:3px;text-shadow:1px 1px 0 #071116}'+
       '#ar-podium .slot .nm{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2px 0}'+
       '#ar-podium .slot .lv{font-size:11px;color:#72e4b0}'+
       '#ar-podium .slot .fm{font-size:13px;color:#f6c66a;font-weight:700}'+
@@ -1360,14 +1360,14 @@
       const r = topRows[i];
       const cls = 'slot t'+(i+1) + (r ? '' : ' empty-slot');
       if(!r){
-        podiumHtml += '<div class="'+cls+'"><div class="rn">#'+(i+1)+'</div><div style="height:72px"></div><div class="nm">Trống</div></div>';
+        podiumHtml += '<div class="'+cls+'"><div style="height:72px"></div><div class="nm">Trống</div><div class="rn">#'+(i+1)+'</div></div>';
       }else{
         podiumHtml += '<div class="'+cls+'" data-uid="'+esc(r.uid)+'" data-nick="'+esc(r.nick)+'">'+
-          '<div class="rn">#'+(i+1)+'</div>'+
           '<canvas width="128" height="128" data-i="'+i+'"></canvas>'+
           '<div class="nm">'+esc(r.nick)+'</div>'+
           '<div class="lv">Lv.'+r.lv+'</div>'+
-          '<div class="fm">'+dispFame(r)+'</div></div>';
+          '<div class="fm">'+dispFame(r)+'</div>'+
+          '<div class="rn">#'+(i+1)+'</div></div>';
       }
     }
     podiumHtml += '</div>';

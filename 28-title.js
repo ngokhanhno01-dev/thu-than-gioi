@@ -74,10 +74,10 @@ function tag(uid){
   const x=c.list[0],st=styleOf(x)||'color:#ffd24a';
   return'<span class="ttg-tag'+(x.manual&&x.id==='admin'?' adm':'')+'" style="'+st+'">'+iconOf(x)+' '+esc(text(x))+'</span>'}
 /* Huy hiệu cho khung chat: CHỈ ảnh danh hiệu + hạt lấp lánh (không icon, không chữ). '' nếu chưa có ảnh / chưa nạp xong. */
-function chatBadge(uid){
+function chatBadge(uid,cls,rm){
   const c=cache[uid];if(!(c&&c.list&&c.list.length))return'';
   const x=c.list[0],src=imgOf(x);if(!src)return'';
-  return'<span class="ttg-cb" title="'+esc(text(x))+'"><img src="'+src+'" alt="" onerror="this.parentNode.remove()"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>'}
+  return'<span class="'+(cls||'ttg-cb')+'" title="'+esc(text(x))+'"><img src="'+src+'" alt="" onerror="'+(rm||'this.parentNode.remove()')+'"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>'}
 function icon(uid){const c=cache[uid];return(c&&c.list&&c.list.length)?iconOf(c.list[0]):''}
 function prefetch(uid,cb){if(!uid)return;const c=cache[uid];if(c&&c.list&&Date.now()-c.t<TTL)return;get(uid).then(l=>{if(l.length&&cb)cb()})}
 
@@ -101,17 +101,22 @@ function fill(uid,el){
   '.ttg-tag{font-weight:800;white-space:nowrap}'+
   '.ttg-cb{position:relative;display:inline-block;vertical-align:middle;margin-right:5px;height:32px;line-height:0}'+
   '.ttg-cb img{display:block;height:32px;width:auto;max-width:104px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.65))}'+
-  '.ttg-cb i{position:absolute;width:3px;height:3px;background:#fff;box-shadow:0 0 3px 1px #ffe28a,0 0 7px 2px rgba(255,210,74,.55);opacity:0;pointer-events:none;animation:ttgSp 2.4s ease-in-out infinite}'+
-  '.ttg-cb i:nth-of-type(1){left:6%;top:18%;animation-delay:0s}'+
-  '.ttg-cb i:nth-of-type(2){left:24%;top:72%;width:2px;height:2px;animation-delay:.7s;animation-duration:1.9s}'+
-  '.ttg-cb i:nth-of-type(3){left:42%;top:10%;width:4px;height:4px;animation-delay:1.3s}'+
-  '.ttg-cb i:nth-of-type(4){left:58%;top:64%;animation-delay:.3s;animation-duration:2.8s}'+
-  '.ttg-cb i:nth-of-type(5){left:73%;top:22%;width:2px;height:2px;animation-delay:1.8s;animation-duration:2s}'+
-  '.ttg-cb i:nth-of-type(6){left:88%;top:58%;animation-delay:1s}'+
-  '.ttg-cb i:nth-of-type(7){left:33%;top:42%;width:2px;height:2px;animation-delay:2.1s;animation-duration:2.6s}'+
-  '.ttg-cb i:nth-of-type(8){left:80%;top:84%;animation-delay:.5s;animation-duration:2.2s}'+
+  '.ttg-cb i,.ttg-pb i,.ttg-rb i{position:absolute;width:4px;height:4px;background:#fff;box-shadow:0 0 3px 1px #ffe28a,0 0 7px 2px rgba(255,210,74,.55);opacity:0;pointer-events:none;animation:ttgSp 2.4s ease-in-out infinite;animation-duration:var(--d,2.4s)!important;animation-iteration-count:infinite!important}'+
+  '.ttg-cb i:nth-of-type(1),.ttg-pb i:nth-of-type(1),.ttg-rb i:nth-of-type(1){left:6%;top:18%;animation-delay:0s}'+
+  '.ttg-cb i:nth-of-type(2),.ttg-pb i:nth-of-type(2),.ttg-rb i:nth-of-type(2){left:24%;top:72%;width:3px;height:3px;animation-delay:.7s;--d:1.9s}'+
+  '.ttg-cb i:nth-of-type(3),.ttg-pb i:nth-of-type(3),.ttg-rb i:nth-of-type(3){left:42%;top:10%;width:5px;height:5px;animation-delay:1.3s}'+
+  '.ttg-cb i:nth-of-type(4),.ttg-pb i:nth-of-type(4),.ttg-rb i:nth-of-type(4){left:58%;top:64%;animation-delay:.3s;--d:2.8s}'+
+  '.ttg-cb i:nth-of-type(5),.ttg-pb i:nth-of-type(5),.ttg-rb i:nth-of-type(5){left:73%;top:22%;width:3px;height:3px;animation-delay:1.8s;--d:2s}'+
+  '.ttg-cb i:nth-of-type(6),.ttg-pb i:nth-of-type(6),.ttg-rb i:nth-of-type(6){left:88%;top:58%;animation-delay:1s}'+
+  '.ttg-cb i:nth-of-type(7),.ttg-pb i:nth-of-type(7),.ttg-rb i:nth-of-type(7){left:33%;top:42%;width:3px;height:3px;animation-delay:2.1s;--d:2.6s}'+
+  '.ttg-cb i:nth-of-type(8),.ttg-pb i:nth-of-type(8),.ttg-rb i:nth-of-type(8){left:80%;top:84%;animation-delay:.5s;--d:2.2s}'+
+  '#ar-podium .slot{position:relative}'+
+  '.ttg-pbw{position:relative;height:28px;pointer-events:none}'+
+  '.ttg-pb{position:absolute;left:50%;top:-24px;transform:translateX(-50%);height:46px;line-height:0;z-index:3}'+
+  '.ttg-pb img{display:block;height:46px;width:auto;max-width:118px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}'+
+  '.ttg-rb{position:relative;display:inline-block;vertical-align:middle;margin-right:5px;height:28px;line-height:0}'+
+  '.ttg-rb img{display:block;height:28px;width:auto;max-width:90px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.65))}'+
   '@keyframes ttgSp{0%,100%{opacity:0;transform:scale(.3) translateY(2px)}40%{opacity:1;transform:scale(1.15) translateY(-1px)}70%{opacity:.7;transform:scale(.6) translateY(-4px)}}'+
-  '@media (prefers-reduced-motion:reduce){.ttg-cb i{animation:none;opacity:.7}}'+
   '.ttg-tag.adm{text-shadow:0 0 5px currentColor}'+
   '#ttg-bt-p,#ttg-bt-m{position:absolute;bottom:4px;z-index:6;pointer-events:none;font-size:11px;font-weight:800;white-space:nowrap;max-width:46%;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000,0 0 5px #000}'+
   '#ttg-bt-p{left:6px}#ttg-bt-m{right:6px;text-align:right}';
@@ -181,10 +186,16 @@ function decorate(root){
     if(!nm||!uid||nm.getAttribute('data-tt')===uid)return;
     nm.setAttribute('data-tt',uid);
     get(uid).then(l=>{
-      if(!l.length||!nm.isConnected||nm.querySelector('.ttg-tag'))return;
-      const t=document.createElement('span');t.innerHTML=tag(uid)+' ';
-      if(box.classList.contains('slot')){t.style.display='block';t.style.fontSize='10px'}   /* bục top 3: danh hiệu nằm trên tên */
-      nm.insertBefore(t,nm.firstChild)})})}
+      if(!l.length||!nm.isConnected)return;
+      if(box.classList.contains('slot')){                 /* bục top 3: ảnh danh hiệu treo vắt ngang viền trên, KHÔNG hiện chữ */
+        if(box.querySelector('.ttg-pbw'))return;
+        const h=chatBadge(uid,'ttg-pb',"var w=this.closest('.ttg-pbw');if(w)w.remove()");if(!h)return;
+        const w=document.createElement('div');w.className='ttg-pbw';w.innerHTML=h;
+        box.insertBefore(w,box.firstChild);return}
+      if(nm.querySelector('.ttg-rb'))return;               /* hạng 4 trở xuống + danh sách khiêu chiến: ảnh danh hiệu nhỏ trước tên, KHÔNG hiện chữ */
+      const h=chatBadge(uid,'ttg-rb');if(!h)return;
+      const t=document.createElement('span');t.innerHTML=h;
+      nm.insertBefore(t.firstChild,nm.firstChild)})})}
 let arObs=null,arEl=null;
 setInterval(()=>{
   const b=document.getElementById('ar-body');
