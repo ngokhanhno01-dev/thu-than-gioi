@@ -51,18 +51,20 @@ const SP17=[
  {n:'Chí mạng',m:20,c:.18,t:v=>'Tỉ lệ chí mạng +'+v+'%, sát thương chí mạng +'+Math.round(v*3*10)/10+'%'},
  {n:'Thu hoạch',m:50,c:0,t:v=>'Xu nhận được +'+v+'%'},
  {n:'Danh vọng',m:50,c:0,t:v=>'Uy danh nhận được +'+v+'%'},
- {n:'Phản đòn',m:30,c:.14,t:v=>'Trả lại '+v+'% sát thương nhận'},
- {n:'Xuyên giáp',m:40,c:.18,t:v=>'Bỏ qua '+v+'% Thủ đối thủ'},
+ {n:'Phản đòn',m:42,c:.14,t:v=>'Trả lại '+v+'% sát thương nhận'},
+ {n:'Xuyên giáp',m:60,c:.18,t:v=>'Bỏ qua '+v+'% Thủ đối thủ'},
  {n:'Khiên',m:25,c:.14,t:v=>'Đầu trận có khiên bằng '+v+'% HP'},
  {n:'Kháng hiệu ứng',m:50,c:.08,t:v=>'Giảm choáng, chậm, đốt nhận vào '+v+'%'},
- {n:'Thiêu đốt',m:10,c:.14,t:v=>'Đốt: '+v+'% Công mỗi lượt'},
+ {n:'Thiêu đốt',m:28,c:.14,t:v=>'Đốt: '+v+'% Công mỗi lượt'},
  {n:'Hút máu',m:25,c:.14,t:v=>'Hồi '+v+'% sát thương gây ra'},
  {n:'Tầm bảo',m:60,c:0,t:v=>'Tỉ lệ rơi vật phẩm +'+v+'%'},
  {n:'Hồi sinh',m:40,c:.22,t:v=>'Hồi sinh 1 lần mỗi trận với '+v+'% HP'},
  {n:'Ngộ tính',m:60,c:0,t:v=>'Thám hiểm hiệu quả +'+v+'%'},
- {n:'Bất khuất',m:50,c:.22,t:v=>'HP dưới 25%: Công và Thủ +'+v+'%'}];
-function spInfo(sp,pi,q){const e=Math.min(1.2,pur(pi)*(1+q*.05)),d=SP17[sp],v=Math.round(d.m*e*10)/10;
-  return{e,v,name:d.n,text:d.t(v,e),c:d.c*e}}
+ {n:'Bất khuất',m:50,c:.22,t:v=>'HP dưới 50%: Công và Thủ +'+v+'%'}];
+/* Hệ số hiệu lực buff theo hạng vùng: Phổ biến, Hiếm, Rất hiếm, Huyền thoại — vùng càng khó ra càng mạnh. Sửa tại đây. */
+const TIER_MUL=[1,1.15,1.35,1.6];
+function spInfo(sp,pi,q){const e=Math.min(1.2,pur(pi)*(1+q*.05)),d=SP17[sp],tm=TIER_MUL[TIER[sp]]||1,v=Math.round(d.m*e*tm*10)/10;
+  return{e,v,tm,name:d.n,text:d.t(v,e),c:d.c*e}}
 function spOfPet(){return pet?spInfo(pet.sp,pet.pi+(pet.up||0)*.03,pet.q):null}
 function addFame(n){/* Uy danh chỉ từ Đấu trường (Bước 4). Nguồn cũ (thám hiểm/Linh Đan/Linh Quả) đã tắt. */return 0}
 
@@ -114,7 +116,7 @@ const _ri=renderInfo;renderInfo=function(){_ri();
    el.innerHTML=el.innerHTML.replace('<small>'+B.tip+' khi Phản Tổ</small>','<div style="margin-top:4px">Thưởng huyết mạch hiện tại ('+PL[pi][1]+(!pv.on&&pet&&pet.up?' +'+pet.up:'')+' '+Math.round(p*100)+'%): '+cur+'<br><small>Tối đa '+B.tip+' khi Phản Tổ 100%</small></div>')}
   el.insertAdjacentHTML('beforeend','<div style="margin-top:10px;padding-top:8px;border-top:1px dashed rgba(168,92,78,.4)">'+
    'Vùng <b>'+EPI[sp][0]+'</b> · <b style="color:'+TIERC[TIER[sp]]+'">'+TIERN[TIER[sp]]+'</b><br>'+
-   '✨ <b style="color:var(--gold)">'+s.name+'</b>: '+s.text+(s.c>0?'<br><small>🎖️ Đấu trường: chiến lực +'+Math.round(s.c*1000)/10+'%</small>':'')+'<br>'+
+   '✨ <b style="color:var(--gold)">'+s.name+'</b>: '+s.text+(s.tm>1?'<br><small style="color:'+TIERC[TIER[sp]]+'">Hạng '+TIERN[TIER[sp]]+': hiệu lực buff ×'+String(s.tm).replace('.',',')+'</small>':'')+(s.c>0?'<br><small>🎖️ Đấu trường: chiến lực +'+Math.round(s.c*1000)/10+'%</small>':'')+'<br>'+
    '☯ '+relText(bl)+'</div>')};
 
 /* --- hoạt động: thám hiểm / đấu trường / cửa hàng --- */
