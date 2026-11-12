@@ -96,8 +96,14 @@ function setHtml(eq){
   return Object.keys(c).filter(z=>c[z]>=2&&EQ_SETS[z]).map(z=>{
     const S=EQ_SETS[z],n=c[z],qb=qs[z].reduce((a,b)=>a+b,0)/qs[z].length;
     let d='';try{d=S.t(eqScale(n>=4?S.v4:S.v2,qb,+z))}catch(_){}   /* cùng công thức với trận đấu: có nhân phẩm + vùng */
-    return'<div class="set">'+S.i+' Bộ '+esc(S.name)+' '+n+'/4 — buff bộ '+(n>=4?'đủ 4 món':'2 món')+(qb>0?' · phẩm +'+Math.round(qb*100)+'%':'')+'</div>'+
+    return'<div class="set">'+S.i+' Bộ <b style="color:'+(typeof ZONE_COL!=='undefined'&&ZONE_COL[z]||'#72e4b0')+'">'+esc(S.name)+'</b> '+n+'/4 — buff bộ '+(n>=4?'đủ 4 món':'2 món')+(qb>0?' · phẩm +'+Math.round(qb*100)+'%':'')+'</div>'+
       (d?'<div style="margin:0 0 5px;font-size:13px!important;line-height:1.3;color:#b7bda9">'+d+'</div>':'')}).join('')}
+
+/* Màu của hệ (Kim/Thủy/Mộc/Hỏa/Thổ/Huyễn) = màu hào quang của huyết mạch thuộc hệ đó */
+function elemCol(h){for(const k in BL)if(BL[k].h===h)return'rgb('+BL[k].au+')';return'#f6e9e4'}
+function elemHtml(h){return'<b style="color:'+elemCol(h)+'">'+esc(h)+'</b>'}
+/* tô màu tên hệ trong câu khắc / bị khắc của relText */
+function colorElems(t){return String(t).replace(/<b>(Kim|Thủy|Mộc|Hỏa|Thổ|Huyễn)<\/b>/g,(m,h)=>elemHtml(h))}
 
 /* Huyết mạch: thưởng chỉ số hiện tại theo độ đậm + hệ khắc / bị khắc (dùng lại relText của 05-hatch.js) */
 function bloodHtml(bl,pi,up){
@@ -106,8 +112,8 @@ function bloodHtml(bl,pi,up){
   const cur=Object.keys(B.b).map(k=>(NM[k]||k)+' <b style="color:#72e4b0">+'+Math.round(B.b[k]*p*10)/10+'%</b>').join(', ');
   let rel='';try{rel=typeof relText==='function'?relText(bl):''}catch(_){}
   return'<div class="s">🧬 Huyết mạch &amp; hệ</div>'+
-    '<div style="font-size:14px!important;line-height:1.35">Hệ <b>'+esc(B.h)+'</b> · thưởng hiện tại (độ đậm '+Math.round(p*100)+'%): '+cur+'<br><small style="color:#b7bda9">Tối đa '+esc(B.tip)+' khi độ đậm 100%</small></div>'+
-    (rel?'<div style="margin-top:3px;font-size:14px!important;line-height:1.35">'+rel+'</div>':'')}
+    '<div style="font-size:14px!important;line-height:1.35">Hệ '+elemHtml(B.h)+' · thưởng hiện tại (độ đậm '+Math.round(p*100)+'%): '+cur+'<br><small style="color:#b7bda9">Tối đa '+esc(B.tip)+' khi độ đậm 100%</small></div>'+
+    (rel?'<div style="margin-top:3px;font-size:14px!important;line-height:1.35">'+colorElems(rel)+'</div>':'')}
 
 function ago(t){
   try{const ms=Date.now()-t.toDate().getTime();if(!(ms>=0))return'';
@@ -140,7 +146,11 @@ function render(c,uid,fallbackNick,pt){
   let spName=genOf(bl,sp).name,spTxt='';
   try{const si=spInfo(sp,pi+up*.03,q);spTxt=si&&si.text?si.text:''}catch(_){}
   const pe=Math.round(pur(pi+up*.03)*100);
-  const nm=$('cv-nm');nm.textContent='🐾 '+nick;nm.dataset.nick=nick;
+  /* độ hiếm của loài (Phổ biến / Hiếm / Rất hiếm / Huyền thoại) + vùng, dùng đúng màu của màn chính */
+  let tierCol='#f6e9e4',tierTxt='';
+  try{const ti=TIER[sp];tierCol=TIERC[ti]||tierCol;
+    tierTxt=' · Vùng <b>'+esc(EPI[sp][0])+'</b> · <b style="color:'+tierCol+'">'+esc(TIERN[ti])+'</b>'}catch(_){}
+  const nm=$('cv-nm');nm.textContent='🐾 '+nick;nm.dataset.nick=nick;nm.style.color='rgb('+B.au+')';
   /* Bảng chỉ số: dùng ĐÚNG hàm cbAttrs của màn chính (03-game-core.js) để khớp bảng ngoài,
      gồm cả hiệu ứng kỹ năng loài (chí mạng, kháng hiệu ứng, xuyên giáp, hút máu...). Lỗi thì quay về bảng cơ bản. */
   let rows;
@@ -158,9 +168,9 @@ function render(c,uid,fallbackNick,pt){
    '<div class="top"><canvas id="cv-cv" width="128" height="128"></canvas><div class="inf">'+
    onlineHtml(pt)+'<div><b style="color:var(--jade)">Cấp '+lv+'</b></div><div>'+esc(STAGES[st][1])+'</div>'+
    '<div>Phẩm: <b style="color:rgb('+QC[q]+')">'+QN[q]+'</b></div>'+
-   '<div>Huyết mạch: <b style="color:rgb('+B.au+')">'+esc(B.n)+'</b> <small>(hệ '+esc(B.h)+')</small></div>'+
+   '<div>Huyết mạch: <b style="color:rgb('+B.au+')">'+esc(B.n)+'</b> <small>(hệ '+elemHtml(B.h)+')</small></div>'+
    '<div>Độ đậm: <b style="color:var(--gold)">'+esc(PL[pi][1])+(up?' +'+up:'')+'</b> <small>('+pe+'%)</small></div></div></div>'+
-   '<div>Loài: <b>'+esc(spName)+'</b></div>'+(spTxt?'<div class="set" style="color:#b7bda9">'+spTxt+'</div>':'')+bloodHtml(bl,pi,up)+
+   '<div>Loài: <b style="color:'+tierCol+'">'+esc(spName)+'</b>'+tierTxt+'</div>'+(spTxt?'<div class="set" style="color:#b7bda9">'+spTxt+'</div>':'')+bloodHtml(bl,pi,up)+
    '<div class="s">📊 Chỉ số tổng (huyết mạch + trang bị + kỹ năng loài)</div><div class="sg">'+grid+'</div>'+
    '<div class="s">🛡️ Trang bị đang mang</div>'+setHtml(eq)+[0,1,2,3].map(i=>itemHtml(eq[i])).join('')+
    (upd?'<div class="ft">Thẻ cập nhật '+upd+'</div>':'')+reportBtnHtml(uid);
