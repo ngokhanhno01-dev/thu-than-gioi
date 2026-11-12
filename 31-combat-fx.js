@@ -97,22 +97,22 @@ function zoneBuffArt(b,z){
   default:return z.attack;
  }
 }
-/* Bảng thông tin cố định ở 2 góc dưới khung, hiện suốt trận (không mờ dần, không đè lên tên/thanh máu) */
+/* Bảng thông tin cố định ở 2 góc TRÊN khung, hiện suốt trận (không mờ dần, không đè lên tên/thanh máu) */
 function wrapLines(g,t,w,max){const words=String(t).split(' '),out=[];let cur='';
  for(const wd of words){const n=cur?cur+' '+wd:wd;if(cur&&g.measureText(n).width>w){out.push(cur);cur=wd}else cur=n}
  if(cur)out.push(cur);if(out.length>max){out.length=max;out[max-1]=out[max-1].replace(/.{0,2}$/,'…')}return out}
-function panel(g,x,y2,w,color,lines){
- const lh=10,h=lines.length*lh+6,y=y2-h;g.save();g.globalAlpha=.78;g.fillStyle='#120a1c';g.fillRect(x,y,w,h);
- g.globalAlpha=.9;g.strokeStyle=color;g.lineWidth=1;g.strokeRect(x+.5,y+.5,w-1,h-1);g.globalAlpha=1;
- g.textAlign='left';g.textBaseline='top';g.font='bold 9px monospace';
- lines.forEach((l,k)=>{g.fillStyle=l.c;g.fillText(l.t,x+4,y+4+k*lh)});g.restore()}
+function panel(g,x,y,w,color,lines){
+ const lh=9,h=lines.length*lh+4;g.save();g.globalAlpha=.88;g.fillStyle='#100818';g.fillRect(x,y,w,h);
+ g.globalAlpha=1;g.strokeStyle=color;g.lineWidth=1;g.strokeRect(x+.5,y+.5,w-1,h-1);
+ g.textAlign='left';g.textBaseline='top';g.font='bold 8px monospace';
+ lines.forEach((l,k)=>{g.fillStyle=l.c;g.fillText(l.t,x+4,y+3+k*lh)});g.restore()}
 function infoPanels(g,z,zp,R){
- g.save();g.font='bold 9px monospace';const W=170,iw=W-8,mode=v=>v.mode==='melee'?'Cận chiến':'Đánh xa';
+ g.save();g.font='bold 8px monospace';const W=146,iw=W-8,mode=v=>v.mode==='melee'?'Cận chiến':'Đánh xa';
  const L=[{t:zp.mark+' '+zp.name+' · '+mode(zp),c:zp.color}];
  if(R&&R.startBuffs&&R.startBuffs.length)wrapLines(g,'✦ '+R.startBuffs.map(v=>v.name).join(', '),iw,2).forEach(t=>L.push({t,c:'#ffe8a8'}));
  const M=[{t:z.mark+' '+z.name+' · '+mode(z),c:z.color}];
  if(R&&R.zoneBuff)wrapLines(g,R.zoneBuff.label+': '+R.zoneBuff.desc,iw,2).forEach(t=>M.push({t,c:'#fff0bd'}));
- panel(g,3,247,W,zp.color,L);panel(g,357-W,247,W,z.color,M);g.restore()}
+ panel(g,3,2,W,zp.color,L);panel(g,357-W,2,W,z.color,M);g.restore()}
 function drawField(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  const z=zone(i),zp=zone(petSp==null?currentPetZone:petSp),q=clamp(1-Math.max(0,elapsed-(hold||0))/1.35,0,1),pulse=.55+.45*Math.sin(T*5);
  const ring=(cx,color,opacity)=>{
@@ -140,7 +140,7 @@ function drawCountdown(g,T,CD,tick,N){
  const out=T>=CD,k=out?clamp((T-CD)/.7,0,1):(T%tick)/tick,n=out?0:N-Math.floor(T/tick);
  if(!out&&(n<1||n>N))return;
  const txt=out?'CHIẾN!':String(n),sc=out?1.15+.35*k:1.5-.5*Math.min(1,k*3),al=out?1-k*k:1;
- g.save();g.globalAlpha=al;g.textAlign='center';g.textBaseline='middle';g.font='bold '+Math.round(54*sc)+'px monospace';
+ g.save();g.globalAlpha=al;g.textAlign='center';g.textBaseline='middle';g.font='bold '+Math.round(38*sc)+'px monospace';
  g.lineWidth=7;g.lineJoin='round';g.strokeStyle='#160e1c';g.strokeText(txt,180,128);
  g.fillStyle=out?'#ff6a3a':n===1?'#ffd24a':'#fff0bd';g.fillText(txt,180,128);
  g.restore()}
