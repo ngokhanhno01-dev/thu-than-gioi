@@ -1,7 +1,7 @@
 /* ===== 32-prefight.js — Bảng SO SÁNH trước khi vào trận đấu trường =====
    Hiện: tên/cấp, HỆ (kèm khắc chế), vùng, TẦM ĐÁNH, BUFF VÙNG của 2 bên.
-   Bấm "BẮT ĐẦU" để vào trận ngay, hoặc tự vào sau 5 giây.
-   Dùng: TTGPREFIGHT.show({me:{...}, opp:{...}, secs:5}).then(()=>{ vào trận })
+   Bấm "BẮT ĐẦU" để vào trận ngay, hoặc tự vào sau 10 giây.
+   Dùng: TTGPREFIGHT.show({me:{...}, opp:{...}, secs:10}).then(()=>{ vào trận })
    Mỗi bên: {nick, lv, pet, h, hRel, zone, mark, color, mode, buff, buffOn}
      hRel = hệ số khắc chế của bên đó (1.25 khắc, 0.8 bị khắc, 1 trung lập). */
 (()=>{
@@ -68,7 +68,7 @@ function summary(me,op){
 let cur=null;
 function show(opt){
   opt=opt||{};
-  const me=opt.me||{},op=opt.op||{},secs=Math.max(1,Math.round(opt.secs||5));
+  const me=opt.me||{},op=opt.opp||opt.op||{},secs=Math.max(1,Math.round(opt.secs||5));
   if(cur)cur.finish();                                   /* đang mở bảng cũ -> đóng nó trước */
   return new Promise(resolve=>{
     const el=ui(),body=$p('pf-body'),go=$p('pf-go');

@@ -333,7 +333,7 @@
       let rm = 1, ro = 1;
       try{ rm = relMul(pet.bl, oppBl); ro = relMul(oppBl, pet.bl); }catch(_){}
       return TTGPREFIGHT.show({
-        secs: 5,
+        secs: 10,
         me: prefightSide(myNick(), level, pet.bl, pet.sp, rm),
         opp: prefightSide(oppName, (card && card.lv) || '?', oppBl, oppSp, ro)
       });

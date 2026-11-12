@@ -161,7 +161,10 @@ function placeOwn(){
   const el=document.getElementById('ttg-pt'),st=document.querySelector('.stage'),H=window.__petHead;
   if(!el||!st)return;
   const mob=document.getElementById('mob');
-  if(!ownImg||!H||Date.now()-H.t>800||(mob&&mob.style.display!=='none')){el.style.display='none';return}
+  /* đang mở bảng phủ toàn màn hình (đấu trường, thẻ thú, thông báo, so sánh trước trận, tái sinh) thì ẩn danh hiệu trên đầu thú,
+     nếu không nó đè lên giao diện bên dưới (vd: màn chọn đối thủ khiêu chiến) */
+  const ovOpen=['ar-ov','cv-ov','noti','pf-ov','rb-ov'].some(id=>{const e=document.getElementById(id);return !!e&&getComputedStyle(e).display!=='none'});
+  if(ovOpen||!ownImg||!H||Date.now()-H.t>800||(mob&&mob.style.display!=='none')){el.style.display='none';return}
   const w=st.clientWidth,h=st.clientHeight,k=Math.max(w/360,h/250);
   const x=(w-360*k)*.5+H.x*k,y=(h-250*k)*.55+H.top*k;
   /* Tỉ lệ cao/rộng của ảnh (mỗi danh hiệu một khổ). Thú càng lớn thì đầu càng sát mép trên: nếu ảnh không đủ chỗ
