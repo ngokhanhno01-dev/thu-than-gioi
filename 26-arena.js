@@ -311,6 +311,34 @@
     f.zb = zb;
     return f;
   }
+  /* ===== Bảng so sánh trước trận (32-prefight.js): Hệ, vùng, tầm đánh, buff vùng của 2 bên =====
+     Bấm BẮT ĐẦU hoặc tự vào sau 5 giây. Thiếu module thì bỏ qua, vào trận luôn. */
+  function prefightSide(nick, lv, bl, sp, rel){
+    let z = null;
+    try{ z = window.TTGCombatFX && TTGCombatFX.getZone(sp); }catch(_){}
+    const zb = zoneBuffInfo(sp);
+    return {
+      nick: String(nick || '').slice(0, 14), lv: lv,
+      pet: (BL[bl] || {}).n || '', h: (BL[bl] || {}).h || '', hRel: rel,
+      zone: z ? z.name : '', mark: z ? z.mark : '', color: z ? z.color : '#f5edcf',
+      mode: z ? (z.mode === 'melee' ? 'Cận chiến' : 'Đánh xa') : '—',
+      buff: zb ? zb.text : ''
+    };
+  }
+  function prefight(oppName, card){
+    if(!window.TTGPREFIGHT || !pet) return Promise.resolve();
+    try{
+      const oppBl = (card && card.bl) || 'ho';
+      const oppSp = Math.max(0, Math.min(16, Math.floor(Number(card && card.sp) || 0)));
+      let rm = 1, ro = 1;
+      try{ rm = relMul(pet.bl, oppBl); ro = relMul(oppBl, pet.bl); }catch(_){}
+      return TTGPREFIGHT.show({
+        secs: 5,
+        me: prefightSide(myNick(), level, pet.bl, pet.sp, rm),
+        opp: prefightSide(oppName, (card && card.lv) || '?', oppBl, oppSp, ro)
+      });
+    }catch(e){ console.warn('[arena] prefight', e); return Promise.resolve(); }
+  }
   function mkFighterFromMe(){
     const s = (typeof statsOf === 'function' && pet)
       ? statsOf(pet.bl, pet.pi, pet.base, level)
@@ -813,7 +841,6 @@
         drawOpp(g, card, 272, 208, 120, tt, dmx, am, false);
         if(pf > 0) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, dp, 1, true); }, '#ffffff', 1, pf);
         if(mf > 0) tintDraw(g, function(c){ drawOpp(c, card, 272, 208, 120, tt, dmx, 1, true); }, '#ffffff', 1, mf);
-        try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaPanels) TTGCombatFX.drawArenaPanels(g, pet.sp, oppSP, zbP, zbM); }catch(_){}
         if(fx) impact(g, fx, tt);
         try{ fxDraw(g, tt, dp, dmx); }catch(_){}
         g.restore();
@@ -909,7 +936,9 @@
       // chuyển sang màn chiến đấu (đóng bảng đấu trường trước)
       showPanel(false);
       try{ if(window.TTGFX) TTGFX.setBusy(true); }catch(_){}
-      arenaBattle(R, card, Q.n, isNpc ? '' : targetUid).then(after).catch(function(e){
+      prefight(Q.n, card).then(function(){
+        return arenaBattle(R, card, Q.n, isNpc ? '' : targetUid);
+      }).then(after).catch(function(e){
         console.error('[arena] battle', e);
         after();
       });

@@ -36,7 +36,8 @@ const KEYS=[['hp','Sinh Lực'],['atk','Công'],['def','Thủ'],['spd','Tốc'],
  document.head.appendChild(s)}
 
 /* ---- trạng thái ---- */
-const N=window.NOTI={q:[],open:false,cur:null,raf:0};
+const AUTO_LV=3,AUTO_RANK=5;                                               /* giây tự đóng */
+const N=window.NOTI={q:[],open:false,cur:null,raf:0,tm:0};
 N.blocking=()=>N.open||N.q.some(x=>x.k==='lv');                         /* đang có bảng lên cấp chờ/đang mở -> chưa cho tiến hóa chạy */
 N.level=(l0,l1)=>{                                                         /* gọi từ addExp() */
   if(!(l1>l0))return;
@@ -53,6 +54,7 @@ function canShow(it){
   if(typeof hatched!=='undefined'&&!hatched)return false;
   const m=$n('mob');if(m&&m.style.display==='block')return false;         /* đang đánh nhau */
   if(visible('xp'))return false;                                           /* đang ở màn kết quả / thám hiểm */
+  if(visible('pf-ov'))return false;                                        /* đang ở bảng so sánh trước trận đấu trường */
   const E=window.EVO;
   if(E){if(E.on)return false;if(it.k==='rank'&&E.queue.length)return false}
   return true;
@@ -62,7 +64,8 @@ function ui(){
   if(!el){el=document.createElement('div');el.id='noti';
     el.innerHTML='<div class="box"><div id="noti-body"></div><button type="button" id="noti-ok">OK</button></div>';
     document.body.appendChild(el);
-    $n('noti-ok').onclick=close}
+    $n('noti-ok').onclick=close;
+    el.addEventListener('click',e=>{if(e.target===el)close()})}              /* chạm nền tối ngoài bảng cũng đóng */
   return el}
 function rows(a,b,abs){                                                    /* a: chỉ số cũ, b: chỉ số mới */
   return '<div class="nr">'+KEYS.map(([k,n])=>{
@@ -94,6 +97,15 @@ function show(it){
   it.shown=true;body.innerHTML=html;
   el.classList.add('show');N.open=true;
   if(it.k==='rank'&&!N.raf)N.raf=requestAnimationFrame(drawPet);
+  autoClose(it.k==='lv'?AUTO_LV:AUTO_RANK);
+}
+/* tự đóng: lên cấp 3 giây, lên bậc 5 giây (nút hiện đếm ngược; bấm OK hoặc chạm nền tối để đóng sớm) */
+function autoClose(secs){
+  clearInterval(N.tm);
+  const ok=$n('noti-ok');let left=secs;
+  const label=()=>{if(ok)ok.textContent='OK ('+left+')'};
+  label();
+  N.tm=setInterval(()=>{left--;if(left<=0)close();else label()},1000);
 }
 function drawPet(){
   const cv=$n('noti-pet');
@@ -105,6 +117,8 @@ function drawPet(){
   N.raf=requestAnimationFrame(drawPet);
 }
 function close(){
+  clearInterval(N.tm);N.tm=0;
+  if(!N.open)return;                                                       /* đã đóng rồi (bấm OK + hết giờ cùng lúc) */
   const el=$n('noti');if(el)el.classList.remove('show');
   N.open=false;N.cur=null;N.q.shift();
 }
