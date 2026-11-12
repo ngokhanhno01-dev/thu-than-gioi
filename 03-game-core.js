@@ -396,7 +396,7 @@ function beast(t){
   // Mỗi bậc là bản giảm chi tiết của ảnh trưởng thành (getStageImage), chân thú đặt đúng mặt đất.
   if(stImg){
     const bb=stImg.bb,u=size/128,beat=(key==='tuoc'||G.wing>0)?Math.sin(t*8)*.035:Math.sin(t*3)*.012;
-    const dw=Math.max(1,Math.round(bb.w*u)),dh=Math.max(1,Math.round(bb.h*u*(1+beat)));
+    const dw=Math.max(1,Math.round(bb.w*u)),dh=Math.max(1,Math.round(bb.h*u*(1+beat)));window.__petHead={x:x,top:y-dh,t:Date.now()}; /* [DANH HIỆU] vị trí đầu thú cho 28-title.js */
     if(!(window.EVO&&EVO.petDraw(c,stImg,bb,x,y,dw,dh))){ /* EVO: rung/bóng trắng/hiện hình khi đang tiến hóa */
     c.save();c.translate(Math.round(x),Math.round(y));c.imageSmoothingEnabled=false;if(axOn)c.filter=AX.rim(st,purity,false); /* AURA: viền sáng theo phẩm */
     c.drawImage(stImg,bb.x,bb.y,bb.w,bb.h,-Math.round(dw/2),-dh,dw,dh);c.restore();}

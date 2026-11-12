@@ -14,13 +14,16 @@ const CFG=()=>window.TTGCFG||null;
 /* ---- Bảng danh hiệu thủ công (id phải trùng với danh sách trong Rules RTDB adminTitles) ----
    adminOnly: chỉ tài khoản admin thật mới giữ được (Rules kiểm tra root.admins). Xếp theo mức giàu tăng dần. */
 const MANUAL=[
- {id:'admin',     name:'Quản Trị Viên', icon:'🛠️', col:'#ff5a6a', adminOnly:true},
- {id:'cochuttien',name:'Có Chút Tiền',  icon:'🪙', col:'#cdb98c'},
- {id:'giauco',    name:'Giàu Có',       icon:'💰', col:'#ffd24a'},
- {id:'sieugiau',  name:'Siêu Giàu',     icon:'💎', col:'#6fe3ff'},
- {id:'daigia',    name:'Đại Gia',       icon:'👑', col:'#ffb84a'},
- {id:'phunhidai', name:'Phú Nhị Đại',   icon:'🏆', col:'#c08aff'},
- {id:'typhu',     name:'Tỷ Phú',        icon:'🌟', col:'#ff7be0', glow:true}];
+ {id:'admin', name:'Quản Trị Viên',      icon:'🛠️', col:'#ff5a6a', adminOnly:true, img:'img-title-admin.webp'},
+ {id:'vip1',  name:'Tinh Anh Kỵ Sĩ',     icon:'🛡️', col:'#8fc4ee', img:'img-title-vip1.webp'},
+ {id:'vip2',  name:'Ngự Thú Nam Tước',   icon:'🐺', col:'#6fd08a', img:'img-title-vip2.webp'},
+ {id:'vip3',  name:'Linh Thú Bá Tước',   icon:'🦌', col:'#7fb4ff', img:'img-title-vip3.webp'},
+ {id:'vip4',  name:'Thánh Thú Hầu Tước', icon:'🦄', col:'#c08aff', img:'img-title-vip4.webp'},
+ {id:'vip5',  name:'Long Thần Công Tước',icon:'🐲', col:'#ff8a4a', img:'img-title-vip5.webp'},
+ {id:'vip6',  name:'Vạn Thú Quân Vương', icon:'👑', col:'#ffd24a', img:'img-title-vip6.webp'},
+ {id:'vip7',  name:'Thần Thú Đế Tôn',    icon:'🌟', col:'#ff7be0', glow:true, img:'img-title-vip7.webp'}];
+/* Ảnh danh hiệu mùa: img-title-top{hạng}-s{mùa}.webp. Làm xong ảnh mùa nào thì thêm số mùa đó vào đây (mùa chưa có ảnh dùng icon + chữ). */
+const TOPIMG={1:1};
 const MBY={};MANUAL.forEach(m=>MBY[m.id]=m);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function rdb(){try{return firebase.database()}catch(_){return null}}
@@ -34,7 +37,7 @@ function parse(val){
 
 function parseManual(val){
   if(!val||typeof val!=='object')return null;
-  const m=MBY[val.id];return m?{manual:true,id:m.id,name:m.name,icon:m.icon,col:m.col,glow:!!m.glow}:null}
+  const m=MBY[val.id];return m?{manual:true,id:m.id,name:m.name,icon:m.icon,col:m.col,glow:!!m.glow,img:m.img}:null}
 
 function get(uid){
   if(!uid)return Promise.resolve([]);
@@ -54,6 +57,7 @@ function get(uid){
   cache[uid]=Object.assign(cache[uid]||{t:0,list:null},{p});
   return p}
 
+function imgOf(x){if(!x)return'';if(x.manual)return x.img||'';return(TOPIMG[x.s]&&x.tier>=1&&x.tier<=3)?'img-title-top'+x.tier+'-s'+x.s+'.webp':''}
 function text(x){if(x&&x.manual)return x.name;const C=CFG();return C&&x?C.titleText(x.tier,x.s):''}
 function iconOf(x){if(x&&x.manual)return x.icon;const C=CFG();return(C&&x&&C.TITLE_ICONS[x.tier])||''}
 function styleOf(x){return x&&x.manual?'color:'+x.col+(x.glow?';text-shadow:0 0 6px '+x.col+',1px 1px 0 #071116':''):''}
@@ -83,7 +87,8 @@ function fill(uid,el){
   '#cv-body .ti{text-align:center;margin:0 0 6px}'+
   '#cv-body .ti .tt1{font-size:17px!important;color:#ffd24a;text-shadow:1px 1px 0 #071116}'+
   '#cv-body .ti .tt2{font-size:13px!important;color:#b7bda9}'+
-  '#ttg-pt{position:absolute;top:30px;left:0;right:0;z-index:4;text-align:center;pointer-events:none;font-size:13px;font-weight:800;color:#ffd24a;text-shadow:0 1px 3px #000,0 0 6px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px}'+
+  '#ttg-pt{position:absolute;left:0;top:0;z-index:4;pointer-events:none;display:none;width:150px;line-height:0;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}'+
+  '#ttg-pt img{width:150px;height:auto;display:block}'+
   '.ttg-tag{font-weight:800;white-space:nowrap}'+
   '.ttg-tag.adm{text-shadow:0 0 5px currentColor}'+
   '#ttg-bt-p,#ttg-bt-m{position:absolute;bottom:4px;z-index:6;pointer-events:none;font-size:11px;font-weight:800;white-space:nowrap;max-width:46%;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000,0 0 5px #000}'+
@@ -95,16 +100,31 @@ let ownUid='',ownT=0;
 function myUid(){
   try{const u=firebase.auth().currentUser;if(u&&!u.isAnonymous)return u.uid}catch(_){}
   return ''}
+let ownImg='';
 function mountOwn(){
   const st=document.querySelector('.stage');if(!st)return;
   let el=document.getElementById('ttg-pt');
   if(!el){el=document.createElement('div');el.id='ttg-pt';st.appendChild(el)}
   const u=myUid();
-  if(!u){el.textContent='';return}
+  if(!u){ownImg='';el.innerHTML='';return}
   if(u!==ownUid||Date.now()-ownT>TTL){ownUid=u;ownT=Date.now();
-    get(u).then(l=>{el.textContent=l.length?(iconOf(l[0])+' '+text(l[0])):'';el.style.color=l.length?(styleOf(l[0]).match(/^color:([^;]+)/)||[0,''])[1]:''})}}
+    get(u).then(l=>{
+      const src=l.length?imgOf(l[0]):'';
+      if(src!==ownImg){ownImg=src;el.innerHTML=src?'<img src="'+src+'" alt="" onerror="this.parentNode.innerHTML=\'\';">':''}})}}
+/* Đặt danh hiệu ngay trên đầu thú (03-game-core.js ghi window.__petHead mỗi khung vẽ). Canvas 360x250, object-fit:cover, object-position center 55% */
+function placeOwn(){
+  const el=document.getElementById('ttg-pt'),st=document.querySelector('.stage'),H=window.__petHead;
+  if(!el||!st)return;
+  const mob=document.getElementById('mob');
+  if(!ownImg||!H||Date.now()-H.t>800||(mob&&mob.style.display!=='none')){el.style.display='none';return}
+  const w=st.clientWidth,h=st.clientHeight,k=Math.max(w/360,h/250);
+  const x=(w-360*k)*.5+H.x*k,y=(h-250*k)*.55+H.top*k;
+  const tw=Math.min(150,w*.42);el.style.width=tw+'px';if(el.firstChild)el.firstChild.style.width=tw+'px';
+  const th=el.offsetHeight||tw*.5;
+  el.style.display='block';el.style.left=Math.round(x-tw/2)+'px';el.style.top=Math.max(2,Math.round(y-th+4))+'px'}
 setInterval(()=>{try{mountOwn()}catch(_){}},15000);
 setTimeout(()=>{try{mountOwn()}catch(_){}},4000);
+setInterval(()=>{try{placeOwn()}catch(_){}},120);
 
 /* ---------- Màn chiến đấu (thám hiểm + đấu trường): danh hiệu dưới thanh máu mỗi bên ---------- */
 function btEl(id){
@@ -145,5 +165,5 @@ setInterval(()=>{
     arObs=new MutationObserver(()=>{try{decorate(b)}catch(_){}});
     arObs.observe(b,{childList:true,subtree:true});try{decorate(b)}catch(_){}}},1000);
 
-window.TTGTITLE={get,text,icon,tag,decorate,prefetch,fill,MANUAL,refresh(uid){delete cache[uid||ownUid];ownT=0}};
+window.TTGTITLE={imgOf,get,text,icon,tag,decorate,prefetch,fill,MANUAL,refresh(uid){delete cache[uid||ownUid];ownT=0}};
 })();
