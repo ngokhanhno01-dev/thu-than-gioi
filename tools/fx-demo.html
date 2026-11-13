@@ -35,7 +35,7 @@ label{display:flex;align-items:center;gap:6px}
  <div class="row"><select id="style"><option value="px">Kiểu: Pixel</option><option value="sm">Kiểu: Mịn</option></select><select id="spd"><option value="1">Tốc độ 1x</option><option value="0.5">Chậm 0.5x</option><option value="0.25">Rất chậm 0.25x</option></select></div>
  <div class="row"><button id="play">▶ Phát lại</button><label><input type="checkbox" id="loop" checked> Lặp</label></div>
 </div>
-<div class="row" id="statusControls" hidden><select id="statusKind"><option value="crit">Chí mạng</option><option value="miss">Né tránh</option><option value="burn">Thiêu đốt</option><option value="counter">Phản đòn</option><option value="shield">Khiên (xoay quanh + chặn đòn, còn khiên)</option><option value="shield0">Khiên (chặn đòn, vỡ hết khiên)</option><option value="revive">Hồi sinh</option><option value="bq">Bất khuất dưới 50% HP</option><option value="lightning">Sét giáng đất</option><option value="lava">Dung nham</option><option value="heal">Hồi máu</option><option value="freeze">Đóng băng</option><option value="stun">Choáng</option></select><select id="statusSide"><option value="p">Bên thú</option><option value="m">Bên quái</option></select><button id="statusPlay">▶ Phát lại</button></div>
+<div class="row" id="statusControls" hidden><select id="statusKind"><option value="crit">Chí mạng</option><option value="miss">Né tránh</option><option value="burn">Thiêu đốt</option><option value="counter">Phản đòn</option><option value="shield">Khiên (xoay quanh + chặn đòn, còn khiên)</option><option value="shield0">Khiên (chặn đòn, vỡ hết khiên)</option><option value="revive">Hồi sinh</option><option value="bq">Bất khuất dưới 50% HP</option><option value="lightning">Sét giáng đất</option><option value="lava">Dung nham</option><option value="heal">Hồi máu</option><option value="freeze">Đóng băng</option><option value="stun">Choáng</option></select><select id="statusSide"><option value="p">Bên thú</option><option value="m">Bên quái</option></select><button id="statusPlay">▶ Phát lại</button><label><input type="checkbox" id="refShow" checked> Hiện ảnh mẫu</label></div>
 <div id="info"></div>
 <script src="31-combat-fx.js"></script>
 <script src="33-attack-fx.js"></script>
@@ -94,6 +94,13 @@ function pet(g,x,c1,c2,T,flip){
  g.fillStyle='#111';g.beginPath();g.arc(10,GY-40+b,3,0,6.283);g.arc(-2,GY-40+b,3,0,6.283);g.fill();
  g.restore();
 }
+/* ảnh mẫu (chỉ để so sánh trong trang demo này, game KHÔNG dùng) */
+const REF={xanh:new Image(),do:new Image()};REF.xanh.src='tools/ref-khien-xanh.png';REF.do.src='tools/ref-khien-do.png';
+function drawRef(){if($('viewMode').value!=='status'||!$('refShow').checked)return;
+ const a=REF.xanh,b=REF.do,hA=34,hB=44;g.save();g.globalAlpha=.98;
+ if(a.complete&&a.naturalWidth)g.drawImage(a,150-hA*a.naturalWidth/a.naturalHeight/2,38,hA*a.naturalWidth/a.naturalHeight,hA);
+ if(b.complete&&b.naturalWidth)g.drawImage(b,210-hB*b.naturalWidth/b.naturalHeight/2,34,hB*b.naturalWidth/b.naturalHeight,hB);
+ g.fillStyle='#fff';g.font='8px monospace';g.textAlign='center';g.fillText('ảnh mẫu',150,32);g.fillText('ảnh mẫu',210,28);g.restore()}
 /* ---- vòng lặp ---- */
 function restart(){t0=performance.now();run=true;if(FX)FX.engine.clear()}
 $('play').onclick=restart;$('zone').onchange=restart;$('side').onchange=restart;$('kind').onchange=restart;
@@ -151,6 +158,7 @@ function loop(now){
  if(mode==='attack'&&run&&u>=1){if($('loop').checked)restart();else run=false}
  if(mode==='status'&&run&&u>=1)restart();
  }catch(e){msg='Lỗi: '+e.message}
+ drawRef();
  info.textContent=(msg||(mode==='buff'?'Buff nền vùng '+zi+' · '+$('buffStat').selectedOptions[0].text+' · pixel art riêng theo vùng.':mode==='gear'?'Buff bộ trang bị · '+$('gear').selectedOptions[0].text+' · pixel art riêng theo bộ.':mode==='status'?'Hiệu ứng 4A · '+$('statusKind').selectedOptions[0].text+' · bên '+(statusP?'thú':'quái')+'.':(FX.codeZone&&FX.codeZone(zi)?'Vùng này đã vẽ bằng code (không ảnh).':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.')))+'\nHạt đang chạy: '+FX.engine.count();
 }
 requestAnimationFrame(loop);
