@@ -501,6 +501,7 @@
       }
       const cr = forceCrit || roll(a.crit + kv(a, 4));
       const ig = kv(a, 8) / 100;                                     // Xuyên giáp
+      if(ig > 0) note += ' · 🗡️ Xuyên giáp';                      // chỉ để hiện hiệu ứng, không đổi công thức
       let dm = Math.max(1, Math.round((a.atk * lo(a) + a.mag * 0.3) * 1.6 * 100 / (100 + d.def * lo(d) * (1 - ig)) * a.r * (cr ? 1.5 + kv(a, 4) * 3 / 100 : 1)));
       if(cr){
         const st = hasSet(a, 'star');

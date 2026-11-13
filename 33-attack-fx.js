@@ -250,7 +250,7 @@ function boot(){
 
  /* Đòn đặc biệt (dung nham/Lôi Phạt) vẫn dùng hiệu ứng gốc của 31 */
  const ATK_SPECIAL=/Dung Nham Phun Trào|Thiêu đốt -|Xích Diệm vùng|Lôi Phạt giáng/;
- const IMP_SPECIAL=/Khiên hấp thụ|Chắn đòn|hồi sức|Sinh Cơ Cổ Thụ|Hồi sinh|Lôi Phạt|Dung Nham|Thiêu đốt|Xích Diệm/;
+ const IMP_SPECIAL=/Khiên hấp thụ|Chắn đòn|hồi sức|Sinh Cơ Cổ Thụ|Hồi sinh|Hút máu|Lôi Phạt|Lôi Kích -|Dung Nham|Thiêu đốt|Xích Diệm/;
 
  function drawAttackX(g,T,S){
   try{

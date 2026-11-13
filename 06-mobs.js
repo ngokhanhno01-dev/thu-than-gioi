@@ -1984,7 +1984,7 @@ function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv
     if(window.EQFX)dm=EQFX.mod(a,d,dm,cr);
    if(has(d,2)){const cap=Math.round(d.mx*(60-40*Math.min(1,d.e))/100);if(dm>cap){dm=cap;guarded=true}}
    let absorbed=0;if(d.sh>0){absorbed=Math.min(d.sh,dm);d.sh-=absorbed;dm-=absorbed;if(absorbed>0)push(d,'block',absorbed,'🛡️ Khiên hấp thụ '+absorbed+' sát thương')}
-   d.hp-=dm;push(a,cr?'crit':'hit',dm,(cr?'💥 Chí mạng! ':'')+a.n+(dm?' đánh -'+dm:absorbed?' bị khiên chặn hoàn toàn':' đánh -0')+(guarded?' · 🛡️ Chắn đòn':'')+(window.EQFX?EQFX.note():'')+(a.r>1?' (khắc hệ '+BL[a.w==='p'?e.m.bl:pet.bl].h+')':a.r<1?' (bị hệ '+BL[a.w==='p'?e.m.bl:pet.bl].h+' khắc)':''),a.r);
+   d.hp-=dm;push(a,cr?'crit':'hit',dm,(cr?'💥 Chí mạng! ':'')+a.n+(dm?' đánh -'+dm:absorbed?' bị khiên chặn hoàn toàn':' đánh -0')+(guarded?' · 🛡️ Chắn đòn':'')+(ig>0?' · 🗡️ Xuyên giáp':'')+(window.EQFX?EQFX.note():'')+(a.r>1?' (khắc hệ '+BL[a.w==='p'?e.m.bl:pet.bl].h+')':a.r<1?' (bị hệ '+BL[a.w==='p'?e.m.bl:pet.bl].h+' khắc)':''),a.r);
   if(kv(a,12)){const heal=Math.min(a.mx-a.hp,Math.round(dm*kv(a,12)/100));if(heal>0){a.hp+=heal;push(a,'heal',heal,'🩸 Hút máu +'+heal+' HP')}}
   if(kv(a,3)&&dm>0&&d.hp>0&&acc(a,'_lm',kv(a,3))){const x=Math.round(dm*.5);d.hp-=x;push(a,'hit',x,'⚡ Liên kích -'+x)}
   if(kv(d,7)&&dm){const x=Math.max(1,Math.round(dm*kv(d,7)/100));a.hp-=x;push(d,'hit',x,'↩ Phản đòn -'+x)}
@@ -2060,7 +2060,7 @@ function impact(g,fx,tt){
 const EVL=[[/Phản đòn -/,'PHẢN ĐÒN','#ff9a6a'],[/Thiêu đốt -/,'THIÊU ĐỐT','#ff6a3a'],[/Liên kích -/,'LIÊN KÍCH','#ffe45a'],
  [/Nguyệt Ảnh phản kích/,'NGUYỆT ẢNH','#b8a8ff'],[/Lôi Phạt giáng/,'LÔI PHẠT','#ffe53a'],[/Phong Nhận chém/,'PHONG NHẬN','#a0ffd0'],
  [/Phản Chấn -/,'PHẢN CHẤN','#ff9a6a'],[/Dung Nham Phun Trào/,'DUNG NHAM','#ff7a3a'],
- [/Hút máu \+/,'HÚT MÁU','#ff5a7a'],[/Sinh Cơ Cổ Thụ/,'SINH CƠ','#8be04a'],[/hồi sức \+/,'HỒI SỨC','#72e4b0'],[/Hồi sinh/,'HỒI SINH','#72e4b0'],
+ [/Hút máu \+/,'HÚT MÁU','#ff5a7a'],[/Xuyên giáp/,'XUYÊN GIÁP','#cfe0f0'],[/Phong Nhận -/,'PHONG NHẬN','#a0ffd0'],[/Sinh Cơ Cổ Thụ/,'SINH CƠ','#8be04a'],[/hồi sức \+/,'HỒI SỨC','#72e4b0'],[/Hồi sinh/,'HỒI SINH','#72e4b0'],
  [/·\s\S+\sDương Diệm/,'DƯƠNG DIỆM','#ffb84a'],[/·\s\S+\sThần Phán/,'THẦN PHÁN','#ffd24a'],[/·\s\S+\sTinh Quang/,'TINH QUANG','#c08aff'],
  [/·\s\S+\sThiên Uy/,'THIÊN UY','#fff0a0'],[/·\s\S+\sSương Tán/,'SƯƠNG TÁN','#9fd9c8']];
 function evTags(x){const t=x.t||'',o=[];EVL.forEach(a=>{if(a[0].test(t))o.push([a[1],a[2]])});return o}
