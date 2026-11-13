@@ -2228,6 +2228,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
   else if(x.k==='stun')fl={x:pp?90:270,y:130-q*40,t:/đóng băng/.test(x.t)?'ĐÓNG BĂNG!':'CHOÁNG!',c:/đóng băng/.test(x.t)?'#9fe4ff':'#ffe45a',tags:[[/đóng băng/.test(x.t)?'❄️':'💫','#ffe45a']],q,big:1}
      }}});
   if(T>=TE){rb.style.display='none';msg=R.win?'🏆 Chiến thắng! +'+gd+' xu · +'+ex+' EXP':'💥 Bại trận...';if(R.win)am=Math.max(0,1-(T-TE)*1.2)}
+  if(window.TTGCombatFX&&TTGCombatFX.drawBack){try{TTGCombatFX.drawBack(g,tt,(T0-t0)/1000,e.m.zone,R,shp,shm,hp,mh,pet.sp,CD)}catch(_){}}/* [buff] lớp nền: vẽ TRƯỚC thú để không che thú */
   aura(g,RP,0,85,tt);aura(g,RM,180,272,tt);
   gst.forEach(q=>{if(q.pa)tintDraw(g,c=>drawPet(c,85,208,120,tt,q.off,1,true),RP[0],.75,q.a);else tintDraw(g,c=>drawM(c,e.m,272,208,e.m.boss?6:7,tt,-q.off,1,e.tr,true),RM[0],.75,q.a)});
   drawPet(g,85,208,120,tt,dp,ap);drawM(g,e.m,272,208,e.m.boss?6:7,tt,dmx,am,e.tr);

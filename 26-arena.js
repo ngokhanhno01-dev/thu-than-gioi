@@ -833,6 +833,7 @@
           msg = R.win ? '🏆 Chiến thắng!' : '💥 Bại trận...';
           if(R.win) am = Math.max(0, 1 - (T-TE)*1.2);
         }
+        try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaBack) TTGCombatFX.drawArenaBack(g, tt, T, pet.sp, oppSP, zbP, zbM); }catch(_){}   // buff vùng: lớp nền, vẽ TRƯỚC thú để không che thú
         aura(g, RP, 0, 85, tt); aura(g, RM, 180, 272, tt);
         gst.forEach(function(q){
           if(q.pa) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, q.off, 1, true); }, RP[0], .75, q.a);
