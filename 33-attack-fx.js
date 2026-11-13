@@ -112,26 +112,41 @@ function boot(){
   layer(g,gg=>iceRun(gg,T,u*1.9,!!S.pa,!!S.miss,!!S.cr,s));
   return true;
  }
- /* 1 Sương Cốc (gần): KHÔNG có nhát chém hay vật bay. Nhiều cột sương/nước sáng PHUN từ đất, lan dần từ chân người đánh tới mục tiêu,
-    uốn cong như vòi phun (lõi trắng, rìa xanh ngọc mềm, thân thon dần, cuộn xoáy). Cao trào: 2 cột lớn uốn cong hai bên mục tiêu (chừa giữa để thấy mục tiêu).
-    Chân cột có vòng bọt + vài mảnh tinh thể nhỏ; giọt nước rơi có trọng lực. Trúng lúc t=.665s (u=.35): bọt sương tỏa ra mặt đất. Rồi tan dần. */
+ /* 1 Sương Cốc (gần): thú KHÔNG di chuyển (giữ nguyên vị trí); luồng sương xông từ thú tới sát mục tiêu (như lao tới), rồi 2 nhát chém sương
+    bắt chéo tại mục tiêu, rồi các cột sương/nước PHUN từ đất CHỈ quanh mục tiêu (uốn cong như vòi phun, lõi trắng, rìa xanh ngọc, thon dần, cuộn xoáy;
+    2 cột lớn hai bên, chừa giữa để thấy mục tiêu). Chân cột có vòng bọt + mảnh tinh thể nhỏ, giọt nước rơi có trọng lực. Trúng lúc t=.665s (u=.35). Rồi tan dần. */
  function mistRun(g,T,t,pa,miss,cr,s){
-  const GY=204,TS=.06,TH=.665,END=1.68,dir=pa?1:-1,x0=pa?108:250,tx=pa?272:85,L0=Math.abs(tx-x0),L=miss?L0*.6:L0,hk=cr?1.2:1,
-   r=E.rng(s.seed),cap=l=>Math.max(.12,Math.min(l,END-t)),tHd=miss?TH*.7:TH,C1='#a3e1d4',C2='#4fd0bf',C3='#e8fffa';
-  const cols=[],N=miss?9:13;
-  for(let i=0;i<N;i++){const k=i/(N-1);
-   cols.push({k,bx:x0+dir*(34+k*(L-34-(miss?0:30)))+r.range(-7,7),H:(30+46*Math.pow(k,1.2)+r.range(0,14))*(miss?.7:hk),w:8+6*k+r.range(0,3),bend:dir*r.range(-.35,.9),ph:r.range(0,6.28),tE:TS+k*(tHd-TS-.14),tF:(miss?.95:1.1)+(1-k)*.2,big:0})}
-  if(!miss)[[-26,120,-.95,0],[28,104,.85,.05]].forEach(c=>cols.push({k:1,bx:tx+dir*c[0],H:c[1]*hk,w:17,bend:dir*c[2],ph:r.range(0,6.28),tE:TH-.2+c[3],tF:1.3,big:1}));
+  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,x0=pa?108:250,tx=pa?272:85,tc=miss?tx-dir*80:tx,hk=cr?1.2:1,
+   r=E.rng(s.seed),cap=l=>Math.max(.12,Math.min(l,END-t)),C1='#a3e1d4',C2='#4fd0bf',C3='#e8fffa',
+   ex=tc-dir*38,rp=E.eIO(E.ph(t,.12,.52)),fall=1-E.ph(t,.5,.64);
+  /* cột phun quanh mục tiêu (hướng cong = hướng ra xa mục tiêu) */
+  const cols=[],N=miss?4:9;
+  for(let i=0;i<N;i++){
+   const k=i/(N-1);let off=-64+k*118+r.range(-5,5);if(Math.abs(off)<20)off=off<0?-20:20;
+   const bx=tc+dir*off;
+   cols.push({bx,H:(30+34*(1-Math.abs(k-.5)*1.2)+r.range(0,12))*(miss?.65:hk),w:8+4*(1-Math.abs(k-.5)*2)+r.range(0,2),bend:(off<0?-dir:dir)*r.range(.25,.8),ph:r.range(0,6.28),tE:TH-.04+Math.abs(off)/220,tF:(miss?1:1.12)+r.range(0,.18),big:0})}
+  if(!miss)[[-27,120,-.95,0],[27,104,.85,.05]].forEach(c=>cols.push({bx:tc+dir*c[0],H:c[1]*hk,w:17,bend:(c[0]<0?-dir:dir)*Math.abs(c[2]),ph:r.range(0,6.28),tE:TH-.02+c[3],tF:1.32,big:1}));
   /* tụ sương dưới chân người đánh */
-  if(t<TS+.35){
+  if(t<.5){
    const c=E.ph(t,0,.22);
    E.glow(g,x0,GY-6,36*E.eOut(c),C2,.5*(1-E.ph(t,.2,.42)));
    E.wave(g,x0,GY,8+26*E.eOut(E.ph(t,0,.3)),C1,(1-E.ph(t,.1,.4))*.8,1.6,{seed:s.seed,t:T});
    for(let n=E.rate(s,'ch',E.ph(t,0,.2),26);n>0;n--)E.emit({x:x0+r.range(-20,20),y:GY-r.range(0,4),vx:r.range(-8,8),vy:r.range(-46,-18),life:r.range(.3,.5),s0:r.range(1.6,3),s1:.5,shape:'orb',c:C1,c2:'#ffffff',a:.9,add:true,tag:'fx'});
   }
-  /* sương phủ mặt đất dọc đường lan */
-  for(let i=0;i<9;i++){const k=i/8,p=E.ph(t,TS+k*(tHd-TS),TS+k*(tHd-TS)+.3);
-   if(p>0)E.blob(g,x0+dir*L*k,GY+1,34,5.5,C1,.34*p*(1-E.ph(t,1.2,1.62)),T,s.seed+i,{wob:.4,core:C3})}
+  /* sương phủ mặt đất dọc đường xông */
+  for(let i=0;i<9;i++){const k=i/8,p=E.ph(t,.12+k*.4,.12+k*.4+.3);
+   if(p>0)E.blob(g,x0+(ex-x0)*k,GY+1,30,5,C1,.32*p*(1-E.ph(t,1.2,1.62)),T,s.seed+i,{wob:.4,core:C3})}
+  /* luồng sương xông từ thú tới sát mục tiêu */
+  if(t>.13&&fall>0){
+   const n=14,tl=Math.max(0,rp-.45),pts=[];
+   for(let j=0;j<n;j++){const f=tl+(rp-tl)*j/(n-1);pts.push([x0+(ex-x0)*f,GY-36+Math.sin(j*.9+T*16)*3.5*(j/(n-1))-Math.sin(f*Math.PI)*6])}
+   const wf=q=>20*Math.pow(q,.8)*(1+.1*Math.sin(T*14));
+   E.ribbon(g,pts,wf,C2,fall*.5,{core:C1});
+   E.ribbon(g,pts,q=>wf(q)*.6,C1,fall*.8,{core:C3});
+   E.ribbon(g,pts,q=>wf(q)*.25,'#ffffff',fall,{core:'#ffffff'});
+   E.glow(g,pts[n-1][0],GY-36,26,C2,.5*fall);
+   for(let m=E.rate(s,'rush',E.ph(t,.12,.52),44);m>0;m--)E.emit({x:pts[n-1][0]-dir*r.range(0,18),y:GY-r.range(10,50),vx:-dir*r.range(10,50),vy:r.range(-16,6),life:cap(r.range(.35,.6)),s0:6,s1:r.range(12,18),shape:'mist',c:'#bff3ea',a:.6,tag:'fx'});
+  }
   /* các cột phun */
   cols.forEach((c,i)=>{
    const gw=E.eOut(E.ph(t,c.tE,c.tE+.34)),out=1-E.ph(t,c.tF,c.tF+.34);
@@ -156,19 +171,32 @@ function boot(){
    for(let m=E.rate(s,'d'+i,E.ph(t,c.tE+.12,c.tF+.2),c.big?26:10);m>0;m--){const tp=pts[0];
     E.emit({x:tp[0]+r.range(-3,3),y:tp[1],vx:c.bend*r.range(10,40)+r.range(-12,12),vy:-r.range(6,40),gy:300,drag:.3,life:cap(r.range(.5,.85)),s0:r.range(1.6,2.8),s1:.7,shape:'orb',c:C1,c2:'#ffffff',a:.95,add:true,tag:'fx',floor:GY+3,bounce:.12})}
   });
+  /* 2 nhát chém sương bắt chéo tại mục tiêu (nhát sau lệch nhịp), kết thúc đúng lúc trúng */
+  const slash=(ts,tilt,flip,R,w)=>{
+   const sw=E.eOut(E.ph(t,ts,ts+.14)),out=1-E.ph(t,ts+.12,ts+.36);if(sw<.05||out<=0)return;
+   const n=14,pts=[],a0=-2.5,a1=.35,ca=Math.cos(tilt),sa=Math.sin(tilt);
+   for(let j=0;j<n;j++){const an=a0+(a1-a0)*sw*(j/(n-1)),px=dir*Math.cos(an)*R*.85,py=flip*Math.sin(an)*R;
+    pts.push([tc+px*ca-py*sa,GY-56+px*sa+py*ca])}
+   const wf=q=>w*Math.sin(Math.min(1,q*1.15)*Math.PI*.85+.15);
+   E.ribbon(g,pts,wf,C2,out*.55,{core:C1});
+   E.ribbon(g,pts,q=>wf(q)*.6,C1,out*.85,{core:C3});
+   E.ribbon(g,pts,q=>wf(q)*.22,'#ffffff',out,{core:'#ffffff'});
+  };
+  slash(TH-.15,-.5,1,miss?36:50,miss?10:15);
+  slash(TH-.09,.5,-1,miss?30:44,miss?8:13);
   /* khi đòn trúng: quầng mát nhẹ + vòng bọt sương toả ra mặt đất (không chớp trắng) */
   if(!miss&&t>TH-.1){
    E.glow(g,tx,GY-30,60,C2,.26*E.ph(t,TH-.1,TH)*(1-E.ph(t,TH+.1,TH+.6)));
    E.wave(g,tx,GY,10+104*E.eOut(E.ph(t,TH-.1,TH+.8)),C1,(1-E.ph(t,TH+.15,TH+.8))*.8,2,{seed:s.seed+5,t:T});
    E.wave(g,tx,GY,6+66*E.eOut(E.ph(t,TH-.05,TH+.6)),'#ffffff',(1-E.ph(t,TH+.1,TH+.6))*.5,1.2,{seed:s.seed+9,t:T});
   }
-  if(!miss&&t>=TH&&E.once(s,'hit')){
+  if(t>=TH&&E.once(s,'hit')){
    const rb=E.rng(s.seed^0x2b7);
-   E.burst(rb,tx,GY-8,20,{speed:[20,100],ang:[-Math.PI*.95,-Math.PI*.05],size:[2,5],life:[cap(.5),cap(.9)],gy:120,drag:.9,shape:'orb',c:C1,c2:'#ffffff',a:.9,add:true,tag:'fx'});
-   [[-.35,.35],[Math.PI-.35,Math.PI+.35]].forEach(an=>E.burst(rb,tx,GY,5,{speed:[30,90],ang:an,size:[10,16],life:[cap(.6),cap(.95)],gy:-6,drag:1.4,shape:'mist',c:'#bff3ea',a:.7,tag:'fx'}));
+   E.burst(rb,tc,GY-8,miss?8:20,{speed:[20,100],ang:[-Math.PI*.95,-Math.PI*.05],size:[2,5],life:[cap(.5),cap(.9)],gy:120,drag:.9,shape:'orb',c:C1,c2:'#ffffff',a:.9,add:true,tag:'fx'});
+   if(!miss)[[-.35,.35],[Math.PI-.35,Math.PI+.35]].forEach(an=>E.burst(rb,tc,GY,5,{speed:[30,90],ang:an,size:[10,16],life:[cap(.6),cap(.95)],gy:-6,drag:1.4,shape:'mist',c:'#bff3ea',a:.7,tag:'fx'}));
   }
-  /* hơi sương bốc lên */
-  for(let m=E.rate(s,'fog',E.ph(t,.1,.9),30);m>0;m--)E.emit({x:x0+dir*r.range(0,L),y:GY-r.range(0,8),vx:r.range(-6,6),vy:r.range(-14,-4),life:cap(r.range(.6,1)),s0:8,s1:r.range(16,24),shape:'mist',c:'#bff3ea',a:.6,tag:'fx'});
+  /* hơi sương bốc lên quanh mục tiêu */
+  for(let m=E.rate(s,'fog',E.ph(t,.5,1),24);m>0;m--)E.emit({x:tc+r.range(-70,70),y:GY-r.range(0,8),vx:r.range(-6,6),vy:r.range(-14,-4),life:cap(r.range(.6,1)),s0:8,s1:r.range(16,24),shape:'mist',c:'#bff3ea',a:.6,tag:'fx'});
   E.draw(g,'fx');
  }
  function mistFx(g,T,S){
