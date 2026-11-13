@@ -443,118 +443,109 @@ function drawArenaPanels(g,spP,spM,bP,bM){
  const mk=(z,b)=>{const L=[{t:z.mark+' '+z.name+' · '+mode(z),c:z.color}];if(b&&b.text)wrapLines(g,'✦ '+b.text,iw,2).forEach(t=>L.push({t,c:'#fff0bd'}));return L};
  const L=mk(zp,bP),M=mk(zm,bM);
  panel(g,3,CH-(L.length*lh+2)-bot,W,zp.color,L);panel(g,CW-3-W,CH-(M.length*lh+2)-bot,W,zm.color,M);g.restore()}
-/* Hạt đặc trưng theo loại buff vùng */
+/* Buff vùng 0–8: pixel art vẽ bằng canvas, nằm sau thú; palette lấy riêng từ màu từng vùng. */
 const BUFFSH={atk:'ember',def:'shard',spd:'streak',mag:'star',eva:'streak',crit:'spark',regen:'leaf',hp:'petal'};
-const BUFFSEC=2.4;   /* giây hiệu ứng bật buff rõ rồi mờ dần thành quầng nhẹ */
-/* Buff vùng 0–8: lớp nền được vẽ hoàn toàn bằng canvas, ở sau thú. */
-function buffZoneArc(g,x,y,rx,ry,start,span,col,a,w,T,seed){
- if(a<=.01)return;
- g.save();g.globalCompositeOperation='lighter';g.lineCap='round';g.lineJoin='round';
- for(let pass=0;pass<2;pass++){
-  g.strokeStyle=FXE.rgba(pass?'#ffffff':col,a*(pass?.48:.42));
-  g.lineWidth=pass?Math.max(.7,w*.42):w*2.2;
-  g.beginPath();
-  for(let i=0;i<=18;i++){
-   const u=i/18,an=start+span*u;
-   const wob=1+.045*FXE.noise(seed+u*5+T*1.8);
-   const px=x+Math.cos(an)*rx*wob,py=y+Math.sin(an)*ry*wob;
-   if(i)g.lineTo(px,py);else g.moveTo(px,py);
-  }
-  g.stroke();
- }
- g.restore();
+const BUFFSEC=2.4;
+function buffPixel(g,x,y,c,a,u,w,h){
+ if(a<=.012)return;u=Math.max(1.4,u||2.2);w=Math.max(1,Math.round(w||1));h=Math.max(1,Math.round(h||1));
+ const ww=w*u,hh=h*u;g.globalAlpha=FXE.cl(a,0,1);g.fillStyle=c;
+ g.fillRect(Math.round((x-ww/2)/u)*u,Math.round((y-hh/2)/u)*u,ww,hh);
 }
-function buffZoneGlyph(g,shape,x,y,s,col,a,rot,stat){
- if(a<=.01||s<.7)return;
- g.save();g.translate(x,y);g.rotate(rot);g.globalAlpha=Math.min(1,a);
- g.globalCompositeOperation='lighter';g.lineCap='round';g.lineJoin='round';
- g.shadowColor=col;g.shadowBlur=s*2.2;g.lineWidth=Math.max(.7,s*.22);
- const grad=g.createLinearGradient(0,-s*1.5,0,s*1.5);
- grad.addColorStop(0,'#ffffff');grad.addColorStop(.42,col);grad.addColorStop(1,FXE.mix(col,'#14202a',.28));
- g.fillStyle=grad;g.strokeStyle=FXE.rgba('#ffffff',.76);
- if(shape==='ember'){
-  g.beginPath();g.moveTo(0,-s*1.55);g.quadraticCurveTo(s*1.12,-s*.45,s*.55,s*.92);
-  g.quadraticCurveTo(0,s*1.55,-s*.55,s*.92);g.quadraticCurveTo(-s*1.13,-s*.36,0,-s*1.55);g.fill();g.stroke();
- }else if(shape==='shard'){
-  g.beginPath();g.moveTo(0,-s*1.5);g.lineTo(s*.86,-s*.2);g.lineTo(s*.54,s*1.1);
-  g.lineTo(-s*.34,s*1.18);g.lineTo(-s*.9,-s*.3);g.closePath();g.fill();g.stroke();
- }else if(shape==='streak'){
-  g.beginPath();g.moveTo(-s*1.5,s*.55);g.quadraticCurveTo(-s*.05,-s*.75,s*1.55,-s*.52);
-  g.strokeStyle=grad;g.lineWidth=Math.max(1,s*.48);g.stroke();
-  g.beginPath();g.moveTo(-s*.9,s*1.05);g.quadraticCurveTo(0,s*.2,s*1.1,s*.12);
-  g.lineWidth=Math.max(.7,s*.2);g.strokeStyle=FXE.rgba('#ffffff',.72);g.stroke();
- }else if(shape==='star'){
-  g.beginPath();
-  for(let i=0;i<10;i++){const an=-Math.PI/2+i*Math.PI/5,r=i%2?s*.52:s*1.35,px=Math.cos(an)*r,py=Math.sin(an)*r;if(i)g.lineTo(px,py);else g.moveTo(px,py)}
-  g.closePath();g.fill();g.stroke();
- }else if(shape==='spark'){
-  g.beginPath();g.moveTo(0,-s*1.45);g.quadraticCurveTo(s*.13,-s*.15,s*1.25,0);
-  g.quadraticCurveTo(s*.13,s*.14,0,s*1.4);g.quadraticCurveTo(-s*.12,s*.14,-s*1.25,0);
-  g.quadraticCurveTo(-s*.12,-s*.15,0,-s*1.45);g.fill();g.stroke();
+function buffLine(g,pts,c,a,u,width){
+ if(!pts||pts.length<2||a<=.012)return;const step=Math.max(1.4,u||2.2),w=width||1,seen=new Set();
+ for(let i=1;i<pts.length;i++){const p=pts[i-1],q=pts[i],n=Math.max(1,Math.ceil(Math.hypot(q[0]-p[0],q[1]-p[1])/step));
+  for(let j=0;j<=n;j++){const t=j/n,xx=p[0]+(q[0]-p[0])*t,yy=p[1]+(q[1]-p[1])*t,key=Math.round(xx/step)+':'+Math.round(yy/step);if(seen.has(key))continue;seen.add(key);buffPixel(g,xx,yy,c,a,step,w,w)}}
+}
+function buffArc(g,x,y,rx,ry,a0,a1,c,a,u,T,dash){
+ if(a<=.012)return;const step=Math.max(1.4,u||2.2),n=Math.max(2,Math.ceil(Math.abs(a1-a0)*Math.max(rx,ry)/step)),seen=new Set();
+ for(let i=0;i<=n;i++){if(dash&&Math.floor(i/4+T*2.5)%3===1)continue;const an=a0+(a1-a0)*i/n,xx=x+Math.cos(an)*rx,yy=y+Math.sin(an)*ry,key=Math.round(xx/step)+':'+Math.round(yy/step);if(seen.has(key))continue;seen.add(key);buffPixel(g,xx,yy,c,a,step)}
+}
+function buffDiamond(g,x,y,r,c,a,u){
+ const n=Math.max(1,Math.round(r));for(let row=-n;row<=n;row++){const w=n-Math.abs(row);
+  for(let col=-w;col<=w;col++)buffPixel(g,x+col*u,y+row*u,c,a,u)}
+}
+function buffSpark(g,x,y,r,c,a,u){
+ const n=Math.max(2,Math.round(r));for(let i=-n;i<=n;i++){
+  buffPixel(g,x+i*u,y,c,a,u);buffPixel(g,x,y+i*u,c,a,u);
+  if(Math.abs(i)%2===0){buffPixel(g,x+i*u,y+i*u,c,a*.72,u);buffPixel(g,x+i*u,y-i*u,c,a*.72,u)}
+ }
+}
+function buffStatPixel(g,shape,x,y,sz,col,pale,a,u,T,stat){
+ if(a<=.02)return;const n=Math.max(2,Math.round(sz));
+ if(shape==='shard'||shape==='petal')buffDiamond(g,x,y,n,col,a,u);
+ else if(shape==='ember'){for(let j=0;j<n;j++)buffPixel(g,x,y+(n-j)*u,pale,a,u,Math.max(1,n-j),1);buffPixel(g,x,y-n*u,col,a,u)}
+ else if(shape==='streak'){
+  buffLine(g,[[x-n*u,y+u],[x,y],[x+n*u,y-u]],col,a,u,1);
+  if(stat==='eva')buffArc(g,x,y,n*u*1.4,n*u*.65,-.25,Math.PI*1.2,pale,a*.8,u,T,1);
  }else if(shape==='leaf'){
-  g.beginPath();g.moveTo(-s*1.25,s*.72);g.quadraticCurveTo(-s*.62,-s*1.55,s*1.28,-s*.82);
-  g.quadraticCurveTo(s*.78,s*.9,-s*1.25,s*.72);g.fill();g.stroke();
-  g.beginPath();g.moveTo(-s*.9,s*.58);g.quadraticCurveTo(0,-s*.12,s*.93,-s*.68);
-  g.lineWidth=Math.max(.65,s*.14);g.strokeStyle=FXE.rgba('#ffffff',.82);g.stroke();
- }else{
-  g.beginPath();g.moveTo(0,-s*1.48);g.quadraticCurveTo(s*.45,-s*.16,s*1.12,s*.7);
-  g.quadraticCurveTo(s*.08,s*1.55,-s*1.1,s*.7);g.quadraticCurveTo(-s*.44,-s*.12,0,-s*1.48);
-  g.fill();g.stroke();
- }
- /* Né và tốc độ cùng dùng vệt cong; một vòng hở mảnh phân biệt hiệu ứng né. */
- if(stat==='eva'){
-  g.beginPath();g.ellipse(0,0,s*1.72,s*.78,-.2,-.55,Math.PI*1.25);
-  g.lineWidth=Math.max(.65,s*.15);g.strokeStyle=FXE.rgba('#ffffff',.7);g.stroke();
- }
- g.restore();
+  buffLine(g,[[x-n*u,y+n*u],[x,y],[x+n*u,y-n*u]],col,a,u,1);buffPixel(g,x,y,pale,a,u);
+ }else buffSpark(g,x,y,n,col,a,u);
 }
 function backZoneCode(g,x,z,q,T,shape,k,zoneId,stat){
- const a=FXE.cl(q,0,1),phase=T*2.25+zoneId*.73,breath=.78+.22*Math.sin(phase);
- const seed=0x3a5b00+zoneId*977+(String(stat||shape).length*53),col=z.color;
- const pale=FXE.mix(col,'#ffffff',.48),deep=FXE.mix(col,'#15202a',.24);
- FXE.glow(g,x,174,58*k*(.94+.08*Math.sin(T*1.7+zoneId)),col,.3*a*breath,'#ffffff');
- FXE.blob(g,x,176,37*k*(.94+.08*Math.sin(phase)),47*k,col,.2*a*breath,T,seed,
-  {wob:.3,speed:1.8,core:pale});
- /* Một quầng sóng gợn sát đất và hai cung quay lệch nhịp. */
- FXE.wave(g,x,204,38*k,col,.66*a*breath,2,{t:T,seed:seed+1,sq:.18,wob:.11,core:pale});
- for(let i=0;i<2;i++){
-  const rot=T*(i===1?-.72:.48)+zoneId*.31+i*2.1;
-  buffZoneArc(g,x,204,43*k+i*7,7*k+i*1.2,rot,1.24,col,a*(.44-i*.07),1.8,T,seed+i*19);
+ const a=FXE.cl(q,0,1),u=Math.max(1.5,2.2*(k||1)),col=z.color;
+ const pale=FXE.mix(col,'#fff3c5',.52),deep=FXE.mix(col,'#101827',.7),mid=FXE.mix(col,'#ffffff',.18);
+ const y=204,pulse=.74+.26*Math.sin(T*3.1+zoneId*.83),w=a*pulse;
+ g.save();
+ /* Dấu chân pixel thay vòng mượt cũ; mỗi vùng chồng lên một huy hiệu khác nhau. */
+ buffArc(g,x,y,36*k,5*k,.16,Math.PI*2-.12,deep,a*.72,u,T,1);
+ buffArc(g,x,y,30*k,3*k,T*.7, T*.7+Math.PI*1.12,col,a*.86,u,T,1);
+ for(let i=0;i<5;i++){const an=T*.45+i*Math.PI*2/5+zoneId*.17;buffPixel(g,x+Math.cos(an)*33*k,y+Math.sin(an)*5*k,pale,a*.8,u,1,1)}
+ switch(zoneId){
+  case 0:{ /* Tuyết Nguyên: cụm tinh thể mọc tầng bậc */
+   for(let i=-2;i<=2;i++){const h=13+Math.max(0,5-Math.abs(i))*2+Math.floor((Math.sin(T*2+i)*1.5+1));
+    for(let r=0;r<h;r++){const half=Math.max(0,Math.floor((h-r)/5)),xx=x+i*12*u,yy=y-u*(r+1),shade=r%4===0?pale:(r%3===0?mid:col);
+     buffPixel(g,xx,yy,deep,w*.92,u,half*2+2,1);buffPixel(g,xx-u,yy,shade,w*.95,u,Math.max(1,half),1);if(r%2===0)buffPixel(g,xx+u,yy,pale,w*.82,u,1,1)}}
+   buffDiamond(g,x-27*u,y-9*u,2,pale,w*.75,u);buffDiamond(g,x+28*u,y-14*u,2,mid,w*.8,u);break}
+  case 1:{ /* Sương Cốc: bậc hơi nước uốn thành cột mềm */
+   for(let colN=-1;colN<=1;colN++){const pts=[];for(let j=0;j<24;j++){const v=j/23,xx=x+colN*17*u+Math.sin(T*1.4+v*6+colN)*4*u,yy=y-v*25*u;pts.push([xx,yy])}
+    buffLine(g,pts,deep,w*.55,u,2);buffLine(g,pts.slice(2),col,w*.92,u,1);for(let j=3;j<22;j+=5)buffPixel(g,pts[j][0]-u,pts[j][1],pale,w*.72,u,2,1)}
+   for(let i=0;i<7;i++){const an=T*.6+i*Math.PI*2/7;buffPixel(g,x+Math.cos(an)*26*u,y-12*u+Math.sin(an)*8*u,pale,w*.78,u,2,2)}break}
+  case 2:{ /* Vân Đảo: mây vuông xoáy thành vòng tím */
+   for(let ring=0;ring<3;ring++)buffArc(g,x,y-19*u,(17+ring*8)*k,(7+ring*3)*k,T*(ring%2?-.65:.5)+ring*1.4,T*(ring%2?-.65:.5)+ring*1.4+Math.PI*1.48,ring===1?pale:col,w*(.85-ring*.12),u,T,1);
+   for(let i=0;i<6;i++){const an=T*.55+i*Math.PI/3,xx=x+Math.cos(an)*30*k,yy=y-16*u+Math.sin(an)*10*k;buffPixel(g,xx,yy,deep,w*.9,u,3,2);buffPixel(g,xx+u,yy-u,pale,w*.8,u,2,1)}
+   buffLine(g,[[x-20*u,y-29*u],[x-17*u,y-26*u],[x-19*u,y-23*u],[x-13*u,y-20*u]],pale,w*.85,u);break}
+  case 3:{ /* Phong Nguyên: các dải gió xoáy và lá bay */
+   for(let side of [-1,1]){const pts=[];for(let j=0;j<22;j++){const v=j/21,an=T*1.5+v*4.5+side*.7;pts.push([x+side*(8+28*v)*k+Math.sin(an)*7*k,y-7*u-v*23*u+Math.cos(an)*2*u])}
+    buffLine(g,pts,deep,w*.62,u,2);buffLine(g,pts.slice(3),col,w*.95,u)}
+   for(let i=0;i<5;i++){const an=T*1.2+i*2.4,xx=x+Math.sin(an)*31*k,yy=y-12*u-(i%3)*7*u;buffLine(g,[[xx-2*u,yy+u],[xx,yy],[xx+2*u,yy-u]],pale,w*.9,u,2)}break}
+  case 4:{ /* Lôi Vực: tia sét rẽ nhánh, nét vàng bậc thang */
+   for(let side of [-1,1]){const sx=x+side*16*k,pts=[[sx-3*u,y-31*u],[sx+u,y-27*u],[sx-2*u,y-23*u],[sx+2*u,y-19*u],[sx,y-15*u],[sx+4*u,y-11*u],[sx+2*u,y-6*u],[sx+6*u,y-2*u]];
+    buffLine(g,pts,deep,w*.7,u,3);buffLine(g,pts,col,w,u,1);buffLine(g,[pts[2],[sx+side*9*k,y-20*u],[sx+side*12*k,y-16*u]],pale,w*.8,u,1)}
+   for(let i=-3;i<=3;i++)buffPixel(g,x+i*8*k,y-2*u,mid,w*.82,u,2,1);break}
+  case 5:{ /* Nguyệt Cung: trăng lưỡi liềm bằng cung ô pixel và sao */
+   for(let side of [-1,1]){const cx=x+side*23*k,cy=y-20*u,rot=T*.32+side*.9;
+    buffArc(g,cx,cy,10*k,12*k,rot+.55,rot+Math.PI*1.8,pale,w,u,T,0);
+    buffArc(g,cx+4*u,cy-2*u,8*k,10*k,rot+.7,rot+Math.PI*1.7,deep,w*.95,u,T,0)}
+   buffSpark(g,x,y-27*u,2,pale,w*.9,u);buffDiamond(g,x-34*k,y-18*u,1,col,w,u);buffDiamond(g,x+35*k,y-10*u,1,mid,w,u);break}
+  case 6:{ /* Dương Sơn: đài lửa pixel bật lên từ vòng đất */
+   for(let i=-4;i<=4;i++){const height=8+Math.floor((Math.sin(T*4+i*1.7)+1)*4)+(4-Math.abs(i));
+    for(let r=0;r<height;r++){const width=r<3?2:(r<height*.55?1:0),xx=x+i*7*u,yy=y-u*(r+1),c=r<3?pale:(r%3===0?mid:col);
+     buffPixel(g,xx,yy,deep,w*.88,u,width+1,1);buffPixel(g,xx-u,yy,c,w*.9,u,width,1)} }
+   for(let i=0;i<6;i++)buffPixel(g,x+Math.sin(T*2+i*4)*34*k,y-(10+i%4*5)*u,mid,w*.9,u,1,2);break}
+  case 7:{ /* Huyền Uyên: khe nứt vuông tối và các vết nứt tím */
+   const jit=Math.sin(T*1.7)*u;for(let j=0;j<20;j++){const yy=y-4*u-j*1.15*u,xx=x+jit+Math.sin(j*.92+T)*2*u;buffPixel(g,xx,yy,deep,w*.95,u,Math.max(1,3-(j%4===0?2:0)),1);if(j%3===0)buffPixel(g,xx+3*u,yy+u,pale,w*.9,u,1,1)}
+   for(let side of [-1,1])buffLine(g,[[x+side*5*u,y-10*u],[x+side*10*u,y-14*u],[x+side*7*u,y-18*u],[x+side*15*u,y-24*u],[x+side*12*u,y-30*u]],col,w,u,2);
+   buffDiamond(g,x-24*k,y-18*u,2,mid,w*.9,u);buffDiamond(g,x+24*k,y-26*u,2,pale,w*.9,u);break}
+  case 8:{ /* Kim Khoáng: lưỡi kiếm vàng dựng chéo, tia kim loại */
+   for(let i=0;i<5;i++){const side=i%2?1:-1,xx=x+side*(12+i*5)*k,yy=y-(8+(i%3)*6)*u,pts=[[xx-3*u,yy+8*u],[xx-u,yy+4*u],[xx+u,yy],[xx+3*u,yy-5*u],[xx+5*u,yy-7*u]];
+    buffLine(g,pts,deep,w*.8,u,3);buffLine(g,pts.slice(1),i%2?pale:col,w,u,1)}
+   buffArc(g,x,y-18*u,34*k,14*k,T*.55,T*.55+Math.PI*1.2,pale,w*.85,u,T,1);break}
  }
- /* Hạt bay lệch nhịp và uốn theo loại chỉ số, không dùng Math.random hay ảnh. */
- for(let i=0;i<9;i++){
-  const offset=(FXE.noise(seed+i*1.31)+1)*.5;
-  const speed=.24+(FXE.noise(seed+i*2.17+4)+1)*.175;
-  const drift=22+(FXE.noise(seed+i*3.07+8)+1)*13.5;
-  const side=FXE.noise(seed+i*4.13+12);
-  const p=(T*speed+offset)%1,fade=Math.pow(Math.sin(Math.PI*p),.72)*a;
-  const phase=FXE.noise(seed+i*5.19+16);
-  const px=x+side*drift*k+Math.sin(T*(1.5+Math.abs(phase))+i*1.7+zoneId)*8*k;
-  const py=204-p*(77+(FXE.noise(seed+i*6.23+20)+1)*9)*k;
-  const size=(1.7+(FXE.noise(seed+i*7.29+24)+1)*.75)*k;
-  FXE.glow(g,px,py,size*3.3,col,fade*.34,pale);
-  buffZoneGlyph(g,shape,px,py,size,pale,fade*(.46+.3*breath),T*(side||1)+i*.7,stat);
- }
- /* Dải khí mỏng ôm hai bên, nhịp và độ nghiêng thay theo vùng. */
- for(let side of [-1,1]){
-  const pts=[];
-  for(let j=0;j<7;j++){
-   const u=j/6,ang=T*1.65+u*2.35+zoneId*.42+side;
-   pts.push([x+side*(25+11*u)*k+Math.sin(ang)*5*k,201-u*62*k]);
-  }
-  FXE.ribbon(g,pts,u=>(.9+1.9*Math.sin(Math.PI*u))*k,col,a*.27,
-   {core:pale,edge:deep,edgeW:.7});
- }
+ /* Hạt chỉ số vẫn đổi hình theo Công/Thủ/Tốc/Né/Pháp/Chí mạng/Hồi phục/HP. */
+ const sh=BUFFSH[stat]||shape||'star';
+ for(let i=0;i<7;i++){const p=(T*(.2+(i%3)*.055)+i*.163+zoneId*.071)%1,fade=Math.sin(Math.PI*p)*a;
+  const side=Math.sin(i*17.3+zoneId*4.1),xx=x+side*(20+8*Math.sin(T*1.2+i))*k,yy=y-(8+p*38)*k,sz=1+(i%3===0?1:0);
+  buffStatPixel(g,sh,xx,yy,sz,i%2?col:pale,pale,fade*.92,u,T,stat)}
+ g.restore();
 }
 /* ===== HIỆU ỨNG BUFF — QUY TẮC: tất cả vẽ TRƯỚC thú (lớp nền, gọi từ drawBack/drawArenaBack) nên thú luôn nằm trên,
    hiệu ứng chỉ lộ ra quanh người. Lớp trên (drawField/drawArenaBuffs) chỉ còn chữ nhãn + viền khiên mảnh. Không có ảnh nào đè lên thân thú. =====
-   BUFF VÙNG   = ảnh nhóm 1 của vùng đó (z.field), màu vùng, hạt theo chỉ số.
+   BUFF VÙNG   = pixel art riêng cho vùng 0–8; vùng 9–16 sẽ được nối ở 3B.
    BUFF BỘ TRANG BỊ = ngọn lửa aura nhóm 2, mỗi bộ 1 màu (GEAR_AURA). Hai loại KHÔNG dùng chung ảnh. */
 function groundRing(g,x,col,a,T,r){
- g.save();g.globalAlpha=a;g.strokeStyle=col;g.lineWidth=2;g.setLineDash([5,4]);g.lineDashOffset=-T*16;
- g.beginPath();g.ellipse(x,204,(r||36)+Math.sin(T*2)*2,7+Math.sin(T*2)*1.2,0,0,Math.PI*2);g.stroke();
- g.setLineDash([]);g.globalAlpha=a*.45;g.lineWidth=1;
- for(let k=0;k<5;k++){const an=T*.7+k*Math.PI*2/5;g.fillStyle=col;g.fillRect(x+Math.cos(an)*((r||36)-7)-1,202+Math.sin(an)*6-1,3,3)}
+ const u=2.2,rx=(r||36)+Math.sin(T*2)*2;g.save();
+ buffArc(g,x,204,rx,7+Math.sin(T*2)*1.2,0,Math.PI*2,col,a,u,T,1);
+ for(let k=0;k<5;k++){const an=T*.7+k*Math.PI*2/5;buffPixel(g,x+Math.cos(an)*(rx-7),202+Math.sin(an)*6,col,a*.78,u,1,1)}
  g.restore();
 }
 /* buff vùng, lớp nền: quầng + vòng chân + hiệu ứng vùng phía SAU thú + hạt bay lên */
