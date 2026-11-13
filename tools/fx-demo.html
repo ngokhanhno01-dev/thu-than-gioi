@@ -24,7 +24,8 @@ label{display:flex;align-items:center;gap:6px}
 <script src="33-attack-fx.js"></script>
 <script>
 'use strict';
-/* Trang này gọi ĐÚNG cách game gọi: TTGCombatFX.drawAttack(g,T,S) khi u<.9 và TTGCombatFX.drawImpact(g,fx,T) khi u≥.35 (trúng ở u=.35, mỗi đòn kéo dài 1.9s). */
+/* Trang này gọi ĐÚNG cách game gọi: TTGCombatFX.drawAttack(g,T,S) khi u<.9 và TTGCombatFX.drawImpact(g,fx,T) khi u≥.35 (trúng ở u=.35, mỗi đòn kéo dài 1.9s).
+   Vùng đánh GẦN: thú/quái lao tới như trong game (hàm lungeAt chép từ 06-mobs.js). Vùng đánh XA: giật lùi nhẹ khi bắn (fxRecoil). */
 const FX=window.TTGCombatFX,CW=360,CH=250,GY=204,BST=1.9;
 const cv=document.getElementById('cv'),g=cv.getContext('2d'),info=document.getElementById('info');
 const $=id=>document.getElementById(id);
@@ -36,6 +37,18 @@ else{
  const build=()=>{sel.innerHTML=FX.zones.map((z,i)=>'<option value="'+i+'">'+i+' · '+z.name+' ('+(z.mode==='melee'?'gần':'xa')+')'+(FX.codeZone&&FX.codeZone(i)?' — VẼLAI BẰNG CODE':' — cũ (ảnh)')+'</option>').join('')};
  build();setTimeout(build,600);   /* 33-attack-fx.js tự gắn codeZone sau khi tải xong */
 }
+/* ---- chuyển động lao tới / giật lùi: chép từ 06-mobs.js để demo giống game ---- */
+function lungeAt(u){if(u<=0)return 0;
+ if(u<.14)return -14*Math.sin(u/.14*Math.PI/2);
+ if(u<.35){const t=(u-.14)/.21;return -14+(100+14)*t*t*(1.4-.4*t)}
+ if(u<.42)return 100;
+ if(u<.72){const t=(u-.42)/.3,sm=t*t*(3-2*t);return 100*(1-sm)}
+ return 0}
+function recoilAt(u){if(u<.05)return 0;
+ if(u<.2){const t=(u-.05)/.15;return -5*t*t}
+ if(u<.27){const t=(u-.2)/.07;return -5-12*t}
+ if(u<.55){const t=(u-.27)/.28,sm=t*t*(3-2*t);return -17*(1-sm)}
+ return 0}
 /* ---- thú giả để có chỗ đánh ---- */
 function pet(g,x,c1,c2,T,flip){
  const b=Math.sin(T*3+x)*1.5;
@@ -61,10 +74,15 @@ function loop(now){
  window.BSPD=sp<1?1:sp;FX.engine.setSpeed(sp);
  const bg=g.createLinearGradient(0,0,0,CH);bg.addColorStop(0,'#26324f');bg.addColorStop(.7,'#3b4a63');bg.addColorStop(1,'#1f2a1f');
  g.fillStyle=bg;g.fillRect(0,0,CW,CH);g.fillStyle='#2e3d2c';g.fillRect(0,GY-2,CW,CH-GY+2);
- pet(g,85,'#6cc4ff','#2a6fb0',T,false);pet(g,272,'#ff8a7a','#a83a3a',T,true);
- let msg='';
+ const u=Math.min(1,t/BST);let dp=0,dmx=0,msg='';
  try{
-  const u=Math.min(1,t/BST);
+  if(run&&u<.9){
+   const z=FX.zones[zi],melee=z&&z.mode==='melee',lg=melee?lungeAt(u)*(kind==='miss'?.6:1):recoilAt(u);
+   if(pa)dp=lg;else dmx=-lg;
+  }
+ }catch(e){msg='Lỗi: '+e.message}
+ pet(g,85+dp*.84,'#6cc4ff','#2a6fb0',T,false);pet(g,272+dmx*.78,'#ff8a7a','#a83a3a',T,true);
+ try{
   if(run&&u<.9){
    const S={on:1,s:zi,u:u,pa:pa,cl:0,cr:kind==='crit',miss:kind==='miss',h:'Thủy',i:1,text:''};
    if(u>=.35)FX.drawImpact(g,{pp:pa,q:Math.min(.9999,(u-.35)/.55),k:kind,d:12,r:1,i:1,h:'Thủy',s:zi,cl:0,text:''},T);
