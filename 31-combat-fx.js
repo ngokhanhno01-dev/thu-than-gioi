@@ -538,9 +538,50 @@ function backZoneCode(g,x,z,q,T,shape,k,zoneId,stat){
   buffStatPixel(g,sh,xx,yy,sz,i%2?col:pale,pale,fade*.92,u,T,stat)}
  g.restore();
 }
+/* Buff nền pixel art cho vùng 9–16; mỗi vùng có silhouette riêng, chỉ dùng fillRect theo ô. */
+function backZoneCode3B(g,x,z,q,T,shape,k,zoneId,stat){
+ const a=FXE.cl(q,0,1),u=Math.max(1.5,2.2*(k||1)),col=z.color;
+ const pale=FXE.mix(col,'#fff1c9',.54),deep=FXE.mix(col,'#111426',.72),mid=FXE.mix(col,'#ffffff',.2);
+ const y=204,pulse=.73+.27*Math.sin(T*2.7+zoneId*.61),w=a*pulse;
+ g.save();buffArc(g,x,y,37*k,5*k,.08,Math.PI*2-.08,deep,a*.72,u,T,1);
+ buffArc(g,x,y,29*k,3*k,T*.63,T*.63+Math.PI*1.1,col,a*.9,u,T,1);
+ for(let i=0;i<5;i++){const an=T*.38+i*Math.PI*2/5+zoneId*.13;buffPixel(g,x+Math.cos(an)*34*k,y+Math.sin(an)*5*k,pale,a*.82,u)}
+ switch(zoneId){
+  case 9:{ /* Ngọc Động: rắn linh khí ngọc cuộn qua cụm hoa */
+   for(let strand=0;strand<2;strand++){const pts=[];for(let j=0;j<29;j++){const v=j/28;pts.push([x+(v-.5)*64*k,y-(12+Math.sin(v*7+T*1.45+strand*.8)*8+v*8)*k])}buffLine(g,pts,deep,w*.68,u,3);buffLine(g,pts.slice(2),strand?pale:col,w,u)}
+   for(let i=0;i<6;i++){const an=T*.55+i*Math.PI/3,xx=x+Math.cos(an)*16*k,yy=y-23*k+Math.sin(an)*9*k;buffDiamond(g,xx,yy,2,i%2?pale:mid,w*.9,u)}buffDiamond(g,x,y-23*k,2,col,w,u);break}
+  case 10:{ /* Thanh Lâm: dây leo mọc bậc, nhánh lá xanh */
+   for(let side of [-1,1]){const pts=[];for(let j=0;j<27;j++){const v=j/26;pts.push([x+side*(10+29*v)*k+Math.sin(T*1.1+v*5+side)*4*k,y-v*29*k])}buffLine(g,pts,deep,w*.76,u,3);buffLine(g,pts.slice(3),col,w,u);
+    for(let j=5;j<25;j+=5){const p=pts[j],dir=(j%2?1:-1)*side;buffLine(g,[[p[0],p[1]],[p[0]+dir*4*u,p[1]-2*u],[p[0]+dir*6*u,p[1]-2*u]],pale,w*.9,u);buffDiamond(g,p[0]+dir*6*u,p[1]-3*u,1,mid,w,u)}}buffPixel(g,x,y-12*u,pale,w,u,2,2);break}
+  case 11:{ /* Xích Hỏa Địa: sóng lửa ngang và cột lửa đỏ */
+   for(let i=-5;i<=5;i++){const h=5+Math.floor((Math.sin(T*3.8+i*1.4)+1)*3)+(5-Math.abs(i));for(let row=0;row<h;row++){const ww=row<2?2:(row<h*.5?1:0),xx=x+i*6.5*u,yy=y-(row+1)*u;buffPixel(g,xx,yy,deep,w*.8,u,ww+2,1);buffPixel(g,xx-u,yy,row<3?pale:(row%2?mid:col),w*.98,u,ww+1,1)}}
+   for(let side of [-1,1])buffLine(g,[[x+side*11*k,y-4*u],[x+side*18*k,y-10*u],[x+side*22*k,y-17*u],[x+side*29*k,y-21*u]],col,w*.8,u,2);break}
+  case 12:{ /* Hắc Ám Lâm: xúc tu bóng đen dựng từ vũng tối */
+   buffPixel(g,x,y-4*u,deep,w*.96,u,12,3);buffPixel(g,x,y-6*u,col,w*.72,u,7,1);
+   for(let side of [-1,1])for(let arm=0;arm<3;arm++){const pts=[];for(let j=0;j<19;j++){const v=j/18,xx=x+side*(7+arm*5+v*(12+arm*4))*k+Math.sin(T*1.7+v*4+arm)*3*u,yy=y-5*u-v*(17+arm*3)*u;pts.push([xx,yy])}buffLine(g,pts,deep,w*.95,u,3);buffLine(g,pts.slice(8),arm%2?pale:col,w*.88,u)}
+   buffDiamond(g,x-3*u,y-10*u,1,pale,w*.8,u);buffDiamond(g,x+3*u,y-10*u,1,pale,w*.8,u);break}
+  case 13:{ /* Tử Tinh Hải: tinh thể sáu cánh và mảnh sao lơ lửng */
+   for(let i=0;i<8;i++){const an=T*.18+i*Math.PI/4,rr=(19+(i%2)*8)*k,xx=x+Math.cos(an)*rr,yy=y-21*k+Math.sin(an)*rr*.6,tip=[xx+Math.cos(an)*5*u,yy+Math.sin(an)*5*u],back=[xx-Math.cos(an)*4*u,yy-Math.sin(an)*4*u];
+    buffLine(g,[back,[xx-Math.sin(an)*2*u,yy+Math.cos(an)*2*u],tip,[xx+Math.sin(an)*2*u,yy-Math.cos(an)*2*u],back],deep,w*.8,u,2);buffLine(g,[back,tip],i%2?pale:col,w,u)}
+   buffDiamond(g,x,y-21*k,3,col,w,u);buffDiamond(g,x,y-21*k,1,pale,w,u);buffArc(g,x,y-21*k,30*k,12*k,T*.3,T*.3+Math.PI*1.3,mid,w*.75,u,T,1);break}
+  case 14:{ /* Thiên Không: ba dải khí xanh xoắn riêng nhịp */
+   for(let strand=0;strand<3;strand++){const pts=[];for(let j=0;j<31;j++){const v=j/30,an=T*(strand===1?-.9:.72)+v*5.8+strand*2.05,rr=(11+22*v)*k;pts.push([x+Math.cos(an)*rr,y-18*k+Math.sin(an)*rr*.52-v*4*u])}buffLine(g,pts,deep,w*.65,u,3);buffLine(g,pts.slice(4),strand===1?pale:col,w*.92,u)}
+   for(let side of [-1,1])buffSpark(g,x+side*31*k,y-18*k,1,pale,w*.84,u);break}
+  case 15:{ /* Linh Hoa Viên: thân cỏ và bông hoa pixel nhiều cánh */
+   for(let i=0;i<5;i++){const side=i-2,xx=x+side*13*k,top=y-(16+(i%3)*5)*k;buffLine(g,[[xx,y-2*u],[xx+Math.sin(T*.7+i)*2*u,top]],FXE.mix(col,'#183c25',.48),w*.92,u,1);buffLine(g,[[xx,top+7*u],[xx+side*3*u,top+4*u],[xx+side*5*u,top+4*u]],col,w*.82,u,1);
+    for(let petal=0;petal<4;petal++){const an=petal*Math.PI/2+T*.17;buffDiamond(g,xx+Math.cos(an)*2*u,top+Math.sin(an)*2*u,1,petal%2?pale:mid,w,u)}buffPixel(g,xx,top,col,w,u)}buffArc(g,x,y-3*u,34*k,8*k,T*.3,T*.3+Math.PI,col,w*.75,u,T,1);break}
+  case 16:{ /* Thần Điện: pháp trận vuông bậc, trụ sáng và lông vũ vàng */
+   const rot=T*.16;for(let side of [-1,1]){const xx=x+side*28*k;buffLine(g,[[xx-2*u,y-2*u],[xx-2*u,y-16*u],[xx,y-19*u],[xx+2*u,y-16*u],[xx+2*u,y-2*u]],deep,w*.8,u,2);buffLine(g,[[xx,y-16*u],[xx,y-3*u]],pale,w,u,1);for(let j=0;j<4;j++)buffPixel(g,xx+side*(j%2)*u,y-(5+j*3)*u,mid,w*.9,u,1,2)}
+   buffArc(g,x,y-12*u,30*k,18*k,rot,rot+Math.PI*1.82,col,w*.88,u,T,1);buffArc(g,x,y-12*u,22*k,12*k,-rot,-rot+Math.PI*1.55,pale,w*.8,u,T,1);
+   for(let i=0;i<8;i++){const an=T*.24+i*Math.PI/4;buffDiamond(g,x+Math.cos(an)*22*k,y-12*u+Math.sin(an)*12*k,1,mid,w*.9,u)}break}
+ }
+ const sh=BUFFSH[stat]||shape||'star';for(let i=0;i<7;i++){const p=(T*(.19+(i%3)*.06)+i*.157+zoneId*.053)%1,fade=Math.sin(Math.PI*p)*a,an=i*2.399+T*.22,rr=(19+5*Math.sin(T+i))*k;
+  buffStatPixel(g,sh,x+Math.cos(an)*rr,y-(7+p*40)*k,1+(i%3===1?1:0),i%2?col:pale,pale,fade*.88,u,T,stat)}
+ g.restore();
+}
 /* ===== HIỆU ỨNG BUFF — QUY TẮC: tất cả vẽ TRƯỚC thú (lớp nền, gọi từ drawBack/drawArenaBack) nên thú luôn nằm trên,
    hiệu ứng chỉ lộ ra quanh người. Lớp trên (drawField/drawArenaBuffs) chỉ còn chữ nhãn + viền khiên mảnh. Không có ảnh nào đè lên thân thú. =====
-   BUFF VÙNG   = pixel art riêng cho vùng 0–8; vùng 9–16 sẽ được nối ở 3B.
+   BUFF VÙNG   = pixel art vẽ riêng cho từng vùng (0–16), màu vùng, hạt theo chỉ số.
    BUFF BỘ TRANG BỊ = ngọn lửa aura nhóm 2, mỗi bộ 1 màu (GEAR_AURA). Hai loại KHÔNG dùng chung ảnh. */
 function groundRing(g,x,col,a,T,r){
  const u=2.2,rx=(r||36)+Math.sin(T*2)*2;g.save();
@@ -553,6 +594,7 @@ function backZone(g,x,z,q,T,e,shape,k,stat){
  if(q<=0)return;k=k||1;
  const zoneId=ZONES.indexOf(z);
  if(zoneId>=0&&zoneId<=8){backZoneCode(g,x,z,q,T,shape||'star',k,zoneId,stat||shape);return}
+  if(zoneId>=9&&zoneId<=16){backZoneCode3B(g,x,z,q,T,shape||'star',k,zoneId,stat||shape);return}
  const a=Math.min(1,q*1.8),gr=1.25-q*.25;
  glow(g,x,176,74*k*gr,z.color,.34*a);
  ring(g,x,204,(46+(1-q)*28)*k,(10+(1-q)*6)*k,z.color,.85*a,2.5);

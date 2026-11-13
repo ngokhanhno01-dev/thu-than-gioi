@@ -17,7 +17,7 @@ label{display:flex;align-items:center;gap:6px}
 </style></head><body>
 <h1>Trang xem thử hiệu ứng (vẽ bằng code)</h1>
 <canvas id="cv"></canvas>
-<div class="row"><select id="zone"></select><select id="viewMode"><option value="buff">Buff nền vùng · 3A (0–8)</option><option value="attack">Đòn đánh</option></select></div>
+<div class="row"><select id="zone"></select><select id="viewMode"><option value="buff">Buff nền vùng pixel art · 3A/3B (0–16)</option><option value="attack">Đòn đánh</option></select></div>
 <div class="row" id="buffControls">
  <select id="buffStat">
   <option value="atk">Buff Công</option><option value="def">Buff Thủ</option><option value="spd">Buff Tốc độ</option><option value="mag">Buff Pháp thuật</option>
@@ -52,9 +52,9 @@ if(!FX){info.textContent='Không tải được 31-combat-fx.js'}
 else{
  const sel=$('zone'),view=$('viewMode');
  const build=()=>{
-  const max=view.value==='buff'?9:FX.zones.length,old=Number(sel.value)||0;
+  const max=view.value==='buff'?17:FX.zones.length,old=Number(sel.value)||0;
   sel.innerHTML=FX.zones.slice(0,max).map((z,i)=>'<option value="'+i+'">'+i+' · '+z.name+' ('+(z.mode==='melee'?'gần':'xa')+')'+
-   (view.value==='buff'?' — buff nền code':(FX.codeZone&&FX.codeZone(i)?' — vẽ lại bằng code':' — cũ (ảnh)'))+'</option>').join('');
+   (view.value==='buff'?' — pixel art':(FX.codeZone&&FX.codeZone(i)?' — vẽ lại bằng code':' — cũ (ảnh)'))+'</option>').join('');
   sel.value=old<max?String(old):'0';
  };
  const syncMode=()=>{$('buffControls').hidden=view.value!=='buff';$('attackControls').hidden=view.value==='buff';build();restart()};
@@ -132,7 +132,7 @@ function loop(now){
   }
   if(mode==='attack'&&run&&u>=1){if($('loop').checked)restart();else run=false}
  }catch(e){msg='Lỗi: '+e.message}
- info.textContent=(msg||(mode==='buff'?'Buff nền vùng '+zi+' · '+$('buffStat').selectedOptions[0].text+' · vẽ bằng code.':
+ info.textContent=(msg||(mode==='buff'?'Buff nền vùng '+zi+' · '+$('buffStat').selectedOptions[0].text+' · pixel art vẽ theo vùng.':
   (FX.codeZone&&FX.codeZone(zi)?'Vùng này đã vẽ bằng code (không ảnh).':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.')))+'\nHạt đang chạy: '+FX.engine.count();
 }
 requestAnimationFrame(loop);
