@@ -33,14 +33,14 @@ function boot(){
   g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);g.restore();
  }
  /* Hướng ĐẦU của từng ảnh đòn xa (rad, 0 = đầu quay sang phải, y hướng xuống). Ảnh vẽ đầu hướng góc dưới-trái thì xoay lại cho đầu hướng tới đối thủ. */
- const FACE={0:2.40,2:-2.88,4:0,6:2.55,9:2.6,11:1.9,13:0,14:0,16:3.0};
+ const FACE={0:3.1416,2:-2.88,4:3.1416,6:2.40,9:0,11:0,13:3.1416,14:0,15:0,16:0};   /* hướng đầu của ảnh mới: tia băng/sấm/sao tím có đầu quay TRÁI */
  /* độ nhuộm màu vùng cho từng ảnh (0 = giữ màu gốc của ảnh; chỉ nhuộm ảnh lệch màu vùng) */
- const ZT={0:0,1:0,2:0,3:.6,4:0,5:0,6:0,7:.5,8:.55,9:.45,10:.85,11:0,12:.4,13:.3,14:0,15:.15,16:.5};
+ const ZT={0:0,1:.35,2:0,3:.6,4:0,5:0,6:0,7:.75,8:.8,9:0,10:0,11:0,12:.55,13:0,14:0,15:0,16:0};   /* ảnh đòn đã đúng màu vùng nên không nhuộm; chỉ nhuộm các chuỗi cận chiến xanh/hồng dùng lại */
  const DEF_R={path:'lob',arc:30,sc:1.35,trail:{k:'spark',n:6,gap:.05,s:2},chg:{k:'spark',n:6},tint:.5};
  const DEF_M={sc:1.3,sweep:.6,part:{k:'spark',n:8,R:46},tint:.5};
  const PROF=[
  /* 0 Tuyết Nguyên — băng lao vòng cung cao, xoay, rơi tuyết */
- {r:{path:'lob',arc:46,sc:1.4,spin:9,trail:{k:'snow',n:9,gap:.045,s:2.4,grav:1.4},chg:{k:'snow',n:8},tint:.5,glow:12},
+ {r:{path:'lob',arc:30,sc:1.3,trail:{k:'snow',n:9,gap:.045,s:2.4,grav:1.4},chg:{k:'snow',n:8},tint:0,glow:12},
   i:{k:'snow',n:14,R:58,ring:1,sc:1.45,grav:.4}},
  /* 1 Sương Cốc — vòng sương xoáy tròn quanh mục tiêu */
  {m:{sc:1.45,rot0:0,sweep:5.4,part:{k:'mist',n:8,R:46},tint:.45,glow:10,pulse:1},
@@ -73,19 +73,19 @@ function boot(){
  {m:{sc:1.35,rot0:.6,sweep:-1.3,part:{k:'leaf',n:12,R:50,grav:.9},tint:.5,glow:9},
   i:{k:'leaf',n:12,R:60,sc:1.45,grav:.8}},
  /* 11 Xích Hỏa Địa — cầu lửa nặng nảy 2 lần, tàn lửa lớn */
- {r:{path:'bounce',n:2,h:32,sc:1.65,trail:{k:'ember',n:12,gap:.035,s:3,grav:1},chg:{k:'ember',n:9},tint:.35,glow:14},
+ {r:{path:'lob',arc:20,sc:1.5,trail:{k:'ember',n:12,gap:.035,s:3,grav:1},chg:{k:'ember',n:9},tint:0,glow:14},
   i:{k:'ember',n:18,R:70,ring:1,sc:1.8,grav:.5}},
  /* 12 Hắc Ám Lâm — xoáy tối co lại vào tâm (hút) */
  {m:{sc:1,grow:[1.75,.85],rot0:0,sweep:-5,part:{k:'mist',n:9,R:56,inward:1},tint:.55,glow:12,pulse:1},
   i:{k:'mist',n:9,R:54,sc:1.45}},
  /* 13 Tử Tinh Hải — sao tím bay đường chữ S, để lại bóng mờ */
- {r:{path:'S',rise:22,amp:22,sc:1.4,spin:5,ghost:3,trail:{k:'shard',n:8,gap:.045,s:1.8},chg:{k:'shard',n:7},tint:.5,glow:13},
+ {r:{path:'S',rise:22,amp:22,sc:1.4,ghost:3,trail:{k:'shard',n:8,gap:.045,s:1.8},chg:{k:'shard',n:7},tint:0,glow:13},
   i:{k:'shard',n:12,R:60,ring:1,sc:1.5}},
  /* 14 Thiên Không — 3 mũi phóng hội tụ về mục tiêu, vệt gió */
  {r:{path:'none',fan:[-1,0,1],spread:22,sc:1.05,trail:{k:'line',n:6,gap:.05,s:2.2},chg:{k:'line',n:6},tint:.45,glow:10},
   i:{k:'line',n:10,R:64,ring:1,sc:1.4}},
  /* 15 Linh Hoa Viên — chém cánh hoa, hoa bay tản */
- {m:{sc:1.4,rot0:-.2,sweep:.6,copies:[{r:0},{r:2.1,d:.1,sc:.82,oy:-6}],part:{k:'petal',n:14,R:58,grav:.35},tint:.5,glow:11},
+ {r:{path:'lob',arc:26,sc:1.4,trail:{k:'petal',n:10,gap:.045,s:2.4,grav:.8},chg:{k:'petal',n:8},tint:0,glow:12},
   i:{k:'petal',n:14,R:62,sc:1.45,grav:.3}},
  /* 16 Thần Điện — trụ sáng thần giáng thẳng từ trên xuống */
  {r:{path:'down',h:140,sc:1.55,trail:{k:'spark',n:10,gap:.04,s:2.2},chg:{k:'spark',n:8},tint:.3,glow:14,add:.3,pillar:1},
