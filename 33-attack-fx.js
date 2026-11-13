@@ -32,6 +32,10 @@ function boot(){
   const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,col);gr.addColorStop(.45,col);gr.addColorStop(1,'rgba(0,0,0,0)');
   g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);g.restore();
  }
+ /* Hướng ĐẦU của từng ảnh đòn xa (rad, 0 = đầu quay sang phải, y hướng xuống). Ảnh vẽ đầu hướng góc dưới-trái thì xoay lại cho đầu hướng tới đối thủ. */
+ const FACE={0:2.40,2:-2.88,4:0,6:2.55,9:2.6,11:1.9,13:0,14:0,16:3.0};
+ /* độ nhuộm màu vùng cho từng ảnh (0 = giữ màu gốc của ảnh; chỉ nhuộm ảnh lệch màu vùng) */
+ const ZT={0:0,1:0,2:0,3:.6,4:0,5:0,6:0,7:.5,8:.55,9:.45,10:.85,11:0,12:.4,13:.3,14:0,15:.15,16:.5};
  const DEF_R={path:'lob',arc:30,sc:1.35,trail:{k:'spark',n:6,gap:.05,s:2},chg:{k:'spark',n:6},tint:.5};
  const DEF_M={sc:1.3,sweep:.6,part:{k:'spark',n:8,R:46},tint:.5};
  const PROF=[
@@ -109,7 +113,7 @@ function boot(){
  /* Bọc ctx: chặn đúng lần drawImage đầu (sprite chính) để tô màu/phóng to/xoay; mọi lệnh khác chuyển thẳng cho ctx thật. */
  function drawMain(g,o,a){
   const img=a[0],sx=a[1],sy=a[2],sw=a[3],sh=a[4],dx=a[5],dy=a[6],dw=a[7],dh=a[8];
-  const src=tinted(img,sx,sy,sw,sh,o.col,Math.max(.9,o.tint==null?.5:o.tint),o.idx)||img,tc=src!==img;
+  const amt=o.tint==null?0:o.tint,src=amt>.04?(tinted(img,sx,sy,sw,sh,o.col,amt,o.idx)||img):img,tc=src!==img;
   const put=()=>tc?g.drawImage(src,0,0,sw,sh,dx,dy,dw,dh):g.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
   g.save();
   if(o.spin)g.rotate(o.spin);
@@ -178,7 +182,7 @@ function boot(){
 
  function atkRanged(g,T,S,idx,z,c){
   const u=S.u||0,pa=!!S.pa,dir=pa?1:-1,sx=pa?112:248,tx=pa?255:105,ty=148,col=z.color,col2=lighten(col,.6),big=S.cr?1.18:1;
-  const base={col,idx,tint:c.tint,glow:c.glow,add:c.add};
+  const base={col,idx,tint:ZT[idx],glow:c.glow,add:c.add},head=FACE[idx]||0;
   if(u<.18){
    if(u<=.035)return orig.drawAttack(g,T,S);
    const ch=clamp((u-.035)/.145,0,1),r=rnd(S.i*31+idx),n=c.chg?c.chg.n:6,k=c.chg?c.chg.k:'spark';
@@ -186,12 +190,14 @@ function boot(){
    for(let j=0;j<n;j++){const a=r()*6.283+T*3,d=(1-ch)*(34+r()*18)+6;part(g,k,sx+Math.cos(a)*d,ty+Math.sin(a)*d*.7,1.5+ch*1.5,col,col2,0,.35+ch*.6)}
    g.restore();
    halo(g,sx,ty,(26+ch*34)*(c.sc||1.3),col,.3+ch*.4);
-   return callOrig(g,T,S,u,Object.assign({},base,{sc:Math.min(2.3,(c.sc||1.3)*SZR)*(.95+ch*.45)}),0,0);
+   return callOrig(g,T,S,u,Object.assign({},base,{sc:Math.min(2.3,(c.sc||1.3)*SZR)*(.95+ch*.45),spin:-head+(dir>0?-T*.7:T*.7)}),0,0);
   }
   if(u<.43){
    const f=clamp((u-.18)/.25,0,1);
    const pos=ft=>{const o=pathOff(c,ft,sx,tx,dir,S.i||0);return[sx+(tx-sx)*ft+o[0],ty-Math.sin(ft*Math.PI)*18+o[1]]};
    const off=pathOff(c,f,sx,tx,dir,S.i||0);
+   /* góc bay tại f (đã tính phía bị lật khi đối thủ bắn sang trái) -> xoay ảnh cho ĐẦU hướng về phía trước */
+   const ang=ft=>{const a=pos(Math.max(0,ft-.08)),b=pos(Math.min(1,ft+.08));return Math.atan2(b[1]-a[1],(b[0]-a[0])*dir)};
    /* vệt hạt phía sau */
    if(c.trail){const t=c.trail,r=rnd((S.i||0)*17+idx);g.save();
     for(let i=1;i<=t.n;i++){const ft=f-i*t.gap;if(ft<0)break;const p=pos(ft),k=i/t.n;
@@ -199,12 +205,12 @@ function boot(){
     g.restore()}
    /* bóng mờ phía sau */
    if(c.ghost){for(let k=1;k<=c.ghost;k++){const f2=f-k*.055;if(f2<0)break;const o2=pathOff(c,f2,sx,tx,dir,S.i||0);
-    callOrig(g,T,S,.18+f2*.25,Object.assign({},base,{sc:Math.min(2.3,(c.sc||1.3)*SZR)*big*.9,spin:f2*(c.spin||0),alpha:.3/k}),o2[0],o2[1])}}
+    callOrig(g,T,S,.18+f2*.25,Object.assign({},base,{sc:Math.min(2.3,(c.sc||1.3)*SZR)*big*.9,spin:ang(f2)-head+f2*(c.spin||0),alpha:.3/k}),o2[0],o2[1])}}
    /* thân đạn (có thể chia nhiều mũi) */
    const fan=c.fan||[0];let ret=null;
    const hp=pos(f);halo(g,hp[0],hp[1],46*(c.sc||1.3),col,.55);
    fan.forEach(k=>{
-    const o={...base,sc:Math.min(2.3,(c.sc||1.3)*SZR)*big*(k===0?1.12:1),spin:f*(c.spin||0)};
+    const o={...base,sc:Math.min(2.3,(c.sc||1.3)*SZR)*big*(k===0?1.12:1),spin:ang(f)-head+f*(c.spin||0)};
     const r=callOrig(g,T,S,u,o,off[0],off[1]+k*(c.spread||0)*(1-f));
     if(ret===null||k===0)ret=r;
    });
@@ -227,7 +233,7 @@ function boot(){
    const spin=(c.rot0||0)+(k.r||0)+(c.sweep||0)*(clamp(fc,0,1)-.5);
    const al=c.pulse?.8+.2*Math.sin(T*18+ci):1;
    if(ci===0)halo(g,tx,ty,(40+fc*26)*sc,col,.5*Math.sin(Math.PI*clamp(fc,0,1))+.15);
-   const r=callOrig(g,T,S,uc,{col,idx,tint:c.tint,glow:c.glow,add:c.add,sc,spin,alpha:al},(k.ox||0)*dir,k.oy||0);
+   const r=callOrig(g,T,S,uc,{col,idx,tint:ZT[idx],glow:c.glow,add:c.add,sc,spin,alpha:al},(k.ox||0)*dir,k.oy||0);
    if(ret===null)ret=r;
   });
   if(c.part&&f>.28){
@@ -262,8 +268,7 @@ function boot(){
    if(fx.k==='block'||fx.k==='heal'||fx.k==='stun'||IMP_SPECIAL.test(text))return orig.drawImpact(g,fx,T);
    const idx=zi(fx.s),z=zones[idx],P=PROF[idx],c=P.i||{k:'spark',n:10,R:56,sc:1.3};
    const col=z.color,col2=lighten(col,.6),q=clamp(fx.q||0,0,.9999),tgt=fx.pp?272:90,y=150,miss=fx.k==='miss',crit=fx.k==='crit';
-   const tint=((P.r||P.m||{}).tint);
-   const o={col,idx,tint:tint==null?.5:tint,sc:Math.min(2.3,(c.sc||1.3)*SZI)*(crit?1.2:1)*(miss?.8:1),glow:14};
+   const o={col,idx,tint:ZT[idx],spin:-(FACE[idx]||0),sc:Math.min(2.3,(c.sc||1.3)*SZI)*(crit?1.2:1)*(miss?.8:1),glow:14};
    let ok;
    g.save();
    if(!miss)halo(g,tgt,y,52*(c.sc||1.3),col,.55*(1-q));
