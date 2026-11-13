@@ -796,7 +796,7 @@
               cl = CL[i], rg = FXRG[HN[pa?0:1]] === 1, lu = !rg && cl !== 3 && cl !== 2,
               lg = dmg && !dot ? (lu ? lungeAt(u) : fxRecoil(u, cl)) : mis ? (lu ? lungeAt(u)*.6 : fxRecoil(u, 0)) : 0;
             if(pa) dp += lg; else dmx -= lg;
-            if(dmg || mis){ FXS.on = 1; FXS.u = u; FXS.pa = pa; FXS.cl = cl; FXS.cr = x.k==='crit'; FXS.miss = mis; FXS.h = cl===2 ? 'Hỏa' : HN[pa?0:1]; FXS.s = pa ? pet.sp : oppSP; FXS.i = i; }
+            if(dmg || mis){ FXS.on = 1; FXS.u = u; FXS.pa = pa; FXS.cl = cl; FXS.cr = x.k==='crit'; FXS.miss = mis; FXS.h = cl===2 ? 'Hỏa' : HN[pa?0:1]; FXS.s = pa ? pet.sp : oppSP; FXS.i = i; FXS.text = x.t; }
             if(lu && lg && u > .12 && u < .37) for(let k=1;k<=5;k++){ const off = lungeAt(u - k*.02)*ms; if(Math.abs(off - lg) > 3) gst.push({pa:pa, off:off, a:.6*(1-(k-1)/5)}); }
             if(mis){ const dd = 16*Math.sin(Math.PI*Math.max(0, Math.min(1, (u-.28)/.42))); if(pa) dmx += dd; else dp -= dd; }
             if(dmg && x.d && u >= .35){
@@ -808,7 +808,7 @@
             }
             if(u >= .35){
               const q = (u-.35)/.55, pp = x.w==='p';
-              fx = {pp:pp, q:q, k:x.k, d:(x.k==='heal'||x.k==='block') ? 0 : x.d, r:x.r, i:i, h:/Thiêu đốt/.test(x.t) ? 'Hỏa' : BL[pp ? pet.bl : oppBL].h, s:pp ? pet.sp : oppSP, cl:CL[i]};
+              fx = {pp:pp, q:q, k:x.k, d:(x.k==='heal'||x.k==='block') ? 0 : x.d, r:x.r, i:i, h:/Thiêu đốt/.test(x.t) ? 'Hỏa' : BL[pp ? pet.bl : oppBL].h, s:pp ? pet.sp : oppSP, cl:CL[i], text:x.t};
               if(x.k==='block') fl = {x:pp?90:270, y:130-q*40, t:'🛡️ '+x.d, c:'#8fd0ff', tags:[['KHIÊN HẤP THỤ','#8fd0ff']], q:q, big:1};
               else if(x.k==='heal') fl = {x:pp?90:270, y:130-q*40, t:x.d>0 ? '+'+x.d+' HP' : 'HỒI SỨC', c:'#72e4b0', tags:evTags(x), q:q, big:1};
               else if(x.d){
@@ -841,6 +841,7 @@
         drawOpp(g, card, 272, 208, 120, tt, dmx, am, false);
         if(pf > 0) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, dp, 1, true); }, '#ffffff', 1, pf);
         if(mf > 0) tintDraw(g, function(c){ drawOpp(c, card, 272, 208, 120, tt, dmx, 1, true); }, '#ffffff', 1, mf);
+        try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaBuffs) TTGCombatFX.drawArenaBuffs(g, tt, T, pet.sp, oppSP, zbP, zbM); }catch(_){}   // buff vùng: bật to rõ lúc vào trận
         if(fx) impact(g, fx, tt);
         try{ fxDraw(g, tt, dp, dmx); }catch(_){}
         g.restore();
