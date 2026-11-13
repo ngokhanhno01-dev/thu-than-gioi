@@ -42,7 +42,7 @@ label{display:flex;align-items:center;gap:6px}
 <script src="35-attack-fx-2c.js"></script>
 <script src="36-attack-fx-2c-boom.js"></script>
 <script src="37-attack-fx-2c-detail.js"></script>
-<script src="../38-attack-fx-2d.js"></script>
+<script src="38-attack-fx-2d.js"></script>
 <script src="39-attack-fx-2d-detail.js"></script>
 <script src="40-attack-fx-3a.js"></script>
 <script>
@@ -52,6 +52,8 @@ label{display:flex;align-items:center;gap:6px}
 const FX=window.TTGCombatFX,CW=360,CH=250,GY=204,BST=1.9;
 const cv=document.getElementById('cv'),g=cv.getContext('2d'),info=document.getElementById('info');
 const $=id=>document.getElementById(id);
+/* PHẢI khai báo t0/run TRƯỚC khi gọi syncMode()→restart(), nếu không sẽ lỗi TDZ ("Cannot access 't0' before initialization") làm cả script dừng, canvas đen */
+let t0=performance.now(),run=true;
 function fit(){const w=Math.min(innerWidth-16,720),d=Math.min(window.devicePixelRatio||1,3);cv.style.width=w+'px';cv.style.height=(w*CH/CW)+'px';cv.width=Math.round(w*d);cv.height=Math.round(w*d*CH/CW)}
 fit();addEventListener('resize',fit);
 if(!FX){info.textContent='Không tải được 31-combat-fx.js'}
@@ -92,7 +94,6 @@ function pet(g,x,c1,c2,T,flip){
  g.restore();
 }
 /* ---- vòng lặp ---- */
-let t0=performance.now(),run=true;
 function restart(){t0=performance.now();run=true;if(FX)FX.engine.clear()}
 $('play').onclick=restart;$('zone').onchange=restart;$('side').onchange=restart;$('kind').onchange=restart;
 $('style').onchange=()=>{if(FX.setFxStyle)FX.setFxStyle($('style').value);restart()};
