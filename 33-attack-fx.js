@@ -3,7 +3,7 @@
    Cách làm: bọc TTGCombatFX.drawAttack / drawImpact của 31-combat-fx.js. Sprite vẫn do 31 chọn khung,
    file này tô màu theo vùng, đổi quỹ đạo, phóng to, thêm hạt/vệt riêng cho từng vùng.
    Lỗi bất kỳ → tự quay về hiệu ứng gốc của 31, không làm đứng trận.
-   [FX 1B] Vùng đã vẽ lại bằng CODE (không ảnh) nằm trong bảng ZFX bên dưới; vùng nào có trong ZFX thì bỏ qua ảnh. */
+   [FX 1B/1C] Vùng đã vẽ lại bằng CODE (không ảnh) nằm trong bảng ZFX bên dưới; vùng nào có trong ZFX thì bỏ qua ảnh. */
 (()=>{
 'use strict';
 let tries=0;
@@ -112,6 +112,72 @@ function boot(){
   layer(g,gg=>iceRun(gg,T,u*1.9,!!S.pa,!!S.miss,!!S.cr,s));
   return true;
  }
+ /* 1 Sương Cốc (gần): KHÔNG có nhát chém hay vật bay. Nhiều cột sương/nước sáng PHUN từ đất, lan dần từ chân người đánh tới mục tiêu,
+    uốn cong như vòi phun (lõi trắng, rìa xanh ngọc mềm, thân thon dần, cuộn xoáy). Cao trào: 2 cột lớn uốn cong hai bên mục tiêu (chừa giữa để thấy mục tiêu).
+    Chân cột có vòng bọt + vài mảnh tinh thể nhỏ; giọt nước rơi có trọng lực. Trúng lúc t=.665s (u=.35): bọt sương tỏa ra mặt đất. Rồi tan dần. */
+ function mistRun(g,T,t,pa,miss,cr,s){
+  const GY=204,TS=.06,TH=.665,END=1.68,dir=pa?1:-1,x0=pa?108:250,tx=pa?272:85,L0=Math.abs(tx-x0),L=miss?L0*.6:L0,hk=cr?1.2:1,
+   r=E.rng(s.seed),cap=l=>Math.max(.12,Math.min(l,END-t)),tHd=miss?TH*.7:TH,C1='#a3e1d4',C2='#4fd0bf',C3='#e8fffa';
+  const cols=[],N=miss?9:13;
+  for(let i=0;i<N;i++){const k=i/(N-1);
+   cols.push({k,bx:x0+dir*(34+k*(L-34-(miss?0:30)))+r.range(-7,7),H:(30+46*Math.pow(k,1.2)+r.range(0,14))*(miss?.7:hk),w:8+6*k+r.range(0,3),bend:dir*r.range(-.35,.9),ph:r.range(0,6.28),tE:TS+k*(tHd-TS-.14),tF:(miss?.95:1.1)+(1-k)*.2,big:0})}
+  if(!miss)[[-26,120,-.95,0],[28,104,.85,.05]].forEach(c=>cols.push({k:1,bx:tx+dir*c[0],H:c[1]*hk,w:17,bend:dir*c[2],ph:r.range(0,6.28),tE:TH-.2+c[3],tF:1.3,big:1}));
+  /* tụ sương dưới chân người đánh */
+  if(t<TS+.35){
+   const c=E.ph(t,0,.22);
+   E.glow(g,x0,GY-6,36*E.eOut(c),C2,.5*(1-E.ph(t,.2,.42)));
+   E.wave(g,x0,GY,8+26*E.eOut(E.ph(t,0,.3)),C1,(1-E.ph(t,.1,.4))*.8,1.6,{seed:s.seed,t:T});
+   for(let n=E.rate(s,'ch',E.ph(t,0,.2),26);n>0;n--)E.emit({x:x0+r.range(-20,20),y:GY-r.range(0,4),vx:r.range(-8,8),vy:r.range(-46,-18),life:r.range(.3,.5),s0:r.range(1.6,3),s1:.5,shape:'orb',c:C1,c2:'#ffffff',a:.9,add:true,tag:'fx'});
+  }
+  /* sương phủ mặt đất dọc đường lan */
+  for(let i=0;i<9;i++){const k=i/8,p=E.ph(t,TS+k*(tHd-TS),TS+k*(tHd-TS)+.3);
+   if(p>0)E.blob(g,x0+dir*L*k,GY+1,34,5.5,C1,.34*p*(1-E.ph(t,1.2,1.62)),T,s.seed+i,{wob:.4,core:C3})}
+  /* các cột phun */
+  cols.forEach((c,i)=>{
+   const gw=E.eOut(E.ph(t,c.tE,c.tE+.34)),out=1-E.ph(t,c.tF,c.tF+.34);
+   if(gw<=.01)return;
+   if(E.once(s,'b'+i)){
+    const rb=E.rng(s.seed+i*53);
+    E.burst(rb,c.bx,GY,c.big?7:3,{speed:[10,40],ang:[-Math.PI,0],size:[2,3.5],life:[cap(.5),cap(.9)],gy:-30,drag:.6,shape:'orb',c:'#d8fff7',c2:'#ffffff',a:.85,add:true,tag:'fx'});
+    E.burst(rb,c.bx,GY-2,c.big?3:1,{speed:[30,70],ang:[-Math.PI*.95,-Math.PI*.05],size:[2,3.5],life:[cap(.4),cap(.7)],gy:240,drag:.4,shape:'shard',c:C2,c2:C3,a:.9,tag:'fx',vr:[-8,8],floor:GY+4,bounce:.3});
+   }
+   if(out<=0)return;
+   const len=gw*(.5+.5*out),n=c.big?20:15,pts=[],br=1+.05*Math.sin(T*9+c.ph);
+   for(let j=0;j<n;j++){const sv=len*(1-j/(n-1)),yy=c.H*br*(1.25*sv-.75*sv*sv);
+    pts.push([c.bx+c.bend*c.H*.5*sv*sv+Math.sin(sv*5+T*7+c.ph)*3.5*sv,GY-yy])}
+   const a=out,wk=c.w*(1+.1*Math.sin(T*10+c.ph)),wf=q=>wk*(.12+.88*Math.pow(q,.75));
+   E.blob(g,c.bx,GY+1,c.w*1.6+8,3.5+c.w*.25,C3,.5*a*Math.min(1,gw*2),T,s.seed+i*3,{wob:.35,core:'#ffffff'});
+   E.wave(g,c.bx,GY+1,6+(c.big?26:15)*E.eOut(E.ph(t,c.tE,c.tE+.45)),C1,.6*a*(1-E.ph(t,c.tE+.2,c.tE+.6)),1.2,{seed:s.seed+i,t:T});
+   E.ribbon(g,pts,wf,C2,a*.5,{core:C1});
+   E.ribbon(g,pts,q=>wf(q)*.62,C1,a*.8,{core:C3});
+   E.ribbon(g,pts,q=>wf(q)*.26,'#ffffff',a,{core:'#ffffff'});
+   if(c.big){const p2=pts.map((p,j)=>{const q=j/(n-1);return[p[0]+Math.cos((1-q)*10+T*8+c.ph)*8*(1-q),p[1]]});E.ribbon(g,p2,q=>wf(q)*.2,C1,a*.6,{core:C3})}
+   /* giọt nước văng từ ngọn cột, rơi có trọng lực */
+   for(let m=E.rate(s,'d'+i,E.ph(t,c.tE+.12,c.tF+.2),c.big?26:10);m>0;m--){const tp=pts[0];
+    E.emit({x:tp[0]+r.range(-3,3),y:tp[1],vx:c.bend*r.range(10,40)+r.range(-12,12),vy:-r.range(6,40),gy:300,drag:.3,life:cap(r.range(.5,.85)),s0:r.range(1.6,2.8),s1:.7,shape:'orb',c:C1,c2:'#ffffff',a:.95,add:true,tag:'fx',floor:GY+3,bounce:.12})}
+  });
+  /* khi đòn trúng: quầng mát nhẹ + vòng bọt sương toả ra mặt đất (không chớp trắng) */
+  if(!miss&&t>TH-.1){
+   E.glow(g,tx,GY-30,60,C2,.26*E.ph(t,TH-.1,TH)*(1-E.ph(t,TH+.1,TH+.6)));
+   E.wave(g,tx,GY,10+104*E.eOut(E.ph(t,TH-.1,TH+.8)),C1,(1-E.ph(t,TH+.15,TH+.8))*.8,2,{seed:s.seed+5,t:T});
+   E.wave(g,tx,GY,6+66*E.eOut(E.ph(t,TH-.05,TH+.6)),'#ffffff',(1-E.ph(t,TH+.1,TH+.6))*.5,1.2,{seed:s.seed+9,t:T});
+  }
+  if(!miss&&t>=TH&&E.once(s,'hit')){
+   const rb=E.rng(s.seed^0x2b7);
+   E.burst(rb,tx,GY-8,20,{speed:[20,100],ang:[-Math.PI*.95,-Math.PI*.05],size:[2,5],life:[cap(.5),cap(.9)],gy:120,drag:.9,shape:'orb',c:C1,c2:'#ffffff',a:.9,add:true,tag:'fx'});
+   [[-.35,.35],[Math.PI-.35,Math.PI+.35]].forEach(an=>E.burst(rb,tx,GY,5,{speed:[30,90],ang:an,size:[10,16],life:[cap(.6),cap(.95)],gy:-6,drag:1.4,shape:'mist',c:'#bff3ea',a:.7,tag:'fx'}));
+  }
+  /* hơi sương bốc lên */
+  for(let m=E.rate(s,'fog',E.ph(t,.1,.9),30);m>0;m--)E.emit({x:x0+dir*r.range(0,L),y:GY-r.range(0,8),vx:r.range(-6,6),vy:r.range(-14,-4),life:cap(r.range(.6,1)),s0:8,s1:r.range(16,24),shape:'mist',c:'#bff3ea',a:.6,tag:'fx'});
+  E.draw(g,'fx');
+ }
+ function mistFx(g,T,S){
+  const u=clamp(S.u||0,0,1),s=E.seed('mist',u);
+  E.setSpeed(window.BSPD||1);
+  if(E.once(s,'init'))E.clear();                 /* đòn mới: bỏ hạt của đòn trước */
+  layer(g,gg=>mistRun(gg,T,u*1.9,!!S.pa,!!S.miss,!!S.cr,s));
+  return true;
+ }
  /* va chạm của vùng code: mọi thứ đã do ZFX vẽ trong lúc đánh; chỉ còn quầng + tia chí mạng mềm (không chớp trắng) */
  function impactCode(g,fx){
   if(fx.k!=='crit')return true;
@@ -124,7 +190,7 @@ function boot(){
   });
   return true;
  }
- const ZFX=E?{0:iceFx}:{};
+ const ZFX=E?{0:iceFx,1:mistFx}:{};
  const NOCODE_ATK=/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/,NOCODE_IMP=/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích|Xuyên giáp|Liên kích -|Phong Nhận(?: chém| -)|Dương Diệm|Thần Phán|Tinh Quang|Thiên Uy|Sương Tán/;
 
  /* ---------- Cấu hình 17 vùng ----------
