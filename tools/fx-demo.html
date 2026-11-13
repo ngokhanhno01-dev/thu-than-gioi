@@ -13,17 +13,23 @@ select,button{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid
 button{background:#6a3fc4;font-weight:700}
 label{display:flex;align-items:center;gap:6px}
 #info{font-size:12px;color:#b9a7d6;min-height:34px;white-space:pre-wrap}
-#attackControls[hidden],#buffControls[hidden]{display:none}
+#attackControls[hidden],#buffControls[hidden],#gearControls[hidden]{display:none}
 </style></head><body>
 <h1>Trang xem thử hiệu ứng (vẽ bằng code)</h1>
 <canvas id="cv"></canvas>
-<div class="row"><select id="zone"></select><select id="viewMode"><option value="buff">Buff nền vùng pixel art · 3A/3B (0–16)</option><option value="attack">Đòn đánh</option></select></div>
+<div class="row"><select id="zone"></select><select id="viewMode"><option value="buff">Buff nền vùng pixel art · 3A/3B (0–16)</option><option value="gear">Buff bộ trang bị pixel art · 3C (17 bộ)</option><option value="attack">Đòn đánh</option></select></div>
 <div class="row" id="buffControls">
  <select id="buffStat">
   <option value="atk">Buff Công</option><option value="def">Buff Thủ</option><option value="spd">Buff Tốc độ</option><option value="mag">Buff Pháp thuật</option>
   <option value="eva">Buff Né tránh</option><option value="crit">Buff Chí mạng</option><option value="regen">Buff Hồi phục</option><option value="hp">Buff HP</option>
  </select>
 </div>
+<div class="row" id="gearControls" hidden><select id="gear">
+  <option value="frost">Frost · Băng</option><option value="mist">Mist · Sương</option><option value="cloud">Cloud · Mây</option><option value="wind">Wind · Gió</option>
+  <option value="thunder">Thunder · Lôi</option><option value="counter">Counter · Phản kích</option><option value="sun">Sun · Dương quang</option><option value="shield">Shield · Khiên</option>
+  <option value="thorn">Thorn · Gai</option><option value="revive">Revive · Hồi sinh</option><option value="grove">Grove · Rừng</option><option value="lava">Lava · Dung nham</option>
+  <option value="ambush">Ambush · Tập kích</option><option value="star">Star · Tinh quang</option><option value="first">First · Tiên thủ</option><option value="weaken">Weaken · Suy yếu</option><option value="judge">Judge · Thần phán</option>
+ </select></div>
 <div id="attackControls" hidden>
  <div class="row"><select id="side"><option value="p">Thú đánh quái</option><option value="m">Quái đánh thú</option></select><select id="kind"><option value="hit">Đòn thường</option><option value="crit">Chí mạng</option><option value="miss">Trượt (né)</option></select></div>
  <div class="row"><select id="style"><option value="px">Kiểu: Pixel</option><option value="sm">Kiểu: Mịn</option></select><select id="spd"><option value="1">Tốc độ 1x</option><option value="0.5">Chậm 0.5x</option><option value="0.25">Rất chậm 0.25x</option></select></div>
@@ -57,10 +63,10 @@ else{
    (view.value==='buff'?' — pixel art':(FX.codeZone&&FX.codeZone(i)?' — vẽ lại bằng code':' — cũ (ảnh)'))+'</option>').join('');
   sel.value=old<max?String(old):'0';
  };
- const syncMode=()=>{$('buffControls').hidden=view.value!=='buff';$('attackControls').hidden=view.value==='buff';build();restart()};
- build();$('buffControls').hidden=view.value!=='buff';$('attackControls').hidden=view.value==='buff';setTimeout(build,600);   /* cập nhật nhãn vùng khi 33-attack-fx.js tải xong */
+ const syncMode=()=>{$('buffControls').hidden=view.value!=='buff';$('gearControls').hidden=view.value!=='gear';$('attackControls').hidden=view.value!=='attack';$('zone').hidden=view.value==='gear';build();restart()};
+ syncMode();setTimeout(build,600);   /* cập nhật nhãn vùng khi 33-attack-fx.js tải xong */
  view.onchange=syncMode;
- $('buffStat').onchange=restart;
+ $('buffStat').onchange=restart;$('gear').onchange=restart;
 }
 /* ---- chuyển động lao tới / giật lùi: chép từ 06-mobs.js để demo giống game ---- */
 function lungeAt(u){if(u<=0)return 0;
@@ -107,6 +113,7 @@ function loop(now){
    FX.drawBack(g,T,.7,zi,{zoneBuff:{stat,label:'Buff '+labels[stat]},startBuffs:[]},0,0,100,100,zi,0);
   }catch(e){msg='Lỗi buff vùng: '+e.message}
  }
+ if(mode==='gear'){try{FX.drawBack(g,T,.7,0,{startBuffs:[{kind:$('gear').value}],zoneBuff:null},0,0,100,100,0,0)}catch(e){msg='Lỗi buff bộ: '+e.message}}
  try{
   if(mode==='attack'&&run&&u<.9){
    const z=FX.zones[zi],melee=z&&z.mode==='melee',lg=melee?lungeAt(u)*(kind==='miss'?.6:1):recoilAt(u);
@@ -132,8 +139,7 @@ function loop(now){
   }
   if(mode==='attack'&&run&&u>=1){if($('loop').checked)restart();else run=false}
  }catch(e){msg='Lỗi: '+e.message}
- info.textContent=(msg||(mode==='buff'?'Buff nền vùng '+zi+' · '+$('buffStat').selectedOptions[0].text+' · pixel art vẽ theo vùng.':
-  (FX.codeZone&&FX.codeZone(zi)?'Vùng này đã vẽ bằng code (không ảnh).':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.')))+'\nHạt đang chạy: '+FX.engine.count();
+ info.textContent=(msg||(mode==='buff'?'Buff nền vùng '+zi+' · '+$('buffStat').selectedOptions[0].text+' · pixel art riêng theo vùng.':mode==='gear'?'Buff bộ trang bị · '+$('gear').selectedOptions[0].text+' · pixel art riêng theo bộ.':(FX.codeZone&&FX.codeZone(zi)?'Vùng này đã vẽ bằng code (không ảnh).':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.')))+'\nHạt đang chạy: '+FX.engine.count();
 }
 requestAnimationFrame(loop);
 </script>

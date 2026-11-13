@@ -605,14 +605,73 @@ function backZone(g,x,z,q,T,e,shape,k,stat){
   mote(g,shape||'star',x+(rnd(i*9.1)-.5)*84*k,y0(k)-ph*100*k,2+rnd(i)*2.2,z.color,Math.sin(ph*3.1416)*a,T*2+i)}
 }
 const y0=k=>206;
-/* buff bộ trang bị, lớp nền: ngọn lửa aura sau lưng thú, đậm lúc bật rồi còn lại quầng nhạt */
+/* Buff bộ trang bị 17 bộ: pixel-aura nhiều dải uốn, màu và silhouette độc lập với buff vùng. */
+const GEAR_PIXEL_STYLE={
+ frost:{id:0,n:4,h:32,form:'ice'},mist:{id:1,n:4,h:31,form:'mist'},cloud:{id:2,n:4,h:34,form:'cloud'},wind:{id:3,n:4,h:29,form:'wind'},
+ thunder:{id:4,n:4,h:35,form:'bolt'},counter:{id:5,n:4,h:32,form:'orbit'},sun:{id:6,n:4,h:35,form:'sun'},shield:{id:7,n:4,h:30,form:'shield'},
+ thorn:{id:8,n:4,h:33,form:'thorn'},revive:{id:9,n:4,h:35,form:'feather'},grove:{id:10,n:4,h:31,form:'vine'},lava:{id:11,n:4,h:34,form:'lava'},
+ ambush:{id:12,n:4,h:29,form:'shadow'},star:{id:13,n:4,h:34,form:'star'},first:{id:14,n:4,h:36,form:'spear'},weaken:{id:15,n:4,h:30,form:'drip'},judge:{id:16,n:4,h:36,form:'crown'}
+};
 function backGear(g,x,kind,q,T,e){
- const col=gearCol(kind),art=gearArt(kind),a=q>0?Math.min(1,q*1.8):0,rest=.34+.1*Math.sin(T*4);
- const al=Math.max(rest,.85*a);
- glow(g,x,176,66,col,.12+.26*a);
- ring(g,x,204,38+Math.sin(T*2)*2,8,col,.35+.5*a,2);
- paint(g,art,(T*3.2)%1,x,166,(88+30*a)*1.18,(100+34*a)*1.18,col,al,false,0,.18,10);
- if(a>0)for(let i=0;i<10;i++){const ph=(T*.8+i*.1)%1;mote(g,'spark',x+(rnd(i*7.3)-.5)*60,206-ph*96,1.8+rnd(i)*1.8,col,Math.sin(ph*3.1416)*a,T*2+i)}
+ const st=GEAR_PIXEL_STYLE[kind]||GEAR_PIXEL_STYLE.judge,id=st.id,u=2.2,col=gearCol(kind);
+ const pale=FXE.mix(col,'#fff4cf',.58),deep=FXE.mix(col,'#101321',.72),mid=FXE.mix(col,'#ffffff',.22);
+ const a=q>0?Math.min(1,q*1.8):0,rest=.31+.09*Math.sin(T*3.7+id),al=Math.max(rest,.88*a),pulse=.72+.28*Math.sin(T*2.6+id*.9),w=al*pulse;
+ g.save();
+ /* Rãnh chân pixel; aura trang bị dựng cao hơn và xoắn nhiều lớp hơn buff vùng. */
+ buffArc(g,x,204,43,8,0,Math.PI*2,deep,al*.7,u,T,1);
+ buffArc(g,x,204,38,5,T*.45,T*.45+Math.PI*1.7,col,al*.9,u,T,1);
+ buffArc(g,x,204,30,3,-T*.55,-T*.55+Math.PI*1.2,pale,al*.74,u,T,1);
+ for(let i=0;i<st.n;i++){
+  const side=i%2?1:-1,offset=(i-(st.n-1)/2)*5.5*u,phase=T*(1.2+(i%3)*.18)+id*.67+i*1.7,pts=[];
+  for(let j=0;j<22;j++){const v=j/21;let bend=0;
+   switch(st.form){
+    case'ice':bend=side*(3+v*10)*u+Math.sin(v*5+phase)*2*u;break;
+    case'mist':bend=Math.sin(v*8+phase)*7*u+side*2*u;break;
+    case'cloud':bend=Math.sin(v*5+phase)*8*u+Math.cos(v*9+phase)*3*u;break;
+    case'wind':bend=side*(5+v*17)*u+Math.sin(v*6+phase)*3*u;break;
+    case'bolt':bend=Math.round(Math.sin(v*14+phase)*3)*u+side*v*7*u;break;
+    case'orbit':bend=Math.sin(v*FXE.TAU*1.35+phase)*9*u+side*2*u;break;
+    case'sun':bend=side*v*14*u+Math.sin(v*4+phase)*3*u;break;
+    case'shield':bend=side*(v<.3?3:7+v*10)*u+Math.sin(v*4+phase)*2*u;break;
+    case'thorn':bend=side*(v*15+Math.sin(v*5+phase)*3)*u;break;
+    case'feather':bend=side*5*u+Math.sin(v*6+phase)*6*u;break;
+    case'vine':bend=side*(5+v*15)*u+Math.sin(v*4+phase)*4*u;break;
+    case'lava':bend=side*v*13*u+Math.sin(v*5+phase)*5*u;break;
+    case'shadow':bend=Math.sin(v*FXE.TAU*.85+phase)*11*u+side*2*u;break;
+    case'star':bend=side*v*14*u+Math.sin(v*9+phase)*4*u;break;
+    case'spear':bend=side*(1+v*17)*u+Math.sin(v*5+phase)*2*u;break;
+    case'drip':bend=Math.sin(v*7+phase)*5*u+side*2*u;break;
+    default:bend=side*(4+v*12)*u+Math.sin(v*3+phase)*4*u;
+   }
+   const lift=st.h*v,xx=x+offset+bend,yy=202-lift*u;
+   if(st.form==='wind'&&i%2===0&&j>3&&j%4<2)continue;
+   pts.push([xx,yy]);
+  }
+  const outline=pts.map(p=>[p[0]+side*u,p[1]+u]);buffLine(g,outline,deep,w*.72,u,1);buffLine(g,pts.slice(2),i%2?pale:col,w*(.84+(i%3)*.05),u,1);
+ }
+ switch(kind){
+  case'frost':for(let i=-2;i<=2;i++)buffDiamond(g,x+i*9*u,164-Math.abs(i)*3,i%2===0?2:1,i%2?pale:mid,w,u);break;
+  case'mist':for(let i=0;i<3;i++)buffArc(g,x,174-i*7,17+i*7,7+i*2,T+i*1.4,T+i*1.4+Math.PI*1.25,col,w*.85,u,T,1);for(let i=0;i<5;i++)buffPixel(g,x+(i-2)*8*u,165+(i%2)*5*u,pale,w*.85,u,2,1);break;
+  case'cloud':for(let i=0;i<4;i++){const an=T*.4+i*Math.PI/2,xx=x+Math.cos(an)*21,yy=165+Math.sin(an)*10;buffPixel(g,xx,yy,col,w,u,3,2);buffPixel(g,xx+2*u,yy-u,pale,w*.9,u,2,1)}break;
+  case'wind':for(let i=0;i<4;i++){const yy=168+i*5,shift=Math.sin(T*1.7+i)*8;buffLine(g,[[x-27+shift,yy],[x-12+shift,yy-u],[x+7+shift,yy-u],[x+23+shift,yy-2*u]],i%2?pale:col,w*.9,u,1);buffDiamond(g,x+18+shift,yy-4*u,1,mid,w,u)}break;
+  case'thunder':for(let s of [-1,1])buffLine(g,[[x+s*17,143],[x+s*12,151],[x+s*18,158],[x+s*10,166],[x+s*13,174],[x+s*5,181]],pale,w,u,2);break;
+  case'counter':buffArc(g,x,166,26,18,T*.8,T*.8+Math.PI*1.5,pale,w,u,T,1);buffArc(g,x,166,18,12,-T*.9,-T*.9+Math.PI*1.35,col,w*.9,u,T,1);buffDiamond(g,x-24,164,1,mid,w,u);buffDiamond(g,x+24,164,1,mid,w,u);break;
+  case'sun':for(let i=0;i<12;i++){const an=i*Math.PI/6+T*.12;buffLine(g,[[x+Math.cos(an)*8,168+Math.sin(an)*7],[x+Math.cos(an)*17,168+Math.sin(an)*14],[x+Math.cos(an)*24,168+Math.sin(an)*20]],i%2?pale:col,w*.9,u,1)}buffDiamond(g,x,168,2,pale,w,u);break;
+  case'shield':buffLine(g,[[x-25,165],[x-20,153],[x-9,148],[x,151],[x+9,148],[x+20,153],[x+25,165],[x+17,177],[x,184],[x-17,177],[x-25,165]],pale,w,u,1);buffLine(g,[[x-17,165],[x,158],[x+17,165],[x,176],[x-17,165]],col,w*.9,u,1);break;
+  case'thorn':for(let s of [-1,1])for(let i=0;i<4;i++){const xx=x+s*(10+i*7),yy=177-i*7;buffLine(g,[[xx-s*3*u,yy+u],[xx,yy],[xx+s*4*u,yy-3*u]],pale,w,u,1)}break;
+  case'revive':buffArc(g,x,157,23,8,Math.PI,Math.PI*2,pale,w,u,T,1);for(let i=-2;i<=2;i++){const xx=x+i*11;buffLine(g,[[xx,167],[xx+2*u,160],[xx,153],[xx-2*u,160],[xx,167]],i%2?col:mid,w*.9,u,1)}break;
+  case'grove':for(let i=-2;i<=2;i++){const xx=x+i*10,yy=168-Math.abs(i)*5;buffLine(g,[[xx,196],[xx,yy]],col,w,u,1);buffDiamond(g,xx-2*u,yy+3*u,1,pale,w,u);buffDiamond(g,xx+2*u,yy-2*u,1,mid,w,u)}break;
+  case'lava':for(let i=-4;i<=4;i++){const h=3+Math.floor((Math.sin(T*4+i)*1.5+1)*2);for(let j=0;j<h;j++)buffPixel(g,x+i*6*u,195-j*2*u,j%2?pale:col,w,u,2,1)}break;
+  case'ambush':buffPixel(g,x,193,deep,w,u,14,3);for(let i=-2;i<=2;i++)buffLine(g,[[x+i*8,190],[x+i*8+Math.sin(T*2+i)*8,183],[x+i*8+Math.sin(T*2.5+i)*13,174]],i%2?pale:col,w*.85,u,2);break;
+  case'star':for(let i=0;i<8;i++){const an=T*.25+i*Math.PI/4,xx=x+Math.cos(an)*25,yy=164+Math.sin(an)*13;buffSpark(g,xx,yy,1,i%2?pale:mid,w,u)}buffDiamond(g,x,164,2,col,w,u);break;
+  case'first':buffLine(g,[[x-27,171],[x-12,169],[x+4,166],[x+22,163],[x+29,160],[x+22,157],[x+4,160]],pale,w,u,2);buffDiamond(g,x+21,163,2,col,w,u);for(let i=0;i<4;i++)buffLine(g,[[x-22,178+i*3],[x-8,176+i*3]],col,w*.8,u,1);break;
+  case'weaken':for(let i=-2;i<=2;i++){const xx=x+i*11,dropY=154+((T*8+i*13)%24);buffDiamond(g,xx,dropY,1,pale,w,u);buffLine(g,[[xx,dropY+2*u],[xx,dropY+5*u]],col,w*.9,u,1)}break;
+  case'judge':buffLine(g,[[x-28,177],[x-20,160],[x-12,171],[x,151],[x+12,171],[x+20,160],[x+28,177],[x-28,177]],pale,w,u,2);buffArc(g,x,177,30,9,T*.2,T*.2+Math.PI*1.75,col,w*.86,u,T,1);buffDiamond(g,x,151,1,mid,w,u);break;
+ }
+ /* Hạt pixel đi lên theo từng nhịp, giữ lại aura nhẹ sau lúc buff vừa kích hoạt. */
+ for(let i=0;i<8;i++){const p=(T*.42+i*.125+id*.037)%1,fade=Math.sin(Math.PI*p)*al,side=Math.sin(i*2.7+id)*((18+i%3*4)*u),xx=x+side+Math.sin(T*1.4+i+id)*2*u,yy=202-p*78;
+  if(i%3===0)buffDiamond(g,xx,yy,1,i%2?pale:mid,fade,u);else if(i%3===1)buffSpark(g,xx,yy,1,col,fade*.9,u);else buffPixel(g,xx,yy,pale,fade,u,2,2)}
+ g.restore();
 }
 /* nhãn nổi trên đầu (lớp trên): nằm ở đỉnh khung, không chạm thân thú */
 function bannerFx(g,x,col,txt,q,sub){
