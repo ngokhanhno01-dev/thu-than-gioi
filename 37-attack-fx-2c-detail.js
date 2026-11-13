@@ -2,7 +2,8 @@
    Chạy SAU 36-attack-fx-2c-boom.js: gọi bản trước (vẽ như cũ) rồi vẽ THÊM lớp chi tiết, chỉ khi t >= lúc trúng (.665s). Hạt gắn nhãn 'dt'. PRNG riêng (E.rng).
    10: cổng dây leo gai nở hoa rồi héo, nấm phát sáng nổ bào tử, đom đóm, lá rơi, tia nắng phấn hoa, nứt rễ.
    11: lốc lửa xoáy, 6 mạch dung nham phun, thiên thạch đá cháy, mạng nứt dung nham nguội dần, vòm nhiệt, suối tàn lửa, cột khói.
-   12: ấn pháp trận dưới đất, vết nứt bóng tối, dơi, hồn bóng xoắn ốc, sương đen, và MẶT QUỶ bay lên từ từ rồi tan thành khói. */
+   12: ấn pháp trận dưới đất, vết nứt bóng tối, dơi, hồn bóng xoắn ốc, sương đen, và MẶT QUỶ bay lên từ từ rồi tan thành khói.
+   [sửa] Lỗi gọi sai tham số (D[idx](gg,T,t,pa,miss,cr,o)) làm lớp này không vẽ gì. Giờ gọi D[idx](gg,T,t,o). */
 (()=>{
 'use strict';
 let tries=0;
@@ -291,10 +292,10 @@ function boot(){
      st.last=t;st.t=t;
      const pa=!!S.pa,miss=!!S.miss,cr=!!S.cr,dir=pa?1:-1,tx=pa?272:85;
      const o={tc:miss?tx-dir*80:tx,k:(miss?.55:1)*(cr?1.4:1),m:miss,st:st};
-     layer(g,gg=>D[idx](gg,T,t,pa,miss,cr,o));
+     layer(g,gg=>D[idx](gg,T,t,o));
     }else ST[idx]=null;
    }
-  }catch(e){if(window.__ATK17_DEBUG)throw e}
+  }catch(e){window.__fxErr='37: '+(e&&e.message);if(window.__ATK17_DEBUG)throw e}
   return res;
  };
  API.setFxStyle=v=>{STY=v==='sm'?'sm':'px';if(prevSty)prevSty(v)};
