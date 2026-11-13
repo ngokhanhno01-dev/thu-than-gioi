@@ -1,7 +1,8 @@
 /* ===== 36-attack-fx-2c-boom.js — [FX 2C+] Lớp NỔ NHIỀU ĐỢT khi trúng đòn cho vùng 10-13 (Thanh Lâm, Xích Hỏa Địa, Hắc Ám Lâm, Tử Tinh Hải) =====
    Chạy SAU 35-attack-fx-2c.js: bọc lại API.drawAttack, gọi bản trước (vẽ như cũ) rồi vẽ THÊM lớp nổ lên trên, chỉ khi t >= lúc trúng (.665s).
    Mỗi vùng: nổ chính (t=.665) -> nổ phụ (+.14~.18) -> dư chấn (+.32~.36), vòng sóng, vật bay có đuôi rơi nảy đất, hạt có trọng lực, màu lõi ở đất và hai bên (không che quái).
-   Số ngẫu nhiên dùng E.rng (PRNG riêng), không Math.random. Hạt gắn nhãn 'bm'. Muốn chỉnh độ mạnh: đổi các số trong BOOM[10..13] hoặc hệ số k. */
+   Số ngẫu nhiên dùng E.rng (PRNG riêng), không Math.random. Hạt gắn nhãn 'bm'. Muốn chỉnh độ mạnh: đổi các số trong BOOM[10..13] hoặc hệ số k.
+   [sửa] Lỗi gọi sai tham số (BOOM[idx](gg,T,t,o)) làm lớp này không vẽ gì. */
 (()=>{
 'use strict';
 let tries=0;
@@ -128,7 +129,7 @@ function boot(){
    const tp=pts[pts.length-1];E.glow(g,tp[0],tp[1],7,LY,.5*fo*gw);
   }
   bombs(g,T,t,st,{x:tc,t0:TH+.02,n:m?3:6,k:k,sd:11,v0:110,v1:150,g:420,w:4,c1:LA,c2:LY,key:'b10',nb:7});
-  if(E.once&&st.once('w1')){const rb=E.rng(sd^0x10a);
+  if(st.once('w1')){const rb=E.rng(sd^0x10a);
    E.burst(rb,tc,GY-40,m?14:34,{speed:[50,210],ang:[0,TAU],size:[3,6],life:[cap(.7),cap(1.3)],gy:70,drag:.65,shape:'leaf',c:LA,c2:LB,a:1,tag:'bm',vr:[-9,9],fl:12});
    E.burst(rb,tc,GY-30,m?10:26,{speed:[30,150],ang:[0,TAU],size:[1.4,3],life:[cap(.8),cap(1.5)],gy:-24,drag:.6,shape:'orb',c:LY,c2:LB,a:1,add:true,tag:'bm'})}
   if(t>=TH+.14&&st.once('w2')){const rb=E.rng(sd^0x10b);
@@ -241,10 +242,10 @@ function boot(){
      st.last=t;st.t=t;
      const pa=!!S.pa,miss=!!S.miss,cr=!!S.cr,dir=pa?1:-1,tx=pa?272:85;
      const o={tc:miss?tx-dir*80:tx,k:(miss?.55:1)*(cr?1.4:1),m:miss,st:st};
-     layer(g,gg=>BOOM[idx](gg,T,t,pa,miss,cr,o));
+     layer(g,gg=>BOOM[idx](gg,T,t,o));
     }else ST[idx]=null;
    }
-  }catch(e){if(window.__ATK17_DEBUG)throw e}
+  }catch(e){window.__fxErr='36: '+(e&&e.message);if(window.__ATK17_DEBUG)throw e}
   return res;
  };
  API.setFxStyle=v=>{STY=v==='sm'?'sm':'px';if(prevSty)prevSty(v)};
