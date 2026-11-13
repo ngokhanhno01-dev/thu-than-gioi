@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base href="../">
+<title>FX Demo — Thú Thần Giới</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:8px;background:#120c1a;color:#f3e9ff;font:14px/1.4 system-ui,sans-serif;text-align:center}
+h1{font-size:16px;margin:4px 0 8px}
+canvas{display:block;margin:0 auto;border:1px solid #3a2a55;border-radius:8px;background:#000;touch-action:manipulation}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin:8px auto;max-width:720px}
+select,button{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #5a3f86;background:#2a1d40;color:#fff;min-height:44px}
+button{background:#6a3fc4;font-weight:700}
+label{display:flex;align-items:center;gap:6px}
+#info{font-size:12px;color:#b9a7d6;min-height:34px;white-space:pre-wrap}
+</style></head><body>
+<h1>Trang xem thử hiệu ứng (vẽ bằng code)</h1>
+<canvas id="cv"></canvas>
+<div class="row"><select id="zone"></select><select id="side"><option value="p">Thú đánh quái</option><option value="m">Quái đánh thú</option></select></div>
+<div class="row"><button id="play">▶ Phát lại</button><label><input type="checkbox" id="loop" checked> Lặp</label><select id="spd"><option value="1">Tốc độ 1x</option><option value="0.5">Chậm 0.5x</option><option value="0.25">Rất chậm 0.25x</option></select></div>
+<div id="info"></div>
+<script src="31-combat-fx.js"></script>
+<script src="33-attack-fx.js"></script>
+<script>
+'use strict';
+const FX=window.TTGCombatFX,CW=360,CH=230,GY=204;
+const cv=document.getElementById('cv'),g=cv.getContext('2d'),info=document.getElementById('info');
+const $=id=>document.getElementById(id);
+function fit(){const w=Math.min(innerWidth-16,720),d=Math.min(window.devicePixelRatio||1,3);cv.style.width=w+'px';cv.style.height=(w*CH/CW)+'px';cv.width=Math.round(w*d);cv.height=Math.round(w*d*CH/CW)}
+fit();addEventListener('resize',fit);
+if(!FX){info.textContent='Không tải được 31-combat-fx.js'}
+else{
+ const sel=$('zone');
+ sel.innerHTML='<option value="E">⚙ Thử engine (bước 1A)</option>'+FX.zones.map((z,i)=>'<option value="'+i+'">'+i+' · '+z.name+' ('+(z.mode==='melee'?'gần':'xa')+') — cũ dùng ảnh</option>').join('');
+}
+/* ---- thú giả để có chỗ đánh ---- */
+function pet(x,c1,c2,T,flip){
+ const b=Math.sin(T*3+x)*1.5;
+ g.save();g.translate(x,0);if(flip)g.scale(-1,1);
+ g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(0,GY,26,6,0,0,6.283);g.fill();
+ const gr=g.createLinearGradient(0,GY-62,0,GY);gr.addColorStop(0,c1);gr.addColorStop(1,c2);g.fillStyle=gr;
+ g.beginPath();g.ellipse(0,GY-30+b,24,30,0,0,6.283);g.fill();
+ g.fillStyle='#fff';g.beginPath();g.arc(8,GY-40+b,6,0,6.283);g.arc(-4,GY-40+b,6,0,6.283);g.fill();
+ g.fillStyle='#111';g.beginPath();g.arc(10,GY-40+b,3,0,6.283);g.arc(-2,GY-40+b,3,0,6.283);g.fill();
+ g.restore();
+}
+/* ---- hiệu ứng thử cho engine (chỉ để xem engine chạy; hiệu ứng thật bắt đầu từ bước 1B) ---- */
+const ET={
+ atk(g,T,u,pa){
+  const E=FX.engine,s=E.seed('atk',u),r=E.rng(s.seed),sx=pa?112:248,tx=pa?255:105,ty=150,dir=pa?1:-1,col='#9fe4ff';
+  if(u<.2){
+   const c=E.ph(u,0,.2),R=6+14*E.eOut(c);
+   E.blob(g,sx,ty,R,R,col,.9,T,s.seed,{wob:.3});
+   for(let i=0;i<8;i++){const an=r.range(0,E.TAU)+T*3,rr=(1-E.eIn(c))*(34+r()*20);E.glow(g,sx+Math.cos(an)*rr,ty+Math.sin(an)*rr*.8,5,col,c*.9)}
+  }else if(u<.5){
+   const f=E.ph(u,.2,.5),pos=b=>[sx+(tx-sx)*E.eIO(b),ty-Math.sin(b*Math.PI)*16+Math.sin(b*14+T*10)*5*(1-b*.4)],pts=[];
+   for(let i=0;i<14;i++)pts.push(pos(Math.max(0,f-i*.04)));
+   pts.reverse();
+   const h=pos(f);
+   E.ribbon(g,pts,t=>2+t*13,col,.9,{core:'#ffffff'});
+   E.blob(g,h[0],h[1],11,9,col,.95,T,s.seed);
+   for(let n=E.rate(s,'tr',f,40);n>0;n--)E.emit({x:h[0]+r.range(-3,3),y:h[1]+r.range(-3,3),vx:-dir*r.range(10,40),vy:r.range(-30,10),gy:80,drag:1.5,life:r.range(.4,.8),s0:r.range(2,4),s1:.5,shape:r()<.4?'flake':'orb',c:col,c2:'#ffffff',a:.9,add:true,tag:'atk',rot:r()*6,vr:r.range(-4,4)});
+  }
+  E.draw(g,'atk');
+ },
+ imp(g,q,pp,T){
+  const E=FX.engine,s=E.seed('imp',q),r=E.rng(s.seed),tx=pp?272:90,col='#9fe4ff',pal={dark:'#1b5fa8',mid:'#58b8f0',light:'#c8f2ff',edge:'#e8fbff'};
+  E.wave(g,tx,GY,18+90*E.eOut(E.ph(q,0,.7)),col,(1-E.ph(q,.2,1))*.9,2,{seed:s.seed,t:T});
+  const n=7,vis=1-E.ph(q,.5,.56);
+  if(vis>0)for(let i=0;i<n;i++){
+   const k=i/(n-1),x=tx-70+k*95+r.range(-6,6),h=(18+84*k*k+r.range(0,12))*E.eBack(E.ph(q,k*.12,.28+k*.12)),w=12+k*14,lean=r.range(-5,5);
+   E.crystal(g,x,GY,w,h,lean,pal,vis,{crack:E.ph(q,.35,.5),shine:Math.sin(T*4+i)*.5+.5});
+  }
+  if(q>=.5)for(let i=0;i<n;i++){
+   if(!E.once(s,'b'+i))continue;
+   const rb=E.rng(s.seed+i*77),k=i/(n-1),x=tx-70+k*95,h=18+84*k*k;
+   E.burst(rb,x,GY-h*.5,9,{speed:[40,140],ang:[-Math.PI*.95,-Math.PI*.05],size:[3,6],life:[.7,1.3],gy:260,drag:.6,shape:'shard',c:pal.mid,c2:pal.light,a:.95,tag:'imp',vr:[-9,9],floor:GY+4,bounce:.3});
+   E.burst(rb,x,GY-h*.4,3,{speed:[10,40],ang:[-Math.PI,0],size:[14,22],life:[1.2,2],gy:-8,drag:1,shape:'mist',c:'#bfe8ff',a:.8,tag:'imp'});
+  }
+  if(q>=.55&&E.once(s,'snow')){
+   const rs=E.rng(s.seed^777);
+   E.burst(rs,tx,60,20,{jx:70,jy:12,speed:[2,14],ang:[1.2,1.9],size:[3,5],life:[1.2,2],gy:28,drag:.4,shape:'flake',c:'#ffffff',a:.9,tag:'imp',vr:[-2,2]});
+  }
+  E.draw(g,'imp');
+ }
+};
+/* ---- vòng lặp ---- */
+const ATK=1.4,IMP=1.1;
+let t0=performance.now(),run=true;
+function restart(){t0=performance.now();run=true;if(FX)FX.engine.clear()}
+$('play').onclick=restart;$('zone').onchange=restart;$('side').onchange=restart;
+$('spd').onchange=()=>{if(FX)FX.engine.setSpeed(+$('spd').value);restart()};
+function loop(now){
+ requestAnimationFrame(loop);
+ if(!FX)return;
+ const k=cv.width/CW;g.setTransform(k,0,0,k,0,0);
+ const sp=+$('spd').value,t=(now-t0)/1000*sp,T=now/1000,zv=$('zone').value,eng=zv==='E',zi=eng?0:+zv,pa=$('side').value==='p';
+ const zn=eng?null:FX.zones[zi],hitU=eng?.45:(zn.mode==='melee'?.6:.45),tHit=hitU*ATK,total=tHit+IMP+.5;
+ const bg=g.createLinearGradient(0,0,0,CH);bg.addColorStop(0,'#26324f');bg.addColorStop(.7,'#3b4a63');bg.addColorStop(1,'#1f2a1f');
+ g.fillStyle=bg;g.fillRect(0,0,CW,CH);g.fillStyle='#2e3d2c';g.fillRect(0,GY-2,CW,CH-GY+2);
+ pet(85,'#6cc4ff','#2a6fb0',T,false);pet(272,'#ff8a7a','#a83a3a',T,true);
+ let msg='';
+ try{
+  const u=Math.min(1,t/ATK),q=t>=tHit?Math.min(.9999,(t-tHit)/IMP):-1;
+  if(run){
+   if(eng){ET.atk(g,T,u,pa);if(q>=0)ET.imp(g,q,pa,T)}
+   else{FX.drawAttack(g,T,{s:zi,u:u,pa:pa,text:'',miss:false});if(q>=0)FX.drawImpact(g,{s:zi,q:q,k:'hit',pp:pa,i:1,text:''},T)}
+  }
+  if(run&&t>total){if($('loop').checked){restart()}else run=false}
+ }catch(e){msg='Lỗi: '+e.message}
+ info.textContent=(msg||(eng?'Engine 1A: băng mọc + mảnh vỡ chỉ là bản thử công cụ.':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.'))+'\nHạt đang chạy: '+FX.engine.count();
+}
+requestAnimationFrame(loop);
+</script>
+</body></html>
