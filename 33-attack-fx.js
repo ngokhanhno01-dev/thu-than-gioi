@@ -331,40 +331,41 @@ function boot(){
     Trúng: điện giật lan quanh quái, tàn lửa bắn, mặt đất cháy xém có khói. */
  const TPAL={sh:'#2c2650',md:'#5a5090',lt:'#9a90d8'},SMK={sh:'#4a4a58',md:'#8a8a9a',lt:'#c8c8d4'};
  function thunderRun(g,T,t,pa,miss,cr,s){
-  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,tx=pa?272:85,tc=miss?tx-dir*80:tx,hk=cr?1.25:1,sd=s.seed,
-   cap=l=>Math.max(.12,Math.min(l,END-t)),eo=E.eOut,ph=E.ph,CA='#ffe53a',CB='#fff8b8',ST=TH-.07;
-  const cA=ph(t,.06,.32)*(1-ph(t,TH+.5,1.1));
+  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,tx=pa?272:85,tc=miss?tx-dir*80:tx,hk=(cr?1.25:1)*(miss?.85:1),sd=s.seed,
+   cap=l=>Math.max(.12,Math.min(l,END-t)),eo=E.eOut,ph=E.ph,CA='#ffe53a',CB='#fff8b8',
+   SK=[[.46,-30,.7],[.565,28,.85],[TH,0,1.25],[.775,-12,1]];   /* 4 đợt sét độ kiếp: [thời điểm, lệch ngang, uy lực]; đợt 3 trúng đúng lúc TH */
+  /* MÂY GIÔNG TRƯỚC: tụ 0→.3s, giữ suốt các đợt sét, rồi tan */
+  const cA=ph(t,0,.3)*(1-ph(t,1.15,1.5));
+  let flash=0;SK.forEach(k=>{const d=t-k[0];if(d>-.07&&d<.2)flash=Math.max(flash,(d<0?(d+.07)/.07*.5:1-d/.2)*k[2])});
   if(cA>0){
-   for(let i=0;i<7;i++){const k=i/6;puff(g,tc+(k-.5)*130+Math.sin(t*1.5+i)*4,24+(i%2)*7,19+7*Math.sin(i*1.7+1),cA*.95,T,sd+i*13,.6,TPAL)}
-   E.glow(g,tc,30,66,'#8a7cff',.28*cA*Math.max(0,Math.sin(t*37))*(t<ST?1:.3));
+   const gr=ph(t,0,.3);
+   for(let row=0;row<2;row++)for(let i=0;i<9;i++){const k=i/8,pal=row?TPAL:{sh:'#1c1838',md:'#3a3270',lt:'#7a70c0'};
+    puff(g,clamp(tc,100,262)+(k-.5)*(row?150:178)+Math.sin(t*1.5+i+row)*5,(row?30:20)+(i%2)*6,(row?20:26)*(.5+.5*gr)+5*Math.sin(i*1.7+1+row),cA*.95,T,sd+i*13+row*97,.6,pal)}
+   E.glow(g,clamp(tc,100,262),32,80+30*flash,'#8a7cff',Math.min(.7,.14+.5*flash)*cA);
+   const fq=Math.floor(t/.07),rf=E.rng(sd+fq*7);
+   if(t>.2&&t<1.2&&rf()<.5){const x=tc+rf.range(-70,70);bolt(g,E.jag(rf,x,26,x+rf.range(-20,20),48,4,6),1,.5*cA,'#a898ff',CB)}   /* chớp ngầm trong mây */
   }
-  const rl=E.rng(sd^0x77),tp=tc+rl.range(-10,10),lead=E.jag(rl,tp,36,tc,GY-4,16,16),lh=ph(t,.3,ST);
-  if(lh>0&&t<ST+.1)bolt(g,lead.slice(0,Math.max(2,Math.ceil(lh*lead.length))),.9,.6*(1-ph(t,ST,ST+.1)),CA,CB);
-  const d=t-ST;
-  if(d>0&&d<.34){
-   const pw=(1-ph(d,.06,.34))*(.55+.45*Math.abs(Math.sin(d*55))),wg=Math.floor(d/.045),rm=E.rng(sd+wg*131),
-    pts=E.jag(rm,tp,36,tc,GY-2,18,15*hk),w=(cr?3.4:2.6)*(miss?.85:1);
-   bolt(g,pts,w,pw,CA,CB);
-   [3,6,9,12].forEach((i,k)=>{const p=pts[i],sg=k%2?1:-1,en=[p[0]+sg*rm.range(14,34),p[1]+rm.range(14,30)];bolt(g,E.jag(rm,p[0],p[1],en[0],en[1],3,5),1.3,pw*.8,CA,CB)});
-   E.glow(g,tc,GY-30,50*hk,CA,.28*pw);
-  }
-  if(t>TH-.02){
-   const gp=ph(t,TH-.02,TH+.2),fo=1-ph(t,TH+.2,TH+.6);
-   if(fo>0&&gp>0)for(let i=0;i<6;i++){
-    const stp=Math.floor(t/.05),rg=E.rng(sd+i*37+stp),sg=i%2?1:-1,L=(34+hs(i)*52)*gp*(miss?.7:1),pts=E.jag(rg,tc,GY+2+(i%3),tc+sg*L,GY+(i%3)*2,7,4);
-    bolt(g,pts,1.5,fo*(.6+.4*hs(i+stp)),CA,CB);
-   }
-  }
+  SK.forEach((k,i)=>{
+   const d=t-k[0],pw=k[2]*hk,gx=tc+k[1]*(miss?.6:1);
+   if(d>-.07&&d<0){const rl=E.rng(sd+i*17),lead=E.jag(rl,gx+rl.range(-8,8),38,gx,GY-4,14,14);bolt(g,lead.slice(0,Math.max(2,Math.ceil((d+.07)/.07*lead.length))),1,.6,CA,CB)}   /* tia dẫn */
+   if(d<0||d>.34)return;
+   const wg=Math.floor(d/.04),rm=E.rng(sd+i*131+wg*29),env=(1-ph(d,.08,.3))*(.6+.4*Math.abs(Math.sin(d*55))),
+    sx=gx+rm.range(-12,12),pts=E.jag(rm,sx,36,gx,GY-2,16,18*Math.min(1.3,pw)),w=(3.4+(cr?1.2:0))*pw;
+   g.save();g.globalCompositeOperation='lighter';g.lineCap='round';g.lineJoin='round';g.strokeStyle=E.rgba(CA,.16*env);g.lineWidth=w*6;strokePts(g,pts);g.restore();
+   bolt(g,pts,w,env,CA,CB);
+   [3,6,9,12].forEach((q,n)=>{const p=pts[q],sg=n%2?1:-1,en=[p[0]+sg*rm.range(16,40)*pw,p[1]+rm.range(14,32)];bolt(g,E.jag(rm,p[0],p[1],en[0],en[1],4,6),1.5*pw,env*.85,CA,CB)});
+   E.glow(g,gx,GY-6,(36+16*pw),CA,.4*env);
+   E.wave(g,gx,GY,6+60*pw*eo(ph(d,0,.4)),CA,(1-ph(d,.1,.4))*.7,1.5,{seed:sd+i*5,t:T,sq:.28});
+   const ga=eo(ph(d,0,.2)),gf=1-ph(d,.15,.45);
+   if(gf>0)for(let j=0;j<4;j++){const sg=j%2?1:-1,L=(24+40*pw)*ga,rg=E.rng(sd+i*37+j+Math.floor(d/.05));bolt(g,E.jag(rg,gx,GY+2+(j>>1)*2,gx+sg*L*(1-.3*(j>>1)),GY+(j>>1)*3,6,4),1.4,gf*.8,CA,CB)}
+   if(E.once(s,'k'+i))E.burst(E.rng(sd^(0x3c1+i)),gx,GY-6,Math.round((miss?6:10)+8*pw),{speed:[40,140],ang:[-Math.PI*.95,-Math.PI*.05],size:[1.4,2.6],life:[cap(.4),cap(.8)],gy:260,drag:.5,shape:'spark',c:CA,c2:'#ffffff',a:1,add:true,tag:'fx',vr:[-6,6]});
+  });
   {const sa=ph(t,TH,TH+.1)*(1-ph(t,1.25,END))*(miss?.5:1);
    if(sa>0)E.blob(g,tc,GY+3,34,7,'#1c1424',.6*sa,T,sd,{add:false,core:'#0c0812',wob:.25});}
   if(!miss)for(let i=0;i<5;i++){const p=ph(t,TH+i*.04,TH+.95);puff(g,tc+(hs(i+60)-.5)*40,GY-8-p*60,6+9*p,Math.sin(p*3.14)*.6,T,sd+1100+i*3,1,SMK)}
-  if(t>=TH-.02&&E.once(s,'hit')){
-   const rb=E.rng(sd^0x3c1);
-   E.burst(rb,tc,GY-6,miss?8:22,{speed:[40,140],ang:[-Math.PI*.95,-Math.PI*.05],size:[1.4,2.6],life:[cap(.4),cap(.8)],gy:260,drag:.5,shape:'spark',c:CA,c2:'#ffffff',a:1,add:true,tag:'fx',vr:[-6,6]});
-  }
   if(!miss&&t>TH-.05){
    E.glow(g,tc,GY-24,46,CA,.3*ph(t,TH-.05,TH)*(1-ph(t,TH,TH+.3)));
-   E.wave(g,tc,GY,8+70*eo(ph(t,TH-.02,TH+.5)),CA,(1-ph(t,TH+.1,TH+.5))*.8,1.6,{seed:sd+5,t:T});
+   E.wave(g,tc,GY,8+70*eo(ph(t,TH-.02,TH+.5)),CA,(1-ph(t,TH+.1,TH+.5))*.8,1.6,{seed:sd+5,t:T,sq:.28});
   }
   E.draw(g,'fx');
  }
@@ -479,20 +480,16 @@ function boot(){
  /* 4 Lôi Vực: tia nhỏ bò từ đất hút điện → sét chính + 3 sét phụ giáng lệch nhịp → mục tiêu BỊ ĐIỆN GIẬT (vòng tia điện quanh thân, tia bò dọc thân)
     → lưới nứt đất cháy cam rồi nguội, vòng sốc đôi, tàn lửa bay lên */
  function thunderX(g,T,t,pa,miss,cr,s){
-  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,tx=pa?272:85,tc=miss?tx-dir*80:tx,hk=cr?1.25:1,sd=s.seed,ph=E.ph,eo=E.eOut,ST=TH-.07,
+  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,tx=pa?272:85,tc=miss?tx-dir*80:tx,hk=cr?1.25:1,sd=s.seed,ph=E.ph,eo=E.eOut,ST=.45,
    CA='#ffe53a',CB='#fff8b8',CO='#ff9a30',cap=l=>Math.max(.12,Math.min(l,END-t));
   {const a=ph(t,.2,ST)*(1-ph(t,ST,ST+.06));
    if(a>0){const stp=Math.floor(t/.055);
     for(let i=0;i<5;i++){const rb=E.rng(sd+stp*17+i*5),x=tc+rb.range(-44,44);bolt(g,E.jag(rb,x,GY+1,x+rb.range(-8,8),GY-rb.range(14,34)*a,4,4),.9,a*.9,CA,CB)}
     E.glow(g,tc,GY-4,30+20*a,CA,.18*a)}}
-  [[.04,-44,.7],[.09,40,.6],[.13,-72,.45]].forEach((q,i)=>{
-   const d=t-ST-q[0];if(d<0||d>.16)return;
-   const rb=E.rng(sd+i*211+Math.floor(d/.05)),x=tc+q[1],pw=(1-ph(d,.05,.16))*(.6+.4*Math.abs(Math.sin(d*60)))*(miss?.6:1);
-   bolt(g,E.jag(rb,x+rb.range(-6,6),34,x,GY,12,10),1.6*q[2],pw,CA,CB);E.glow(g,x,GY-4,16,CA,.3*pw)});
   if(t>TH-.02){
    const stp=Math.floor(t/.05);
-   if(!miss&&t<TH+.7){
-    const fo=1-ph(t,TH+.25,TH+.7);
+   if(!miss&&t<TH+.55){
+    const fo=1-ph(t,TH+.3,TH+.55);
     for(let i=0;i<5;i++){const rb=E.rng(sd+stp*29+i*13),a0=rb()*6.283,a1=a0+rb.range(1.2,2.6),R=26*hk;
      bolt(g,E.jag(rb,tc+Math.cos(a0)*R*.7,150+Math.sin(a0)*R*1.5,tc+Math.cos(a1)*R*.7,150+Math.sin(a1)*R*1.5,5,9),1.1,fo*.85,CA,CB)}
     for(let i=0;i<3;i++){const rb=E.rng(sd+stp*41+i),x=tc+(i-1)*16;bolt(g,E.jag(rb,x,GY-2,x+rb.range(-10,10),GY-60-rb.range(0,40),7,7),1,fo*.8,CA,CB)}
