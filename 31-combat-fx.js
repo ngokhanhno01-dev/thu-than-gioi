@@ -289,7 +289,7 @@ const FXE=(()=>{
   g.restore();
  }
  /* --- HẠT (pool cố định, có trọng lực/lực cản/nảy đất) --- */
- const MAX=700,P=[];for(let i=0;i<MAX;i++)P.push({on:false});
+ const MAX=1000,P=[];for(let i=0;i<MAX;i++)P.push({on:false});
  let head=0,lastT=0,ts=1;
  function fill(p,o){
   p.on=true;p.x=o.x||0;p.y=o.y||0;p.vx=o.vx||0;p.vy=o.vy||0;p.gx=o.gx||0;p.gy=o.gy||0;p.drag=o.drag||0;p.life=o.life||1;p.age=0;
