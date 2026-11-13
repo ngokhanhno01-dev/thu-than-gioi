@@ -18,13 +18,13 @@ const ZONES=[
  make('Huyền Uyên','#947aff','melee',seq('3_don_danh_gan/slash-pixel-sheet','slash-pixel-sheet_',38),one('1_buff_vung/orbs-dome-tim-lua/dome-tim-lua_01.png'),'◉'),
  make('Kim Khoáng','#e0b038','melee',seq('3_don_danh_gan/attack-pack-cyan','attack-pack-cyan_',47),one('1_buff_vung/orbs-cau-xanh-khien/cau-xanh-khien_01.png'),'◇'),
  make('Ngọc Động','#18e0b0','ranged',one('4_don_danh_xa/orbs-linh-hon-xanh-la/linh-hon-xanh-la_01.png'),one('1_buff_vung/orbs-cau-nang-luong-xanh/cau-nang-luong-xanh_01.png'),'⬡'),
- make('Thanh Lâm','#8be04a','melee',seq('3_don_danh_gan/slash-pixel-sheet','slash-pixel-sheet_',38),seq('1_buff_vung/dust-ground','dust-ground_',72),'♧'),
+ make('Thanh Lâm','#8be04a','melee',seq('1_buff_vung/ground-flame-blue','ground-flame-blue_',9),seq('1_buff_vung/dust-ground','dust-ground_',72),'♧'),
  make('Xích Hỏa Địa','#ff5a1e','ranged',one('4_don_danh_xa/orbs-hoa-cau-lon/hoa-cau-lon_01.png'),seq('1_buff_vung/ground-flame-blue','ground-flame-blue_',9),'♨'),
- make('Hắc Ám Lâm','#b0206a','melee',seq('3_don_danh_gan/swirl-blue','swirl-blue_',18),one('1_buff_vung/orbs-dome-tim-lua/dome-tim-lua_01.png'),'◈'),
+ make('Hắc Ám Lâm','#b0206a','melee',one('4_don_danh_xa/orbs-cau-den-tim/cau-den-tim_01.png'),one('1_buff_vung/orbs-dome-tim-lua/dome-tim-lua_01.png'),'◈'),
  make('Tử Tinh Hải','#b45cff','ranged',one('4_don_danh_xa/orbs-cau-den-tim/cau-den-tim_01.png'),one('1_buff_vung/orbs-dome-tim-nho/dome-tim-nho_01.png'),'✧'),
  make('Thiên Không','#6ac4ff','ranged',seq('4_don_danh_xa/projectiles-b','projectiles-b_',12),one('1_buff_vung/orbs-cau-nang-luong-xanh/cau-nang-luong-xanh_01.png'),'⌁'),
- make('Linh Hoa Viên','#ff7ac0','melee',seq('3_don_danh_gan/attack-pack-cyan','attack-pack-cyan_',47),one('1_buff_vung/orbs-dome-hong/dome-hong_01.png'),'✿'),
- make('Thần Điện','#fff0a0','ranged',seq('4_don_danh_xa/magic-bolts-a','magic-bolts-a_',10),one('1_buff_vung/dome-shield/_sheet_nen-trong.png'),'✥')
+ make('Linh Hoa Viên','#ff7ac0','melee',seq('1_buff_vung/dust-ground','dust-ground_',72),one('1_buff_vung/orbs-dome-hong/dome-hong_01.png'),'✿'),
+ make('Thần Điện','#fff0a0','ranged',one('4_don_danh_xa/orbs-sao-choi-lua/sao-choi-lua_01.png'),one('1_buff_vung/dome-shield/_sheet_nen-trong.png'),'✥')
 ];
 const SHIELD=one('1_buff_vung/dome-shield/_sheet_nen-trong.png');
 const LIGHTNING=one('1_buff_vung/orbs-sam-set-mat-dat/sam-set-mat-dat_01.png');

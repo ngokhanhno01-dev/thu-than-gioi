@@ -24,6 +24,14 @@ function boot(){
   r: path(quỹ đạo) sc(cỡ) spin(số rad xoay cả chặng bay) trail{k,n,gap,s} chg{k,n} tint glow add fan spread ghost
   m: sc rot0 sweep(xoay thêm) grow[đầu,cuối] copies[{ox,oy,r,d,sc}] part{k,n,R,grav,inward} tint glow pulse
   i: k(loại hạt) n R ring pillar sc grav */
+ const SZR=1.3,SZM=1.28,SZI=1.3;      /* phóng to đòn xa / đòn gần / va chạm so với bản gốc */
+ /* quầng sáng màu vùng sau viên đạn / nhát chém: để nhìn là biết vùng nào kể cả khi ảnh gốc giống nhau */
+ function halo(g,x,y,r,col,a){
+  if(a<=.01)return;
+  g.save();g.globalAlpha=clamp(a,0,1);g.globalCompositeOperation='lighter';
+  const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,col);gr.addColorStop(.45,col);gr.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2);g.restore();
+ }
  const DEF_R={path:'lob',arc:30,sc:1.35,trail:{k:'spark',n:6,gap:.05,s:2},chg:{k:'spark',n:6},tint:.5};
  const DEF_M={sc:1.3,sweep:.6,part:{k:'spark',n:8,R:46},tint:.5};
  const PROF=[
@@ -83,7 +91,7 @@ function boot(){
  /* ---------- Tô màu sprite (cache) ---------- */
  const TC=new Map();
  function tinted(img,sx,sy,sw,sh,col,amt,idx){
-  const key=idx+'|'+amt+'|'+sx+','+sy+','+sw+','+sh;
+  const key=idx+'|'+col+'|'+amt+'|'+sx+','+sy+','+sw+','+sh;
   if(TC.has(key))return TC.get(key);
   if(TC.size>700)TC.clear();
   let c=null;
@@ -91,14 +99,17 @@ function boot(){
    c=document.createElement('canvas');c.width=sw;c.height=sh;
    const x=c.getContext('2d');x.imageSmoothingEnabled=false;
    x.drawImage(img,sx,sy,sw,sh,0,0,sw,sh);
-   x.globalCompositeOperation='source-atop';x.globalAlpha=amt;x.fillStyle=col;x.fillRect(0,0,sw,sh);
+   /* đổi hẳn sắc độ sang màu vùng nhưng giữ sáng/tối của ảnh, rồi trả lại viền trong suốt của ảnh gốc */
+   x.globalCompositeOperation='color';x.globalAlpha=amt;x.fillStyle=col;x.fillRect(0,0,sw,sh);
+   x.globalCompositeOperation='destination-in';x.globalAlpha=1;x.drawImage(img,sx,sy,sw,sh,0,0,sw,sh);
+   x.globalCompositeOperation='lighter';x.globalAlpha=.3;x.drawImage(c,0,0);
   }catch(_){c=null}
   TC.set(key,c);return c;
  }
  /* Bọc ctx: chặn đúng lần drawImage đầu (sprite chính) để tô màu/phóng to/xoay; mọi lệnh khác chuyển thẳng cho ctx thật. */
  function drawMain(g,o,a){
   const img=a[0],sx=a[1],sy=a[2],sw=a[3],sh=a[4],dx=a[5],dy=a[6],dw=a[7],dh=a[8];
-  const src=tinted(img,sx,sy,sw,sh,o.col,o.tint==null?.5:o.tint,o.idx)||img,tc=src!==img;
+  const src=tinted(img,sx,sy,sw,sh,o.col,Math.max(.9,o.tint==null?.5:o.tint),o.idx)||img,tc=src!==img;
   const put=()=>tc?g.drawImage(src,0,0,sw,sh,dx,dy,dw,dh):g.drawImage(img,sx,sy,sw,sh,dx,dy,dw,dh);
   g.save();
   if(o.spin)g.rotate(o.spin);
@@ -174,7 +185,8 @@ function boot(){
    g.save();
    for(let j=0;j<n;j++){const a=r()*6.283+T*3,d=(1-ch)*(34+r()*18)+6;part(g,k,sx+Math.cos(a)*d,ty+Math.sin(a)*d*.7,1.5+ch*1.5,col,col2,0,.35+ch*.6)}
    g.restore();
-   return callOrig(g,T,S,u,Object.assign({},base,{sc:(c.sc||1.3)*(.95+ch*.45)}),0,0);
+   halo(g,sx,ty,(26+ch*34)*(c.sc||1.3),col,.3+ch*.4);
+   return callOrig(g,T,S,u,Object.assign({},base,{sc:Math.min(2.3,(c.sc||1.3)*SZR)*(.95+ch*.45)}),0,0);
   }
   if(u<.43){
    const f=clamp((u-.18)/.25,0,1);
@@ -187,11 +199,12 @@ function boot(){
     g.restore()}
    /* bóng mờ phía sau */
    if(c.ghost){for(let k=1;k<=c.ghost;k++){const f2=f-k*.055;if(f2<0)break;const o2=pathOff(c,f2,sx,tx,dir,S.i||0);
-    callOrig(g,T,S,.18+f2*.25,Object.assign({},base,{sc:(c.sc||1.3)*big*.9,spin:f2*(c.spin||0),alpha:.3/k}),o2[0],o2[1])}}
+    callOrig(g,T,S,.18+f2*.25,Object.assign({},base,{sc:Math.min(2.3,(c.sc||1.3)*SZR)*big*.9,spin:f2*(c.spin||0),alpha:.3/k}),o2[0],o2[1])}}
    /* thân đạn (có thể chia nhiều mũi) */
    const fan=c.fan||[0];let ret=null;
+   const hp=pos(f);halo(g,hp[0],hp[1],46*(c.sc||1.3),col,.55);
    fan.forEach(k=>{
-    const o={...base,sc:(c.sc||1.3)*big*(k===0?1.12:1),spin:f*(c.spin||0)};
+    const o={...base,sc:Math.min(2.3,(c.sc||1.3)*SZR)*big*(k===0?1.12:1),spin:f*(c.spin||0)};
     const r=callOrig(g,T,S,u,o,off[0],off[1]+k*(c.spread||0)*(1-f));
     if(ret===null||k===0)ret=r;
    });
@@ -209,10 +222,11 @@ function boot(){
   copies.forEach((k,ci)=>{
    const fc=f-(k.d||0);if(fc<0)return;
    const uc=.23+clamp(fc,0,.9999)*.37;
-   let sc=(c.sc||1.3)*(k.sc||1)*(S.cr?1.15:1);
+   let sc=Math.min(2.4,(c.sc||1.3)*SZM)*(k.sc||1)*(S.cr?1.15:1);
    if(c.grow)sc*=c.grow[0]+(c.grow[1]-c.grow[0])*clamp(fc/.8,0,1);
    const spin=(c.rot0||0)+(k.r||0)+(c.sweep||0)*(clamp(fc,0,1)-.5);
    const al=c.pulse?.8+.2*Math.sin(T*18+ci):1;
+   if(ci===0)halo(g,tx,ty,(40+fc*26)*sc,col,.5*Math.sin(Math.PI*clamp(fc,0,1))+.15);
    const r=callOrig(g,T,S,uc,{col,idx,tint:c.tint,glow:c.glow,add:c.add,sc,spin,alpha:al},(k.ox||0)*dir,k.oy||0);
    if(ret===null)ret=r;
   });
@@ -249,9 +263,10 @@ function boot(){
    const idx=zi(fx.s),z=zones[idx],P=PROF[idx],c=P.i||{k:'spark',n:10,R:56,sc:1.3};
    const col=z.color,col2=lighten(col,.6),q=clamp(fx.q||0,0,.9999),tgt=fx.pp?272:90,y=150,miss=fx.k==='miss',crit=fx.k==='crit';
    const tint=((P.r||P.m||{}).tint);
-   const o={col,idx,tint:tint==null?.5:tint,sc:(c.sc||1.3)*(crit?1.2:1)*(miss?.8:1),glow:12};
+   const o={col,idx,tint:tint==null?.5:tint,sc:Math.min(2.3,(c.sc||1.3)*SZI)*(crit?1.2:1)*(miss?.8:1),glow:14};
    let ok;
    g.save();
+   if(!miss)halo(g,tgt,y,52*(c.sc||1.3),col,.55*(1-q));
    try{ok=orig.drawImpact(hook(g,o),fx,T)}finally{g.restore()}
    if(ok){
     const n=Math.round((c.n||10)*(crit?1.5:1)*(miss?.35:1)),r=rnd((fx.i||0)*71+idx*7+1),R=c.R||56;
