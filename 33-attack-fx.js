@@ -2,7 +2,8 @@
    Chỉ thay phần HÌNH ẢNH của đòn đánh/va chạm: không đụng chỉ số, công thức hay diễn biến trận.
    Cách làm: bọc TTGCombatFX.drawAttack / drawImpact của 31-combat-fx.js. Sprite vẫn do 31 chọn khung,
    file này tô màu theo vùng, đổi quỹ đạo, phóng to, thêm hạt/vệt riêng cho từng vùng.
-   Lỗi bất kỳ → tự quay về hiệu ứng gốc của 31, không làm đứng trận. */
+   Lỗi bất kỳ → tự quay về hiệu ứng gốc của 31, không làm đứng trận.
+   [FX 1B] Vùng đã vẽ lại bằng CODE (không ảnh) nằm trong bảng ZFX bên dưới; vùng nào có trong ZFX thì bỏ qua ảnh. */
 (()=>{
 'use strict';
 let tries=0;
@@ -18,6 +19,113 @@ function boot(){
  const rgb=h=>{const n=parseInt(String(h).slice(1),16);return[n>>16&255,n>>8&255,n&255]};
  const lighten=(h,t)=>'rgb('+rgb(h).map(v=>Math.round(v+(255-v)*t)).join(',')+')';
  const zi=s=>Math.max(0,Math.min(zones.length-1,Number(s)||0));
+
+ /* ===== [FX 1B] VÙNG VẼ BẰNG CODE (canvas 2D, không ảnh) =====
+    ZFX[số vùng] = hàm vẽ toàn bộ đòn đánh + va chạm theo S.u (0..1, trúng ở u=.35). Dùng engine API.engine của 31-combat-fx.js. */
+ const E=API.engine;
+ let STY='px';                                    /* 'px' = pixel (chốt), 'sm' = mịn (chỉ để so sánh trong trang demo) */
+ const pxC=document.createElement('canvas');pxC.width=180;pxC.height=125;
+ const pxG=pxC.getContext('2d',{willReadFrequently:true});
+ /* vẽ fn lên lớp độ phân giải 1/2, giới hạn 6 mức/kênh (216 màu) + 4 mức trong suốt, rồi phóng to không làm mịn → pixel art */
+ function layer(g,fn){
+  if(STY!=='px'){fn(g);return}
+  pxG.setTransform(1,0,0,1,0,0);pxG.clearRect(0,0,180,125);pxG.setTransform(.5,0,0,.5,0,0);
+  fn(pxG);
+  pxG.setTransform(1,0,0,1,0,0);
+  const id=pxG.getImageData(0,0,180,125),d=id.data;
+  for(let i=0;i<d.length;i+=4){const a=d[i+3];if(!a)continue;d[i]=Math.round(d[i]/51)*51;d[i+1]=Math.round(d[i+1]/51)*51;d[i+2]=Math.round(d[i+2]/51)*51;d[i+3]=Math.round(a/85)*85}
+  pxG.putImageData(id,0,0);
+  g.save();g.imageSmoothingEnabled=false;g.drawImage(pxC,0,0,360,250);g.restore();
+ }
+ const ICE_PAL={dark:'#1b5fa8',mid:'#58b8f0',light:'#c8f2ff',edge:'#e8fbff'},ICE_PAL2={dark:'#27408f',mid:'#6f94e8',light:'#d4e4ff',edge:'#ffffff'};
+ /* 0 Tuyết Nguyên: KHÔNG có vật bay. Dải gai băng mọc từ đất, chạy từ chân người đánh tới mục tiêu (thấp → cao), cụm gai lớn nhất bao quanh mục tiêu
+    (chừa khoảng giữa để thấy mục tiêu), rồi vỡ dần từ mục tiêu ngược về người đánh. Trúng lúc t=.665s (u=.35). */
+ function iceRun(g,T,t,pa,miss,cr,s){
+  const GY=204,TS=.08,TH=.665,TSH=.86,END=1.68,dir=pa?1:-1,x0=pa?108:250,tx=pa?272:85,L0=Math.abs(tx-x0),L=miss?L0*.62:L0,hk=cr?1.15:1,
+   r=E.rng(s.seed),col='#9fe4ff',cap=l=>Math.max(.12,Math.min(l,END-t)),tHd=miss?TH*.7:TH;
+  const main=[],back=[],small=[];
+  for(let i=0;i<13;i++){const k=i/12;main.push({k,x:x0+dir*(k*(L-40))+r.range(-4,4),y:GY,h:(14+90*Math.pow(k,1.6)+r.range(0,10))*(miss?.7:hk),w:9+11*k+r.range(0,3),lean:r.range(-4,4)+dir*2,tE:TS+k*(tHd-TS-.1),p:ICE_PAL})}
+  if(!miss)[[-34,125,26,0,-1],[34,118,24,.04,1],[-54,86,16,.07,-1],[54,80,16,.1,1]].forEach(c=>main.push({k:1,x:tx+dir*c[0],y:GY,h:c[1]*hk,w:c[2],lean:c[4]*dir*6,tE:TH-.1+c[3],p:ICE_PAL,hi:1}));
+  for(let i=0;i<12;i++){const k=i/11;back.push({k,x:x0+dir*(k*L)+r.range(-6,6),y:GY-5,h:(10+.55*(14+90*Math.pow(k,1.6))+r.range(0,8))*(miss?.7:1),w:8+9*k,lean:r.range(-5,5),tE:TS+.03+k*(tHd-TS-.08),p:ICE_PAL2})}
+  for(let i=0;i<26;i++){const k=i/25;small.push({k,x:x0+dir*(k*(L+10))+r.range(-5,5),y:GY+3,h:5+r()*9+k*6,w:5+r()*3,lean:r.range(-3,3),tE:TS+.06+k*(tHd-TS-.06),p:ICE_PAL2})}
+  const crackA=1-E.ph(t,TSH+.3,TSH+.7),headK=E.eIO(E.ph(t,TS,tHd)),head=x0+dir*L*headK;
+  /* tụ lạnh dưới chân người đánh */
+  if(t<TS+.3){
+   const c=E.ph(t,0,.2);
+   E.glow(g,x0,GY-4,34*E.eOut(c),col,.55*(1-E.ph(t,.2,.42)));
+   E.wave(g,x0,GY,8+26*E.eOut(E.ph(t,0,.3)),col,(1-E.ph(t,.1,.4))*.85,1.6,{seed:s.seed,t:T});
+   for(let n=E.rate(s,'ch',E.ph(t,0,.2),30);n>0;n--)E.emit({x:x0+r.range(-18,18),y:GY-r.range(0,6),vx:r.range(-10,10),vy:r.range(-40,-14),life:r.range(.3,.5),s0:r.range(2,3.5),s1:.5,shape:r()<.5?'flake':'spark',c:col,c2:'#ffffff',a:.9,add:true,tag:'fx',rot:r()*6,vr:r.range(-4,4)});
+  }
+  /* sương băng phủ mặt đất dọc đường đi */
+  for(let i=0;i<9;i++){const k=i/8,p=E.ph(t,TS+k*(tHd-TS),TS+k*(tHd-TS)+.3);
+   if(p>0)E.blob(g,x0+dir*L*k,GY+1,32,5,col,.38*p*crackA,T,s.seed+i,{wob:.4,core:'#dff6ff'})}
+  /* vết nứt đất chạy theo mũi băng + nhánh */
+  if(t>TS&&crackA>0){
+   const rc=E.rng(s.seed^0x51ed),pts=E.jag(rc,x0,GY+3,head,GY+3,18,3);
+   g.save();g.globalCompositeOperation='lighter';g.lineCap='round';g.lineJoin='round';g.strokeStyle=E.rgba('#dff6ff',.8*crackA);g.lineWidth=2;
+   g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();
+   g.lineWidth=1.4;g.strokeStyle=E.rgba('#9fe4ff',.6*crackA);
+   for(let i=2;i<pts.length-1;i++){const p=pts[i],sg=rc.sign(),l=rc.range(8,20);g.beginPath();g.moveTo(p[0],p[1]);g.lineTo(p[0]+sg*dir*l*.4,p[1]+sg*l*.35);g.lineTo(p[0]+sg*dir*l*.9,p[1]+sg*l*.2);g.stroke()}
+   g.restore();
+   E.glow(g,head,GY-8,24,col,.5*(1-E.ph(t,tHd,tHd+.2)));
+  }
+  /* vẽ gai: hàng sau → hàng chính (+ cụm quanh mục tiêu) → hàng trước; mọc, rồi vỡ dần từ mục tiêu ngược về người đánh */
+  const drawRow=(a,id,burstN)=>a.forEach((c,i)=>{
+   if(t<c.tE)return;
+   const ts=(miss?TSH-.2:TSH)+(1-c.k)*(miss?.15:.22)+(i%3)*.02,vis=1-E.ph(t,ts,ts+.05);
+   if(vis>0){
+    const hh=c.h*E.eBack(E.ph(t,c.tE,c.tE+.24));
+    E.crystal(g,c.x,c.y,c.w,hh,c.lean,c.p,vis*(c.hi?.88:1)*(miss?.85:1),{crack:E.ph(t,c.tE+.15,c.tE+.4),shine:Math.sin(T*4+c.k*9+i)*.5+.5});
+   }
+   if(id!=='s'&&E.once(s,id+'e'+i)){
+    const re=E.rng(s.seed+i*31+id.charCodeAt(0));
+    E.burst(re,c.x,c.y,4,{speed:[30,90],ang:[-Math.PI,0],size:[2,3.5],life:[cap(.4),cap(.7)],gy:240,drag:.4,shape:'shard',c:c.p.mid,c2:c.p.light,a:.9,tag:'fx',vr:[-8,8],floor:GY+4,bounce:.3});
+    E.burst(re,c.x,c.y-2,1,{speed:[4,16],ang:[-Math.PI,0],size:[10,16],life:[cap(.6),cap(.9)],gy:-10,drag:1,shape:'mist',c:'#cfeeff',a:.7,tag:'fx'});
+   }
+   if(t>=ts&&E.once(s,id+'s'+i)){
+    const rb=E.rng(s.seed+i*77+id.charCodeAt(0)*13);
+    E.burst(rb,c.x,c.y-c.h*.5,burstN,{speed:[40,150],ang:[-Math.PI*.95,-Math.PI*.05],size:[3,6],life:[cap(.4),cap(.65)],gy:260,drag:.6,shape:'shard',c:c.p.mid,c2:c.p.light,a:.95,tag:'fx',vr:[-9,9],floor:GY+4,bounce:.3});
+    if(id==='m')E.burst(rb,c.x,c.y-c.h*.8,2,{speed:[10,50],size:[2,3],life:[cap(.3),cap(.5)],gy:40,drag:1,shape:'spark',c:'#ffffff',c2:'#ffffff',a:1,add:true,tag:'fx',vr:[-4,4]});
+    if(id!=='s')E.burst(rb,c.x,c.y-c.h*.4,1,{speed:[10,40],ang:[-Math.PI,0],size:[14,22],life:[cap(.5),cap(.75)],gy:-8,drag:1,shape:'mist',c:'#bfe8ff',a:.8,tag:'fx'});
+   }
+  });
+  drawRow(back,'b',4);drawRow(main,'m',6);drawRow(small,'s',2);
+  /* sương băng bốc lên lúc gai mọc */
+  for(let n=E.rate(s,'fog',E.ph(t,0,.5),36);n>0;n--)E.emit({x:x0+dir*r.range(0,L),y:GY-r.range(0,8),vx:r.range(-6,6),vy:r.range(-14,-4),life:cap(r.range(.6,1)),s0:8,s1:r.range(18,26),shape:'mist',c:'#bfe8ff',a:.7,tag:'fx'});
+  /* khi đòn trúng: quầng lạnh nhẹ + sóng băng quanh mục tiêu (không chớp trắng) */
+  if(!miss&&t>TH-.1){
+   E.glow(g,tx,GY-36,64,col,.3*E.ph(t,TH-.1,TH)*(1-E.ph(t,TH+.1,TH+.6)));
+   E.wave(g,tx,GY,10+100*E.eOut(E.ph(t,TH-.1,TH+.7)),col,(1-E.ph(t,TH+.1,TH+.7))*.85,2,{seed:s.seed+5,t:T});
+   E.wave(g,tx,GY,6+60*E.eOut(E.ph(t,TH-.05,TH+.5)),'#ffffff',(1-E.ph(t,TH+.1,TH+.5))*.5,1.2,{seed:s.seed+9,t:T});
+  }
+  /* bông tuyết rơi + hơi lạnh sau khi vỡ */
+  if(t>=TSH+.1&&E.once(s,'snow')){
+   const rs=E.rng(s.seed^777);
+   [.25,.55,.85].forEach(f=>E.burst(rs,x0+dir*L*f,60,14,{jx:50,jy:14,speed:[2,14],ang:[1.2,1.9],size:[3,5],life:[cap(.7),cap(.9)],gy:28,drag:.4,shape:'flake',c:'#ffffff',a:.9,tag:'fx',vr:[-2,2]}));
+  }
+  E.draw(g,'fx');
+ }
+ function iceFx(g,T,S){
+  const u=clamp(S.u||0,0,1),s=E.seed('ice',u);
+  E.setSpeed(window.BSPD||1);
+  if(E.once(s,'init'))E.clear();                 /* đòn mới: bỏ hạt của đòn trước */
+  layer(g,gg=>iceRun(gg,T,u*1.9,!!S.pa,!!S.miss,!!S.cr,s));
+  return true;
+ }
+ /* va chạm của vùng code: mọi thứ đã do ZFX vẽ trong lúc đánh; chỉ còn quầng + tia chí mạng mềm (không chớp trắng) */
+ function impactCode(g,fx){
+  if(fx.k!=='crit')return true;
+  const q=clamp(fx.q||0,0,.9999),tgt=fx.pp?272:90,y=150,fa=1-q;
+  layer(g,gg=>{
+   E.glow(gg,tgt,y,70,'#ffd24a',.4*Math.max(0,1-q*2.2));
+   gg.save();gg.globalCompositeOperation='lighter';gg.lineCap='round';gg.strokeStyle=E.rgba('#ffd24a',.85*fa);gg.lineWidth=3;
+   for(let i=0;i<16;i++){const an=i*Math.PI/8,r1=14+q*10,r2=40+q*84;gg.beginPath();gg.moveTo(tgt+Math.cos(an)*r1,y+Math.sin(an)*r1);gg.lineTo(tgt+Math.cos(an)*r2,y+Math.sin(an)*r2);gg.stroke()}
+   gg.restore();
+  });
+  return true;
+ }
+ const ZFX=E?{0:iceFx}:{};
+ const NOCODE_ATK=/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/,NOCODE_IMP=/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích|Xuyên giáp|Liên kích -|Phong Nhận(?: chém| -)|Dương Diệm|Thần Phán|Tinh Quang|Thiên Uy|Sương Tán/;
 
  /* ---------- Cấu hình 17 vùng ----------
   r = đòn đánh xa, m = đòn cận chiến, i = va chạm. Vùng nào không có r/m thì dùng mặc định theo màu vùng.
@@ -257,6 +365,7 @@ function boot(){
    const text=S.text||'';
    if(ATK_SPECIAL.test(text))return orig.drawAttack(g,T,S);
    const idx=zi(S.s),z=zones[idx],P=PROF[idx];
+   if(ZFX[idx]&&S.cl!==3&&!NOCODE_ATK.test(text))return ZFX[idx](g,T,S);      /* [FX 1B] vùng đã vẽ bằng code */
    const melee=/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/.test(text)||z.mode==='melee';
    return melee?atkMelee(g,T,S,idx,z,P.m||DEF_M):atkRanged(g,T,S,idx,z,P.r||DEF_R);
   }catch(e){if(window.__ATK17_DEBUG)throw e;return orig.drawAttack(g,T,S)}
@@ -266,6 +375,7 @@ function boot(){
   try{
    const text=fx.text||'';
    if(fx.k==='block'||fx.k==='heal'||fx.k==='stun'||IMP_SPECIAL.test(text))return orig.drawImpact(g,fx,T);
+   if(ZFX[zi(fx.s)]&&(fx.k==='hit'||fx.k==='crit'||fx.k==='miss')&&!NOCODE_IMP.test(text))return impactCode(g,fx);   /* [FX 1B] */
    const idx=zi(fx.s),z=zones[idx],P=PROF[idx],c=P.i||{k:'spark',n:10,R:56,sc:1.3};
    const col=z.color,col2=lighten(col,.6),q=clamp(fx.q||0,0,.9999),tgt=fx.pp?272:90,y=150,miss=fx.k==='miss',crit=fx.k==='crit';
    const o={col,idx,tint:ZT[idx],spin:-(FACE[idx]||0),sc:Math.min(2.3,(c.sc||1.3)*SZI)*(crit?1.2:1)*(miss?.8:1),glow:14};
@@ -295,6 +405,8 @@ function boot(){
  API.drawAttack=drawAttackX;
  API.drawImpact=drawImpactX;
  API.attackProfiles=PROF;
+ API.codeZone=i=>!!ZFX[zi(i)];                              /* [FX 1B] vùng nào đã vẽ bằng code */
+ API.setFxStyle=v=>{STY=v==='sm'?'sm':'px'};                /* [FX 1B] 'px' pixel (mặc định) | 'sm' mịn (chỉ để so sánh) */
 }
 boot();
 })();
