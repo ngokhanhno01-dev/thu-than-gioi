@@ -13,12 +13,22 @@ select,button{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid
 button{background:#6a3fc4;font-weight:700}
 label{display:flex;align-items:center;gap:6px}
 #info{font-size:12px;color:#b9a7d6;min-height:34px;white-space:pre-wrap}
+#attackControls[hidden],#buffControls[hidden]{display:none}
 </style></head><body>
 <h1>Trang xem thử hiệu ứng (vẽ bằng code)</h1>
 <canvas id="cv"></canvas>
-<div class="row"><select id="zone"></select><select id="side"><option value="p">Thú đánh quái</option><option value="m">Quái đánh thú</option></select></div>
-<div class="row"><select id="kind"><option value="hit">Đòn thường</option><option value="crit">Chí mạng</option><option value="miss">Trượt (né)</option></select><select id="style"><option value="px">Kiểu: Pixel</option><option value="sm">Kiểu: Mịn</option></select><select id="spd"><option value="1">Tốc độ 1x</option><option value="0.5">Chậm 0.5x</option><option value="0.25">Rất chậm 0.25x</option></select></div>
-<div class="row"><button id="play">▶ Phát lại</button><label><input type="checkbox" id="loop" checked> Lặp</label></div>
+<div class="row"><select id="zone"></select><select id="viewMode"><option value="buff">Buff nền vùng · 3A (0–8)</option><option value="attack">Đòn đánh</option></select></div>
+<div class="row" id="buffControls">
+ <select id="buffStat">
+  <option value="atk">Buff Công</option><option value="def">Buff Thủ</option><option value="spd">Buff Tốc độ</option><option value="mag">Buff Pháp thuật</option>
+  <option value="eva">Buff Né tránh</option><option value="crit">Buff Chí mạng</option><option value="regen">Buff Hồi phục</option><option value="hp">Buff HP</option>
+ </select>
+</div>
+<div id="attackControls" hidden>
+ <div class="row"><select id="side"><option value="p">Thú đánh quái</option><option value="m">Quái đánh thú</option></select><select id="kind"><option value="hit">Đòn thường</option><option value="crit">Chí mạng</option><option value="miss">Trượt (né)</option></select></div>
+ <div class="row"><select id="style"><option value="px">Kiểu: Pixel</option><option value="sm">Kiểu: Mịn</option></select><select id="spd"><option value="1">Tốc độ 1x</option><option value="0.5">Chậm 0.5x</option><option value="0.25">Rất chậm 0.25x</option></select></div>
+ <div class="row"><button id="play">▶ Phát lại</button><label><input type="checkbox" id="loop" checked> Lặp</label></div>
+</div>
 <div id="info"></div>
 <script src="31-combat-fx.js"></script>
 <script src="33-attack-fx.js"></script>
@@ -40,9 +50,17 @@ function fit(){const w=Math.min(innerWidth-16,720),d=Math.min(window.devicePixel
 fit();addEventListener('resize',fit);
 if(!FX){info.textContent='Không tải được 31-combat-fx.js'}
 else{
- const sel=$('zone');
- const build=()=>{sel.innerHTML=FX.zones.map((z,i)=>'<option value="'+i+'">'+i+' · '+z.name+' ('+(z.mode==='melee'?'gần':'xa')+')'+(FX.codeZone&&FX.codeZone(i)?' — VẼLAI BẰNG CODE':' — cũ (ảnh)')+'</option>').join('')};
- build();setTimeout(build,600);   /* 33-attack-fx.js tự gắn codeZone sau khi tải xong */
+ const sel=$('zone'),view=$('viewMode');
+ const build=()=>{
+  const max=view.value==='buff'?9:FX.zones.length,old=Number(sel.value)||0;
+  sel.innerHTML=FX.zones.slice(0,max).map((z,i)=>'<option value="'+i+'">'+i+' · '+z.name+' ('+(z.mode==='melee'?'gần':'xa')+')'+
+   (view.value==='buff'?' — buff nền code':(FX.codeZone&&FX.codeZone(i)?' — vẽ lại bằng code':' — cũ (ảnh)'))+'</option>').join('');
+  sel.value=old<max?String(old):'0';
+ };
+ const syncMode=()=>{$('buffControls').hidden=view.value!=='buff';$('attackControls').hidden=view.value==='buff';build();restart()};
+ build();$('buffControls').hidden=view.value!=='buff';$('attackControls').hidden=view.value==='buff';setTimeout(build,600);   /* cập nhật nhãn vùng khi 33-attack-fx.js tải xong */
+ view.onchange=syncMode;
+ $('buffStat').onchange=restart;
 }
 /* ---- chuyển động lao tới / giật lùi: chép từ 06-mobs.js để demo giống game ---- */
 function lungeAt(u){if(u<=0)return 0;
@@ -77,13 +95,20 @@ function loop(now){
  requestAnimationFrame(loop);
  if(!FX)return;
  g.setTransform(cv.width/CW,0,0,cv.width/CW,0,0);
- const sp=+$('spd').value,t=(now-t0)/1000*sp,T=now/1000,zi=+$('zone').value||0,pa=$('side').value==='p',kind=$('kind').value;
+ const mode=$('viewMode').value,sp=mode==='attack'?+$('spd').value:1,t=(now-t0)/1000*sp,T=now/1000,zi=+$('zone').value||0,pa=mode==='attack'&&$('side').value==='p',kind=mode==='attack'?$('kind').value:'hit';
  window.BSPD=sp<1?1:sp;FX.engine.setSpeed(sp);
  const bg=g.createLinearGradient(0,0,0,CH);bg.addColorStop(0,'#26324f');bg.addColorStop(.7,'#3b4a63');bg.addColorStop(1,'#1f2a1f');
  g.fillStyle=bg;g.fillRect(0,0,CW,CH);g.fillStyle='#2e3d2c';g.fillRect(0,GY-2,CW,CH-GY+2);
  const u=Math.min(1,t/BST);let dp=0,dmx=0,msg='';
+ if(mode==='buff'){
+  try{
+   const labels={atk:'Công',def:'Thủ',spd:'Tốc độ',mag:'Pháp thuật',eva:'Né tránh',crit:'Chí mạng',regen:'Hồi phục',hp:'HP'};
+   const stat=$('buffStat').value;
+   FX.drawBack(g,T,.7,zi,{zoneBuff:{stat,label:'Buff '+labels[stat]},startBuffs:[]},0,0,100,100,zi,0);
+  }catch(e){msg='Lỗi buff vùng: '+e.message}
+ }
  try{
-  if(run&&u<.9){
+  if(mode==='attack'&&run&&u<.9){
    const z=FX.zones[zi],melee=z&&z.mode==='melee',lg=melee?lungeAt(u)*(kind==='miss'?.6:1):recoilAt(u);
    if(pa)dp=lg;else dmx=-lg;
   }
@@ -91,23 +116,24 @@ function loop(now){
  /* bên bị đánh: né = lùi 16px (giống 06-mobs.js) kèm tàn ảnh; chí mạng/trúng = bị đẩy lùi + giật */
  const ddf=w=>16*Math.sin(Math.PI*Math.max(0,Math.min(1,(w-.28)/.42)));
  let ghosts=[];
- if(run&&u<.9){
+ if(mode==='attack'&&run&&u<.9){
   if(kind==='miss'){const dd=ddf(u);if(pa)dmx+=dd;else dp-=dd;
    if(dd>1&&u<.8)for(let k=1;k<=6;k++){const o2=ddf(u-k*.028);if(Math.abs(dd-o2)>1.2)ghosts.push({defP:!pa,off:-o2,a:.55*(1-(k-1)/6)})}}
   else if(u>=.35){const hu=u-.35,big=kind==='crit'?1.7:1,kb=24*big*Math.pow(Math.max(0,1-hu/.4),2),jt=hu<.25?Math.sin(T*70)*4*big*(1-hu/.25):0;if(pa)dmx+=kb+jt;else dp-=kb+jt}
  }
  ghosts.forEach(q=>{g.save();g.globalAlpha=q.a;if(q.defP)pet(g,85+q.off*.84,'#9fd8ff','#9fd8ff',T,false);else pet(g,272-q.off*.78,'#ffb0a0','#ffb0a0',T,true);g.restore()});
  pet(g,85+dp*.84,'#6cc4ff','#2a6fb0',T,false);pet(g,272+dmx*.78,'#ff8a7a','#a83a3a',T,true);
- try{if(run&&u<.9&&kind==='miss'&&FX.drawDodge)FX.drawDodge(g,u,pa,T)}catch(e){msg='Lỗi: '+e.message}
+ try{if(mode==='attack'&&run&&u<.9&&kind==='miss'&&FX.drawDodge)FX.drawDodge(g,u,pa,T)}catch(e){msg='Lỗi: '+e.message}
  try{
-  if(run&&u<.9){
+  if(mode==='attack'&&run&&u<.9){
    const S={on:1,s:zi,u:u,pa:pa,cl:0,cr:kind==='crit',miss:kind==='miss',h:'Thủy',i:1,text:''};
    if(u>=.35)FX.drawImpact(g,{pp:pa,q:Math.min(.9999,(u-.35)/.55),k:kind,d:12,r:1,i:1,h:'Thủy',s:zi,cl:0,text:''},T);
    FX.drawAttack(g,T,S);
   }
-  if(run&&u>=1){if($('loop').checked)restart();else run=false}
+  if(mode==='attack'&&run&&u>=1){if($('loop').checked)restart();else run=false}
  }catch(e){msg='Lỗi: '+e.message}
- info.textContent=(msg||(FX.codeZone&&FX.codeZone(zi)?'Vùng này đã vẽ bằng code (không ảnh).':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.'))+'\nHạt đang chạy: '+FX.engine.count();
+ info.textContent=(msg||(mode==='buff'?'Buff nền vùng '+zi+' · '+$('buffStat').selectedOptions[0].text+' · vẽ bằng code.':
+  (FX.codeZone&&FX.codeZone(zi)?'Vùng này đã vẽ bằng code (không ảnh).':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.')))+'\nHạt đang chạy: '+FX.engine.count();
 }
 requestAnimationFrame(loop);
 </script>
