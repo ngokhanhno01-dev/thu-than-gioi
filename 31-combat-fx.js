@@ -725,11 +725,15 @@ function makeSprite(W,H,cellFn){
   if(c2){for(let r=0;r<H;r++)for(const run of runs[r]){c2.fillStyle=run[2];c2.fillRect(run[0],r,run[1],1)}spr.cv=cv}}}catch(_){spr.cv=null}
  return spr;
 }
+function spriteImg(s){const im=s.img;return im&&im.complete&&im.naturalWidth?im:null}
+/* hộp vẽ của sprite: nếu có ảnh mẫu thì giữ đúng tỉ lệ ảnh, không thì dùng lưới ô */
+function spriteBox(s,cx,cy,unit){const im=spriteImg(s),h=s.h*unit,w=im?h*im.naturalWidth/im.naturalHeight:s.w*unit;return{im,w,h,x:cx-w/2,y:cy-h/2}}
 function drawSprite(g,s,cx,cy,unit,a){
- if(a<=.01||unit<=0)return;const x0=cx-s.w*unit/2,y0=cy-s.h*unit/2;
+ if(a<=.01||unit<=0)return;const b=spriteBox(s,cx,cy,unit);
  g.save();g.globalAlpha=FXE.cl(a,0,1);
- if(s.cv){g.imageSmoothingEnabled=false;g.drawImage(s.cv,x0,y0,s.w*unit,s.h*unit)}
- else for(let r=0;r<s.h;r++)for(const run of s.runs[r]){g.fillStyle=run[2];g.fillRect(x0+run[0]*unit,y0+r*unit,run[1]*unit+.4,unit+.4)}
+ if(b.im){g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(b.im,b.x,b.y,b.w,b.h)}
+ else if(s.cv){g.imageSmoothingEnabled=false;g.drawImage(s.cv,b.x,b.y,b.w,b.h)}
+ else for(let r=0;r<s.h;r++)for(const run of s.runs[r]){g.fillStyle=run[2];g.fillRect(b.x+run[0]*unit,b.y+r*unit,run[1]*unit+.4,unit+.4)}
  g.restore();
 }
 /* bóc lớp từ ngoài vào trong: trả về độ sâu (1 = ngoài cùng) của từng ô thuộc hình khiên */
@@ -762,6 +766,7 @@ function blueShieldSprite(){
   if(c<CC){return(c%2===0)?((r%5===2)?'#c58a49':'#b27b3d'):((r%7===3)?'#6f4521':'#8b5729')}
   return(c%2===0)?((r%5===2)?'#4a8be6':'#3077d6'):((r%7===3)?'#16438c':'#2260b8');
  });
+ try{if(typeof Image!=='undefined'){const im=new Image();im.src='fx/khien-xanh.png';BLUE_SH.img=im}}catch(_){}
  return BLUE_SH;
 }
 const SHIELD_N=5;
@@ -780,7 +785,7 @@ function shieldOrbit(g,x,T,elapsed,hold,front,fa){
   const sc=o.sc*(.55+.45*FXE.eBack(o.pop)),unit=1.05*sc,al=(front?.97:.6)*Math.min(1,o.pop*3)*(fa==null?1:fa),pulse=.6+.4*Math.sin(T*5.5+o.i*1.9);
   FXE.glow(g,o.x,o.y,16*sc,'#4fd6ff',.2*al*(front?1:.6));
   drawSprite(g,spr,o.x,o.y,unit,al);
-  FXE.glow(g,o.x,o.y-2*unit,4.6*unit,'#7ff6ff',.42*pulse*al);
+  FXE.glow(g,o.x,o.y-1.4*unit,4.6*unit,'#7ff6ff',.42*pulse*al);
   if(o.pop<1)buffSpark(g,o.x,o.y,2,'#dffbff',.9*(1-o.pop),2.4);
  }}finally{g.restore()}
 }
@@ -871,14 +876,16 @@ function statusShield(g,fx,T,q,x,y,s){g.save();try{
    buffLine(g,[[ix+hx*.15,iy+hy*.15],[ix+hx*.6,iy+hy*.28]],'#fff4b0',a*ck,u,1)}
  }else{
   /* vỡ: mỗi cụm 2×2 ô văng riêng theo parabol (tính trực tiếp theo thời gian, không tốn hạt), nảy nhẹ khi chạm đất */
-  const r=FXE.rng(s.seed^0x5b1d),t=(q-QB)*1.05,fade=1-FXE.ph(q,.55,.95),ox=ix-spr.w*unit/2,oy=iy-spr.h*unit/2,g0=300;g.save();
+  const r=FXE.rng(s.seed^0x5b1d),t=(q-QB)*1.05,fade=1-FXE.ph(q,.55,.95),bx=spriteBox(spr,ix,iy,unit),ox=bx.x,oy=bx.y,cw=bx.w/spr.w,g0=300;g.save();g.imageSmoothingEnabled=true;
   for(let cy=0;cy<spr.h;cy+=3)for(let cx=0;cx<spr.w;cx+=3){
    let col=null;for(let a=0;a<3;a++)for(let b=0;b<3;b++){const v=spr.grid[cy+a]&&spr.grid[cy+a][cx+b];if(v&&(!col||col==='#0a1730'))col=v}
    const vx=r.range(-16,16)+(cx-8)*4+dir*r.range(-10,34),vy=-r.range(22,78)+(cy-9)*3;if(!col)continue;
-   const x0=ox+cx*unit,y0=oy+cy*unit;let yy=y0+vy*t+.5*g0*t*t;
+   const x0=ox+cx*cw,y0=oy+cy*unit;let yy=y0+vy*t+.5*g0*t*t;
    const tb=(-vy+Math.sqrt(vy*vy+2*g0*Math.max(0,205-y0)))/g0;
    if(t>tb){const tt=t-tb,v2=-(vy+g0*tb)*.32;yy=205+Math.min(0,v2*tt+.5*g0*tt*tt)}
-   const sz=unit*3*(1-.3*FXE.ph(t,.3,1));g.globalAlpha=FXE.cl(fade,0,1);g.fillStyle=col;g.fillRect(x0+vx*t,Math.min(yy,205),sz,sz)}
+   const k=1-.3*FXE.ph(t,.3,1),sw=cw*3*k,sh=unit*3*k;g.globalAlpha=FXE.cl(fade,0,1);
+   if(bx.im){const iw=bx.im.naturalWidth/spr.w,ih=bx.im.naturalHeight/spr.h;g.drawImage(bx.im,cx*iw,cy*ih,iw*3,ih*3,x0+vx*t,Math.min(yy,205),sw,sh)}
+   else{g.fillStyle=col;g.fillRect(x0+vx*t,Math.min(yy,205),sw,sh)}}
   g.restore();
   const hot=1-FXE.ph(q,QB,QB+.16);if(hot>0)FXE.glow(g,ix,iy,26+14*(1-hot),'#5fe0ff',.55*hot);
   statusBurst(s,'shield',ix,iy,16,{speed:[30,125],ang:[-Math.PI*.96,-Math.PI*.04],size:[1.4,3.2],life:[.4,.95],gy:210,drag:.45,shape:'spark',c:'#4fd6ff',c2:'#efffff',a:.98,add:true,tag:'status',vr:[-6,6],floor:205,bounce:.2});
