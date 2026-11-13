@@ -228,11 +228,11 @@ function boot(){
 
  /* ===== [FX 2A] Vùng 2-5: Vân Đảo, Phong Nguyên, Lôi Vực, Nguyệt Cung =====
     Cùng quy ước: trúng lúc t=.665s (u=.35), hết đòn t=1.68s. Vùng gần (3, 5) đọc cú lao tới của game qua lungeX; vùng xa (2, 4) không lao. */
- const wrap=(key,run)=>(g,T,S)=>{
+ const wrap=(key,run,ex)=>(g,T,S)=>{
   const u=clamp(S.u||0,0,1),s=E.seed(key,u);
   E.setSpeed(window.BSPD||1);
   if(E.once(s,'init'))E.clear();
-  layer(g,gg=>run(gg,T,u*1.9,!!S.pa,!!S.miss,!!S.cr,s));
+  layer(g,gg=>{run(gg,T,u*1.9,!!S.pa,!!S.miss,!!S.cr,s);if(ex)ex(gg,T,u*1.9,!!S.pa,!!S.miss,!!S.cr,s)});
   return true;
  };
  /* lưỡi liềm cong thon hai đầu: cung a0→a1 (rad), dày th, sx=-1 lật ngang, sy<0 lật dọc / dẹt, rot xoay thêm; viền ngoài sáng nhất */
@@ -404,19 +404,228 @@ function boot(){
   }
   E.draw(g,'fx');
  }
- /* va chạm của vùng code: mọi thứ đã do ZFX vẽ trong lúc đánh; chỉ còn quầng + tia chí mạng mềm (không chớp trắng) */
- function impactCode(g,fx){
-  if(fx.k!=='crit')return true;
-  const q=clamp(fx.q||0,0,.9999),tgt=fx.pp?272:90,y=150,fa=1-q;
-  layer(g,gg=>{
-   E.glow(gg,tgt,y,70,'#ffd24a',.4*Math.max(0,1-q*2.2));
-   gg.save();gg.globalCompositeOperation='lighter';gg.lineCap='round';gg.strokeStyle=E.rgba('#ffd24a',.85*fa);gg.lineWidth=3;
-   for(let i=0;i<16;i++){const an=i*Math.PI/8,r1=14+q*10,r2=40+q*84;gg.beginPath();gg.moveTo(tgt+Math.cos(an)*r1,y+Math.sin(an)*r1);gg.lineTo(tgt+Math.cos(an)*r2,y+Math.sin(an)*r2);gg.stroke()}
-   gg.restore();
-  });
-  return true;
+ /* ===== [FX 2A sửa] LỚP CHI TIẾT BỔ SUNG cho vùng 2-5 (vẽ SAU lớp chính, hạt gắn nhãn 'fx2') =====
+    Mỗi vùng thêm: tụ lực rõ hơn, nhiều lớp chuyển động lệch nhịp, hiệu ứng "độc quyền" của nguyên tố, và dư âm sau khi trúng. */
+ const DUSTP={sh:'#8c7a64',md:'#cdbb9f',lt:'#f4ead6'};
+ const orb=(cx,cy,rx,ry,an)=>[cx+Math.cos(an)*rx,cy+Math.sin(an)*ry];
+ const strokePts=(g,pts)=>{g.beginPath();pts.forEach((p,j)=>j?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke()};
+
+ /* 2 Vân Đảo: khí tím xoắn quanh tay + pháp trận → 4 dải gió xoáy quấn quanh cơn lốc, mắt bão phát sáng, mưa vệt trong lốc, điện tím giật trong mây
+    → trúng: vòng sóng, 6 tia điện bò ra đất, chuỗi cầu sáng xoáy ra ngoài, tàn sáng bay lên */
+ function cloudX(g,T,t,pa,miss,cr,s){
+  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,tx=pa?272:85,x0=pa?85:272,tc=miss?tx-dir*80:tx,sc=(miss?.7:1)*(cr?1.15:1),sd=s.seed,r=E.rng(sd^0x2c1),
+   cap=l=>Math.max(.12,Math.min(l,END-t)),eo=E.eOut,ph=E.ph,CA='#c9a8ff',CB='#fff0ff',CV='#8f6af0',H=118*sc;
+  const ca=ph(t,0,.2)*(1-ph(t,.38,.55));
+  if(ca>0){
+   for(let k=0;k<3;k++){const pts=[];for(let i=0;i<14;i++){const q=i/13,an=t*9+k*2.09+q*5.2,rr=(32-q*24)*(1-.35*ph(t,.2,.4));pts.push([x0+dir*26+Math.cos(an)*rr,150+Math.sin(an)*rr*.6-q*6])}
+    E.ribbon(g,pts,q=>1+4*q,k%2?CA:CV,.8*ca,{core:CB})}
+   const rr=14+30*eo(ph(t,0,.3));
+   E.wave(g,x0,GY,rr,CA,ca*.85,1.4,{seed:sd,t:T,sq:.3});E.wave(g,x0,GY,rr*.55,CV,ca*.7,1.2,{seed:sd+9,t:T,sq:.3});
+   for(let i=0;i<6;i++){const p=orb(x0,GY,rr,rr*.3,T*2.6+i*1.047);E.glow(g,p[0],p[1],5,CA,ca*.9)}
+  }
+  const fa=ph(t,.22,.5)*(1-ph(t,TH+.02,TH+.38));
+  if(fa>0){
+   const grow=eo(ph(t,.22,.55)),shr=1-.5*ph(t,.4,TH),sp=t*(8+10*ph(t,.3,TH));
+   for(let k=0;k<4;k++){const pts=[];for(let i=0;i<20;i++){const h=i/19,th=sp*(1+.5*(1-h))+k*1.571+h*7,rho=(12+60*h)*shr*sc;pts.push([tc+Math.cos(th)*rho,GY-8-h*H*grow+Math.sin(th)*rho*.22])}
+    E.ribbon(g,pts,q=>2+3*q,k%2?CA:CV,.6*fa,{core:'#ffffff'})}
+   E.glow(g,tc,GY-H*grow,44*sc,CV,.32*fa);
+   E.wave(g,tc,GY,(40+20*Math.sin(T*5))*shr*sc,CV,.55*fa,1.6,{seed:sd+3,t:T,sq:.28});
+   for(let n=E.rate(s,'ir',ph(t,.3,TH),40);n>0;n--){const an=r()*6.283,rho=r.range(20,60)*sc;E.emit({x:tc+Math.cos(an)*rho,y:GY-r.range(10,H*grow),vx:-Math.sin(an)*60,vy:r.range(-20,10),life:cap(r.range(.25,.45)),s0:r.range(1.6,2.6),s1:.5,shape:'streak',c:CV,c2:CB,a:.9,add:true,tag:'fx2',drag:1})}
+  }
+  [.4,.5,.58,.64].forEach((bt,i)=>{const d=t-bt;if(d<0||d>.09)return;const rb=E.rng(sd+i*53+Math.floor(d/.03)),px=tc+rb.range(-36,36)*sc,py=GY-H*(.45+.4*rb());
+   bolt(g,E.jag(rb,px,py,px+rb.range(-34,34),py+rb.range(14,40),6,7),1.4,1-d/.09,CV,CB)});
+  if(t>TH-.03){
+   const p=ph(t,TH,TH+1),fo=1-ph(t,TH+.3,TH+1);
+   if(!miss){
+    E.wave(g,tc,GY,6+120*eo(ph(t,TH+.05,TH+.9)),CV,(1-ph(t,TH+.2,TH+.9))*.55,1.4,{seed:sd+8,t:T,sq:.28});
+    for(let k=0;k<6;k++){const an=k/6*6.283+.3,L=(30+60*eo(p))*sc,pp=E.jag(E.rng(sd+k*7+Math.floor(t/.06)),tc,GY+1,tc+Math.cos(an)*L,GY+Math.sin(an)*L*.28,6,5);bolt(g,pp,1.2,fo*.8,CA,CB)}
+    for(let i=0;i<10;i++){const an=i/10*6.283+(t-TH)*5,rho=(8+70*eo(p))*sc;E.glow(g,tc+Math.cos(an)*rho,GY-24+Math.sin(an)*rho*.28-p*18,4+3*hs(i),CA,fo*.9)}
+   }
+   if(E.once(s,'cx'))E.burst(E.rng(sd^0x99),tc,GY-40,miss?8:20,{speed:[30,110],ang:[-Math.PI,0],size:[1.4,2.4],life:[cap(.5),cap(.9)],gy:120,drag:.8,shape:'spark',c:CV,c2:CB,a:1,add:true,tag:'fx2'});
+  }
+  E.draw(g,'fx2');
  }
- const ZFX=E?{0:iceFx,1:mistFx,2:wrap('cloud',cloudRun),3:wrap('wind',windRun),4:wrap('thunder',thunderRun),5:wrap('moon',moonRun)}:{};
+
+ /* 3 Phong Nguyên: vòng gió + bụi cỏ phía sau lúc lao → 7 dải gió xoắn VÀO tâm từ mọi hướng → trúng: 3 dải lốc xoáy dựng đứng, 2 vòng gió dưới đất, lá cuốn xoáy bay tản */
+ function windX(g,T,t,pa,miss,cr,s){
+  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,tx=pa?272:85,tc=miss?tx-dir*80:tx,u=t/1.9,sd=s.seed,r=E.rng(sd^0x3d7),
+   cap=l=>Math.max(.12,Math.min(l,END-t)),eo=E.eOut,ph=E.ph,lk=miss?.6:1,ax=x=>pa?85+.84*lungeX(x)*lk:272-.78*lungeX(x)*lk,sc=(miss?.75:1)*(cr?1.15:1),
+   WG='#82f0bb',WL='#e8fff2';
+  if(u>.04&&u<.5){
+   const al=1-ph(u,.38,.5);
+   for(let j=0;j<6;j++){const uj=Math.max(0,u-j*.028),x=ax(uj)-dir*(8+j*5);E.wave(g,x,GY-34,8+j*3.5,WG,al*(.7-j*.1),1.2,{seed:sd+j,t:T,sq:2.1,wob:.1})}
+   for(let n=E.rate(s,'dd',ph(u,.08,.36),30);n>0;n--)E.emit({x:ax(u)-dir*r.range(6,20),y:GY-r.range(0,4),vx:-dir*r.range(10,50),vy:r.range(-24,-4),gy:20,drag:1.4,life:cap(r.range(.3,.55)),s0:r.range(3,6),s1:2.2,shape:'mist',c:'#c9e8c0',a:.7,tag:'fx2'});
+  }
+  for(let k=0;k<7;k++){
+   const ts=TH-.38+k*.04,hd=eo(ph(t,ts,ts+.3)),tl=ph(t,ts+.1,ts+.38),al=1-ph(t,ts+.3,ts+.46);
+   if(hd<.05||al<=0||hd<=tl)continue;
+   const an=(k/7)*6.283+.4,R0=110+hs(k)*40,pts=[];
+   for(let i=0;i<14;i++){const q=tl+(hd-tl)*i/13,rr=R0*(1-q)+12,aa=an+q*3.4*(k%2?1:-1);pts.push([tc+Math.cos(aa)*rr,GY-48+Math.sin(aa)*rr*.38+(1-q)*(hs(k+3)-.5)*30])}
+   E.ribbon(g,pts,q=>1.4+3*q,k%2?WG:WL,.8*al,{core:'#c8ffe0'});
+  }
+  if(t>TH-.03){
+   const p=ph(t,TH,TH+1),fo=1-ph(p,.65,1);
+   if(!miss){
+    for(let k=0;k<3;k++){const pts=[];for(let i=0;i<18;i++){const h=i/17,th=(t-TH)*11+k*2.09+h*6,rho=(8+34*h)*sc*(.6+.4*eo(p));pts.push([tc+Math.cos(th)*rho,GY-4-h*86*sc*eo(ph(p,0,.5))+Math.sin(th)*rho*.25])}
+     E.ribbon(g,pts,q=>2+3.6*q,k%2?WG:WL,.8*fo,{core:'#c8ffe0'})}
+    E.wave(g,tc,GY,10+90*eo(p),WG,fo*.6,1.5,{seed:sd+6,t:T,sq:.26});E.wave(g,tc,GY,6+55*eo(p),WL,fo*.5,1.2,{seed:sd+7,t:T,sq:.26});
+   }
+   for(let n=E.rate(s,'lv',ph(t,TH,TH+.6),miss?20:50);n>0;n--){const an=r()*6.283,rho=r.range(10,50)*sc;
+    E.emit({x:tc+Math.cos(an)*rho,y:GY-r.range(0,20),vx:-Math.sin(an)*r.range(60,110),vy:r.range(-60,-20),gy:-4,drag:.5,life:cap(r.range(.5,.9)),s0:r.range(3,5),shape:'leaf',c:r()<.5?'#4fcf86':'#9ff5c8',c2:WL,a:.95,tag:'fx2',rot:r()*6,vr:r.range(-9,9),fl:r.range(8,14)})}
+  }
+  E.draw(g,'fx2');
+ }
+
+ /* 4 Lôi Vực: tia nhỏ bò từ đất hút điện → sét chính + 3 sét phụ giáng lệch nhịp → mục tiêu BỊ ĐIỆN GIẬT (vòng tia điện quanh thân, tia bò dọc thân)
+    → lưới nứt đất cháy cam rồi nguội, vòng sốc đôi, tàn lửa bay lên */
+ function thunderX(g,T,t,pa,miss,cr,s){
+  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,tx=pa?272:85,tc=miss?tx-dir*80:tx,hk=cr?1.25:1,sd=s.seed,ph=E.ph,eo=E.eOut,ST=TH-.07,
+   CA='#ffe53a',CB='#fff8b8',CO='#ff9a30',cap=l=>Math.max(.12,Math.min(l,END-t));
+  {const a=ph(t,.2,ST)*(1-ph(t,ST,ST+.06));
+   if(a>0){const stp=Math.floor(t/.055);
+    for(let i=0;i<5;i++){const rb=E.rng(sd+stp*17+i*5),x=tc+rb.range(-44,44);bolt(g,E.jag(rb,x,GY+1,x+rb.range(-8,8),GY-rb.range(14,34)*a,4,4),.9,a*.9,CA,CB)}
+    E.glow(g,tc,GY-4,30+20*a,CA,.18*a)}}
+  [[.04,-44,.7],[.09,40,.6],[.13,-72,.45]].forEach((q,i)=>{
+   const d=t-ST-q[0];if(d<0||d>.16)return;
+   const rb=E.rng(sd+i*211+Math.floor(d/.05)),x=tc+q[1],pw=(1-ph(d,.05,.16))*(.6+.4*Math.abs(Math.sin(d*60)))*(miss?.6:1);
+   bolt(g,E.jag(rb,x+rb.range(-6,6),34,x,GY,12,10),1.6*q[2],pw,CA,CB);E.glow(g,x,GY-4,16,CA,.3*pw)});
+  if(t>TH-.02){
+   const stp=Math.floor(t/.05);
+   if(!miss&&t<TH+.7){
+    const fo=1-ph(t,TH+.25,TH+.7);
+    for(let i=0;i<5;i++){const rb=E.rng(sd+stp*29+i*13),a0=rb()*6.283,a1=a0+rb.range(1.2,2.6),R=26*hk;
+     bolt(g,E.jag(rb,tc+Math.cos(a0)*R*.7,150+Math.sin(a0)*R*1.5,tc+Math.cos(a1)*R*.7,150+Math.sin(a1)*R*1.5,5,9),1.1,fo*.85,CA,CB)}
+    for(let i=0;i<3;i++){const rb=E.rng(sd+stp*41+i),x=tc+(i-1)*16;bolt(g,E.jag(rb,x,GY-2,x+rb.range(-10,10),GY-60-rb.range(0,40),7,7),1,fo*.8,CA,CB)}
+    E.glow(g,tc,150,40,CA,.14*fo);
+   }
+   const gp=ph(t,TH-.02,TH+.25),keep=1-ph(t,1.2,END),heat=1-ph(t,TH+.1,TH+.9);
+   g.save();g.lineCap='round';g.lineJoin='round';
+   for(let i=0;i<7;i++){
+    const rb=E.rng(sd+900+i),an=(i/7)*6.283+rb.range(-.3,.3),L=(30+rb.range(0,34))*eo(gp)*(miss?.6:1),pts=E.jag(rb,tc,GY+3,tc+Math.cos(an)*L,GY+3+Math.sin(an)*L*.3,6,3);
+    g.globalCompositeOperation='source-over';g.strokeStyle=E.rgba('#1c1424',.8*keep);g.lineWidth=2.4;strokePts(g,pts);
+    g.globalCompositeOperation='lighter';g.strokeStyle=E.rgba(CO,.85*heat*keep);g.lineWidth=1.1;strokePts(g,pts);
+   }
+   g.restore();
+   if(!miss){E.wave(g,tc,GY,6+95*eo(ph(t,TH+.04,TH+.6)),CO,(1-ph(t,TH+.2,TH+.6))*.6,1.5,{seed:sd+11,t:T,sq:.28})}
+   if(E.once(s,'tx'))E.burst(E.rng(sd^0x5a5),tc,GY-4,miss?6:16,{speed:[14,60],ang:[-Math.PI*.95,-Math.PI*.05],size:[1.3,2.4],life:[cap(.7),cap(1.1)],gy:-18,drag:.6,shape:'orb',c:CO,c2:CB,a:.95,add:true,tag:'fx2'});
+  }
+  E.draw(g,'fx2');
+ }
+
+ /* 5 Nguyệt Cung: trăng tròn lớn hiện trên đầu mục tiêu (có hố, vành sao quay) + pháp trận trăng khuyết dưới đất → sao băng ánh trăng rơi chéo → chùm sáng rọi xuống
+    → trúng: trăng khuyết nhỏ trôi lên, bụi sao, vòng sóng; trăng tan chậm */
+ function moonX(g,T,t,pa,miss,cr,s){
+  const GY=204,TH=.665,END=1.68,dir=pa?1:-1,tx=pa?272:85,tc=miss?tx-dir*80:tx,sd=s.seed,r=E.rng(sd^0x5e3),
+   cap=l=>Math.max(.12,Math.min(l,END-t)),eo=E.eOut,ph=E.ph,sc=(miss?.75:1)*(cr?1.15:1),CA='#a8b8ff',CW='#f4f6ff';
+  {const a=ph(t,TH-.45,TH-.1)*(1-ph(t,TH+.35,TH+1.0))*(miss?.5:1);
+   if(a>0){
+    const my=GY-128,R=30*sc*(.85+.15*eo(ph(t,TH-.45,TH)));
+    E.glow(g,tc,my,R*2.1,CA,.3*a);
+    g.save();g.globalAlpha=a*.9;const gr=g.createRadialGradient(tc-R*.3,my-R*.3,2,tc,my,R);gr.addColorStop(0,'#ffffff');gr.addColorStop(.6,'#dfe6ff');gr.addColorStop(1,'#8fa0ee');
+    g.fillStyle=gr;g.beginPath();g.arc(tc,my,R,0,6.2832);g.fill();
+    g.fillStyle='rgba(120,135,215,.45)';[[-.35,.2,.22],[.3,-.25,.16],[.25,.4,.12]].forEach(c=>{g.beginPath();g.arc(tc+c[0]*R,my+c[1]*R,c[2]*R,0,6.2832);g.fill()});g.restore();
+    for(let i=0;i<8;i++){const p=orb(tc,my,R*1.5,R*1.5,T*1.2+i*.785);E.glow(g,p[0],p[1],3.5,CW,a*.9)}
+   }}
+  {const a=ph(t,TH-.35,TH-.1)*(1-ph(t,TH+.5,1.2));
+   if(a>0){const R=34+8*Math.sin(T*3);
+    E.wave(g,tc,GY,R,CA,a*.8,1.4,{seed:sd,t:T,sq:.3});E.wave(g,tc,GY,R*.62,CW,a*.6,1,{seed:sd+2,t:T,sq:.3});
+    for(let i=0;i<3;i++){const an=T*1.5+i*2.094,p=orb(tc,GY,R,R*.3,an);crescent(g,p[0],p[1],6,-2.2,.9,2.4,1,1,a*.9,MPAL,an)}}}
+  for(let k=0;k<5;k++){
+   const ts=TH-.3+k*.07,p=ph(t,ts,ts+.38);if(p<=0||p>=1)continue;
+   const sx=tc-70+k*34+hs(k+11)*20,sy=GY-190,ex=sx+50,ey=GY-8,hx=sx+(ex-sx)*p,hy=sy+(ey-sy)*p,tl=Math.max(0,p-.28),tx0=sx+(ex-sx)*tl,ty0=sy+(ey-sy)*tl;
+   E.ribbon(g,[[tx0,ty0],[(hx+tx0)/2,(hy+ty0)/2],[hx,hy]],q=>1+3*q,CA,.85*(1-ph(p,.8,1)),{core:'#ffffff'});E.glow(g,hx,hy,6,CW,.8*(1-ph(p,.85,1)));
+  }
+  {const a=ph(t,TH-.12,TH)*(1-ph(t,TH+.1,TH+.7))*(miss?.4:1);
+   if(a>0){g.save();g.globalCompositeOperation='lighter';const gr=g.createLinearGradient(0,GY-120,0,GY);gr.addColorStop(0,E.rgba(CA,0));gr.addColorStop(.5,E.rgba(CA,.22*a));gr.addColorStop(1,E.rgba(CW,.32*a));
+    g.fillStyle=gr;g.beginPath();g.moveTo(tc-12,GY-120);g.lineTo(tc+12,GY-120);g.lineTo(tc+30,GY);g.lineTo(tc-30,GY);g.closePath();g.fill();g.restore()}}
+  if(t>TH-.02){
+   for(let i=0;i<7;i++){const st=TH+hs(i+70)*.25,p=ph(t,st,st+.9);if(p<=0||p>=1)continue;
+    crescent(g,tc+(hs(i+80)-.5)*90+Math.sin(p*5+i)*6,GY-30-p*70*(.5+hs(i+90)),3+3*hs(i+100),-2.2,.9,1.6,1,1,Math.sin(p*3.14)*.9,MPAL,i)}
+   if(!miss)E.wave(g,tc,GY,6+100*eo(ph(t,TH+.05,TH+.8)),CW,(1-ph(t,TH+.2,TH+.8))*.5,1.3,{seed:sd+12,t:T,sq:.3});
+   if(E.once(s,'mx'))E.burst(E.rng(sd^0x6b1),tc,GY-60,miss?8:22,{speed:[16,70],ang:[0,6.2832],size:[1.6,2.8],life:[cap(.6),cap(1.1)],gy:26,drag:.6,shape:'spark',c:CA,c2:'#ffffff',a:1,add:true,tag:'fx2'});
+  }
+  E.draw(g,'fx2');
+ }
+
+ /* ===== [FX 2A sửa] CHÍ MẠNG = ĐAU THẬT =====
+    Vẽ lên MỤC TIÊU (không chớp trắng): thân đỏ lên, sao nổ có đỉnh nhọn rung giật, vết chém chữ X xé ngang thân, tia xung kích, vòng sốc dưới đất,
+    đất nứt (viền cam), bụi tung, giọt máu/tinh huyết văng theo đường parabol + mảnh màu vùng. Tính theo q (0..1) nên không cần trạng thái. */
+ function critPain(g,fx){
+  const q=clamp(fx.q||0,0,.9999),pp=!!fx.pp,tgt=pp?272:90,cy=146,GY=204,dir=pp?1:-1,seed=((fx.i||0)*977+13)|0,z=zones[zi(fx.s)],ZC=(z&&z.color)||'#ffd24a',
+   ph=E.ph,eo=E.eOut,hold=1-ph(q,.38,.8),R=rnd(seed);
+  layer(g,gg=>{
+   const fl=Math.floor(q*40);
+   E.glow(gg,tgt,cy,62,'#ff2a2a',.5*(1-ph(q,.04,.6)),'#ff6a5a');
+   /* sao nổ nhọn */
+   {const o=eo(ph(q,0,.1))*(1-ph(q,.1,.42));
+    if(o>.02){const Ro=(24+46*eo(ph(q,0,.1)))*(1+.05*Math.sin(q*120)),n=14;
+     gg.save();gg.globalCompositeOperation='lighter';
+     const gr=gg.createRadialGradient(tgt,cy,Ro*.3,tgt,cy,Ro);gr.addColorStop(0,E.rgba('#ffd24a',0));gr.addColorStop(.55,E.rgba('#ffd24a',.7*o));gr.addColorStop(1,E.rgba(ZC,.9*o));
+     gg.fillStyle=gr;gg.beginPath();
+     for(let i=0;i<n*2;i++){const an=i/(n*2)*6.2832,rr=i%2?Ro*.52:Ro*(.85+.5*hs(i+fl*3+seed%13));gg.lineTo(tgt+Math.cos(an)*rr,cy+Math.sin(an)*rr*.9)}
+     gg.closePath();gg.fill();gg.restore()}}
+   /* vết chém chữ X */
+   const X=[[-46,-62,44,56,0,.09],[46,-58,-44,60,.04,.13]];
+   X.forEach(c=>{
+    const hd=eo(ph(q,c[4],c[5]));if(hd<.05)return;
+    const pts=[];for(let i=0;i<10;i++){const k=hd*i/9;pts.push([tgt+c[0]+(c[2]-c[0])*k,cy+c[1]+(c[3]-c[1])*k])}
+    E.ribbon(gg,pts,k=>3+13*Math.sin(Math.min(1,k)*Math.PI*.9)+1,'#7a0f1e',.85*hold,{add:false,core:'#c4202e'});
+    E.ribbon(gg,pts,k=>1.5+7*Math.sin(Math.min(1,k)*Math.PI*.9),'#ffd24a',.95*hold,{core:'#ffffff'});
+   });
+   /* tia xung kích */
+   {const a=1-ph(q,.05,.45);
+    if(a>0){gg.save();gg.globalCompositeOperation='lighter';gg.lineCap='round';gg.strokeStyle=E.rgba('#ffe9a0',.8*a);gg.lineWidth=2;
+     for(let i=0;i<14;i++){const an=i/14*6.2832+.2*hs(i),r1=22+q*60,r2=r1+16+26*hs(i+3);gg.beginPath();gg.moveTo(tgt+Math.cos(an)*r1,cy+Math.sin(an)*r1*.85);gg.lineTo(tgt+Math.cos(an)*r2,cy+Math.sin(an)*r2*.85);gg.stroke()}
+     gg.restore()}}
+   /* vòng sốc + đất nứt */
+   E.wave(gg,tgt,GY,10+120*eo(ph(q,0,.5)),ZC,(1-ph(q,.1,.5))*.85,2,{seed:seed,t:q*6,sq:.3});
+   E.wave(gg,tgt,GY,6+80*eo(ph(q,.06,.5)),'#ffd24a',(1-ph(q,.15,.5))*.7,1.5,{seed:seed+4,t:q*6,sq:.3});
+   gg.save();gg.lineCap='round';gg.lineJoin='round';
+   for(let i=0;i<8;i++){const rb=E.rng(seed+i*31),an=(i/8)*6.2832+rb.range(-.25,.25),L=(26+rb.range(0,40))*eo(ph(q,0,.16)),pts=E.jag(rb,tgt,GY+3,tgt+Math.cos(an)*L,GY+3+Math.sin(an)*L*.3,5,3);
+    gg.globalCompositeOperation='source-over';gg.strokeStyle=E.rgba('#1c1424',.85*(1-ph(q,.7,1)));gg.lineWidth=2.4;strokePts(gg,pts);
+    gg.globalCompositeOperation='lighter';gg.strokeStyle=E.rgba('#ff8a30',.9*(1-ph(q,.25,.75)));gg.lineWidth=1.1;strokePts(gg,pts)}
+   gg.restore();
+   /* bụi tung */
+   for(let i=0;i<6;i++){const x=tgt+(hs(i+seed)-.5)*80*eo(ph(q,0,.3)),p=ph(q,.02+i*.02,.7);if(p>0&&p<1)puff(gg,x,GY-3-p*16,6+12*p,.8*(1-p),q*3,seed+i*9,.6,DUSTP)}
+   /* giọt máu / tinh huyết + mảnh màu vùng văng theo parabol */
+   const tau=q*1.1;
+   for(let i=0;i<34;i++){
+    const an=-Math.PI*(.08+.84*hs(i*3+seed)),v=90+140*hs(i*5+seed+1),vx=Math.cos(an)*v+dir*(i%2?-1:1)*18,vy=Math.sin(an)*v,x=tgt+vx*tau,y0=cy+vy*tau+210*tau*tau,y=Math.min(y0,GY+3),a=1-ph(q,.55,.95);
+    if(a<=0)continue;
+    if(i<26){
+     const wx=vx,wy=vy+420*tau,ln=Math.hypot(wx,wy)||1,sx=-wx/ln*(y0>GY?3:9),sy=-wy/ln*(y0>GY?1.5:9);
+     gg.save();gg.lineCap='round';gg.strokeStyle=E.rgba('#d81e30',a);gg.lineWidth=4;gg.beginPath();gg.moveTo(x+sx,y+sy);gg.lineTo(x,y);gg.stroke();
+     gg.strokeStyle=E.rgba('#ffb0a0',a);gg.lineWidth=1;gg.beginPath();gg.moveTo(x+sx*.6,y+sy*.6);gg.lineTo(x,y);gg.stroke();gg.restore();
+    }else{
+     gg.save();gg.translate(x,y);gg.rotate(tau*9+i);gg.fillStyle=E.rgba(ZC,a);gg.beginPath();gg.moveTo(0,-4);gg.lineTo(2.4,0);gg.lineTo(0,4);gg.lineTo(-2.4,0);gg.closePath();gg.fill();gg.restore();
+    }
+   }
+  });
+ }
+
+ /* ===== [FX 2A sửa] NÉ TRÁNH: bụi bặm ở chân bên né (bật đất lúc lách đi + chạm đất lúc về) + vệt gió ngang thân.
+    06-mobs.js lo dịch chuyển + tàn ảnh (gst); hàm này chỉ vẽ bụi theo u (0..1), pa = bên RA ĐÒN là người chơi → bên né là quái, ngược lại. */
+ function drawDodge(g,u,pa,T){
+  if(u<.26||u>.9)return;
+  const defP=!pa,bx=defP?85:272,away=defP?-1:1,k=defP?.84:.78,off=w=>16*Math.sin(Math.PI*clamp((w-.28)/.42,0,1)),foot=w=>bx+away*off(w)*k,GY=204,seed=defP?31:77;
+  layer(g,gg=>{
+   const sa=E.ph(u,.28,.36)*(1-E.ph(u,.5,.62));
+   if(sa>0){gg.save();gg.globalCompositeOperation='lighter';gg.lineCap='round';
+    for(let i=0;i<4;i++){const y=GY-6-i*13,len=(16+10*hs(i+seed))*sa,x1=foot(u)-away*5;
+     const gr=gg.createLinearGradient(x1,0,x1-away*len,0);gr.addColorStop(0,E.rgba('#ffffff',.45*sa));gr.addColorStop(1,E.rgba('#ffffff',0));
+     gg.strokeStyle=gr;gg.lineWidth=2;gg.beginPath();gg.moveTo(x1,y);gg.lineTo(x1-away*len,y);gg.stroke()}
+    gg.restore()}
+   for(let i=0;i<16;i++){
+    const late=i>=9,ub=late?.58+.1*hs(i+seed):.28+.1*hs(i+seed+3),p=E.ph(u,ub,ub+.2);
+    if(p<=0||p>=1)continue;
+    const x=foot(ub)-away*(4+p*18)+(hs(i+9)-.5)*10,y=GY-1-p*(late?7:12)-hs(i+4)*3,r=(late?6:9)+(late?7:12)*p;
+    puff(gg,x,y,r,.95*Math.pow(1-p,1),T*2,seed+i*11,.7,DUSTP);
+   }
+  });
+ }
+ /* va chạm của vùng code: mọi thứ đã do ZFX vẽ trong lúc đánh; chỉ còn quầng + tia chí mạng mềm (không chớp trắng) */
+ function impactCode(g,fx){return true}   /* [FX 2A sửa] chí mạng do critPain vẽ (gọi ở đầu drawImpactX) */
+ const ZFX=E?{0:iceFx,1:mistFx,2:wrap('cloud',cloudRun,cloudX),3:wrap('wind',windRun,windX),4:wrap('thunder',thunderRun,thunderX),5:wrap('moon',moonRun,moonX)}:{};
  const NOCODE_ATK=/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/,NOCODE_IMP=/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích|Xuyên giáp|Liên kích -|Phong Nhận(?: chém| -)|Dương Diệm|Thần Phán|Tinh Quang|Thiên Uy|Sương Tán/;
 
  /* ---------- Cấu hình 17 vùng ----------
@@ -666,6 +875,7 @@ function boot(){
  function drawImpactX(g,fx,T){
   try{
    const text=fx.text||'';
+   if(fx.k==='crit'&&fx.d){try{critPain(g,fx)}catch(_){}}   /* [FX 2A sửa] chí mạng: vẽ cảnh đau thật lên mục tiêu */
    if(fx.k==='block'||fx.k==='heal'||fx.k==='stun'||IMP_SPECIAL.test(text))return orig.drawImpact(g,fx,T);
    if(ZFX[zi(fx.s)]&&(fx.k==='hit'||fx.k==='crit'||fx.k==='miss')&&!NOCODE_IMP.test(text))return impactCode(g,fx);   /* [FX 1B] */
    const idx=zi(fx.s),z=zones[idx],P=PROF[idx],c=P.i||{k:'spark',n:10,R:56,sc:1.3};
@@ -697,6 +907,7 @@ function boot(){
  API.drawAttack=drawAttackX;
  API.drawImpact=drawImpactX;
  API.attackProfiles=PROF;
+ API.drawDodge=drawDodge;                                   /* [FX 2A sửa] bụi bặm khi né (06-mobs.js gọi) */
  API.codeZone=i=>!!ZFX[zi(i)];                              /* [FX 1B] vùng nào đã vẽ bằng code */
  API.setFxStyle=v=>{STY=v==='sm'?'sm':'px'};                /* [FX 1B] 'px' pixel (mặc định) | 'sm' mịn (chỉ để so sánh) */
 }

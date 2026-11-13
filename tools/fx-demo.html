@@ -81,7 +81,17 @@ function loop(now){
    if(pa)dp=lg;else dmx=-lg;
   }
  }catch(e){msg='Lỗi: '+e.message}
+ /* bên bị đánh: né = lùi 16px (giống 06-mobs.js) kèm tàn ảnh; chí mạng/trúng = bị đẩy lùi + giật */
+ const ddf=w=>16*Math.sin(Math.PI*Math.max(0,Math.min(1,(w-.28)/.42)));
+ let ghosts=[];
+ if(run&&u<.9){
+  if(kind==='miss'){const dd=ddf(u);if(pa)dmx+=dd;else dp-=dd;
+   if(dd>1&&u<.8)for(let k=1;k<=6;k++){const o2=ddf(u-k*.028);if(Math.abs(dd-o2)>1.2)ghosts.push({defP:!pa,off:-o2,a:.55*(1-(k-1)/6)})}}
+  else if(u>=.35){const hu=u-.35,big=kind==='crit'?1.7:1,kb=24*big*Math.pow(Math.max(0,1-hu/.4),2),jt=hu<.25?Math.sin(T*70)*4*big*(1-hu/.25):0;if(pa)dmx+=kb+jt;else dp-=kb+jt}
+ }
+ ghosts.forEach(q=>{g.save();g.globalAlpha=q.a;if(q.defP)pet(g,85+q.off*.84,'#9fd8ff','#9fd8ff',T,false);else pet(g,272-q.off*.78,'#ffb0a0','#ffb0a0',T,true);g.restore()});
  pet(g,85+dp*.84,'#6cc4ff','#2a6fb0',T,false);pet(g,272+dmx*.78,'#ff8a7a','#a83a3a',T,true);
+ try{if(run&&u<.9&&kind==='miss'&&FX.drawDodge)FX.drawDodge(g,u,pa,T)}catch(e){msg='Lỗi: '+e.message}
  try{
   if(run&&u<.9){
    const S={on:1,s:zi,u:u,pa:pa,cl:0,cr:kind==='crit',miss:kind==='miss',h:'Thủy',i:1,text:''};
