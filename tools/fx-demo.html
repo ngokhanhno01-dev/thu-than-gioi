@@ -133,6 +133,7 @@ function loop(now){
  }
  ghosts.forEach(q=>{g.save();g.globalAlpha=q.a;if(q.defP)pet(g,85+q.off*.84,'#9fd8ff','#9fd8ff',T,false);else pet(g,272-q.off*.78,'#ffb0a0','#ffb0a0',T,true);g.restore()});
  pet(g,85+dp*.84,'#6cc4ff','#2a6fb0',T,false);pet(g,272+dmx*.78,'#ff8a7a','#a83a3a',T,true);
+ try{if(mode==='status'&&status==='bq'){const R={startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100};FX.drawField(g,T,t,zi,R,0,0,statusP?42:100,statusP?100:42,zi,0)}}catch(e){msg='Lỗi lớp cuồng nộ: '+e.message}
  try{if(mode==='attack'&&run&&u<.9&&kind==='miss'&&FX.drawDodge)FX.drawDodge(g,u,pa,T)}catch(e){msg='Lỗi: '+e.message}
  try{
   if(mode==='attack'&&run&&u<.9){
@@ -141,7 +142,7 @@ function loop(now){
    FX.drawAttack(g,T,S);
   }
   if(mode==='status'&&run&&status!=='bq'&&u>=.35){
-  const cfg={crit:{k:'crit',text:'💥 Chí mạng!',d:34},miss:{k:'miss',text:'né được đòn!',d:0},burn:{k:'hit',text:'🔥 Thiêu đốt - 18',d:18},counter:{k:'hit',text:'↩ Phản đòn - 18',d:18},shield:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},revive:{k:'heal',text:'✨ Hồi sinh +32 HP',d:0},lightning:{k:'hit',text:'⚡ Lôi Phạt giáng -18',d:18},lava:{k:'hit',text:'🌋 Dung Nham -18',d:18},heal:{k:'heal',text:'Hồi sức +18 HP',d:0},freeze:{k:'stun',text:'đóng băng',d:0},stun:{k:'stun',text:'bị choáng',d:0}}[status];
+  const cfg={crit:{k:'crit',text:'💥 Chí mạng!',d:34},miss:{k:'miss',text:'né được đòn!',d:0},burn:{k:'hit',text:'🔥 Thiêu đốt - 18',d:18},counter:{k:'hit',text:'↩ Phản đòn · chặn rồi trả đòn',d:18},shield:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},revive:{k:'heal',text:'✨ Hồi sinh +32 HP',d:0},lightning:{k:'hit',text:'⚡ Lôi Phạt giáng -18',d:18},lava:{k:'hit',text:'🌋 Dung Nham -18',d:18},heal:{k:'heal',text:'Hồi sức +18 HP',d:0},freeze:{k:'stun',text:'đóng băng',d:0},stun:{k:'stun',text:'bị choáng',d:0}}[status];
   const actor=statusP,q=Math.min(.9999,(u-.35)/.55);
   if(cfg){if(status==='miss'&&FX.drawDodge)FX.drawDodge(g,u,actor,T);FX.drawImpact(g,{pp:actor,q:q,k:cfg.k,d:cfg.d,r:1,i:1,h:'Thủy',s:zi,cl:0,text:cfg.text},T);FX.engine.draw(g,'status')}
  }
