@@ -35,7 +35,7 @@ label{display:flex;align-items:center;gap:6px}
  <div class="row"><select id="style"><option value="px">Kiểu: Pixel</option><option value="sm">Kiểu: Mịn</option></select><select id="spd"><option value="1">Tốc độ 1x</option><option value="0.5">Chậm 0.5x</option><option value="0.25">Rất chậm 0.25x</option></select></div>
  <div class="row"><button id="play">▶ Phát lại</button><label><input type="checkbox" id="loop" checked> Lặp</label></div>
 </div>
-<div class="row" id="statusControls" hidden><select id="statusKind"><option value="crit">Chí mạng</option><option value="miss">Né tránh</option><option value="burn">Thiêu đốt</option><option value="counter">Phản đòn</option><option value="shield">Khiên</option><option value="revive">Hồi sinh</option><option value="bq">Bất khuất dưới 50% HP</option><option value="lightning">Sét giáng đất</option><option value="lava">Dung nham</option><option value="heal">Hồi máu</option><option value="freeze">Đóng băng</option><option value="stun">Choáng</option></select><select id="statusSide"><option value="p">Bên thú</option><option value="m">Bên quái</option></select><button id="statusPlay">▶ Phát lại</button></div>
+<div class="row" id="statusControls" hidden><select id="statusKind"><option value="crit">Chí mạng</option><option value="miss">Né tránh</option><option value="burn">Thiêu đốt</option><option value="counter">Phản đòn</option><option value="shield">Khiên (xoay quanh + chặn đòn, còn khiên)</option><option value="shield0">Khiên (chặn đòn, vỡ hết khiên)</option><option value="revive">Hồi sinh</option><option value="bq">Bất khuất dưới 50% HP</option><option value="lightning">Sét giáng đất</option><option value="lava">Dung nham</option><option value="heal">Hồi máu</option><option value="freeze">Đóng băng</option><option value="stun">Choáng</option></select><select id="statusSide"><option value="p">Bên thú</option><option value="m">Bên quái</option></select><button id="statusPlay">▶ Phát lại</button></div>
 <div id="info"></div>
 <script src="31-combat-fx.js"></script>
 <script src="33-attack-fx.js"></script>
@@ -104,10 +104,10 @@ function loop(now){
  if(!FX)return;
  g.setTransform(cv.width/CW,0,0,cv.width/CW,0,0);
  const mode=$('viewMode').value,sp=mode==='attack'?+$('spd').value:1,t=(now-t0)/1000*sp,T=now/1000,zi=+$('zone').value||0,pa=mode==='attack'&&$('side').value==='p',kind=mode==='attack'?$('kind').value:'hit',status=$('statusKind').value,statusP=$('statusSide').value==='p';
- window.BSPD=sp<1?1:sp;FX.engine.setSpeed(sp);
+ const u=Math.min(1,t/BST),isSh=mode==='status'&&(status==='shield'||status==='shield0'),shAlive=isSh&&!(status==='shield0'&&u>=.35),shP=shAlive&&statusP?50:0,shM=shAlive&&!statusP?50:0;window.BSPD=sp<1?1:sp;FX.engine.setSpeed(sp);
  const bg=g.createLinearGradient(0,0,0,CH);bg.addColorStop(0,'#26324f');bg.addColorStop(.7,'#3b4a63');bg.addColorStop(1,'#1f2a1f');
  g.fillStyle=bg;g.fillRect(0,0,CW,CH);g.fillStyle='#2e3d2c';g.fillRect(0,GY-2,CW,CH-GY+2);
- const u=Math.min(1,t/BST);let dp=0,dmx=0,msg='';
+ let dp=0,dmx=0,msg='';
  if(mode==='buff'){
   try{
    const labels={atk:'Công',def:'Thủ',spd:'Tốc độ',mag:'Pháp thuật',eva:'Né tránh',crit:'Chí mạng',regen:'Hồi phục',hp:'HP'};
@@ -117,6 +117,7 @@ function loop(now){
  }
  if(mode==='gear'){try{FX.drawBack(g,T,.7,0,{startBuffs:[{kind:$('gear').value}],zoneBuff:null},0,0,100,100,0,0)}catch(e){msg='Lỗi buff bộ: '+e.message}}
  if(mode==='status'&&status==='bq'){try{FX.drawBack(g,T,t,zi,{startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100},0,0,statusP?42:100,statusP?100:42,zi,0)}catch(e){msg='Lỗi Bất khuất: '+e.message}}
+ if(isSh){try{FX.drawBack(g,T,t,zi,{startBuffs:[],zoneBuff:null},shP,shM,100,100,zi,0)}catch(e){msg='Lỗi khiên (nền): '+e.message}}
  try{
   if(mode==='attack'&&run&&u<.9){
    const z=FX.zones[zi],melee=z&&z.mode==='melee',lg=melee?lungeAt(u)*(kind==='miss'?.6:1):recoilAt(u);
@@ -134,6 +135,7 @@ function loop(now){
  ghosts.forEach(q=>{g.save();g.globalAlpha=q.a;if(q.defP)pet(g,85+q.off*.84,'#9fd8ff','#9fd8ff',T,false);else pet(g,272-q.off*.78,'#ffb0a0','#ffb0a0',T,true);g.restore()});
  pet(g,85+dp*.84,'#6cc4ff','#2a6fb0',T,false);pet(g,272+dmx*.78,'#ff8a7a','#a83a3a',T,true);
  try{if(mode==='status'&&status==='bq'){const R={startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100};FX.drawField(g,T,t,zi,R,0,0,statusP?42:100,statusP?100:42,zi,0)}}catch(e){msg='Lỗi lớp cuồng nộ: '+e.message}
+ if(isSh){try{FX.drawField(g,T,t,zi,{startBuffs:[],zoneBuff:null},shP,shM,100,100,zi,0)}catch(e){msg='Lỗi khiên (trên): '+e.message}}
  try{if(mode==='attack'&&run&&u<.9&&kind==='miss'&&FX.drawDodge)FX.drawDodge(g,u,pa,T)}catch(e){msg='Lỗi: '+e.message}
  try{
   if(mode==='attack'&&run&&u<.9){
@@ -142,9 +144,9 @@ function loop(now){
    FX.drawAttack(g,T,S);
   }
   if(mode==='status'&&run&&status!=='bq'&&u>=.35){
-  const cfg={crit:{k:'crit',text:'💥 Chí mạng!',d:34},miss:{k:'miss',text:'né được đòn!',d:0},burn:{k:'hit',text:'🔥 Thiêu đốt - 18',d:18},counter:{k:'hit',text:'↩ Phản đòn · chặn rồi trả đòn',d:18},shield:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},revive:{k:'heal',text:'✨ Hồi sinh +32 HP',d:0},lightning:{k:'hit',text:'⚡ Lôi Phạt giáng -18',d:18},lava:{k:'hit',text:'🌋 Dung Nham -18',d:18},heal:{k:'heal',text:'Hồi sức +18 HP',d:0},freeze:{k:'stun',text:'đóng băng',d:0},stun:{k:'stun',text:'bị choáng',d:0}}[status];
+  const cfg={crit:{k:'crit',text:'💥 Chí mạng!',d:34},miss:{k:'miss',text:'né được đòn!',d:0},burn:{k:'hit',text:'🔥 Thiêu đốt - 18',d:18},counter:{k:'hit',text:'↩ Phản đòn · chặn rồi trả đòn',d:18},shield0:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},shield:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},revive:{k:'heal',text:'✨ Hồi sinh +32 HP',d:0},lightning:{k:'hit',text:'⚡ Lôi Phạt giáng -18',d:18},lava:{k:'hit',text:'🌋 Dung Nham -18',d:18},heal:{k:'heal',text:'Hồi sức +18 HP',d:0},freeze:{k:'stun',text:'đóng băng',d:0},stun:{k:'stun',text:'bị choáng',d:0}}[status];
   const actor=statusP,q=Math.min(.9999,(u-.35)/.55);
-  if(cfg){if(status==='miss'&&FX.drawDodge)FX.drawDodge(g,u,actor,T);FX.drawImpact(g,{pp:actor,q:q,k:cfg.k,d:cfg.d,r:1,i:1,h:'Thủy',s:zi,cl:0,text:cfg.text},T);FX.engine.draw(g,'status')}
+  if(cfg){if(status==='miss'&&FX.drawDodge)FX.drawDodge(g,u,actor,T);FX.drawImpact(g,{pp:actor,q:q,k:cfg.k,d:cfg.d,r:1,i:1,h:'Thủy',s:zi,cl:0,text:cfg.text},T);if(!isSh)FX.engine.draw(g,'status')}
  }
  if(mode==='attack'&&run&&u>=1){if($('loop').checked)restart();else run=false}
  if(mode==='status'&&run&&u>=1)restart();

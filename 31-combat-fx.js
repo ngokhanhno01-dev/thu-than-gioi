@@ -711,6 +711,79 @@ function pixelShield(g,x,y,T,a,scale,hit){
  for(let i=0;i<3;i++){const yy=cy+(i-1)*8*u,flash=.55+.45*Math.sin(T*6+i*2);buffPixel(g,cx+dir*7*u,yy,shine,a*.8*flash,u,2,1)}g.restore();
 }
 function shieldOutline(g,x,y,T,a,scale){pixelShield(g,x,y,T,a,scale,0)}
+/* ===== FX 4A (làm lại): KHIÊN XANH pixel art theo ảnh mẫu — 5 chiếc xoay quanh thú, chặn đòn thì vỡ mảnh =====
+   Sprite được TỰ VẼ bằng code từ bảng màu (không tải ảnh), cất 1 lần vào canvas nhỏ rồi phóng to không làm mờ (nét pixel giữ nguyên).
+   Nếu môi trường không có canvas phụ thì tự chuyển sang vẽ từng dải ô màu (chậm hơn nhưng giống hệt). */
+function makeSprite(W,H,cellFn){
+ const grid=[],runs=[];
+ for(let r=0;r<H;r++){const row=[],rr=[];let run=null;
+  for(let c=0;c<W;c++){const col=cellFn(r,c)||null;row.push(col);
+   if(col){if(run&&run[2]===col)run[1]++;else{run=[c,1,col];rr.push(run)}}else run=null}
+  grid.push(row);runs.push(rr)}
+ const spr={w:W,h:H,grid,runs,cv:null};
+ try{if(typeof document!=='undefined'){const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c2=cv.getContext('2d');
+  if(c2){for(let r=0;r<H;r++)for(const run of runs[r]){c2.fillStyle=run[2];c2.fillRect(run[0],r,run[1],1)}spr.cv=cv}}}catch(_){spr.cv=null}
+ return spr;
+}
+function drawSprite(g,s,cx,cy,unit,a){
+ if(a<=.01||unit<=0)return;const x0=cx-s.w*unit/2,y0=cy-s.h*unit/2;
+ g.save();g.globalAlpha=FXE.cl(a,0,1);
+ if(s.cv){g.imageSmoothingEnabled=false;g.drawImage(s.cv,x0,y0,s.w*unit,s.h*unit)}
+ else for(let r=0;r<s.h;r++)for(const run of s.runs[r]){g.fillStyle=run[2];g.fillRect(x0+run[0]*unit,y0+r*unit,run[1]*unit+.4,unit+.4)}
+ g.restore();
+}
+/* bóc lớp từ ngoài vào trong: trả về độ sâu (1 = ngoài cùng) của từng ô thuộc hình khiên */
+function spriteDepth(W,H,inside){
+ const dep=[];for(let r=0;r<H;r++){dep.push(new Array(W).fill(0))}
+ const open=(r,c,d)=>r<0||r>=H||c<0||c>=W||!inside(r,c)||(dep[r][c]>0&&dep[r][c]<d);
+ for(let d=1;d<30;d++){const mark=[];
+  for(let r=0;r<H;r++)for(let c=0;c<W;c++){if(!inside(r,c)||dep[r][c])continue;
+   if(open(r-1,c,d)||open(r+1,c,d)||open(r,c-1,d)||open(r,c+1,d))mark.push([r,c])}
+  if(!mark.length)break;
+  mark.forEach(m=>{dep[m[0]][m[1]]=d})}
+ return dep;
+}
+let BLUE_SH=null;
+function blueShieldSprite(){
+ if(BLUE_SH)return BLUE_SH;
+ /* khiên 17×20 ô theo ảnh mẫu: viền bạc có đinh tán, dải xanh đậm có chữ rune sáng, mặt giữa nửa gỗ (trái) nửa xanh (phải), vòng phép xanh ngọc phát sáng ở giữa */
+ const W=17,H=20,cx=8,widths=[17,17,17,17,17,17,17,17,17,17,17,15,15,13,11,9,7,5,3,1];
+ const inside=(r,c)=>{if(r<0||r>=H||c<0||c>=W)return false;const w=widths[r],x0=cx-(w-1)/2;return c>=x0&&c<x0+w};
+ const dep=spriteDepth(W,H,inside),RC=8,CC=8;
+ BLUE_SH=makeSprite(W,H,(r,c)=>{
+  if(!inside(r,c))return null;const d=dep[r][c];
+  if(d===1)return'#0a1730';
+  if(d===2){if((r===1&&(c===1||c===15))||(r===9&&(c===1||c===15))||(r===1&&c===8))return'#ffffff';return(r<2||(c<cx-2&&r<12))?'#eef3fa':(c>cx+2||r>12)?'#8c9db6':'#c4d0e0'}
+  if(d===3)return((r+c)%2===0&&r>1&&r<15&&!(r<4&&c>3&&c<13))?'#3fe2ff':'#12397f';
+  if(d===4&&r>2)return'#0d2a62';
+  const dr=r-RC,dc=c-CC,ad=Math.abs(dr),ac=Math.abs(dc),oct=ad<=2&&ac<=2&&ad+ac<=3;
+  if(ad+ac<=1)return ad+ac===0?'#06204f':'#0b2d6a';
+  if(oct)return(ad+ac)%2===0?'#9ffaff':'#3fe6ff';
+  if(c<CC){return(c%2===0)?((r%5===2)?'#c58a49':'#b27b3d'):((r%7===3)?'#6f4521':'#8b5729')}
+  return(c%2===0)?((r%5===2)?'#4a8be6':'#3077d6'):((r%7===3)?'#16438c':'#2260b8');
+ });
+ return BLUE_SH;
+}
+const SHIELD_N=5;
+/* vị trí khiên thứ i trên quỹ đạo elip quanh thân (tâm y≈150); dep>0 = ở phía trước thú */
+function shOrbitPose(i,T,x,pop){
+ const side=x<180?0:1,an=T*(1.5+side*.12)+i*FXE.TAU/SHIELD_N+side*1.1,dep=Math.sin(an),rr=.25+.75*FXE.eOut(pop);
+ return{x:x+Math.cos(an)*38*rr,y:150+dep*13*rr+Math.sin(T*2.2+i*1.7)*1.6,dep,sc:.8+.32*(dep+1)/2,pop,i};
+}
+/* lớp khiên xoay: front=false vẽ các khiên phía SAU thú (gọi trong drawBack), front=true vẽ phía TRƯỚC (drawField). fa = độ mờ chung */
+function shieldOrbit(g,x,T,elapsed,hold,front,fa){
+ const spr=blueShieldSprite(),t0=Math.max(0,(hold||0)-.6),list=[];
+ for(let i=0;i<SHIELD_N;i++){const age=(elapsed||0)-t0-i*.13;if(age<0)continue;
+  const o=shOrbitPose(i,T,x,FXE.cl(age/.38,0,1));if((o.dep>=0)===front)list.push(o)}
+ list.sort((a,b)=>a.dep-b.dep);
+ g.save();try{for(const o of list){
+  const sc=o.sc*(.55+.45*FXE.eBack(o.pop)),unit=1.05*sc,al=(front?.97:.6)*Math.min(1,o.pop*3)*(fa==null?1:fa),pulse=.6+.4*Math.sin(T*5.5+o.i*1.9);
+  FXE.glow(g,o.x,o.y,16*sc,'#4fd6ff',.2*al*(front?1:.6));
+  drawSprite(g,spr,o.x,o.y,unit,al);
+  FXE.glow(g,o.x,o.y-2*unit,4.6*unit,'#7ff6ff',.42*pulse*al);
+  if(o.pop<1)buffSpark(g,o.x,o.y,2,'#dffbff',.9*(1-o.pop),2.4);
+ }}finally{g.restore()}
+}
 function bqAura(g,x,T,elapsed,side,front){
  const dir=side===0?1:-1,phase=T*2.7+side*1.3+(elapsed||0)*.14,pulse=.72+.28*Math.sin(phase),u=3.4;
  g.save();
@@ -774,10 +847,43 @@ function pixelLava(g,x,T,q,s,dir,scale){
  if(p>.14)statusBurst(s,'lava',x,floor-5,22,{speed:[25,120],ang:[-Math.PI*.98,-Math.PI*.02],size:[1.6,3.8],life:[.45,1.15],gy:150,drag:.43,shape:'shard',c:'#ff642b',c2:'#ffe17a',a:.96,add:true,tag:'status',vr:[-8,8],floor:207,bounce:.2});
  g.restore();
 }
+/* KHIÊN chặn đòn: 1 khiên ở phía kẻ đánh chớp sáng → nứt → vỡ thành mảnh pixel xanh văng có trọng lực + vòng sóng; các khiên còn lại mờ dần */
 function statusShield(g,fx,T,q,x,y,s){g.save();try{
- const fa=1-q;pixelShield(g,x,y,T,.96*fa,1.18,q);const dir=x<180?1:-1;
- if(q>.12){const impact=FXE.ph(q,.12,.34)*(1-FXE.ph(q,.56,.88));buffSpark(g,x+dir*24,y-2,5,'#dffbff',.9*impact,3.2);buffLine(g,[[x+dir*48,y-12],[x+dir*59,y-6],[x+dir*52,y+1]],'#d9fbff',impact,3,1)}
- statusBurst(s,'shield',x+(x<180?25:-25),190,20,{speed:[28,105],ang:[-Math.PI*.94,-Math.PI*.06],size:[1.5,3.4],life:[.38,.92],gy:185,drag:.45,shape:'shard',c:'#60d8ff',c2:'#efffff',a:.98,add:true,tag:'status',vr:[-6,6],floor:205,bounce:.2});return true;
+ const px=x<180?85:272,dir=x<180?1:-1,spr=blueShieldSprite(),QB=.22,ix=px+dir*34,iy=152,unit=1.5;
+ /* các khiên xoay còn lại tan dần (nếu game vẫn còn khiên thì chúng chồng khít lên khiên xoay thật nên không thấy khác) */
+ const rem=1-FXE.ph(q,.1,.8);
+ if(rem>0){shieldOrbit(g,px,T,99,0,false,.9*rem);shieldOrbit(g,px,T,99,0,true,.9*rem)}
+ /* vòng sóng: 1 vòng dưới đất lan ra, 1 vòng đứng quanh chỗ khiên vỡ */
+ const w1=FXE.ph(q,.04,.82),wa=(1-w1)*FXE.ph(q,.04,.12);
+ if(wa>0){buffArc(g,ix,205,8+w1*46,2.4+w1*13,0,FXE.TAU,'#143f86',.85*wa,3.2,T,1);buffArc(g,ix,205,6+w1*42,2+w1*11.5,.3,.3+FXE.TAU,'#7fe6ff',.95*wa,3.2,T,1)}
+ const w2=FXE.ph(q,QB,.74),wb=(1-w2)*FXE.ph(q,QB,QB+.05);
+ if(wb>0)buffArc(g,ix,iy,8+w2*30,8+w2*30,0,FXE.TAU,'#9fefff',.8*wb,3,T,1);
+ if(q<QB){
+  /* đỡ đòn: khiên phình nhẹ, chớp xanh sáng (chỉ trên thân khiên), rồi hiện vết nứt */
+  const pop=FXE.ph(q,0,.1),fl=1-FXE.ph(q,.04,.2),sc=unit*(1+.2*Math.sin(Math.PI*pop)),jx=-dir*Math.sin(q*140)*1.4*(1-FXE.ph(q,0,QB));
+  FXE.glow(g,ix,iy,30,'#4fd6ff',.5*Math.min(1,q*14));
+  drawSprite(g,spr,ix+jx,iy,sc,1);
+  if(fl>0){g.save();g.globalCompositeOperation='lighter';drawSprite(g,spr,ix+jx,iy,sc,.65*fl);g.restore()}
+  const ck=FXE.ph(q,.07,.17);
+  if(ck>0){const u=1.6,a=.95,hx=spr.w*sc/2,hy=spr.h*sc/2;
+   buffLine(g,[[ix,iy-hy*.5],[ix-hx*.2,iy-hy*.12],[ix+hx*.15,iy+hy*.15],[ix-hx*.1,iy+hy*.6]],'#fff4b0',a*ck,u,1);
+   buffLine(g,[[ix-hx*.2,iy-hy*.12],[ix-hx*.62,iy-hy*.02]],'#fff4b0',a*ck,u,1);
+   buffLine(g,[[ix+hx*.15,iy+hy*.15],[ix+hx*.6,iy+hy*.28]],'#fff4b0',a*ck,u,1)}
+ }else{
+  /* vỡ: mỗi cụm 2×2 ô văng riêng theo parabol (tính trực tiếp theo thời gian, không tốn hạt), nảy nhẹ khi chạm đất */
+  const r=FXE.rng(s.seed^0x5b1d),t=(q-QB)*1.05,fade=1-FXE.ph(q,.55,.95),ox=ix-spr.w*unit/2,oy=iy-spr.h*unit/2,g0=300;g.save();
+  for(let cy=0;cy<spr.h;cy+=3)for(let cx=0;cx<spr.w;cx+=3){
+   let col=null;for(let a=0;a<3;a++)for(let b=0;b<3;b++){const v=spr.grid[cy+a]&&spr.grid[cy+a][cx+b];if(v&&(!col||col==='#0a1730'))col=v}
+   const vx=r.range(-16,16)+(cx-8)*4+dir*r.range(-10,34),vy=-r.range(22,78)+(cy-9)*3;if(!col)continue;
+   const x0=ox+cx*unit,y0=oy+cy*unit;let yy=y0+vy*t+.5*g0*t*t;
+   const tb=(-vy+Math.sqrt(vy*vy+2*g0*Math.max(0,205-y0)))/g0;
+   if(t>tb){const tt=t-tb,v2=-(vy+g0*tb)*.32;yy=205+Math.min(0,v2*tt+.5*g0*tt*tt)}
+   const sz=unit*3*(1-.3*FXE.ph(t,.3,1));g.globalAlpha=FXE.cl(fade,0,1);g.fillStyle=col;g.fillRect(x0+vx*t,Math.min(yy,205),sz,sz)}
+  g.restore();
+  const hot=1-FXE.ph(q,QB,QB+.16);if(hot>0)FXE.glow(g,ix,iy,26+14*(1-hot),'#5fe0ff',.55*hot);
+  statusBurst(s,'shield',ix,iy,16,{speed:[30,125],ang:[-Math.PI*.96,-Math.PI*.04],size:[1.4,3.2],life:[.4,.95],gy:210,drag:.45,shape:'spark',c:'#4fd6ff',c2:'#efffff',a:.98,add:true,tag:'status',vr:[-6,6],floor:205,bounce:.2});
+ }
+ return true;
 }finally{g.restore()}}
 function statusHeal(g,fx,T,q,x,y,s,text){g.save();try{
  const rev=/hồi sinh/i.test(text),drain=/hút máu/i.test(text),fa=1-q,phase=T*.9,col=rev?'#35ed78':drain?'#ed5571':'#56e985',hi=rev?'#d5ffe0':drain?'#ffc0cb':'#e5ffed';
@@ -911,6 +1017,9 @@ function drawBack(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  /* Bất khuất: dưới 50% máu thì ngọn lửa đỏ bừng sau lưng (nằm sau thú, không đè) */
  if(R&&R.bqP>0&&hp>0&&hp<R.maxP*.5)bqAura(g,85,T,elapsed,0);
  if(R&&R.bqM>0&&mh>0&&mh<R.maxM*.5)bqAura(g,272,T,elapsed,1);
+ /* Khiên: các khiên nằm phía SAU thú (nhỏ, mờ hơn) */
+ if(shP>0)shieldOrbit(g,85,T,elapsed,hold,false);
+ if(shM>0)shieldOrbit(g,272,T,elapsed,hold,false);
 }
 function auraBack(g,x,col,T,a){glow(g,x,176,58,col,a*1.4*(.6+.4*Math.sin(T*3)))}
 /* ---- THÁM HIỂM: lớp TRÊN (sau khi vẽ thú): nhãn + khiên viền mảnh + bảng thông tin ---- */
@@ -919,8 +1028,9 @@ function drawField(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  if(R&&R.zoneBuff)bannerFx(g,272,z.color,'✦ '+R.zoneBuff.label,q,0);
  if(R&&R.startBuffs&&R.startBuffs.length)bannerFx(g,85,gearCol(R.startBuffs[0].kind),'✦ BỘ TRANG BỊ',q,0);
  infoPanels(g,z,zp,R);
- if(shP>0)shieldOutline(g,85,157,T,.88+.1*pulse,1.14);
- if(shM>0)shieldOutline(g,272,157,T,.88+.1*pulse,1.14);
+ /* Khiên: các khiên nằm phía TRƯỚC thú (to, rõ hơn) */
+ if(shP>0)shieldOrbit(g,85,T,elapsed,hold,true);
+ if(shM>0)shieldOrbit(g,272,T,elapsed,hold,true);
  if(R&&R.bqP>0&&hp>0&&hp<R.maxP*.5)bqAura(g,85,T,elapsed,0,true);
  if(R&&R.bqM>0&&mh>0&&mh<R.maxM*.5)bqAura(g,272,T,elapsed,1,true);
  FXE.draw(g,'status');
