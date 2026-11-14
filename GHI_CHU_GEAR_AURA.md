@@ -150,3 +150,6 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 - Cách dự phòng bằng Chrome/Chromium + playwright (nếu có `/usr/bin/google-chrome`): chạy `python3 -m http.server` ở gốc repo, trang test gọi
   `TTGCombatFX.drawBack(g,T,elapsed,0,{startBuffs:[{kind}],zoneBuff:null},0,0,100,100,0,0)` với elapsed=10 (nền) và .7 (vào trận),
   canvas 360x240 phóng x3, chụp bằng playwright (launch executable_path=/usr/bin/google-chrome, args --no-sandbox). Nhớ vẽ 1 hình bầu dục giả làm thú để thấy che chắn.
+
+## [CHỐT DỰ ÁN] Đã BỎ buff nền vùng (bước 3A/3B)
+Người dùng chốt: không vẽ buff nền vùng nữa. `backZone` trong 31-combat-fx.js return ngay (giữ hàm + chỗ gọi), bỏ luôn `auraBack` dư quang. Vẫn giữ: groundRing, nhãn chữ buff (bannerFx), buff bộ trang bị 3C. Chỉ còn bước 5 (kiểm tra cuối + PR).

@@ -523,6 +523,7 @@ function groundRing(g,x,col,a,T,r){
 }
 /* buff vùng, lớp nền: quầng + vòng chân + hiệu ứng vùng phía SAU thú + hạt bay lên */
 function backZone(g,x,z,q,T,e,shape,k,stat){
+ return;/* [FX chốt] BỎ buff nền vùng (3A/3B) theo yêu cầu người dùng: không vẽ gì; giữ hàm để không đổi chỗ gọi */
  if(q<=0)return;k=k||1;
  const zoneId=ZONES.indexOf(z);
  if(zoneId>=0&&zoneId<=8){backZoneCode(g,x,z,q,T,shape||'star',k,zoneId,stat||shape);return}
@@ -1245,7 +1246,7 @@ function drawLightningAttackCode(g,T,S){
 function drawBack(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  const z=zone(i),zp=zone(petSp==null?currentPetZone:petSp),h=Math.max(0,hold||0),e=Math.max(0,elapsed-Math.max(0,h-.6)),q=elapsed<Math.max(0,h-.6)?0:clamp(1-e/BUFFSEC,0,1),pulse=.55+.45*Math.sin(T*5);
  groundRing(g,85,zp.color,.2+.16*pulse,T);groundRing(g,272,z.color,.1+.1*pulse,T);
- if(R&&R.zoneBuff){backZone(g,272,z,q,T,e,BUFFSH[R.zoneBuff.stat],1,R.zoneBuff.stat);if(q<=0)auraBack(g,272,z.color,T,.2)}
+ if(R&&R.zoneBuff){backZone(g,272,z,q,T,e,BUFFSH[R.zoneBuff.stat],1,R.zoneBuff.stat)}
  if(R&&R.startBuffs&&R.startBuffs.length){backGear(g,85,R.startBuffs[0].kind,q,T,e)}
  /* Bất khuất: dưới 50% máu thì ngọn lửa đỏ bừng sau lưng (nằm sau thú, không đè) */
  burnReset(elapsed);
@@ -1284,7 +1285,6 @@ function drawArenaBack(g,T,t,spP,spM,bP,bM,burn){
   const b=a[2];if(!b||!b.text)return;
   const z=zone(a[1]);
   backZone(g,a[0],z,q,T,e,BUFFSH[b.stat],1,b.stat);
-  if(q<=0)auraBack(g,a[0],z.color,T,.22);
  });
 }
 function drawArenaBuffs(g,T,t,spP,spM,bP,bM,burn){
