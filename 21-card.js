@@ -28,7 +28,7 @@ function buildCard(){
       /* chấp nhận l là [id,giá trị] (bản game) hoặc {k,v} */
       const k=Array.isArray(l)?l[0]:(l&&l.k),v=Array.isArray(l)?l[1]:(l&&l.v);
       return{k:String(k==null?'':k).slice(0,12),v:R(v)}}).filter(o=>o.k);
-    return{z:I(it.z,0,99,0),s:I(it.s,0,99,0),q:I(it.q,0,4,0),L}});
+    return{z:I(it.z,0,99,0),s:I(it.s,0,99,0),q:I(it.q,0,4,0),e:I(it.e,0,10,0),L}});
   return{
     nick:String(nick||'').slice(0,20),
     lv:I(level,1,100,1),st:I(stageOf(level),0,9,0),

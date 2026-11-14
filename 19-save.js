@@ -223,7 +223,7 @@ function snap(){
   };
   return{v:VER,t:Date.now(),tab:TAB,g}}
 const validPet=p=>p&&BL[p.bl]&&Number.isInteger(p.sp)&&p.sp>=0&&p.sp<17&&p.pi>=0&&p.pi<5&&p.q>=0&&p.q<5&&p.base&&['hp','atk','def','spd','mag'].every(k=>isFinite(p.base[k]));
-const validEq=it=>(it&&Number.isInteger(it.z)&&it.z>=0&&it.z<VAN_KIEP_ZONES.length&&Number.isInteger(it.s)&&it.s>=0&&it.s<4&&Number.isInteger(it.q)&&it.q>=0&&it.q<5&&Array.isArray(it.L)&&isFinite(it.uid))?eqMigrate(it):null;
+const validEq=it=>(it&&Number.isInteger(it.z)&&it.z>=0&&it.z<VAN_KIEP_ZONES.length&&Number.isInteger(it.s)&&it.s>=0&&it.s<4&&Number.isInteger(it.q)&&it.q>=0&&it.q<5&&Array.isArray(it.L)&&isFinite(it.uid))?eqEnh(eqMigrate(it)):null;   /* [CƯỜNG HÓA] eqEnh: món cũ chưa có e → +0, ép về 0..ENH_MAX */
 
 function parseSave(raw){
   if(!raw)return null;
