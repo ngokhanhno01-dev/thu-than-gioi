@@ -1,7 +1,9 @@
-/* ===== 48-enh-ui.js — [CUONG HOA 5] Tab ⚡ Cường hóa trong mục 🛡️ Trang bị =====
+/* ===== 48-enh-ui.js — [CUONG HOA 5, làm lại] Tab ⚡ Cường hóa trong mục 🛡️ Trang bị =====
    Nạp SAU 12-equip.js, 45-enh-border.js, 46-enh-items.js (cần thêm cnt/removeItem/upToast của 09-blood.js).
    Không sửa file cũ: bọc renderEquip() để thêm tab thứ 3 (eqTab='enh'); chỉ số tự tính lại từ it.e (xem eqVal ở 12-equip.js).
-   Kiểu giao diện/thông báo bắt chước 09-blood.js (upToast + log). Mọi con số sửa ở khối cấu hình ngay bên dưới. */
+   Giao diện làm GIỐNG tab Rèn: nút chọn ở trên, vòng tròn nguyên liệu hình tam giác (đá / ngũ sắc / vé) quanh món ở giữa,
+   cột phải chọn ô trang bị, rồi các khung 📦 Nguyên liệu · tỉ lệ · chỉ số · nút bấm · thông báo. Dùng lại class CSS của Rèn.
+   Mọi con số sửa ở khối cấu hình ngay bên dưới. */
 
 /* ---------- Cấu hình ---------- */
 const ENH_RATE=[95,90,85,75,65,55,45,35,25,15];   /* tỉ lệ thành công (%) theo cấp hiện tại 0→9 */
@@ -22,16 +24,23 @@ function enhResolve(e,roll,ticket,rate){
  return{ok:false,e2:e,saved:false}}
 
 /* ---------- Trạng thái giao diện ---------- */
-let enhUid=0,enhTier=0,enhRb=0,enhTicket=false,enhMsg='',enhBusy=false;
+let enhUid=0,enhTier=0,enhRb=0,enhTicket=false,enhMsg='',enhBusy=false,enhBagOpen=false,enhInfoOpen=false;
 const enhFind=uid=>{for(const it of eqWorn)if(it&&it.uid===uid)return it;return ebag.find(x=>x.uid===uid)||null};
 const enhStoneChoice=it=>{const t=enhTierOf(it.z);return t.indexOf(enhTier)>=0?enhTier:t[0]};   /* mặc định đá đúng bậc vùng; bậc 6 nếu người chơi chọn */
-function enhPick(uid){enhUid=uid;enhTier=0;enhMsg='';renderEquip()}
+function enhPick(uid){enhUid=uid;enhTier=0;enhRb=0;enhMsg='';enhBagOpen=false;renderEquip()}
 function enhSetTier(t){enhTier=t;enhMsg='';renderEquip()}
+function enhCycleTier(){const it=enhFind(enhUid);if(!it)return;const t=enhTierOf(it.z);if(t.length<2)return;enhTier=enhStoneChoice(it)===t[0]?t[1]:t[0];enhMsg='';renderEquip()}
 function enhRbAdd(d){
  const it=enhFind(enhUid);if(!it)return;
  const lim=Math.min(cnt('da_ngu_sac'),enhRbMax(it.e||0));
  enhRb=Math.max(0,Math.min(lim,enhRb+d));enhMsg='';renderEquip()}
-function enhToggleTicket(){enhTicket=!enhTicket;renderEquip()}
+function enhRbCycle(){      /* chạm ô Đá Ngũ Sắc ở vòng tròn: +1 viên; đang ở mức tối đa thì về 0 */
+ const it=enhFind(enhUid);if(!it)return;
+ const lim=Math.min(cnt('da_ngu_sac'),enhRbMax(it.e||0));
+ enhRb=enhRb>=lim?0:enhRb+1;enhMsg='';renderEquip()}
+function enhToggleTicket(){if(!enhTicket&&!cnt('ve_bao_ho'))return;enhTicket=!enhTicket;renderEquip()}
+function enhToggleBag(){enhBagOpen=!enhBagOpen;renderEquip()}
+function enhToggleInfo(){enhInfoOpen=!enhInfoOpen;renderEquip()}
 
 function enhDo(){
  if(!hatched||!pet||enhBusy)return;
@@ -78,55 +87,118 @@ function enhDo(){
  }finally{enhBusy=false}
  renderEquip()}
 
+/* ---------- CSS riêng cho vòng tròn cường hóa (còn lại dùng lại class của Rèn: upgrid/upcircle/upslot/eqzone/eqslotbtn/upnote/upmsg) ---------- */
+{if(!document.getElementById('enh-ui-css')){const s=document.createElement('style');s.id='enh-ui-css';
+ s.textContent=
+  '.enhc{position:absolute;left:50%;top:56%;width:32%;aspect-ratio:1;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;background:#183036;border:2px solid #4d533b}'+
+  '.enhc>span{display:flex;align-items:center;justify-content:center;width:100%}.enhc .pxi{width:68%;height:auto;aspect-ratio:1}'+
+  '.enhc>b{position:absolute;right:2px;bottom:0;font-size:11px;color:var(--gold);z-index:4}'+
+  '.upslot.enht{cursor:pointer}.upslot.enht.off{opacity:.45}'+
+  '.enhtier{display:flex;gap:6px;margin-top:4px}.enhtier button{flex:1}'+
+  '.enhzn{margin-top:4px;line-height:1.4;font-size:12.5px}';
+ document.head.appendChild(s)}}
+
 /* ---------- Giao diện ---------- */
-const enhTabs=on=>'<div class="eqtabs"><button class="mini" onclick="eqSetTab(\'wear\')">🛡️ Trang bị</button><button class="mini" onclick="eqSetTab(\'forge\')">'+EQ_REN_ICO+' Rèn</button><button class="mini'+(on?' jade':'')+'" data-enh="1" onclick="eqSetTab(\'enh\')">'+ENH_TAB_ICO+' Cường hóa</button></div>';
+const enhTabs=on=>'<div class="eqtabs" style="grid-template-columns:repeat(3,1fr)"><button class="mini" onclick="eqSetTab(\'wear\')">🛡️ Trang bị</button><button class="mini" onclick="eqSetTab(\'forge\')">'+EQ_REN_ICO+' Rèn</button><button class="mini'+(on?' jade':'')+'" data-enh="1" onclick="eqSetTab(\'enh\')">'+ENH_TAB_ICO+' Cường hóa</button></div>';
 const enhSlotBtn=(it,sel)=>'<button class="slot'+(sel?' sel':'')+'" data-uid="'+it.uid+'" style="position:relative;border-color:'+(sel?'var(--gold)':eqRgb(it))+'" onclick="enhPick('+it.uid+')" title="'+eqName(it)+'"><span>'+eqIco(it.s,it.z)+'</span><b>+'+(it.e||0)+'</b></button>';
-function enhPanelHtml(it){
- if(!it)return'<small>Chạm một món đang mặc hoặc trong kho ở trên để cường hóa.</small>';
- const e=it.e||0,col=eqRgb(it),FX=window.ENHFX;
- let h='<div style="display:flex;gap:6px;align-items:flex-start"><span class="eqpv'+(FX&&e?' '+FX.cls(it):'')+'" style="border-color:'+col+'">'+(FX&&e?FX.inner(it):'')+eqIco(it.s,it.z)+'</span><div style="min-width:0;flex:1"><b style="color:'+col+'">['+QN[it.q]+'] '+eqName(it)+'</b><br><small>Cường hóa hiện tại <b>+'+e+'</b> / +'+ENH_MAX+'</small></div></div>';
- if(e>=ENH_MAX)return h+'<div style="margin-top:6px;text-align:center"><b style="color:var(--gold)">Đã đạt cấp tối đa +'+ENH_MAX+'</b></div>';
- const need=enhNeed(e),tiers=enhTierOf(it.z),tier=enhStoneChoice(it),sid=enhStoneId(tier),have=cnt(sid),
+const enhZoneTag=z=>'<b style="color:'+ZONE_COL[z]+'">'+VAN_KIEP_ZONES[z].name+'</b>';
+
+/* Gom mọi số liệu của món đang chọn (null nếu chưa chọn; {maxed:true} nếu đã +10) */
+function enhCtx(it){
+ if(!it)return null;
+ const e=it.e||0;if(e>=ENH_MAX)return{e,maxed:true};
+ const need=enhNeed(e),tiers=enhTierOf(it.z),tier=enhStoneChoice(it),sid=enhStoneId(tier),
   rbHave=cnt('da_ngu_sac'),rbLim=Math.min(rbHave,enhRbMax(e)),rb=Math.min(enhRb,rbLim),
-  tkHave=cnt('ve_bao_ho'),tk=enhTicket&&tkHave>0,base=ENH_RATE[e],tot=enhRateAt(e,rb);
- h+='<div style="margin-top:6px"><b>Nâng +'+e+' → +'+(e+1)+'</b></div>';
- /* chọn đá */
- if(tiers.length>1)h+='<div style="margin-top:4px"><small>Chọn loại đá:</small><div style="display:flex;gap:6px;margin-top:2px">'+tiers.map(t=>{const id=enhStoneId(t);
-  return'<button class="mini'+(t===tier?' jade':'')+'" style="flex:1" onclick="enhSetTier('+t+')">'+ITEMS[id].i+' Bậc '+t+' (có '+cnt(id)+')</button>'}).join('')+'</div>'+
-  '<small style="color:var(--mute)">'+(tiers[0]===ENH_TIER_MAX?'':'Đá bậc '+ENH_TIER_MAX+' thay được cho mọi vùng.')+'</small></div>';
- else h+='<div style="margin-top:2px"><small style="color:var(--mute)">Món vùng này chỉ dùng được Đá Cường Hóa bậc '+ENH_TIER_MAX+'.</small></div>';
- h+='<div style="margin-top:4px">📦 Cần: <span style="color:'+(ITEMS[sid].col||'inherit')+'">'+ITEMS[sid].i+' '+ITEMS[sid].n+'</span> ×<b style="color:'+(have>=need.stone?'var(--jade)':'#ff7654')+'">'+have+'/'+need.stone+'</b> · 🪙 <b style="color:'+(gold>=need.xu?'var(--gold)':'#ff7654')+'">'+need.xu+' xu</b> (bạn có '+gold+')</div>';
- /* đá ngũ sắc */
- h+='<div style="margin-top:5px;display:flex;align-items:center;gap:6px"><span style="flex:1">'+ITEMS.da_ngu_sac.i+' Đá Ngũ Sắc <small>(+'+ENH_RB_PCT+'%/viên · có '+rbHave+(rbLim<rbHave?' · tối đa '+rbLim+' để đạt 100%':'')+')</small></span>'+
-  '<button class="mini" onclick="enhRbAdd(-1)"'+(rb<=0?' disabled':'')+'>−</button><b style="min-width:22px;text-align:center">'+rb+'</b><button class="mini" onclick="enhRbAdd(1)"'+(rb>=rbLim?' disabled':'')+'>+</button></div>';
- /* vé bảo hộ */
- h+='<label style="display:flex;align-items:center;gap:6px;margin-top:5px;'+(tkHave?'':'opacity:.55')+'"><input type="checkbox" onchange="enhToggleTicket()"'+(tk?' checked':'')+(tkHave?'':' disabled')+'> '+ITEMS.ve_bao_ho.i+' Dùng Vé Bảo Hộ <small>(có '+tkHave+')</small></label>';
- /* tỉ lệ */
- h+='<div style="margin-top:5px">✅ Tỉ lệ thành công: gốc <b>'+base+'%</b>'+(rb>0?' + ngũ sắc <b>'+(tot-base)+'%</b>':'')+' = <b style="color:var(--jade)">'+tot+'%</b></div>';
- /* chỉ số trước / sau */
- const a=eqLines(it),b=eqLines(Object.assign({},it,{e:e+1}));
- h+='<div class="eqstat" style="margin-top:4px">'+a.map((l,i)=>{const d=EQ_STATS[l[0]],p=d.t==='p'?'%':'';
-  return'<div><span>'+d.n+'</span><b>+'+l[1]+p+' → <span class="ok">+'+b[i][1]+p+'</span></b></div>'}).join('')+'</div><small style="color:var(--mute)">Chỉ số sau khi thành công. Buff bộ không đổi.</small>';
- /* cảnh báo thất bại */
- if(e>=ENH_DROP_FROM)h+='<div style="margin-top:4px">'+(tk?'🎫 <span class="ok">Có Vé Bảo Hộ: thất bại vẫn giữ <b>+'+e+'</b> (mất 1 vé).</span>':'<span class="bad">⚠️ Thất bại sẽ tụt xuống <b>+'+(e-1)+'</b>.</span>')+'</div>';
- else h+='<div style="margin-top:4px"><small>Thất bại: mất đá và xu, giữ nguyên +'+e+' (dưới +'+ENH_DROP_FROM+' không tụt cấp, vé không bị trừ).</small></div>';
+  tkHave=cnt('ve_bao_ho'),tk=enhTicket&&tkHave>0;
+ return{e,need,tiers,tier,sid,have:cnt(sid),rbHave,rbLim,rb,tkHave,tk,base:ENH_RATE[e],tot:enhRateAt(e,rb)}}
+
+/* Vòng tròn giống Rèn: món ở giữa (có viền hiệu ứng theo +cấp), 3 ô tam giác: Đá Cường Hóa (trên), Đá Ngũ Sắc (trái dưới), Vé Bảo Hộ (phải dưới) */
+function enhCircle(it,X){
+ const FX=window.ENHFX,e=it?(it.e||0):0,live=!!(X&&!X.maxed);
+ const slot=(x,y,cls,ico,txt,fn,title)=>'<button type="button" class="upslot enht'+cls+'" style="left:'+x+'%;top:'+y+'%" '+(fn?'onclick="'+fn+'" ':'')+'title="'+title+'"><span>'+ico+'</span><b>'+txt+'</b></button>';
+ let h='<div class="upcircle"><svg viewBox="0 0 100 100"><circle cx="50" cy="56" r="38" class="r1"/><circle cx="50" cy="56" r="31" class="r2"/><polygon points="50,18 17,75 83,75" class="tri"/></svg>';
+ if(live){
+  h+=slot(50,18,X.have>=X.need.stone?' full':'',ITEMS[X.sid].i,X.have+'/'+X.need.stone,X.tiers.length>1?'enhCycleTier()':'',ITEMS[X.sid].n+(X.tiers.length>1?' (chạm để đổi bậc đá)':''));
+  h+=slot(17,75,X.rb>0?' full':(X.rbHave?'':' off'),ITEMS.da_ngu_sac.i,X.rb+'/'+X.rbHave,'enhRbCycle()','Đá Ngũ Sắc (chạm để thêm 1 viên)');
+  h+=slot(83,75,X.tk?' full':(X.tkHave?'':' off'),ITEMS.ve_bao_ho.i,X.tk?'✓ '+X.tkHave:'có '+X.tkHave,'enhToggleTicket()','Vé Bảo Hộ (chạm để bật/tắt)')
+ }else{
+  h+=slot(50,18,' off',ITEMS.da_ch1.i,'—','','Đá Cường Hóa');
+  h+=slot(17,75,' off',ITEMS.da_ngu_sac.i,'—','','Đá Ngũ Sắc');
+  h+=slot(83,75,' off',ITEMS.ve_bao_ho.i,'—','','Vé Bảo Hộ')}
+ h+='<div class="enhc'+(FX&&e?' '+FX.cls(it):'')+'" style="border-color:'+(it?eqRgb(it):'#4d533b')+'">'+(FX&&e?FX.inner(it):'')+
+  '<span style="opacity:'+(it?1:.4)+'">'+(it?eqIco(it.s,it.z):eqIco(0,null))+'</span>'+(it?'<b>+'+e+'</b>':'')+'</div></div>';
  return h}
+
+/* Cột phải: 4 nút ô đang mặc + thông tin món đang chọn */
+function enhSide(it,X){
+ const btns=[0,1,2,3].map(s=>{const w=eqWorn[s];
+  if(!w)return'<button type="button" class="mini" disabled style="opacity:.3" title="'+EQ_SLOTS[s].n+' (trống)">'+eqIco(s,null)+'</button>';
+  const sel=w.uid===enhUid;
+  return'<button type="button" class="mini'+(sel?' jade':'')+'" data-uid="'+w.uid+'" style="position:relative;border-color:'+(sel?'var(--gold)':eqRgb(w))+'" onclick="enhPick('+w.uid+')" title="'+eqName(w)+' +'+(w.e||0)+'">'+eqIco(s,w.z)+'<small style="display:block;line-height:1;color:var(--gold)">+'+(w.e||0)+'</small></button>'}).join('');
+ let info;
+ if(!it)info='<small>Chạm một món đang mặc (hoặc nút 🎒 Chọn món từ kho ở trên).</small>';
+ else{
+  const e=it.e||0;
+  info='<b style="color:'+eqRgb(it)+'">['+QN[it.q]+'] '+eqName(it)+'</b><br><small>Vùng '+enhZoneTag(it.z)+'<br>'+
+   (X&&X.maxed?'<b style="color:var(--gold)">+'+e+' (tối đa)</b>':'Cường hóa <b>+'+e+' → +'+(e+1)+'</b>')+'</small>'}
+ return'<div class="infobox" style="margin-bottom:4px"><small>Chọn ô trang bị đang mặc:</small></div><div class="eqslotbtn">'+btns+'</div>'+
+  '<div class="infobox upinfo">'+info+'</div>'}
+
+/* Khung 📦 Nguyên liệu cần: đá (đúng bậc / bậc 6), xu, và TÊN VÙNG đúng màu mà bậc đá đó cường hóa được */
+function enhNeedBox(it,X){
+ if(!it)return'<small>Chạm chọn một món trang bị để bắt đầu cường hóa.</small>';
+ if(X.maxed)return'<div style="text-align:center"><b style="color:var(--gold)">Đã đạt cấp tối đa +'+ENH_MAX+'</b></div>';
+ const I=ITEMS[X.sid],n=X.need;
+ let h='📦 <b>Nguyên liệu cần:</b>'+
+  '<div><span style="color:'+I.col+'">'+I.i+' '+I.n+'</span> ×<b style="color:'+(X.have>=n.stone?'var(--jade)':'#ff7654')+'">'+X.have+'/'+n.stone+'</b></div>'+
+  '<div>🪙 Xu ×<b style="color:'+(gold>=n.xu?'var(--gold)':'#ff7654')+'">'+gold+'/'+n.xu+'</b></div>';
+ if(X.tiers.length>1)h+='<div class="enhtier">'+X.tiers.map(t=>{const id=enhStoneId(t);
+  return'<button type="button" class="mini'+(t===X.tier?' jade':'')+'" onclick="enhSetTier('+t+')">'+ITEMS[id].i+' Bậc '+t+' (có '+cnt(id)+')</button>'}).join('')+'</div>';
+ h+='<div class="enhzn">Đá <b style="color:'+ENH_TIER_COL[X.tier-1]+'">bậc '+X.tier+'</b> cường hóa được '+(X.tier===ENH_TIER_MAX?'<b>mọi vùng</b>':'vùng')+':<br>'+enhTierZones(X.tier)+'</div>';
+ h+='<small style="color:var(--mute)">'+(X.tiers.length>1?'Món này dùng đá bậc '+X.tiers[0]+'; đá bậc '+ENH_TIER_MAX+' thay được cho mọi vùng.':'Món vùng '+enhZoneTag(it.z)+' chỉ dùng được Đá Cường Hóa bậc '+ENH_TIER_MAX+'.')+'</small>';
+ return h}
+
+/* Khung đá ngũ sắc (+/−) và vé bảo hộ */
+function enhOptBox(it,X){
+ if(!it||X.maxed)return'';
+ return'<div class="infobox upnote" style="margin-top:5px"><div style="display:flex;align-items:center;gap:6px"><span style="flex:1">'+ITEMS.da_ngu_sac.i+' Đá Ngũ Sắc <small>(+'+ENH_RB_PCT+'%/viên · có '+X.rbHave+(X.rbLim<X.rbHave?' · tối đa '+X.rbLim+' để đạt 100%':'')+')</small></span>'+
+  '<button type="button" class="mini" style="width:34px" onclick="enhRbAdd(-1)"'+(X.rb<=0?' disabled':'')+'>−</button><b style="min-width:22px;text-align:center">'+X.rb+'</b><button type="button" class="mini" style="width:34px" onclick="enhRbAdd(1)"'+(X.rb>=X.rbLim?' disabled':'')+'>+</button></div>'+
+  '<label style="display:flex;align-items:center;gap:6px;margin-top:5px;'+(X.tkHave?'':'opacity:.55')+'"><input type="checkbox" onchange="enhToggleTicket()"'+(X.tk?' checked':'')+(X.tkHave?'':' disabled')+'> '+ITEMS.ve_bao_ho.i+' Dùng Vé Bảo Hộ <small>(có '+X.tkHave+')</small></label></div>'}
+
+/* Khung tỉ lệ + chỉ số trước/sau + cảnh báo thất bại */
+function enhRateBox(it,X){
+ if(!it||X.maxed)return'';
+ const e=X.e,a=eqLines(it),b=eqLines(Object.assign({},it,{e:e+1}));
+ let h='<div class="infobox upnote" style="margin-top:5px">✅ Tỉ lệ thành công: gốc <b>'+X.base+'%</b>'+(X.rb>0?' + ngũ sắc <b>'+(X.tot-X.base)+'%</b>':'')+' = <b style="color:var(--jade)">'+X.tot+'%</b>'+
+  '<div class="eqstat" style="margin-top:4px">'+a.map((l,i)=>{const d=EQ_STATS[l[0]],p=d.t==='p'?'%':'';
+   return'<div><span>'+d.n+'</span><b>+'+l[1]+p+' → <span class="ok">+'+b[i][1]+p+'</span></b></div>'}).join('')+'</div>'+
+  '<small style="color:var(--mute)">Chỉ số sau khi thành công. Buff bộ không đổi.</small>';
+ if(e>=ENH_DROP_FROM)h+='<div style="margin-top:4px">'+(X.tk?'🎫 <span class="ok">Có Vé Bảo Hộ: thất bại vẫn giữ <b>+'+e+'</b> (mất 1 vé).</span>':'<span class="bad">⚠️ Thất bại sẽ tụt xuống <b>+'+(e-1)+'</b>.</span>')+'</div>';
+ else h+='<div style="margin-top:4px"><small>Thất bại: mất đá và xu, giữ nguyên +'+e+' (dưới +'+ENH_DROP_FROM+' không tụt cấp, vé không bị trừ).</small></div>';
+ return h+'</div>'}
+
+/* Bảng 6 bậc đá ↔ vùng (mỗi tên vùng đúng màu), thu gọn/mở rộng như khung thông tin của Rèn */
+function enhInfoBox(){
+ let h='<div class="infobox upnote" style="margin-top:5px"><button class="eqinfo-h" onclick="enhToggleInfo()">'+ENH_TAB_ICO+' <b>Đá Cường Hóa theo vùng</b><span>'+(enhInfoOpen?'▴ Thu gọn':'▾ Xem thêm')+'</span></button>';
+ if(!enhInfoOpen)h+='<small>6 bậc đá. Bậc 1–5 mỗi bậc cho một nhóm vùng, bậc '+ENH_TIER_MAX+' dùng cho mọi vùng kể cả Thần Điện.</small>';
+ else for(let t=1;t<=ENH_TIER_MAX;t++)h+='<div class="enhzn">'+ITEMS[enhStoneId(t)].i+' <b style="color:'+ENH_TIER_COL[t-1]+'">Đá bậc '+t+'</b>: '+enhTierZones(t)+'</div>';
+ return h+'</div>'}
+
 function enhHtml(){
- const it=enhFind(enhUid);
- let worn='<div style="display:flex;gap:6px;justify-content:center;margin:2px 0 4px">';
- for(let s=0;s<4;s++){const w=eqWorn[s];
-  worn+=w?enhSlotBtn(w,w.uid===enhUid).replace('style="','style="flex:none;width:46px;height:46px;')
-   :'<button class="slot" disabled style="flex:none;width:46px;height:46px;opacity:.3"><span>'+eqIco(s,null)+'</span></button>'}
- worn+='</div>';
- let bagH='<div class="eqbag" id="eq-bag">';
- for(let i=0;i<EQ_BAG;i++){const b=ebag[i];bagH+=b?enhSlotBtn(b,b.uid===enhUid):'<button class="slot" disabled style="opacity:.3"></button>'}
- bagH+='</div>';
- const maxed=it&&(it.e||0)>=ENH_MAX;
- return'<div class="infobox" style="text-align:center;margin-bottom:4px">'+ENH_TAB_ICO+' Cường hóa trang bị · tối đa <b style="color:var(--gold)">+'+ENH_MAX+'</b> · mỗi cấp <b>+'+Math.round(ENH_GAIN*100)+'%</b> mọi chỉ số</div>'+
-  '<div class="infobox upnote" style="text-align:center"><small>Đang mặc:</small>'+worn+'<div class="eqhead"><span>Kho <b>'+ebag.length+'/'+EQ_BAG+'</b></span></div>'+bagH+'</div>'+
-  '<div class="infobox upnote" style="margin-top:5px">'+enhPanelHtml(it)+'</div>'+
+ const it=enhFind(enhUid),X=enhCtx(it),open=enhBagOpen||!it;
+ const pickBtn='<button class="eqzone" onclick="enhToggleBag()">🎒 Chọn món từ kho · '+(it?'<span style="color:'+eqRgb(it)+'">'+eqName(it)+' +'+(it.e||0)+'</span>':'chưa chọn')+' · '+ebag.length+'/'+EQ_BAG+(open?' ▴':' ▾')+'</button>';
+ let bagH='';
+ if(open){bagH='<div class="eqbag" id="eq-bag" style="margin:6px 0 4px">';
+  for(let i=0;i<EQ_BAG;i++){const b=ebag[i];bagH+=b?enhSlotBtn(b,b.uid===enhUid):'<button class="slot" disabled style="opacity:.3"></button>'}
+  bagH+='</div>'}
+ const maxed=X&&X.maxed;
+ return'<div class="infobox" style="text-align:center;margin-bottom:4px">'+ENH_TAB_ICO+' Cường hóa · tối đa <b style="color:var(--gold)">+'+ENH_MAX+'</b> · mỗi cấp <b>+'+Math.round(ENH_GAIN*100)+'%</b> mọi chỉ số</div>'+
+  '<div class="infobox" style="text-align:center;margin-bottom:4px">'+pickBtn+'</div>'+bagH+
+  '<div class="upgrid"><div>'+enhCircle(it,X)+'</div><div>'+enhSide(it,X)+'</div></div>'+
+  '<div class="infobox upnote" style="margin-top:5px">'+enhNeedBox(it,X)+'</div>'+
+  enhOptBox(it,X)+enhRateBox(it,X)+
   (it&&!maxed?'<button class="jade" style="margin-top:5px" onclick="enhDo()">'+ENH_TAB_ICO+' Cường hóa</button>':'')+
-  '<div class="infobox upmsg">'+enhMsg+'</div>'}
+  '<div class="infobox upmsg">'+enhMsg+'</div>'+enhInfoBox()}
 
 /* ---------- Gắn tab thứ 3 vào renderEquip ---------- */
 {const _re=renderEquip;
@@ -139,11 +211,11 @@ function enhHtml(){
    if(!cnt('ve_bao_ho'))enhTicket=false;
    el.innerHTML=enhTabs(true)+enhHtml();
    const FX=window.ENHFX;
-   if(FX){el.querySelectorAll('.slot[data-uid]').forEach(b=>FX.decorate(b,enhFind(+b.dataset.uid)))}   /* viền hiệu ứng theo +cấp (45-enh-border.js) */
+   if(FX){el.querySelectorAll('[data-uid]').forEach(b=>FX.decorate(b,enhFind(+b.dataset.uid)))}   /* viền hiệu ứng theo +cấp (45-enh-border.js) cho ô đang mặc + ô kho */
    const nb=document.getElementById('eq-bag');if(nb)nb.scrollTop=sc;
    return}
   const r=_re.apply(this,arguments);
   const tb=document.querySelector('#eq-wrap .eqtabs');
-  if(tb&&!tb.querySelector('[data-enh]'))tb.insertAdjacentHTML('beforeend','<button class="mini" data-enh="1" onclick="eqSetTab(\'enh\')">'+ENH_TAB_ICO+' Cường hóa</button>');
+  if(tb&&!tb.querySelector('[data-enh]')){tb.style.gridTemplateColumns='repeat(3,1fr)';tb.insertAdjacentHTML('beforeend','<button class="mini" data-enh="1" onclick="eqSetTab(\'enh\')">'+ENH_TAB_ICO+' Cường hóa</button>')}
   return r}}
 try{renderEquip()}catch(e){console.warn('[enh-ui]',e)}

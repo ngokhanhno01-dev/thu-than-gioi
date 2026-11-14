@@ -24,12 +24,20 @@ function enhNeedTier(z){return enhTierOf(z)[0]}
 const enhStoneId=t=>'da_ch'+t;
 const enhIsItem=id=>/^da_ch[1-6]$/.test(id)||id==='ve_bao_ho'||id==='da_ngu_sac';
 
+/* Danh sách vùng mà đá bậc t cường hóa được, MỖI TÊN VÙNG ĐÚNG MÀU VÙNG (ZONE_COL). Bậc 6 = cả 17 vùng. Trả chuỗi HTML. */
+function enhTierZones(t){
+ const all=t>=ENH_TIER_MAX,a=all?1:ENH_TIERS[t-1][0],b=all?VAN_KIEP_ZONES.length:ENH_TIERS[t-1][1],out=[];
+ for(let v=a;v<=b;v++)out.push('<b style="color:'+ZONE_COL[v-1]+'">'+v+'. '+VAN_KIEP_ZONES[v-1].name+'</b>');
+ return out.join(' · ')}
+
 /* ---------- Vật phẩm ---------- */
 for(let t=1;t<=ENH_TIER_MAX;t++){
  const id=enhStoneId(t),col=ENH_TIER_COL[t-1];
  ITEMS[id]={n:'Đá Cường Hóa bậc '+t,i:enhStoneIcon(t),e:'🔶',col,
-  d:t===ENH_TIER_MAX?'Cường hóa mọi vùng, kể cả Thần Điện. (mục 🛡️ Trang bị → Cường hóa)'
-   :'Dùng cường hóa trang bị vùng '+ENH_TIERS[t-1][0]+'–'+ENH_TIERS[t-1][1]+' (mục 🛡️ Trang bị → Cường hóa). Đá bậc 6 cũng thay được.',use:null};
+  d:(t===ENH_TIER_MAX
+   ?'Cường hóa trang bị của <b>MỌI vùng</b>, kể cả Thần Điện:<br>'
+   :'Cường hóa trang bị thuộc các vùng:<br>')+enhTierZones(t)+
+   '<br>Dùng ở mục 🛡️ Trang bị → ⚡ Cường hóa.'+(t===ENH_TIER_MAX?'':' Đá bậc '+ENH_TIER_MAX+' cũng thay được.'),use:null};
  SELL_PRICE[id]=ENH_SELL.stone*t;
  try{HL_ITEM[id]=col}catch(_){}}
 ITEMS.ve_bao_ho={n:'Vé Bảo Hộ',i:enhTicketIcon(),e:'🎫',col:'#6fd1ff',d:'Dùng khi cường hóa: thất bại không bị tụt cấp. (mục 🛡️ Trang bị → Cường hóa)',use:null};
