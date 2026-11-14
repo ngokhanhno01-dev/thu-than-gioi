@@ -227,10 +227,9 @@
    halo(g,E,x,P,T,al,a,q);
    /* bãi sương rộng phía sau: nhiều khối mềm trôi chậm */
    for(let k=0;k<18;k++){
-    const side=hash(k*1.7)*2-1,px=x+side*(70+16*Math.abs(side)+10*Math.sin(T*.3+k))+Math.sin(T*.35+k*1.9)*8,
-     py=GY-2-hash(k+5)*38*grow,rx=30+hash(k+9)*26,ry=12+hash(k+13)*13;
-    E.blob(g,px,py,rx,ry,k%3?P.main:P.light,(.42+.18*hash(k))*al,T*.5,k*17,{wob:.4,speed:1.1,core:P.light});
-    if(k%3===0)E.blob(g,px,py+3,rx*.7,ry*.6,P.deep,.14*al,T*.4,k*5,{wob:.3,speed:.9,core:P.deep});
+    const side=hash(k*1.7)*2-1,px=x+side*(66+10*Math.abs(side)+8*Math.sin(T*.3+k))+Math.sin(T*.35+k*1.9)*8,
+     py=GY-2-hash(k+5)*30*grow,rx=26+hash(k+9)*20,ry=10+hash(k+13)*10;
+    E.blob(g,px,py,rx,ry,k%3?P.main:P.light,(.2+.08*hash(k))*al,T*.5,k*17,{wob:.4,speed:1.1,core:P.light});
    }
    /* vòng sương thấp quay quanh trận pháp (nhiều lớp) */
    swirl(g,E,x,P,T,al*.85,{n:5,H:46,R:66,turns:.9,spin:.7,wmax:13,ph:1.1});

@@ -22,10 +22,11 @@
    cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,W,H);cx.setTransform(W/360,0,0,H/240,0,0);
    try{fn(cx,x,q,T,e,E)}finally{cx.setTransform(1,0,0,1,0,0)}
    const im=cx.getImageData(0,0,W,H),d=im.data,o=id.data,op=OP;
-   /* 1) alpha cứng (mép mềm chỉ còn 1 dải dither), màu ép mức */
+   /* 1) alpha 3 tầng: đặc (>=.5), bán trong suốt (.14–.5), trong; màu ép mức */
    for(let py=0;py<H;py++)for(let px=0;px<W;px++){
     const i=(py*W+px)*4,a=d[i+3]/255,k=py*W+px,t=(BAY[(py&3)*4+(px&3)]+.5)/16;
-    if(a>=.42||(a>=.2&&t<(a-.2)/.22)){o[i]=tone(d[i]);o[i+1]=tone(d[i+1]);o[i+2]=tone(d[i+2]);o[i+3]=255;op[k]=1}
+    if(a>=.5){o[i]=tone(d[i]);o[i+1]=tone(d[i+1]);o[i+2]=tone(d[i+2]);o[i+3]=255;op[k]=1}
+    else if(a>=.14){o[i]=tone(d[i]);o[i+1]=tone(d[i+1]);o[i+2]=tone(d[i+2]);o[i+3]=a>=.3?125:70;op[k]=2}   /* bán trong suốt (sương, khói) */
     else{o[i+3]=0;op[k]=0}
    }
    /* 2) viền tối 1 pixel quanh hình (đặc trưng pixel art) */
