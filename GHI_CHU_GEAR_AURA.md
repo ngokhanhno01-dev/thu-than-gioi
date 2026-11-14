@@ -11,8 +11,9 @@ Trả lời tiếng Việt, ngắn gọn. Xong mỗi bộ: báo + gửi ảnh ch
 | 1 | mist (sương) | XONG (người dùng bảo làm tiếp) | tools/ref-gear/suong-coc.jpg |
 | 2 | cloud (mây) | XONG (người dùng bảo làm tiếp) | tools/ref-gear/van-dao.jpg |
 | 3 | wind (gió) | XONG bản đầu, chờ người dùng duyệt | tools/ref-gear/phong-nguyen.jpg |
-| 4 | thunder (sấm) | XONG bản đầu (chưa xem hình thật, chỉ chạy harness không lỗi), chờ người dùng duyệt | tools/ref-gear/loi-vuc.jpg |
-| 5–16 | counter, sun, shield, thorn, revive, grove, lava, ambush, star, first, weaken, judge | CHƯA, KHÔNG có ảnh mẫu: tự thiết kế cùng phong cách | (dùng 5 ảnh mẫu làm chuẩn) |
+| 4 | thunder (sấm) | XONG (người dùng đã xem trên điện thoại, bảo làm tiếp) | tools/ref-gear/loi-vuc.jpg |
+| 5 | counter (phản đòn) | XONG bản đầu (chưa xem hình thật, chỉ chạy harness không lỗi), chờ người dùng duyệt | tự thiết kế: đỏ thẫm, lưỡi gai cong, vòng sáng co vào, mũi tên V |
+| 6–16 | sun, shield, thorn, revive, grove, lava, ambush, star, first, weaken, judge | CHƯA, KHÔNG có ảnh mẫu: tự thiết kế cùng phong cách | (dùng 5 ảnh mẫu làm chuẩn) |
 
 Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không hỏng giữa chừng.
 
@@ -31,10 +32,11 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 - KIT dùng chung trong file: `circle(g,E,x,P,T,al,{r,ph,runeDir,cracks})` trận pháp, `swirl(g,E,x,P,T,al,{n,H,R,turns,spin,wmax,ph})` lốc xoắn,
   `sparks`, `spark4`, `halo` (quầng + sóng lúc vào trận), `level(q,T,id)` (độ đậm). Palette P = {deep,main,light,core}.
   Hàm của engine E: glow, blob, ribbon (o.add=false → vẽ thường), crystal, wave, rgba, mix. Xem `frost` làm mẫu.
-- Helper riêng của thunder (dùng lại được cho bộ có sét/đá nứt): `zig` (đường gãy khúc), `bolt` (tia sét 3 lớp), `tree` (cành sét rẽ nhánh), `rock` (đá nứt dung nham), `dswirl` (lốc xoắn tối viền vàng; ribbon tối phải dùng add:false vì mặc định cộng sáng sẽ mất màu tối).
+- Helper có sẵn dùng lại: `curl`, `gem`, `crescent`, `wisp`, `leaf`, `slash` (vệt chém cung), `flake`, `bead`; của thunder: `zig` (đường gãy khúc), `bolt` (tia sét 3 lớp), `tree` (cành sét), `rock` (đá nứt dung nham), `dswirl` (lốc xoắn tối viền vàng; ribbon tối phải dùng add:false vì mặc định cộng sáng sẽ mất màu tối); của counter: `blade` (lưỡi gai cong).
 - Toạ độ: thú x=85, mặt đất GY=203, trận pháp elip tỉ lệ SQ=.4, bán kính ~58, thân y≈150, lốc cao ~110.
 - Bài học: KHÔNG đặt vật thể ở cung PHÍA TRƯỚC trận pháp (che mất rune) — tinh thể/cột chỉ ở hai bên và phía sau; mọi thứ vẽ trước thú nên thú che phần giữa.
 - Tham số `e` = giây từ lúc bắt đầu (dùng cho hiệu ứng mọc lên lúc vào trận); `q` = 1→0 trong 2.4s đầu trận, sau đó 0.
+- Mỗi bộ thêm vào 41 phải đẩy lại CẢ file 41 (GitHub connector không vá từng đoạn): lấy bản mới nhất bằng get_file_contents rồi chèn trước `})();`.
 
 ## Chế độ pixel art (xem thử)
 - File `42-gear-pixel.js` (nạp sau 41) tự bọc MỌI bộ trong `TTGGearAura`: `TTGGearAura.style='pixel'` → vẽ vào khung 240x160, nén sáng + ép 6 mức/kênh + độ trong 4 mức (dither Bayer), phóng không làm mịn. Người dùng đã CHỌN PIXEL ART (hợp với thú pixel; bản mượt bị chê quá bóng): mặc định 'pixel'. Pixel pass: alpha 3 tầng: đặc (>=.5) / bán trong suốt (.14–.5, dùng cho sương/khói: vẽ alpha ~.2–.4) / trong, màu ép mức, viền tối 1px quanh hình.
@@ -54,7 +56,7 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 ## Điều người dùng ĐÃ DUYỆT / ĐÃ YÊU CẦU (đừng làm trái)
 - Làm theo ảnh mẫu "thật giống từ chi tiết, trận pháp, hiệu ứng".
 - Kiểu PIXEL ART là mặc định (thú của game là pixel art; bản vẽ mượt bị chê quá bóng và quá rõ khi đặt gần thú). Đã duyệt pixel pass hiện tại (alpha cứng + viền tối 1px + tầng bán trong suốt).
-- Frost (0), Mist (1) và Cloud (2): người dùng đã xem và bảo làm tiếp (coi như duyệt). Wind (3): đã đẩy, chờ người dùng xem. Thunder (4): đã đẩy, chờ người dùng xem.
+- Frost (0), Mist (1), Cloud (2), Thunder (4): người dùng đã xem và bảo làm tiếp (coi như duyệt). Wind (3) và Counter (5): đã đẩy, chờ người dùng xem.
 - Mist: sương phải MỜ, TRONG SUỐT, không che nền (đã sửa theo góp ý; sương/khói nói chung vẽ alpha ~.2–.4 để rơi vào tầng bán trong suốt).
 - Buff vẫn là lớp NỀN vẽ trước thú; không đè lên thân thú.
 - Những bộ chưa làm tiếp tục chạy code cũ, không được làm hỏng game giữa chừng.
