@@ -301,13 +301,29 @@ function eqInfoHtml(z,s,need){
   '<div class="eqstat eqrange" style="margin-top:4px">'+rows+'</div>'+
   '<small style="color:var(--mute)">Sinh Lực/Công/Thủ/Tốc/Pháp Công là số cố định theo cấp vùng (Pháp Công góp 30% vào sát thương đòn đánh); Né tránh/Choáng/Hồi/Chí mạng là % và có trần tổng ('+Object.keys(EQ_CAP).map(k=>EQ_STAT_NAME[k]+' '+EQ_CAP[k]+'%').join(', ')+').</small></div>'}
 
+/* ---------- Đủ cấp mới được mang: món đang mang mà cấp thú thấp hơn cấp yêu cầu (tái sinh về cấp 1, bị hạ cấp...) tự nhảy về kho ---------- */
+function eqEnforce(){
+ let moved=[];
+ try{
+  for(let s=0;s<eqWorn.length;s++){
+   const it=eqWorn[s];
+   if(it&&level<it.lv){eqWorn[s]=null;ebag.push(it);moved.push(it);if(eqSel&&eqSel.w&&eqSel.i===s)eqSel={w:false,i:ebag.length-1}}}
+  if(moved.length){
+   try{log('🎒 Chưa đủ cấp để mang, <b>'+moved.length+'</b> món trang bị đã về kho: '+moved.map(it=>'<b style="color:'+eqRgb(it)+'">'+eqName(it)+'</b> (cần cấp '+it.lv+')').join(', ')+'.')}catch(_){}
+   setTimeout(()=>{try{if(typeof renderEquip==='function')renderEquip();if(typeof renderInfo==='function')renderInfo()}catch(_){}},0)   /* vẽ lại sau, tránh vẽ lồng khi đang dựng giao diện */
+   try{if(window.TTGSAVE&&TTGSAVE.save)TTGSAVE.save()}catch(_){}}
+ }catch(e){console.warn('[equip] eqEnforce',e)}
+ return moved.length}
+
 /* ---------- Tổng chỉ số + buff bộ ---------- */
 function eqTotals(){
+ eqEnforce();
  const t={hp:0,atk:0,def:0,spd:0,mag:0,eva:0,stun:0,regen:0,crit:0};
  for(const it of eqWorn){if(!it)continue;for(const[k,v]of eqLines(it))t[k]+=v}
  return t}
 /* Danh sách buff bộ đang kích hoạt (đã nhân phẩm trung bình của các món cùng bộ) */
 function eqSetInfo(){
+ eqEnforce();
  const c={},qs={},out=[];
  for(const it of eqWorn){if(!it)continue;c[it.z]=(c[it.z]||0)+1;(qs[it.z]=qs[it.z]||[]).push(EQ_QBONUS[it.q])}
  for(const z in c){

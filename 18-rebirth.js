@@ -189,6 +189,7 @@ function apply(){
   gs=0;curStage=-1;vs=0;pv.on=false;
   upPut.huyet=0;upPut.thuoc=0;upPut.tinh=0;upSel=null;upMsg=''; /* ô nâng cấp huyết mạch (09-blood.js) */
   if(window.EVO){EVO.queue.length=0;EVO.shown=null;EVO.got=[]}
+  try{eqEnforce()}catch(_){}   /* về cấp 1: trang bị đang mang yêu cầu cấp cao hơn nhảy về kho */
   /* --- xu, uy danh, balo, trang bị, buff: KHÔNG đụng tới --- */
   $('h-age').textContent=0;
   layout();
