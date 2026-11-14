@@ -1422,4 +1422,119 @@
    sparks(g,E,x,P,T,al,12,125);
   }finally{g.restore()}
  };
+
+ /* ================= BỘ 13 — VÙNG TỬ TINH HẢI (key kỹ thuật 'star'): màu vùng #b45cff, tự thiết kế, KHÔNG trùng Vân Đảo (mây tím) hay Huyền Uyên (vực xoáy) =================
+    Hiệu ứng khi mặc đủ bộ 4 món của vùng. Nét riêng theo vùng (biển sao tím: sóng biển + thiên hà):
+    thiên hà xoắn ốc mờ sau lưng, sóng biển tím cuộn cao có bọt sao hai bên trận pháp, sao 5 cánh nổi quanh thú,
+    sao băng rơi chéo, bụi sao lấp lánh; lúc vào trận thiên hà bừng to, sao 5 cánh bắn toả hình quạt. */
+ const STARP={deep:'#4a1a8a',main:'#b45cff',light:'#dcaaff',core:'#f8ecff'};
+ /* thiên hà xoắn ốc: đĩa tối mờ + 3 nhánh hạt sao quay chậm + lõi sáng */
+ function galaxy(g,E,x,y,r,P,T,al){
+  if(al<=.02||r<3)return;
+  E.glow(g,x,y,r*1.5,P.main,.28*al,P.light);
+  g.save();
+  g.fillStyle=E.rgba('#1a0a36',.4*al);g.beginPath();g.ellipse(x,y,r*1.05,r*.62,0,0,TAU);g.fill();
+  g.globalCompositeOperation='lighter';
+  for(let arm=0;arm<3;arm++){
+   for(let j=0;j<24;j++){
+    const t=j/23,an=arm*TAU/3+t*3.3+T*.35,rad=r*(.14+.9*t),px=x+Math.cos(an)*rad,py=y+Math.sin(an)*rad*.58,sz=(1-t*.6)*2.6+.6;
+    g.fillStyle=E.rgba(j%3?P.light:P.core,(.35+.55*(1-t))*al);g.fillRect(px-sz/2,py-sz/2,sz,sz);
+   }
+  }
+  g.restore();
+  E.glow(g,x,y,r*.34,P.core,.7*al,'#ffffff');
+ }
+ /* sóng biển tím cuộn: dải sóng dựng đứng, đỉnh cuộn về phía dir, bọt sao sáng chạy dọc đỉnh */
+ function swell(g,E,x0,y0,h,dir,T,k,P,al){
+  if(al<=.02||h<4)return;
+  const pts=[],m=14;
+  for(let j=0;j<m;j++){
+   const t=j/(m-1),bd=Math.sin(T*1.2+k*1.9)*2;
+   pts.push([x0+dir*(h*.55*Math.pow(t,2.2)+bd*t),y0-h*(1-Math.pow(1-t,1.8))+Math.sin(t*9+T*1.5+k)*1.2]);
+  }
+  E.ribbon(g,pts,q=>Math.max(2,15*(1-q*.72)+2),P.deep,al*.9,{add:false,core:P.deep});
+  E.ribbon(g,pts.slice(1),q=>Math.max(1.5,9*(1-q*.72)+1.2),P.main,al*.9,{core:P.light});
+  E.ribbon(g,pts.slice(3),q=>Math.max(1,3*(1-q)+1),P.light,al*.85,{core:P.core});
+  const tp=pts[m-1];
+  g.save();g.globalCompositeOperation='lighter';
+  for(let i=0;i<5;i++){
+   const p=pts[7+i],tw=Math.pow(Math.max(0,Math.sin(T*2.6+k*2+i*1.7)),2);
+   g.fillStyle=E.rgba(P.core,.95*al*tw);g.fillRect(p[0]-1.1+dir*2,p[1]-3-i*.4,2.2,2.2);
+  }
+  g.restore();
+  E.glow(g,tp[0],tp[1],6,P.light,.4*al);
+ }
+ /* sao 5 cánh: nửa tối + nửa sáng, viền trắng, quầng nhẹ */
+ function star5(g,E,x,y,r,rot,col,a){
+  if(a<=.02||r<1)return;
+  E.glow(g,x,y,r*2.2,col,.3*a);
+  g.save();g.translate(x,y);g.rotate(rot);g.globalCompositeOperation='lighter';g.lineJoin='round';
+  g.fillStyle=E.rgba(col,.85*a);g.beginPath();
+  for(let i=0;i<10;i++){const an=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;i?g.lineTo(Math.cos(an)*rr,Math.sin(an)*rr):g.moveTo(Math.cos(an)*rr,Math.sin(an)*rr)}
+  g.closePath();g.fill();g.strokeStyle=E.rgba('#ffffff',.85*a);g.lineWidth=.8;g.stroke();g.restore();
+ }
+ /* sao băng: đầu sáng + đuôi thon */
+ function comet(g,E,hx,hy,len,ang,P,al){
+  if(al<=.02)return;
+  const tx=hx-Math.cos(ang)*len,ty=hy-Math.sin(ang)*len;
+  E.ribbon(g,[[tx,ty],[(tx+hx)/2,(ty+hy)/2],[hx,hy]],q=>Math.max(.6,4.2*q),P.main,al*.8,{core:P.light});
+  E.glow(g,hx,hy,5,P.core,.7*al,'#ffffff');
+ }
+ REG.star=function(g,x,q,T,e,E){
+  const P=STARP,{a,al}=level(q,T,13),grow=e==null?1:cl(e/.6,0,1),gk=easeBack(grow);
+  g.save();
+  try{
+   halo(g,E,x,P,T,al,a,q);
+   /* thiên hà xoắn ốc mờ sau lưng thú */
+   galaxy(g,E,x,GY-86,42*(.97+.03*Math.sin(T*1.8)),P,T,al);
+   circle(g,E,x,P,T,al,{r:58,ph:13.4,runeDir:-1});
+   /* sương sao tím sát đất, bán trong suốt */
+   for(let k=0;k<7;k++){
+    const side=hash(k*1.9+17)*2-1,px=x+side*(58+10*Math.abs(side))+Math.sin(T*.4+k*1.7)*6,py=GY-2-hash(k+5)*20*grow,rx=22+hash(k+9)*16,ry=8+hash(k+13)*8;
+    E.blob(g,px,py,rx,ry,k%2?P.light:P.main,.2*al,T*.5,k*41,{wob:.35,speed:1,core:P.light});
+   }
+   /* sóng biển cuộn: hai bên và phía sau trận pháp (không che cung trước) */
+   const it=[];
+   for(let side=-1;side<=1;side+=2){
+    for(let k=0;k<4;k++){
+     const t=k/3,ang0=-.3+t*1.75,ang=(side<0?Math.PI+ang0:-ang0)+(hash(k+side*7+37)-.5)*.2,rp=58*(.97+hash(k*2+side+16)*.12),p=gp(x,ang,rp),
+      sd=Math.abs(Math.cos(ang)),h=(30+hash(k*3+side*5+14)*34)*(.55+.75*sd);
+     it.push({x:p[0],y:p[1],h,dir:-side,k:k+side*20+90});
+    }
+   }
+   it.sort((u,v)=>u.y-v.y);
+   const dI=o=>swell(g,E,o.x,o.y,o.h*gk,o.dir,T,o.k,P,al);
+   it.filter(o=>o.y<GY).forEach(dI);
+   swirl(g,E,x,P,T,al,{n:6,H:112,R:50,turns:.8,spin:1.25,wmax:15,ph:1});
+   swirl(g,E,x,P,T,al*.7,{n:3,H:92,R:60,turns:.7,spin:-.95,wmax:10,ph:2.7});
+   it.filter(o=>o.y>=GY).forEach(dI);
+   /* sao 5 cánh nổi quanh thú */
+   for(let k=0;k<6;k++){
+    const an=T*(.5+hash(k)*.3)*(k%2?1:-1)+k*1.05,rr=38+hash(k+2)*28,px=x+Math.cos(an)*rr,py=GY-24-hash(k+3)*92+Math.sin(an)*8,tw=.7+.3*Math.sin(T*3+k*1.9);
+    star5(g,E,px,py,(3.6+hash(k+6)*2.4)*Math.min(1,grow*1.5),T*.8+k,k%2?P.light:P.main,al*tw*(Math.sin(an)>.6?.75:1));
+   }
+   /* sao băng rơi chéo */
+   for(let k=0;k<3;k++){
+    const p=(T*.28+k/3)%1,hx=x-70+k*70+p*52,hy=GY-150+p*120;
+    comet(g,E,hx,hy,26,.75,P,al*Math.sin(Math.PI*Math.min(1,p*1.05)));
+   }
+   /* lúc vào trận: thiên hà bừng to + sao 5 cánh bắn toả hình quạt */
+   if(a>0&&e!=null&&e<1){
+    const k=cl(e,0,1);
+    galaxy(g,E,x,GY-86,42+34*k,P,T,a*(1-k)*.9);
+    for(let j=0;j<8;j++){
+     const an=-Math.PI/2+(j-3.5)*.4,d=8+k*78;
+     star5(g,E,x+Math.cos(an)*d,GY-34+Math.sin(an)*d,5,k*8+j,P.light,a*(1-k));
+    }
+   }
+   /* bụi sao lấp lánh bốc lên */
+   g.save();g.globalCompositeOperation='lighter';
+   for(let k=0;k<16;k++){
+    const p=(T*(.06+hash(k)*.06)+hash(k*3.1))%1,px=x+(hash(k*5.3)*2-1)*68+Math.sin(T*1.4+k*1.7)*5,py=GY-6-p*124;
+    g.fillStyle=E.rgba(k%3?P.light:P.core,Math.sin(Math.PI*p)*.9*al);g.fillRect(px-1,py-1,2.4,2.4);
+   }
+   g.restore();
+   sparks(g,E,x,P,T,al,14,125);
+  }finally{g.restore()}
+ };
 })();
