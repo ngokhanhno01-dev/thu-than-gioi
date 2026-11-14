@@ -242,7 +242,8 @@ function hopConfirm(){
 const EQ_REN_ICO='<img src="img-misc-ren.png" alt="" style="height:1.5em;width:1.5em;vertical-align:-.35em;image-rendering:pixelated">';
 let fgInfo=false,eqWorn=[null,null,null,null],ebag=[],eqUid=1,eqTab='wear',eqSel=null,fgSlot=0,fgZone=-1,fgLast=null,fgOpen=false,eqMsg='',eqRaf=0;
 /* Icon ảnh riêng theo bộ (vùng z → 4 ảnh theo ô: Vũ Khí, Giáp, Vòng, Ngọc). Vùng không có trong bảng thì dùng icon pixel vẽ bằng code. Thêm bộ mới: thêm 1 dòng vào EQ_ICON_IMG. */
-const EQ_ICON_IMG={0:['img-eq-tuyet-nguyen-vukhi.webp','img-eq-tuyet-nguyen-giap.webp','img-eq-tuyet-nguyen-vong.webp','img-eq-tuyet-nguyen-ngoc.webp']};
+const EQ_ICON_IMG={0:['img-eq-tuyet-nguyen-vukhi.webp','img-eq-tuyet-nguyen-giap.webp','img-eq-tuyet-nguyen-vong.webp','img-eq-tuyet-nguyen-ngoc.webp'],
+ 1:['img-eq-suong-coc-vukhi.webp','img-eq-suong-coc-giap.webp','img-eq-suong-coc-vong.webp','img-eq-suong-coc-ngoc.webp']};
 const eqIco=(s,z)=>{const f=z!=null&&EQ_ICON_IMG[z]&&EQ_ICON_IMG[z][s];
  return f?'<img class="pxi eqimg" alt="" src="'+f+'">':pxImg(EQ_SLOTS[s].px,z==null?'#8a95a0':ZONE_COL[z])};
 const eqRgb=it=>'rgb('+QC[it.q]+')';
