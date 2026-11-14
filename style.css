@@ -297,6 +297,7 @@ details.bagbox summary{padding:1px 2px;letter-spacing:-.3px}
 
 /* icon pixel art */
 .pxi{width:1.35em;height:1.35em;image-rendering:pixelated;vertical-align:-.3em}
+.pxi.eqimg{image-rendering:auto}
 .slot>span,.upslot>span{display:flex;justify-content:center;align-items:center;width:100%}
 .slot .pxi{width:72%;max-width:44px;height:auto;aspect-ratio:1}
 .upslot .pxi{width:30px;height:30px}
