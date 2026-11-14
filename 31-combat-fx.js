@@ -1,108 +1,43 @@
 /* ===== 31-combat-fx.js — Hiệu ứng chiến đấu theo 17 vùng =====
-   Tải sprite PNG tại combat-effects/; hiệu ứng trang bị chỉ xuất hiện khi sự kiện thực sự kích hoạt. */
+   Vẽ hiệu ứng hoàn toàn bằng canvas 2D; hiệu ứng trang bị chỉ xuất hiện khi sự kiện thực sự kích hoạt. [FX 4B] đã gỡ hạ tầng tải ảnh hiệu ứng (chỉ còn 2 ảnh khiên mẫu). */
 (()=>{
 'use strict';
-/* Ảnh hiệu ứng đã được cắt sạch nằm trong fx/ (tạo bằng tools/clean_fx.py). Không còn dùng atlas combat-fx-atlas.png. */
-const RECTS={};
-const seq=(dir,prefix,count)=>({dir,prefix,count,pad:2,start:1});
-const one=file=>({file});
-const lone=f=>({file:'loose/'+f});                       /* ảnh lẻ trong fx/ */
-const fxs=(prefix,count,pad)=>({dir:'loose',prefix,count,pad:pad||2,start:1});   /* chuỗi khung trong fx/ */
-/* make(tên, màu, kiểu đánh, ẢNH ĐÒN ĐÁNH, ẢNH BUFF VÙNG, biểu tượng, độ nhuộm ảnh buff vùng)
-   - đòn đánh: mỗi vùng 1 ảnh/1 chuỗi ảnh RIÊNG (nhóm 3 cận chiến, nhóm 4 đánh xa)
-   - buff vùng: chỉ dùng ảnh nhóm 1 (dome, cầu, sấm sét, nổ lửa, ngọn lửa nền); KHÔNG dùng ảnh bộ trang bị */
-const make=(name,color,mode,attack,field,mark,bt)=>({name,color,mode,attack,field,mark,bt:bt||0});
+/* make(tên, màu, kiểu đánh, biểu tượng, độ nhuộm) */
+const make=(name,color,mode,mark,bt)=>({name,color,mode,mark,bt:bt||0});
 const ZONES=[
- make('Tuyết Nguyên','#9fe4ff','ranged',lone('atk-tuyet-nguyen.png'),lone('bz-khien-vong.png'),'❄'),
- make('Sương Cốc','#a3e1d4','melee',fxs('mel-suong-coc-',11),lone('bz-cau-xanh.png'),'霧',.4),
- make('Vân Đảo','#c9a8ff','ranged',lone('atk-van-dao.png'),lone('bz-dome-tim-nho.png'),'☁'),
- make('Phong Nguyên','#82f0bb','melee',fxs('mel-phong-nguyen-',6),fxs('flame-',9),'➶',.8),
- make('Lôi Vực','#ffe53a','ranged',lone('atk-loi-vuc.png'),lone('bz-set.png'),'ϟ'),
- make('Nguyệt Cung','#a8b8ff','melee',fxs('mel-nguyet-cung-',8),lone('bz-cau-khien.png'),'☾'),
- make('Dương Sơn','#ffa94d','ranged',lone('atk-duong-son.png'),lone('bz-no-lua.png'),'☼'),
- make('Huyền Uyên','#947aff','melee',fxs('mel-huyen-uyen-',4),lone('bz-dome-tim-lua.png'),'◉'),
- make('Kim Khoáng','#e0b038','melee',fxs('mel-kim-khoang-',4),lone('bz-khien-vong.png'),'◇',.75),
- make('Ngọc Động','#18e0b0','ranged',lone('atk-ngoc-dong.png'),lone('bz-cau-xanh.png'),'⬡',.65),
- make('Thanh Lâm','#8be04a','melee',fxs('mel-thanh-lam-',4),lone('bz-linh-hon.png'),'♧'),
- make('Xích Hỏa Địa','#ff5a1e','ranged',lone('atk-xich-hoa.png'),fxs('flame-',9),'♨',.85),
- make('Hắc Ám Lâm','#b0206a','melee',fxs('mel-hac-am-',4),lone('bz-cau-den.png'),'◈'),
- make('Tử Tinh Hải','#b45cff','ranged',lone('atk-tu-tinh.png'),lone('bz-dome-hong.png'),'✧',.5),
- make('Thiên Không','#6ac4ff','ranged',lone('atk-thien-khong.png'),fxs('flame-',9),'⌁',.2),
- make('Linh Hoa Viên','#ff7ac0','ranged',lone('atk-linh-hoa.png'),lone('bz-dome-hong.png'),'✿'),
- make('Thần Điện','#fff0a0','ranged',lone('atk-than-dien.png'),lone('bz-dome-tim-lua.png'),'✥',.6)
+ make('Tuyết Nguyên','#9fe4ff','ranged','❄'),
+ make('Sương Cốc','#a3e1d4','melee','霧',.4),
+ make('Vân Đảo','#c9a8ff','ranged','☁'),
+ make('Phong Nguyên','#82f0bb','melee','➶',.8),
+ make('Lôi Vực','#ffe53a','ranged','ϟ'),
+ make('Nguyệt Cung','#a8b8ff','melee','☾'),
+ make('Dương Sơn','#ffa94d','ranged','☼'),
+ make('Huyền Uyên','#947aff','melee','◉'),
+ make('Kim Khoáng','#e0b038','melee','◇',.75),
+ make('Ngọc Động','#18e0b0','ranged','⬡',.65),
+ make('Thanh Lâm','#8be04a','melee','♧'),
+ make('Xích Hỏa Địa','#ff5a1e','ranged','♨',.85),
+ make('Hắc Ám Lâm','#b0206a','melee','◈'),
+ make('Tử Tinh Hải','#b45cff','ranged','✧',.5),
+ make('Thiên Không','#6ac4ff','ranged','⌁',.2),
+ make('Linh Hoa Viên','#ff7ac0','ranged','✿'),
+ make('Thần Điện','#fff0a0','ranged','✥',.6)
 ];
-/* ---- ảnh dùng chung (mỗi loại 1 nguồn, không trộn nhóm) ---- */
-const SHIELD=lone('bz-khien-vong.png');          /* khiên: chỉ còn viền bong bóng, bỏ đĩa đặc */
-const LIGHTNING=lone('bz-set.png');              /* sấm sét giáng đất (nhóm 1) */
-const LAVA=fxs('flame-',9);                      /* ngọn lửa nền, nhuộm cam khi dùng cho dung nham (nhóm 1) */
-/* BUFF BỘ TRANG BỊ (nhóm 2): ngọn lửa khí aura, mỗi bộ 1 màu riêng. Chỉ dùng khung 1–2 (khung 3–4 trong tờ gốc là mảnh cắt dở). */
-const AURA=c=>fxs('aura-'+c+'-',2,1);
-const HEAL=AURA('xanh-ngoc');
-const WARM=AURA('do');
-const GEAR_AURA={frost:['xanh-lo-nhat','#bff4ff'],mist:['xanh-ngoc-dam','#8fe9d5'],cloud:['xanh-duong-nhat','#c9d0ff'],wind:['jade','#7affc0'],
- thunder:['vang','#ffe84a'],counter:['hong-do','#ff9a8a'],sun:['gold','#ffd45a'],shield:['blue','#9fb0ff'],thorn:['red','#ff5a4a'],
- revive:['pink','#ffb0d0'],grove:['jade','#8be04a'],lava:['do','#ff8a3a'],ambush:['xanh-duong-dam','#7a8cff'],star:['vang-dam','#e8d05a'],
- first:['hong-do','#ffc08a'],weaken:['pink','#e89ad0'],judge:['gold','#fff0a0']};
-const GEAR_DEF=['gold','#ffd45a'];
-const gearArt=k=>AURA((GEAR_AURA[k]||GEAR_DEF)[0]);
-const gearCol=k=>(GEAR_AURA[k]||GEAR_DEF)[1];
+const GEAR_AURA={frost:'#bff4ff',mist:'#8fe9d5',cloud:'#c9d0ff',wind:'#7affc0',
+ thunder:'#ffe84a',counter:'#ff9a8a',sun:'#ffd45a',shield:'#9fb0ff',thorn:'#ff5a4a',
+ revive:'#ffb0d0',grove:'#8be04a',lava:'#ff8a3a',ambush:'#7a8cff',star:'#e8d05a',
+ first:'#ffc08a',weaken:'#e89ad0',judge:'#fff0a0'};
+const GEAR_DEF='#ffd45a';
+const gearCol=k=>GEAR_AURA[k]||GEAR_DEF;
 function gearProc(text){
- if(/Dương Diệm/.test(text||''))return{asset:AURA('do'),color:'#ff8a3a'};
- if(/Thần Phán|Tinh Quang/.test(text||''))return{asset:AURA('blue'),color:'#d7a0ff'};
- if(/Thiên Uy/.test(text||''))return{asset:AURA('vang'),color:'#ffe16b'};
- if(/Sương Tán/.test(text||''))return{asset:AURA('xanh-ngoc'),color:'#a9f4e5'};
+ if(/Dương Diệm/.test(text||''))return{color:'#ff8a3a'};
+ if(/Thần Phán|Tinh Quang/.test(text||''))return{color:'#d7a0ff'};
+ if(/Thiên Uy/.test(text||''))return{color:'#ffe16b'};
+ if(/Sương Tán/.test(text||''))return{color:'#a9f4e5'};
  return null;
 }
-const cache=new Map();
 let currentZone=0,currentPetZone=0;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-function pathFor(d,frame){
- if(d.file)return d.file;
- const n=(d.start||1)+(frame%d.count);
- return d.dir+'/'+d.prefix+String(n).padStart(d.pad||2,'0')+'.png';
-}
-let atlas=null;
-function getAtlas(){
- if(atlas)return atlas;
- atlas=new Image();atlas.onerror=()=>{};atlas.src=ATLAS_SRC;return atlas;
-}
-function ready(){const a=getAtlas();return a.complete&&a.naturalWidth>0}
-const LOOSE=new Map();
-function looseImg(k){const n=k.split('/').pop();let im=LOOSE.get(n);if(!im){im=new Image();im.src='fx/'+n;LOOSE.set(n,im)}return im}
-function frame(d,p){
- const i=d.count?Math.min(d.count-1,Math.floor(clamp(p,0,.9999)*d.count)):0;
- const k=pathFor(d,i);
- if(k.indexOf('loose/')===0){
-  const im=looseImg(k),ok=im.complete&&im.naturalWidth>0;
-  return{complete:ok,naturalWidth:ok?im.naturalWidth:0,naturalHeight:ok?im.naturalHeight:0,r:ok?[0,0,im.naturalWidth,im.naturalHeight]:null,k,img:im};
- }
- const r=RECTS[k],ok=!!r&&ready();
- return{complete:ok,naturalWidth:r?r[2]:0,naturalHeight:r?r[3]:0,r,k};
-}
-/* Nhuộm màu vùng lên ảnh: bộ ảnh gốc chỉ có vài bộ xanh/tím dùng chung cho 17 vùng nên phải nhuộm thì mới khác nhau. Có bộ nhớ đệm. */
-const TC=new Map();
-function tinted(im,color,a){
- const key=im.k+'|'+color+'|'+a;let c=TC.get(key);
- if(c)return c;
- if(TC.size>320)TC.clear();
- c=document.createElement('canvas');c.width=im.r[2];c.height=im.r[3];
- const x=c.getContext('2d');x.imageSmoothingEnabled=false;
- x.drawImage(im.img||getAtlas(),im.r[0],im.r[1],im.r[2],im.r[3],0,0,im.r[2],im.r[3]);
- x.globalCompositeOperation='source-atop';x.globalAlpha=a;x.fillStyle=color;x.fillRect(0,0,c.width,c.height);
- TC.set(key,c);return c;
-}
-/* tint = độ nhuộm 0..1 (bỏ trống = giữ màu ảnh gốc), glow = độ sáng viền */
-function paint(g,d,p,x,y,w,h,color,alpha,flip,rotate,tint,glow){
- const im=frame(d,p);
- if(!im.complete||!im.r)return false;
- const iw=im.naturalWidth,ih=im.naturalHeight,s=Math.min(w/iw,h/ih),dw=iw*s,dh=ih*s;
- g.save();g.translate(x,y);g.rotate(rotate||0);if(flip)g.scale(-1,1);
- g.globalAlpha=alpha==null?1:alpha;g.imageSmoothingEnabled=false;
- g.shadowColor=color||'#fff';g.shadowBlur=glow==null?3:glow;
- if(tint>0)g.drawImage(tinted(im,color||'#fff',Math.round(tint*20)/20),0,0,iw,ih,-dw/2,-dh/2,dw,dh);
- else g.drawImage(im.img||getAtlas(),im.r[0],im.r[1],iw,ih,-dw/2,-dh/2,dw,dh);
- g.restore();return true;
-}
 
 /* ===== Đợt 4: công cụ vẽ hiệu ứng (hạt, vòng, tia, quầng sáng) — không giữ trạng thái, mọi thứ tính từ u/T ===== */
 const eo=t=>1-(1-t)*(1-t);
@@ -364,9 +299,6 @@ const FXE=(()=>{
   setSpeed:v=>{ts=cl(+v||1,.05,4)}};
 })();
 
-/* tải trước toàn bộ ảnh lẻ của 17 vùng (sau khi trang tải xong) để đòn đánh đầu tiên không bị trống */
-setTimeout(()=>{try{const ds=[SHIELD,LIGHTNING,LAVA,HEAL,WARM];ZONES.forEach(z=>{ds.push(z.attack,z.field)});Object.keys(GEAR_AURA).forEach(k=>ds.push(gearArt(k)));
- ds.forEach(d=>{if(!d)return;const n=d.count||1;for(let i=0;i<n;i++){const k=pathFor(d,i);if(k.indexOf('loose/')===0)looseImg(k)}})}catch(_){}},800);
 function zone(i){return ZONES[Math.max(0,Math.min(ZONES.length-1,Number(i)||0))]}
 function getZone(i){return i==null?zone(currentZone):zone(i)}
 /* Mô tả ngắn hiệu ứng từng bộ trang bị (ch=tỉ lệ %, pct/mul=độ mạnh %) */
@@ -600,7 +532,6 @@ function backZone(g,x,z,q,T,e,shape,k,stat){
  ring(g,x,204,(46+(1-q)*28)*k,(10+(1-q)*6)*k,z.color,.85*a,2.5);
  ring(g,x,204,(30+(1-q)*14)*k,(7+(1-q)*3)*k,'#ffffff',.5*a,1.5);
  rays(g,x,150,10,40*k,(56+52*(1-q))*k,z.color,.22*a,T*.7,2);
- paint(g,z.field,clamp(e*.9,0,.99),x,156,152*k*gr,152*k*gr,z.color,.72*a,false,0,z.bt||0,9);
  for(let i=0;i<12;i++){const ph=(T*.7+i*.083)%1;
   mote(g,shape||'star',x+(rnd(i*9.1)-.5)*84*k,y0(k)-ph*100*k,2+rnd(i)*2.2,z.color,Math.sin(ph*3.1416)*a,T*2+i)}
 }
@@ -1386,19 +1317,15 @@ function drawAttack(g,T,S){
  if(/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/.test(text))return counterThrow(g,T,S);
  if(mode==='ranged'){
   if(u<.18){
-   if(u>.035){const charge=clamp((u-.035)/.145,0,1),asset=frame(z.attack,charge*.3);
-    if(asset.complete)paint(g,z.attack,charge*.3,sx,ty,28+charge*18,28+charge*18,z.color,.55+charge*.35,false,T*.7)}
    return true;
   }
   if(u<.43){
-   const f=clamp((u-.18)/.25,0,1),x=sx+(tx-sx)*f,y=ty-Math.sin(f*Math.PI)*18;
-   return paint(g,z.attack,f,x,y,80,54,z.color,S.miss?.88:1,!pa,0)||u>.39;
+   return true;
   }
   return true;
  }
  if(u>=.23&&u<.6){
-  const f=clamp((u-.23)/.37,0,1);
-  return paint(g,z.attack,f,tx,ty,104,86,z.color,S.miss?.8:1,!pa,(pa?1:-1)*(f-.5)*.18)||u>.42;
+  return true;
  }
  return u>=.6;
 }
@@ -1412,7 +1339,7 @@ function drawImpact(g,fx,T){
  const coded=statusImpact(g,fx,T,z,text,q,target,y);if(coded!==null)return coded;
  /* KHIÊN: vòm lớn, sóng lan, mảnh vỡ */
  if(fx.k==='block'||/Khiên hấp thụ|Chắn đòn/.test(text)){
-  const a=paint(g,SHIELD,q,target,y,120+q*22,134+q*22,'#8fd0ff',Math.max(.28,1-q),false,0,.25,11);
+  const a=true;
   ring(g,target,y+14,30+q*74,20+q*48,'#8fd0ff',.85*fa,3);
   ring(g,target,y+14,16+q*46,11+q*30,'#ffffff',.6*fa,1.5);
   if(q>.2)spray(g,target,y,'#bfe6ff','shard',12,(q-.2)/.8,64,seed,0);
@@ -1426,23 +1353,22 @@ function drawImpact(g,fx,T){
    ring(g,target,y+20,(1-q)*60+8,(1-q)*30+5,hc,.9*fa+.1,2.5);
    glow(g,target,y,56,hc,.35*Math.sin(Math.min(1,q*1.4)*3.14));
    label(g,'HÚT MÁU',target,y-62-q*14,hc,fa*1.4,11);
-   return paint(g,HEAL,q,target,y,86,84,hc,Math.max(.3,1-q*.6),false,0,.9,11);
+   return true;
   }
   pillar(g,target,y+46,(rev?58:38)*Math.sin(Math.min(1,q*3)*1.57),130*sz,hc,.5*fa);
-  const a=paint(g,HEAL,q,target,y,98*sz,96*sz,hc,Math.max(.3,1-q*.6),false,0,.2,11);
+  const a=true;
   ring(g,target,y+46,(18+q*56)*sz,(5+q*15)*sz,hc,.9*fa,2.5);
   for(let i=0;i<(rev?24:15);i++)mote(g,'star',target+(rnd(seed+i*5)-.5)*72*sz,y+48-q*(50+rnd(seed+i)*64)*sz,2+rnd(seed+i*7)*2.4,hc,fa*1.1,T*2+i);
   if(rev){rays(g,target,y,14,20,52+q*64,'#ffe27a',.55*fa,T*.8,2);ring(g,target,y+46,(30+q*90),(9+q*26),'#ffffff',.6*fa,2)}
   return a;
  }
- let d=z.attack,w=82,h=72,c=z.color,tn=0,glowN,kind='hit';
- if(/Lôi Phạt|Lôi Kích -/.test(text)){d=LIGHTNING;w=118;h=104;c='#ffe53a';tn=.55;glowN=12;kind='bolt'}
- else if(/Dung Nham|Thiêu đốt|Xích Diệm/.test(text)){d=LAVA;w=108;h=104;c='#ff632d';tn=.8;glowN=12;kind='burn'}
- else if(/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/.test(text)){w=96;h=78;dir=-dir;kind='counter'}
- else if(fx.k==='stun'){d=LIGHTNING;w=84;h=84;c='#ffe53a';tn=.55;glowN=10;kind='stun'}
- else if(fx.k==='miss'){w=88;h=68;kind='miss'}
- const f=q<.35?q/.35:Math.min(.999,(q-.35)/.65);
- const ok=paint(g,d,f,target,y,w,h,c,Math.max(.2,1-q*.82),dir<0,dir*.12,tn,glowN);
+ let kind='hit';
+ if(/Lôi Phạt|Lôi Kích -/.test(text))kind='bolt';
+ else if(/Dung Nham|Thiêu đốt|Xích Diệm/.test(text))kind='burn';
+ else if(/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/.test(text)){dir=-dir;kind='counter'}
+ else if(fx.k==='stun')kind='stun';
+ else if(fx.k==='miss')kind='miss';
+ const ok=true;
  if(kind==='counter'){                                                     /* phản đòn: vòng vàng co lại = sức đòn dội ngược */
   ring(g,target,y+6,12+q*62,8+q*42,'#ffd24a',.9*fa,3);
   ring(g,target,y+6,(1-q)*70+6,(1-q)*46+4,'#ffffff',.7*fa,2);
@@ -1486,7 +1412,6 @@ function drawImpact(g,fx,T){
  }
  const proc=gearProc(text);                                                /* buff bộ trang bị kích hoạt */
  if(ok&&proc){
-  paint(g,proc.asset,q,target,y-6,104,98,proc.color,Math.max(.3,.9-q*.7),false,0,.25,11);
   ring(g,target,y+6,20+q*58,14+q*38,proc.color,.8*fa,2.5);
   spray(g,target,y-6,proc.color,'star',8,q,50,seed+99,1);
  }
