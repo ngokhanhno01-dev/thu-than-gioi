@@ -96,10 +96,13 @@
  }
 })();
 
-/* ===== [FX 4A] Nhãn tên SỰ KIỆN bộ trang bị ngay trên thú trong ĐẤU TRƯỜNG (thú mình và thú đối thủ đều có) =====
+/* ===== [FX 4A] Nhãn tên SỰ KIỆN bộ trang bị ngay trên thú — ĐẤU TRƯỜNG và THÁM HIỂM (thú mình và thú đối thủ đều có) =====
    Khi buff bộ kích hoạt (ví dụ Dung Nham Phun Trào) → hiện 1 dòng chữ tên sự kiện phía trên đầu thú CHỦ BUFF, hiện nhanh, giữ, rồi mờ dần.
-   Chỉ VẼ: bọc TTGFX.impact (đấu trường lấy hàm này lúc bắt đầu trận); không đụng sát thương/chỉ số/lưu.
-   [regex khớp, tên hiển thị, màu, chủ buff: 0 = bên ra sự kiện, 1 = bên đối diện (buff phòng thủ)] */
+   Chỉ VẼ: không đụng sát thương/chỉ số/lưu.
+   - Đấu trường lấy TTGFX.impact lúc bắt đầu trận → bọc hàm đó.
+   - Thám hiểm (06-mobs.js battle) dùng impact nội bộ → gọi window.TTGEvBanner(g,fx) ngay sau impact.
+   - Vị trí: ngay DƯỚI bảng thông tin (tên/máu/hệ) của mỗi bên, đo từ DOM thật để chữ không bị bảng che.
+   [regex khớp, tên hiển thị, màu, chủ buff: 0 = bên ra sự kiện, 1 = bên đối diện (buff phòng thủ / bên bị đánh)] */
 (()=>{
  'use strict';
  const EVN=[
@@ -110,22 +113,41 @@
   [/Sinh Cơ(?: Cổ Thụ)? \+/,'Sinh Cơ Cổ Thụ','#8be04a',0],
   [/\(Ngọc Hộ Mệnh\)/,'Ngọc Hộ Mệnh','#ffe27a',0],
   [/ẩn mình trong mây/,'Vân Ẩn','#c9d8ff',1],
-  [/Sương Tán giảm nửa/,'Sương Tán','#9fd9c8',1]
+  [/·\s\S+\sSương Tán/,'Sương Tán','#9fd9c8',1],
+  [/·\s\S+\sDương Diệm/,'Dương Diệm','#ffb84a',0],
+  [/·\s\S+\sThần Phán/,'Thần Phán','#ffd24a',0],
+  [/·\s\S+\sTinh Quang/,'Tinh Quang','#c08aff',0],
+  [/·\s\S+\sThiên Uy/,'Thiên Uy','#fff0a0',0],
+  [/bị đóng băng, mất lượt/,'Băng Phong','#9fe4ff',1]   /* bên bị đóng băng là bên ra sự kiện → chủ buff là bên đối diện */
  ];
- function evName(t){for(const a of EVN)if(a[0].test(t))return a;return null}
+ function evNames(t){const o=[];for(const a of EVN)if(a[0].test(t))o.push(a);return o}
+ /* y (toạ độ canvas 360×250) ngay dưới bảng thông tin; đo từ DOM, lỗi thì dùng mặc định */
+ function hudBottom(g){
+  try{
+   const cv=g.canvas,p=cv&&cv.parentNode,r=cv.getBoundingClientRect();
+   if(!p||!(r.height>0))return 0;
+   let m=0;p.querySelectorAll('.bh-stage').forEach(el=>{const b=el.getBoundingClientRect().bottom;if(b>m)m=b});
+   return m?Math.max(0,Math.min(150,(m-r.top)*250/r.height)):0;
+  }catch(_){return 0}
+ }
  function banner(g,fx){
-  const a=evName(fx.text||'');if(!a)return;
-  const own=a[3]?!fx.pp:!!fx.pp;                 /* true = thú của mình (bên trái x=85), false = thú đối thủ (x=272) */
+  const list=evNames(fx.text||'');if(!list.length)return;
   const q=Math.max(0,Math.min(1,fx.q||0));
   const al=Math.min(1,q/.1,(1-q)/.25+.15);       /* hiện nhanh, giữ, mờ dần ở cuối */
   if(!(al>.01))return;
+  const y0=Math.max(50,hudBottom(g)+9),used={};
   g.save();
-  g.globalAlpha=Math.max(0,Math.min(1,al));g.font='bold 13px monospace';g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';
-  const w=g.measureText(a[1]).width,x=Math.max(w/2+4,Math.min(356-w/2,own?85:272)),y=50-q*5;
-  g.lineWidth=4;g.strokeStyle='rgba(16,8,24,.92)';g.strokeText(a[1],x,y);
-  g.fillStyle=a[2];g.fillText(a[1],x,y);
+  g.globalAlpha=Math.max(0,Math.min(1,al));g.font='bold 13px monospace';g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.lineWidth=4;
+  list.forEach(a=>{
+   const own=a[3]?!fx.pp:!!fx.pp;               /* true = thú của mình (bên trái x=85), false = thú đối thủ (x=272) */
+   const side=own?0:1,n=used[side]||0;used[side]=n+1;
+   const w=g.measureText(a[1]).width,x=Math.max(w/2+4,Math.min(356-w/2,own?85:272)),y=y0-q*4+n*15;
+   g.strokeStyle='rgba(16,8,24,.92)';g.strokeText(a[1],x,y);
+   g.fillStyle=a[2];g.fillText(a[1],x,y);
+  });
   g.restore();
  }
+ window.TTGEvBanner=banner;
  const F=window.TTGFX;
  if(F&&typeof F.impact==='function'&&!F.impact.__evn){
   const o=F.impact,w=function(g,fx){

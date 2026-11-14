@@ -432,6 +432,7 @@
       const sun = hasSet(a, 'sun');
       if(sun && sun.v && d.hp / d.mx > 0.6){
         dm = Math.round(dm * (1 + sun.v.pct / 100));
+        note += ' · ☀️ Dương Diệm';                                  // [FX 4A] chỉ để hiện nhãn, không đổi công thức
       }
       if(d.shield > 0){
         const ab = Math.min(d.shield, dm);
@@ -454,7 +455,7 @@
         push(side(d), 'hit', ref, '↩ Phản đòn -' + ref);
       }
       const fr = hasSet(d, 'frost');
-      if(fr && fr.v && roll(fr.v.ch) && d.hp > 0){ a.stn = 1; }
+      if(fr && fr.v && roll(fr.v.ch) && d.hp > 0){ a.stn = 2; }   // [FX 4A] 2 = đóng băng (chỉ khác nhãn/hiệu ứng, vẫn mất 1 lượt như choáng)
       return dm;
     };
 
@@ -478,7 +479,7 @@
 
     const act = function(a, d){
       if(a.hp <= 0 || d.hp <= 0) return;
-      if(a.stn){ a.stn = 0; push(side(a), 'stun', 0, a.n + ' bị choáng/đóng băng, mất lượt!'); return; }
+      if(a.stn){ const fz = a.stn === 2; a.stn = 0; push(side(a), 'stun', 0, a.n + (fz ? ' bị đóng băng, mất lượt!' : ' bị choáng, mất lượt!')); return; }
       if(d.nextEvade){
         d.nextEvade = false;
         push(side(a), 'miss', 0, '☁️ ' + d.n + ' ẩn mình trong mây, đòn trượt!');
@@ -505,7 +506,7 @@
       let dm = Math.max(1, Math.round((a.atk * lo(a) + a.mag * 0.3) * 1.6 * 100 / (100 + d.def * lo(d) * (1 - ig)) * a.r * (cr ? 1.5 + kv(a, 4) * 3 / 100 : 1)));
       if(cr){
         const st = hasSet(a, 'star');
-        if(st && st.v && st.v.pct) dm = Math.round(dm * (1 + st.v.pct / 100));
+        if(st && st.v && st.v.pct){ dm = Math.round(dm * (1 + st.v.pct / 100)); note += ' · ✨ Tinh Quang'; }   // [FX 4A] nhãn
       }
       if(kv(d, 2)){                                                   // Chắn đòn
         const cap = Math.round(d.mx * (60 - 40 * Math.min(1, d.e)) / 100);
