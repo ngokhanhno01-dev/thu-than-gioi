@@ -13,8 +13,9 @@ OUT = sys.argv[2] if len(sys.argv) > 2 else '.'
 SIZE, MARGIN = 256, 6
 BG = np.array([21, 26, 30])
 THR = 40            # khoảng cách màu so với nền; > THR là điểm ảnh của icon (gồm cả quầng sáng)
-HOLE_MAX = 1500     # lỗ nhỏ bên trong (điểm đen của giáp...) được lấp; lỗ lớn để trong suốt
-RING_HOLE_THR = 70  # lòng chiếc vòng có quầng tím mờ (d≈10-50) bị vỡ vụn ở THR=40 -> cắt riêng bằng ngưỡng cao hơn
+HOLE_MAX = 10**9    # lấp MỌI lỗ kín bên trong (khe nứt/lem trắng giữa các vệt quầng sáng); riêng lòng nhẫn khoét lại sau
+CLOSE_R = 7         # đóng các khe nứt hẹp ăn vào từ mép
+RING_HOLE_THR = 125 # lòng chiếc vòng có quầng tím mờ (d≈10-50) bị vỡ vụn ở THR=40 -> cắt riêng bằng ngưỡng cao hơn
 
 # (tên, x0, y0, x1, y1) vùng chứa từng món trong ảnh sheet
 REGIONS = [('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
@@ -30,6 +31,10 @@ for name, x0, y0, x1, y1 in REGIONS:
     lab, n = ndi.label(reg)
     sizes = ndi.sum(reg, lab, range(1, n + 1))
     m = lab == (1 + int(np.argmax(sizes)))          # chỉ giữ khối lớn nhất (bỏ nhiễu / dấu sao)
+    pad = CLOSE_R + 2                               # đóng khe nứt (có đệm để không dính mép ảnh)
+    mp = np.pad(m, pad)
+    mp = ndi.binary_closing(mp, structure=np.hypot(*np.mgrid[-CLOSE_R:CLOSE_R+1, -CLOSE_R:CLOSE_R+1]) <= CLOSE_R)
+    m = mp[pad:-pad, pad:-pad]
     holes, hn = ndi.label(~m)                       # lấp lỗ nhỏ
     hs = ndi.sum(~m, holes, range(1, hn + 1))
     for i, s in enumerate(hs, 1):
@@ -42,6 +47,7 @@ for name, x0, y0, x1, y1 in REGIONS:
         core = ndi.binary_opening(low, structure=disk)
         cl, _ = ndi.label(core)
         hole = ndi.binary_dilation(cl == cl[900, 215], structure=disk) & low
+        hole = ndi.binary_fill_holes(ndi.binary_opening(hole, structure=disk))   # làm mượt mép lòng nhẫn
         m &= ~hole
     ys, xs = np.where(m)
     ty0, ty1, tx0, tx1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
