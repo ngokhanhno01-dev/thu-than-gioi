@@ -791,29 +791,45 @@ function shieldOrbit(g,x,T,elapsed,hold,front,fa){
   if(o.pop<1)buffSpark(g,o.x,o.y,2,'#dffbff',.9*(1-o.pop),2.4);
  }}finally{g.restore()}
 }
+const BQ={t0:[-1,-1]};
+/* ===== FX 4A (làm lại): BẤT KHUẤT — cuồng nộ: lúc kích hoạt bùng nổ (sóng đất + cột lửa đỏ đen), đối thủ run sợ; sau đó aura giận dữ bập bùng dữ dội, gân giận, vết cào, tiếng gầm lặp lại ===== */
 function bqAura(g,x,T,elapsed,side,front){
- const dir=side===0?1:-1,phase=T*2.7+side*1.3+(elapsed||0)*.14,pulse=.72+.28*Math.sin(phase),u=3.4;
+ if(BQ.t0[side]<0)BQ.t0[side]=T;
+ const dir=side===0?1:-1,ox=side===0?272:85,age=T-BQ.t0[side],boom=FXE.cl(age/1.1,0,1),be=1-FXE.ph(age,.2,1.1),ph=T*5+side*1.3,pulse=.7+.3*Math.sin(ph*1.7),u=3.4;
  g.save();
  if(!front){
-  buffArc(g,x,204,38,9,phase*.08,phase*.08+Math.PI*2,'#581b27',.78,u,T,1);buffArc(g,x,204,31,6,phase*.08+.5,phase*.08+Math.PI*1.35,'#fb493c',.8*pulse,u,T,1);
+  FXE.glow(g,x,160,74+26*be,'#a80f1c',.26+.1*pulse+.25*be);
+  buffArc(g,x,204,40+5*pulse,9,ph*.07,ph*.07+Math.PI*2,'#3a0c16',.85,u,T,1);buffArc(g,x,204,34+5*pulse,7,ph*.07+.5,ph*.07+Math.PI*1.45,'#ff3b2a',.9*pulse,u,T,1);
   for(let i=0;i<9;i++){
-   const bx=x+(i-4)*9,top=164-(12+Math.abs(i-4)*2+Math.floor((1+Math.sin(phase+i*1.8))*7))*pulse,rows=Math.max(4,Math.floor((204-top)/u));
-   for(let r=0;r<rows;r++){
-    const py=204-r*u,half=Math.max(0,Math.floor((rows-r)/5)),w=1+half*2;
-    buffPixel(g,bx,py,'#4c1725',.86,u,w+2,1);buffPixel(g,bx,py,r%3===0?'#ff633d':'#d92739',.84,u,w,1);
-    if(r%3===1)buffPixel(g,bx-dir*u,py,'#ffad50',.78,u,1,1);if(r%4===0)buffPixel(g,bx+dir*u,py,'#ffe081',.7,u,1,1);
-   }
+   const bx=x+(i-4)*8.5,hh=(28+bh(i,2)*22+(4-Math.abs(i-4))*4)*(.8+.4*Math.sin(T*11+i*1.7))*(1+.8*be),n=Math.max(2,Math.floor(hh/u));
+   for(let r=0;r<n;r++){const v=r/n,w=Math.max(1,Math.round((1-v)*3+(r<2?1:0))),px=bx+Math.sin(T*8+i*2+v*3.4)*v*5,yy=204-r*u;
+    buffPixel(g,px,yy,'#1e0610',.9,u,w+2,1);buffPixel(g,px,yy,v<.25?'#ffb040':v<.55?'#ff3b2a':'#b3121f',.9*(1-v*.35),u,w,1)}
+  }
+  if(age<1.4){
+   const pil=[-48,-24,0,24,48];
+   for(let j=0;j<5;j++){const tb=.12+Math.abs(j-2)*.05,gr=FXE.eOut(FXE.cl((age-tb)/.18,0,1))*(1-FXE.ph(age,tb+.3,tb+.7));if(gr<=.02)continue;
+    const H=(140-Math.abs(j-2)*26)*gr,px=x+pil[j]*.9;
+    for(let t=0;t<4;t++){const w=5-t,hh=H*(1-t*.2);buffPixel(g,px,204-hh/2,t===0?'#1e0610':t===1?'#7a0f1c':t===2?'#ff3b2a':'#ffb040',.8-.1*t,u,w+(t?0:2),hh/u)}
+    buffPixel(g,px,204-H-3,'#ffe081',.9,u,2,2)}
   }
  }else{
-  /* Các vết cào đỏ/cam chạy hai bên thân, giữ rõ cả khi aura của thú đang sáng. */
-  for(let s of [-1,1])for(let i=0;i<3;i++){
-   const sx=x+s*(25+i*2),sy=144+i*10+Math.sin(phase+i)*2,ex=sx+dir* s*(18+i*4),ey=sy-13-i*2;
-   const pts=[[sx,sy],[sx+s*5,sy-4],[ex-s*3,ey+3],[ex,ey]];
-   buffLine(g,pts,'#611627',.9*pulse,u,3);buffLine(g,pts,i===1?'#ffb34a':'#ff5141',.93*pulse,u,1);
-   if(i===1)buffPixel(g,ex,ey,'#fff0a0',.95,u,2,1);
+  for(let sd of [-1,1])for(let i=0;i<4;i++){
+   const sx=x+sd*(24+i*2),sy=140+i*9+Math.sin(ph+i)*2,ex=sx+dir*sd*(19+i*4),ey=sy-14-i*2,pts=[[sx,sy],[sx+sd*5,sy-4],[ex-sd*3,ey+3],[ex,ey]];
+   buffLine(g,pts,'#3a0c16',.92*pulse,u,3);buffLine(g,pts,i%2?'#ffb34a':'#ff2f2f',.95*pulse,u,1);
   }
-  buffArc(g,x,203,44,13,phase*.17,phase*.17+Math.PI*1.8,'#ff6340',.86*pulse,u,T,1);
-  for(let i=0;i<7;i++){const an=phase*.46+i*Math.PI*2/7,px=x+Math.cos(an)*39,py=161+Math.sin(an)*34;pixelStar(g,px,py,2.4,i%2?'#ff6742':'#ffbf52','#fff0a4',.75*pulse)}
+  const ax=x+dir*22,ay=104,sc=.85+.35*Math.sin(T*13),m=[[-1,-1],[1,-1],[1,1],[-1,1]];
+  for(const c of m){const a0=[ax+c[0]*3*sc,ay+c[1]*3*sc],pts=[[a0[0]+c[0]*7*sc,a0[1]],a0,[a0[0],a0[1]+c[1]*7*sc]];buffLine(g,pts,'#3a0c16',.95,2.6,3);buffLine(g,pts,'#ff2a2a',.98,2.6,1)}
+  for(let i=0;i<10;i++){const p=(T*.9+i*.123+bh(i,6))%1;buffPixel(g,x+(bh(i,8)-.5)*58+Math.sin(T*3+i)*6,196-p*96,i%2?'#ff3b2a':'#ffb040',(1-p)*.9,2.4,1,1)}
+  if(age>1.1){const rp=((age-1.1)%2.4)/2.4;ringPix(g,x,204,14+rp*120,3+rp*26,20,'#ff3b2a','#3a0c16',(1-rp)*.7,4)}
+  if(age<1.3){
+   for(let i=0;i<3;i++){const w=FXE.cl((age-.08*i)/.8,0,1);if(w<=0||w>=1)continue;ringPix(g,x,204,12+w*165,3+w*38,26,i%2?'#ffb040':'#ff3b2a','#3a0c16',(1-w)*.95,4)}
+   const sa=FXE.ph(age,.12,.3);if(sa>0){const sl=FXE.seed('bq-act:'+side,age);if(FXE.once(sl,'b'))FXE.burst(FXE.rng(sl.seed^0x2b9),x,170,32,{speed:[40,170],ang:[-Math.PI*.98,-Math.PI*.02],size:[1.6,3.8],life:[.5,1.1],gy:120,drag:.45,shape:'shard',c:'#ff3b2a',c2:'#ffe081',a:.97,add:true,tag:'status',vr:[-8,8],floor:206,bounce:.2})}
+  }
+  if(age<3.2){
+   const fa=1-FXE.ph(age,2.2,3.2);
+   for(let i=0;i<3;i++){const p=(T*1.5+i*.34)%1,dx=ox+(i-1)*19,dy=112+p*52;buffPixel(g,dx,dy,'#5aa8e6',.9*fa,2.8,1,2);buffPixel(g,dx,dy-3,'#d6f0ff',.9*fa,2.8,1,1)}
+   const tr=Math.round(Math.sin(T*60))*1.4;for(let sd of[-1,1])for(let i=0;i<2;i++)buffPixel(g,ox+sd*(34+i*5)+tr,140+i*14,'#9fd0ff',.85*fa,2.6,1,3);
+  }
  }
  g.restore();
 }
@@ -826,32 +842,40 @@ function pixelMagicCircle(g,x,y,T,a,revive){
  buffDiamond(g,x,y,3,col,a,u);buffPixel(g,x,y,hi,a,u,1,5);buffPixel(g,x,y,hi,a,u,5,1);g.restore();
  }
 function pixelLava(g,x,T,q,s,dir,scale){
- const p=FXE.cl(q,0,1),u=3.5*(scale||1),floor=205,fade=1-FXE.ph(p,.84,1),rise=FXE.eOut(FXE.cl(p/.48,0,1)),spread=(10+74*rise)*(scale||1),phase=T*2.4;
+ /* DUNG NHAM PHUN TRÀO (kiểu núi lửa): mặt đất rung mạnh + nứt đỏ → dung nham phun từ dưới đất lên thành các cột → cục nham bắn theo cung rơi xuống + khói → nguội dần */
+ const p=FXE.cl(q,0,1),k=scale||1,u=3.5,fl=205,fade=1-FXE.ph(p,.86,1),rum=FXE.eOut(FXE.cl(p/.05,0,1))*(1-FXE.ph(p,.4,.66)),jx=Math.sin(T*83)*2.4*rum,jy=Math.sin(T*71+1)*1.3*rum;
  g.save();
- /* Nứt nền tối, viền than và các nhánh dung nham sáng chảy dọc mặt đất. */
- buffLine(g,[[x-spread-14,floor+2],[x-spread*.52,floor-2],[x-13,floor+1],[x+8,floor-3],[x+spread*.6,floor+1],[x+spread+12,floor-2]],'#241a25',.95*fade,u,4);
- buffLine(g,[[x-spread-5,floor],[x-spread*.48,floor-3],[x-9,floor],[x+10,floor-2],[x+spread*.5,floor],[x+spread+5,floor-1]],'#eb3425',.95*fade,u,2);
- buffLine(g,[[x-spread*.68,floor-3],[x-14,floor-3],[x+7,floor-5],[x+spread*.72,floor-3]],'#ffbc42',.96*fade,u,1);
- for(let side of [-1,1])for(let i=0;i<7;i++){
-  const d=side*(8+i*8*(.5+rise)),yy=floor-1-(i%3)*u,aa=fade*(1-i*.085);
-  buffPixel(g,x+d,yy,'#601d24',aa,u,4-(i%2),2);buffPixel(g,x+d,yy,i%3===0?'#ffce55':'#ff672b',aa,u,2+(i%2),1);
-  if(i%2===0)buffPixel(g,x+d+side*u,yy-u,'#fff08a',aa*.8,u,1,1);
+ const crk=FXE.eOut(FXE.cl(p/.16,0,1)),L=(26+66*crk)*k;
+ FXE.glow(g,x,fl-2,(38+34*crk)*k,'#ff3a14',(.12+.22*FXE.ph(p,.12,.3))*fade);
+ for(let c=0;c<5;c++){
+  const an=(c-2)*.52+(c%2?.1:-.1),len=L*(.55+.45*bh(c,5)),pts=[];
+  for(let j=0;j<=4;j++){const f=j/4;pts.push([x+jx+Math.cos(an)*len*f+(bh(c,j+9)-.5)*7,fl-1+jy+Math.sin(an)*len*f*.3+(bh(c,j+20)-.5)*3])}
+  buffLine(g,pts,'#1c0f16',.95*fade,u,3);buffLine(g,pts,'#ff3a1e',.95*fade,u,1);
+  if(p>.14)buffLine(g,pts.slice(0,4),'#ffc24a',(.7+.3*Math.sin(T*18+c))*fade,u,1);
  }
- /* Năm vòi nham thạch bậc pixel phun thẳng lên khỏi khe. */
- for(let j=-2;j<=2;j++){
-  const center=x+j*10*u*.72+Math.sin(phase+j*1.7)*2*u, h=(20+22*(.5+.5*Math.sin(phase+j*1.9)))*rise*fade+5*rise, nr=Math.max(1,Math.floor(h/u));
-  for(let r=0;r<nr;r++){
-   const yy=floor-u*(r+.5),half=Math.max(0,Math.floor((nr-r)/5)),w=1+half*2;
-   buffPixel(g,center,yy,'#681b27',fade,u,w+2,1);buffPixel(g,center,yy,r%4===0?'#ff9b32':'#f34225',fade,u,w,1);
-   if(r%3===1)buffPixel(g,center-u,yy,'#ffd458',fade*.95,u,1,1);if(r%4===0)buffPixel(g,center+u,yy,'#fff0a0',fade*.82,u,1,1);
+ for(let i=0;i<9;i++){const cx=x+(bh(i,7)-.5)*L*1.7,hop=Math.abs(Math.sin(T*31+i*2.3))*6*rum;buffPixel(g,cx,fl-2-hop,i%2?'#4a3436':'#2e2024',.9*rum*fade,2.6,2,1)}
+ const env=FXE.eOut(FXE.ph(p,.12,.34))*(1-FXE.ph(p,.6,.86));
+ if(env>.02){
+  const cols=[[-44,56],[-24,90],[0,122],[24,90],[44,56]];
+  for(let j=0;j<5;j++){
+   const cx0=x+cols[j][0]*k,h=cols[j][1]*env*(.86+.14*Math.sin(T*14+j*1.7)),n=Math.max(1,Math.floor(h/u));
+   for(let r=0;r<n;r++){
+    const v=r/n,sw=Math.sin(T*9+j*2+v*4)*v*4,w=Math.max(1,Math.round(1+3.2*Math.pow(1-v,1.1)+(v>.86?1:0))),yy=fl-r*u-u/2,px=cx0+sw+jx*.5;
+    buffPixel(g,px,yy,'#681b27',fade*.95,u,w+2,1);buffPixel(g,px,yy,v<.3?'#ffb23a':r%2?'#f34225':'#ff7a2e',fade*.96,u,w,1);
+    if(w>=3&&r%2===0)buffPixel(g,px,yy,'#ffe27a',fade*.9,u,w-2,1);
+   }
+   FXE.glow(g,cx0,fl-h*.55,22+h*.12,'#ff5a1e',.22*env*fade);
   }
  }
- /* Đá đen viền cam bay theo cung, bong bóng đỏ nằm sát mặt đất. */
- for(let i=0;i<8;i++){
-  const ang=phase*.7+i*2.399,dist=17+((i*17)%31),px=x+Math.cos(ang)*dist*rise,py=floor-5-Math.abs(Math.sin(ang))*48*rise;
-  buffPixel(g,px,py,'#331c2a',fade*.96,u,2+(i%2),2);buffPixel(g,px+u,py-u,'#ff6b32',fade*.95,u,1,1);if(i%3===0)buffPixel(g,px,py-u,'#ffd75a',fade,u,1,1);
+ for(let i=0;i<12;i++){
+  const tl=.15+i*.03,a=(p-tl)*1.05;if(a<0)continue;
+  const vx=(bh(i,11)-.5)*140,vy0=-(110+bh(i,12)*100),px=x+vx*a+jx,py=fl-6+vy0*a+.5*380*a*a;if(py>fl-1||a>1.4)continue;
+  const hot=FXE.cl(1-a/.9,0,1);buffPixel(g,px,py,'#331c2a',fade*.95,u,3,3);buffPixel(g,px,py,hot>.5?'#ffd458':'#ff672b',fade*.97,u,2,2);
+  buffPixel(g,px-vx*.02,py-vy0*.02-3,'#ff7a2e',fade*.6*hot,u,1,1);
  }
- if(p>.14)statusBurst(s,'lava',x,floor-5,22,{speed:[25,120],ang:[-Math.PI*.98,-Math.PI*.02],size:[1.6,3.8],life:[.45,1.15],gy:150,drag:.43,shape:'shard',c:'#ff642b',c2:'#ffe17a',a:.96,add:true,tag:'status',vr:[-8,8],floor:207,bounce:.2});
+ const sa=FXE.ph(p,.3,.5)*fade;
+ if(sa>0)for(let i=0;i<6;i++){const f=(p*1.4+i*.17)%1,sx=x+(i-2.5)*13+Math.sin(T*2+i)*6,sy=fl-80-f*55,sz=5+f*6;buffPixel(g,sx,sy,'#2b2229',.38*(1-f)*sa,sz,1,1)}
+ if(p>.12)statusBurst(s,'lava',x,fl-5,26,{speed:[30,140],ang:[-Math.PI*.98,-Math.PI*.02],size:[1.6,3.8],life:[.5,1.2],gy:150,drag:.43,shape:'shard',c:'#ff642b',c2:'#ffe17a',a:.96,add:true,tag:'status',vr:[-8,8],floor:207,bounce:.2});
  g.restore();
 }
 /* KHIÊN chặn đòn: 1 khiên ở phía kẻ đánh chớp sáng → nứt → vỡ thành mảnh pixel xanh văng có trọng lực + vòng sóng; các khiên còn lại mờ dần */
@@ -894,7 +918,36 @@ function statusShield(g,fx,T,q,x,y,s){g.save();try{
  }
  return true;
 }finally{g.restore()}}
+/* vòng chấm pixel (elip) dùng cho sóng/vành sáng */
+function ringPix(g,cx,cy,rx,ry,n,col,dark,a,u){if(a<=.02)return;for(let i=0;i<n;i++){const an=i*FXE.TAU/n+.2,px=cx+Math.cos(an)*rx,py=cy+Math.sin(an)*ry;buffPixel(g,px,py,dark,a*.8,u,2,2);buffPixel(g,px,py,col,a,u,1,1)}}
+/* ===== FX 4A (làm lại): HỒI SINH — pháp trận hiện dưới chân → các tia sáng lần lượt bắn thẳng lên trời → năng lượng tụ lại thành quả cầu trên ngực thú rồi nở ra ===== */
+function statusRevive(g,fx,T,q,x,s){
+ const GR='#35ed78',HI='#d5ffe0',GD='#ffe27a',DK='#123d32',N=7,BH=132,E=FXE.TAU;
+ const ca=FXE.ph(q,0,.12)*(1-FXE.ph(q,.9,1));
+ if(ca>0){pixelMagicCircle(g,x,204,T*1.6,ca,true);ringPix(g,x,204,50+8*FXE.ph(q,0,.3),12,18,GD,DK,ca*.9,3.4);FXE.glow(g,x,204,46,GR,.22*ca)}
+ for(let i=0;i<N;i++){
+  const an=i*E/N,bx=x+Math.cos(an)*38,tb=.14+i*.05,grow=FXE.eOut(FXE.cl((q-tb)/.09,0,1)),shrink=FXE.ph(q,tb+.15,tb+.3);
+  if(grow<=0)continue;
+  const top=204-BH*grow,bot=204-BH*shrink,hgt=bot-top;if(hgt<=2)continue;const cy=(top+bot)/2,rows=hgt/3;
+  buffPixel(g,bx,cy,DK,.55,3,5,rows);buffPixel(g,bx,cy,GR,.8,3,3,rows);buffPixel(g,bx,cy,HI,.96,3,1,rows);
+  buffPixel(g,bx,top-2,HI,.95,3,3,2);buffPixel(g,bx,top-5,GD,.9,3,1,2);
+  for(let k=0;k<3;k++){const sy=top+((T*46+i*17+k*43)%hgt);buffPixel(g,bx+(k%2?3:-3)*1.4,sy,k%2?GD:HI,.85*(1-shrink),2.4,1,1)}
+  if(shrink<1)FXE.glow(g,bx,203,11,GD,.42*(1-shrink));
+ }
+ for(let i=0;i<14;i++){
+  const k=i%N,ox=x+Math.cos(k*E/N)*38,oy=204-BH+bh(i,3)*34,ts=.46+k*.012,pm=FXE.cl((q-ts)/.4,0,1),e=pm*pm*(3-2*pm);if(pm<=0||q>.94)continue;
+  const px=ox+(x-ox)*e+Math.sin((1-e)*6+i)*9*(1-e),py=oy+(150-oy)*e;
+  buffPixel(g,px,py,DK,.7,3,2,2);buffPixel(g,px,py,i%2?GD:HI,.95,2.6,1,1);
+ }
+ const oa=FXE.ph(q,.52,.78)*(1-FXE.ph(q,.9,1)),rad=3+10*FXE.eOut(FXE.ph(q,.5,.88));
+ if(oa>0){FXE.glow(g,x,150,10+rad*2,GR,.4*oa);buffDiamond(g,x,150,Math.max(1,Math.round(rad/3)),DK,.85*oa,3.6);buffDiamond(g,x,150,Math.max(1,Math.round(rad/4)),GR,.95*oa,3.4);buffDiamond(g,x,150,1,HI,oa,3.2)}
+ if(q>.88){const k=FXE.ph(q,.88,1);ringPix(g,x,150,12+40*k,12+40*k,22,GD,DK,(1-k)*.95,3.4);ringPix(g,x,204,20+60*k,5+14*k,20,GR,DK,(1-k)*.9,3.4)}
+ if(q>.2)statusBurst(s,'rev1',x,200,14,{speed:[20,80],ang:[-Math.PI*.9,-Math.PI*.1],size:[1.4,3],life:[.5,1],gy:-60,drag:.5,shape:'spark',c:GR,c2:HI,a:.95,add:true,tag:'status'});
+ if(q>.88)statusBurst(s,'rev2',x,150,22,{speed:[25,95],ang:[-Math.PI,Math.PI],size:[1.4,3.2],life:[.4,.9],gy:40,drag:.5,shape:'spark',c:GD,c2:HI,a:.95,add:true,tag:'status'});
+ return true;
+}
 function statusHeal(g,fx,T,q,x,y,s,text){g.save();try{
+ if(/hồi sinh/i.test(text))return statusRevive(g,fx,T,q,x,s);
  const rev=/hồi sinh/i.test(text),drain=/hút máu/i.test(text),fa=1-q,phase=T*.9,col=rev?'#35ed78':drain?'#ed5571':'#56e985',hi=rev?'#d5ffe0':drain?'#ffc0cb':'#e5ffed';
  if(rev){pixelMagicCircle(g,x,204,T,fa,true);buffArc(g,x,203,22,5,T*.2,T*.2+Math.PI*2,'#c8ffd5',.9*fa,3,T,1)}
  else{buffArc(g,x,200,32,9,T*.19,T*.19+Math.PI*1.6,'#1f5a39',.75*fa,3,T,1);buffArc(g,x,200,28,7,T*.19+.7,T*.19+Math.PI*2,col,.9*fa,3,T,1)}
@@ -909,7 +962,7 @@ function statusHeal(g,fx,T,q,x,y,s,text){g.save();try{
 }finally{g.restore()}}
 /* ===== FX 4A (làm lại): THIÊU ĐỐT — lửa THẬT bám trên người mục tiêu, vẽ lặp mỗi khung tới khi hết trận; mỗi lần game trừ máu thì bùng lên một nhịp ===== */
 const BURN={lit:[0,0],t0:[0,0],hit:[-9,-9],qs:[1,1],last:0};
-function burnReset(elapsed){if(elapsed<BURN.last-.3){for(let i=0;i<2;i++){BURN.lit[i]=0;BURN.t0[i]=0;BURN.hit[i]=-9;BURN.qs[i]=1}}BURN.last=elapsed}
+function burnReset(elapsed){if(elapsed<BURN.last-.3){BQ.t0[0]=BQ.t0[1]=-1;for(let i=0;i<2;i++){BURN.lit[i]=0;BURN.t0[i]=0;BURN.hit[i]=-9;BURN.qs[i]=1}}BURN.last=elapsed}
 function bh(i,k){const v=Math.sin(i*127.1+k*311.7)*43758.5453;return v-Math.floor(v)}
 /* front=false: quầng nóng + khói phía SAU thú · front=true: lưỡi lửa + tàn lửa phía TRƯỚC thú (mỏng, thưa để vẫn thấy thân thú) */
 function burnLayer(g,x,T,front,side){g.save();try{
@@ -1053,26 +1106,38 @@ function statusCounter(g,fx,T,q,x,y,s){g.save();try{
  return true;
 }finally{g.restore()}}
 function statusFreeze(g,fx,T,q,x,y,s){g.save();try{
- const p=FXE.eOut(FXE.cl(q/.28,0,1)),fade=1-FXE.ph(q,.82,1),u=4.1,ground=207,height=88*p,rows=Math.max(1,Math.floor(height/u));
- if(rows>0){for(let r=0;r<rows;r++){
-  const v=r/Math.max(1,rows-1),yy=ground-r*u,half=Math.max(1,Math.round(1+6*Math.sin(Math.PI*v)));
-  for(let c=-half-1;c<=half+1;c++){
-   const edge=Math.abs(c)>half,facet=c< -half*.34?'#388bb2':c>half*.35?'#95eaff':'#58bfdf',core=(r+c)%5===0?'#e2ffff':facet;
-   buffPixel(g,x+c*u,yy,edge?'#123d62':core,fade*(edge?.88:.46),u);
-}
-  if(r%3===1)buffPixel(g,x-u,yy,'#d6fbff',fade*.74,u,1,1);
-  if(r%4===0)buffPixel(g,x+u*2,yy,'#1f628a',fade*.7,u,1,1);
-}
- buffLine(g,[[x,ground-height],[x-4*u,ground-height*.68],[x-2*u,ground-height*.42],[x-5*u,ground-height*.17]],'#cfffff',.72*fade,u,1);
- buffLine(g,[[x,ground-height],[x+4*u,ground-height*.72],[x+u,ground-height*.4],[x+5*u,ground-height*.18]],'#2c7ca3',.78*fade,u,2);
- buffLine(g,[[x-5*u,ground-height*.35],[x-2*u,ground-height*.32],[x,ground-height*.25],[x+3*u,ground-height*.2]],'#c9f8ff',.63*fade,u,1);
-}
+ /* khối băng lớn trùm qua đầu thú (nửa trong suốt), tinh thể băng mọc quanh chân và trên đỉnh; cuối cùng vỡ thành mảnh rơi */
+ const u=4.1,gnd=207,grow=FXE.eOut(FXE.cl(q/.26,0,1)),fade=1-FXE.ph(q,.84,1),shat=FXE.ph(q,.84,1),BHt=124*grow,rows=Math.max(1,Math.floor(BHt/u)),hw0=9;
+ for(let r=0;r<rows;r++){
+  const v=r/Math.max(1,rows-1),yy=gnd-r*u-u/2,tp=v>.82?(v-.82)/.18:0,half=Math.max(3,Math.round(hw0-2.8*tp*tp-(v<.05?1:0))),lw=Math.round(half*.66),rw=Math.round(half*.58),mw=Math.max(1,2*half-lw-rw);
+  buffPixel(g,x-(half+.5)*u,yy,'#0f3358',fade*.92,u,1,1);buffPixel(g,x+(half+.5)*u,yy,'#0f3358',fade*.92,u,1,1);
+  buffPixel(g,x+(-half+lw/2)*u,yy,'#9fe4f6',fade*.52,u,lw,1);
+  buffPixel(g,x+((lw-rw)/2)*u,yy,'#58bfdf',fade*.4,u,mw,1);
+  buffPixel(g,x+(half-rw/2)*u,yy,'#2f84ad',fade*.55,u,rw,1);
+  if(r===rows-1||r===0){buffPixel(g,x,yy,'#0f3358',fade*.9,u,2*half+2,1)}
+ }
+ if(BHt>8){
+  buffLine(g,[[x-hw0*u*.62,gnd-10],[x-hw0*u*.3,gnd-BHt*.45],[x-hw0*u*.05,gnd-BHt*.78]],'#f2ffff',.8*fade,u,1);
+  buffLine(g,[[x+hw0*u*.25,gnd-BHt*.2],[x+hw0*u*.1,gnd-BHt*.42],[x+hw0*u*.4,gnd-BHt*.58],[x+hw0*u*.18,gnd-BHt*.86]],'#1f628a',(.55+.35*shat)*fade+.35*shat,u,1);
+  buffLine(g,[[x-hw0*u*.4,gnd-BHt*.3],[x-hw0*u*.12,gnd-BHt*.36]],'#1f628a',.6*fade,u,1);
+ }
+ const cr=[[-17,26],[2,40],[19,22]];
+ for(let i=0;i<3;i++){const hh=cr[i][1]*FXE.ph(q,.1,.3),bx=x+cr[i][0],top=gnd-BHt+2;if(hh<4)continue;
+  const n=Math.floor(hh/3);for(let r=0;r<n;r++){const w=Math.max(1,Math.round((1-r/n)*4)),yy=top-r*3;buffPixel(g,bx,yy,'#123d62',fade*.9,3,w+1,1);buffPixel(g,bx,yy,r%3===0?'#e8ffff':'#6bd5f0',fade*.95,3,Math.max(1,w-1),1)}}
  for(let side of [-1,1])for(let i=0;i<3;i++){
-  const px=x+side*(25+i*10),h=(18+i*9)*p,top=ground-h;
-  buffLine(g,[[px-side*6,ground],[px,top],[px+side*6,ground]],'#174a70',.92*fade,u,2);buffLine(g,[[px-side*3,ground-2],[px,top+u],[px+side*2,ground-5]],i===1?'#d9ffff':'#6bd5f0',.88*fade,u,1);
-}
- pixelStar(g,x,ground-height-7,2.6,'#76ddf4','#f3ffff',fade*.9);
- statusBurst(s,'freeze',x,198,24,{speed:[18,86],ang:[-Math.PI*.97,-Math.PI*.03],size:[1.3,3.3],life:[.45,1],gy:95,drag:.5,shape:'shard',c:'#7cdef7',c2:'#f1ffff',a:.95,add:true,tag:'status',vr:[-4,4],floor:207,bounce:.2});return true;
+  const px=x+side*(38+i*10),h=(30+i*13)*FXE.ph(q,0,.28),top=gnd-h;if(h<4)continue;
+  buffLine(g,[[px-side*7,gnd],[px+side*2,top],[px+side*8,gnd]],'#174a70',.92*fade,u,2);buffLine(g,[[px-side*3,gnd-2],[px+side*2,top+u],[px+side*3,gnd-6]],i===1?'#e8ffff':'#6bd5f0',.9*fade,u,1);
+ }
+ ringPix(g,x,gnd-2,46,8,16,'#bff4ff','#174a70',.8*fade,u);
+ const sa=fade*FXE.ph(q,.15,.3);pixelStar(g,x-30,96,2.4,'#76ddf4','#f3ffff',sa);pixelStar(g,x+8,74,2.8,'#76ddf4','#f3ffff',sa);pixelStar(g,x+32,110,2.2,'#76ddf4','#f3ffff',sa);
+ if(shat>0){
+  const r=FXE.rng((s.seed|0)^0x77aa),t=shat*.55;
+  for(let i=0;i<16;i++){const sx=x+r.range(-34,34),sy=gnd-r.range(10,116),vx=r.range(-40,40),vy=-r.range(10,60);let yy=sy+vy*t+.5*330*t*t;if(yy>gnd)yy=gnd-1;
+   buffPixel(g,sx+vx*t,yy,'#123d62',(1-shat*.8),3.4,2,2);buffPixel(g,sx+vx*t,yy,i%2?'#e8ffff':'#6bd5f0',(1-shat*.8),3,1,1)}
+ }
+ statusBurst(s,'freeze',x,198,24,{speed:[18,86],ang:[-Math.PI*.97,-Math.PI*.03],size:[1.3,3.3],life:[.45,1],gy:95,drag:.5,shape:'shard',c:'#7cdef7',c2:'#f1ffff',a:.95,add:true,tag:'status',vr:[-4,4],floor:207,bounce:.2});
+ if(q>.84)statusBurst(s,'freeze2',x,150,18,{speed:[30,110],ang:[-Math.PI,Math.PI],size:[1.4,3.4],life:[.4,.9],gy:200,drag:.45,shape:'shard',c:'#9fe4f6',c2:'#ffffff',a:.95,add:true,tag:'status',vr:[-6,6],floor:207,bounce:.2});
+ return true;
 }finally{g.restore()}}
 function statusStun(g,fx,T,q,x,y,s){g.save();try{
  const fa=1-q,rot=T*1.35,cy=87,u=3.1;buffArc(g,x,cy,32,10,rot,rot+Math.PI*2,'#40273e',.92*fa,u,T,1);buffArc(g,x,cy,27,7,rot+.2,rot+Math.PI*1.76,'#ffd145',.95*fa,u,T,1);buffArc(g,x,cy,20,4,rot+1,rot+1+Math.PI*1.4,'#fff2a1',.83*fa,u,T,1);
@@ -1108,7 +1173,7 @@ function statusImpact(g,fx,T,z,text,q,target,y){
 function drawLavaAttackCode(g,T,S){g.save();try{
  const u=clamp(S.u||0,0,1),pa=!!S.pa,dir=pa?1:-1,sx=pa?112:248,tx=pa?255:105,slot=FXE.seed('special-lava:'+(pa?'p':'m'),u),phase=FXE.eOut(FXE.cl((u-.04)/.34,0,1));
  if(u<.38){const x=sx+(tx-sx)*phase,y=201+Math.sin(T*8)*1.5;buffPixel(g,x,y,'#401824',.9,4.2,8,3);buffPixel(g,x,y,'#ec4927',.98,3.5,5,2);buffPixel(g,x+dir*5,y-4,'#ffdf65',.98,3.2,2,2);for(let i=0;i<3;i++)buffPixel(g,x-dir*(i+1)*6,y-2-i%2*3,'#ff7e2f',.88,3,2,1);if(u>.14)statusBurst(slot,'seed',x,y,6,{speed:[12,48],ang:[-Math.PI*.92,-Math.PI*.08],size:[1.2,2.4],life:[.25,.55],gy:110,drag:.6,shape:'spark',c:'#ff7434',c2:'#ffe46e',a:.9,add:true,tag:'status'});return true}
- return pixelLava(g,tx,T,FXE.cl((u-.34)/.66,0,1),slot,dir,1.18);
+ return true;/* phần phun trào do drawImpact (pixelLava) vẽ đúng lúc trúng */
 }finally{g.restore()}}
 function drawLightningAttackCode(g,T,S){
  const u=clamp(S.u||0,0,1),pa=!!S.pa,x=pa?255:105,slot=FXE.seed('special-lightning:'+(pa?'p':'m'),u),q=FXE.cl((u-.08)/.92,0,1);pixelCloud(g,x,T,1,3.5);pixelLightningSequence(g,x,T,q,slot,pa?1:-1,205);return true;
@@ -1121,8 +1186,9 @@ function drawBack(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  if(R&&R.zoneBuff){backZone(g,272,z,q,T,e,BUFFSH[R.zoneBuff.stat],1,R.zoneBuff.stat);if(q<=0)auraBack(g,272,z.color,T,.2)}
  if(R&&R.startBuffs&&R.startBuffs.length){backGear(g,85,R.startBuffs[0].kind,q,T,e)}
  /* Bất khuất: dưới 50% máu thì ngọn lửa đỏ bừng sau lưng (nằm sau thú, không đè) */
- if(R&&R.bqP>0&&hp>0&&hp<R.maxP*.5)bqAura(g,85,T,elapsed,0);
- if(R&&R.bqM>0&&mh>0&&mh<R.maxM*.5)bqAura(g,272,T,elapsed,1);
+ burnReset(elapsed);
+ if(R&&R.bqP>0&&hp>0&&hp<R.maxP*.5)bqAura(g,85,T,elapsed,0);else BQ.t0[0]=-1;
+ if(R&&R.bqM>0&&mh>0&&mh<R.maxM*.5)bqAura(g,272,T,elapsed,1);else BQ.t0[1]=-1;
  burnReset(elapsed);
  if(R&&R.brP>0&&hp>0&&BURN.lit[0])burnLayer(g,85,T,false,0);
  if(R&&R.brM>0&&mh>0&&BURN.lit[1])burnLayer(g,272,T,false,1);
