@@ -6,7 +6,7 @@ Trả lời tiếng Việt, ngắn gọn.
 ## !!! QUY TẮC MỚI NHẤT CỦA NGƯỜI DÙNG (ưu tiên cao nhất, ghi đè các mục bên dưới nếu mâu thuẫn)
 
 ### A. QUY TẮC VỀ NỘI DUNG HIỆU ỨNG (người dùng dặn sau khi xem bộ 7 shield — ĐỌC KỸ, đừng làm sai nữa)
-1. TÊN TRONG DEMO PHẢI LÀ TÊN VÙNG, không phải tên hình/vật (không "Shield · Khiên", "Thorn · Gai"...). Ô chọn bộ ở `fx-demo.html` và `tools/fx-demo.html` phải hiện đúng tên vùng (Tuyết Nguyên, Sương Cốc, Vân Đảo, ..., Huyền Uyên, Kim Khoáng...). Chỉ đổi chữ hiển thị, giữ nguyên value (frost, mist, ..., shield, thorn...) để code không hỏng.
+1. TÊN TRONG DEMO PHẢI LÀ TÊN VÙNG, không phải tên hình/vật (không "Shield · Khiên", "Thorn · Gai"...). Ô chọn bộ ở `fx-demo.html` và `tools/fx-demo.html` hiện đúng tên vùng (Tuyết Nguyên, Sương Cốc, Vân Đảo, ..., Huyền Uyên, Kim Khoáng...). Chỉ đổi chữ hiển thị, giữ nguyên value (frost, mist, ..., shield, thorn...) để code không hỏng. ĐÃ SỬA XONG cả 2 file (17 bộ); bộ mới thêm sau này không cần sửa gì thêm ở demo.
 2. LẤY MẤY VÙNG TRƯỚC ĐÃ HOÀN THÀNH LÀM MẪU (frost, mist, cloud, wind, thunder, counter, sun) rồi làm theo cùng kiểu: trận pháp dưới chân + lốc xoắn + nét riêng của vùng.
 3. ĐỪNG LÀM NHƯ KIỂU "KHIÊN" HAY "GAI" (tên kind chỉ là nhãn nội bộ): bước đó CÓ NGƯỜI LÀM RỒI (4 món trang bị của vùng đã có sẵn). Không vẽ cái khiên, cái gai... làm hiệu ứng chính. Chủ đề phải lấy từ VÙNG (tên vùng, môi trường, biểu tượng vùng).
    - Vd Huyền Uyên: vực xoáy, xúc tu, mắt vực (KHÔNG phải khiên). Kim Khoáng (bộ 8): khoáng thạch, mạch kim loại, tinh thể vàng, bụi quặng (KHÔNG phải gai nhọn).
@@ -23,8 +23,9 @@ Trả lời tiếng Việt, ngắn gọn.
 4. LÀM XONG PHẢI CẬP NHẬT GHI CHÚ NÀY (bảng tiến độ + quy tắc mới nếu có) TRONG CÙNG COMMIT, để claude sau hiểu và làm theo. Đừng đẩy mỗi file code mà quên ghi chú.
 
 ## VIỆC CÒN TỒN
-- [ ] Đổi tên hiển thị trong ô chọn bộ của `fx-demo.html` và `tools/fx-demo.html` thành tên vùng (xem quy tắc A.1). Hai file demo hơi khác nhau: chỉ sửa đúng khối `<select id="gear">`, đừng ghi đè cả file bằng bản của file kia. Đẩy cả hai file.
+- [x] Đổi tên hiển thị trong ô chọn bộ của `fx-demo.html` và `tools/fx-demo.html` thành tên vùng (XONG, commit ee10771 và 000f987).
 - [ ] Bộ kế tiếp: 8 thorn (Kim Khoáng #e0b038) — làm theo quy tắc A.
+- Lưu ý khi sửa 2 file demo: chúng hơi khác nhau (bản tools có thêm khiên/thiêu đốt lặp/ảnh mẫu). Chỉ sửa đúng chỗ cần, đừng ghi đè file này bằng bản của file kia.
 
 ## QUY TẮC MÀU (người dùng dặn: "làm theo kiểu màu từng vùng")
 Mỗi bộ trang bị ứng với 1 vùng theo đúng thứ tự (bộ 0 = vùng 0 ...). Bộ mới PHẢI dùng màu của vùng đó (màu ZONES trong 31-combat-fx.js) làm màu chủ đạo:
@@ -104,7 +105,7 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 ## Điều người dùng ĐÃ DUYỆT / ĐÃ YÊU CẦU (đừng làm trái)
 - Làm theo ảnh mẫu "thật giống từ chi tiết, trận pháp, hiệu ứng".
 - Màu mỗi bộ = màu vùng tương ứng (xem QUY TẮC MÀU). Chủ đề mỗi bộ = chủ đề vùng, KHÔNG phải hình khiên/gai... (quy tắc A).
-- Tên trong demo = tên vùng (quy tắc A.1).
+- Tên trong demo = tên vùng (quy tắc A.1, đã làm).
 - KHÔNG cần gửi ảnh cho người dùng duyệt nữa, làm xong đẩy luôn lên nhánh (xem QUY TẮC B.2). Quy tắc "gửi ảnh duyệt trước" cũ đã bị HỦY.
 - Kiểu PIXEL ART là mặc định (thú của game là pixel art; bản vẽ mượt bị chê quá bóng và quá rõ khi đặt gần thú). Đã duyệt pixel pass hiện tại (alpha cứng + viền tối 1px + tầng bán trong suốt).
 - Frost (0), Mist (1), Cloud (2), Thunder (4): người dùng đã xem và bảo làm tiếp (coi như duyệt). Counter (5): người dùng bảo "ổn" nhưng yêu cầu màu theo vùng (đã sửa). Wind (3): đã đẩy, chờ người dùng xem. Sun (6): người dùng bảo "ổn". Shield (7): bản đầu (khiên) bị chê sai hướng → đã vẽ lại theo chủ đề vùng Huyền Uyên, chưa có phản hồi.
