@@ -248,7 +248,8 @@ const EQ_ICON_IMG={0:['img-eq-tuyet-nguyen-vukhi.webp','img-eq-tuyet-nguyen-giap
  3:['img-eq-phong-nguyen-vukhi.webp','img-eq-phong-nguyen-giap.webp','img-eq-phong-nguyen-vong.webp','img-eq-phong-nguyen-ngoc.webp'],
  4:['img-eq-loi-vuc-vukhi.webp','img-eq-loi-vuc-giap.webp','img-eq-loi-vuc-vong.webp','img-eq-loi-vuc-ngoc.webp'],
  5:['img-eq-nguyet-cung-vukhi.webp','img-eq-nguyet-cung-giap.webp','img-eq-nguyet-cung-vong.webp','img-eq-nguyet-cung-ngoc.webp'],
- 6:['img-eq-duong-son-vukhi.webp','img-eq-duong-son-giap.webp','img-eq-duong-son-vong.webp','img-eq-duong-son-ngoc.webp']};
+ 6:['img-eq-duong-son-vukhi.webp','img-eq-duong-son-giap.webp','img-eq-duong-son-vong.webp','img-eq-duong-son-ngoc.webp'],
+ 7:['img-eq-huyen-uyen-vukhi.webp','img-eq-huyen-uyen-giap.webp','img-eq-huyen-uyen-vong.webp','img-eq-huyen-uyen-ngoc.webp']};
 const eqIco=(s,z)=>{const f=z!=null&&EQ_ICON_IMG[z]&&EQ_ICON_IMG[z][s];
  return f?'<img class="pxi eqimg" alt="" src="'+f+'">':pxImg(EQ_SLOTS[s].px,z==null?'#8a95a0':ZONE_COL[z])};
 const eqRgb=it=>'rgb('+QC[it.q]+')';
