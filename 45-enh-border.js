@@ -4,7 +4,9 @@
    +0: không hiệu ứng. +1..+10: class "enh enh-N" trên ô (ô đang mặc, ô kho, khung xem chi tiết).
    Vệt sáng chạy quanh viền = 1 lớp <i class="enh-rg"> (viền khoét bằng mask) chứa nền conic-gradient XOAY bằng transform
    (nhẹ hơn và chạy cả máy cũ, không cần @property). Máy không hỗ trợ mask thì chỉ còn viền phát sáng tĩnh/nhấp nháy.
-   Lấp lánh từ +7: <i class="enh-sp"> (3 lớp đốm lệch pha). Tôn trọng prefers-reduced-motion (đứng yên, giữ màu).
+   Lấp lánh từ +7: <i class="enh-sp"> (3 lớp đốm lệch pha).
+   [SỬA] style.css có luật "prefers-reduced-motion" ép MỌI animation chạy 0,01ms 1 lần (máy bật tiết kiệm pin / tắt hiệu ứng là dính) → viền đứng yên.
+   Nay đặt lại thời lượng + số lần lặp bằng !important riêng cho viền cường hóa (độ ưu tiên cao hơn luật chung) nên luôn chạy.
    Bảng cấp (màu, số vệt, giây/vòng) nằm ở khối CSS bên dưới: .enh-1 … .enh-10 → sửa tại đó.
    Hàm dùng chung cho tab Cường hóa (đợt 5): window.ENHFX.cls(it) / .inner(it) / .decorate(el,it). */
 (()=>{
@@ -74,8 +76,16 @@ window.ENHFX={cls,lv:lvOf,decorate,inner:it=>{const e=lvOf(it);return ringHtml(e
  '.eqpv .pxi{width:28px;height:28px}'+
  /* ô cuộn ra ngoài khung kho: tạm dừng chuyển động cho nhẹ máy */
  '.enh-off::after,.enh-off .enh-rg::before,.enh-off .enh-sp,.enh-off .enh-sp::before,.enh-off .enh-sp::after,.enh-off .enh-sp s{animation-play-state:paused!important}'+
- /* giảm chuyển động: đứng yên, giữ màu */
- '@media (prefers-reduced-motion:reduce){.enh::after,.enh-rg::before,.enh-sp,.enh-sp::before,.enh-sp::after,.enh-sp s{animation:none!important}}';
+ /* [SỬA] đặt lại thời lượng + lặp vô hạn bằng !important (độ ưu tiên cao hơn luật prefers-reduced-motion của style.css ép 0,01ms × 1 lần) */
+ '.enh::after,.enh-rg::before,.enh-sp,.enh-sp::before,.enh-sp::after,.enh-sp s{animation-iteration-count:infinite!important}'+
+ '.enh-rg::before{animation-duration:var(--d,2s)!important}'+
+ '.enh-9 .enh-rg::before{animation-duration:var(--d,1s),3s!important}'+
+ '.enh-4::after,.enh-5::after,.enh-6::after{animation-duration:1.6s!important}'+
+ '.enh-7::after,.enh-8::after{animation-duration:1.2s!important}'+
+ '.enh-9::after{animation-duration:.9s,3s!important}'+
+ '.enh-10::after{animation-duration:.8s,1.6s!important}'+
+ '.enh-sp::before,.enh-sp::after,.enh-sp s{animation-duration:var(--td,1s)!important}'+
+ '.enh-10 .enh-sp{animation-duration:1.5s!important}';
  document.head.appendChild(s)}
 
 /* ---------- Chỉ chạy chuyển động cho ô đang nhìn thấy (kho cuộn 100 ô) ---------- */

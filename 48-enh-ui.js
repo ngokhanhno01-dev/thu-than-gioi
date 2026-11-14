@@ -2,7 +2,7 @@
    Nạp SAU 12-equip.js, 45-enh-border.js, 46-enh-items.js (cần thêm cnt/removeItem/upToast của 09-blood.js).
    Không sửa file cũ: bọc renderEquip() để thêm tab thứ 3 (eqTab='enh'); chỉ số tự tính lại từ it.e (xem eqVal ở 12-equip.js).
    Giao diện làm GIỐNG tab Rèn: nút chọn ở trên, vòng tròn nguyên liệu hình tam giác (đá / ngũ sắc / vé) quanh món ở giữa,
-   cột phải chọn ô trang bị, rồi các khung 📦 Nguyên liệu · tỉ lệ · chỉ số · nút bấm · thông báo. Dùng lại class CSS của Rèn.
+   cột phải chọn ô trang bị + TỈ LỆ THÀNH CÔNG + CHỈ SỐ TRƯỚC/SAU, rồi các khung 📦 Nguyên liệu · nút bấm · thông báo. Dùng lại class CSS của Rèn.
    Mọi con số sửa ở khối cấu hình ngay bên dưới. */
 
 /* ---------- Cấu hình ---------- */
@@ -95,7 +95,8 @@ function enhDo(){
   '.enhc>b{position:absolute;right:2px;bottom:0;font-size:11px;color:var(--gold);z-index:4}'+
   '.upslot.enht{cursor:pointer}.upslot.enht.off{opacity:.45}'+
   '.enhtier{display:flex;gap:6px;margin-top:4px}.enhtier button{flex:1}'+
-  '.enhzn{margin-top:4px;line-height:1.4;font-size:12.5px}';
+  '.enhzn{margin-top:4px;line-height:1.4;font-size:12.5px}'+
+  '.enhside{margin-top:4px;font-size:12.5px;line-height:1.3}.enhside .eqstat{grid-template-columns:1fr;gap:1px;margin-top:3px;font-size:12px}';
  document.head.appendChild(s)}}
 
 /* ---------- Giao diện ---------- */
@@ -129,7 +130,19 @@ function enhCircle(it,X){
   '<span style="opacity:'+(it?1:.4)+'">'+(it?eqIco(it.s,it.z):eqIco(0,null))+'</span>'+(it?'<b>+'+e+'</b>':'')+'</div></div>';
  return h}
 
-/* Cột phải: 4 nút ô đang mặc + thông tin món đang chọn */
+/* Khối nhỏ ở cột phải: tỉ lệ thành công + chỉ số trước → sau + cảnh báo thất bại (gọn để nằm vừa dưới thông tin món) */
+function enhRateMini(it,X){
+ if(!it||X.maxed)return'';
+ const e=X.e,a=eqLines(it),b=eqLines(Object.assign({},it,{e:e+1}));
+ let h='<div class="enhside">✅ Tỉ lệ: gốc <b>'+X.base+'%</b>'+(X.rb>0?' + ngũ sắc <b>'+(X.tot-X.base)+'%</b>':'')+' = <b style="color:var(--jade)">'+X.tot+'%</b>'+
+  '<div class="eqstat">'+a.map((l,i)=>{const d=EQ_STATS[l[0]],p=d.t==='p'?'%':'';
+   return'<div><span>'+d.n+'</span><b>+'+l[1]+p+' → <span class="ok">+'+b[i][1]+p+'</span></b></div>'}).join('')+'</div>'+
+  '<small style="color:var(--mute)">Chỉ số sau khi thành công.</small>';
+ if(e>=ENH_DROP_FROM)h+='<div>'+(X.tk?'🎫 <span class="ok">Thất bại vẫn giữ <b>+'+e+'</b> (mất 1 vé).</span>':'<span class="bad">⚠️ Thất bại sẽ tụt xuống <b>+'+(e-1)+'</b>.</span>')+'</div>';
+ else h+='<div><small>Thất bại: mất đá và xu, giữ +'+e+' (dưới +'+ENH_DROP_FROM+' không tụt, vé không mất).</small></div>';
+ return h+'</div>'}
+
+/* Cột phải: 4 nút ô đang mặc + thông tin món đang chọn + tỉ lệ/chỉ số */
 function enhSide(it,X){
  const btns=[0,1,2,3].map(s=>{const w=eqWorn[s];
   if(!w)return'<button type="button" class="mini" disabled style="opacity:.3" title="'+EQ_SLOTS[s].n+' (trống)">'+eqIco(s,null)+'</button>';
@@ -142,7 +155,7 @@ function enhSide(it,X){
   info='<b style="color:'+eqRgb(it)+'">['+QN[it.q]+'] '+eqName(it)+'</b><br><small>Vùng '+enhZoneTag(it.z)+'<br>'+
    (X&&X.maxed?'<b style="color:var(--gold)">+'+e+' (tối đa)</b>':'Cường hóa <b>+'+e+' → +'+(e+1)+'</b>')+'</small>'}
  return'<div class="infobox" style="margin-bottom:4px"><small>Chọn ô trang bị đang mặc:</small></div><div class="eqslotbtn">'+btns+'</div>'+
-  '<div class="infobox upinfo">'+info+'</div>'}
+  '<div class="infobox upinfo">'+info+'</div>'+enhRateMini(it,X)}
 
 /* Khung 📦 Nguyên liệu cần: đá (đúng bậc / bậc 6), xu, và TÊN VÙNG đúng màu mà bậc đá đó cường hóa được */
 function enhNeedBox(it,X){
@@ -165,18 +178,6 @@ function enhOptBox(it,X){
   '<button type="button" class="mini" style="width:34px" onclick="enhRbAdd(-1)"'+(X.rb<=0?' disabled':'')+'>−</button><b style="min-width:22px;text-align:center">'+X.rb+'</b><button type="button" class="mini" style="width:34px" onclick="enhRbAdd(1)"'+(X.rb>=X.rbLim?' disabled':'')+'>+</button></div>'+
   '<label style="display:flex;align-items:center;gap:6px;margin-top:5px;'+(X.tkHave?'':'opacity:.55')+'"><input type="checkbox" onchange="enhToggleTicket()"'+(X.tk?' checked':'')+(X.tkHave?'':' disabled')+'> '+ITEMS.ve_bao_ho.i+' Dùng Vé Bảo Hộ <small>(có '+X.tkHave+')</small></label></div>'}
 
-/* Khung tỉ lệ + chỉ số trước/sau + cảnh báo thất bại */
-function enhRateBox(it,X){
- if(!it||X.maxed)return'';
- const e=X.e,a=eqLines(it),b=eqLines(Object.assign({},it,{e:e+1}));
- let h='<div class="infobox upnote" style="margin-top:5px">✅ Tỉ lệ thành công: gốc <b>'+X.base+'%</b>'+(X.rb>0?' + ngũ sắc <b>'+(X.tot-X.base)+'%</b>':'')+' = <b style="color:var(--jade)">'+X.tot+'%</b>'+
-  '<div class="eqstat" style="margin-top:4px">'+a.map((l,i)=>{const d=EQ_STATS[l[0]],p=d.t==='p'?'%':'';
-   return'<div><span>'+d.n+'</span><b>+'+l[1]+p+' → <span class="ok">+'+b[i][1]+p+'</span></b></div>'}).join('')+'</div>'+
-  '<small style="color:var(--mute)">Chỉ số sau khi thành công. Buff bộ không đổi.</small>';
- if(e>=ENH_DROP_FROM)h+='<div style="margin-top:4px">'+(X.tk?'🎫 <span class="ok">Có Vé Bảo Hộ: thất bại vẫn giữ <b>+'+e+'</b> (mất 1 vé).</span>':'<span class="bad">⚠️ Thất bại sẽ tụt xuống <b>+'+(e-1)+'</b>.</span>')+'</div>';
- else h+='<div style="margin-top:4px"><small>Thất bại: mất đá và xu, giữ nguyên +'+e+' (dưới +'+ENH_DROP_FROM+' không tụt cấp, vé không bị trừ).</small></div>';
- return h+'</div>'}
-
 /* Bảng 6 bậc đá ↔ vùng (mỗi tên vùng đúng màu), thu gọn/mở rộng như khung thông tin của Rèn */
 function enhInfoBox(){
  let h='<div class="infobox upnote" style="margin-top:5px"><button class="eqinfo-h" onclick="enhToggleInfo()">'+ENH_TAB_ICO+' <b>Đá Cường Hóa theo vùng</b><span>'+(enhInfoOpen?'▴ Thu gọn':'▾ Xem thêm')+'</span></button>';
@@ -196,7 +197,7 @@ function enhHtml(){
   '<div class="infobox" style="text-align:center;margin-bottom:4px">'+pickBtn+'</div>'+bagH+
   '<div class="upgrid"><div>'+enhCircle(it,X)+'</div><div>'+enhSide(it,X)+'</div></div>'+
   '<div class="infobox upnote" style="margin-top:5px">'+enhNeedBox(it,X)+'</div>'+
-  enhOptBox(it,X)+enhRateBox(it,X)+
+  enhOptBox(it,X)+
   (it&&!maxed?'<button class="jade" style="margin-top:5px" onclick="enhDo()">'+ENH_TAB_ICO+' Cường hóa</button>':'')+
   '<div class="infobox upmsg">'+enhMsg+'</div>'+enhInfoBox()}
 
