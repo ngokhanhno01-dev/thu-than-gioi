@@ -1996,7 +1996,7 @@ function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv
   [[P,Q],[Q,P]].forEach(([a,d])=>{if(a.hp>0&&d.hp>0&&kv(a,11)){const b=Math.max(1,Math.round(a.atk*kv(a,11)*rs(d)/100));d.hp-=b;push(a,'hit',b,'🔥 Thiêu đốt -'+b);revive(d)}});
   [P,Q].forEach(c=>{if(c.hp>0&&P.hp>0&&Q.hp>0&&c.regen){const heal=Math.min(c.mx-c.hp,Math.round(c.mx*c.regen/100));if(heal>0){c.hp+=heal;push(c,'heal',heal,c.n+' hồi sức +'+heal+' HP')}}});if(window.EQFX&&P.hp>0&&Q.hp>0)EQFX.round(P,Q,r,push);
  }
- return{ev,win:Q.hp<=0||(P.hp>0&&P.hp/P.mx>Q.hp/Q.mx),maxP:P.mx,maxM:Q.mx,shP:sh0P,shM:sh0M,first:first===P,zone:e.m.zone,zoneBuff:e.m.buff,startBuffs,bqP:kv(P,16),bqM:kv(Q,16)}}/*@@E*/
+ return{ev,win:Q.hp<=0||(P.hp>0&&P.hp/P.mx>Q.hp/Q.mx),maxP:P.mx,maxM:Q.mx,shP:sh0P,shM:sh0M,first:first===P,zone:e.m.zone,zoneBuff:e.m.buff,startBuffs,bqP:kv(P,16),bqM:kv(Q,16),brP:kv(Q,11),brM:kv(P,11)}}/*@@E*/
 
 /* ===== Màu độc quyền 17 vùng + hiệu ứng đòn theo hệ ===== */
 const REG=[['#9fe4ff','#ffffff','flake'],['#9fd9c8','#e6fff8','mist'],['#c9a8ff','#fff0ff','puff'],['#a0ffd0','#e8fff4','streak'],['#ffe53a','#ffffff','bolt'],['#a8b8ff','#f0f2ff','moon'],['#ffa030','#fff0b0','ray'],['#5a6cff','#c04aff','void'],['#e0b038','#fff2b8','diamond'],['#18e0b0','#d8fff0','gem'],['#8be04a','#f0ffc0','leaf'],['#ff5a1e','#ffc070','ember'],['#b0206a','#ff4a6a','wisp'],['#b45cff','#ffd0ff','star'],['#6ac4ff','#ffffff','feather'],['#ff7ac0','#ffe0f0','petal'],['#fff0a0','#ffffff','crown']];
@@ -2210,7 +2210,8 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
      if(pa)dp+=lg;else dmx-=lg;
      if(dmg||mis){FXS.on=1;FXS.u=u;FXS.pa=pa;FXS.cl=cl;FXS.cr=x.k==='crit';FXS.miss=mis;FXS.h=cl===2?'Hỏa':HN[pa?0:1];FXS.s=pa?pet.sp:e.m.sp;FXS.i=i;FXS.text=x.t}/* [combat FX] sự kiện thực tế điều khiển hiệu ứng nội tại */
      if(lu&&lg&&u>.12&&u<.37)for(let k=1;k<=5;k++){const off=lungeAt(u-k*.02)*ms;if(Math.abs(off-lg)>3)gst.push({pa,off,a:.6*(1-(k-1)/5)})} /* vệt lao tới */
-     if(mis){const dd=16*Math.sin(Math.PI*Math.max(0,Math.min(1,(u-.28)/.42)));if(pa)dmx+=dd;else dp-=dd} /* bên bị đánh trượt: nhảy né */
+     if(mis){const ddf=w=>16*Math.sin(Math.PI*Math.max(0,Math.min(1,(w-.28)/.42))),dd=ddf(u);if(pa)dmx+=dd;else dp-=dd;
+      if(dd>1&&u<.8)for(let k=1;k<=6;k++){const o2=ddf(u-k*.028);if(Math.abs(dd-o2)>1.2)gst.push({pa:!pa,off:-o2,a:.55*(1-(k-1)/6)})}} /* bên bị đánh trượt: nhảy né + [FX 2A sửa] tàn ảnh */
      if(dmg&&x.d&&u>=.35){const hu=u-.35,big=x.k==='crit'?1.7:x.r>1?1.3:1,sc=dot?.35:1,fa=hu<.05?1:Math.max(0,1-(hu-.05)/.17),
        kb=24*big*sc*Math.pow(Math.max(0,1-hu/.4),2),jt=hu<.25?Math.sin(T*70)*4*big*sc*(1-hu/.25):0;
       if(!dot&&(x.k==='crit'||x.r>1))sf=Math.max(sf,Math.max(0,1-hu/.12)*.5);
@@ -2235,6 +2236,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
   if(pf>0)tintDraw(g,c=>drawPet(c,85,208,120,tt,dp,1,true),'#ffffff',1,pf);
   if(mf>0)tintDraw(g,c=>drawM(c,e.m,272,208,e.m.boss?6:7,tt,dmx,1,e.tr,true),'#ffffff',1,mf);
   if(window.TTGCombatFX){try{TTGCombatFX.drawField(g,tt,(T0-t0)/1000,e.m.zone,R,shp,shm,hp,mh,pet.sp,CD);if(CD>0&&T<CD+.7)TTGCombatFX.drawCountdown(g,T,CD,CD/CDN,CDN)}catch(_){}}
+  if(FXS.on&&FXS.miss&&window.TTGCombatFX&&TTGCombatFX.drawDodge){try{TTGCombatFX.drawDodge(g,FXS.u,FXS.pa,tt)}catch(_){}}/* [FX 2A sửa] bụi khi né */
   if(fx)impact(g,fx,tt);try{fxDraw(g,tt,dp,dmx)}catch(_){}/* [FX đợt 2] lỗi hiệu ứng không được làm đứng trận */g.restore();
   if(sf>0){g.save();g.globalAlpha=sf;g.fillStyle='#ffffff';g.fillRect(0,0,360,250);g.restore()}
   if(FXS.on&&FXS.cr&&!FXS.miss){try{fxTop(g,FXS.u,REDM)}catch(_){}}/* [FX đợt 2] vignette + chữ CHÍ MẠNG */

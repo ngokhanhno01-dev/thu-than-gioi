@@ -1,0 +1,207 @@
+thu-than-gioi
+Bài tập 4A
+Private chat
+Mình thấy đúng điểm cần sửa: một số hiệu ứng còn là nét mượt mỏng, Bất khuất chủ yếu nằm sau thú, và đòn sét/dung nham trong nhánh tấn công vẫn gọi ảnh. Mình sẽ chuyển phần đó sang pixel block, vẽ thêm lớp nổi phía trước thú, và tách rõ ch…
+Hổ thần — bộ mẫu sprite
+Thú Thần Giới cập nhật vùng 11-15
+Private chat
+Dán prompt dưới đây vào chat Replit mới. Đính kèm HTML vùng 1–15 mới nhất, CSV 102 quái và ZIP ảnh; đừng chỉ gửi HTML gốc. Bản HTML khoảng 5,8 MB nên khung chat có thể báo “Too large to preview”—đó là giới hạn xem trước, không phải bằng ch…
+Plugin Checker
+Alo Chat
+Plugin Titles
+Làm lại thành pixel art và thêm nhiều hiệu ứng, chi tiết hơn nữa vì nếu đơn giản quá vô game sẽ bị hào quang của thú che mất càn nhiều chi tiết càng tốt và có vài hiệu ứng kiểu dáng chưa đạt chuẩn 1. Khiên ( phải làm dạng 1 tấm chắn trước mặt) , 2 phản đòn ( bạn suy nghĩ giúp ), 3.hồi sinh ( vòng tròn ma thuật màu xanh lá dưới chân và có dấu + bay từ dưới lên ), 4.bất khuất ( phải làm dạng cuồn nộ mới đúng),5.sét gián đất ( phải làm theo kiểu đánh từ trên xuống nhưng các hướng đánh liên tục kiểu độ kiếp ) 6. Dung nham ( phải là nham thạch bùng nổ tử dưới đất lên và dung nham chảy ra đất )7.hồi máu ( phải kiểu các dấu + xanh lá bay xung quanh) 8. Đóng băng ( nguyên khối tinh thể băng trồi lên và đông cứng đối thủ ở giữa )9. Choáng ( có vòng tròn trên đầu và các ngôi sao bay xung quanh vòng tròn đó ) đó là ý tưởng của mình và quan trọng nhất phải nhiều hiệu ứng và chi tiết
+
+Free
+Mình sẽ làm lại chín hiệu ứng theo hướng pixel art có khối và chuyển động rõ, ưu tiên hình dáng lớn hơn hào quang của thú để vẫn nhìn thấy trong giao tranh. Mình sẽ giữ nguyên nhánh 4A và phạm vi render-only, kiểm tra mã hiện tại trước rồi thay từng hiệu ứng theo mô tả của bạn.
+
+Mình thấy đúng điểm cần sửa: một số hiệu ứng còn là nét mượt mỏng, Bất khuất chủ yếu nằm sau thú, và đòn sét/dung nham trong nhánh tấn công vẫn gọi ảnh. Mình sẽ chuyển phần đó sang pixel block, vẽ thêm lớp nổi phía trước thú, và tách rõ choáng khỏi đóng băng để mỗi trạng thái có hình riêng.
+
+Alright, I need to think through the storm mechanics here. The "Q" starts at 0, with no strikes until 0.08, and clouds are displayed. The pixelStormCloud is using a dark width with buffPixel. The branches rely on seeded RNG, which adds an interesting element. I also see the bright alpha decreases while the statusBurst emitter activates once per bolt, and it uses the same key and FXE. This all seems connected!
+
+I’m thinking about how to create this visual effect. I want to use each side, with horizontal cross buffPixel stripes, and include two side crystals around it. A snowflake freeze icon can go above, while I'll integrate statusBurst for ice effects. The crystal should rise from the ground as its shape increases until a certain point, then remains visible before fading away.
+
+For statusStun, I'll place a ring at specific coordinates and create a high ring with a gold and white outer edge.
+
+I think this might relate to converting attributes like "9" and special attacks, but I'm also curious about how visual styles fit into this. Specifically, I'm wondering if we're talking about "code art" and how pixel art differs in terms of smoothness or texture. It's interesting to think about how these elements could impact the overall design or feel. Hm, I’ll need to explore this a bit further to clarify things!
+
+The demo already controls the events well, so I don't think it needs modifications except possibly to show a full pixel style. I could add a kind of state, statusP, but that shouldn't require changes. Since only source 31 is modified, it'll just be one commit. The user's instructions say one commit per step, but it’s not aligned with the main code branch. I could add status modes for unique "counter" and freeze choices, but updating demo text for new visuals seems unnecessary. Should I inform the user about the "pixel art" mode? The title might need updating too.
+
+Considering demo features
+
+I see that we don't really need to adjust anything because the status item options already display labels. There's an existing demo that shows the status states, so it seems sufficient. The user is specifically asking for "more effects and details," which means they might appreciate additional enhancements. The demo user can always open and inspect it themselves. I should ensure that the current setup meets their expectations and explore ways to enhance effects further.
+
+I'm looking at the handoff that mentions enabling a preview branch. There might not be a direct preview for the user right now, but we'll provide a commit link and Vercel details. I need to check the currentDemo select options closely and consider updating the label content to enhance the demonstration. I'll inspect the small currentDemo around the status controls and test the script, using currentDemo.match() output and CodeExecution.
+
+I'm looking to inspect the current demo lines, specifically those related to the status controls script that surrounds the map feature. It seems crucial to ensure everything is working properly, especially the interactions between these components. By analyzing this area, I might uncover any issues or areas for improvement. Let's dig in and see what we can learn from this code!
+
+I need to search for the term "status" later. If I'm not changing the demo code itself, updating just the labels should be enough. We might be able to change the <option> labels to reflect the actual type without needing any mapping. But first, I should review the full script to check where "status" appears. That way, I can confirm the current setup works as intended before making any adjustments.
+
+I deleted tmp-fx4a, so now I can create a scratch directory and save new files: 31-combat-fx.js, the original 31-original.js, and demo-script.js extracted from the new demo. The harness script will run newResult=go('31-combat-fx.js') and oldResult=go('31-original.js') using the old stack. I might want to modify status scenario tests to include 9 effects and 17 zones. The new code handles everything with no exceptions, which is great!
+
+Testing harness variables
+
+Great, I see that the harness variable in the old script uses drawBack(g,3,1,0,{...},...), which seems promising. I need to test the pixelBurst helper calls since the mock context can catch numbers. It might also detect NaN or Infinity values that could come from globalAlpha. I know Math.sin works with finite values, and buffArc uses Math.ceil(...). I’ll make sure to verify these components to ensure everything is functioning as expected.
+
+I see there’s a need to inspect our code for optimization. Right now, we’re using many buffPixel calls for pixel art, which could lead to performance issues. Each pixel fill is expected, but we should keep the number of calls reasonable per frame. Since status effects only trigger on events, we might reduce the calls to under 500 while maintaining acceptable gameplay performance on phones. It's important to balance detail with efficiency for a smoother experience.
+
+Estimating effects on performance
+
+I’m estimating the effects for our pixel art. For the shield, it's around 70 fillRect calls per pet, based on 14 rows and 4-6 fillRect each. For the bq back, it’s approximately 270 fillRect calls, and for the front, it’s about 200, along with around 300 for stars. That adds up to roughly 600 per pet per frame, or 1200 for two bq, which could be significant, especially considering the low HP.
+
+I'm working on the pixel lightning status, noting there are five strikes for each attack, with paths rasterized to about 50 cells. I initially thought there might be around 3000 pixels per frame, but recalculating reveals it’s closer to 1270 per frame with the associated branches. It seems heavy but manageable given the status. If all five bolts persist through the frames, they'd still be rendered with fading, adding some intensity despite their age.
+
+Estimating pixel details
+
+I’m calculating that with five bolts, I’ll reach around 1000 pixels total. For the buffArc, I've got a ring radius of 20 and about 36 points per ring, which gives me an additional 300 pixels to bring the total to 1300—though that might be a bit too much. I need a visual demonstration, but without a browser or canvas package to generate screenshots, I’m thinking Playwright might help. There’s also the Vercel preview deployment option for visual previews after commits.
+
+Updating project details
+
+After I commit, it looks like a GitHub status query could return the Vercel target, which is similar to what I need. I must provide the answer in Vietnamese while keeping the branch constraints in mind. I’ll also update the new demo labels after I refine the helper code by writing a patch in CodeExecution. Before generating, I need to fix the outer save states in the helper code since the current pixelBlock function strings don’t have those saves. I’ll make targeted replacements carefully to avoid editing the already computed rework31.
+
+I'm realizing the previous code test only accounted for total calls in the attack loop and skipped them in the status loop. This means avgDrawCalls isn't accurate because the denominator includes statuses but only sums attack calls. I need to update the harness to add totalCalls in the status and back frames, plus address the special loop. Also, should I note frames++ for BQ? I’ll check that but it doesn't seem essential right now. I need to finalize this output.
+
+Updating coding harness
+
+I'm planning to create a new harness using existing strings with some replacements. First, I'm adding a special loop right before const events=[, where I'll define specialAttacks and include specific drawing logic. There’s a need for specific code paths for certain text patterns, but I’ll add guards to ensure proper invocation.
+
+For the statuses loop, I want to add totalCalls+=rt.calls; peakCalls... before frames++, while being careful about how replacements might affect the attack loop and BQ. I need to check the remainder from the harness string as well.
+
+I’m looking at special frames and their statuses, with each averaging about a thousand new pixels. The performance seems good, with 70 pixel calls per status, not too high. I’ll compare new and old frames one by one using a test script. The average differences look reasonable. It’s good to report that average mock draw calls increased by 1.3%, and we’ll check the peak calls related to pixel layers, ensuring efficient processing without unnecessary calls.
+
+Checking for Math.random usage
+
+I’m considering whether Math.random is present in rework31. It might have older functions that use it, but our new additions do not. I should run a test to confirm that no instances of Math.random are included in the added block. For that, I can use a simple check like addedBlock.includes('Math.random') and it should return false. Since the user specified no usage, we’ll ensure to keep it that way!
+
+The user is interested in visual forms, so I should focus on updating the actual code, committing changes, and checking for Vercel updates. It’s important to track line count and consider possible demo UI labels too. I’ve made a change to newDemo, and I should also look at how lengthy labels might affect mobile displays, like adjusting the <select> width to 180px. Abbreviating long options might help avoid clutter. The user values clarity over length.
+
+I'm checking the width of .row select in CSS to see if it needs adjustment. I might not need to because the demo's controls are responsive. I'll inspect the CSS around select {} to gain better insight. I think looking at the current demo lines 0-500 could give me some useful context. For now, I'll utilize code execution for small adjustments. It's all about getting the right fit!
+
+I’m looking at how the user wants BQ to be visible. If the drawField isn’t called in the demo's status mode for BQ, it won’t show up in the demo. But it seems that in actual battle scenarios, the calls to drawField do happen. The summary indicates a positive check, so maybe the demo is looping calls after the BQ code. Time to inspect this further!
+
+I'm considering whether we need to add a persistent shield test too. The demo status currently lacks a persistent shield state, which is represented by a one-time block using drawImpact. That's working fine! The BQ persistent only requires a foreground call. I think we can call FX.drawField directly after drawing the two pet shapes. However, I need to understand the exact flow first. Let's take a closer look to clarify things!
+
+I should consider how to ensure the demo accurately reflects the actual game experience while also meeting user needs. This requires thinking about gameplay elements that are engaging and representative of what users can expect. I want to make sure that potential players get a genuine feel of the game, which helps build excitement. Balancing between showcasing features and not overwhelming users with too much information seems crucial. Let's keep that clarity in mind!
+
+I'm thinking there might be a GitHub deployment endpoint I can look into later. For now, I should focus on patching the newDemo code. It's apparent that making sure the code works is my priority before getting into deployment specifics. I want to ensure this patch goes smoothly, as that’s essential for what I'm aiming to achieve here. Maybe I'll revisit the deployment part once the code is solid!
+
+I need to consider if FX.drawField and infoPanels will work as expected. I want to create a diff summary by removing unnecessary strings, comparing current and reworked versions side by side. It seems there are only two changed files, and I want to confirm a few key points:
+
+Check that "Math.random" is absent from the new block.
+Ensure no duplicate function names exist.
+Review how drawImpact processes statusImpact before the old asset.
+I also see that the image fallback is still calling paint(...) if text isn't recognized, so I need to address that to prevent old effects from showing up.
+Inspecting drawing assets
+
+To avoid any unwanted drawing assets from the status types in 4A, I should remove old image branches or switch to pixel functions instead of relying on fallback methods. I need to search for the code near drawImpact, focusing on let d=z.attack and the if statement involving /Lôi Phạt|Lôi Kích/.... It's crucial to inspect the entire legacy path of drawImpact. I’ll analyze the output after the rework, specifically processing current31, and print the drawImpact function until the next one to check references.
+
+I'm working on changing a configuration string in JavaScript. I need to update the entry for counter from one phrase to another. The new text includes "Phản đòn" and seems appropriate for my context. I'll also consider updating the freeze label, but it might not be necessary. I think I should establish a new phrase for the counter, along with some strict updates for the harness and BQ changes. Let’s get started!
+
+I need to write the latest newDemo script to a temporary location and create a new branch for testing. Since the code for newDemo has changed since the last write, I must update the demo script accordingly. I'll also need to update the harness file. To keep things organized, I'll use a separate function to handle the file writing. Let's get this done step by step!
+
+'use strict';
+/* Trang này gọi ĐÚNG cách game gọi: TTGCombatFX.drawAttack(g,T,S) khi u<.9 và TTGCombatFX.drawImpact(g,fx,T) khi u≥.35 (trúng ở u=.35, mỗi đòn kéo dài 1.9s).
+   Vùng đánh GẦN: thú/quái lao tới như trong game (hàm lungeAt chép từ 06-mobs.js). Vùng đánh XA: giật lùi nhẹ khi bắn (fxRecoil). */
+const FX=window.TTGCombatFX,CW=360,CH=250,GY=204,BST=1.9;
+const cv=document.getElementById('cv'),g=cv.getContext('2d'),info=document.getElementById('info');
+const $=id=>document.getElementById(id);
+/* PHẢI khai báo t0/run TRƯỚC khi gọi syncMode()→restart(), nếu không sẽ lỗi TDZ ("Cannot access 't0' before initialization") làm cả script dừng, canvas đen */
+let t0=performance.now(),run=true;
+function fit(){const w=Math.min(innerWidth-16,720),d=Math.min(window.devicePixelRatio||1,3);cv.style.width=w+'px';cv.style.height=(w*CH/CW)+'px';cv.width=Math.round(w*d);cv.height=Math.round(w*d*CH/CW)}
+fit();addEventListener('resize',fit);
+if(!FX){info.textContent='Không tải được 31-combat-fx.js'}
+else{
+ const sel=$('zone'),view=$('viewMode');
+ const build=()=>{
+  const max=view.value==='buff'?17:FX.zones.length,old=Number(sel.value)||0;
+  sel.innerHTML=FX.zones.slice(0,max).map((z,i)=>'<option value="'+i+'">'+i+' · '+z.name+' ('+(z.mode==='melee'?'gần':'xa')+')'+
+   (view.value==='buff'?' — pixel art':(FX.codeZone&&FX.codeZone(i)?' — vẽ lại bằng code':' — cũ (ảnh)'))+'</option>').join('');
+  sel.value=old<max?String(old):'0';
+ };
+ const syncMode=()=>{$('buffControls').hidden=view.value!=='buff';$('gearControls').hidden=view.value!=='gear';$('attackControls').hidden=view.value!=='attack';$('statusControls').hidden=view.value!=='status';$('zone').hidden=view.value==='gear';build();restart()};
+ syncMode();setTimeout(build,600);   /* cập nhật nhãn vùng khi 33-attack-fx.js tải xong */
+ view.onchange=syncMode;
+ $('buffStat').onchange=restart;$('gear').onchange=restart;$('statusKind').onchange=restart;$('statusSide').onchange=restart;$('statusPlay').onclick=restart;
+}
+/* ---- chuyển động lao tới / giật lùi: chép từ 06-mobs.js để demo giống game ---- */
+function lungeAt(u){if(u<=0)return 0;
+ if(u<.14)return -14*Math.sin(u/.14*Math.PI/2);
+ if(u<.35){const t=(u-.14)/.21;return -14+(100+14)*t*t*(1.4-.4*t)}
+ if(u<.42)return 100;
+ if(u<.72){const t=(u-.42)/.3,sm=t*t*(3-2*t);return 100*(1-sm)}
+ return 0}
+function recoilAt(u){if(u<.05)return 0;
+ if(u<.2){const t=(u-.05)/.15;return -5*t*t}
+ if(u<.27){const t=(u-.2)/.07;return -5-12*t}
+ if(u<.55){const t=(u-.27)/.28,sm=t*t*(3-2*t);return -17*(1-sm)}
+ return 0}
+/* ---- thú giả để có chỗ đánh ---- */
+function pet(g,x,c1,c2,T,flip){
+ const b=Math.sin(T*3+x)*1.5;
+ g.save();g.translate(x,0);if(flip)g.scale(-1,1);
+ g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(0,GY,26,6,0,0,6.283);g.fill();
+ const gr=g.createLinearGradient(0,GY-62,0,GY);gr.addColorStop(0,c1);gr.addColorStop(1,c2);g.fillStyle=gr;
+ g.beginPath();g.ellipse(0,GY-30+b,24,30,0,0,6.283);g.fill();
+ g.fillStyle='#fff';g.beginPath();g.arc(8,GY-40+b,6,0,6.283);g.arc(-4,GY-40+b,6,0,6.283);g.fill();
+ g.fillStyle='#111';g.beginPath();g.arc(10,GY-40+b,3,0,6.283);g.arc(-2,GY-40+b,3,0,6.283);g.fill();
+ g.restore();
+}
+/* ---- vòng lặp ---- */
+function restart(){t0=performance.now();run=true;if(FX)FX.engine.clear()}
+$('play').onclick=restart;$('zone').onchange=restart;$('side').onchange=restart;$('kind').onchange=restart;
+$('style').onchange=()=>{if(FX.setFxStyle)FX.setFxStyle($('style').value);restart()};
+$('spd').onchange=()=>{restart()};
+function loop(now){
+ requestAnimationFrame(loop);
+ if(!FX)return;
+ g.setTransform(cv.width/CW,0,0,cv.width/CW,0,0);
+ const mode=$('viewMode').value,sp=mode==='attack'?+$('spd').value:1,t=(now-t0)/1000*sp,T=now/1000,zi=+$('zone').value||0,pa=mode==='attack'&&$('side').value==='p',kind=mode==='attack'?$('kind').value:'hit',status=$('statusKind').value,statusP=$('statusSide').value==='p';
+ window.BSPD=sp<1?1:sp;FX.engine.setSpeed(sp);
+ const bg=g.createLinearGradient(0,0,0,CH);bg.addColorStop(0,'#26324f');bg.addColorStop(.7,'#3b4a63');bg.addColorStop(1,'#1f2a1f');
+ g.fillStyle=bg;g.fillRect(0,0,CW,CH);g.fillStyle='#2e3d2c';g.fillRect(0,GY-2,CW,CH-GY+2);
+ const u=Math.min(1,t/BST);let dp=0,dmx=0,msg='';
+ if(mode==='buff'){
+  try{
+   const labels={atk:'Công',def:'Thủ',spd:'Tốc độ',mag:'Pháp thuật',eva:'Né tránh',crit:'Chí mạng',regen:'Hồi phục',hp:'HP'};
+   const stat=$('buffStat').value;
+   FX.drawBack(g,T,.7,zi,{zoneBuff:{stat,label:'Buff '+labels[stat]},startBuffs:[]},0,0,100,100,zi,0);
+  }catch(e){msg='Lỗi buff vùng: '+e.message}
+ }
+ if(mode==='gear'){try{FX.drawBack(g,T,.7,0,{startBuffs:[{kind:$('gear').value}],zoneBuff:null},0,0,100,100,0,0)}catch(e){msg='Lỗi buff bộ: '+e.message}}
+ if(mode==='status'&&status==='bq'){try{FX.drawBack(g,T,t,zi,{startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100},0,0,statusP?42:100,statusP?100:42,zi,0)}catch(e){msg='Lỗi Bất khuất: '+e.message}}
+ try{
+  if(mode==='attack'&&run&&u<.9){
+   const z=FX.zones[zi],melee=z&&z.mode==='melee',lg=melee?lungeAt(u)*(kind==='miss'?.6:1):recoilAt(u);
+   if(pa)dp=lg;else dmx=-lg;
+  }
+ }catch(e){msg='Lỗi: '+e.message}
+ /* bên bị đánh: né = lùi 16px (giống 06-mobs.js) kèm tàn ảnh; chí mạng/trúng = bị đẩy lùi + giật */
+ const ddf=w=>16*Math.sin(Math.PI*Math.max(0,Math.min(1,(w-.28)/.42)));
+ let ghosts=[];
+ if(mode==='attack'&&run&&u<.9){
+  if(kind==='miss'){const dd=ddf(u);if(pa)dmx+=dd;else dp-=dd;
+   if(dd>1&&u<.8)for(let k=1;k<=6;k++){const o2=ddf(u-k*.028);if(Math.abs(dd-o2)>1.2)ghosts.push({defP:!pa,off:-o2,a:.55*(1-(k-1)/6)})}}
+  else if(u>=.35){const hu=u-.35,big=kind==='crit'?1.7:1,kb=24*big*Math.pow(Math.max(0,1-hu/.4),2),jt=hu<.25?Math.sin(T*70)*4*big*(1-hu/.25):0;if(pa)dmx+=kb+jt;else dp-=kb+jt}
+ }
+ ghosts.forEach(q=>{g.save();g.globalAlpha=q.a;if(q.defP)pet(g,85+q.off*.84,'#9fd8ff','#9fd8ff',T,false);else pet(g,272-q.off*.78,'#ffb0a0','#ffb0a0',T,true);g.restore()});
+ pet(g,85+dp*.84,'#6cc4ff','#2a6fb0',T,false);pet(g,272+dmx*.78,'#ff8a7a','#a83a3a',T,true);
+ try{if(mode==='status'&&status==='bq'){const R={startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100};FX.drawField(g,T,t,zi,R,0,0,statusP?42:100,statusP?100:42,zi,0)}}catch(e){msg='Lỗi lớp cuồng nộ: '+e.message}
+ try{if(mode==='attack'&&run&&u<.9&&kind==='miss'&&FX.drawDodge)FX.drawDodge(g,u,pa,T)}catch(e){msg='Lỗi: '+e.message}
+ try{
+  if(mode==='attack'&&run&&u<.9){
+   const S={on:1,s:zi,u:u,pa:pa,cl:0,cr:kind==='crit',miss:kind==='miss',h:'Thủy',i:1,text:''};
+   if(u>=.35)FX.drawImpact(g,{pp:pa,q:Math.min(.9999,(u-.35)/.55),k:kind,d:12,r:1,i:1,h:'Thủy',s:zi,cl:0,text:''},T);
+   FX.drawAttack(g,T,S);
+  }
+  if(mode==='status'&&run&&status!=='bq'&&u>=.35){
+  const cfg={crit:{k:'crit',text:'💥 Chí mạng!',d:34},miss:{k:'miss',text:'né được đòn!',d:0},burn:{k:'hit',text:'🔥 Thiêu đốt - 18',d:18},counter:{k:'hit',text:'↩ Phản đòn · chặn rồi trả đòn',d:18},shield:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},revive:{k:'heal',text:'✨ Hồi sinh +32 HP',d:0},lightning:{k:'hit',text:'⚡ Lôi Phạt giáng -18',d:18},lava:{k:'hit',text:'🌋 Dung Nham -18',d:18},heal:{k:'heal',text:'Hồi sức +18 HP',d:0},freeze:{k:'stun',text:'đóng băng',d:0},stun:{k:'stun',text:'bị choáng',d:0}}[status];
+  const actor=statusP,q=Math.min(.9999,(u-.35)/.55);
+  if(cfg){if(status==='miss'&&FX.drawDodge)FX.drawDodge(g,u,actor,T);FX.drawImpact(g,{pp:actor,q:q,k:cfg.k,d:cfg.d,r:1,i:1,h:'Thủy',s:zi,cl:0,text:cfg.text},T);FX.engine.draw(g,'status')}
+ }
+ if(mode==='attack'&&run&&u>=1){if($('loop').checked)restart();else run=false}
+ if(mode==='status'&&run&&u>=1)restart();
+ }catch(e){msg='Lỗi: '+e.message}
+ info.textContent=(msg||(mode==='buff'?'Buff nền vùng '+zi+' · '+$('buffStat').selectedOptions[0].text+' · pixel art riêng theo vùng.':mode==='gear'?'Buff bộ trang bị · '+$('gear').selectedOptions[0].text+' · pixel art riêng theo bộ.':mode==='status'?'Hiệu ứng 4A · '+$('statusKind').selectedOptions[0].text+' · bên '+(statusP?'thú':'quái')+'.':(FX.codeZone&&FX.codeZone(zi)?'Vùng này đã vẽ bằng code (không ảnh).':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.')))+'\nHạt đang chạy: '+FX.engine.count();
+}
+requestAnimationFrame(loop);
+
+

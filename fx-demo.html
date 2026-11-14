@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base href="../">
+<title>FX Demo — Thú Thần Giới</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:8px;background:#120c1a;color:#f3e9ff;font:14px/1.4 system-ui,sans-serif;text-align:center}
+h1{font-size:16px;margin:4px 0 8px}
+canvas{display:block;margin:0 auto;border:1px solid #3a2a55;border-radius:8px;background:#000;touch-action:manipulation}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;margin:8px auto;max-width:720px}
+select,button{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid #5a3f86;background:#2a1d40;color:#fff;min-height:44px}
+button{background:#6a3fc4;font-weight:700}
+label{display:flex;align-items:center;gap:6px}
+#info{font-size:12px;color:#b9a7d6;min-height:34px;white-space:pre-wrap}
+#attackControls[hidden],#buffControls[hidden],#gearControls[hidden],#statusControls[hidden]{display:none}
+</style></head><body>
+<h1>Trang xem thử hiệu ứng (vẽ bằng code)</h1>
+<canvas id="cv"></canvas>
+<div class="row"><select id="zone"></select><select id="viewMode"><option value="buff">Buff nền vùng pixel art · 3A/3B (0–16)</option><option value="gear">Buff bộ trang bị pixel art · 3C (17 bộ)</option><option value="attack">Đòn đánh</option><option value="status">Trạng thái / sự kiện · 4A</option></select></div>
+<div class="row" id="buffControls">
+ <select id="buffStat">
+  <option value="atk">Buff Công</option><option value="def">Buff Thủ</option><option value="spd">Buff Tốc độ</option><option value="mag">Buff Pháp thuật</option>
+  <option value="eva">Buff Né tránh</option><option value="crit">Buff Chí mạng</option><option value="regen">Buff Hồi phục</option><option value="hp">Buff HP</option>
+ </select>
+</div>
+<div class="row" id="gearControls" hidden><select id="gearStyle"><option value="smooth">Kiểu: mượt</option><option value="pixel">Kiểu: pixel art</option></select><select id="gear">
+  <option value="frost">Tuyết Nguyên</option><option value="mist">Sương Cốc</option><option value="cloud">Vân Đảo</option><option value="wind">Phong Nguyên</option>
+  <option value="thunder">Lôi Vực</option><option value="counter">Nguyệt Cung</option><option value="sun">Dương Sơn</option><option value="shield">Huyền Uyên</option>
+  <option value="thorn">Kim Khoáng</option><option value="revive">Ngọc Động</option><option value="grove">Thanh Lâm</option><option value="lava">Xích Hỏa Địa</option>
+  <option value="ambush">Hắc Ám Lâm</option><option value="star">Tử Tinh Hải</option><option value="first">Thiên Không</option><option value="weaken">Linh Hoa Viên</option><option value="judge">Thần Điện</option>
+ </select></div>
+<div id="attackControls" hidden>
+ <div class="row"><select id="side"><option value="p">Thú đánh quái</option><option value="m">Quái đánh thú</option></select><select id="kind"><option value="hit">Đòn thường</option><option value="crit">Chí mạng</option><option value="miss">Trượt (né)</option></select></div>
+ <div class="row"><select id="style"><option value="px">Kiểu: Pixel</option><option value="sm">Kiểu: Mịn</option></select><select id="spd"><option value="1">Tốc độ 1x</option><option value="0.5">Chậm 0.5x</option><option value="0.25">Rất chậm 0.25x</option></select></div>
+ <div class="row"><button id="play">▶ Phát lại</button><label><input type="checkbox" id="loop" checked> Lặp</label></div>
+</div>
+<div class="row" id="statusControls" hidden><select id="statusKind"><option value="crit">Chí mạng</option><option value="miss">Né tránh</option><option value="burn">Thiêu đốt</option><option value="counter">Phản đòn</option><option value="shield">Khiên</option><option value="revive">Hồi sinh</option><option value="bq">Bất khuất dưới 50% HP</option><option value="lightning">Sét giáng đất</option><option value="lava">Dung nham</option><option value="heal">Hồi máu</option><option value="freeze">Đóng băng</option><option value="stun">Choáng</option></select><select id="statusSide"><option value="p">Bên thú</option><option value="m">Bên quái</option></select><button id="statusPlay">▶ Phát lại</button></div>
+<div id="info"></div>
+<script src="31-combat-fx.js"></script>
+<script src="33-attack-fx.js"></script>
+<script src="34-attack-fx-2b.js"></script>
+<script src="35-attack-fx-2c.js"></script>
+<script src="36-attack-fx-2c-boom.js"></script>
+<script src="37-attack-fx-2c-detail.js"></script>
+<script src="38-attack-fx-2d.js"></script>
+<script src="39-attack-fx-2d-detail.js"></script>
+<script src="40-attack-fx-3a.js"></script>
+<script src="41-gear-aura.js"></script>
+<script src="42-gear-pixel.js"></script>
+<script>
+'use strict';
+/* Trang này gọi ĐÚNG cách game gọi: TTGCombatFX.drawAttack(g,T,S) khi u<.9 và TTGCombatFX.drawImpact(g,fx,T) khi u≥.35 (trúng ở u=.35, mỗi đòn kéo dài 1.9s).
+   Vùng đánh GẦN: thú/quái lao tới như trong game (hàm lungeAt chép từ 06-mobs.js). Vùng đánh XA: giật lùi nhẹ khi bắn (fxRecoil). */
+const FX=window.TTGCombatFX,CW=360,CH=250,GY=204,BST=1.9;
+const cv=document.getElementById('cv'),g=cv.getContext('2d'),info=document.getElementById('info');
+const $=id=>document.getElementById(id);
+/* PHẢI khai báo t0/run TRƯỚC khi gọi syncMode()→restart(), nếu không sẽ lỗi TDZ ("Cannot access 't0' before initialization") làm cả script dừng, canvas đen */
+let t0=performance.now(),run=true;
+function fit(){const w=Math.min(innerWidth-16,720),d=Math.min(window.devicePixelRatio||1,3);cv.style.width=w+'px';cv.style.height=(w*CH/CW)+'px';cv.width=Math.round(w*d);cv.height=Math.round(w*d*CH/CW)}
+fit();addEventListener('resize',fit);
+if(!FX){info.textContent='Không tải được 31-combat-fx.js'}
+else{
+ const sel=$('zone'),view=$('viewMode');
+ const build=()=>{
+  const max=view.value==='buff'?17:FX.zones.length,old=Number(sel.value)||0;
+  sel.innerHTML=FX.zones.slice(0,max).map((z,i)=>'<option value="'+i+'">'+i+' · '+z.name+' ('+(z.mode==='melee'?'gần':'xa')+')'+
+   (view.value==='buff'?' — pixel art':(FX.codeZone&&FX.codeZone(i)?' — vẽ lại bằng code':' — cũ (ảnh)'))+'</option>').join('');
+  sel.value=old<max?String(old):'0';
+ };
+ const syncMode=()=>{$('buffControls').hidden=view.value!=='buff';$('gearControls').hidden=view.value!=='gear';$('attackControls').hidden=view.value!=='attack';$('statusControls').hidden=view.value!=='status';$('zone').hidden=view.value==='gear';build();restart()};
+ syncMode();setTimeout(build,600);   /* cập nhật nhãn vùng khi 33-attack-fx.js tải xong */
+ view.onchange=syncMode;
+ $('buffStat').onchange=restart;$('gear').onchange=restart;$('gearStyle').onchange=restart;$('statusKind').onchange=restart;$('statusSide').onchange=restart;$('statusPlay').onclick=restart;
+}
+/* ---- chuyển động lao tới / giật lùi: chép từ 06-mobs.js để demo giống game ---- */
+function lungeAt(u){if(u<=0)return 0;
+ if(u<.14)return -14*Math.sin(u/.14*Math.PI/2);
+ if(u<.35){const t=(u-.14)/.21;return -14+(100+14)*t*t*(1.4-.4*t)}
+ if(u<.42)return 100;
+ if(u<.72){const t=(u-.42)/.3,sm=t*t*(3-2*t);return 100*(1-sm)}
+ return 0}
+function recoilAt(u){if(u<.05)return 0;
+ if(u<.2){const t=(u-.05)/.15;return -5*t*t}
+ if(u<.27){const t=(u-.2)/.07;return -5-12*t}
+ if(u<.55){const t=(u-.27)/.28,sm=t*t*(3-2*t);return -17*(1-sm)}
+ return 0}
+/* ---- thú giả để có chỗ đánh ---- */
+function pet(g,x,c1,c2,T,flip){
+ const b=Math.sin(T*3+x)*1.5;
+ g.save();g.translate(x,0);if(flip)g.scale(-1,1);
+ g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(0,GY,26,6,0,0,6.283);g.fill();
+ const gr=g.createLinearGradient(0,GY-62,0,GY);gr.addColorStop(0,c1);gr.addColorStop(1,c2);g.fillStyle=gr;
+ g.beginPath();g.ellipse(0,GY-30+b,24,30,0,0,6.283);g.fill();
+ g.fillStyle='#fff';g.beginPath();g.arc(8,GY-40+b,6,0,6.283);g.arc(-4,GY-40+b,6,0,6.283);g.fill();
+ g.fillStyle='#111';g.beginPath();g.arc(10,GY-40+b,3,0,6.283);g.arc(-2,GY-40+b,3,0,6.283);g.fill();
+ g.restore();
+}
+/* ---- vòng lặp ---- */
+function restart(){t0=performance.now();run=true;if(FX)FX.engine.clear()}
+$('play').onclick=restart;$('zone').onchange=restart;$('side').onchange=restart;$('kind').onchange=restart;
+$('style').onchange=()=>{if(FX.setFxStyle)FX.setFxStyle($('style').value);restart()};
+$('spd').onchange=()=>{restart()};
+function loop(now){
+ requestAnimationFrame(loop);
+ if(!FX)return;
+ g.setTransform(cv.width/CW,0,0,cv.width/CW,0,0);
+ const mode=$('viewMode').value,sp=mode==='attack'?+$('spd').value:1,t=(now-t0)/1000*sp,T=now/1000,zi=+$('zone').value||0,pa=mode==='attack'&&$('side').value==='p',kind=mode==='attack'?$('kind').value:'hit',status=$('statusKind').value,statusP=$('statusSide').value==='p';
+ window.BSPD=sp<1?1:sp;FX.engine.setSpeed(sp);
+ const bg=g.createLinearGradient(0,0,0,CH);bg.addColorStop(0,'#26324f');bg.addColorStop(.7,'#3b4a63');bg.addColorStop(1,'#1f2a1f');
+ g.fillStyle=bg;g.fillRect(0,0,CW,CH);g.fillStyle='#2e3d2c';g.fillRect(0,GY-2,CW,CH-GY+2);
+ const u=Math.min(1,t/BST);let dp=0,dmx=0,msg='';
+ if(mode==='buff'){
+  try{
+   const labels={atk:'Công',def:'Thủ',spd:'Tốc độ',mag:'Pháp thuật',eva:'Né tránh',crit:'Chí mạng',regen:'Hồi phục',hp:'HP'};
+   const stat=$('buffStat').value;
+   FX.drawBack(g,T,.7,zi,{zoneBuff:{stat,label:'Buff '+labels[stat]},startBuffs:[]},0,0,100,100,zi,0);
+  }catch(e){msg='Lỗi buff vùng: '+e.message}
+ }
+ if(mode==='gear'){if(window.TTGGearAura)TTGGearAura.style=$('gearStyle').value;try{FX.drawBack(g,T,t%6,0,{startBuffs:[{kind:$('gear').value}],zoneBuff:null},0,0,100,100,0,0)}catch(e){msg='Lỗi buff bộ: '+e.message}}
+ if(mode==='status'&&status==='bq'){try{FX.drawBack(g,T,t,zi,{startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100},0,0,statusP?42:100,statusP?100:42,zi,0)}catch(e){msg='Lỗi Bất khuất: '+e.message}}
+ try{
+  if(mode==='attack'&&run&&u<.9){
+   const z=FX.zones[zi],melee=z&&z.mode==='melee',lg=melee?lungeAt(u)*(kind==='miss'?.6:1):recoilAt(u);
+   if(pa)dp=lg;else dmx=-lg;
+  }
+ }catch(e){msg='Lỗi: '+e.message}
+ /* bên bị đánh: né = lùi 16px (giống 06-mobs.js) kèm tàn ảnh; chí mạng/trúng = bị đẩy lùi + giật */
+ const ddf=w=>16*Math.sin(Math.PI*Math.max(0,Math.min(1,(w-.28)/.42)));
+ let ghosts=[];
+ if(mode==='attack'&&run&&u<.9){
+  if(kind==='miss'){const dd=ddf(u);if(pa)dmx+=dd;else dp-=dd;
+   if(dd>1&&u<.8)for(let k=1;k<=6;k++){const o2=ddf(u-k*.028);if(Math.abs(dd-o2)>1.2)ghosts.push({defP:!pa,off:-o2,a:.55*(1-(k-1)/6)})}}
+  else if(u>=.35){const hu=u-.35,big=kind==='crit'?1.7:1,kb=24*big*Math.pow(Math.max(0,1-hu/.4),2),jt=hu<.25?Math.sin(T*70)*4*big*(1-hu/.25):0;if(pa)dmx+=kb+jt;else dp-=kb+jt}
+ }
+ ghosts.forEach(q=>{g.save();g.globalAlpha=q.a;if(q.defP)pet(g,85+q.off*.84,'#9fd8ff','#9fd8ff',T,false);else pet(g,272-q.off*.78,'#ffb0a0','#ffb0a0',T,true);g.restore()});
+ pet(g,85+dp*.84,'#6cc4ff','#2a6fb0',T,false);pet(g,272+dmx*.78,'#ff8a7a','#a83a3a',T,true);
+ try{if(mode==='status'&&status==='bq'){const R={startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100};FX.drawField(g,T,t,zi,R,0,0,statusP?42:100,statusP?100:42,zi,0)}}catch(e){msg='Lỗi lớp cuồng nộ: '+e.message}
+ try{if(mode==='attack'&&run&&u<.9&&kind==='miss'&&FX.drawDodge)FX.drawDodge(g,u,pa,T)}catch(e){msg='Lỗi: '+e.message}
+ try{
+  if(mode==='attack'&&run&&u<.9){
+   const S={on:1,s:zi,u:u,pa:pa,cl:0,cr:kind==='crit',miss:kind==='miss',h:'Thủy',i:1,text:''};
+   if(u>=.35)FX.drawImpact(g,{pp:pa,q:Math.min(.9999,(u-.35)/.55),k:kind,d:12,r:1,i:1,h:'Thủy',s:zi,cl:0,text:''},T);
+   FX.drawAttack(g,T,S);
+  }
+  if(mode==='status'&&run&&status!=='bq'&&u>=.35){
+  const cfg={crit:{k:'crit',text:'💥 Chí mạng!',d:34},miss:{k:'miss',text:'né được đòn!',d:0},burn:{k:'hit',text:'🔥 Thiêu đốt - 18',d:18},counter:{k:'hit',text:'↩ Phản đòn · chặn rồi trả đòn',d:18},shield:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},revive:{k:'heal',text:'✨ Hồi sinh +32 HP',d:0},lightning:{k:'hit',text:'⚡ Lôi Phạt giáng -18',d:18},lava:{k:'hit',text:'🌋 Dung Nham -18',d:18},heal:{k:'heal',text:'Hồi sức +18 HP',d:0},freeze:{k:'stun',text:'đóng băng',d:0},stun:{k:'stun',text:'bị choáng',d:0}}[status];
+  const actor=statusP,q=Math.min(.9999,(u-.35)/.55);
+  if(cfg){if(status==='miss'&&FX.drawDodge)FX.drawDodge(g,u,actor,T);FX.drawImpact(g,{pp:actor,q:q,k:cfg.k,d:cfg.d,r:1,i:1,h:'Thủy',s:zi,cl:0,text:cfg.text},T);FX.engine.draw(g,'status')}
+ }
+ if(mode==='attack'&&run&&u>=1){if($('loop').checked)restart();else run=false}
+ if(mode==='status'&&run&&u>=1)restart();
+ }catch(e){msg='Lỗi: '+e.message}
+ info.textContent=(msg||(mode==='buff'?'Buff nền vùng '+zi+' · '+$('buffStat').selectedOptions[0].text+' · pixel art riêng theo vùng.':mode==='gear'?'Buff bộ trang bị · '+$('gear').selectedOptions[0].text+' · pixel art riêng theo bộ.':mode==='status'?'Hiệu ứng 4A · '+$('statusKind').selectedOptions[0].text+' · bên '+(statusP?'thú':'quái')+'.':(FX.codeZone&&FX.codeZone(zi)?'Vùng này đã vẽ bằng code (không ảnh).':'Đây là hiệu ứng CŨ (ảnh) để so sánh; sẽ được vẽ lại ở các bước sau.')))+'\nHạt đang chạy: '+FX.engine.count();
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
