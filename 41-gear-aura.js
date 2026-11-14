@@ -519,25 +519,59 @@
    E.blob(g,sx+(hash(seed+i*4)-.5)*10+Math.sin(age*2+i)*3,sy-6-u*34,5+u*7,3+u*4,'#2a2420',.26*Math.sin(Math.PI*u)*al,age*.5,seed+i*13,{wob:.3,speed:1,core:'#4a4038'});
   }
  }
+ /* [FX 3C-4 sửa 3] đường cong MỀM cho tia sét độ kiếp: từ (x0,y0) tới (x1,y1), lệch ngang theo sóng sin mượt (chữ S) thay cho đường gãy khúc;
+    hai đầu khớp đúng điểm; ph đổi theo thời gian → tia lắc lư uyển chuyển. */
+ function kcurve(x0,y0,x1,y1,seed,n,amp,ph){
+  const pts=[],dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,
+   c1=1.1+hash(seed*2.3)*.5,c2=2.3+hash(seed*4.1)*.8,p1=hash(seed*1.7)*TAU,p2=hash(seed*3.3)*TAU;
+  for(let j=0;j<=n;j++){
+   const t=j/n,env=Math.pow(Math.sin(Math.PI*t),.7),o=amp*env*(Math.sin(TAU*c1*t+p1+ph)+.38*Math.sin(TAU*c2*t+p2+ph*1.3));
+   pts.push([x0+dx*t+nx*o,y0+dy*t+ny*o]);
+  }
+  return pts;
+ }
+ /* vẽ tia sét mềm: dải thon dần về phía đất (3 lớp: quầng vàng, thân sáng, lõi trắng), tô ĐẶC từ đầu tới cuối (E.ribbon mờ dần đầu đuôi nên không dùng), không có góc gãy */
+ function sribbon(g,E,pts,wf,col,a,solid){
+  const n=pts.length,L=[],R=[];
+  for(let i=0;i<n;i++){
+   const p0=pts[Math.max(0,i-1)],p1=pts[Math.min(n-1,i+1)];let dx=p1[0]-p0[0],dy=p1[1]-p0[1];const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;
+   const w=wf(i/(n-1))/2;
+   L.push([pts[i][0]-dy*w,pts[i][1]+dx*w]);R.push([pts[i][0]+dy*w,pts[i][1]-dx*w]);
+  }
+  g.save();g.globalCompositeOperation=solid?'source-over':'lighter';g.fillStyle=E.rgba(col,a);
+  g.beginPath();g.moveTo(L[0][0],L[0][1]);
+  for(let i=1;i<n-1;i++)g.quadraticCurveTo(L[i][0],L[i][1],(L[i][0]+L[i+1][0])/2,(L[i][1]+L[i+1][1])/2);
+  g.lineTo(L[n-1][0],L[n-1][1]);g.lineTo(R[n-1][0],R[n-1][1]);
+  for(let i=n-2;i>0;i--)g.quadraticCurveTo(R[i][0],R[i][1],(R[i][0]+R[i-1][0])/2,(R[i][1]+R[i-1][1])/2);
+  g.lineTo(R[0][0],R[0][1]);g.closePath();g.fill();g.restore();
+ }
+ function sbolt(g,E,pts,w,P,al){
+  if(al<=.02)return;
+  const tp=q=>Math.max(1.3,w*(1.1-.8*q));
+  sribbon(g,E,pts,q=>tp(q)*3.4,'#2a1608',.4*al,true);   /* viền tối mỏng cho tia nổi khỏi lốc vàng */
+  sribbon(g,E,pts,q=>tp(q)*2.6,P.main,.4*al);
+  sribbon(g,E,pts,q=>tp(q)*1.25,P.light,.95*al);
+  sribbon(g,E,pts,q=>Math.max(1,tp(q)*.62),P.core,.98*al);
+ }
  /* tia sét độ kiếp: báo trước (vòng điện co lại) → tia dày có nhánh + chớp → sóng xung kích + mảnh vỡ */
  function kbolt(g,E,x,T,sx,sy,seed,big,age,P,al){
-  if(age<-.45||age>.55)return;
+  if(age<-.45||age>.6)return;
   if(age<0){
    const u=1+age/.45,r=(big?30:20)*(1-u*.6)*(1+.3*Math.sin(T*30));
    g.save();g.globalCompositeOperation='lighter';g.lineWidth=1.4;g.strokeStyle=E.rgba(P.light,.4*u*al);g.beginPath();g.ellipse(sx,sy,r,r*SQ,0,0,TAU);g.stroke();g.restore();
    E.glow(g,sx,sy,6+8*u,P.main,.35*u*al,P.light);
    return;
   }
-  const fv=age<.22?(hash(Math.floor(T*40)+seed)>.25?1:.55)*(1-age/.22*.35):0,top=GY-124,xs=x+(sx-x)*.55+(hash(seed+3)-.5)*14;
+  const FL=.42,fv=age<FL?Math.pow(1-age/FL,.9)*(.88+.12*Math.sin(age*70+seed)):0,top=GY-124,xs=x+(sx-x)*.55+(hash(seed+3)-.5)*14;
   if(fv>0){
-   const pts=zig(xs,top,sx,sy,seed,big?13:11,big?9:7);
-   bolt(g,E,pts,big?5:3.4,P,al*fv);
-   [3,6,8].forEach((ix,i)=>{
-    const p=pts[Math.min(ix,pts.length-2)],sg=hash(seed+i*2.3)>.5?1:-1,L=(big?34:24)*(1-i*.2);
-    bolt(g,E,zig(p[0],p[1],p[0]+sg*L*.7,p[1]+L,seed*3+i,4,4),big?2.2:1.5,P,al*fv*.85);
+   const ph=age*4.5,pts=kcurve(xs,top,sx,sy,seed,18,big?15:11,ph);
+   sbolt(g,E,pts,big?6.4:4.4,P,al*fv);
+   [5,9,13].forEach((ix,i)=>{
+    const p=pts[ix],sg=hash(seed+i*2.3)>.5?1:-1,L=(big?36:26)*(1-i*.18);
+    sbolt(g,E,kcurve(p[0],p[1],p[0]+sg*L*.8,p[1]+L*.75,seed*3+i,9,L*.28,ph*1.2+i),big?3.4:2.4,P,al*fv*.85);
    });
    E.glow(g,sx,sy,(big?34:22)*fv,P.light,.7*al*fv,P.core);
-   g.save();g.globalCompositeOperation='lighter';g.fillStyle=E.rgba(P.core,.35*al*fv);g.fillRect(x-80,GY-140,160,150);g.restore();
+   E.glow(g,x,GY-72,(big?90:74),P.light,.22*al*fv,P.core);   /* chớp sáng TRÒN (bản cũ dùng fillRect 160x150 → hiện thành cái khung) */
   }
   const u=cl(age/.5,0,1);
   E.wave(g,sx,sy,6+u*(big?62:44),P.light,(1-u)*.9*al,2.2,{t:T,seed:seed,sq:SQ,wob:.05,core:P.core});
