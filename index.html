@@ -10,9 +10,8 @@
 #ttg-boot{position:fixed;inset:0;z-index:2147483000;overflow:hidden;background:#050b0f;color:#e8fff4;
   font-family:'VT323',monospace;text-align:center;transition:opacity .6s ease}
 #ttg-boot.out{opacity:0;pointer-events:none}
-#ttg-boot .bgb{position:absolute;inset:-20px;background:url(img-boot-bg.webp) center/cover no-repeat;filter:blur(16px) brightness(.55) saturate(1.2)}
-#ttg-boot .pic{position:absolute;inset:0;background:url(img-boot-bg.webp) center 12%/contain no-repeat;image-rendering:pixelated;animation:tb-in 1s ease both}
-#ttg-boot .shade{position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(to top,rgba(4,10,14,.96) 0%,rgba(4,10,14,.82) 45%,rgba(4,10,14,0) 100%)}
+#ttg-boot .pic{position:absolute;inset:0;background:url(img-boot-bg.webp) 50% 30%/cover no-repeat;image-rendering:pixelated;animation:tb-in 1s ease both}
+#ttg-boot .shade{position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(to top,rgba(4,10,14,.96) 0%,rgba(4,10,14,.82) 45%,rgba(4,10,14,0) 100%)}
 #ttg-boot .panel{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;
   padding:0 18px calc(34px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
 #ttg-boot .msg{font-size:clamp(20px,5.4vw,26px);line-height:1.15;color:#e8fff4;max-width:94vw;min-height:2.4em;text-shadow:0 2px 0 #000,0 0 10px rgba(0,0,0,.8)}
@@ -32,15 +31,15 @@
 #ttg-boot.ready .bar{border-color:#6fd1a0;box-shadow:0 0 0 2px #040a0e,0 0 18px rgba(111,209,160,.7)}
 @keyframes tb-in{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
 @keyframes tb-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-@media (min-aspect-ratio:3/4){#ttg-boot .pic{background-position:center center}#ttg-boot .shade{height:38%}}
+@media (min-aspect-ratio:3/4){#ttg-boot .pic{background-position:50% 25%}#ttg-boot .shade{height:36%}}
 </style>
 </head>
 <body>
 <div id="ttg-boot" role="status" aria-live="polite">
-  <div class="bgb"></div><div class="pic"></div><div class="shade"></div>
+  <div class="pic"></div><div class="shade"></div>
   <div class="panel">
     <div class="msg" id="tb-msg">Dữ liệu nhân vật đang được tải, xin vui lòng chờ<b id="tb-dots">.</b></div>
-    <div class="bar"><i id="tb-fill"></i><span id="tb-pct">0%</span></div>
+    <div class="bar"><i id="boot-fill"></i><span id="tb-pct">0%</span></div>
     <button type="button" class="go" id="tb-go">▶ BẮT ĐẦU</button>
   </div>
 </div>
@@ -49,7 +48,7 @@
    19-save.js gọi TTGBOOT.ready() khi dữ liệu người chơi đã sẵn sàng -> thanh chạy tới 100% rồi hiện nút BẮT ĐẦU, người chơi bấm mới vào game.
    TTGBOOT.hide() = tắt ngay (dùng khi cần hiện màn đăng nhập / đặt biệt danh). Sau 30 giây mà chưa xong cũng cho hiện nút. */
 (function(){
-  var el=document.getElementById('ttg-boot'),fill=document.getElementById('tb-fill'),pctEl=document.getElementById('tb-pct'),
+  var el=document.getElementById('ttg-boot'),fill=document.getElementById('boot-fill'),pctEl=document.getElementById('tb-pct'),
     dots=document.getElementById('tb-dots'),msg=document.getElementById('tb-msg'),go=document.getElementById('tb-go'),
     n=0,pct=0,floor=0,ready=false,done=false,shown=false,t0=Date.now();
   function paint(){var p=Math.max(0,Math.min(100,pct));fill.style.width=p+'%';pctEl.textContent=Math.floor(p)+'%'}
