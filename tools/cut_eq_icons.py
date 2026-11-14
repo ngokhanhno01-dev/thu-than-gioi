@@ -21,7 +21,9 @@ PRESETS = {
     'linh-hoa-vien': dict(bg=(26, 29, 36), thr=100, min_area=12, ring_seed=(210, 990), ring_hole_thr=125,
                           regions=[('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
                                    ('vong', 0, 600, 420, 1200), ('ngoc', 420, 600, 896, 1100)]),
-    'than-dien': dict(bg=(25, 28, 35), thr=40, min_area=6, close_r=3, hole_max=400, ring_seed=(215, 1010), ring_hole_thr=125,
+    'than-dien': dict(bg=(25, 28, 35), thr=40, min_area=6, close_r=3, hole_max=400,
+                      ring_seed=[(240, 935), (215, 1030)], ring_hole_thr=125,
+                      body={'giap': (10, 9000), 'vong': (8, 1500)},
                       regions=[('vukhi', 0, 0, 462, 600), ('giap', 462, 0, 896, 600),
                                ('vong', 0, 600, 422, 1200), ('ngoc', 422, 600, 896, 1100)]),
 }
@@ -60,6 +62,19 @@ for name, x0, y0, x1, y1 in P['regions']:
     m = np.isin(lab, keep)
     pad = CLOSE_R + 2                               # đóng khe nứt (có đệm để không dính mép ảnh)
     m = ndi.binary_closing(np.pad(m, pad), structure=close_se)[pad:-pad, pad:-pad]
+    body_r, body_hole = P.get('body', {}).get(name, (0, 0))   # (bán kính đóng, lỗ tối đa) CHỈ cho thân chính: lấp vùng tối gần màu nền nằm trong thân
+    if body_r:
+        se_ = np.hypot(*np.mgrid[-body_r:body_r + 1, -body_r:body_r + 1]) <= body_r
+        pad_ = body_r + 2
+        body = ndi.binary_closing(np.pad(lab == main, pad_), structure=se_)[pad_:-pad_, pad_:-pad_]
+        hl_, hn2_ = ndi.label(~body)
+        if hn2_:
+            hs2_ = ndi.sum(~body, hl_, range(1, hn2_ + 1))
+            out2_ = {hl_[0, 0], hl_[0, -1], hl_[-1, 0], hl_[-1, -1]}
+            for i_, a_ in enumerate(hs2_, 1):
+                if a_ <= body_hole and i_ not in out2_:
+                    body |= hl_ == i_
+        m |= body
     holes_, hn_ = ndi.label(~m)                     # lấp lỗ kín (khe nứt/lem trắng); riêng lòng nhẫn khoét lại sau
     if hn_:
         hs_ = ndi.sum(~m, holes_, range(1, hn_ + 1))
@@ -71,8 +86,12 @@ for name, x0, y0, x1, y1 in P['regions']:
         low = np.zeros_like(fg); low[y0:y1, x0:x1] = (dd <= P['ring_hole_thr'])[y0:y1, x0:x1]
         core = ndi.binary_opening(low, structure=disk)     # mở để cắt cầu nối, lấy khối chứa tâm lòng, nở lại
         cl, _ = ndi.label(core)
-        sx, sy = P['ring_seed']
-        hole = ndi.binary_dilation(cl == cl[sy, sx], structure=disk) & low
+        seeds = P['ring_seed'] if isinstance(P['ring_seed'], list) else [P['ring_seed']]
+        pick = np.zeros_like(low)
+        for sx, sy in seeds:
+            if cl[sy, sx]:
+                pick |= cl == cl[sy, sx]
+        hole = ndi.binary_dilation(pick, structure=disk) & low
         hole = ndi.binary_fill_holes(ndi.binary_opening(hole, structure=disk))   # làm mượt mép lòng nhẫn
         m &= ~hole
     ys, xs = np.where(m)
