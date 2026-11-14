@@ -76,6 +76,9 @@ const EQ_SHARED=4;
 const EQ_BAG=100;                    /* số ô kho trang bị */
 const EQ_QW=[55,28,12,4,1];          /* tỉ lệ gacha phẩm: Phàm / Linh / Địa / Thiên / Thần */
 const EQ_QBONUS=[0,.10,.22,.38,.60]; /* phẩm càng cao càng mạnh: Linh +10% · Địa +22% · Thiên +38% · Thần +60% (nhân cho MỌI chỉ số của món và buff bộ) */
+/* [CƯỜNG HÓA] cấp cường hóa của món: it.e = 0..ENH_MAX; mỗi cấp cộng ENH_GAIN (4%) cho MỌI dòng chỉ số của món. Buff bộ không đổi. */
+const ENH_MAX=10,ENH_GAIN=.04;
+const eqEnh=it=>{if(it&&typeof it==='object'){const e=Math.floor(Number(it.e));it.e=isFinite(e)?Math.max(0,Math.min(ENH_MAX,e)):0}return it};
 const EQ_QBONUS_OLD=[0,.06,.12,.20,.30]; /* công thức cũ: CHỈ dùng để quy đổi trang bị cũ khi tải bản lưu */
 const EQ_LINES=2;                    /* số dòng chỉ số NGẪU NHIÊN mỗi món (ngoài 1 chỉ số mặc định theo ô) */
 const EQ_ZSTEP=.03;                  /* vùng z (0..16) nhân thêm 1+z×0,03: ×1 ở vùng đầu → ×1,48 ở vùng 17 (áp cho chỉ số mặc định, dòng bốc và buff bộ) */
@@ -246,13 +249,13 @@ function eqRef(z){const zb=VAN_KIEP_ZONE_BOUNDS[z];return 72/5*(1+3*petGrow((zb.
 
 const eqZM=z=>1+z*EQ_ZSTEP;
 /* Giá trị 1 dòng chỉ số k: b (gốc) × vùng × phẩm × roll r. Loại 'f' tính theo chỉ số tham chiếu của vùng, loại 'p' là % điểm. */
-function eqVal(z,k,q,r,b){
- const d=EQ_STATS[k],pct=b*eqZM(z)*(1+EQ_QBONUS[q])*r;
+function eqVal(z,k,q,r,b,e){
+ const d=EQ_STATS[k],pct=b*eqZM(z)*(1+EQ_QBONUS[q])*r*(1+ENH_GAIN*(e||0));
  return d.t==='f'?Math.max(1,Math.round(eqRef(z)*(k==='hp'?8:1)*pct/100)):Math.round(pct*10)/10}
 /* Mọi dòng của 1 món = [chỉ số mặc định] + [2 dòng bốc]. TÍNH LẠI mỗi lần từ z/q/roll nên công thức đổi là đồ cũ tự đổi theo. Trả [[k,giá trị],...] (dòng đầu = mặc định). */
 function eqLines(it){
- const m=EQ_MAIN[it.s],out=[[m.k,eqVal(it.z,m.k,it.q,1,m.b)]];
- for(const l of it.L)if(EQ_STATS[l[0]])out.push([l[0],eqVal(it.z,l[0],it.q,l[1],EQ_STATS[l[0]].b)]);
+ const m=EQ_MAIN[it.s],e=it.e||0,out=[[m.k,eqVal(it.z,m.k,it.q,1,m.b,e)]];
+ for(const l of it.L)if(EQ_STATS[l[0]])out.push([l[0],eqVal(it.z,l[0],it.q,l[1],EQ_STATS[l[0]].b,e)]);
  return out}
 function eqPickKeys(excl,n){
  const pool=Object.keys(EQ_STATS).filter(k=>k!==excl).map(k=>[k,EQ_W[k]||1]),out=[];
@@ -263,7 +266,7 @@ function eqPickKeys(excl,n){
  return out}
 function eqRoll(z,s,q){
  const L=eqPickKeys(EQ_MAIN[s].k,EQ_LINES).map(k=>[k,Math.round((EQ_ROLL[0]+Math.random()*(EQ_ROLL[1]-EQ_ROLL[0]))*1000)/1000]);
- return{uid:eqUid++,z,s,q,lv:VAN_KIEP_ZONE_BOUNDS[z].start,ver:2,L}}
+ return{uid:eqUid++,z,s,q,e:0,lv:VAN_KIEP_ZONE_BOUNDS[z].start,ver:2,L}}
 /* Quy đổi trang bị CŨ (L = [[k,giá trị đã cộng sẵn]] ×3, chưa có ver) sang dạng mới L = [[k,roll]] ×2.
    Giữ nguyên các chỉ số người chơi đã bốc; nếu thừa thì bỏ dòng trùng chỉ số mặc định trước, rồi bỏ dòng roll thấp nhất. Chạy 1 lần rồi gắn ver:2. */
 function eqMigrate(it){
@@ -421,7 +424,7 @@ function fgDo(){
 /* ---------- Giao diện ---------- */
 function eqItemHtml(it,withCmp){
  if(!it)return'<small>Chạm vào một món trang bị để xem.</small>';
- let h='<b style="color:'+eqRgb(it)+'">['+QN[it.q]+'] '+eqName(it)+'</b><br><small'+(level<it.lv?' class="bad"':'')+'>Cấp yêu cầu '+it.lv+' · Bộ '+VAN_KIEP_ZONES[it.z].name+(it.q?' · Phẩm +'+Math.round(EQ_QBONUS[it.q]*100)+'%':'')+'</small>'+
+ let h='<b style="color:'+eqRgb(it)+'">['+QN[it.q]+'] '+eqName(it)+'</b><br><small'+(level<it.lv?' class="bad"':'')+'>Cấp yêu cầu '+it.lv+' · Bộ '+VAN_KIEP_ZONES[it.z].name+(it.q?' · Phẩm +'+Math.round(EQ_QBONUS[it.q]*100)+'%':'')+' · Cường hóa +'+(it.e||0)+'</small>'+
   eqLines(it).map((l,i)=>'<div class="stl">'+(i?'':'⭐ ')+eqLine(l)+(i?'':' <small>(mặc định)</small>')+'</div>').join('');
  const w=withCmp?eqWorn[it.s]:null;
  if(w)h+='<small style="color:var(--mute)">Đang mặc: <span style="color:'+eqRgb(w)+'">['+QN[w.q]+'] '+eqName(w)+'</span><br>'+eqLines(w).map(eqLine).join(' · ')+'</small>';
@@ -445,14 +448,14 @@ function eqWearHtml(){
  for(let s=0;s<4;s++){
   const it=eqWorn[s],sel=eqSel&&eqSel.w&&eqSel.i===s;
   circ+='<button class="upslot eqs'+(sel?' sel':'')+'" style="left:'+pos[s][0]+'%;top:'+pos[s][1]+'%;border-color:'+(it?eqRgb(it):'#4d533b')+'!important" onclick="eqPick(true,'+s+')" title="'+EQ_SLOTS[s].n+'">'+
-   '<span style="opacity:'+(it?1:.4)+'">'+eqIco(s,it?it.z:null)+'</span>'+(it?'<b>'+(it.z+1)+'</b>':'')+'</button>'}
+   '<span style="opacity:'+(it?1:.4)+'">'+eqIco(s,it?it.z:null)+'</span>'+(it?'<b>+'+(it.e||0)+'</b>':'')+'</button>'}
  circ+='</div>';
  let bagH='<div class="eqbag" id="eq-bag">';
  for(let i=0;i<EQ_BAG;i++){
   const it=ebag[i];
   if(!it){bagH+='<button class="slot" disabled style="opacity:.3"></button>';continue}
   const sel=eqSel&&!eqSel.w&&eqSel.i===i;
-  bagH+='<button class="slot'+(sel?' sel':'')+'" style="border-color:'+(sel?'var(--gold)':eqRgb(it))+'" onclick="eqPick(false,'+i+')" title="'+eqName(it)+'"><span>'+eqIco(it.s,it.z)+'</span><b>'+(it.z+1)+'</b></button>'}
+  bagH+='<button class="slot'+(sel?' sel':'')+'" style="border-color:'+(sel?'var(--gold)':eqRgb(it))+'" onclick="eqPick(false,'+i+')" title="'+eqName(it)+'"><span>'+eqIco(it.s,it.z)+'</span><b>+'+(it.e||0)+'</b></button>'}
  bagH+='</div>';
  const it=eqSelItem();
  let btns='';

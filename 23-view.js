@@ -76,7 +76,7 @@ function statRows(st){
 
 function itemHtml(it){
   if(!it||typeof it!=='object')return'<div class="it no">— Trống —</div>';
-  const z=Math.floor(num(it.z,0,99,-1)),s=Math.floor(num(it.s,0,99,-1)),q=Math.floor(num(it.q,0,4,0));
+  const z=Math.floor(num(it.z,0,99,-1)),s=Math.floor(num(it.s,0,99,-1)),q=Math.floor(num(it.q,0,4,0)),e=Math.floor(num(it.e,0,10,0));
   const slot=EQ_SLOTS[s],zone=VAN_KIEP_ZONES[z];
   if(!slot||!zone)return'<div class="it no">— Không rõ —</div>';
   const col='rgb('+QC[q]+')';
@@ -86,7 +86,7 @@ function itemHtml(it){
     if(Array.isArray(l)){k=l[0];v=l[1]}else if(l&&typeof l==='object'){k=l.k;v=l.v}else return'';
     const d=EQ_STATS[String(k)];if(!d)return'';
     return'<div>'+esc(d.n)+' +'+r1(v)+(d.t==='p'?'%':'')+'</div>'}).join('');
-  return'<div class="it" style="border-color:'+col+'"><b style="color:'+col+'">'+slot.i+' ['+QN[q]+'] '+esc(slot.n+' '+zone.name)+'</b>'+lines+'</div>'}
+  return'<div class="it" style="border-color:'+col+'"><b style="color:'+col+'">'+slot.i+' ['+QN[q]+'] '+esc(slot.n+' '+zone.name)+' +'+e+'</b>'+lines+'</div>'}
 
 /* buff bộ: đếm số món cùng bộ (>=2 món thì có buff) */
 function setHtml(eq){
