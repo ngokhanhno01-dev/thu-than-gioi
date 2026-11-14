@@ -35,7 +35,7 @@ label{display:flex;align-items:center;gap:6px}
  <div class="row"><select id="style"><option value="px">Kiểu: Pixel</option><option value="sm">Kiểu: Mịn</option></select><select id="spd"><option value="1">Tốc độ 1x</option><option value="0.5">Chậm 0.5x</option><option value="0.25">Rất chậm 0.25x</option></select></div>
  <div class="row"><button id="play">▶ Phát lại</button><label><input type="checkbox" id="loop" checked> Lặp</label></div>
 </div>
-<div class="row" id="statusControls" hidden><select id="statusKind"><option value="crit">Chí mạng</option><option value="miss">Né tránh</option><option value="burn">Thiêu đốt</option><option value="counter">Phản đòn</option><option value="shield">Khiên (xoay quanh + chặn đòn, còn khiên)</option><option value="shield0">Khiên (chặn đòn, vỡ hết khiên)</option><option value="revive">Hồi sinh</option><option value="bq">Bất khuất dưới 50% HP</option><option value="lightning">Sét giáng đất</option><option value="lava">Dung nham</option><option value="heal">Hồi máu</option><option value="freeze">Đóng băng</option><option value="stun">Choáng</option></select><select id="statusSide"><option value="p">Bên thú</option><option value="m">Bên quái</option></select><button id="statusPlay">▶ Phát lại</button><label><input type="checkbox" id="refShow" checked> Hiện ảnh mẫu</label></div>
+<div class="row" id="statusControls" hidden><select id="statusKind"><option value="crit">Chí mạng</option><option value="miss">Né tránh</option><option value="burn">Thiêu đốt</option><option value="counter">Phản đòn</option><option value="shield">Khiên (xoay quanh + chặn đòn, còn khiên)</option><option value="burnloop">Thiêu đốt (bám trên người, lặp)</option><option value="shield0">Khiên (chặn đòn, vỡ hết khiên)</option><option value="revive">Hồi sinh</option><option value="bq">Bất khuất dưới 50% HP</option><option value="lightning">Sét giáng đất</option><option value="lava">Dung nham</option><option value="heal">Hồi máu</option><option value="freeze">Đóng băng</option><option value="stun">Choáng</option></select><select id="statusSide"><option value="p">Bên thú</option><option value="m">Bên quái</option></select><button id="statusPlay">▶ Phát lại</button><label><input type="checkbox" id="refShow" checked> Hiện ảnh mẫu</label></div>
 <div id="info"></div>
 <script src="31-combat-fx.js"></script>
 <script src="33-attack-fx.js"></script>
@@ -124,6 +124,8 @@ function loop(now){
  }
  if(mode==='gear'){try{FX.drawBack(g,T,.7,0,{startBuffs:[{kind:$('gear').value}],zoneBuff:null},0,0,100,100,0,0)}catch(e){msg='Lỗi buff bộ: '+e.message}}
  if(mode==='status'&&status==='bq'){try{FX.drawBack(g,T,t,zi,{startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100},0,0,statusP?42:100,statusP?100:42,zi,0)}catch(e){msg='Lỗi Bất khuất: '+e.message}}
+ const isBl=mode==='status'&&status==='burnloop',BR={startBuffs:[],zoneBuff:null,brP:statusP?0:1,brM:statusP?1:0};
+ if(isBl){try{FX.drawBack(g,T,T,zi,BR,0,0,100,100,zi,0)}catch(e){msg='Lỗi thiêu đốt (nền): '+e.message}}
  if(isSh){try{FX.drawBack(g,T,t,zi,{startBuffs:[],zoneBuff:null},shP,shM,100,100,zi,0)}catch(e){msg='Lỗi khiên (nền): '+e.message}}
  try{
   if(mode==='attack'&&run&&u<.9){
@@ -142,6 +144,7 @@ function loop(now){
  ghosts.forEach(q=>{g.save();g.globalAlpha=q.a;if(q.defP)pet(g,85+q.off*.84,'#9fd8ff','#9fd8ff',T,false);else pet(g,272-q.off*.78,'#ffb0a0','#ffb0a0',T,true);g.restore()});
  pet(g,85+dp*.84,'#6cc4ff','#2a6fb0',T,false);pet(g,272+dmx*.78,'#ff8a7a','#a83a3a',T,true);
  try{if(mode==='status'&&status==='bq'){const R={startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100};FX.drawField(g,T,t,zi,R,0,0,statusP?42:100,statusP?100:42,zi,0)}}catch(e){msg='Lỗi lớp cuồng nộ: '+e.message}
+ if(isBl){try{const ph=(T%1.8)/1.8;if(ph<.55)FX.drawImpact(g,{pp:statusP,q:Math.min(.9999,ph/.55),k:'hit',d:18,r:1,i:1,h:'Hỏa',s:zi,cl:2,text:'🔥 Thiêu đốt - 18'},T);FX.drawField(g,T,T,zi,BR,0,0,100,100,zi,0)}catch(e){msg='Lỗi thiêu đốt (trên): '+e.message}}
  if(isSh){try{FX.drawField(g,T,t,zi,{startBuffs:[],zoneBuff:null},shP,shM,100,100,zi,0)}catch(e){msg='Lỗi khiên (trên): '+e.message}}
  try{if(mode==='attack'&&run&&u<.9&&kind==='miss'&&FX.drawDodge)FX.drawDodge(g,u,pa,T)}catch(e){msg='Lỗi: '+e.message}
  try{

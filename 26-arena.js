@@ -588,7 +588,7 @@
       if(P.hp <= 0 || Q.hp <= 0) break;
     }
     const win = Q.hp <= 0 || (P.hp > 0 && P.hp / P.mx > Q.hp / Q.mx);
-    return { win: win, ev: ev, maxP: P.mx, maxM: Q.mx, shP: shP0, shM: shM0, first: first === P };
+    return { win: win, ev: ev, maxP: P.mx, maxM: Q.mx, shP: shP0, shM: shM0, first: first === P, brP: kv(Q, 11), brM: kv(P, 11) };
   }
 
   function makeNpcCard(){
@@ -833,7 +833,7 @@
           msg = R.win ? '🏆 Chiến thắng!' : '💥 Bại trận...';
           if(R.win) am = Math.max(0, 1 - (T-TE)*1.2);
         }
-        try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaBack) TTGCombatFX.drawArenaBack(g, tt, T, pet.sp, oppSP, zbP, zbM); }catch(_){}   // buff vùng: lớp nền, vẽ TRƯỚC thú để không che thú
+        try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaBack) TTGCombatFX.drawArenaBack(g, tt, T, pet.sp, oppSP, zbP, zbM, {p:R.brP>0&&hp>0, m:R.brM>0&&mh>0}); }catch(_){}   // buff vùng: lớp nền, vẽ TRƯỚC thú để không che thú
         aura(g, RP, 0, 85, tt); aura(g, RM, 180, 272, tt);
         gst.forEach(function(q){
           if(q.pa) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, q.off, 1, true); }, RP[0], .75, q.a);
@@ -843,7 +843,7 @@
         drawOpp(g, card, 272, 208, 120, tt, dmx, am, false);
         if(pf > 0) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, dp, 1, true); }, '#ffffff', 1, pf);
         if(mf > 0) tintDraw(g, function(c){ drawOpp(c, card, 272, 208, 120, tt, dmx, 1, true); }, '#ffffff', 1, mf);
-        try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaBuffs) TTGCombatFX.drawArenaBuffs(g, tt, T, pet.sp, oppSP, zbP, zbM); }catch(_){}   // buff vùng: bật to rõ lúc vào trận
+        try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaBuffs) TTGCombatFX.drawArenaBuffs(g, tt, T, pet.sp, oppSP, zbP, zbM, {p:R.brP>0&&hp>0, m:R.brM>0&&mh>0}); }catch(_){}   // buff vùng: bật to rõ lúc vào trận
         if(fx) impact(g, fx, tt);
         try{ fxDraw(g, tt, dp, dmx); }catch(_){}
         g.restore();

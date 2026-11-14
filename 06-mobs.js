@@ -1996,7 +1996,7 @@ function sim(e){const P=mkP(),Q=mkM(e),ev=[],acc=(c,k,v)=>Math.random()*100<v,kv
   [[P,Q],[Q,P]].forEach(([a,d])=>{if(a.hp>0&&d.hp>0&&kv(a,11)){const b=Math.max(1,Math.round(a.atk*kv(a,11)*rs(d)/100));d.hp-=b;push(a,'hit',b,'🔥 Thiêu đốt -'+b);revive(d)}});
   [P,Q].forEach(c=>{if(c.hp>0&&P.hp>0&&Q.hp>0&&c.regen){const heal=Math.min(c.mx-c.hp,Math.round(c.mx*c.regen/100));if(heal>0){c.hp+=heal;push(c,'heal',heal,c.n+' hồi sức +'+heal+' HP')}}});if(window.EQFX&&P.hp>0&&Q.hp>0)EQFX.round(P,Q,r,push);
  }
- return{ev,win:Q.hp<=0||(P.hp>0&&P.hp/P.mx>Q.hp/Q.mx),maxP:P.mx,maxM:Q.mx,shP:sh0P,shM:sh0M,first:first===P,zone:e.m.zone,zoneBuff:e.m.buff,startBuffs,bqP:kv(P,16),bqM:kv(Q,16)}}/*@@E*/
+ return{ev,win:Q.hp<=0||(P.hp>0&&P.hp/P.mx>Q.hp/Q.mx),maxP:P.mx,maxM:Q.mx,shP:sh0P,shM:sh0M,first:first===P,zone:e.m.zone,zoneBuff:e.m.buff,startBuffs,bqP:kv(P,16),bqM:kv(Q,16),brP:kv(Q,11),brM:kv(P,11)}}/*@@E*/
 
 /* ===== Màu độc quyền 17 vùng + hiệu ứng đòn theo hệ ===== */
 const REG=[['#9fe4ff','#ffffff','flake'],['#9fd9c8','#e6fff8','mist'],['#c9a8ff','#fff0ff','puff'],['#a0ffd0','#e8fff4','streak'],['#ffe53a','#ffffff','bolt'],['#a8b8ff','#f0f2ff','moon'],['#ffa030','#fff0b0','ray'],['#5a6cff','#c04aff','void'],['#e0b038','#fff2b8','diamond'],['#18e0b0','#d8fff0','gem'],['#8be04a','#f0ffc0','leaf'],['#ff5a1e','#ffc070','ember'],['#b0206a','#ff4a6a','wisp'],['#b45cff','#ffd0ff','star'],['#6ac4ff','#ffffff','feather'],['#ff7ac0','#ffe0f0','petal'],['#fff0a0','#ffffff','crown']];

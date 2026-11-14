@@ -907,9 +907,44 @@ function statusHeal(g,fx,T,q,x,y,s,text){g.save();try{
  else{for(let i=0;i<5;i++){const an=phase+i*1.256,px=x+Math.cos(an)*34,py=150+Math.sin(an)*24;buffPixel(g,px,py,'#c8ffd8',.82*fa,2.8,1,2)}}
  statusBurst(s,rev?'revive':drain?'drain':'heal',x,198,rev?28:18,{speed:[18,88],ang:[-Math.PI*.92,-Math.PI*.08],size:[1.4,3.2],life:[.55,1.15],gy:-65,drag:.5,shape:'spark',c:col,c2:hi,a:.94,add:true,tag:'status',vr:[-3,3]});return true;
 }finally{g.restore()}}
+/* ===== FX 4A (làm lại): THIÊU ĐỐT — lửa THẬT bám trên người mục tiêu, vẽ lặp mỗi khung tới khi hết trận; mỗi lần game trừ máu thì bùng lên một nhịp ===== */
+const BURN={lit:[0,0],t0:[0,0],hit:[-9,-9],qs:[1,1],last:0};
+function burnReset(elapsed){if(elapsed<BURN.last-.3){for(let i=0;i<2;i++){BURN.lit[i]=0;BURN.t0[i]=0;BURN.hit[i]=-9;BURN.qs[i]=1}}BURN.last=elapsed}
+function bh(i,k){const v=Math.sin(i*127.1+k*311.7)*43758.5453;return v-Math.floor(v)}
+/* front=false: quầng nóng + khói phía SAU thú · front=true: lưỡi lửa + tàn lửa phía TRƯỚC thú (mỏng, thưa để vẫn thấy thân thú) */
+function burnLayer(g,x,T,front,side){g.save();try{
+ const env=FXE.cl((T-BURN.t0[side])/.6,0,1),dt=T-BURN.hit[side],fl=dt<0?0:Math.max(0,1-dt/.75),flare=fl*fl,u=3,ph=T*8;
+ if(env<=0)return;
+ if(!front){
+  FXE.glow(g,x,168,52+16*flare,'#ff5a1e',(.16+.07*Math.sin(T*9)+.3*flare)*env);
+  FXE.glow(g,x,196,30,'#ff8a2a',(.2+.2*flare)*env);
+  buffArc(g,x,204,34+6*flare,8,T*.5,T*.5+Math.PI*1.8,'#5d1a20',.8*env,u,T,1);buffArc(g,x,204,29+6*flare,6,T*.5+.4,T*.5+Math.PI*1.6,'#ff6a2e',.85*env,u,T,1);
+  for(let i=0;i<4;i++){const p=(T*.42+i*.25)%1,sx=x+(i-1.5)*9+Math.sin(T*1.3+i*2.1)*8,sy=176-p*66,sz=3+p*4;buffPixel(g,sx,sy,'#3a2a32',.3*(1-p)*env,sz,1,1)}
+  return;
+ }
+ for(let i=0;i<7;i++){
+  const cx0=x+(i-3)*9+Math.sin(T*2.2+i*1.7)*2,yb=198-bh(i,1)*34,hh=(17+bh(i,2)*17)*(.85+.3*Math.sin(ph+i*1.9))*env*(1+.85*flare),n=Math.max(1,Math.floor(hh/u));
+  for(let r=0;r<n;r++){
+   const t=r/n,yy=yb-r*u,px=cx0+Math.sin(T*7+i*2+t*3.4)*t*5,wc=Math.max(1,Math.round((1-t)*2.4+(r<2?1:0)));
+   buffPixel(g,px,yy,'#541727',.72*(1-t*.5),u,wc+2,1);
+   buffPixel(g,px,yy,t<.22?'#ffe57c':t<.5?'#ff9b35':t<.8?'#f4512b':'#9c2420',.86*(1-t*.45),u,wc,1);
+  }
+ }
+ const ne=8+Math.round(6*flare);
+ for(let i=0;i<ne;i++){const p=(T*.85+i*.173+bh(i,3))%1,ex=x+(bh(i,4)-.5)*54+Math.sin(T*3+i)*6,ey=192-p*(78+bh(i,5)*20);buffPixel(g,ex,ey,i%2?'#ffd35c':'#ff7a2e',(1-p)*env*(.75+.25*flare),2.2,1,1)}
+}finally{g.restore()}}
+/* mỗi lần game trừ máu vì Thiêu đốt: ghi lại nhịp bùng (chỉ trong module hiệu ứng) + phun tàn lửa */
+function statusBurnTick(g,fx,T,q,x,s){
+ const side=x>180?1:0;
+ if(!BURN.lit[side]){BURN.lit[side]=1;BURN.t0[side]=T}
+ if(q<BURN.qs[side]||BURN.hit[side]<0)BURN.hit[side]=T-q*.55;BURN.qs[side]=q;
+ statusBurst(s,'burntick',x,178,16,{speed:[25,100],ang:[-Math.PI*.95,-Math.PI*.05],size:[1.4,3.2],life:[.45,1],gy:-35,drag:.5,shape:'spark',c:'#ff6a32',c2:'#ffe57c',a:.95,add:true,tag:'status',vr:[-4,4]});
+ return true;
+}
 function statusFire(g,fx,T,q,x,y,s,text){g.save();try{
  const lava=/dung nham/i.test(text),fa=1-q,phase=T*1.5;
  if(lava)return pixelLava(g,x,T,q,s,fx.pp?1:-1,1.15);
+ if(/thiêu đốt/i.test(text))return statusBurnTick(g,fx,T,q,x,s);
  const u=3.2,fade=fa*(.3+.7*FXE.eOut(FXE.cl(q/.18,0,1)));
  buffArc(g,x,202,36,9,phase*.08,phase*.08+Math.PI*1.75,'#5d1a20',.86*fade,u,T,1);buffArc(g,x,202,30,6,phase*.08+.4,phase*.08+Math.PI*1.55,'#ff5b2e',.85*fade,u,T,1);
  for(let i=0;i<7;i++){
@@ -1088,6 +1123,9 @@ function drawBack(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  /* Bất khuất: dưới 50% máu thì ngọn lửa đỏ bừng sau lưng (nằm sau thú, không đè) */
  if(R&&R.bqP>0&&hp>0&&hp<R.maxP*.5)bqAura(g,85,T,elapsed,0);
  if(R&&R.bqM>0&&mh>0&&mh<R.maxM*.5)bqAura(g,272,T,elapsed,1);
+ burnReset(elapsed);
+ if(R&&R.brP>0&&hp>0&&BURN.lit[0])burnLayer(g,85,T,false,0);
+ if(R&&R.brM>0&&mh>0&&BURN.lit[1])burnLayer(g,272,T,false,1);
  /* Khiên: các khiên nằm phía SAU thú (nhỏ, mờ hơn) */
  if(shP>0)shieldOrbit(g,85,T,elapsed,hold,false);
  if(shM>0)shieldOrbit(g,272,T,elapsed,hold,false);
@@ -1099,6 +1137,8 @@ function drawField(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  if(R&&R.zoneBuff)bannerFx(g,272,z.color,'✦ '+R.zoneBuff.label,q,0);
  if(R&&R.startBuffs&&R.startBuffs.length)bannerFx(g,85,gearCol(R.startBuffs[0].kind),'✦ BỘ TRANG BỊ',q,0);
  infoPanels(g,z,zp,R);
+ if(R&&R.brP>0&&hp>0&&BURN.lit[0])burnLayer(g,85,T,true,0);
+ if(R&&R.brM>0&&mh>0&&BURN.lit[1])burnLayer(g,272,T,true,1);
  /* Khiên: các khiên nằm phía TRƯỚC thú (to, rõ hơn) */
  if(shP>0)shieldOrbit(g,85,T,elapsed,hold,true);
  if(shM>0)shieldOrbit(g,272,T,elapsed,hold,true);
@@ -1107,8 +1147,10 @@ function drawField(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  FXE.draw(g,'status');
 }
 /* ---- ĐẤU TRƯỜNG: buff vùng của 2 thú. bP/bM = {stat,text} từ 26-arena.js ---- */
-function drawArenaBack(g,T,t,spP,spM,bP,bM){
+function drawArenaBack(g,T,t,spP,spM,bP,bM,burn){
  const q=clamp(1-Math.max(0,t)/BUFFSEC,0,1),e=Math.max(0,t);
+ burnReset(t);
+ if(burn){if(burn.p&&BURN.lit[0])burnLayer(g,85,T,false,0);if(burn.m&&BURN.lit[1])burnLayer(g,272,T,false,1)}
  groundRing(g,85,zone(spP).color,.28,T);groundRing(g,272,zone(spM).color,.2,T);
  [[85,spP,bP],[272,spM,bM]].forEach(a=>{
   const b=a[2];if(!b||!b.text)return;
@@ -1117,8 +1159,9 @@ function drawArenaBack(g,T,t,spP,spM,bP,bM){
   if(q<=0)auraBack(g,a[0],z.color,T,.22);
  });
 }
-function drawArenaBuffs(g,T,t,spP,spM,bP,bM){
+function drawArenaBuffs(g,T,t,spP,spM,bP,bM,burn){
  const q=clamp(1-Math.max(0,t)/BUFFSEC,0,1);
+ if(burn){if(burn.p&&BURN.lit[0])burnLayer(g,85,T,true,0);if(burn.m&&BURN.lit[1])burnLayer(g,272,T,true,1)}
  [[85,spP,bP],[272,spM,bM]].forEach(a=>{const b=a[2];if(b&&b.text)bannerFx(g,a[0],zone(a[1]).color,'✦ '+b.text,q,0)});
  FXE.draw(g,'status');
 }
@@ -1141,6 +1184,7 @@ function attackMode(z,text){
 function drawAttack(g,T,S){
  const z=getZone(S.s),u=S.u||0,pa=!!S.pa,dir=pa?1:-1,text=S.text||'',mode=attackMode(z,text);
  const sx=pa?112:248,tx=pa?255:105,ty=148;
+ if(/Thiêu đốt -/.test(text)&&!/Dung Nham Phun Trào/.test(text))return true;/* Thiêu đốt: lửa bám trên mục tiêu do lớp lặp (burnLayer) vẽ */
  if(/Dung Nham Phun Trào|Thiêu đốt -|Xích Diệm vùng/.test(text))return drawLavaAttackCode(g,T,S);
  if(/Lôi Phạt giáng|Lôi Kích\s*-/.test(text))return drawLightningAttackCode(g,T,S);
  if(/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/.test(text))return counterThrow(g,T,S);
