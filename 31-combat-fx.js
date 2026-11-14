@@ -544,6 +544,7 @@ const GEAR_PIXEL_STYLE={
  ambush:{id:12,n:4,h:29,form:'shadow'},star:{id:13,n:4,h:34,form:'star'},first:{id:14,n:4,h:36,form:'spear'},weaken:{id:15,n:4,h:30,form:'drip'},judge:{id:16,n:4,h:36,form:'crown'}
 };
 function backGear(g,x,kind,q,T,e){
+ if(window.TTGGearAura&&window.TTGGearAura[kind]){try{window.TTGGearAura[kind](g,x,q,T,e,FXE);return}catch(_){}}   /* [FX 3C] aura vẽ lại: 41-gear-aura.js */
  const st=GEAR_PIXEL_STYLE[kind]||GEAR_PIXEL_STYLE.judge,id=st.id,u=2.2,col=gearCol(kind);
  const pale=FXE.mix(col,'#fff4cf',.58),deep=FXE.mix(col,'#101321',.72),mid=FXE.mix(col,'#ffffff',.22);
  const a=q>0?Math.min(1,q*1.8):0,rest=.31+.09*Math.sin(T*3.7+id),al=Math.max(rest,.88*a),pulse=.72+.28*Math.sin(T*2.6+id*.9),w=al*pulse;
