@@ -19,3 +19,8 @@ Chỉ sửa hiệu ứng; không đụng cơ chế/chỉ số/lưu/UI/âm thanh/
 
 ## Việc sau đó (chờ người dùng nói "tiếp")
 Bước 4B: gỡ hạ tầng ảnh (giữ fx/khien-xanh.png, fx/khien-do.png; tools/ref-* chỉ demo, liệt kê chứ không xoá), bước 5: kiểm tra cuối + mở PR cho người dùng merge. Trả lời tiếng Việt, ngắn gọn, người dùng dùng điện thoại, ngại hết quota.
+
+## Cập nhật sau phản hồi (12:20)
+- Hồi sinh: đổi thành 22 tia nhỏ, mảnh, ngắn, rải đều quanh pháp trận (ảnh mẫu: cột sáng + hạt lấp lánh xanh/vàng).
+- Dung nham: tách `lavaCracks` — đất nứt TỪ TỪ + rung trong lúc tung chiêu (drawLavaAttackCode, u 0→1), rồi lúc trúng (drawImpact→pixelLava) mới phun trào 7 cột to + khói đen viền cam (ảnh mẫu).
+- Đã chạy harness t11.js: 0 lỗi. Chưa đo draw call, chưa xem hình thật.

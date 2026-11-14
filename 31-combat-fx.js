@@ -841,44 +841,50 @@ function pixelMagicCircle(g,x,y,T,a,revive){
   buffLine(g,[[x+Math.cos(an)*18,y+Math.sin(an)*4],[px,py]],deep,a*.8,u,2);if(i%2===0)pixelPlus(g,px,py,2.1,col,hi,a*.9);else buffDiamond(g,px,py,2,hi,a,u)}
  buffDiamond(g,x,y,3,col,a,u);buffPixel(g,x,y,hi,a,u,1,5);buffPixel(g,x,y,hi,a,u,5,1);g.restore();
  }
-function pixelLava(g,x,T,q,s,dir,scale){
- /* DUNG NHAM PHUN TRÀO (kiểu núi lửa): mặt đất rung mạnh + nứt đỏ → dung nham phun từ dưới đất lên thành các cột → cục nham bắn theo cung rơi xuống + khói → nguội dần */
- const p=FXE.cl(q,0,1),k=scale||1,u=3.5,fl=205,fade=1-FXE.ph(p,.86,1),rum=FXE.eOut(FXE.cl(p/.05,0,1))*(1-FXE.ph(p,.4,.66)),jx=Math.sin(T*83)*2.4*rum,jy=Math.sin(T*71+1)*1.3*rum;
- g.save();
- const crk=FXE.eOut(FXE.cl(p/.16,0,1)),L=(26+66*crk)*k;
- FXE.glow(g,x,fl-2,(38+34*crk)*k,'#ff3a14',(.12+.22*FXE.ph(p,.12,.3))*fade);
- for(let c=0;c<5;c++){
-  const an=(c-2)*.52+(c%2?.1:-.1),len=L*(.55+.45*bh(c,5)),pts=[];
-  for(let j=0;j<=4;j++){const f=j/4;pts.push([x+jx+Math.cos(an)*len*f+(bh(c,j+9)-.5)*7,fl-1+jy+Math.sin(an)*len*f*.3+(bh(c,j+20)-.5)*3])}
+/* nứt đất đỏ + đất rung — crk 0..1 là độ nứt (tăng từ từ), rum 0..1 là độ rung */
+function lavaCracks(g,x,T,crk,rum,fade,k){
+ const u=3.5,fl=205,jx=Math.sin(T*83)*2.6*rum,jy=Math.sin(T*71+1)*1.4*rum,L=(10+82*crk)*k;
+ FXE.glow(g,x,fl-2,(30+40*crk)*k,'#ff3a14',(.05+.3*crk)*fade);
+ for(let c=0;c<7;c++){
+  const f0=FXE.cl(crk*1.25-c*.06,0,1),an=(c-3)*.42+(c%2?.08:-.08),len=L*(.5+.5*bh(c,5))*f0/Math.max(.01,crk||1),pts=[];
+  if(f0<=.02)continue;
+  for(let j2=0;j2<=5;j2++){const f=j2/5;pts.push([x+jx+Math.cos(an)*len*f+(bh(c,j2+9)-.5)*7,fl-1+jy+Math.sin(an)*len*f*.3+(bh(c,j2+20)-.5)*3])}
   buffLine(g,pts,'#1c0f16',.95*fade,u,3);buffLine(g,pts,'#ff3a1e',.95*fade,u,1);
-  if(p>.14)buffLine(g,pts.slice(0,4),'#ffc24a',(.7+.3*Math.sin(T*18+c))*fade,u,1);
+  if(crk>.3)buffLine(g,pts.slice(0,4),'#ffc24a',(.7+.3*Math.sin(T*18+c))*fade,u,1);
  }
- for(let i=0;i<9;i++){const cx=x+(bh(i,7)-.5)*L*1.7,hop=Math.abs(Math.sin(T*31+i*2.3))*6*rum;buffPixel(g,cx,fl-2-hop,i%2?'#4a3436':'#2e2024',.9*rum*fade,2.6,2,1)}
- const env=FXE.eOut(FXE.ph(p,.12,.34))*(1-FXE.ph(p,.6,.86));
+ for(let i=0;i<11;i++){const cx=x+(bh(i,7)-.5)*L*1.7,hop=Math.abs(Math.sin(T*31+i*2.3))*7*rum;buffPixel(g,cx,fl-2-hop,i%2?'#4a3436':'#2e2024',.9*rum*fade,2.6,2,1)}
+ return jx;
+}
+function pixelLava(g,x,T,q,s,dir,scale){
+ /* DUNG NHAM PHUN TRÀO: (vết nứt đã vẽ từ lúc tung chiêu) → dung nham phun từ dưới đất thành cột to → cục nham bắn cung + đám khói đen viền cam → nguội dần */
+ const p=FXE.cl(q,0,1),k=scale||1,u=3.5,fl=205,fade=1-FXE.ph(p,.88,1),rum=1-FXE.ph(p,.1,.4);
+ g.save();
+ const jx=lavaCracks(g,x,T,1,rum,fade,k);
+ const env=FXE.eOut(FXE.ph(p,0,.2))*(1-FXE.ph(p,.55,.86));
  if(env>.02){
-  const cols=[[-44,56],[-24,90],[0,122],[24,90],[44,56]];
-  for(let j=0;j<5;j++){
-   const cx0=x+cols[j][0]*k,h=cols[j][1]*env*(.86+.14*Math.sin(T*14+j*1.7)),n=Math.max(1,Math.floor(h/u));
+  const cols=[[-50,50],[-30,86],[-12,130],[0,160],[12,130],[30,86],[50,50]];
+  for(let j=0;j<7;j++){
+   const cx0=x+cols[j][0]*k,h=cols[j][1]*env*(.88+.12*Math.sin(T*14+j*1.7)),n=Math.max(1,Math.floor(h/u)),cw=4-Math.abs(j-3)*.5;
    for(let r=0;r<n;r++){
-    const v=r/n,sw=Math.sin(T*9+j*2+v*4)*v*4,w=Math.max(1,Math.round(1+3.2*Math.pow(1-v,1.1)+(v>.86?1:0))),yy=fl-r*u-u/2,px=cx0+sw+jx*.5;
+    const v=r/n,sw=Math.sin(T*9+j*2+v*4)*v*4,w=Math.max(1,Math.round(1+cw*Math.pow(1-v,1.1)+(v>.9?1:0))),yy=fl-r*u-u/2,px=cx0+sw+jx*.5;
     buffPixel(g,px,yy,'#681b27',fade*.95,u,w+2,1);buffPixel(g,px,yy,v<.3?'#ffb23a':r%2?'#f34225':'#ff7a2e',fade*.96,u,w,1);
     if(w>=3&&r%2===0)buffPixel(g,px,yy,'#ffe27a',fade*.9,u,w-2,1);
    }
    FXE.glow(g,cx0,fl-h*.55,22+h*.12,'#ff5a1e',.22*env*fade);
   }
  }
- for(let i=0;i<12;i++){
-  const tl=.15+i*.03,a=(p-tl)*1.05;if(a<0)continue;
-  const vx=(bh(i,11)-.5)*140,vy0=-(110+bh(i,12)*100),px=x+vx*a+jx,py=fl-6+vy0*a+.5*380*a*a;if(py>fl-1||a>1.4)continue;
+ for(let i=0;i<16;i++){
+  const tl=.03+i*.02,a=(p-tl)*1.05;if(a<0)continue;
+  const vx=(bh(i,11)-.5)*150,vy0=-(120+bh(i,12)*110),px=x+vx*a+jx,py=fl-6+vy0*a+.5*380*a*a;if(py>fl-1||a>1.4)continue;
   const hot=FXE.cl(1-a/.9,0,1);buffPixel(g,px,py,'#331c2a',fade*.95,u,3,3);buffPixel(g,px,py,hot>.5?'#ffd458':'#ff672b',fade*.97,u,2,2);
   buffPixel(g,px-vx*.02,py-vy0*.02-3,'#ff7a2e',fade*.6*hot,u,1,1);
  }
- const sa=FXE.ph(p,.3,.5)*fade;
- if(sa>0)for(let i=0;i<6;i++){const f=(p*1.4+i*.17)%1,sx=x+(i-2.5)*13+Math.sin(T*2+i)*6,sy=fl-80-f*55,sz=5+f*6;buffPixel(g,sx,sy,'#2b2229',.38*(1-f)*sa,sz,1,1)}
- if(p>.12)statusBurst(s,'lava',x,fl-5,26,{speed:[30,140],ang:[-Math.PI*.98,-Math.PI*.02],size:[1.6,3.8],life:[.5,1.2],gy:150,drag:.43,shape:'shard',c:'#ff642b',c2:'#ffe17a',a:.96,add:true,tag:'status',vr:[-8,8],floor:207,bounce:.2});
+ const sa=FXE.ph(p,.12,.35)*(1-FXE.ph(p,.8,1));
+ if(sa>0)for(let i=0;i<9;i++){const f=FXE.cl((p-.12)*1.2+i*.05,0,1),sx=x+(bh(i,13)-.5)*84+Math.sin(T*2+i)*4,sy=fl-120-f*40+(i%3)*8,sz=14+f*10+(i%3)*3;
+  buffPixel(g,sx,sy,'#2e2c33',.85*sa,sz,1,1);buffPixel(g,sx-sz*.1,sy-sz*.1,'#4a4750',.8*sa,sz*.7,1,1);if(i%2)buffPixel(g,sx+sz*.3,sy+sz*.3,'#ff8a2e',.7*sa,3,2,1)}
+ if(p>.02)statusBurst(s,'lava',x,fl-5,30,{speed:[30,150],ang:[-Math.PI*.98,-Math.PI*.02],size:[1.6,3.8],life:[.5,1.2],gy:150,drag:.43,shape:'shard',c:'#ff642b',c2:'#ffe17a',a:.96,add:true,tag:'status',vr:[-8,8],floor:207,bounce:.2});
  g.restore();
 }
-/* KHIÊN chặn đòn: 1 khiên ở phía kẻ đánh chớp sáng → nứt → vỡ thành mảnh pixel xanh văng có trọng lực + vòng sóng; các khiên còn lại mờ dần */
 function statusShield(g,fx,T,q,x,y,s){g.save();try{
  const px=x<180?85:272,dir=x<180?1:-1,spr=blueShieldSprite(),QB=.22,ix=px+dir*38,iy=150,unit=1.9;
  /* các khiên xoay còn lại tan dần (nếu game vẫn còn khiên thì chúng chồng khít lên khiên xoay thật nên không thấy khác) */
@@ -922,27 +928,26 @@ function statusShield(g,fx,T,q,x,y,s){g.save();try{
 function ringPix(g,cx,cy,rx,ry,n,col,dark,a,u){if(a<=.02)return;for(let i=0;i<n;i++){const an=i*FXE.TAU/n+.2,px=cx+Math.cos(an)*rx,py=cy+Math.sin(an)*ry;buffPixel(g,px,py,dark,a*.8,u,2,2);buffPixel(g,px,py,col,a,u,1,1)}}
 /* ===== FX 4A (làm lại): HỒI SINH — pháp trận hiện dưới chân → các tia sáng lần lượt bắn thẳng lên trời → năng lượng tụ lại thành quả cầu trên ngực thú rồi nở ra ===== */
 function statusRevive(g,fx,T,q,x,s){
- const GR='#35ed78',HI='#d5ffe0',GD='#ffe27a',DK='#123d32',N=7,BH=132,E=FXE.TAU;
+ const GR='#35ed78',HI='#d5ffe0',GD='#ffe27a',DK='#123d32',N=22,E=FXE.TAU;
  const ca=FXE.ph(q,0,.12)*(1-FXE.ph(q,.9,1));
  if(ca>0){pixelMagicCircle(g,x,204,T*1.6,ca,true);ringPix(g,x,204,50+8*FXE.ph(q,0,.3),12,18,GD,DK,ca*.9,3.4);FXE.glow(g,x,204,46,GR,.22*ca)}
  for(let i=0;i<N;i++){
-  const an=i*E/N,bx=x+Math.cos(an)*38,tb=.14+i*.05,grow=FXE.eOut(FXE.cl((q-tb)/.09,0,1)),shrink=FXE.ph(q,tb+.15,tb+.3);
+  const bx=x+(bh(i,1)-.5)*84,BH=34+bh(i,2)*50,tb=.12+i*.017,grow=FXE.eOut(FXE.cl((q-tb)/.07,0,1)),shrink=FXE.ph(q,tb+.1,tb+.22);
   if(grow<=0)continue;
-  const top=204-BH*grow,bot=204-BH*shrink,hgt=bot-top;if(hgt<=2)continue;const cy=(top+bot)/2,rows=hgt/3;
-  buffPixel(g,bx,cy,DK,.55,3,5,rows);buffPixel(g,bx,cy,GR,.8,3,3,rows);buffPixel(g,bx,cy,HI,.96,3,1,rows);
-  buffPixel(g,bx,top-2,HI,.95,3,3,2);buffPixel(g,bx,top-5,GD,.9,3,1,2);
-  for(let k=0;k<3;k++){const sy=top+((T*46+i*17+k*43)%hgt);buffPixel(g,bx+(k%2?3:-3)*1.4,sy,k%2?GD:HI,.85*(1-shrink),2.4,1,1)}
-  if(shrink<1)FXE.glow(g,bx,203,11,GD,.42*(1-shrink));
+  const top=204-BH*grow-bh(i,3)*6,bot=204-BH*shrink,hgt=bot-top;if(hgt<=2)continue;const cy=(top+bot)/2,rows=hgt/2.4;
+  buffPixel(g,bx,cy,DK,.5,2.4,3,rows);buffPixel(g,bx,cy,i%3?GR:'#5fd6e8',.85,2.4,1,rows);
+  buffPixel(g,bx,top-2,HI,.95,2.4,1,2);if(i%2)buffPixel(g,bx,top-5,GD,.9,2.4,1,1);
+  if(shrink<1)FXE.glow(g,bx,203,7,GD,.3*(1-shrink));
  }
- for(let i=0;i<14;i++){
-  const k=i%N,ox=x+Math.cos(k*E/N)*38,oy=204-BH+bh(i,3)*34,ts=.46+k*.012,pm=FXE.cl((q-ts)/.4,0,1),e=pm*pm*(3-2*pm);if(pm<=0||q>.94)continue;
+ for(let i=0;i<18;i++){
+  const ox=x+(bh(i,5)-.5)*84,oy=204-30-bh(i,3)*56,ts=.46+(i%7)*.012,pm=FXE.cl((q-ts)/.4,0,1),e=pm*pm*(3-2*pm);if(pm<=0||q>.94)continue;
   const px=ox+(x-ox)*e+Math.sin((1-e)*6+i)*9*(1-e),py=oy+(150-oy)*e;
   buffPixel(g,px,py,DK,.7,3,2,2);buffPixel(g,px,py,i%2?GD:HI,.95,2.6,1,1);
  }
  const oa=FXE.ph(q,.52,.78)*(1-FXE.ph(q,.9,1)),rad=3+10*FXE.eOut(FXE.ph(q,.5,.88));
  if(oa>0){FXE.glow(g,x,150,10+rad*2,GR,.4*oa);buffDiamond(g,x,150,Math.max(1,Math.round(rad/3)),DK,.85*oa,3.6);buffDiamond(g,x,150,Math.max(1,Math.round(rad/4)),GR,.95*oa,3.4);buffDiamond(g,x,150,1,HI,oa,3.2)}
  if(q>.88){const k=FXE.ph(q,.88,1);ringPix(g,x,150,12+40*k,12+40*k,22,GD,DK,(1-k)*.95,3.4);ringPix(g,x,204,20+60*k,5+14*k,20,GR,DK,(1-k)*.9,3.4)}
- if(q>.2)statusBurst(s,'rev1',x,200,14,{speed:[20,80],ang:[-Math.PI*.9,-Math.PI*.1],size:[1.4,3],life:[.5,1],gy:-60,drag:.5,shape:'spark',c:GR,c2:HI,a:.95,add:true,tag:'status'});
+ if(q>.2)statusBurst(s,'rev1',x,200,18,{speed:[20,80],ang:[-Math.PI*.9,-Math.PI*.1],size:[1.4,3],life:[.5,1],gy:-60,drag:.5,shape:'spark',c:GR,c2:HI,a:.95,add:true,tag:'status'});
  if(q>.88)statusBurst(s,'rev2',x,150,22,{speed:[25,95],ang:[-Math.PI,Math.PI],size:[1.4,3.2],life:[.4,.9],gy:40,drag:.5,shape:'spark',c:GD,c2:HI,a:.95,add:true,tag:'status'});
  return true;
 }
@@ -1171,9 +1176,9 @@ function statusImpact(g,fx,T,z,text,q,target,y){
  return null;
 }
 function drawLavaAttackCode(g,T,S){g.save();try{
- const u=clamp(S.u||0,0,1),pa=!!S.pa,dir=pa?1:-1,sx=pa?112:248,tx=pa?255:105,slot=FXE.seed('special-lava:'+(pa?'p':'m'),u),phase=FXE.eOut(FXE.cl((u-.04)/.34,0,1));
- if(u<.38){const x=sx+(tx-sx)*phase,y=201+Math.sin(T*8)*1.5;buffPixel(g,x,y,'#401824',.9,4.2,8,3);buffPixel(g,x,y,'#ec4927',.98,3.5,5,2);buffPixel(g,x+dir*5,y-4,'#ffdf65',.98,3.2,2,2);for(let i=0;i<3;i++)buffPixel(g,x-dir*(i+1)*6,y-2-i%2*3,'#ff7e2f',.88,3,2,1);if(u>.14)statusBurst(slot,'seed',x,y,6,{speed:[12,48],ang:[-Math.PI*.92,-Math.PI*.08],size:[1.2,2.4],life:[.25,.55],gy:110,drag:.6,shape:'spark',c:'#ff7434',c2:'#ffe46e',a:.9,add:true,tag:'status'});return true}
- return true;/* phần phun trào do drawImpact (pixelLava) vẽ đúng lúc trúng */
+ const u=clamp(S.u||0,0,1),pa=!!S.pa,tx=pa?255:105,crk=FXE.cl((u-.02)/.9,0,1);
+ /* đất nứt từ từ + rung mạnh dần; phần phun trào do drawImpact (pixelLava) vẽ đúng lúc trúng */
+ lavaCracks(g,tx,T,crk,crk*(1-FXE.ph(u,.9,1)*.5),1,1.15);return true;
 }finally{g.restore()}}
 function drawLightningAttackCode(g,T,S){
  const u=clamp(S.u||0,0,1),pa=!!S.pa,x=pa?255:105,slot=FXE.seed('special-lightning:'+(pa?'p':'m'),u),q=FXE.cl((u-.08)/.92,0,1);pixelCloud(g,x,T,1,3.5);pixelLightningSequence(g,x,T,q,slot,pa?1:-1,205);return true;
