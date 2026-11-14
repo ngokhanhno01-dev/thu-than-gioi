@@ -1367,7 +1367,7 @@
     return ok}
   
   function drawTopPet(canvas, card, T){
-    if(window.TTGGearScene) TTGGearScene.cur = TTGGearScene.kindFromEq(card && card.eq);   /* [FX 3C] buff bộ trong khung top */
+    if(window.TTGGearScene) TTGGearScene.cur = (card && card.own) ? TTGGearScene.ownKind() : TTGGearScene.kindFromEq(card && card.eq);   /* [FX 3C] buff bộ trong khung top (thẻ của mình không có eq → lấy bộ đang mặc) */
     try{ drawTopPet0(canvas, card, T); } finally { if(window.TTGGearScene) TTGGearScene.cur = undefined; }
   }
   function drawTopPet0(canvas, card, T){
@@ -1472,7 +1472,7 @@
       podList.push(ent);
       if(r.uid === myUid() && typeof pet !== 'undefined' && pet){
         // thú của chính mình: lấy trực tiếp từ game, luôn đúng thú đang dùng
-        ent.card = {bl: pet.bl, sp: pet.sp, pi: pet.pi, st: (typeof stageOf === 'function' && typeof level === 'number') ? stageOf(level) : 0};
+        ent.card = {own: true, bl: pet.bl, sp: pet.sp, pi: pet.pi, st: (typeof stageOf === 'function' && typeof level === 'number') ? stageOf(level) : 0};
         drawTopPet(cv, ent.card, 0); podStart();
       }else{
         getCard(r.uid).then(function(card){
