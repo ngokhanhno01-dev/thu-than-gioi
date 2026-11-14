@@ -6,15 +6,13 @@
 const ENH_TIERS=[[1,4],[5,7],[8,10],[11,13],[14,16]];   /* bậc 1..5 = vùng a..b (số vùng 1-based). Bậc 6 = mọi vùng 1..17 */
 const ENH_TIER_MAX=6;
 const ENH_TIER_COL=['#cfd8e3','#3fdc72','#4aa8ff','#b46bff','#ffc83a','#ff5a4a'];   /* màu bậc 1..6: trắng, lục, lam, tím, vàng, đỏ */
+const ENH_TIER_HUE=['grayscale(1) brightness(1.5)','hue-rotate(95deg)','hue-rotate(190deg)','hue-rotate(250deg)','hue-rotate(12deg) saturate(1.3)','hue-rotate(-28deg) saturate(1.4)']; /* chỉ để tô màu emoji tạm 🔶 */
 const ENH_SELL={stone:20,ticket:250,rainbow:375};       /* giá bán lại: đá = 20 × bậc */
 
-/* ---------- [CUONG HOA 6] Icon ảnh: file PNG nằm cạnh index.html (img-enh-stone1..6.png, img-enh-ticket.png, img-enh-rainbow.png, img-enh-tab.png) ----------
-   Muốn đổi ảnh: thay file cùng tên. Thiếu file thì tự rơi về emoji tạm (🔶 🎫 🌈 ⚡), không bao giờ mất icon. */
-const enhImg=(name,emo)=>'<img class="pxi" alt="" src="img-enh-'+name+'.png" onerror="this.replaceWith(document.createTextNode(\''+emo+'\'))">';
-const enhStoneIcon=t=>enhImg('stone'+t,'🔶');
-const enhTicketIcon=()=>enhImg('ticket','🎫');
-const enhRainbowIcon=()=>enhImg('rainbow','🌈');
-const ENH_TAB_IMG=enhImg('tab','⚡');                   /* icon tab + nút Cường hóa (48-enh-ui.js dùng qua ENH_TAB_ICO) */
+/* Icon: đổi ĐÚNG 1 CHỖ ở 3 hàm này khi có file ảnh (đợt 6) */
+const enhStoneIcon=t=>'<span style="display:inline-block;filter:'+ENH_TIER_HUE[t-1]+'">🔶</span>';
+const enhTicketIcon=()=>'🎫';
+const enhRainbowIcon=()=>'🌈';
 
 /* Bậc đá có thể cường hóa món vùng z (z 0-based): vùng 1–16 → [bậc đúng vùng, 6]; vùng 17 → [6] */
 function enhTierOf(z){
