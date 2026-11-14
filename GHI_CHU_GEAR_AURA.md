@@ -153,3 +153,10 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 
 ## [CHỐT DỰ ÁN] Đã BỎ buff nền vùng (bước 3A/3B)
 Người dùng chốt: không vẽ buff nền vùng nữa. `backZone` trong 31-combat-fx.js return ngay (giữ hàm + chỗ gọi), bỏ luôn `auraBack` dư quang. Vẫn giữ: groundRing, nhãn chữ buff (bannerFx), buff bộ trang bị 3C. Chỉ còn bước 5 (kiểm tra cuối + PR).
+
+## [FX 3C-mở rộng] Buff bộ hiện ở sảnh chính / thẻ / khung top / Đấu trường (file mới 43-gear-scene.js)
+- Trước đó buff bộ CHỈ vẽ trong drawBack (thám hiểm). Người dùng báo sảnh chính, thẻ, khung top, Đấu trường không có.
+- `43-gear-scene.js` (nạp sau 42 trong index.html): bọc hàm toàn cục `formation(t,sp)` (sảnh chính, thẻ 23-view, khung top 26-arena đều gọi nó để vẽ bệ) → vẽ `TTGGearAura[kind]` ngay sau bệ, trước thú; dời lên mặt đất y=191, phóng 1.1.
+- `TTGGearScene.cur`: undefined = bộ đang mặc của mình (sảnh chính); null = không bộ; chuỗi = kind của thẻ người khác. 23-view.js (biến `gearKindView`, đặt trong render từ c.eq, bật/tắt quanh petScene) và 26-arena.js (`drawTopPet` bọc `drawTopPet0`) set cur từ `card.eq` bằng `kindFromEq`.
+- Đấu trường (trận): 26-arena.js tính `gkP`/`gkM` (own / card.eq) và gọi `TTGGearScene.arena(g,tt,T,gkP,gkM)` ngay sau drawArenaBack (x=85 và 272, q 1→0 trong 2.4s).
+- Chọn bộ giống getStartBuffs: bộ đầu tiên có từ 2 món cùng vùng. Chưa xem hình thật trong game (chỉ node --check + harness giả); nếu lệch cỡ/vị trí ở sảnh chính thì chỉnh `translate(180,191)` và `scale(1.1)` trong 43.

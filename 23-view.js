@@ -143,6 +143,7 @@ function render(c,uid,fallbackNick,pt){
   const lv=Math.floor(num(c.lv,1,100,1)),st=(c.st==null&&typeof stageOf==='function')?Math.max(0,Math.min(9,stageOf(lv))):Math.floor(num(c.st,0,9,0));
   const nick=String(c.nick||fallbackNick||'Ẩn danh').slice(0,20);
   const B=BL[bl],eq=Array.isArray(c.eq)?c.eq.slice(0,4):[];
+  gearKindView=window.TTGGearScene?TTGGearScene.kindFromEq(eq):null;
   let spName=genOf(bl,sp).name,spTxt='';
   try{const si=spInfo(sp,pi+up*.03,q);spTxt=si&&si.text?si.text:''}catch(_){}
   const pe=Math.round(pur(pi+up*.03)*100);
@@ -206,6 +207,7 @@ function petScene(x,api,bl,sp,st,pi,T){
   if(AX){try{AX.front(x,64,by,bw,bh,T,'main',st,sp,pi||0,true,1)}catch(_){}}
   return ok}
 
+let gearKindView=null;   /* [FX 3C] kind bộ của thẻ đang xem (buff bộ vẽ sau bệ) */
 function drawPet(bl,sp,st,pi){
   cancelAnimationFrame(raf);
   const cv=$('cv-cv');if(!cv)return;
@@ -213,7 +215,7 @@ function drawPet(bl,sp,st,pi){
   const step=ts=>{
     if(!open)return;
     x.clearRect(0,0,128,128);
-    let ok=false;try{ok=!!petScene(x,api,bl,sp,st,pi,(ts||performance.now())/1000)}catch(_){}
+    let ok=false;if(window.TTGGearScene)TTGGearScene.cur=gearKindView;try{ok=!!petScene(x,api,bl,sp,st,pi,(ts||performance.now())/1000)}catch(_){}finally{if(window.TTGGearScene)TTGGearScene.cur=undefined}
     if(ok)raf=requestAnimationFrame(step);        /* vẽ liên tục để hào quang chuyển động; dừng khi đóng thẻ */
     else if(++n<240&&open)raf=requestAnimationFrame(step)};
   step()}
