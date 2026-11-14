@@ -3,7 +3,7 @@
    - Sảnh chính, thẻ, khung top đều gọi formation() (bệ dưới chân thú) → bọc formation: vẽ aura NGAY SAU bệ, trước khi vẽ thú.
      TTGGearScene.cur: undefined = dùng bộ đang mặc của mình (sảnh chính); null = không có bộ; chuỗi = kind bộ của thẻ người khác.
    - Đấu trường (trận): 26-arena.js gọi TTGGearScene.arena(...) ngay sau drawArenaBack.
-   Bộ được chọn giống getStartBuffs: bộ đầu tiên có từ 2 món cùng vùng trở lên. */
+   Chỉ hiện khi mặc ĐỦ 4 món cùng bộ (người dùng yêu cầu). */
 (()=>{
  'use strict';
  const S=window.TTGGearScene={cur:undefined};
@@ -13,7 +13,7 @@
    if(!Array.isArray(eq)||typeof EQ_SETS==='undefined')return null;
    const cnt={};
    eq.forEach(it=>{if(!it||it.z==null)return;const z=Math.floor(Number(it.z));if(z>=0&&z<17)cnt[z]=(cnt[z]||0)+1});
-   for(const z in cnt)if(cnt[z]>=2&&EQ_SETS[z])return EQ_SETS[z].k;
+   for(const z in cnt)if(cnt[z]>=4&&EQ_SETS[z])return EQ_SETS[z].k;
   }catch(_){}
   return null;
  };
@@ -21,7 +21,7 @@
  S.ownKind=function(){
   try{
    if(typeof eqSetInfo!=='function')return null;
-   const on=eqSetInfo().filter(x=>x.on)[0];
+   const on=eqSetInfo().filter(x=>x.full)[0];
    return on&&on.S?on.S.k:null;
   }catch(_){return null}
  };

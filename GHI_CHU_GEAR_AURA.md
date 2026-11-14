@@ -160,3 +160,5 @@ Người dùng chốt: không vẽ buff nền vùng nữa. `backZone` trong 31-c
 - `TTGGearScene.cur`: undefined = bộ đang mặc của mình (sảnh chính); null = không bộ; chuỗi = kind của thẻ người khác. 23-view.js (biến `gearKindView`, đặt trong render từ c.eq, bật/tắt quanh petScene) và 26-arena.js (`drawTopPet` bọc `drawTopPet0`) set cur từ `card.eq` bằng `kindFromEq`.
 - Đấu trường (trận): 26-arena.js tính `gkP`/`gkM` (own / card.eq) và gọi `TTGGearScene.arena(g,tt,T,gkP,gkM)` ngay sau drawArenaBack (x=85 và 272, q 1→0 trong 2.4s).
 - Chọn bộ giống getStartBuffs: bộ đầu tiên có từ 2 món cùng vùng. Chưa xem hình thật trong game (chỉ node --check + harness giả); nếu lệch cỡ/vị trí ở sảnh chính thì chỉnh `translate(180,191)` và `scale(1.1)` trong 43.
+
+- [CHỐT] Người dùng yêu cầu: buff bộ CHỈ hiện khi mặc ĐỦ 4 món cùng bộ (2–3 món thì không hiện). Áp dụng cho thám hiểm (drawBack chỉ lấy startBuffs có full!==false), sảnh chính, thẻ, khung top, Đấu trường (43-gear-scene.js: kindFromEq cần ≥4 món, ownKind dùng x.full). Hiệu ứng chỉ số của bộ 2 món vẫn hoạt động bình thường, chỉ bỏ phần vẽ aura.

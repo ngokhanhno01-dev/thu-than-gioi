@@ -1247,7 +1247,7 @@ function drawBack(g,T,elapsed,i,R,shP,shM,hp,mh,petSp,hold){
  const z=zone(i),zp=zone(petSp==null?currentPetZone:petSp),h=Math.max(0,hold||0),e=Math.max(0,elapsed-Math.max(0,h-.6)),q=elapsed<Math.max(0,h-.6)?0:clamp(1-e/BUFFSEC,0,1),pulse=.55+.45*Math.sin(T*5);
  groundRing(g,85,zp.color,.2+.16*pulse,T);groundRing(g,272,z.color,.1+.1*pulse,T);
  if(R&&R.zoneBuff){backZone(g,272,z,q,T,e,BUFFSH[R.zoneBuff.stat],1,R.zoneBuff.stat)}
- if(R&&R.startBuffs&&R.startBuffs.length){backGear(g,85,R.startBuffs[0].kind,q,T,e)}
+ {const gb=R&&R.startBuffs?R.startBuffs.find(b=>b.full!==false):null;if(gb)backGear(g,85,gb.kind,q,T,e)}   /* [FX chốt] chỉ vẽ aura khi đủ 4 món */
  /* Bất khuất: dưới 50% máu thì ngọn lửa đỏ bừng sau lưng (nằm sau thú, không đè) */
  burnReset(elapsed);
  if(R&&R.bqP>0&&hp>0&&hp<R.maxP*.5)bqAura(g,85,T,elapsed,0);else BQ.t0[0]=-1;
