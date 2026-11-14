@@ -24,7 +24,7 @@ label{display:flex;align-items:center;gap:6px}
   <option value="eva">Buff Né tránh</option><option value="crit">Buff Chí mạng</option><option value="regen">Buff Hồi phục</option><option value="hp">Buff HP</option>
  </select>
 </div>
-<div class="row" id="gearControls" hidden><select id="gear">
+<div class="row" id="gearControls" hidden><select id="gearStyle"><option value="smooth">Kiểu: mượt</option><option value="pixel">Kiểu: pixel art</option></select><select id="gear">
   <option value="frost">Frost · Băng</option><option value="mist">Mist · Sương</option><option value="cloud">Cloud · Mây</option><option value="wind">Wind · Gió</option>
   <option value="thunder">Thunder · Lôi</option><option value="counter">Counter · Phản kích</option><option value="sun">Sun · Dương quang</option><option value="shield">Shield · Khiên</option>
   <option value="thorn">Thorn · Gai</option><option value="revive">Revive · Hồi sinh</option><option value="grove">Grove · Rừng</option><option value="lava">Lava · Dung nham</option>
@@ -47,6 +47,7 @@ label{display:flex;align-items:center;gap:6px}
 <script src="39-attack-fx-2d-detail.js"></script>
 <script src="40-attack-fx-3a.js"></script>
 <script src="41-gear-aura.js"></script>
+<script src="42-gear-pixel.js"></script>
 <script>
 'use strict';
 /* Trang này gọi ĐÚNG cách game gọi: TTGCombatFX.drawAttack(g,T,S) khi u<.9 và TTGCombatFX.drawImpact(g,fx,T) khi u≥.35 (trúng ở u=.35, mỗi đòn kéo dài 1.9s).
@@ -70,7 +71,7 @@ else{
  const syncMode=()=>{$('buffControls').hidden=view.value!=='buff';$('gearControls').hidden=view.value!=='gear';$('attackControls').hidden=view.value!=='attack';$('statusControls').hidden=view.value!=='status';$('zone').hidden=view.value==='gear';build();restart()};
  syncMode();setTimeout(build,600);   /* cập nhật nhãn vùng khi 33-attack-fx.js tải xong */
  view.onchange=syncMode;
- $('buffStat').onchange=restart;$('gear').onchange=restart;$('statusKind').onchange=restart;$('statusSide').onchange=restart;$('statusPlay').onclick=restart;
+ $('buffStat').onchange=restart;$('gear').onchange=restart;$('gearStyle').onchange=restart;$('statusKind').onchange=restart;$('statusSide').onchange=restart;$('statusPlay').onclick=restart;
 }
 /* ---- chuyển động lao tới / giật lùi: chép từ 06-mobs.js để demo giống game ---- */
 function lungeAt(u){if(u<=0)return 0;
@@ -116,7 +117,7 @@ function loop(now){
    FX.drawBack(g,T,.7,zi,{zoneBuff:{stat,label:'Buff '+labels[stat]},startBuffs:[]},0,0,100,100,zi,0);
   }catch(e){msg='Lỗi buff vùng: '+e.message}
  }
- if(mode==='gear'){try{FX.drawBack(g,T,.7,0,{startBuffs:[{kind:$('gear').value}],zoneBuff:null},0,0,100,100,0,0)}catch(e){msg='Lỗi buff bộ: '+e.message}}
+ if(mode==='gear'){if(window.TTGGearAura)TTGGearAura.style=$('gearStyle').value;try{FX.drawBack(g,T,.7,0,{startBuffs:[{kind:$('gear').value}],zoneBuff:null},0,0,100,100,0,0)}catch(e){msg='Lỗi buff bộ: '+e.message}}
  if(mode==='status'&&status==='bq'){try{FX.drawBack(g,T,t,zi,{startBuffs:[],zoneBuff:null,bqP:statusP?1:0,bqM:statusP?0:1,maxP:100,maxM:100},0,0,statusP?42:100,statusP?100:42,zi,0)}catch(e){msg='Lỗi Bất khuất: '+e.message}}
  try{
   if(mode==='attack'&&run&&u<.9){
