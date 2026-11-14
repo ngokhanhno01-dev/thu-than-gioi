@@ -14,7 +14,7 @@ const ENH_STONE_QTY=[1,1,2,2,3,3,4,4,5,5];        /* số đá cường hóa m�
 const ENH_XU_BASE=200;                            /* xu mỗi lần = ENH_XU_BASE × (cấp hiện tại + 1) */
 const ENH_DROP_FROM=4;                            /* từ cấp này trở lên, thất bại bị tụt 1 cấp (+4…+9) */
 const ENH_RB_PCT=5;                               /* mỗi Đá Ngũ Sắc cộng bấy nhiêu % tỉ lệ thành công */
-const ENH_TAB_ICO=(typeof ENH_TAB_IMG!=='undefined')?ENH_TAB_IMG:'⚡';   /* [CUONG HOA 6] icon nút tab + nút Cường hóa = ảnh img-enh-tab.png (46-enh-items.js); lỗi thì rơi về emoji ⚡ */
+const ENH_TAB_ICO='⚡';                            /* icon nút tab + nút Cường hóa: đổi ĐÚNG 1 CHỖ này khi có file ảnh (đợt 6) */
 const ENH_FX_MS=3000;                             /* thời gian tụ lực trước khi nổ (ms) */
 const ENH_BOOM_MS=900;                            /* thời gian nổ + hiện kết quả (ms) */
 const ENH_HOLD_MS=700;                            /* giữ kết quả thêm bao lâu rồi tự đóng (chạm màn hình để đóng sớm) */
