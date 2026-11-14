@@ -80,7 +80,7 @@ function statRows(st){
 
 /* icon pixel của món trang bị (cùng icon với màn Trang bị); lỗi thì rơi về emoji cũ */
 function icoHtml(slot,z){
-  try{return pxImg(slot.px,ZONE_COL[z])}catch(_){return slot.i}}
+  try{const s=EQ_SLOTS.indexOf(slot);return s>=0?eqIco(s,z):pxImg(slot.px,ZONE_COL[z])}catch(_){return slot.i}}
 /* khung icon GIỐNG màn Trang bị: ô vuông viền màu phẩm + viền hiệu ứng theo cấp cường hóa (45-enh-border.js: vòng sáng chạy, lấp lánh từ +7) */
 function frameHtml(slot,z,e,colr){
   let cls='',inn='',sp='';
