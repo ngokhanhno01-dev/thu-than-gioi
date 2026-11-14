@@ -558,7 +558,7 @@ function begin(key,name){
     const d=e.newValue?parseSave(e.newValue):null;
     if(!d||d.tab!==TAB)conflict()});
   window.addEventListener('beforeunload',()=>{save();flushCloud(60000)});
-  try{window.TTGBOOT&&TTGBOOT.hide()}catch(_){}   /* tắt màn hình chờ: dữ liệu người chơi đã sẵn sàng */
+  try{window.TTGBOOT&&TTGBOOT.ready()}catch(_){}   /* dữ liệu người chơi đã sẵn sàng: thanh chờ chạy tới 100% rồi hiện nút Bắt đầu */
   showSaveNotice()}
 
 window.TTGSAVE={save,snap,get user(){return user},exportSave,wipe,logout};
