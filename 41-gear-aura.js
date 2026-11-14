@@ -1657,4 +1657,128 @@
    sparks(g,E,x,P,T,al,12,125);
   }finally{g.restore()}
  };
+
+ /* ================= BỘ 15 — VÙNG LINH HOA VIÊN (key kỹ thuật 'weaken'): màu vùng #ff7ac0, tự thiết kế, KHÔNG trùng Thanh Lâm (rừng xanh) và Hắc Ám Lâm (hồng tối) =================
+    Hiệu ứng khi mặc đủ bộ 4 món của vùng. Nét riêng theo vùng (vườn hoa linh, hồng sáng ngọt):
+    đoá hoa khổng lồ mờ sau lưng, dây leo hoa nở rộ + hoa đất hai bên trận pháp, bướm hoa vỗ cánh bay vòng,
+    cánh hoa rơi xoáy, phấn hoa bốc lên; lúc vào trận đoá hoa nở bừng to, cánh hoa bắn toả hình quạt. */
+ const BLOOM={deep:'#a8306e',main:'#ff7ac0',light:'#ffc0e2',core:'#fff0f8'};
+ const VINE='#5a2848';
+ /* đoá hoa: 2 lớp cánh (tối-ngoài / sáng-trong) so le, nhuỵ sáng giữa; n = số cánh */
+ function blossom(g,E,x,y,r,rot,P,a,n){
+  if(a<=.02||r<1)return;n=n||6;
+  E.glow(g,x,y,r*1.8,P.main,.25*a,P.light);
+  g.save();g.translate(x,y);g.rotate(rot);g.lineJoin='round';
+  for(let ly=r<6.5?1:0;ly<2;ly++){
+   for(let i=0;i<n;i++){
+    const an=i/n*TAU+(ly?Math.PI/n:0);
+    g.save();g.rotate(an);
+    g.fillStyle=E.rgba(ly?P.main:P.deep,(ly?.92:.95)*a);g.beginPath();g.ellipse(r*(ly?.5:.58),0,r*(ly?.42:.5),r*(ly?.22:.27),0,0,TAU);g.fill();
+    g.strokeStyle=E.rgba(P.light,.8*a);g.lineWidth=Math.max(.6,r*.07);g.stroke();
+    g.restore();
+   }
+  }
+  g.globalCompositeOperation='lighter';
+  g.fillStyle=E.rgba(P.core,.95*a);g.beginPath();g.arc(0,0,r*.2,0,TAU);g.fill();
+  g.fillStyle=E.rgba('#ffe27a',.9*a);
+  for(let i=0;i<5;i++){const an=i*1.257;g.fillRect(Math.cos(an)*r*.3-.7,Math.sin(an)*r*.3-.7,1.4,1.4)}
+  g.restore();
+ }
+ /* dây leo hoa: dây nâu hồng uốn lượn, gân hồng sáng, nở 3 đoá hoa dọc dây + nụ ở đầu */
+ function flowervine(g,E,x0,y0,h,lean,T,k,P,al,gk){
+  if(al<=.02||h<4)return;
+  const pts=[],m=12;
+  for(let j=0;j<m;j++){const t=j/(m-1),sw=Math.sin(T*1+k*1.7-t*3)*(1.5+3*t)+Math.sin(t*7+k)*2.5*(1-t*.5);pts.push([x0+lean*t*t+sw,y0-h*t])}
+  E.ribbon(g,pts,q=>Math.max(1.8,6*(1-q*.7)+1),VINE,al*.98,{add:false,core:VINE});
+  E.ribbon(g,pts.slice(1),q=>Math.max(.8,1.5*(1-q*.6)+.5),P.main,al*.85,{core:P.light});
+  [[5,5.2,-1],[9,5.8,1]].forEach((f,i)=>{
+   const p=pts[f[0]],bl=cl(gk*1.3-i*.12,0,1);
+   blossom(g,E,p[0]+f[2]*3,p[1],f[1]*bl,T*.3*f[2]+k+i,P,al,5);
+  });
+  const tp=pts[m-1];E.glow(g,tp[0],tp[1],5,P.light,.3*al*(.7+.3*Math.sin(T*2.4+k)));
+ }
+ /* cánh hoa rơi: giọt nước thon, có gân sáng */
+ function petal(g,E,x,y,s,rot,col,a){
+  if(a<=.02||s<1)return;
+  g.save();g.translate(x,y);g.rotate(rot);g.globalCompositeOperation='lighter';
+  g.fillStyle=E.rgba(col,.8*a);g.beginPath();g.moveTo(0,-s*1.4);g.quadraticCurveTo(s*1.05,-s*.2,0,s*1.2);g.quadraticCurveTo(-s*1.05,-s*.2,0,-s*1.4);g.closePath();g.fill();
+  g.strokeStyle=E.rgba('#ffffff',.7*a);g.lineWidth=.7;g.beginPath();g.moveTo(0,-s*1.1);g.lineTo(0,s*.9);g.stroke();
+  g.restore();
+ }
+ /* bướm hoa: 4 cánh hồng vỗ (co giãn ngang theo nhịp), thân nhỏ, quầng sáng */
+ function butterfly(g,E,x,y,s,fl,P,al){
+  if(al<=.02||s<1)return;
+  const sc=Math.abs(Math.cos(fl))*.75+.25;
+  g.save();g.translate(x,y);g.scale(sc,1);g.lineJoin='round';
+  for(let sd=-1;sd<=1;sd+=2){
+   g.fillStyle=E.rgba(P.main,.92*al);g.strokeStyle=E.rgba(P.light,.9*al);g.lineWidth=.8;
+   g.beginPath();g.ellipse(sd*s*.85,-s*.45,s*.85,s*.58,sd*.5,0,TAU);g.fill();g.stroke();
+   g.fillStyle=E.rgba(P.deep,.92*al);
+   g.beginPath();g.ellipse(sd*s*.6,s*.5,s*.55,s*.4,-sd*.4,0,TAU);g.fill();g.stroke();
+  }
+  g.restore();
+  g.save();g.fillStyle=E.rgba(P.core,.95*al);g.fillRect(x-.6,y-s*.7,1.2,s*1.5);g.restore();
+  E.glow(g,x,y,s*1.8,P.light,.22*al);
+ }
+ REG.weaken=function(g,x,q,T,e,E){
+  const P=BLOOM,{a,al}=level(q,T,15),grow=e==null?1:cl(e/.6,0,1),gk=easeBack(grow);
+  g.save();
+  try{
+   halo(g,E,x,P,T,al,a,q);
+   /* đoá hoa khổng lồ mờ sau lưng thú, xoay chậm */
+   blossom(g,E,x,GY-86,38*(.97+.03*Math.sin(T*1.8)),T*.15,P,al*.6,8);
+   circle(g,E,x,P,T,al,{r:58,ph:15.8,runeDir:-1});
+   /* sương hoa hồng nhạt sát đất, bán trong suốt */
+   for(let k=0;k<7;k++){
+    const side=hash(k*1.9+19)*2-1,px=x+side*(58+10*Math.abs(side))+Math.sin(T*.4+k*1.7)*6,py=GY-2-hash(k+5)*20*grow,rx=22+hash(k+9)*16,ry=8+hash(k+13)*8;
+    E.blob(g,px,py,rx,ry,k%2?P.light:P.main,.2*al,T*.5,k*47,{wob:.35,speed:1,core:P.light});
+   }
+   /* dây leo hoa + hoa đất: hai bên và phía sau trận pháp (không che cung trước) */
+   const it=[];
+   for(let side=-1;side<=1;side+=2){
+    for(let k=0;k<4;k++){
+     const t=k/3,ang0=-.3+t*1.75,ang=(side<0?Math.PI+ang0:-ang0)+(hash(k+side*7+43)-.5)*.2,rp=58*(.97+hash(k*2+side+20)*.12),p=gp(x,ang,rp),
+      sd=Math.abs(Math.cos(ang)),h=(34+hash(k*3+side*5+18)*36)*(.55+.75*sd);
+     it.push({t:'v',x:p[0],y:p[1],h,lean:-side*(h*.25+hash(k+9)*7)+(p[0]-x)*.12,k:k+side*20+120});
+    }
+    for(let k=0;k<2;k++){
+     const an=side>0?-.4+hash(k*3.1+side+6)*1.2:Math.PI-(-.4+hash(k*3.1+side+6)*1.2),p=gp(x,an,70+hash(k+side*3+7)*8);
+     it.push({t:'f',x:p[0],y:p[1],r:8+hash(k*2+side*9+5)*4,k:k*3+side*7+130});
+    }
+   }
+   it.sort((u,v)=>u.y-v.y);
+   const dI=o=>{if(o.t==='v')flowervine(g,E,o.x,o.y,o.h*gk,o.lean,T,o.k,P,al,gk);else blossom(g,E,o.x,o.y-o.r*.2,o.r*gk,o.k+T*.2,P,al,6)};
+   it.filter(o=>o.y<GY).forEach(dI);
+   swirl(g,E,x,P,T,al,{n:6,H:112,R:50,turns:.8,spin:1.2,wmax:15,ph:1.4});
+   swirl(g,E,x,P,T,al*.7,{n:3,H:92,R:60,turns:.7,spin:-.9,wmax:10,ph:3.1});
+   it.filter(o=>o.y>=GY).forEach(dI);
+   /* bướm hoa bay vòng quanh thú */
+   for(let k=0;k<5;k++){
+    const an=T*(.5+hash(k)*.3)*(k%2?1:-1)+k*1.3,rr=40+hash(k+2)*26,px=x+Math.cos(an)*rr,py=GY-30-hash(k+3)*84+Math.sin(an)*7+Math.sin(T*2+k)*3;
+    butterfly(g,E,px,py,3.6+hash(k+6)*1.4,T*8+k*2,P,al*Math.min(1,grow*1.5)*(Math.sin(an)>.6?.75:1));
+   }
+   /* cánh hoa rơi xoáy quanh thú */
+   for(let k=0;k<12;k++){
+    const sp=.04+hash(k*2.1+3)*.04,p=(T*sp+hash(k*5.7+2))%1,an=T*(.6+hash(k+1)*.5)*(k%2?1:-1)+k*1.9,rad=34+hash(k+4)*30;
+    petal(g,E,x+Math.cos(an)*rad,GY-130+p*124+Math.sin(an)*rad*.3,3.2+hash(k+8)*1.6,an+k+T*.8,k%3?P.light:P.main,Math.sin(Math.PI*p)*al);
+   }
+   /* lúc vào trận: đoá hoa nở bừng to + cánh hoa bắn toả hình quạt */
+   if(a>0&&e!=null&&e<1){
+    const k=cl(e,0,1);
+    blossom(g,E,x,GY-86,38+32*k,T*.15+k*1.5,P,a*(1-k)*.9,8);
+    for(let j=0;j<8;j++){
+     const an=-Math.PI/2+(j-3.5)*.4,d=8+k*78;
+     petal(g,E,x+Math.cos(an)*d,GY-36+Math.sin(an)*d,4.6,an+Math.PI/2+k*4,P.light,a*(1-k));
+    }
+   }
+   /* phấn hoa bốc lên */
+   g.save();g.globalCompositeOperation='lighter';
+   for(let k=0;k<16;k++){
+    const p=(T*(.06+hash(k)*.06)+hash(k*3.1))%1,px=x+(hash(k*5.3)*2-1)*68+Math.sin(T*1.4+k*1.7)*5,py=GY-6-p*124;
+    g.fillStyle=E.rgba(k%3?P.light:'#ffe27a',Math.sin(Math.PI*p)*.9*al);g.fillRect(px-1,py-1,2.4,2.4);
+   }
+   g.restore();
+   sparks(g,E,x,P,T,al,12,125);
+  }finally{g.restore()}
+ };
 })();
