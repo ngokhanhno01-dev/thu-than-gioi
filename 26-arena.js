@@ -745,6 +745,7 @@
       const ps = (typeof statsOf === 'function') ? statsOf(pet.bl, pet.pi, pet.base, level) : {spd:0};
       const oppBL = card.bl || 'ho', oppSP = Math.max(0, Math.min(16, Math.floor(Number(card.sp) || 0)));
       const RP = REG[pet.sp], RM = REG[oppSP];
+      const gkP = window.TTGGearScene ? TTGGearScene.ownKind() : null, gkM = window.TTGGearScene ? TTGGearScene.kindFromEq(card && card.eq) : null;   // [FX 3C] buff bộ hai bên
       const zbP = zoneBuffInfo(pet.sp), zbM = zoneBuffInfo(oppSP);   // buff vùng hiện trong đấu trường
       const HN = [fxElem((BL[pet.bl]||{}).h), fxElem((BL[oppBL]||{}).h)];
       const CL = R.ev.map(fxClass);
@@ -834,6 +835,7 @@
           if(R.win) am = Math.max(0, 1 - (T-TE)*1.2);
         }
         try{ if(window.TTGCombatFX && TTGCombatFX.drawArenaBack) TTGCombatFX.drawArenaBack(g, tt, T, pet.sp, oppSP, zbP, zbM, {p:R.brP>0&&hp>0, m:R.brM>0&&mh>0}); }catch(_){}   // buff vùng: lớp nền, vẽ TRƯỚC thú để không che thú
+        try{ if(window.TTGGearScene) TTGGearScene.arena(g, tt, T, gkP, gkM); }catch(_){}   // [FX 3C] buff bộ trang bị hai bên (sau lớp nền, trước thú)
         aura(g, RP, 0, 85, tt); aura(g, RM, 180, 272, tt);
         gst.forEach(function(q){
           if(q.pa) tintDraw(g, function(c){ drawPet(c, 85, 208, 120, tt, q.off, 1, true); }, RP[0], .75, q.a);
@@ -1365,6 +1367,10 @@
     return ok}
   
   function drawTopPet(canvas, card, T){
+    if(window.TTGGearScene) TTGGearScene.cur = TTGGearScene.kindFromEq(card && card.eq);   /* [FX 3C] buff bộ trong khung top */
+    try{ drawTopPet0(canvas, card, T); } finally { if(window.TTGGearScene) TTGGearScene.cur = undefined; }
+  }
+  function drawTopPet0(canvas, card, T){
     if(!canvas || !card) return;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0,0,128,128);
