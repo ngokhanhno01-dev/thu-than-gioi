@@ -1,5 +1,5 @@
-/* ===== 46-enh-items.js — [CUONG HOA 2] Vật phẩm cường hóa (chưa bán, chưa rơi, chưa dùng được) =====
-   Nạp NGAY SAU 45-enh-border.js. Không sửa file cũ: thêm vào ITEMS / SELL_PRICE / HL_ITEM và bọc bagUse().
+/* ===== 46-enh-items.js — [CUONG HOA 2+4] Vật phẩm cường hóa + đá rơi từ quái/boss (chưa dùng được) =====
+   Nạp NGAY SAU 45-enh-border.js. Không sửa file cũ: thêm vào ITEMS / SELL_PRICE / HL_ITEM, bọc bagUse() và rollDrops().
    Mọi con số sửa ở khối cấu hình ngay bên dưới. */
 
 /* ---------- Cấu hình ---------- */
@@ -42,3 +42,27 @@ try{HL_ITEM.ve_bao_ho='#6fd1ff';HL_ITEM.da_ngu_sac='#ff9ae8'}catch(_){}
 {const _bu=bagUse;bagUse=function(){const s=bag[bagSel];
  if(s&&enhIsItem(s.id)){log('🔶 <b>'+ITEMS[s.id].n+'</b> dùng ở mục <b>Trang bị → Cường hóa</b>.');return}
  _bu()}}
+
+/* ---------- [CUONG HOA 4] Đá Cường Hóa rơi từ quái / boss ----------
+   Đá bậc t rơi ở quái các vùng thuộc bậc t (ENH_TIERS). Bậc 6 rơi ở vùng 15–17 với tỉ lệ bằng nửa; riêng boss vùng 17 rơi bậc 6 đủ tỉ lệ.
+   Nhân hệ số may mắn/thuốc rơi (bonus) như đồ khác. Đồ cũ KHÔNG đổi: chỉ nối thêm đá vào kết quả rollDrops(). */
+const ENH_DROP={
+ mob:{'Yếu':6,'Thường':6,'Tinh Anh':10,'Thống Lĩnh':15},   /* % rơi theo bậc quái thường (Yếu chưa có số riêng nên để bằng Thường) */
+ boss:35,                       /* % rơi khi hạ boss (mọi bậc boss) */
+ mobQty:[1,1],bossQty:[1,2],    /* số viên: quái 1, boss 1–2 */
+ t6Zones:[15,17],               /* đá bậc 6 rơi ở vùng a..b (số vùng 1-based) */
+ t6Mul:.5,                      /* bậc 6 ở quái thường và boss vùng 15–16: nhân nửa tỉ lệ */
+ t6BossZone:17                  /* boss vùng này rơi bậc 6 đủ tỉ lệ (không nhân nửa) */
+};
+/* Danh sách [{id,p,q:[min,max]}] đá có thể rơi từ con quái e (p đã nhân bonus, tối đa 95% như đồ cũ) */
+function enhDropRates(e,bonus){
+ bonus=bonus||1;const m=e&&e.m;if(!m)return[];
+ const v=m.zone+1,boss=!!m.boss,out=[],D=ENH_DROP,
+  base=boss?D.boss:(D.mob[e.tr&&e.tr.n]!=null?D.mob[e.tr.n]:D.mob['Thường']),q=boss?D.bossQty:D.mobQty;
+ for(let t=1;t<=ENH_TIERS.length;t++)if(v>=ENH_TIERS[t-1][0]&&v<=ENH_TIERS[t-1][1])out.push({id:enhStoneId(t),p:Math.min(95,base*bonus),q});
+ if(v>=D.t6Zones[0]&&v<=D.t6Zones[1])out.push({id:enhStoneId(ENH_TIER_MAX),p:Math.min(95,base*((boss&&v===D.t6BossZone)?1:D.t6Mul)*bonus),q});
+ return out}
+function enhRollDrops(e,bonus){
+ try{return enhDropRates(e,bonus).filter(d=>Math.random()*100<d.p).map(d=>({id:d.id,q:d.q[0]+Math.floor(Math.random()*(d.q[1]-d.q[0]+1))}))}
+ catch(_){return[]}}   /* lỗi gì cũng không được làm hỏng phần thưởng trận */
+{const _rd=rollDrops;rollDrops=function(){return _rd.apply(this,arguments).concat(enhRollDrops.apply(this,arguments))}}
