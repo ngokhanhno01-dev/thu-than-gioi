@@ -96,7 +96,9 @@ function pet(g,x,c1,c2,T,flip){
 }
 /* ảnh mẫu (chỉ để so sánh trong trang demo này, game KHÔNG dùng) */
 const REF={xanh:new Image(),do:new Image()};REF.xanh.src='tools/ref-khien-xanh.png';REF.do.src='tools/ref-khien-do.png';
+const REF4={bq:new Image(),revive:new Image(),lava:new Image()};REF4.bq.src='tools/ref-batkhuat.jpg';REF4.revive.src='tools/ref-hoisinh.jpg';REF4.lava.src='tools/ref-dungnham.jpg';
 function drawRef(){if($('viewMode').value!=='status'||!$('refShow').checked)return;
+ const r4=REF4[$('statusKind').value];if(r4&&r4.complete&&r4.naturalWidth){const hh=70,ww=hh*r4.naturalWidth/r4.naturalHeight;g.save();g.globalAlpha=.98;g.drawImage(r4,180-ww/2,8,ww,hh);g.fillStyle='#fff';g.font='8px monospace';g.textAlign='center';g.fillText('ảnh mẫu',180,6);g.restore();return}
  const a=REF.xanh,b=REF.do,hA=34,hB=44;g.save();g.globalAlpha=.98;
  if(a.complete&&a.naturalWidth)g.drawImage(a,150-hA*a.naturalWidth/a.naturalHeight/2,38,hA*a.naturalWidth/a.naturalHeight,hA);
  if(b.complete&&b.naturalWidth)g.drawImage(b,210-hB*b.naturalWidth/b.naturalHeight/2,34,hB*b.naturalWidth/b.naturalHeight,hB);

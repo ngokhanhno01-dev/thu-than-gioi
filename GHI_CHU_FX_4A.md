@@ -28,3 +28,13 @@ Bước 4B: gỡ hạ tầng ảnh (giữ fx/khien-xanh.png, fx/khien-do.png; to
 ## Cập nhật 12:30
 - Bất khuất làm lại theo ảnh mẫu: lửa cao nhọn, 2 cánh/găng pixel ô vuông đỏ-vàng hai bên, nền ô vuông dưới chân, sét xanh/đỏ, dấu cộng đỏ trên-phải; vẫn giữ bùng nổ lúc kích hoạt + đối thủ run.
 - Thiêu đốt: người dùng báo "bị lỗi" nhưng chưa nói lỗi gì; harness (t12.js) không thấy exception → cần hỏi người dùng lỗi nhìn thấy là gì (mất lửa? sai bên? chớp?).
+
+## Cập nhật 12:50 — làm lại bằng LỚP PIXEL THẬT (khớp ảnh mẫu)
+- Thêm "lớp PX" trong 31-combat-fx.js (pxBegin/pxp/pxl/pxring/pxell/pxfill/pxflame/pxspike/pxEnd): vẽ thẳng vào mảng điểm ảnh 180×125 (mỗi ô 2×2 px game), đẩy lên canvas 1 lần/lớp. Không tải ảnh. Nhẹ hơn nhiều so với hàng nghìn lệnh fillRect.
+- Bất khuất (`bqBack`/`bqFront`/`bqAura`): bám ảnh mẫu — gai đỏ-đen toả ngang đất, bát cung cam-vàng, lưỡi lửa sẫm, sét đỏ chéo, 4 cụm lửa xoắn, đốm lửa thoi. Đã BỎ dấu cộng, nền ô vuông, cánh ô vuông, giọt mồ hôi (không có trong ảnh mẫu).
+- Dung nham (`pixelLava`): cột nham vàng-cam có vòng cung cuộn, tia nham + giọt nham, tia lửa, đám khói đen xám nhiều tầng viền sáng + vân nham cam. Đất nứt (`lavaCracksPx`) lúc tung chiêu giờ nứt đúng chỗ phun (x=272/90, trước lệch 255/105) và nứt cả hai phía.
+- Hồi sinh (`statusRevive`): pháp trận vàng-ngọc (rune, ngôi sao, 6 huy hiệu), đá vỡ giữa trận, cột sáng vàng→ngọc→lam, sao 4 cánh + bụi sáng xoáy.
+- Thiêu đốt (`burnLayer`): đo thấy bản cũ ~1100 lệnh vẽ/khung (cùng Bất khuất ~2900) → nay ~180. Không thấy exception nào, nghi lỗi người dùng thấy là GIẬT/ĐƠ. Nếu còn lỗi khác thì cần người dùng mô tả.
+- Đo bằng harness (cnt2.js): không hiệu ứng 124 lệnh/khung; +Thiêu đốt 300; +Bất khuất 584; hồi sinh/dung nham ≤ 20 lệnh + hạt. 0 exception, 0 NaN, save/restore cân bằng.
+- Đã render thử lớp pixel ra PNG (harness có kho điểm ảnh thật) và so với ảnh mẫu bằng mắt; chưa xem được lớp glow/hạt (cần canvas thật) và chưa thử trên máy thật.
+- tools/fx-demo.html: thêm ảnh mẫu tools/ref-batkhuat.jpg, ref-hoisinh.jpg, ref-dungnham.jpg hiện cạnh hiệu ứng khi chọn Bất khuất / Hồi sinh / Dung nham (tick "Hiện ảnh mẫu").
