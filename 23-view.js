@@ -45,7 +45,10 @@ const cache={};     /* uid -> {t, card} */
  '#cv-body .sg b{color:#f6c66a;font-size:16px!important}'+
  '#cv-body .it{margin:0 0 4px;padding:3px 6px;border:2px solid #4d533b;background:#0b1a20;font-size:16px!important;line-height:1.15}'+
  '#cv-body .it b{font-size:17px!important}'+
- '#cv-body .it .pxi{width:26px;height:26px;vertical-align:middle;margin:-3px 2px 0 0;image-rendering:pixelated}'+
+ '#cv-body .it .ir{display:flex;gap:8px;align-items:flex-start}#cv-body .it .ib{min-width:0;flex:1}'+
+ '#cv-body .eqpv{position:relative;flex:none;width:52px;height:52px;box-sizing:border-box;border:3px solid #4d533b;background:#183036;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #050c11}'+
+ '#cv-body .eqpv .pxi{width:34px;height:34px;image-rendering:pixelated}'+
+ '#cv-body .eqpv .ebdg{position:absolute;right:2px;bottom:0;font-size:14px!important;color:#f6c66a;z-index:4;text-shadow:1px 1px 0 #000}'+
  '#cv-body .it div{font-size:15px!important;color:#d9d2b4}'+
  '#cv-body .it.no{color:#78864f;border-style:dashed;text-align:center}'+
  '#cv-body .set{margin:0 0 3px;font-size:15px!important;color:#72e4b0}'+
@@ -78,6 +81,11 @@ function statRows(st){
 /* icon pixel của món trang bị (cùng icon với màn Trang bị); lỗi thì rơi về emoji cũ */
 function icoHtml(slot,z){
   try{return pxImg(slot.px,ZONE_COL[z])}catch(_){return slot.i}}
+/* khung icon GIỐNG màn Trang bị: ô vuông viền màu phẩm + viền hiệu ứng theo cấp cường hóa (45-enh-border.js: vòng sáng chạy, lấp lánh từ +7) */
+function frameHtml(slot,z,e,colr){
+  let cls='',inn='',sp='';
+  try{if(e>0&&window.ENHFX){cls=' enh enh-'+e;const f=ENHFX.inner({e});inn=f.indexOf('enh-rg')>=0?'<i class="enh-rg"></i>':'';sp=f.indexOf('enh-sp')>=0?'<i class="enh-sp"><s></s></i>':''}}catch(_){}
+  return'<span class="eqpv'+cls+'" style="border-color:'+colr+'">'+inn+icoHtml(slot,z)+sp+(e>0?'<b class="ebdg">+'+e+'</b>':'')+'</span>'}
 function itemHtml(it){
   if(!it||typeof it!=='object')return'<div class="it no">— Trống —</div>';
   const z=Math.floor(num(it.z,0,99,-1)),s=Math.floor(num(it.s,0,99,-1)),q=Math.floor(num(it.q,0,4,0)),e=Math.floor(num(it.e,0,10,0));
@@ -90,7 +98,7 @@ function itemHtml(it){
     if(Array.isArray(l)){k=l[0];v=l[1]}else if(l&&typeof l==='object'){k=l.k;v=l.v}else return'';
     const d=EQ_STATS[String(k)];if(!d)return'';
     return'<div>'+esc(d.n)+' +'+r1(v)+(d.t==='p'?'%':'')+'</div>'}).join('');
-  return'<div class="it" style="border-color:'+col+'"><b style="color:'+col+'">'+icoHtml(slot,z)+' ['+QN[q]+'] '+esc(slot.n+' '+zone.name)+' +'+e+'</b>'+lines+'</div>'}
+  return'<div class="it" style="border-color:'+col+'"><div class="ir">'+frameHtml(slot,z,e,col)+'<div class="ib"><b style="color:'+col+'">['+QN[q]+'] '+esc(slot.n+' '+zone.name)+' +'+e+'</b>'+lines+'</div></div></div>'}
 
 /* buff bộ: đếm số món cùng bộ (>=2 món thì có buff) */
 function setHtml(eq){
