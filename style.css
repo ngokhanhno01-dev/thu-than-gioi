@@ -356,3 +356,26 @@ button.rebirth.locked{background-color:#283d41!important;border-color:#071117!im
   animation:bhVs 1.3s ease-in-out infinite}
 @keyframes bhVs{0%,100%{transform:translateX(-50%) skewX(-8deg) scale(1)}50%{transform:translateX(-50%) skewX(-8deg) scale(1.1)}}
 @media (prefers-reduced-motion:reduce){#mob .bh-vs{animation:none}}
+
+/* ===== [Giao diện ngang] Chỉ bật khi điện thoại xoay ngang (thấp ≤ 520px). Dọc và máy tính giữ nguyên. =====
+   Bố cục: trái = tiêu đề + thanh năm + khung thú; phải = hàng nút (Chỉ số, Huyết mạch, ...) + khung nút chính.
+   Nhật ký thu thành nút 📜 (44-landscape.js), bấm mới hiện bảng. */
+#log-btn{display:none}
+@media (orientation:landscape) and (max-height:520px){
+  body{padding:max(3px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) 3px max(6px,env(safe-area-inset-left))}
+  .app{max-width:none;display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);
+    grid-template-areas:"hd bag" "tb pn" "st pn" "st .";grid-template-rows:auto auto 1fr 1fr;column-gap:8px;align-content:start}
+  .app>header.frame{grid-area:hd;margin-bottom:4px}
+  .app>.timebar{grid-area:tb;margin-bottom:4px}
+  .app>.stage-wrap{grid-area:st;margin-bottom:0}
+  .app>.bagrow{grid-area:bag;justify-content:flex-start;flex-wrap:wrap;margin-bottom:4px}
+  .app>section.card[id]{grid-area:pn;margin-bottom:0;max-height:calc(100vh - 70px);overflow:auto}
+  .stage{height:calc(100vh - 118px);min-height:170px}
+  .stage canvas{object-fit:contain;object-position:center}
+  /* nhật ký: ẩn, mở bằng nút */
+  .app>section.card:not([id]){display:none;position:fixed;right:max(8px,env(safe-area-inset-right));bottom:44px;width:min(60vw,420px);z-index:60;margin:0}
+  body.show-log .app>section.card:not([id]){display:block}
+  .log{max-height:min(46vh,170px)}
+  #log-btn{display:flex;align-items:center;justify-content:center;position:fixed;right:max(8px,env(safe-area-inset-right));bottom:6px;z-index:61;
+    width:34px;height:34px;font-size:18px;line-height:1;border:3px solid #75613b;background:#16262b;color:var(--gold);padding:0;cursor:pointer}
+}
