@@ -61,3 +61,37 @@
   window.formation=wrapped;
  }
 })();
+
+/* ===== [FX 4A sửa] Sự kiện bộ trang bị (Dung Nham / Lôi Kích / Phong Nhận) chỉ chạy hiệu ứng SỰ KIỆN, không chạy kèm đòn thường =====
+   Nguyên nhân: đấu trường đặt nhãn "Dung Nham -N", "Lôi Kích -N", "Phong Nhận -N" khác nhãn thám hiểm ("Dung Nham Phun Trào",
+   "Lôi Phạt giáng xuống") nên các lớp 33–40 không nhận ra đây là sự kiện đặc biệt → vẽ thêm cả đòn đánh thường (thú lao tới + đạn/vệt chém của vùng)
+   rồi mới tới hiệu ứng sự kiện = 2 hiệu ứng cùng lúc.
+   Cách sửa (chỉ VẼ, không đụng sát thương/chỉ số/lưu): ở pha ra đòn, đổi tên tạm cho khớp nhãn thám hiểm để các lớp trước giao lại cho hiệu ứng gốc
+   của 31 (dung nham nứt đất / sét giáng); Phong Nhận không vẽ pha ra đòn (vệt gió vẽ ở pha trúng); fxClass coi Dung Nham đấu trường là lớp 2 (không lao tới). */
+(()=>{
+ 'use strict';
+ const LAVA=/Dung Nham(?! Phun Trào)\s*-/,THUN=/Lôi Kích\s*-/,WIND=/Phong Nhận(?: chém thêm| -)/;
+ let tries=0;
+ function boot(){
+  const API=window.TTGCombatFX;
+  if(!API||!API.drawAttack||!API.__fx3a){if(tries++<240)setTimeout(boot,50);return}   /* chờ 40-attack-fx-3a bọc xong để bọc ngoài cùng */
+  if(API.__procfix)return;API.__procfix=1;
+  const prev=API.drawAttack;
+  API.drawAttack=function(g,T,S){
+   const t=(S&&S.text)||'';
+   if(WIND.test(t))return true;
+   let t2=t;
+   if(LAVA.test(t))t2=t.replace('Dung Nham','Dung Nham Phun Trào');
+   else if(THUN.test(t))t2=t.replace('Lôi Kích','Lôi Phạt giáng xuống');
+   if(t2===t)return prev.apply(this,arguments);
+   S.text=t2;
+   try{return prev.apply(this,arguments)}finally{S.text=t}
+  };
+ }
+ boot();
+ const F=window.TTGFX;
+ if(F&&typeof F.fxClass==='function'&&!F.fxClass.__proc){
+  const o=F.fxClass,w=function(x){return LAVA.test((x&&x.t)||'')?2:o(x)};
+  w.__proc=1;F.fxClass=w;
+ }
+})();
