@@ -24,8 +24,10 @@ Trả lời tiếng Việt, ngắn gọn.
 
 ## VIỆC CÒN TỒN
 - [x] Đổi tên hiển thị trong ô chọn bộ của `fx-demo.html` và `tools/fx-demo.html` thành tên vùng (XONG, commit ee10771 và 000f987).
-- [ ] Bộ kế tiếp: 8 thorn (Kim Khoáng #e0b038) — làm theo quy tắc A.
+- [x] Bộ 8 thorn (Kim Khoáng) — XONG (commit 12e0690).
+- [ ] Bộ kế tiếp: 9 revive (Ngọc Động #18e0b0) — làm theo quy tắc A (động ngọc: ngọc bích/lục bảo, mạch nước/ánh ngọc, hang động; nét hồi sinh nhẹ nhàng, KHÔNG vẽ hình "hồi sinh" kiểu thập tự/cánh).
 - Lưu ý khi sửa 2 file demo: chúng hơi khác nhau (bản tools có thêm khiên/thiêu đốt lặp/ảnh mẫu). Chỉ sửa đúng chỗ cần, đừng ghi đè file này bằng bản của file kia.
+- Lưu ý môi trường: có lượt Claude không có mạng (không `npm i canvas`, không clone repo). Khi đó vẫn kiểm tra được bằng harness giả (Proxy cho ctx và E, stub KIT) để bắt lỗi cú pháp/NaN, nhưng KHÔNG xem được ảnh → ghi rõ "chưa tự chụp ảnh" trong báo cáo, và lượt sau nếu có môi trường chụp được thì chụp bù bộ đó.
 
 ## QUY TẮC MÀU (người dùng dặn: "làm theo kiểu màu từng vùng")
 Mỗi bộ trang bị ứng với 1 vùng theo đúng thứ tự (bộ 0 = vùng 0 ...). Bộ mới PHẢI dùng màu của vùng đó (màu ZONES trong 31-combat-fx.js) làm màu chủ đạo:
@@ -49,7 +51,7 @@ deep = tối hơn, main = gần màu vùng, light = sáng hơn, core = gần tr�
 | first | Thiên Không | #6ac4ff |
 | weaken | Linh Hoa Viên | #ff7ac0 |
 | judge | Thần Điện | #fff0a0 |
-Nét riêng nên lấy từ tên/biểu tượng vùng (vd Nguyệt Cung = trăng khuyết → counter có trăng khuyết loảng; Dương Sơn = mặt trời/thiên thạch lửa; Huyền Uyên = vực xoáy/xúc tu/mắt vực).
+Nét riêng nên lấy từ tên/biểu tượng vùng (vd Nguyệt Cung = trăng khuyết → counter có trăng khuyết loảng; Dương Sơn = mặt trời/thiên thạch lửa; Huyền Uyên = vực xoáy/xúc tu/mắt vực; Kim Khoáng = tinh thể vàng/khối quặng mạch vàng).
 
 ## Tiến độ
 | # | Bộ (vùng) | Trạng thái | Ảnh mẫu |
@@ -62,7 +64,8 @@ Nét riêng nên lấy từ tên/biểu tượng vùng (vd Nguyệt Cung = trăn
 | 5 | counter (Nguyệt Cung) | XONG, người dùng bảo "ổn"; đã đổi sang màu Nguyệt Cung theo quy tắc màu, chờ người dùng xem lại màu | tự thiết kế: xanh tím trăng, lưỡi gai cong, vòng sáng co vào, mũi tên V, trăng khuyết |
 | 6 | sun (Dương Sơn) | XONG, người dùng bảo "ổn" (commit ca90e8f) | tự thiết kế màu Dương Sơn #ffa94d: mặt trời mờ + tia lửa sau lưng, ngọn lửa mọc quanh trận pháp, nứt đất rỉ lửa, 4 thiên thạch bay vòng kéo đuôi lửa, mưa thiên thạch lúc vào trận |
 | 7 | shield (Huyền Uyên) | XONG BẢN VẼ LẠI (commit 3a179c9 `[FX 3C-7 sửa]`): vẽ lại theo chủ đề vùng Huyền Uyên #947aff = mắt vực, vực xoáy, xúc tu; ĐÃ BỎ hình khiên. Bản đầu (mái vòm lục giác + 6 khiên nhỏ) bị người dùng chê là sai hướng. Chờ người dùng xem. | tự thiết kế, xem `REG.shield` trong 41-gear-aura.js |
-| 8–16 | thorn, revive, grove, lava, ambush, star, first, weaken, judge | CHƯA, KHÔNG có ảnh mẫu: tự thiết kế theo MÀU + CHỦ ĐỀ VÙNG (bảng trên, quy tắc A). Bộ kế tiếp: 8 thorn (Kim Khoáng #e0b038) | (dùng các bộ 0–6 đã xong làm chuẩn phong cách) |
+| 8 | thorn (Kim Khoáng) | XONG, đã đẩy thẳng (commit 12e0690), CHƯA tự chụp ảnh (môi trường lượt đó không có mạng/node-canvas; chỉ qua `node --check` + harness giả 0 lỗi/NaN với q∈{0,.3,1}, e∈{null,0..3}). Chờ người dùng xem; nếu lệch thì sửa `[FX 3C-8 sửa]`. Chủ đề vùng Kim Khoáng #e0b038 (KHÔNG vẽ gai): chùm tia tinh thể vàng mờ sau lưng, cụm tinh thể vàng (E.crystal) + khối quặng có mạch vàng ở hai bên/sau trận pháp, nứt đất đen rỉ vàng, mảnh kim loại góc cạnh bay quanh, bụi quặng vàng bốc lên, lúc vào trận quặng vàng rơi từ trên cao + sóng va đất | tự thiết kế, xem `REG.thorn` trong 41-gear-aura.js |
+| 9–16 | revive, grove, lava, ambush, star, first, weaken, judge | CHƯA, KHÔNG có ảnh mẫu: tự thiết kế theo MÀU + CHỦ ĐỀ VÙNG (bảng trên, quy tắc A). Bộ kế tiếp: 9 revive (Ngọc Động #18e0b0) | (dùng các bộ 0–6 đã xong làm chuẩn phong cách) |
 
 Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không hỏng giữa chừng.
 
@@ -80,12 +83,12 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 - Thêm bộ mới: viết `REG.<kind>=function(g,x,q,T,e,E){...}` (kind = frost, mist, cloud, wind, thunder, counter, sun, shield, thorn, revive, grove, lava, ambush, star, first, weaken, judge). `kind` chỉ là nhãn nội bộ, KHÔNG quyết định hình dạng hiệu ứng (xem quy tắc A.3).
 - KIT dùng chung trong file: `circle(g,E,x,P,T,al,{r,ph,runeDir,cracks})` trận pháp, `swirl(g,E,x,P,T,al,{n,H,R,turns,spin,wmax,ph})` lốc xoắn,
   `sparks`, `spark4`, `halo` (quầng + sóng lúc vào trận), `level(q,T,id)` (độ đậm). Palette P = {deep,main,light,core}.
-  Hàm của engine E: glow, blob, ribbon (o.add=false → vẽ thường), crystal, wave, rgba, mix. Xem `frost` làm mẫu.
-- Helper có sẵn dùng lại: `curl`, `gem`, `crescent`, `wisp`, `leaf`, `slash` (vệt chém cung), `flake`, `bead`; của thunder: `zig` (đường gãy khúc), `bolt` (tia sét 3 lớp), `tree` (cành sét), `rock` (đá nứt dung nham), `dswirl` (lốc xoắn tối viền vàng; ribbon tối phải dùng add:false vì mặc định cộng sáng sẽ mất màu tối); của counter: `blade` (lưỡi gai cong); của sun: `flame` (ngọn lửa 4 lớp bập bùng), `sunDisc` (mặt trời + tia uốn), `meteor` (thiên thạch có đuôi lửa; truyền mảng pts từ đuôi → đầu); của shield (bản đầu, có thể đã đổi/bỏ sau lần vẽ lại, xem file 41): `hexp`, `shieldIcon`, `dome`.
+  Hàm của engine E: glow, blob, ribbon (o.add=false → vẽ thường), crystal (palette riêng {dark,mid,light,edge}), wave, rgba, mix. Xem `frost` làm mẫu.
+- Helper có sẵn dùng lại: `curl`, `gem`, `crescent`, `wisp`, `leaf`, `slash` (vệt chém cung), `flake`, `bead`; của thunder: `zig` (đường gãy khúc), `bolt` (tia sét 3 lớp), `tree` (cành sét), `rock` (đá nứt dung nham), `dswirl` (lốc xoắn tối viền vàng; ribbon tối phải dùng add:false vì mặc định cộng sáng sẽ mất màu tối); của counter: `blade` (lưỡi gai cong); của sun: `flame` (ngọn lửa 4 lớp bập bùng), `sunDisc` (mặt trời + tia uốn), `meteor` (thiên thạch có đuôi lửa; truyền mảng pts từ đuôi → đầu); của shield (Huyền Uyên): `eye` (mắt vực ◉), `vortex` (vực xoáy), `tendril` (xúc tu); của thorn (Kim Khoáng): `ore` (khối quặng mạch vàng), `lode` (chùm tia tinh thể toả sau lưng), `shard` (mảnh kim loại góc cạnh).
 - Toạ độ: thú x=85, mặt đất GY=203, trận pháp elip tỉ lệ SQ=.4, bán kính ~58, thân y≈150, lốc cao ~110.
 - Bài học: KHÔNG đặt vật thể ở cung PHÍA TRƯỚC trận pháp (che mất rune) — tinh thể/cột chỉ ở hai bên và phía sau; mọi thứ vẽ trước thú nên thú che phần giữa.
 - Tham số `e` = giây từ lúc bắt đầu (dùng cho hiệu ứng mọc lên lúc vào trận); `q` = 1→0 trong 2.4s đầu trận, sau đó 0.
-- Mỗi bộ thêm vào 41 phải đẩy lại CẢ file 41 (GitHub connector không vá từng đoạn): lấy bản mới nhất bằng get_file_contents rồi chèn trước `})();`.
+- Mỗi bộ thêm vào 41 phải đẩy lại CẢ file 41 (GitHub connector không vá từng đoạn): lấy bản mới nhất bằng get_file_contents rồi chèn trước `})();`. Sau khi đẩy, dùng get_commit (detail stats) kiểm tra commit chỉ có dòng THÊM (additions≈số dòng bộ mới, deletions=0) để chắc không làm hỏng chỗ khác.
 
 ## Chế độ pixel art (xem thử)
 - File `42-gear-pixel.js` (nạp sau 41) tự bọc MỌI bộ trong `TTGGearAura`: `TTGGearAura.style='pixel'` → vẽ vào khung 240x160, nén sáng + ép 6 mức/kênh + độ trong 4 mức (dither Bayer), phóng không làm mịn. Người dùng đã CHỌN PIXEL ART (hợp với thú pixel; bản mượt bị chê quá bóng): mặc định 'pixel'. Pixel pass: alpha 3 tầng: đặc (>=.5) / bán trong suốt (.14–.5, dùng cho sương/khói: vẽ alpha ~.2–.4) / trong, màu ép mức, viền tối 1px quanh hình.
@@ -96,8 +99,8 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 1. Đọc file này + xem bảng tiến độ và mục "VIỆC CÒN TỒN" để biết việc kế tiếp. Chỉ làm ĐÚNG MỘT bộ mỗi lượt, rồi dừng chờ người dùng nói "tiếp".
 2. Nhìn ảnh mẫu của bộ đó trong `tools/ref-gear/` (bộ không có ảnh mẫu: tự thiết kế theo các bộ 0–6 làm chuẩn + MÀU VÙNG + CHỦ ĐỀ VÙNG, mỗi nguyên tố nét riêng). Nhớ quy tắc A: không vẽ theo tên kind (khiên/gai...).
 3. Viết `REG.<kind>` trong `41-gear-aura.js` (thêm TRƯỚC dòng `})();` cuối file), dùng lại KIT (circle, swirl, sparks, halo, level, curl, gem...). Không viết lại engine. Làm trong thư mục tạm, kiểm tra xong mới đẩy.
-4. `node --check` các file đã sửa; chạy harness kiểm tra không lỗi/NaN (`tools/render-gear.js` gọi thẳng REG.<kind> để lộ lỗi).
-5. TỰ CHỤP HÌNH ở chế độ PIXEL (cách chụp ở mục "Cách xem thử"), tự xem ảnh, chỉnh ít nhất 1 vòng cho đến khi đúng ảnh mẫu / đúng màu + chủ đề vùng. Kiểm tra cả khi có thú giả che giữa.
+4. `node --check` các file đã sửa; chạy harness kiểm tra không lỗi/NaN (`tools/render-gear.js` gọi thẳng REG.<kind> để lộ lỗi; nếu không có repo/mạng thì dùng harness giả như ghi ở "VIỆC CÒN TỒN").
+5. TỰ CHỤP HÌNH ở chế độ PIXEL (cách chụp ở mục "Cách xem thử"), tự xem ảnh, chỉnh ít nhất 1 vòng cho đến khi đúng ảnh mẫu / đúng màu + chủ đề vùng. Kiểm tra cả khi có thú giả che giữa. (Không chụp được thì ghi rõ trong báo cáo + bảng tiến độ.)
 6. KHÔNG gửi ảnh, KHÔNG hỏi duyệt (người dùng đã bảo không cần). Đi thẳng bước 7.
 7. Tự kiểm tra xong là đẩy luôn: cập nhật bảng tiến độ + ghi chú TRONG CÙNG COMMIT, commit `[FX 3C-<số bộ>] ...` (sửa theo góp ý: `[FX 3C-<số bộ> sửa] ...`), đẩy nhánh `fx-ve-bang-code`. TUYỆT ĐỐI KHÔNG ghi vào main. Báo ngắn 1-2 dòng là đã đẩy, rồi dừng chờ "tiếp".
 8. Người dùng không rành code, dùng điện thoại Android, hay hết quota → trả lời ngắn, mỗi lượt đúng một việc nhỏ, không đẩy bản chưa kiểm tra cú pháp/chạy thử.
@@ -108,7 +111,7 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 - Tên trong demo = tên vùng (quy tắc A.1, đã làm).
 - KHÔNG cần gửi ảnh cho người dùng duyệt nữa, làm xong đẩy luôn lên nhánh (xem QUY TẮC B.2). Quy tắc "gửi ảnh duyệt trước" cũ đã bị HỦY.
 - Kiểu PIXEL ART là mặc định (thú của game là pixel art; bản vẽ mượt bị chê quá bóng và quá rõ khi đặt gần thú). Đã duyệt pixel pass hiện tại (alpha cứng + viền tối 1px + tầng bán trong suốt).
-- Frost (0), Mist (1), Cloud (2), Thunder (4): người dùng đã xem và bảo làm tiếp (coi như duyệt). Counter (5): người dùng bảo "ổn" nhưng yêu cầu màu theo vùng (đã sửa). Wind (3): đã đẩy, chờ người dùng xem. Sun (6): người dùng bảo "ổn". Shield (7): bản đầu (khiên) bị chê sai hướng → đã vẽ lại theo chủ đề vùng Huyền Uyên, chưa có phản hồi.
+- Frost (0), Mist (1), Cloud (2), Thunder (4): người dùng đã xem và bảo làm tiếp (coi như duyệt). Counter (5): người dùng bảo "ổn" nhưng yêu cầu màu theo vùng (đã sửa). Wind (3): đã đẩy, chờ người dùng xem. Sun (6): người dùng bảo "ổn". Shield (7): bản đầu (khiên) bị chê sai hướng → đã vẽ lại theo chủ đề vùng Huyền Uyên, chưa có phản hồi. Thorn (8): mới đẩy, chưa có phản hồi.
 - Mist: sương phải MỜ, TRONG SUỐT, không che nền (đã sửa theo góp ý; sương/khói nói chung vẽ alpha ~.2–.4 để rơi vào tầng bán trong suốt).
 - Buff vẫn là lớp NỀN vẽ trước thú; không đè lên thân thú.
 - Những bộ chưa làm tiếp tục chạy code cũ, không được làm hỏng game giữa chừng.
