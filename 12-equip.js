@@ -255,7 +255,8 @@ const EQ_ICON_IMG={0:['img-eq-tuyet-nguyen-vukhi.webp','img-eq-tuyet-nguyen-giap
  10:['img-eq-thanh-lam-vukhi.webp','img-eq-thanh-lam-giap.webp','img-eq-thanh-lam-vong.webp','img-eq-thanh-lam-ngoc.webp'],
  11:['img-eq-xich-hoa-dia-vukhi.webp','img-eq-xich-hoa-dia-giap.webp','img-eq-xich-hoa-dia-vong.webp','img-eq-xich-hoa-dia-ngoc.webp'],
  12:['img-eq-hac-am-lam-vukhi.webp','img-eq-hac-am-lam-giap.webp','img-eq-hac-am-lam-vong.webp','img-eq-hac-am-lam-ngoc.webp'],
- 13:['img-eq-tu-tinh-hai-vukhi.webp','img-eq-tu-tinh-hai-giap.webp','img-eq-tu-tinh-hai-vong.webp','img-eq-tu-tinh-hai-ngoc.webp']};
+ 13:['img-eq-tu-tinh-hai-vukhi.webp','img-eq-tu-tinh-hai-giap.webp','img-eq-tu-tinh-hai-vong.webp','img-eq-tu-tinh-hai-ngoc.webp'],
+ 14:['img-eq-thien-khong-vukhi.webp','img-eq-thien-khong-giap.webp','img-eq-thien-khong-vong.webp','img-eq-thien-khong-ngoc.webp']};
 const eqIco=(s,z)=>{const f=z!=null&&EQ_ICON_IMG[z]&&EQ_ICON_IMG[z][s];
  return f?'<img class="pxi eqimg" alt="" src="'+f+'">':pxImg(EQ_SLOTS[s].px,z==null?'#8a95a0':ZONE_COL[z])};
 const eqRgb=it=>'rgb('+QC[it.q]+')';
