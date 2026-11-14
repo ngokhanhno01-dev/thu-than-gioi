@@ -1,8 +1,17 @@
 # GHI CHÚ [FX 3C] — Vẽ lại BUFF BỘ TRANG BỊ (17 bộ) cho claude sau
 
-Người dùng chê buff bộ cũ "quá sơ sài". Làm LẦN LƯỢT TỪNG BỘ, xong bộ nào commit + đẩy nhánh `fx-ve-bang-code` ngay
-(commit `[FX 3C-<số bộ>] ...`), rồi mới làm bộ kế. Người dùng hay hết quota nên luôn cập nhật bảng tiến độ dưới đây TRONG CÙNG commit.
-Trả lời tiếng Việt, ngắn gọn. Xong mỗi bộ: báo + gửi ảnh chụp, hỏi duyệt/chỉnh rồi dừng chờ "tiếp".
+Người dùng chê buff bộ cũ "quá sơ sài". Làm LẦN LƯỢT TỪNG BỘ. Người dùng hay hết quota nên làm từng bước nhỏ.
+Trả lời tiếng Việt, ngắn gọn.
+
+## !!! QUY TẮC MỚI NHẤT CỦA NGƯỜI DÙNG (ưu tiên cao nhất, ghi đè các mục bên dưới nếu mâu thuẫn)
+1. MÀU PHẢI THEO VÙNG: mỗi bộ dùng đúng màu vùng tương ứng (xem bảng QUY TẮC MÀU). Không tự chọn màu khác.
+2. GỬI ẢNH XEM TRƯỚC, DUYỆT RỒI MỚI ĐẨY (để tránh tốn quota):
+   - Làm xong 1 bộ: chụp ảnh (chế độ PIXEL) và GỬI ẢNH cho người dùng xem trước. Chỉ cần ảnh là đủ, không cần dài dòng.
+   - CHƯA commit, CHƯA đẩy lên GitHub cho tới khi người dùng nói duyệt ("ổn", "được", "tiếp"...).
+   - Người dùng duyệt xong mới commit `[FX 3C-<số bộ>] ...` + cập nhật bảng tiến độ trong cùng commit + đẩy nhánh `fx-ve-bang-code`.
+   - Nếu người dùng góp ý chỉnh: sửa rồi gửi ảnh mới, vẫn chưa đẩy cho tới khi duyệt.
+   - Nếu môi trường KHÔNG chụp được ảnh (không có Chrome/Chromium, không có mạng để tải): nói thẳng với người dùng, đề nghị họ bật mạng cho môi trường chạy lệnh để tải Chromium. KHÔNG tự đẩy bản chưa xem rồi báo sau (lỗi này đã xảy ra ở bộ 6 và người dùng không hài lòng).
+3. Mỗi lượt chỉ làm ĐÚNG MỘT bộ rồi dừng chờ người dùng nói "tiếp".
 
 ## QUY TẮC MÀU (người dùng dặn: "làm theo kiểu màu từng vùng")
 Mỗi bộ trang bị ứng với 1 vùng theo đúng thứ tự (bộ 0 = vùng 0 ...). Bộ mới PHẢI dùng màu của vùng đó (màu ZONES trong 31-combat-fx.js) làm màu chủ đạo:
@@ -26,7 +35,7 @@ deep = tối hơn, main = gần màu vùng, light = sáng hơn, core = gần tr�
 | first | Thiên Không | #6ac4ff |
 | weaken | Linh Hoa Viên | #ff7ac0 |
 | judge | Thần Điện | #fff0a0 |
-Nét riêng nên lấy từ tên/biểu tượng vùng (vd Nguyệt Cung = trăng khuyết → counter có trăng khuyết loeảng; Dương Sơn = mặt trời/thiên thạch lửa).
+Nét riêng nên lấy từ tên/biểu tượng vùng (vd Nguyệt Cung = trăng khuyết → counter có trăng khuyết loảng; Dương Sơn = mặt trời/thiên thạch lửa).
 
 ## Tiến độ
 | # | Bộ | Trạng thái | Ảnh mẫu |
@@ -35,10 +44,10 @@ Nét riêng nên lấy từ tên/biểu tượng vùng (vd Nguyệt Cung = trăn
 | 1 | mist (sương) | XONG (người dùng bảo làm tiếp) | tools/ref-gear/suong-coc.jpg |
 | 2 | cloud (mây) | XONG (người dùng bảo làm tiếp) | tools/ref-gear/van-dao.jpg |
 | 3 | wind (gió) | XONG bản đầu, chờ người dùng duyệt | tools/ref-gear/phong-nguyen.jpg |
-| 4 | thunder (sấm) | XONG (người dùng đã xem trên điện thoại, bảo làm ttiếp) | tools/ref-gear/loi-vuc.jpg |
+| 4 | thunder (sấm) | XONG (người dùng đã xem trên điện thoại, bảo làm tiếp) | tools/ref-gear/loi-vuc.jpg |
 | 5 | counter (phản đòn) | XONG, người dùng bảo "ổn"; đã đổi sang màu Nguyệt Cung theo quy tắc màu, chờ người dùng xem lại màu | tự thiết kế: xanh tím trăng, lưỡi gai cong, vòng sáng co vào, mũi tên V, trăng khuyết |
-| 6 | sun (mặt trời) | XONG bản đầu, chờ người dùng xem trên điện thoại (chưa chụp ảnh được, mới chạy thử harness không lỗi/NaN) | tự thiết kế màu Dương Sơn #ffa94d: mặt trời mờ + tia lửa sau lưng, ngọn lửa mọc quanh trận pháp, nứt đất rỉ lửa, 4 thiên thạch bay vòng kéo đuôi lửa, mưa thiên thạch lúc vào trận |
-| 7–16 | shield, thorn, revive, grove, lava, ambush, star, first, weaken, judge | CHƯA, KHÔNG có ảnh mẫu: tự thiết kế theo màu vùng (bảng trên) | (dùng 5 ảnh mẫu làm chuẩn phong cách) |
+| 6 | sun (mặt trời) | XONG, người dùng bảo "ổn" (đã đẩy trước khi duyệt, commit ca90e8f; từ bộ 7 phải gửi ảnh duyệt trước rồi mới đẩy) | tự thiết kế màu Dương Sơn #ffa94d: mặt trời mờ + tia lửa sau lưng, ngọn lửa mọc quanh trận pháp, nứt đất rỉ lửa, 4 thiên thạch bay vòng kéo đuôi lửa, mưa thiên thạch lúc vào trận |
+| 7–16 | shield, thorn, revive, grove, lava, ambush, star, first, weaken, judge | CHƯA, KHÔNG có ảnh mẫu: tự thiết kế theo màu vùng (bảng trên). Bộ kế tiếp: 7 shield (Huyền Uyên #947aff) | (dùng 5 ảnh mẫu làm chuẩn phong cách) |
 
 Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không hỏng giữa chừng.
 
@@ -71,24 +80,26 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 ## QUY TRÌNH LÀM VIỆC ĐÃ ĐƯỢC NGƯỜI DÙNG DUYỆT (claude sau làm ĐÚNG như vậy)
 1. Đọc file này + xem bảng tiến độ để biết bộ kế tiếp. Chỉ làm ĐÚNG MỘT bộ mỗi lượt, rồi dừng chờ người dùng nói "tiếp".
 2. Nhìn ảnh mẫu của bộ đó trong `tools/ref-gear/` (bộ không có ảnh mẫu: tự thiết kế theo 5 ảnh làm chuẩn + MÀU VÙNG theo bảng trên, mỗi nguyên tố nét riêng).
-3. Viết `REG.<kind>` trong `41-gear-aura.js` (thêm TRƯỚC dòng `})();` cuối file), dùng lại KIT (circle, swirl, sparks, halo, level, curl, gem...). Không viết lại engine.
-4. `node --check` các file đã sửa.
-5. TỰ CHỤP HÌNH ở chế độ PIXEL (cách chụp ở mục "Cách xem thử"), xem ảnh, chỉnh ít nhất 1 vòng cho đến khi đúng ảnh mẫu (bố cục, màu, trận pháp, chi tiết riêng). Kiểm tra cả khi có thú giả che giữa.
-6. Cập nhật bảng tiến độ TRONG CÙNG commit, commit `[FX 3C-<số bộ>] ...` (sửa theo góp ý: `[FX 3C-<số bộ> sửa] ...`), đẩy nhánh `fx-ve-bang-code`. TUYỆT ĐỐI KHÔNG ghi vào main.
-7. Báo người dùng bằng tiếng Việt, ngắn gọn (3–5 dòng): có gì mới, điểm CHƯA giống ảnh mẫu (nói thẳng), cách xem thử (fx-demo.html → Buff bộ trang bị → chọn bộ), gửi ảnh chụp (SendUserFile), rồi hỏi duyệt/chỉnh và DỪNG. Không hỏi nhiều câu.
-8. Người dùng không rành code, dùng điện thoại Android, hay hết quota → mỗi bước nhỏ phải đẩy lên ngay, không dồn.
+3. Viết `REG.<kind>` trong `41-gear-aura.js` (thêm TRƯỚC dòng `})();` cuối file), dùng lại KIT (circle, swirl, sparks, halo, level, curl, gem...). Không viết lại engine. Làm trong thư mục tạm, CHƯA đẩy.
+4. `node --check` các file đã sửa; chạy harness giả canvas kiểm tra không lỗi/NaN.
+5. TỰ CHỤP HÌNH ở chế độ PIXEL (cách chụp ở mục "Cách xem thử"), xem ảnh, chỉnh ít nhất 1 vòng cho đến khi đúng ảnh mẫu / đúng màu vùng. Kiểm tra cả khi có thú giả che giữa.
+6. GỬI ẢNH cho người dùng xem trước (ảnh là đủ), hỏi duyệt/chỉnh rồi DỪNG. KHÔNG đẩy GitHub ở bước này.
+7. Khi người dùng duyệt: cập nhật bảng tiến độ TRONG CÙNG commit, commit `[FX 3C-<số bộ>] ...` (sửa theo góp ý: `[FX 3C-<số bộ> sửa] ...`), đẩy nhánh `fx-ve-bang-code`. TUYỆT ĐỐI KHÔNG ghi vào main. Báo ngắn 1-2 dòng là đã đẩy, rồi chờ "tiếp".
+8. Người dùng không rành code, dùng điện thoại Android, hay hết quota → trả lời ngắn, mỗi lượt đúng một việc nhỏ, không đẩy những thứ chưa được duyệt.
 
 ## Điều người dùng ĐÃ DUYỆT / ĐÃ YÊU CẦU (đừng làm trái)
 - Làm theo ảnh mẫu "thật giống từ chi tiết, trận pháp, hiệu ứng".
 - Màu mỗi bộ = màu vùng tương ứng (xem QUY TẮC MÀU).
+- Gửi ảnh xem trước, duyệt rồi mới đẩy (xem QUY TẮC MỚI NHẤT ở đầu file).
 - Kiểu PIXEL ART là mặc định (thú của game là pixel art; bản vẽ mượt bị chê quá bóng và quá rõ khi đặt gần thú). Đã duyệt pixel pass hiện tại (alpha cứng + viền tối 1px + tầng bán trong suốt).
-- Frost (0), Mist (1), Cloud (2), Thunder (4): người dùng đã xem và bảo làm tiếp (coi như duyệt). Counter (5): người dùng bảo "ổn" nhưng yêu cầu màu theo vùng (đã sửa). Wind (3): đã đẩy, chờ người dùng xem. Sun (6): đã đẩy, chờ người dùng xem.
+- Frost (0), Mist (1), Cloud (2), Thunder (4): người dùng đã xem và bảo làm tiếp (coi như duyệt). Counter (5): người dùng bảo "ổn" nhưng yêu cầu màu theo vùng (đã sửa). Wind (3): đã đẩy, chờ người dùng xem. Sun (6): người dùng bảo "ổn".
 - Mist: sương phải MỜ, TRONG SUỐT, không che nền (đã sửa theo góp ý; sương/khói nói chung vẽ alpha ~.2–.4 để rơi vào tầng bán trong suốt).
 - Buff vẫn là lớp NỀN vẽ trước thú; không đè lên thân thú.
 - Những bộ chưa làm tiếp tục chạy code cũ, không được làm hỏng game giữa chừng.
 
 ## Cách xem thử
 - Điện thoại: mở `fx-demo.html` của nhánh → chọn "Buff bộ trang bị" → chọn bộ. (Trang demo cố định elapsed=.7 nên chỉ thấy trạng thái lúc vào trận.)
-- Chụp hình để tự kiểm tra (máy có /usr/bin/google-chrome + playwright): chạy `python3 -m http.server` ở gốc repo, trang test gọi
+- Chụp hình để tự kiểm tra: cần Chrome/Chromium + playwright. (Có phiên bản môi trường có /usr/bin/google-chrome, có phiên bản KHÔNG có trình duyệt và tắt mạng: kiểm tra bằng `ls /usr/bin/google-chrome*` trước; không có thì làm theo mục 2 ở QUY TẮC MỚI NHẤT.)
+  Chạy `python3 -m http.server` ở gốc repo, trang test gọi
   `TTGCombatFX.drawBack(g,T,elapsed,0,{startBuffs:[{kind}],zoneBuff:null},0,0,100,100,0,0)` với elapsed=10 (nền) và .7 (vào trận),
   canvas 360x240 phóng x3, chụp bằng playwright (launch executable_path=/usr/bin/google-chrome, args --no-sandbox). Nhớ vẽ 1 hình bầu dục giả làm thú để thấy che chắn.
