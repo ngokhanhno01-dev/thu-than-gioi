@@ -1336,6 +1336,27 @@
   g.fillRect(x-s*.3,y+s*.05,s*.2,s*.2);g.fillRect(x+s*.1,y+s*.05,s*.2,s*.2);
   g.restore();
  }
+/* bàn tay bóng tối trồi lên từ đất: cánh tay đen gân hồng, bàn tay xoè 5 ngón co duỗi, vươn lên rồi đung đưa */
+ function hand(g,E,x0,y0,h,lean,k,P,al,T){
+  if(al<=.02||h<6)return;
+  const pts=[],m=9,pu=.7+.3*Math.sin(T*2.2+k*1.7);
+  for(let j=0;j<m;j++){const t=j/(m-1),sw=Math.sin(T*1.3+k*2.1-t*2.5)*(1.5+3.5*t);pts.push([x0+lean*t*t+sw,y0-h*t])}
+  E.ribbon(g,pts,q=>Math.max(2.4,7*(1-q*.45)+1.4),NIGHT,al*.98,{add:false,core:NIGHT});
+  E.ribbon(g,pts.slice(1),q=>Math.max(.8,1.5*(1-q*.5)+.5),P.main,al*.8*pu,{core:P.light});
+  const w=pts[m-1],pr=pts[m-2],ba=Math.atan2(w[1]-pr[1],w[0]-pr[0]),fl=h*.3+3;
+  g.save();g.lineCap='round';g.lineJoin='round';
+  g.fillStyle=E.rgba(NIGHT,.98*al);g.beginPath();g.ellipse(w[0]+Math.cos(ba)*fl*.18,w[1]+Math.sin(ba)*fl*.18,3.6,fl*.26,ba+Math.PI/2,0,TAU);g.fill();
+  for(let i=0;i<5;i++){
+   const sp=(i-2)*.5,cu=.35+.3*Math.sin(T*2.4+k*1.3+i*.9),an=ba+sp,L=fl*(i===2?1:i%4===0?.62:.85),
+    mx=w[0]+Math.cos(an)*L*.55,my=w[1]+Math.sin(an)*L*.55,tx=w[0]+Math.cos(an+cu*sp*-.8+cu*.4)*L,ty=w[1]+Math.sin(an+cu*sp*-.8+cu*.4)*L;
+   g.strokeStyle=E.rgba(NIGHT,.98*al);g.lineWidth=2.8;g.beginPath();g.moveTo(w[0],w[1]);g.quadraticCurveTo(mx,my,tx,ty);g.stroke();
+   g.globalCompositeOperation='lighter';g.strokeStyle=E.rgba(P.light,.85*al*pu);g.lineWidth=.8;g.stroke();g.globalCompositeOperation='source-over';
+  }
+  g.restore();
+  E.glow(g,w[0],w[1]-fl*.4,fl*.9,P.main,.22*al*pu);
+  /* đất nứt toả hồng quanh chỗ tay trồi lên */
+  g.save();g.globalCompositeOperation='lighter';g.strokeStyle=E.rgba(P.main,.7*al);g.lineWidth=1.2;g.beginPath();g.ellipse(x0,y0,6+3*pu,2.4,0,0,TAU);g.stroke();g.restore();
+ }
  REG.ambush=function(g,x,q,T,e,E){
   const P=AMB,{a,al}=level(q,T,12),grow=e==null?1:cl(e/.6,0,1),gk=easeBack(grow);
   g.save();
@@ -1363,8 +1384,15 @@
      it.push({t:k%2?'v':'d',x:p[0],y:p[1],h:k%2?h*.7:h,lean:-side*(h*.22+hash(k+9)*7)+(p[0]-x)*.12,k:k+side*20});
     }
    }
+   /* bàn tay trồi lên từ đất: hai bên và phía sau (không che cung trước) */
+   for(let side=-1;side<=1;side+=2){
+    for(let k=0;k<3;k++){
+     const ang0=.05+k*.62+hash(k+side*5+31)*.15,ang=side<0?Math.PI+ang0:-ang0,rp=62+hash(k*2+side+14)*10,p=gp(x,ang,rp),sd=Math.abs(Math.cos(ang));
+     it.push({t:'h',x:p[0],y:p[1],h:(24+hash(k*3+side*7+12)*14)*(.7+.5*sd),lean:-side*(4+hash(k+3)*6)+(p[0]-x)*.1,k:k+side*20+70});
+    }
+   }
    it.sort((u,v)=>u.y-v.y);
-   const dI=o=>{if(o.t==='d')dtree(g,E,o.x,o.y,o.h*gk,o.lean,o.k,P,al,T);else thornvine(g,E,o.x,o.y,o.h*gk,o.lean,T,o.k,P,al)};
+   const dI=o=>{if(o.t==='h')hand(g,E,o.x,o.y,o.h*gk,o.lean,o.k,P,al,T);else if(o.t==='d')dtree(g,E,o.x,o.y,o.h*gk,o.lean,o.k,P,al,T);else thornvine(g,E,o.x,o.y,o.h*gk,o.lean,T,o.k,P,al)};
    it.filter(o=>o.y<GY).forEach(dI);
    swirl(g,E,x,P,T,al,{n:6,H:112,R:50,turns:.8,spin:1.2,wmax:15,ph:.8});
    swirl(g,E,x,P,T,al*.7,{n:3,H:92,R:60,turns:.7,spin:-.9,wmax:10,ph:2.5});
