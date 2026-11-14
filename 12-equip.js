@@ -235,6 +235,8 @@ function hopConfirm(){
 {const _bu3=bagUse;bagUse=function(){const s=bag[bagSel];if(s&&s.id==='hopnl'){hopOpen();return}_bu3()}}
 
 /* ---------- Dữ liệu ---------- */
+/* Icon Rèn (đe + búa): ảnh img-misc-ren.png thay cho emoji 🔨 ở tab Rèn và nút Rèn trang bị */
+const EQ_REN_ICO='<img src="img-misc-ren.png" alt="" style="height:1.5em;width:1.5em;vertical-align:-.35em;image-rendering:pixelated">';
 let fgInfo=false,eqWorn=[null,null,null,null],ebag=[],eqUid=1,eqTab='wear',eqSel=null,fgSlot=0,fgZone=-1,fgLast=null,fgOpen=false,eqMsg='',eqRaf=0;
 const eqIco=(s,z)=>pxImg(EQ_SLOTS[s].px,z==null?'#8a95a0':ZONE_COL[z]);
 const eqRgb=it=>'rgb('+QC[it.q]+')';
@@ -486,13 +488,13 @@ function eqForgeHtml(){
   '<div class="infobox upnote" style="margin-top:5px">📦 <b>Nguyên liệu cần:</b>'+src(ids.boss,z,'boss')+src(ids.main,z,'main')+src(ids.shared,z,'shared')+'<div>🪙 Xu ×<b>'+gold+'/'+need.xu+'</b></div></div>'+
   '<div class="infobox upnote" style="margin-top:5px"><b style="color:'+ZONE_COL[z]+'">'+S.i+' Buff bộ: '+S.name+'</b><br><small>2 món: '+S.t(eqScale(S.v2,0,z))+'<br>4 món: '+S.t(eqScale(S.v4,0,z))+'</small></div>'+
   '<div class="infobox upnote" style="margin-top:5px">🎲 Phẩm ngẫu nhiên: '+odds+'<br><small>Phẩm cao cộng thêm % cho mọi chỉ số của món và buff bộ. Mỗi món có 1 chỉ số mặc định + '+EQ_LINES+' dòng ngẫu nhiên.</small></div>'+
-  '<button class="jade" style="margin-top:5px" onclick="fgDo()">🔨 Rèn trang bị</button>'+last+
+  '<button class="jade" style="margin-top:5px" onclick="fgDo()">'+EQ_REN_ICO+' Rèn trang bị</button>'+last+
   '<div class="infobox upmsg">'+eqMsg+'</div>'}
 function renderEquip(){
  const el=$('eq-wrap');if(!el)return;
  if(!hatched||!pet){el.innerHTML='<div class="infobox" style="text-align:center">Cần nở thú trước khi dùng trang bị.</div>';return}
  const keep=document.getElementById('eq-bag'),sc=keep?keep.scrollTop:0;
- el.innerHTML='<div class="eqtabs"><button class="mini'+(eqTab==='wear'?' jade':'')+'" onclick="eqSetTab(\'wear\')">🛡️ Trang bị</button><button class="mini'+(eqTab==='forge'?' jade':'')+'" onclick="eqSetTab(\'forge\')">🔨 Rèn</button></div>'+(eqTab==='wear'?eqWearHtml():eqForgeHtml());
+ el.innerHTML='<div class="eqtabs"><button class="mini'+(eqTab==='wear'?' jade':'')+'" onclick="eqSetTab(\'wear\')">🛡️ Trang bị</button><button class="mini'+(eqTab==='forge'?' jade':'')+'" onclick="eqSetTab(\'forge\')">'+EQ_REN_ICO+' Rèn</button></div>'+(eqTab==='wear'?eqWearHtml():eqForgeHtml());
  const nb=document.getElementById('eq-bag');if(nb)nb.scrollTop=sc;
  if(!eqRaf)eqRaf=requestAnimationFrame(eqLoop)}
 function eqLoop(t){
