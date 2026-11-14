@@ -88,10 +88,10 @@ function pet(g,x,c1,c2,T,flip){
  const b=Math.sin(T*3+x)*1.5;
  g.save();g.translate(x,0);if(flip)g.scale(-1,1);
  g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(0,GY,26,6,0,0,6.283);g.fill();
- const gr=g.createLinearGradient(0,GY-62,0,GY);gr.addColorStop(0,c1);gr.addColorStop(1,c2);g.fillStyle=gr;
- g.beginPath();g.ellipse(0,GY-30+b,24,30,0,0,6.283);g.fill();
- g.fillStyle='#fff';g.beginPath();g.arc(8,GY-40+b,6,0,6.283);g.arc(-4,GY-40+b,6,0,6.283);g.fill();
- g.fillStyle='#111';g.beginPath();g.arc(10,GY-40+b,3,0,6.283);g.arc(-2,GY-40+b,3,0,6.283);g.fill();
+ const gr=g.createLinearGradient(0,GY-104,0,GY);gr.addColorStop(0,c1);gr.addColorStop(1,c2);g.fillStyle=gr;
+ g.beginPath();g.ellipse(0,GY-52+b,26,52,0,0,6.283);g.fill();
+ g.fillStyle='#fff';g.beginPath();g.arc(8,GY-66+b,6,0,6.283);g.arc(-4,GY-66+b,6,0,6.283);g.fill();
+ g.fillStyle='#111';g.beginPath();g.arc(10,GY-66+b,3,0,6.283);g.arc(-2,GY-66+b,3,0,6.283);g.fill();
  g.restore();
 }
 /* ảnh mẫu (chỉ để so sánh trong trang demo này, game KHÔNG dùng) */
@@ -150,10 +150,12 @@ function loop(now){
    if(u>=.35)FX.drawImpact(g,{pp:pa,q:Math.min(.9999,(u-.35)/.55),k:kind,d:12,r:1,i:1,h:'Thủy',s:zi,cl:0,text:''},T);
    FX.drawAttack(g,T,S);
   }
-  if(mode==='status'&&run&&status!=='bq'&&u>=.35){
+  if(mode==='status'&&run&&status!=='bq'&&(u>=.35||status==='counter')){
   const cfg={crit:{k:'crit',text:'💥 Chí mạng!',d:34},miss:{k:'miss',text:'né được đòn!',d:0},burn:{k:'hit',text:'🔥 Thiêu đốt - 18',d:18},counter:{k:'hit',text:'↩ Phản đòn · chặn rồi trả đòn',d:18},shield0:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},shield:{k:'block',text:'🛡️ Khiên hấp thụ 18 sát thương',d:18},revive:{k:'heal',text:'✨ Hồi sinh +32 HP',d:0},lightning:{k:'hit',text:'⚡ Lôi Phạt giáng -18',d:18},lava:{k:'hit',text:'🌋 Dung Nham -18',d:18},heal:{k:'heal',text:'Hồi sức +18 HP',d:0},freeze:{k:'stun',text:'đóng băng',d:0},stun:{k:'stun',text:'bị choáng',d:0}}[status];
   const actor=statusP,q=Math.min(.9999,(u-.35)/.55);
-  if(cfg){if(status==='miss'&&FX.drawDodge)FX.drawDodge(g,u,actor,T);FX.drawImpact(g,{pp:actor,q:q,k:cfg.k,d:cfg.d,r:1,i:1,h:'Thủy',s:zi,cl:0,text:cfg.text},T);if(!isSh)FX.engine.draw(g,'status')}
+  if(status==='counter'&&u<.9)FX.drawAttack(g,T,{on:1,s:zi,u:u,pa:statusP,cl:3,cr:false,miss:false,h:'Hỏa',i:1,text:cfg.text});
+  if(cfg&&u>=.35){if(status==='miss'&&FX.drawDodge)FX.drawDodge(g,u,actor,T);FX.drawImpact(g,{pp:actor,q:q,k:cfg.k,d:cfg.d,r:1,i:1,h:'Thủy',s:zi,cl:0,text:cfg.text},T);if(!isSh)FX.engine.draw(g,'status')}
+  if(cfg&&u<.35&&!isSh)FX.engine.draw(g,'status');
  }
  if(mode==='attack'&&run&&u>=1){if($('loop').checked)restart();else run=false}
  if(mode==='status'&&run&&u>=1)restart();

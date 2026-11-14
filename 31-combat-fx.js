@@ -728,8 +728,10 @@ function makeSprite(W,H,cellFn){
 function spriteImg(s){const im=s.img;return im&&im.complete&&im.naturalWidth?im:null}
 /* hộp vẽ của sprite: nếu có ảnh mẫu thì giữ đúng tỉ lệ ảnh, không thì dùng lưới ô */
 function spriteBox(s,cx,cy,unit){const im=spriteImg(s),h=s.h*unit,w=im?h*im.naturalWidth/im.naturalHeight:s.w*unit;return{im,w,h,x:cx-w/2,y:cy-h/2}}
-function drawSprite(g,s,cx,cy,unit,a){
- if(a<=.01||unit<=0)return;const b=spriteBox(s,cx,cy,unit);
+function drawSprite(g,s,cx,cy,unit,a,rot){
+ if(a<=.01||unit<=0)return;
+ if(rot){g.save();g.translate(cx,cy);g.rotate(rot);drawSprite(g,s,0,0,unit,a);g.restore();return}
+ const b=spriteBox(s,cx,cy,unit);
  g.save();g.globalAlpha=FXE.cl(a,0,1);
  if(b.im){g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(b.im,b.x,b.y,b.w,b.h)}
  else if(s.cv){g.imageSmoothingEnabled=false;g.drawImage(s.cv,b.x,b.y,b.w,b.h)}
@@ -773,7 +775,7 @@ const SHIELD_N=5;
 /* vị trí khiên thứ i trên quỹ đạo elip quanh thân (tâm y≈150); dep>0 = ở phía trước thú */
 function shOrbitPose(i,T,x,pop){
  const side=x<180?0:1,an=T*(1.5+side*.12)+i*FXE.TAU/SHIELD_N+side*1.1,dep=Math.sin(an),rr=.25+.75*FXE.eOut(pop);
- return{x:x+Math.cos(an)*38*rr,y:150+dep*13*rr+Math.sin(T*2.2+i*1.7)*1.6,dep,sc:.8+.32*(dep+1)/2,pop,i};
+ return{x:x+Math.cos(an)*42*rr,y:150+dep*15*rr+Math.sin(T*2.2+i*1.7)*1.6,dep,sc:.8+.32*(dep+1)/2,pop,i};
 }
 /* lớp khiên xoay: front=false vẽ các khiên phía SAU thú (gọi trong drawBack), front=true vẽ phía TRƯỚC (drawField). fa = độ mờ chung */
 function shieldOrbit(g,x,T,elapsed,hold,front,fa){
@@ -782,7 +784,7 @@ function shieldOrbit(g,x,T,elapsed,hold,front,fa){
   const o=shOrbitPose(i,T,x,FXE.cl(age/.38,0,1));if((o.dep>=0)===front)list.push(o)}
  list.sort((a,b)=>a.dep-b.dep);
  g.save();try{for(const o of list){
-  const sc=o.sc*(.55+.45*FXE.eBack(o.pop)),unit=1.05*sc,al=(front?.97:.6)*Math.min(1,o.pop*3)*(fa==null?1:fa),pulse=.6+.4*Math.sin(T*5.5+o.i*1.9);
+  const sc=o.sc*(.55+.45*FXE.eBack(o.pop)),unit=1.4*sc,al=(front?.97:.6)*Math.min(1,o.pop*3)*(fa==null?1:fa),pulse=.6+.4*Math.sin(T*5.5+o.i*1.9);
   FXE.glow(g,o.x,o.y,16*sc,'#4fd6ff',.2*al*(front?1:.6));
   drawSprite(g,spr,o.x,o.y,unit,al);
   FXE.glow(g,o.x,o.y-1.4*unit,4.6*unit,'#7ff6ff',.42*pulse*al);
@@ -854,7 +856,7 @@ function pixelLava(g,x,T,q,s,dir,scale){
 }
 /* KHIÊN chặn đòn: 1 khiên ở phía kẻ đánh chớp sáng → nứt → vỡ thành mảnh pixel xanh văng có trọng lực + vòng sóng; các khiên còn lại mờ dần */
 function statusShield(g,fx,T,q,x,y,s){g.save();try{
- const px=x<180?85:272,dir=x<180?1:-1,spr=blueShieldSprite(),QB=.22,ix=px+dir*34,iy=152,unit=1.5;
+ const px=x<180?85:272,dir=x<180?1:-1,spr=blueShieldSprite(),QB=.22,ix=px+dir*38,iy=150,unit=1.9;
  /* các khiên xoay còn lại tan dần (nếu game vẫn còn khiên thì chúng chồng khít lên khiên xoay thật nên không thấy khác) */
  const rem=1-FXE.ph(q,.1,.8);
  if(rem>0){shieldOrbit(g,px,T,99,0,false,.9*rem);shieldOrbit(g,px,T,99,0,true,.9*rem)}
@@ -944,14 +946,76 @@ function pixelLightningSequence(g,x,T,q,s,side,floor){g.save();try{
 function statusLightning(g,fx,T,q,x,y,s){
  pixelLightningSequence(g,x,T,q,s,fx.pp?1:-1,205);return true;
 }
+/* ===== FX 4A (làm lại): PHẢN ĐÒN — khiên đỏ có gai (ảnh mẫu) phình to rồi ném thẳng vào địch, đâm vào thì nứt và vỡ ===== */
+let RED_SH=null;
+function redShieldSprite(){
+ if(RED_SH)return RED_SH;
+ const W=16,H=21,widths=[16,16,16,16,16,16,16,16,16,16,16,14,14,12,10,8,6,4,2,2,2];
+ const inside=(r,c)=>{if(r<0||r>=H||c<0||c>=W)return false;const w=widths[r],x0=(W-w)/2;return c>=x0&&c<x0+w};
+ const dep=spriteDepth(W,H,inside);
+ /* hình dự phòng (khi ảnh chưa tải kịp): khiên đỏ sẫm viền xám, vết nứt cam */
+ RED_SH=makeSprite(W,H,(r,c)=>{if(!inside(r,c))return null;const d=dep[r][c];
+  if(d===1)return'#150608';if(d===2)return(r+c)%3===0?'#7c6f78':'#4a4046';if(d===3)return'#5a1018';
+  if((r*3+c*5)%11===0||(r+c*2)%13===0)return'#ff8a1e';return(c+r)%4===0?'#8c1c1c':'#a02424'});
+ try{if(typeof Image!=='undefined'){const im=new Image();im.src='fx/khien-do.png';RED_SH.img=im}}catch(_){}
+ return RED_SH;
+}
+function counterThrow(g,T,S){g.save();try{
+ const u=clamp(S.u||0,0,1),pa=!!S.pa,dir=pa?1:-1,rx=pa?85:272,tx=pa?272:85,spr=redShieldSprite(),sl=FXE.seed('counter-atk:'+(pa?'p':'m'),u);
+ const x0=rx+dir*30,x1=tx-dir*22,y=150;
+ if(u<.14){
+  /* tụ lực: khiên đỏ nhỏ phình to tại chỗ, vòng đỏ dưới chân, tia lửa hút vào */
+  const p=FXE.ph(u,0,.14),h=16+48*FXE.eBack(p),unit=h/spr.h,pul=1+.04*Math.sin(T*22);
+  buffArc(g,rx,205,10+p*34,3+p*8,T*.9,T*.9+FXE.TAU,'#5a1418',.8,3.2,T,1);buffArc(g,rx,205,8+p*30,2.4+p*7,T*.9+.4,T*.9+.4+FXE.TAU,'#ff5a2a',.95,3.2,T,1);
+  FXE.glow(g,x0,y,12+h*.6,'#ff4a1e',.45*p);
+  drawSprite(g,spr,x0,y,unit*pul,Math.min(1,p*3));
+  for(let i=0;i<8;i++){const an=i*.785+T*3,r=(1-p)*46+8;buffPixel(g,x0+Math.cos(an)*r,y+Math.sin(an)*r*.8,i%2?'#ffb040':'#ff5a2a',.9*p,2.4,1,1)}
+  if(u>.1)statusBurst(sl,'c0',rx,205,8,{speed:[20,70],ang:[-Math.PI*.94,-Math.PI*.06],size:[1.2,2.6],life:[.3,.7],gy:150,drag:.5,shape:'spark',c:'#ff5a2a',c2:'#ffd070',a:.9,add:true,tag:'status',floor:205,bounce:.2});
+ }else if(u<.35){
+  /* ném thẳng: tăng tốc, xoay nhẹ, vệt tàn ảnh đỏ phía sau, tia lửa */
+  const f=FXE.ph(u,.14,.35),pos=k=>{const e=Math.pow(FXE.cl(f-k,0,1),1.7);return x0+(x1-x0)*e},h=64+14*f,unit=h/spr.h,rot=dir*.2*Math.sin(f*10);
+  for(let k=4;k>=1;k--){const gx=pos(k*.07);FXE.glow(g,gx,y,16,'#ff4a1e',.2/k);drawSprite(g,spr,gx,y,unit*(1-k*.04),.3/k,rot)}
+  const hx=pos(0);
+  for(let i=-1;i<=1;i++){const yy=y+i*15+Math.sin(T*30+i)*2;buffLine(g,[[hx-dir*46,yy],[hx-dir*26,yy-1],[hx-dir*12,yy]],i?'#ff5a2a':'#ffd070',.9*(1-FXE.ph(f,.8,1)*.3),2.6,i?1:2)}
+  FXE.glow(g,hx,y,34,'#ff4a1e',.5);
+  drawSprite(g,spr,hx,y,unit,1,rot);
+  for(let k=0;k<7;k++){const rr=FXE.rng(k*977+((T*30)|0));buffPixel(g,hx-dir*(14+rr()*38),y+(rr()-.5)*52,k%2?'#ffd070':'#ff7a2a',.9,2.2,1,1)}
+ }
+ return true;
+}finally{g.restore()}}
 function statusCounter(g,fx,T,q,x,y,s){g.save();try{
- const fa=1-q,dir=fx.pp?-1:1,attackerX=dir<0?90:272,phase=q;
- pixelShield(g,x,y,T,.95*(1-FXE.ph(q,.72,1)),1.1,FXE.ph(q,0,.36));
- const p=FXE.cl((phase-.16)/.78,0,1),headX=x+dir*(22+p*78),headY=158-Math.sin(p*Math.PI)*42,trail=[[x+dir*16,176],[x+dir*28,160],[x+dir*44,150],[headX,headY]];
- buffLine(g,trail,'#361d42',.9*fa,4.1,5);buffLine(g,trail,'#f44353',.96*fa,3.2,3);buffLine(g,trail,'#ffd64b',.96*fa,2.5,1);buffLine(g,trail.slice(1),'#fff4b0',.92*fa,2.2,1);
- for(let i=0;i<3;i++){const yy=headY+(i-1)*8,pt=[[headX-dir*11,yy-5],[headX-dir*4,yy],[headX+dir*4,yy],[headX+dir*11,yy+4]];buffLine(g,pt,i===1?'#fff6c6':'#ffd34a',.95*fa,2.7,1)}
- if(p>.72){pixelStar(g,attackerX,151,3.3,'#ff593e','#fff1a4',.95*FXE.ph(p,.72,.92));buffSpark(g,attackerX,151,6,'#ffe65a',.9*fa,3)}
- statusBurst(s,'counter',x,171,18,{speed:[22,112],ang:[-Math.PI*.92,-Math.PI*.08],size:[1.3,3.2],life:[.34,.85],gy:170,drag:.5,shape:'shard',c:'#ff6551',c2:'#fff0a0',a:.95,add:true,tag:'status',vr:[-8,8],floor:205,bounce:.18});return true;
+ const vx=x<180?85:272,dir=fx.pp?1:-1,spr=redShieldSprite(),QB=.2,sx=vx-dir*22,sy=150,h=78,unit=h/spr.h;
+ /* vòng sóng đỏ lan dưới đất + vòng đứng quanh chỗ trúng */
+ const w1=FXE.ph(q,0,.8),wa=(1-w1)*FXE.ph(q,0,.08);
+ if(wa>0){buffArc(g,vx,205,10+w1*58,3+w1*16,0,FXE.TAU,'#5a1418',.85*wa,3.2,T,1);buffArc(g,vx,205,8+w1*52,2.5+w1*14,.3,.3+FXE.TAU,'#ff6a30',.95*wa,3.2,T,1)}
+ const w2=FXE.ph(q,0,.55),wb=(1-w2);if(wb>0&&q<.55)buffArc(g,sx,sy,10+w2*40,10+w2*40,0,FXE.TAU,'#ffb050',.7*wb,3,T,1);
+ if(q<QB){
+  const jx=-dir*Math.sin(q*150)*2*(1-FXE.ph(q,0,QB)),fl=1-FXE.ph(q,0,.12);
+  FXE.glow(g,sx,sy,44,'#ff4a1e',.55);
+  drawSprite(g,spr,sx+jx,sy,unit,.96);
+  if(fl>0){g.save();g.globalCompositeOperation='lighter';drawSprite(g,spr,sx+jx,sy,unit,.45*fl);g.restore()}
+  const ck=FXE.ph(q,.03,.17);
+  if(ck>0){const hx=spr.w*unit*.4,hy=h/2;
+   buffLine(g,[[sx,sy-hy*.6],[sx-hx*.2,sy-hy*.2],[sx+hx*.2,sy+hy*.1],[sx-hx*.1,sy+hy*.65]],'#ffb23a',ck,2.2,2);
+   buffLine(g,[[sx-hx*.2,sy-hy*.2],[sx-hx*.7,sy-hy*.05]],'#ffd070',ck,2.2,1);buffLine(g,[[sx+hx*.2,sy+hy*.1],[sx+hx*.7,sy+hy*.28]],'#ffd070',ck,2.2,1)}
+ }else{
+  /* vỡ: mảnh cắt từ chính ảnh khiên văng theo parabol, nảy đất, mờ dần */
+  const r=FXE.rng(s.seed^0x7c3a),t=(q-QB)*1.05,fade=1-FXE.ph(q,.6,.97),bx=spriteBox(spr,sx,sy,unit),cw=bx.w/spr.w,g0=320;g.save();g.imageSmoothingEnabled=true;
+  for(let cy=0;cy<spr.h;cy+=3)for(let cx=0;cx<spr.w;cx+=3){
+   const vx2=(cx-8)*6+r.range(-14,14)+dir*r.range(-6,48),vy=-r.range(30,100)+(cy-10)*3,x0=bx.x+cx*cw,y0=bx.y+cy*unit;
+   let yy=y0+vy*t+.5*g0*t*t;const tb=(-vy+Math.sqrt(vy*vy+2*g0*Math.max(0,205-y0)))/g0;
+   if(t>tb){const tt=t-tb,v2=-(vy+g0*tb)*.3;yy=205+Math.min(0,v2*tt+.5*g0*tt*tt)}
+   const k=1-.3*FXE.ph(t,.3,1),sw=cw*3*k,sh=unit*3*k;g.globalAlpha=FXE.cl(fade,0,1);
+   if(bx.im){const iw=bx.im.naturalWidth/spr.w,ih=bx.im.naturalHeight/spr.h;g.drawImage(bx.im,cx*iw,cy*ih,iw*3,ih*3,x0+vx2*t,Math.min(yy,205),sw,sh)}
+   else{g.fillStyle=(cx+cy)%2?'#8c1c1c':'#ff8a1e';g.fillRect(x0+vx2*t,Math.min(yy,205),sw,sh)}}
+  g.restore();
+  const hot=1-FXE.ph(q,QB,QB+.16);if(hot>0)FXE.glow(g,sx,sy,30+16*(1-hot),'#ff5a2a',.6*hot);
+  /* dư ảnh: vết nứt cháy trên đất rồi tan dần */
+  const sc=1-FXE.ph(q,.55,1);
+  if(sc>0){buffLine(g,[[vx-34,206],[vx-16,203],[vx-4,207],[vx+12,203],[vx+36,206]],'#2a1018',.9*sc,3,3);buffLine(g,[[vx-30,206],[vx-14,204],[vx-2,206],[vx+10,204],[vx+30,206]],'#ff6a2a',.95*sc,3,1)}
+  statusBurst(s,'counter',sx,sy,22,{speed:[30,130],ang:[-Math.PI*.96,-Math.PI*.04],size:[1.4,3.4],life:[.4,1],gy:200,drag:.45,shape:'spark',c:'#ff6a2a',c2:'#ffe08a',a:.98,add:true,tag:'status',vr:[-8,8],floor:205,bounce:.25});
+ }
+ return true;
 }finally{g.restore()}}
 function statusFreeze(g,fx,T,q,x,y,s){g.save();try{
  const p=FXE.eOut(FXE.cl(q/.28,0,1)),fade=1-FXE.ph(q,.82,1),u=4.1,ground=207,height=88*p,rows=Math.max(1,Math.floor(height/u));
@@ -1079,6 +1143,7 @@ function drawAttack(g,T,S){
  const sx=pa?112:248,tx=pa?255:105,ty=148;
  if(/Dung Nham Phun Trào|Thiêu đốt -|Xích Diệm vùng/.test(text))return drawLavaAttackCode(g,T,S);
  if(/Lôi Phạt giáng|Lôi Kích\s*-/.test(text))return drawLightningAttackCode(g,T,S);
+ if(/Phản đòn|Phản Chấn|Nguyệt Ảnh phản kích/.test(text))return counterThrow(g,T,S);
  if(mode==='ranged'){
   if(u<.18){
    if(u>.035){const charge=clamp((u-.035)/.145,0,1),asset=frame(z.attack,charge*.3);
