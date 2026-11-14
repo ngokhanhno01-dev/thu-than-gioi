@@ -1,8 +1,32 @@
 # GHI CHÚ [FX 3C] — Vẽ lại BUFF BỘ TRANG BỊ (17 bộ) cho claude sau
 
 Người dùng chê buff bộ cũ "quá sơ sài". Làm LẦN LƯỢT TỪNG BỘ, xong bộ nào commit + đẩy nhánh `fx-ve-bang-code` ngay
-(commit `[FX 3C-<tên bộ>] ...`), rồi mới làm bộ kế. Người dùng hay hết quota nên luôn cập nhật bảng tiến độ dưới đây TRONG CÙNG commit.
+(commit `[FX 3C-<số bộ>] ...`), rồi mới làm bộ kế. Người dùng hay hết quota nên luôn cập nhật bảng tiến độ dưới đây TRONG CÙNG commit.
 Trả lời tiếng Việt, ngắn gọn. Xong mỗi bộ: báo + gửi ảnh chụp, hỏi duyệt/chỉnh rồi dừng chờ "tiếp".
+
+## QUY TẮC MÀU (người dùng dặn: "làm theo kiểu màu từng vùng")
+Mỗi bộ trang bị ứng với 1 vùng theo đúng thứ tự (bộ 0 = vùng 0 ...). Bộ mới PHẢI dùng màu của vùng đó (màu ZONES trong 31-combat-fx.js) làm màu chủ đạo:
+deep = tối hơn, main = gần màu vùng, light = sáng hơn, core = gần trắng. KHÔNG tự chọn màu khác (counter lúc đầu làm màu đỏ là SAI, đã sửa sang màu Nguyệt Cung).
+| Bộ | Vùng | Màu vùng |
+|----|------|---------|
+| frost | Tuyết Nguyên | #9fe4ff |
+| mist | Sương Cốc | #a3e1d4 |
+| cloud | Vân Đảo | #c9a8ff |
+| wind | Phong Nguyên | #82f0bb |
+| thunder | Lôi Vực | #ffe53a |
+| counter | Nguyệt Cung | #a8b8ff |
+| sun | Dương Sơn | #ffa94d |
+| shield | Huyền Uyên | #947aff |
+| thorn | Kim Khoáng | #e0b038 |
+| revive | Ngọc Động | #18e0b0 |
+| grove | Thanh Lâm | #8be04a |
+| lava | Xích Hỏa Địa | #ff5a1e |
+| ambush | Hắc Ám Lâm | #b0206a |
+| star | Tử Tinh Hải | #b45cff |
+| first | Thiên Không | #6ac4ff |
+| weaken | Linh Hoa Viên | #ff7ac0 |
+| judge | Thần Điện | #fff0a0 |
+Nét riêng nên lấy từ tên/biểu tượng vùng (vd Nguyệt Cung = trăng khuyết → counter có trăng khuyết loeảng; Dương Sơn = mặt trời/thiên thạch lửa).
 
 ## Tiến độ
 | # | Bộ | Trạng thái | Ảnh mẫu |
@@ -12,8 +36,8 @@ Trả lời tiếng Việt, ngắn gọn. Xong mỗi bộ: báo + gửi ảnh ch
 | 2 | cloud (mây) | XONG (người dùng bảo làm tiếp) | tools/ref-gear/van-dao.jpg |
 | 3 | wind (gió) | XONG bản đầu, chờ người dùng duyệt | tools/ref-gear/phong-nguyen.jpg |
 | 4 | thunder (sấm) | XONG (người dùng đã xem trên điện thoại, bảo làm tiếp) | tools/ref-gear/loi-vuc.jpg |
-| 5 | counter (phản đòn) | XONG bản đầu (chưa xem hình thật, chỉ chạy harness không lỗi), chờ người dùng duyệt | tự thiết kế: đỏ thẫm, lưỡi gai cong, vòng sáng co vào, mũi tên V |
-| 6–16 | sun, shield, thorn, revive, grove, lava, ambush, star, first, weaken, judge | CHƯA, KHÔNG có ảnh mẫu: tự thiết kế cùng phong cách | (dùng 5 ảnh mẫu làm chuẩn) |
+| 5 | counter (phản đòn) | XONG, người dùng bảo "ổn"; đã đổi sang màu Nguyệt Cung theo quy tắc màu, chờ người dùng xem lại màu | tự thiết kế: xanh tím trăng, lưỡi gai cong, vòng sáng co vào, mũi tên V, trăng khuyết |
+| 6–16 | sun, shield, thorn, revive, grove, lava, ambush, star, first, weaken, judge | CHƯA, KHÔNG có ảnh mẫu: tự thiết kế theo màu vùng (bảng trên) | (dùng 5 ảnh mẫu làm chuẩn phong cách) |
 
 Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không hỏng giữa chừng.
 
@@ -45,7 +69,7 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 
 ## QUY TRÌNH LÀM VIỆC ĐÃ ĐƯỢC NGƯỜI DÙNG DUYỆT (claude sau làm ĐÚNG như vậy)
 1. Đọc file này + xem bảng tiến độ để biết bộ kế tiếp. Chỉ làm ĐÚNG MỘT bộ mỗi lượt, rồi dừng chờ người dùng nói "tiếp".
-2. Nhìn ảnh mẫu của bộ đó trong `tools/ref-gear/` (bộ không có ảnh mẫu: tự thiết kế theo 5 ảnh làm chuẩn, mỗi nguyên tố nét riêng).
+2. Nhìn ảnh mẫu của bộ đó trong `tools/ref-gear/` (bộ không có ảnh mẫu: tự thiết kế theo 5 ảnh làm chuẩn + MÀU VÙNG theo bảng trên, mỗi nguyên tố nét riêng).
 3. Viết `REG.<kind>` trong `41-gear-aura.js` (thêm TRƯỚC dòng `})();` cuối file), dùng lại KIT (circle, swirl, sparks, halo, level, curl, gem...). Không viết lại engine.
 4. `node --check` các file đã sửa.
 5. TỰ CHỤP HÌNH ở chế độ PIXEL (cách chụp ở mục "Cách xem thử"), xem ảnh, chỉnh ít nhất 1 vòng cho đến khi đúng ảnh mẫu (bố cục, màu, trận pháp, chi tiết riêng). Kiểm tra cả khi có thú giả che giữa.
@@ -55,8 +79,9 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 
 ## Điều người dùng ĐÃ DUYỆT / ĐÃ YÊU CẦU (đừng làm trái)
 - Làm theo ảnh mẫu "thật giống từ chi tiết, trận pháp, hiệu ứng".
+- Màu mỗi bộ = màu vùng tương ứng (xem QUY TẮC MÀU).
 - Kiểu PIXEL ART là mặc định (thú của game là pixel art; bản vẽ mượt bị chê quá bóng và quá rõ khi đặt gần thú). Đã duyệt pixel pass hiện tại (alpha cứng + viền tối 1px + tầng bán trong suốt).
-- Frost (0), Mist (1), Cloud (2), Thunder (4): người dùng đã xem và bảo làm tiếp (coi như duyệt). Wind (3) và Counter (5): đã đẩy, chờ người dùng xem.
+- Frost (0), Mist (1), Cloud (2), Thunder (4): người dùng đã xem và bảo làm tiếp (coi như duyệt). Counter (5): người dùng bảo "ổn" nhưng yêu cầu màu theo vùng (đã sửa). Wind (3): đã đẩy, chờ người dùng xem.
 - Mist: sương phải MỜ, TRONG SUỐT, không che nền (đã sửa theo góp ý; sương/khói nói chung vẽ alpha ~.2–.4 để rơi vào tầng bán trong suốt).
 - Buff vẫn là lớp NỀN vẽ trước thú; không đè lên thân thú.
 - Những bộ chưa làm tiếp tục chạy code cũ, không được làm hỏng game giữa chừng.

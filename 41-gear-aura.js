@@ -501,8 +501,8 @@
   }finally{g.restore()}
  };
 
- /* ================= BỘ 5 — COUNTER (phản đòn): tự thiết kế, không có ảnh mẫu ================= */
- const COUNTER={deep:'#5c0f22',main:'#e0343c',light:'#ff9a7a',core:'#fff1e6'};
+ /* ================= BỘ 5 — COUNTER (phản đòn): màu vùng Nguyệt Cung (#a8b8ff), tự thiết kế, không có ảnh mẫu ================= */
+ const COUNTER={deep:'#2c3680',main:'#7d92ee',light:'#c3d0ff',core:'#f5f8ff'};
  /* lưỡi gươm/gai cong dựng từ đất: nửa tối + nửa sáng + sống sáng */
  function blade(g,E,x,y,len,w,lean,P,al,pulse){
   if(al<=.02||len<2)return;const tx=x+lean,ty=y-len;
@@ -550,12 +550,17 @@
    if(a>0){
     for(let s=0;s<2;s++)slash(g,E,x,GY-72,58,20,s?-.4:Math.PI+.4,1.9,6,P.light,P.core,a*.85);
    }
+   /* trăng khuyết loảng quanh thú (nét riêng của Nguyệt Cung) */
+   for(let k=0;k<4;k++){
+    const p=(T*.06+k*.25)%1,side=k%2?1:-1;
+    crescent(g,E,x+side*(50+k*7)+Math.sin(T*.8+k)*3,GY-26-p*92,8+k%2*3,side*.9+Math.sin(T*.6+k)*.4,P.light,Math.sin(Math.PI*p)*.8*al);
+   }
    /* mảnh gương vỡ lấp lánh */
    for(let k=0;k<9;k++){
     const an=T*.4*(k%2?1:-1)+k*.95,rr=34+hash(k)*34,px=x+Math.cos(an)*rr,py=GY-24-hash(k+3)*96+Math.sin(an)*8,tw=.5+.5*Math.sin(T*3.2+k*2);
     gem(g,E,px,py,1.6+hash(k+6)*1.8,al*tw,k%2?P.light:P.core);
    }
-   /* tàn lửa đỏ bốc lên */
+   /* bụi sao bốc lên */
    g.save();g.globalCompositeOperation='lighter';
    for(let k=0;k<14;k++){
     const p=(T*(.07+hash(k)*.06)+hash(k*3.1))%1,px=x+(hash(k*5.3)*2-1)*70,py=GY-6-p*118;
