@@ -774,4 +774,120 @@
    sparks(g,E,x,P,T,al,12,125);
   }finally{g.restore()}
  };
+
+ /* ================= BỘ 8 — VÙNG KIM KHOÁNG (key kỹ thuật 'thorn'): màu vùng #e0b038, tự thiết kế, KHÔNG vẽ gai =================
+    Hiệu ứng khi mặc đủ bộ 4 món của vùng. Nét riêng theo vùng (mỏ vàng, khoáng thạch, mạch kim loại):
+    chùm tia tinh thể vàng mờ sau lưng, cụm tinh thể vàng mọc quanh trận pháp, khối quặng có mạch vàng, nứt đất rỉ vàng,
+    mảnh kim loại bay quanh, bụi quặng lấp lánh, lúc vào trận quặng rơi xuống từ trên cao. */
+ const ORE={deep:'#5e3f08',main:'#e0b038',light:'#ffdf80',core:'#fff7d6'};
+ const GOLD={dark:'#7a5208',mid:'#e0b038',light:'#ffe58a',edge:'#fff8dc'};
+ /* khối quặng: đá nâu tối viền đồng, có mạch vàng chạy ngang sáng nhấp nháy */
+ function ore(g,E,x,y,s,k,al,T){
+  if(al<=.02||s<1)return;
+  const m=7,pts=[];
+  for(let i=0;i<m;i++){const an=i/m*TAU+hash(k+i)*.45,r=s*(.7+hash(k*3+i)*.5);pts.push([x+Math.cos(an)*r,y+Math.sin(an)*r*.85-s*.4])}
+  E.glow(g,x,y-s*.4,s*1.6,'#e0b038',.22*al);
+  g.save();g.lineJoin='round';g.lineCap='round';
+  g.fillStyle=E.rgba('#2b2216',.96*al);g.strokeStyle=E.rgba('#9a7428',.95*al);g.lineWidth=1.2;
+  g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();g.fill();g.stroke();
+  const pu=.7+.3*Math.sin(T*2.2+k*1.7);
+  g.globalCompositeOperation='lighter';
+  for(let c=0;c<2;c++){
+   const a0=pts[(c*3+k)%m],b0=pts[(c*3+k+3)%m],mx=(a0[0]+b0[0])/2+(hash(k+c*4)-.5)*s*.5,my=(a0[1]+b0[1])/2+(hash(k*2+c)-.5)*s*.4;
+   g.strokeStyle=E.rgba('#e0b038',.85*al*pu);g.lineWidth=2.4;g.beginPath();g.moveTo(a0[0],a0[1]);g.lineTo(mx,my);g.lineTo(b0[0],b0[1]);g.stroke();
+   g.strokeStyle=E.rgba('#fff0b0',.9*al*pu);g.lineWidth=1;g.stroke();
+  }
+  g.restore();
+ }
+ /* chùm tia tinh thể vàng toả ra sau lưng thú (nét riêng của mỏ khoáng, thay cho mặt trời/mắt vực) */
+ function lode(g,E,x,y,r,P,T,al){
+  if(al<=.02)return;
+  E.glow(g,x,y,r*1.4,P.main,.32*al,P.core);
+  g.save();g.translate(x,y);g.globalCompositeOperation='lighter';g.lineJoin='round';
+  const N=11,rot=Math.sin(T*.35)*.1;
+  for(let i=0;i<N;i++){
+   const an=rot+i/N*TAU,L=r*(1.25+.55*hash(i*2.3+1)+.06*Math.sin(T*1.8+i*1.9)),hw=r*.13,r0=r*.3,
+    ca=Math.cos(an),sa=Math.sin(an),mx=ca*(r0+L*.35),my=sa*(r0+L*.35),px=-sa*hw,py=ca*hw;
+   g.fillStyle=E.rgba(i%2?P.main:P.light,.42*al);
+   g.beginPath();g.moveTo(ca*r0,sa*r0);g.lineTo(mx+px,my+py);g.lineTo(ca*L,sa*L);g.lineTo(mx-px,my-py);g.closePath();g.fill();
+   g.strokeStyle=E.rgba(P.core,.5*al);g.lineWidth=1;g.stroke();
+  }
+  g.restore();
+ }
+ /* mảnh kim loại góc cạnh bay quanh, có vệt sáng */
+ function shard(g,E,x,y,s,rot,col,a){
+  if(a<=.02)return;
+  g.save();g.translate(x,y);g.rotate(rot);g.globalCompositeOperation='lighter';
+  g.fillStyle=E.rgba(col,.8*a);g.beginPath();g.moveTo(0,-s*1.7);g.lineTo(s*.8,-s*.2);g.lineTo(s*.5,s*1.2);g.lineTo(-s*.6,s*1.1);g.lineTo(-s*.9,-s*.3);g.closePath();g.fill();
+  g.strokeStyle=E.rgba('#ffffff',.7*a);g.lineWidth=.8;g.stroke();g.restore();
+ }
+ REG.thorn=function(g,x,q,T,e,E){
+  const P=ORE,{a,al}=level(q,T,8),grow=e==null?1:cl(e/.6,0,1),gk=easeBack(grow);
+  g.save();
+  try{
+   halo(g,E,x,P,T,al,a,q);
+   lode(g,E,x,GY-80,32*(.95+.05*Math.sin(T*2.1)),P,T,al*.75);
+   circle(g,E,x,P,T,al,{r:58,ph:8.4,runeDir:1,cracks:false});
+   /* nứt đất đen, rỉ vàng như mạch quặng */
+   g.save();g.lineCap='round';g.lineJoin='round';
+   for(let k=0;k<12;k++){
+    const an=hash(k*5.7+8)*TAU,r0=58*(.95+hash(k)*.08),len=14+hash(k+9)*20,pts=[gp(x,an,r0)];
+    for(let s=1;s<=3;s++)pts.push(gp(x,an+(hash(k*7+s)-.5)*.36,r0+len*s/3));
+    g.strokeStyle=E.rgba('#150f06',.85*al);g.lineWidth=1.8;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();
+    g.globalCompositeOperation='lighter';g.strokeStyle=E.rgba(k%3?P.main:P.light,.6*al*(.75+.25*Math.sin(T*2.6+k)));g.lineWidth=1;g.stroke();g.globalCompositeOperation='source-over';
+   }
+   g.restore();
+   /* cụm tinh thể vàng + khối quặng: hai bên và phía sau trận pháp (không che cung trước) */
+   const items=[];
+   for(let side=-1;side<=1;side+=2){
+    for(let k=0;k<5;k++){
+     const t=k/4,ang0=-.3+t*1.75,ang=(side<0?Math.PI+ang0:-ang0)+(hash(k+side*7+3)-.5)*.2,rp=58*(.97+hash(k*2+side+4)*.12),p=gp(x,ang,rp),
+      sd=Math.abs(Math.cos(ang)),hh=(16+hash(k*3+side*5+2)*28)*(.5+.75*sd);
+     items.push({t:'c',x:p[0],y:p[1],h:hh,w:hh*.34+4,lean:-side*(hh*.16+hash(k+5)*5)+(p[0]-x)*.1,k:k+side*20});
+    }
+    for(let k=0;k<3;k++){
+     const an=side>0?-.5+hash(k*3.1+side)*1.4:Math.PI-(-.5+hash(k*3.1+side)*1.4),rp=70+hash(k+side*3)*14,p=gp(x,an,rp);
+     items.push({t:'o',x:p[0],y:p[1],s:5+hash(k*2+side*9)*5,k:k*3+side*7+40});
+    }
+   }
+   items.sort((u,v)=>u.y-v.y);
+   const dI=it=>{
+    if(it.t==='c'){const br=1+.035*Math.sin(T*2+it.k),sh=.5+.5*Math.sin(T*2.4+it.k*1.7);
+     E.crystal(g,it.x,it.y,it.w,it.h*gk*br,it.lean,GOLD,Math.min(1,al*1.25),{shine:sh,crack:.4+.3*Math.sin(T*1.3+it.k)})}
+    else ore(g,E,it.x,it.y,it.s*gk,it.k,al,T);
+   };
+   items.filter(it=>it.y<GY).forEach(dI);
+   swirl(g,E,x,P,T,al,{n:6,H:112,R:50,turns:.8,spin:1.25,wmax:15,ph:.5});
+   swirl(g,E,x,P,T,al*.7,{n:3,H:92,R:60,turns:.7,spin:-.95,wmax:10,ph:2.1});
+   items.filter(it=>it.y>=GY).forEach(dI);
+   /* mảnh kim loại bay quanh thú */
+   for(let k=0;k<8;k++){
+    const an=T*.5*(k%2?1:-1)+k*.8,rr=36+hash(k)*30,px=x+Math.cos(an)*rr,py=GY-22-hash(k+3)*92+Math.sin(an)*8,s=2.4+hash(k+6)*2.2,tw=.6+.4*Math.sin(T*3+k*1.9);
+    shard(g,E,px,py,s*Math.min(1,grow*1.5),an*2+k,k%2?P.light:P.main,al*tw*(Math.sin(an)>.6?.75:1));
+   }
+   /* lúc vào trận: quặng vàng rơi từ trên cao xuống quanh thú, va đất toả sóng */
+   if(a>0&&e!=null&&e<1){
+    for(let k=0;k<5;k++){
+     const t0=k*.1;if(e<t0)continue;
+     const p=cl((e-t0)/.3,0,1),lx=x+(hash(k*3.3+5)*2-1)*62,ly=GY-4+(hash(k+6)-.5)*8,sy=GY-165;
+     if(p<1){
+      const hy=sy+(ly-sy)*p*p;
+      E.glow(g,lx,hy,9,P.light,.45*a);shard(g,E,lx,hy,4.2,p*6+k,P.light,a);shard(g,E,lx,hy-14*p,2.2,k,P.main,a*.7);
+     }else{
+      const f=cl((e-t0-.3)/.5,0,1);
+      E.wave(g,lx,ly,6+f*26,P.light,(1-f)*a,2,{t:T,seed:k+3,sq:SQ,wob:.05,core:P.core});
+      E.glow(g,lx,ly,14*(1-f*.5),P.main,.5*(1-f)*a,P.core);
+     }
+    }
+   }
+   /* bụi quặng vàng bốc lên + lấp lánh */
+   g.save();g.globalCompositeOperation='lighter';
+   for(let k=0;k<18;k++){
+    const p=(T*(.07+hash(k)*.06)+hash(k*3.1))%1,px=x+(hash(k*5.3)*2-1)*70+Math.sin(T*1.6+k*1.7)*4,py=GY-6-p*124;
+    g.fillStyle=E.rgba(k%3?P.light:P.main,Math.sin(Math.PI*p)*.9*al);g.fillRect(px-1,py-1,2.4,2.4);
+   }
+   g.restore();
+   sparks(g,E,x,P,T,al,14,125);
+  }finally{g.restore()}
+ };
 })();
