@@ -2,7 +2,7 @@
 - alpha chỉ 0 hoặc 255 (viền sắc), không làm mờ/feather.
 - màu điểm ảnh lấy nguyên từ ảnh gốc (không pha với nền khi thu nhỏ).
 Dùng: python3 tools/cut_eq_icons.py <bộ> <ảnh-sheet.jpg> [thư-mục-ra] [thr]
-  bộ: hac-am-lam | thien-khong | linh-hoa-vien | than-dien (thêm bộ mới ở PRESETS)
+  bộ: hac-am-lam | thien-khong | linh-hoa-vien | than-dien (| than-dien-v1 = bản xanh ngọc cũ) (thêm bộ mới ở PRESETS)
 """
 import sys
 import numpy as np
@@ -21,11 +21,18 @@ PRESETS = {
     'linh-hoa-vien': dict(bg=(26, 29, 36), thr=100, min_area=12, ring_seed=(210, 990), ring_hole_thr=125,
                           regions=[('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
                                    ('vong', 0, 600, 420, 1200), ('ngoc', 420, 600, 896, 1100)]),
-    'than-dien': dict(bg=(25, 28, 35), thr=40, min_area=6, close_r=3, hole_max=400,
+    'than-dien-v1': dict(bg=(25, 28, 35), thr=40, min_area=6, close_r=3, hole_max=400,
                       ring_seed=[(240, 935), (215, 1030)], ring_hole_thr=125,
                       body={'giap': (10, 9000), 'vong': (8, 1500)},
                       regions=[('vukhi', 0, 0, 462, 600), ('giap', 462, 0, 896, 600),
                                ('vong', 0, 600, 422, 1200), ('ngoc', 422, 600, 896, 1100)]),
+    # Thần Điện bản vàng-rune (thay bản xanh ngọc v1)
+    'than-dien': dict(bg=(25, 28, 35), thr=60, min_area=6, close_r=3, hole_max=400,
+                      ring_seed=[(240, 968)], ring_hole_thr=125,
+                      body={'giap': (10, 9000), 'ngoc': (6, 300000)},
+                      blank=[(790, 1100, 896, 1200)],   # dấu sao watermark góc dưới phải
+                      regions=[('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
+                               ('vong', 0, 600, 422, 1200), ('ngoc', 422, 600, 896, 1150)]),
 }
 SET, SRC = sys.argv[1], sys.argv[2]
 OUT = sys.argv[3] if len(sys.argv) > 3 else '.'
@@ -44,6 +51,8 @@ img = np.array(Image.open(SRC).convert('RGB'))
 H, W, _ = img.shape
 dd = np.abs(img.astype(int) - BG).sum(2)
 fg = dd > THR
+for bx0, by0, bx1, by1 in P.get('blank', []):
+    fg[by0:by1, bx0:bx1] = False
 
 for name, x0, y0, x1, y1 in P['regions']:
     reg = np.zeros_like(fg)
