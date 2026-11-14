@@ -1781,4 +1781,127 @@
    sparks(g,E,x,P,T,al,12,125);
   }finally{g.restore()}
  };
+
+ /* ================= BỘ 16 — VÙNG THẦN ĐIỆN (key kỹ thuật 'judge'): màu vùng #fff0a0, tự thiết kế, KHÔNG trùng Lôi Vực (sét vàng) và Thiên Không (cổng trời xanh) =================
+    Hiệu ứng khi mặc đủ bộ 4 món của vùng. Nét riêng theo vùng (điện thần, phán xét):
+    cán cân vàng mờ sau lưng nghiêng đung đưa, cột đá điện có rãnh vàng hai bên trận pháp, ấn pháp vàng xoay quanh thú,
+    ký tự thiêng rơi xuống, bụi vàng bốc lên; lúc vào trận cán cân bừng to, cột sáng phán xét từ trên giáng xuống + ấn pháp bắn toả hình quạt. */
+ const TEMPLE={deep:'#8a6a1a',main:'#ffd860',light:'#fff0a0',core:'#fffbe8'};
+ /* cán cân: trụ giữa, đòn nghiêng đung đưa, hai đĩa treo bằng dây, đế; mọi nét vàng sáng */
+ function scales(g,E,x,y,r,P,T,al){
+  if(al<=.02||r<4)return;
+  const tilt=Math.sin(T*.8)*.13,bx=Math.cos(tilt)*r,by=Math.sin(tilt)*r,top=y-r*.55;
+  E.glow(g,x,y,r*1.5,P.main,.28*al,P.light);
+  g.save();g.globalCompositeOperation='lighter';g.lineCap='round';g.lineJoin='round';
+  for(let pass=0;pass<2;pass++){
+   g.strokeStyle=E.rgba(pass?P.core:P.main,(pass?.9:.45)*al);g.lineWidth=pass?1:3;
+   g.beginPath();g.moveTo(x,top-3);g.lineTo(x,y+r*.8);g.moveTo(x-r*.35,y+r*.8);g.lineTo(x+r*.35,y+r*.8);g.stroke();
+   g.beginPath();g.moveTo(x-bx,top-by);g.lineTo(x+bx,top+by);g.stroke();
+   for(let sd=-1;sd<=1;sd+=2){
+    const ex=x+sd*bx,ey=top+sd*by,py=ey+r*.62-sd*by*.9;
+    g.beginPath();g.moveTo(ex,ey);g.lineTo(ex-r*.3,py);g.moveTo(ex,ey);g.lineTo(ex+r*.3,py);g.stroke();
+    g.beginPath();g.ellipse(ex,py,r*.34,r*.12,0,0,Math.PI);g.stroke();
+   }
+  }
+  g.fillStyle=E.rgba(P.core,.95*al);g.beginPath();g.arc(x,top,2.4,0,TAU);g.fill();
+  g.restore();
+ }
+ /* cột đá điện: thân đá sáng hai mặt, rãnh vàng, đầu cột + chân cột, đỉnh phát sáng */
+ function pillar(g,E,x,y,h,w,k,P,al,T){
+  if(al<=.02||h<6)return;
+  const pu=.7+.3*Math.sin(T*2.1+k*1.7),ty=y-h;
+  E.glow(g,x,ty,w*2.6,P.main,.26*al*pu,P.light);
+  g.save();g.lineJoin='round';
+  g.fillStyle=E.rgba('#b8a878',.97*al);g.fillRect(x-w,ty,w,h);
+  g.fillStyle=E.rgba('#ece0b8',.97*al);g.fillRect(x,ty,w,h);
+  g.fillStyle=E.rgba('#d8c88c',.98*al);g.fillRect(x-w*1.35,ty-3.5,w*2.7,3.5);g.fillRect(x-w*1.35,y-3,w*2.7,3);
+  g.strokeStyle=E.rgba('#5a4818',.85*al);g.lineWidth=1;g.strokeRect(x-w,ty,w*2,h);
+  g.globalCompositeOperation='lighter';
+  g.strokeStyle=E.rgba(P.main,.85*al*pu);g.lineWidth=1.3;
+  for(let i=-1;i<=1;i++){g.beginPath();g.moveTo(x+i*w*.55,ty+3);g.lineTo(x+i*w*.55,y-4);g.stroke()}
+  g.fillStyle=E.rgba(P.light,.9*al*pu);g.fillRect(x-w*.8,ty-4,w*1.6,1.6);
+  g.restore();
+ }
+ /* ấn pháp: đĩa vàng hai viền, hình thoi quay giữa, chấm khắc quanh */
+ function seal(g,E,x,y,r,rot,P,al){
+  if(al<=.02||r<1)return;
+  E.glow(g,x,y,r*2.2,P.main,.3*al,P.light);
+  g.save();g.translate(x,y);g.rotate(rot);g.globalCompositeOperation='lighter';
+  g.fillStyle=E.rgba(P.main,.4*al);g.beginPath();g.arc(0,0,r,0,TAU);g.fill();
+  g.lineWidth=Math.max(.8,r*.16);g.strokeStyle=E.rgba(P.light,.9*al);g.beginPath();g.arc(0,0,r,0,TAU);g.stroke();
+  g.lineWidth=.8;g.strokeStyle=E.rgba(P.core,.95*al);g.beginPath();g.arc(0,0,r*.68,0,TAU);g.stroke();
+  g.beginPath();g.moveTo(0,-r*.6);g.lineTo(r*.6,0);g.lineTo(0,r*.6);g.lineTo(-r*.6,0);g.closePath();g.stroke();
+  g.fillStyle=E.rgba(P.core,.95*al);g.fillRect(-.8,-.8,1.6,1.6);
+  for(let i=0;i<8;i++){const an=i*TAU/8;g.fillRect(Math.cos(an)*r*.84-.6,Math.sin(an)*r*.84-.6,1.2,1.2)}
+  g.restore();
+ }
+ /* ký tự thiêng: vài nét thẳng/gãy kiểu rune, sáng vàng */
+ function glyph(g,E,x,y,s,k,P,a){
+  if(a<=.02||s<1)return;
+  const v=Math.floor(hash(k*3.7)*4),seg=[[[-1,-1],[1,-1],[1,1]],[[0,-1],[0,1],[-1,0],[1,0]],[[-1,1],[0,-1],[1,1]],[[-1,-1],[1,1],[1,-1],[-1,1]]][v];
+  g.save();g.globalCompositeOperation='lighter';g.lineCap='round';g.lineJoin='round';
+  for(let pass=0;pass<2;pass++){
+   g.strokeStyle=E.rgba(pass?P.core:P.main,(pass?.9:.5)*a);g.lineWidth=pass?.9:2.4;g.beginPath();
+   seg.forEach((p,i)=>i?g.lineTo(x+p[0]*s,y+p[1]*s):g.moveTo(x+p[0]*s,y+p[1]*s));g.stroke();
+  }
+  g.restore();
+ }
+ REG.judge=function(g,x,q,T,e,E){
+  const P=TEMPLE,{a,al}=level(q,T,16),grow=e==null?1:cl(e/.6,0,1),gk=easeBack(grow);
+  g.save();
+  try{
+   halo(g,E,x,P,T,al,a,q);
+   /* cán cân vàng mờ sau lưng thú */
+   scales(g,E,x,GY-84,40*(.97+.03*Math.sin(T*1.8)),P,T,al*.9);
+   circle(g,E,x,P,T,al,{r:58,ph:16.9,runeDir:1});
+   /* sương vàng nhạt sát đất, bán trong suốt */
+   for(let k=0;k<7;k++){
+    const side=hash(k*1.9+23)*2-1,px=x+side*(58+10*Math.abs(side))+Math.sin(T*.4+k*1.7)*6,py=GY-2-hash(k+5)*20*grow,rx=22+hash(k+9)*16,ry=8+hash(k+13)*8;
+    E.blob(g,px,py,rx,ry,k%2?P.light:P.main,.2*al,T*.5,k*53,{wob:.35,speed:1,core:P.light});
+   }
+   /* cột đá điện: hai bên và phía sau trận pháp (không che cung trước) */
+   const it=[];
+   for(let side=-1;side<=1;side+=2){
+    for(let k=0;k<3;k++){
+     const t=k/2,ang0=-.25+t*1.65,ang=(side<0?Math.PI+ang0:-ang0)+(hash(k+side*7+47)-.5)*.2,rp=58*(.98+hash(k*2+side+22)*.1),p=gp(x,ang,rp),
+      sd=Math.abs(Math.cos(ang)),h=(36+hash(k*3+side*5+20)*34)*(.55+.75*sd);
+     it.push({x:p[0],y:p[1],h,w:5+hash(k+side*3)*2,k:k+side*20+140});
+    }
+   }
+   it.sort((u,v)=>u.y-v.y);
+   const dI=o=>pillar(g,E,o.x,o.y,o.h*gk,o.w,o.k,P,al,T);
+   it.filter(o=>o.y<GY).forEach(dI);
+   swirl(g,E,x,P,T,al,{n:6,H:112,R:50,turns:.8,spin:1.2,wmax:15,ph:1.6});
+   swirl(g,E,x,P,T,al*.7,{n:3,H:92,R:60,turns:.7,spin:-.9,wmax:10,ph:3.3});
+   it.filter(o=>o.y>=GY).forEach(dI);
+   /* ấn pháp vàng xoay quanh thú */
+   for(let k=0;k<5;k++){
+    const an=T*(.5+hash(k)*.3)*(k%2?1:-1)+k*1.3,rr=38+hash(k+2)*28,px=x+Math.cos(an)*rr,py=GY-28-hash(k+3)*88+Math.sin(an)*8;
+    seal(g,E,px,py,(3.8+hash(k+6)*1.8)*Math.min(1,grow*1.5),T*.9*(k%2?1:-1)+k,P,al*(Math.sin(an)>.6?.75:1));
+   }
+   /* ký tự thiêng rơi chậm */
+   for(let k=0;k<9;k++){
+    const p=(T*(.05+hash(k+2)*.04)+hash(k*2.9))%1,px=x+(hash(k*4.3)*2-1)*68+Math.sin(T*.9+k*1.7)*5,py=GY-135+p*128;
+    glyph(g,E,px,py,2.4+hash(k+7),k,P,Math.sin(Math.PI*p)*al);
+   }
+   /* lúc vào trận: cán cân bừng to + cột sáng phán xét giáng xuống + ấn pháp toả quạt */
+   if(a>0&&e!=null&&e<1){
+    const k=cl(e,0,1);
+    scales(g,E,x,GY-84,40+30*k,P,T,a*(1-k)*.9);
+    beam(g,E,x,GY,150,10+8*k,P,T,a*(1-k),77);
+    for(let j=0;j<7;j++){
+     const an=-Math.PI/2+(j-3)*.45,d=10+k*80;
+     seal(g,E,x+Math.cos(an)*d,GY-40+Math.sin(an)*d,4.4,k*6+j,P,a*(1-k));
+    }
+   }
+   /* bụi vàng bốc lên */
+   g.save();g.globalCompositeOperation='lighter';
+   for(let k=0;k<16;k++){
+    const p=(T*(.06+hash(k)*.06)+hash(k*3.1))%1,px=x+(hash(k*5.3)*2-1)*68+Math.sin(T*1.4+k*1.7)*5,py=GY-6-p*124;
+    g.fillStyle=E.rgba(k%3?P.light:P.main,Math.sin(Math.PI*p)*.9*al);g.fillRect(px-1,py-1,2.4,2.4);
+   }
+   g.restore();
+   sparks(g,E,x,P,T,al,12,125);
+  }finally{g.restore()}
+ };
 })();
