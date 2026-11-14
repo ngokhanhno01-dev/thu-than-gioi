@@ -2,7 +2,7 @@
 - alpha chỉ 0 hoặc 255 (viền sắc), không làm mờ/feather.
 - màu điểm ảnh lấy nguyên từ ảnh gốc (không pha với nền khi thu nhỏ).
 Dùng: python3 tools/cut_eq_icons.py <bộ> <ảnh-sheet.jpg> [thư-mục-ra] [thr]
-  bộ: hac-am-lam | thien-khong (thêm bộ mới ở PRESETS)
+  bộ: hac-am-lam | thien-khong | linh-hoa-vien (thêm bộ mới ở PRESETS)
 """
 import sys
 import numpy as np
@@ -18,6 +18,9 @@ PRESETS = {
     'thien-khong': dict(bg=(25, 28, 35), thr=100, min_area=12, ring_seed=(224, 980), ring_hole_thr=125,
                         regions=[('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
                                  ('vong', 0, 600, 405, 1200), ('ngoc', 405, 600, 896, 1100)]),
+    'linh-hoa-vien': dict(bg=(26, 29, 36), thr=100, min_area=12, ring_seed=(210, 990), ring_hole_thr=125,
+                          regions=[('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
+                                   ('vong', 0, 600, 420, 1200), ('ngoc', 420, 600, 896, 1100)]),
 }
 SET, SRC = sys.argv[1], sys.argv[2]
 OUT = sys.argv[3] if len(sys.argv) > 3 else '.'
