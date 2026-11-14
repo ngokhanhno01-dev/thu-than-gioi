@@ -109,6 +109,7 @@ Bộ chưa làm vẫn chạy bằng code cũ (backGear pixel) nên game không h
 
 ## Chế độ pixel art (xem thử)
 - File `42-gear-pixel.js` (nạp sau 41) tự bọc MỌI bộ trong `TTGGearAura`: `TTGGearAura.style='pixel'` → vẽ vào khung 240x160, nén sáng + ép 6 mức/kênh + độ trong 4 mức (dither Bayer), phóng không làm mịn. Người dùng đã CHỌN PIXEL ART (hợp với thú pixel; bản mượt bị chê quá bóng): mặc định 'pixel'. Pixel pass: alpha 3 tầng: đặc (>=.5) / bán trong suốt (.14–.5, dùng cho sương/khói: vẽ alpha ~.2–.4) / trong, màu ép mức, viền tối 1px quanh hình.
+- [FX 3C-4 sửa 4] LỖI "tia sét Lôi Vực bị kẹt không tắt": do demo từng truyền elapsed CỐ ĐỊNH .7 nên tia mở màn (seed 902, age=e-.38) đứng im mãi. Đã sửa: ở chế độ buff bộ, demo truyền `t%6` (lặp lại cảnh vào trận mỗi 6s, nút ▶ Phát lại reset). Trong game thật e tăng bình thường nên không bị. Đừng quay lại elapsed cố định.
 - Trang demo (fx-demo.html, tools/fx-demo.html) có ô "Kiểu: mượt / pixel art" ở chế độ buff bộ. Game thật dùng pixel mặc định.
 - Bộ mới chỉ cần thêm vào 41; 42 tự bọc. Bộ mới: kiểm tra bằng ảnh chụp ở chế độ PIXEL (đừng chỉ nhìn bản mượt); tránh vật mảnh <1px (biến mất khi pixel hoá), ưu tiên khối/nét dày ≥1.5 đơn vị.
 
