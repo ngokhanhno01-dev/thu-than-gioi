@@ -24,3 +24,7 @@ Bước 4B: gỡ hạ tầng ảnh (giữ fx/khien-xanh.png, fx/khien-do.png; to
 - Hồi sinh: đổi thành 22 tia nhỏ, mảnh, ngắn, rải đều quanh pháp trận (ảnh mẫu: cột sáng + hạt lấp lánh xanh/vàng).
 - Dung nham: tách `lavaCracks` — đất nứt TỪ TỪ + rung trong lúc tung chiêu (drawLavaAttackCode, u 0→1), rồi lúc trúng (drawImpact→pixelLava) mới phun trào 7 cột to + khói đen viền cam (ảnh mẫu).
 - Đã chạy harness t11.js: 0 lỗi. Chưa đo draw call, chưa xem hình thật.
+
+## Cập nhật 12:30
+- Bất khuất làm lại theo ảnh mẫu: lửa cao nhọn, 2 cánh/găng pixel ô vuông đỏ-vàng hai bên, nền ô vuông dưới chân, sét xanh/đỏ, dấu cộng đỏ trên-phải; vẫn giữ bùng nổ lúc kích hoạt + đối thủ run.
+- Thiêu đốt: người dùng báo "bị lỗi" nhưng chưa nói lỗi gì; harness (t12.js) không thấy exception → cần hỏi người dùng lỗi nhìn thấy là gì (mất lửa? sai bên? chớp?).

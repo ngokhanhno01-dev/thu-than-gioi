@@ -795,35 +795,45 @@ const BQ={t0:[-1,-1]};
 /* ===== FX 4A (làm lại): BẤT KHUẤT — cuồng nộ: lúc kích hoạt bùng nổ (sóng đất + cột lửa đỏ đen), đối thủ run sợ; sau đó aura giận dữ bập bùng dữ dội, gân giận, vết cào, tiếng gầm lặp lại ===== */
 function bqAura(g,x,T,elapsed,side,front){
  if(BQ.t0[side]<0)BQ.t0[side]=T;
- const dir=side===0?1:-1,ox=side===0?272:85,age=T-BQ.t0[side],boom=FXE.cl(age/1.1,0,1),be=1-FXE.ph(age,.2,1.1),ph=T*5+side*1.3,pulse=.7+.3*Math.sin(ph*1.7),u=3.4;
+ const dir=side===0?1:-1,ox=side===0?272:85,age=T-BQ.t0[side],be=1-FXE.ph(age,.2,1.1),ph=T*5+side*1.3,pulse=.7+.3*Math.sin(ph*1.7),u=4,DK='#3a0c16',RD='#e8402a',OR='#ff7a2e',GD='#ffc040',BL='#bfe9ff';
  g.save();
  if(!front){
-  FXE.glow(g,x,160,74+26*be,'#a80f1c',.26+.1*pulse+.25*be);
-  buffArc(g,x,204,40+5*pulse,9,ph*.07,ph*.07+Math.PI*2,'#3a0c16',.85,u,T,1);buffArc(g,x,204,34+5*pulse,7,ph*.07+.5,ph*.07+Math.PI*1.45,'#ff3b2a',.9*pulse,u,T,1);
-  for(let i=0;i<9;i++){
-   const bx=x+(i-4)*8.5,hh=(28+bh(i,2)*22+(4-Math.abs(i-4))*4)*(.8+.4*Math.sin(T*11+i*1.7))*(1+.8*be),n=Math.max(2,Math.floor(hh/u));
-   for(let r=0;r<n;r++){const v=r/n,w=Math.max(1,Math.round((1-v)*3+(r<2?1:0))),px=bx+Math.sin(T*8+i*2+v*3.4)*v*5,yy=204-r*u;
-    buffPixel(g,px,yy,'#1e0610',.9,u,w+2,1);buffPixel(g,px,yy,v<.25?'#ffb040':v<.55?'#ff3b2a':'#b3121f',.9*(1-v*.35),u,w,1)}
+  FXE.glow(g,x,150,84+26*be,'#a80f1c',.3+.1*pulse+.25*be);
+  /* lửa cao nhọn bao quanh (đỉnh răng cưa, đen ở giữa) */
+  for(let i=0;i<13;i++){
+   const o=i-6,bx=x+o*7.2,hh=(46+(6-Math.abs(o))*9+bh(i,2)*22)*(.78+.4*Math.sin(T*11+i*1.7))*(1+.7*be),n=Math.max(2,Math.floor(hh/u));
+   for(let r=0;r<n;r++){const v=r/n,w=Math.max(1,Math.round((1-v)*2.4+(r<2?1:0))),px=bx+Math.sin(T*8+i*2+v*3.4)*v*5+o*v*3,yy=204-r*u;
+    buffPixel(g,px,yy,'#2a0710',.9,u,w+2,1);buffPixel(g,px,yy,v<.2?GD:v<.5?OR:v<.8?RD:'#a01422',.92*(1-v*.25),u,w,1);
+    if(v>.9)buffPixel(g,px,yy-u,GD,.85,u,1,1)}
   }
-  if(age<1.4){
-   const pil=[-48,-24,0,24,48];
-   for(let j=0;j<5;j++){const tb=.12+Math.abs(j-2)*.05,gr=FXE.eOut(FXE.cl((age-tb)/.18,0,1))*(1-FXE.ph(age,tb+.3,tb+.7));if(gr<=.02)continue;
-    const H=(140-Math.abs(j-2)*26)*gr,px=x+pil[j]*.9;
-    for(let t=0;t<4;t++){const w=5-t,hh=H*(1-t*.2);buffPixel(g,px,204-hh/2,t===0?'#1e0610':t===1?'#7a0f1c':t===2?'#ff3b2a':'#ffb040',.8-.1*t,u,w+(t?0:2),hh/u)}
-    buffPixel(g,px,204-H-3,'#ffe081',.9,u,2,2)}
-  }
+  if(age<1.4){const pil=[-48,-24,0,24,48];
+   for(let j=0;j<5;j++){const tb=.1+Math.abs(j-2)*.05,gr=FXE.eOut(FXE.cl((age-tb)/.18,0,1))*(1-FXE.ph(age,tb+.3,tb+.7));if(gr<=.02)continue;
+    const H=(150-Math.abs(j-2)*26)*gr,px=x+pil[j]*.9;
+    for(let t=0;t<4;t++){const w=5-t,hh=H*(1-t*.2);buffPixel(g,px,204-hh/2,t===0?'#1e0610':t===1?'#7a0f1c':t===2?RD:GD,.8-.1*t,u,w+(t?0:2),hh/u)}
+    buffPixel(g,px,204-H-3,'#ffe081',.9,u,2,2)}}
  }else{
-  for(let sd of [-1,1])for(let i=0;i<4;i++){
-   const sx=x+sd*(24+i*2),sy=140+i*9+Math.sin(ph+i)*2,ex=sx+dir*sd*(19+i*4),ey=sy-14-i*2,pts=[[sx,sy],[sx+sd*5,sy-4],[ex-sd*3,ey+3],[ex,ey]];
-   buffLine(g,pts,'#3a0c16',.92*pulse,u,3);buffLine(g,pts,i%2?'#ffb34a':'#ff2f2f',.95*pulse,u,1);
+  /* hai cánh/găng pixel lớn hai bên (ô vuông đỏ-vàng xen kẽ, dốc lên theo bậc thang) */
+  for(let sd of [-1,1]){
+   for(let r=0;r<11;r++){const w=Math.min(r+2,12-r),y0=96+r*u+Math.sin(ph+sd)*1.5;
+    for(let c=0;c<w;c++){const px=x+sd*(24+c*u+r*2.4),k=(r*2+c*3)%5,col=k===0?GD:k===1?RD:k===2?DK:k===3?'#7a0f1c':OR;
+     buffPixel(g,px,y0,DK,.95,u,1.18,1.18);buffPixel(g,px,y0,col,.96,u,1,1)}}
   }
-  const ax=x+dir*22,ay=104,sc=.85+.35*Math.sin(T*13),m=[[-1,-1],[1,-1],[1,1],[-1,1]];
-  for(const c of m){const a0=[ax+c[0]*3*sc,ay+c[1]*3*sc],pts=[[a0[0]+c[0]*7*sc,a0[1]],a0,[a0[0],a0[1]+c[1]*7*sc]];buffLine(g,pts,'#3a0c16',.95,2.6,3);buffLine(g,pts,'#ff2a2a',.98,2.6,1)}
-  for(let i=0;i<10;i++){const p=(T*.9+i*.123+bh(i,6))%1;buffPixel(g,x+(bh(i,8)-.5)*58+Math.sin(T*3+i)*6,196-p*96,i%2?'#ff3b2a':'#ffb040',(1-p)*.9,2.4,1,1)}
-  if(age>1.1){const rp=((age-1.1)%2.4)/2.4;ringPix(g,x,204,14+rp*120,3+rp*26,20,'#ff3b2a','#3a0c16',(1-rp)*.7,4)}
+  /* nền ô vuông vàng-đỏ-đen dưới chân */
+  for(let r=0;r<2;r++)for(let c=-11;c<=11;c++){const px=x+c*4,py=205+r*4,k=(c+r*3+20)%3;buffPixel(g,px,py,k===0?GD:k===1?RD:DK,.95,4,1,1)}
+  /* sét xanh trắng + đỏ nháy quanh thân */
+  const fl=Math.sin(T*23+side);
+  if(fl>-.3)for(let i=0;i<3;i++){const sd=i%2?1:-1,y1=110+i*28,pts=[[x+sd*14,y1],[x+sd*24,y1+9],[x+sd*16,y1+14],[x+sd*29,y1+26]];
+   buffLine(g,pts,'#7a0f1c',.9,3,2);buffLine(g,pts,i===1?'#ff3b2a':BL,.95,3,1)}
+  /* dấu cộng đỏ bên trên-phải (huy hiệu cuồng nộ) */
+  const cx=x+dir*34,cy=84-Math.sin(T*4)*2,cp=1+.08*Math.sin(T*9);
+  for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++){if(Math.abs(a)>1&&Math.abs(b)>1)continue;if(Math.abs(a)<=1&&Math.abs(b)<=1&&!(a===0||b===0))continue;
+   const edge=Math.abs(a)===2||Math.abs(b)===2;buffPixel(g,cx+a*4*cp,cy+b*4*cp,edge?DK:RD,.97,4,1,1)}
+  buffPixel(g,cx,cy,GD,.95,3,1,1);
+  for(let i=0;i<10;i++){const p=(T*.9+i*.123+bh(i,6))%1;buffPixel(g,x+(bh(i,8)-.5)*64+Math.sin(T*3+i)*6,196-p*110,i%2?RD:GD,(1-p)*.9,2.4,1,1)}
+  if(age>1.1){const rp=((age-1.1)%2.4)/2.4;ringPix(g,x,204,14+rp*120,3+rp*26,20,RD,DK,(1-rp)*.7,4)}
   if(age<1.3){
-   for(let i=0;i<3;i++){const w=FXE.cl((age-.08*i)/.8,0,1);if(w<=0||w>=1)continue;ringPix(g,x,204,12+w*165,3+w*38,26,i%2?'#ffb040':'#ff3b2a','#3a0c16',(1-w)*.95,4)}
-   const sa=FXE.ph(age,.12,.3);if(sa>0){const sl=FXE.seed('bq-act:'+side,age);if(FXE.once(sl,'b'))FXE.burst(FXE.rng(sl.seed^0x2b9),x,170,32,{speed:[40,170],ang:[-Math.PI*.98,-Math.PI*.02],size:[1.6,3.8],life:[.5,1.1],gy:120,drag:.45,shape:'shard',c:'#ff3b2a',c2:'#ffe081',a:.97,add:true,tag:'status',vr:[-8,8],floor:206,bounce:.2})}
+   for(let i=0;i<3;i++){const w=FXE.cl((age-.08*i)/.8,0,1);if(w<=0||w>=1)continue;ringPix(g,x,204,12+w*165,3+w*38,26,i%2?GD:RD,DK,(1-w)*.95,4)}
+   const sa=FXE.ph(age,.12,.3);if(sa>0){const sl=FXE.seed('bq-act:'+side,age);if(FXE.once(sl,'b'))FXE.burst(FXE.rng(sl.seed^0x2b9),x,170,34,{speed:[40,170],ang:[-Math.PI*.98,-Math.PI*.02],size:[1.6,3.8],life:[.5,1.1],gy:120,drag:.45,shape:'shard',c:RD,c2:'#ffe081',a:.97,add:true,tag:'status',vr:[-8,8],floor:206,bounce:.2})}
   }
   if(age<3.2){
    const fa=1-FXE.ph(age,2.2,3.2);
