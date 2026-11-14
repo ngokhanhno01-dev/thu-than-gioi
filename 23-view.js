@@ -45,6 +45,7 @@ const cache={};     /* uid -> {t, card} */
  '#cv-body .sg b{color:#f6c66a;font-size:16px!important}'+
  '#cv-body .it{margin:0 0 4px;padding:3px 6px;border:2px solid #4d533b;background:#0b1a20;font-size:16px!important;line-height:1.15}'+
  '#cv-body .it b{font-size:17px!important}'+
+ '#cv-body .it .pxi{width:26px;height:26px;vertical-align:middle;margin:-3px 2px 0 0;image-rendering:pixelated}'+
  '#cv-body .it div{font-size:15px!important;color:#d9d2b4}'+
  '#cv-body .it.no{color:#78864f;border-style:dashed;text-align:center}'+
  '#cv-body .set{margin:0 0 3px;font-size:15px!important;color:#72e4b0}'+
@@ -74,6 +75,9 @@ function statRows(st){
   return[['Sinh Lực',Math.round(g('hp'))],['Công',Math.round(g('atk'))],['Thủ',Math.round(g('def'))],['Tốc',Math.round(g('spd'))],['Pháp Công',Math.round(g('mag'))],
     ['Né tránh',r1(g('eva'))+'%'],['Chí mạng',r1(g('crit'))+'%'],['Choáng',r1(g('stun'))+'%'],['Hồi/lượt',r1(g('regen'))+'%']]}
 
+/* icon pixel của món trang bị (cùng icon với màn Trang bị); lỗi thì rơi về emoji cũ */
+function icoHtml(slot,z){
+  try{return pxImg(slot.px,ZONE_COL[z])}catch(_){return slot.i}}
 function itemHtml(it){
   if(!it||typeof it!=='object')return'<div class="it no">— Trống —</div>';
   const z=Math.floor(num(it.z,0,99,-1)),s=Math.floor(num(it.s,0,99,-1)),q=Math.floor(num(it.q,0,4,0)),e=Math.floor(num(it.e,0,10,0));
@@ -86,7 +90,7 @@ function itemHtml(it){
     if(Array.isArray(l)){k=l[0];v=l[1]}else if(l&&typeof l==='object'){k=l.k;v=l.v}else return'';
     const d=EQ_STATS[String(k)];if(!d)return'';
     return'<div>'+esc(d.n)+' +'+r1(v)+(d.t==='p'?'%':'')+'</div>'}).join('');
-  return'<div class="it" style="border-color:'+col+'"><b style="color:'+col+'">'+slot.i+' ['+QN[q]+'] '+esc(slot.n+' '+zone.name)+' +'+e+'</b>'+lines+'</div>'}
+  return'<div class="it" style="border-color:'+col+'"><b style="color:'+col+'">'+icoHtml(slot,z)+' ['+QN[q]+'] '+esc(slot.n+' '+zone.name)+' +'+e+'</b>'+lines+'</div>'}
 
 /* buff bộ: đếm số món cùng bộ (>=2 món thì có buff) */
 function setHtml(eq){
