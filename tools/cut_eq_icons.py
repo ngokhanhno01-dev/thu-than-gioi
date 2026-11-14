@@ -2,7 +2,7 @@
 - alpha chỉ 0 hoặc 255 (viền sắc), không làm mờ/feather.
 - màu điểm ảnh lấy nguyên từ ảnh gốc (không pha với nền khi thu nhỏ).
 Dùng: python3 tools/cut_eq_icons.py <bộ> <ảnh-sheet.jpg> [thư-mục-ra] [thr]
-  bộ: hac-am-lam | thien-khong | linh-hoa-vien (thêm bộ mới ở PRESETS)
+  bộ: hac-am-lam | thien-khong | linh-hoa-vien | than-dien (thêm bộ mới ở PRESETS)
 """
 import sys
 import numpy as np
@@ -21,6 +21,9 @@ PRESETS = {
     'linh-hoa-vien': dict(bg=(26, 29, 36), thr=100, min_area=12, ring_seed=(210, 990), ring_hole_thr=125,
                           regions=[('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
                                    ('vong', 0, 600, 420, 1200), ('ngoc', 420, 600, 896, 1100)]),
+    'than-dien': dict(bg=(25, 28, 35), thr=40, min_area=6, close_r=3, hole_max=400, ring_seed=(215, 1010), ring_hole_thr=125,
+                      regions=[('vukhi', 0, 0, 462, 600), ('giap', 462, 0, 896, 600),
+                               ('vong', 0, 600, 422, 1200), ('ngoc', 422, 600, 896, 1100)]),
 }
 SET, SRC = sys.argv[1], sys.argv[2]
 OUT = sys.argv[3] if len(sys.argv) > 3 else '.'
@@ -29,7 +32,8 @@ if len(sys.argv) > 4:
     P['thr'] = int(sys.argv[4])
 SIZE, MARGIN = 256, 6
 BG, THR = np.array(P['bg']), P['thr']
-CLOSE_R = 7         # đóng các khe nứt hẹp ăn vào từ mép
+CLOSE_R = P.get('close_r', 7)       # đóng các khe nứt hẹp ăn vào từ mép (nhỏ hơn = giữ chi tiết rời như chấm, vòng đứt)
+HOLE_MAX = P.get('hole_max', 10**9)  # chỉ lấp lỗ kín có diện tích <= HOLE_MAX (điểm ảnh gốc)
 MIN_AREA = P['min_area']  # giữ cả các mảnh rời (lông vũ bay, đốm sáng) có diện tích >= MIN_AREA điểm ảnh gốc
 disk = np.hypot(*np.mgrid[-9:10, -9:10]) <= 9
 close_se = np.hypot(*np.mgrid[-CLOSE_R:CLOSE_R + 1, -CLOSE_R:CLOSE_R + 1]) <= CLOSE_R
@@ -56,7 +60,13 @@ for name, x0, y0, x1, y1 in P['regions']:
     m = np.isin(lab, keep)
     pad = CLOSE_R + 2                               # đóng khe nứt (có đệm để không dính mép ảnh)
     m = ndi.binary_closing(np.pad(m, pad), structure=close_se)[pad:-pad, pad:-pad]
-    m = ndi.binary_fill_holes(m)                    # lấp MỌI lỗ kín (khe nứt/lem trắng); riêng lòng nhẫn khoét lại sau
+    holes_, hn_ = ndi.label(~m)                     # lấp lỗ kín (khe nứt/lem trắng); riêng lòng nhẫn khoét lại sau
+    if hn_:
+        hs_ = ndi.sum(~m, holes_, range(1, hn_ + 1))
+        outside_ = {holes_[0, 0], holes_[0, -1], holes_[-1, 0], holes_[-1, -1]}
+        for i_, a_ in enumerate(hs_, 1):
+            if a_ <= HOLE_MAX and i_ not in outside_:
+                m |= holes_ == i_
     if name == 'vong':                              # lòng nhẫn nối với ngoài qua vài điểm viền mỏng
         low = np.zeros_like(fg); low[y0:y1, x0:x1] = (dd <= P['ring_hole_thr'])[y0:y1, x0:x1]
         core = ndi.binary_opening(low, structure=disk)     # mở để cắt cầu nối, lấy khối chứa tâm lòng, nở lại
