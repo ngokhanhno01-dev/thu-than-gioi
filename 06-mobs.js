@@ -2237,7 +2237,7 @@ function battle(e){return new Promise(resolve=>{busy=true;const SP=BSPD;const o=
   if(mf>0)tintDraw(g,c=>drawM(c,e.m,272,208,e.m.boss?6:7,tt,dmx,1,e.tr,true),'#ffffff',1,mf);
   if(window.TTGCombatFX){try{TTGCombatFX.drawField(g,tt,(T0-t0)/1000,e.m.zone,R,shp,shm,hp,mh,pet.sp,CD);if(CD>0&&T<CD+.7)TTGCombatFX.drawCountdown(g,T,CD,CD/CDN,CDN)}catch(_){}}
   if(FXS.on&&FXS.miss&&window.TTGCombatFX&&TTGCombatFX.drawDodge){try{TTGCombatFX.drawDodge(g,FXS.u,FXS.pa,tt)}catch(_){}}/* [FX 2A sửa] bụi khi né */
-  if(fx)impact(g,fx,tt);try{fxDraw(g,tt,dp,dmx)}catch(_){}/* [FX đợt 2] lỗi hiệu ứng không được làm đứng trận */g.restore();
+  if(fx)impact(g,fx,tt);if(fx&&window.TTGEvBanner){try{TTGEvBanner(g,fx)}catch(_){}}/* [FX 4A] nhãn tên sự kiện bộ trang bị */try{fxDraw(g,tt,dp,dmx)}catch(_){}/* [FX đợt 2] lỗi hiệu ứng không được làm đứng trận */g.restore();
   if(sf>0){g.save();g.globalAlpha=sf;g.fillStyle='#ffffff';g.fillRect(0,0,360,250);g.restore()}
   if(FXS.on&&FXS.cr&&!FXS.miss){try{fxTop(g,FXS.u,REDM)}catch(_){}}/* [FX đợt 2] vignette + chữ CHÍ MẠNG */
   if(fl){g.save();g.globalAlpha=Math.min(1,2.2-fl.q*1.6);g.textAlign='center';
