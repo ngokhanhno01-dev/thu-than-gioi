@@ -7,8 +7,8 @@ Trả lời tiếng Việt, ngắn gọn. Xong mỗi bộ: báo + gửi ảnh ch
 ## Tiến độ
 | # | Bộ | Trạng thái | Ảnh mẫu |
 |---|----|-----------|---------|
-| 0 | frost (băng) | XONG bản đầu, chờ người dùng duyệt | tools/ref-gear/tuyet-nguyen.jpg |
-| 1 | mist (sương) | CHƯA | tools/ref-gear/suong-coc.jpg |
+| 0 | frost (băng) | XONG (người dùng đã bảo làm tiếp) | tools/ref-gear/tuyet-nguyen.jpg |
+| 1 | mist (sương) | XONG bản đầu, chờ người dùng duyệt | tools/ref-gear/suong-coc.jpg |
 | 2 | cloud (mây) | CHƯA | tools/ref-gear/van-dao.jpg |
 | 3 | wind (gió) | CHƯA | tools/ref-gear/phong-nguyen.jpg |
 | 4 | thunder (sấm) | CHƯA | tools/ref-gear/loi-vuc.jpg |

@@ -185,4 +185,80 @@
    sparks(g,E,x,P,T,al,16,125);
   }finally{g.restore()}
  };
+
+ /* ================= BỘ 1 — MIST (sương): ảnh mẫu Sương Cốc ================= */
+ const MIST={deep:'#22857f',main:'#4fd0bd',light:'#a6efdc',core:'#effffb'};
+ /* giọt nước bóng (tròn hoặc giọt lê) */
+ function bead(g,E,x,y,r,a,drop){
+  if(a<=.02||r<1)return;g.save();
+  g.globalAlpha=Math.min(1,a);
+  const gr=g.createRadialGradient(x-r*.3,y-r*.35,r*.1,x,y,r);
+  gr.addColorStop(0,'#d8fffa');gr.addColorStop(.45,'#4fd0e0');gr.addColorStop(1,'#1c7f95');
+  g.fillStyle=gr;g.beginPath();
+  if(drop){g.moveTo(x,y-r*1.7);g.bezierCurveTo(x+r*.2,y-r*.8,x+r,y-r*.4,x+r,y+r*.1);g.arc(x,y+r*.1,r,0,Math.PI);g.bezierCurveTo(x-r,y-r*.4,x-r*.2,y-r*.8,x,y-r*1.7)}
+  else g.arc(x,y,r,0,TAU);
+  g.fill();g.lineWidth=Math.max(.6,r*.18);g.strokeStyle='rgba(18,96,120,.75)';g.stroke();
+  g.globalCompositeOperation='lighter';g.fillStyle='rgba(255,255,255,.95)';
+  g.beginPath();g.arc(x-r*.32,y-r*.38,Math.max(.6,r*.26),0,TAU);g.fill();
+  g.restore();E.glow(g,x,y,r*2,'#6fe6e0',.16*a);
+ }
+ /* vòng xoáy mây (xoắn ốc) */
+ function curl(g,E,x,y,r,rot,col,a,w){
+  g.save();g.globalCompositeOperation='lighter';g.lineCap='round';
+  for(let pass=0;pass<2;pass++){
+   g.strokeStyle=E.rgba(pass?'#ffffff':col,(pass?.55:.3)*a);g.lineWidth=pass?w*.4:w;g.beginPath();
+   for(let i=0;i<=40;i++){const t=i/40,an=rot+t*TAU*1.9,rr=r*t,X=x+Math.cos(an)*rr*1.25,Y=y+Math.sin(an)*rr*.8;i?g.lineTo(X,Y):g.moveTo(X,Y)}
+   g.stroke();
+  }
+  g.restore();
+ }
+ function crescent(g,E,x,y,r,rot,col,a){
+  if(a<=.02)return;g.save();g.translate(x,y);g.rotate(rot);g.globalCompositeOperation='lighter';g.fillStyle=E.rgba(col,a);
+  g.beginPath();g.arc(0,0,r,-1.1,1.1);g.arc(r*.35,0,r*.82,1.0,-1.0,true);g.closePath();g.fill();g.restore();
+ }
+ function gem(g,E,x,y,s,a,col){
+  g.save();g.globalCompositeOperation='lighter';g.fillStyle=E.rgba(col,a);g.strokeStyle=E.rgba('#ffffff',.8*a);g.lineWidth=.6;
+  g.beginPath();g.moveTo(x,y-s*1.4);g.lineTo(x+s,y);g.lineTo(x,y+s*1.4);g.lineTo(x-s,y);g.closePath();g.fill();g.stroke();g.restore();
+ }
+ REG.mist=function(g,x,q,T,e,E){
+  const P=MIST,{a,al}=level(q,T,1),grow=e==null?1:cl(e/.7,0,1);
+  g.save();
+  try{
+   halo(g,E,x,P,T,al,a,q);
+   /* bãi sương rộng phía sau: nhiều khối mềm trôi chậm */
+   for(let k=0;k<18;k++){
+    const side=hash(k*1.7)*2-1,px=x+side*(70+16*Math.abs(side)+10*Math.sin(T*.3+k))+Math.sin(T*.35+k*1.9)*8,
+     py=GY-2-hash(k+5)*38*grow,rx=30+hash(k+9)*26,ry=12+hash(k+13)*13;
+    E.blob(g,px,py,rx,ry,k%3?P.main:P.light,(.42+.18*hash(k))*al,T*.5,k*17,{wob:.4,speed:1.1,core:P.light});
+    if(k%3===0)E.blob(g,px,py+3,rx*.7,ry*.6,P.deep,.14*al,T*.4,k*5,{wob:.3,speed:.9,core:P.deep});
+   }
+   /* vòng sương thấp quay quanh trận pháp (nhiều lớp) */
+   swirl(g,E,x,P,T,al*.85,{n:5,H:46,R:66,turns:.9,spin:.7,wmax:13,ph:1.1});
+   circle(g,E,x,P,T,al,{r:58,ph:1.3,cracks:false,runeDir:-1});
+   swirl(g,E,x,P,T,al*.7,{n:4,H:62,R:50,turns:.8,spin:-.9,wmax:11,ph:.2});
+   /* vòng xoáy mây ở hai đầu bãi sương */
+   for(let k=0;k<5;k++){
+    const side=k%2?1:-1,cx=x+side*(62+k*7)+Math.sin(T*.4+k)*4,cy=GY-10-(k%3)*9;
+    curl(g,E,cx,cy,13+hash(k)*7,T*.5*side+k,P.light,al,2.4);
+   }
+   /* tinh thể nhỏ thành cụm */
+   for(let k=0;k<4;k++){
+    const side=k%2?1:-1,cx=x+side*(70+hash(k)*22),cy=GY-46-hash(k+2)*50;
+    for(let j=0;j<5;j++){const ox=(hash(k*5+j)-.5)*14,oy=(hash(k*7+j)-.5)*12,tw=.55+.45*Math.sin(T*2.4+k*2+j);gem(g,E,cx+ox,cy+oy,1.2+hash(j+k)*1.4,al*tw,j%2?P.light:'#7fe9f2')}
+   }
+   /* giọt nước nổi lên */
+   for(let k=0;k<26;k++){
+    const sp=.05+hash(k*2.2)*.06,p=(T*sp+hash(k*3.9))%1,side=hash(k*1.3)*2-1,
+     bx=x+side*(18+70*Math.abs(side))+Math.sin(T*1.1+k*2.1)*5,by=GY-10-p*128,
+     r=1.6+hash(k+4)*3.8,fa=Math.pow(Math.sin(Math.PI*p),.6)*al*1.05;
+    bead(g,E,bx,by,r,fa,k%4===0);
+   }
+   /* vệt trăng khuyết trắng xanh + lấp lánh */
+   for(let k=0;k<4;k++){
+    const p=(T*.07+k*.25)%1,side=k%2?1:-1;
+    crescent(g,E,x+side*(54+k*6)+Math.sin(T+k)*3,GY-24-p*84,7+k%2*3,side*.9+Math.sin(T*.7+k)*.4,'#cfeff2',Math.sin(Math.PI*p)*.7*al);
+   }
+   sparks(g,E,x,P,T,al,16,120);
+  }finally{g.restore()}
+ };
 })();
