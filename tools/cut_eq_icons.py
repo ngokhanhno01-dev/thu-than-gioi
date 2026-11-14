@@ -10,12 +10,12 @@ from PIL import Image
 from scipy import ndimage as ndi
 
 # bg: màu nền; thr: ngưỡng cách nền (> thr là điểm ảnh icon); regions: (tên,x0,y0,x1,y1);
-# ring_seed: (x,y) một điểm trong lòng nhẫn; ring_hole_thr: ngưỡng riêng khoét lòng nhẫn
+# min_area: giữ mảnh rời >= ngần này điểm ảnh (10**9 = chỉ giữ khối lớn nhất); ring_seed: (x,y) một điểm trong lòng nhẫn; ring_hole_thr: ngưỡng riêng khoét lòng nhẫn
 PRESETS = {
-    'hac-am-lam': dict(bg=(21, 26, 30), thr=40, ring_seed=(215, 900), ring_hole_thr=125,
+    'hac-am-lam': dict(bg=(21, 26, 30), thr=40, min_area=10**9, ring_seed=(215, 900), ring_hole_thr=125,
                        regions=[('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
                                 ('vong', 0, 600, 440, 1200), ('ngoc', 440, 600, 896, 1100)]),
-    'thien-khong': dict(bg=(25, 28, 35), thr=100, ring_seed=(224, 980), ring_hole_thr=125,
+    'thien-khong': dict(bg=(25, 28, 35), thr=100, min_area=12, ring_seed=(224, 980), ring_hole_thr=125,
                         regions=[('vukhi', 0, 0, 456, 600), ('giap', 456, 0, 896, 600),
                                  ('vong', 0, 600, 405, 1200), ('ngoc', 405, 600, 896, 1100)]),
 }
@@ -27,6 +27,7 @@ if len(sys.argv) > 4:
 SIZE, MARGIN = 256, 6
 BG, THR = np.array(P['bg']), P['thr']
 CLOSE_R = 7         # đóng các khe nứt hẹp ăn vào từ mép
+MIN_AREA = P['min_area']  # giữ cả các mảnh rời (lông vũ bay, đốm sáng) có diện tích >= MIN_AREA điểm ảnh gốc
 disk = np.hypot(*np.mgrid[-9:10, -9:10]) <= 9
 close_se = np.hypot(*np.mgrid[-CLOSE_R:CLOSE_R + 1, -CLOSE_R:CLOSE_R + 1]) <= CLOSE_R
 
@@ -40,7 +41,16 @@ for name, x0, y0, x1, y1 in P['regions']:
     reg[y0:y1, x0:x1] = fg[y0:y1, x0:x1]
     lab, n = ndi.label(reg)
     sizes = ndi.sum(reg, lab, range(1, n + 1))
-    m = lab == (1 + int(np.argmax(sizes)))          # chỉ giữ khối lớn nhất (bỏ nhiễu / dấu sao)
+    main = 1 + int(np.argmax(sizes))
+    keep = [main]                                   # khối lớn nhất + các mảnh rời đủ lớn (lông vũ, đốm sáng)
+    for i, sz in enumerate(sizes, 1):
+        if i == main or sz < MIN_AREA:
+            continue
+        ys_, xs_ = np.where(lab == i)               # bỏ mảnh chạm đường chia vùng (là rìa quầng của icon bên cạnh)
+        if (xs_.min() <= x0 and x0 > 0) or (xs_.max() >= x1 - 1 and x1 < W) or (ys_.min() <= y0 and y0 > 0) or (ys_.max() >= y1 - 1 and y1 < H):
+            continue
+        keep.append(i)
+    m = np.isin(lab, keep)
     pad = CLOSE_R + 2                               # đóng khe nứt (có đệm để không dính mép ảnh)
     m = ndi.binary_closing(np.pad(m, pad), structure=close_se)[pad:-pad, pad:-pad]
     m = ndi.binary_fill_holes(m)                    # lấp MỌI lỗ kín (khe nứt/lem trắng); riêng lòng nhẫn khoét lại sau
