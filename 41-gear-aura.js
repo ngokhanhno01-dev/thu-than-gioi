@@ -1007,4 +1007,115 @@
    sparks(g,E,x,P,T,al,14,125);
   }finally{g.restore()}
  };
+
+ /* ================= BỘ 10 — VÙNG THANH LÂM (key kỹ thuật 'grove'): màu vùng #8be04a, tự thiết kế, KHÔNG vẽ một cái cây/khiên đơn lẻ =================
+    Hiệu ứng khi mặc đủ bộ 4 món của vùng. Nét riêng theo vùng (khu rừng cổ thụ, sinh khí xanh lục):
+    tán lá toả tia mờ sau lưng, rễ cây cổ thụ có gân rêu mọc quanh trận pháp, nấm phát sáng, lá lớn xoáy quanh thú,
+    sương rừng mờ, đom đóm lập loè; lúc vào trận rễ trồi lên + tán lá bừng sáng + lá bắn toả ra. */
+ const GROVE={deep:'#2a6a14',main:'#8be04a',light:'#c8f58c',core:'#f5ffe0'};
+ const BARK='#4a3516';
+ /* tán lá mờ sau lưng: vòng lá thon toả ra từ tâm sáng, mỗi lá có gân sáng */
+ function canopy(g,E,x,y,r,P,T,al){
+  if(al<=.02||r<2)return;
+  E.glow(g,x,y,r*1.5,P.main,.3*al,P.light);
+  g.save();g.translate(x,y);g.globalCompositeOperation='lighter';g.lineJoin='round';g.lineCap='round';
+  const N=14,rot=Math.sin(T*.3)*.12;
+  for(let i=0;i<N;i++){
+   const an=rot+i/N*TAU,ca=Math.cos(an),sa=Math.sin(an),L=r*(1.35+.3*hash(i*2.7+1)+.05*Math.sin(T*1.7+i*1.9)),r0=r*.35,hw=r*.2,
+    mx=ca*(r0+L)*.5,my=sa*(r0+L)*.5,px=-sa*hw,py=ca*hw;
+   g.fillStyle=E.rgba(i%2?P.main:P.light,.4*al);
+   g.beginPath();g.moveTo(ca*r0,sa*r0);g.quadraticCurveTo(mx+px*1.4,my+py*1.4,ca*L,sa*L);g.quadraticCurveTo(mx-px*1.4,my-py*1.4,ca*r0,sa*r0);g.closePath();g.fill();
+   g.strokeStyle=E.rgba(P.core,.5*al);g.lineWidth=1.1;g.beginPath();g.moveTo(ca*r0,sa*r0);g.lineTo(ca*L*.9,sa*L*.9);g.stroke();
+  }
+  g.restore();
+ }
+ /* rễ cây cổ thụ: thân vỏ nâu tối + dải rêu xanh + gân sáng, đung đưa nhẹ, nhú lá non ở giữa và đầu rễ */
+ function rootv(g,E,x0,y0,h,lean,T,k,P,al){
+  if(al<=.02||h<3)return;const pts=[],m=14;
+  for(let j=0;j<m;j++){const t=j/(m-1),sw=Math.sin(T*.9+k*1.9-t*3)*(2+4*t)+Math.sin(t*7+k)*2.5*(1-t*.4);pts.push([x0+lean*t*t+sw,y0-h*t])}
+  E.ribbon(g,pts,q=>Math.max(2,15*(1-q*.75)+2),BARK,al*.97,{add:false,core:BARK});
+  E.ribbon(g,pts.slice(1),q=>Math.max(1.6,8*(1-q*.75)+1.4),P.deep,al*.98,{add:false,core:P.main});
+  E.ribbon(g,pts.slice(2),q=>Math.max(1.2,3.2*(1-q)+1.2),P.main,al*.95,{core:P.light});
+  const mid=pts[7],tp=pts[m-1];
+  leaf(g,E,mid[0]+3,mid[1],5.2,-.6+Math.sin(T*1.3+k)*.15,T*1.5+k,'#4fa028',al);
+  leaf(g,E,tp[0],tp[1]-2,6,-1.45+Math.sin(T*1.1+k)*.2,T*1.7+k*2,'#9be34f',al);
+  E.glow(g,tp[0],tp[1],5,P.light,.35*al*(.7+.3*Math.sin(T*2.6+k)));
+ }
+ /* nấm phát sáng: thân trắng xanh, mũ xanh lục có đốm sáng nhấp nháy */
+ function shroom(g,E,x,y,s,k,P,T,al){
+  if(al<=.02||s<1)return;
+  const pu=.7+.3*Math.sin(T*2+k*1.7);
+  E.glow(g,x,y-s*.9,s*2.3,P.main,.28*al*pu,P.light);
+  g.save();
+  g.fillStyle=E.rgba('#dfeec0',.96*al);g.fillRect(x-s*.28,y-s*1.15,s*.56,s*1.15);
+  g.fillStyle=E.rgba(P.deep,.98*al);g.beginPath();g.ellipse(x,y-s*1.1,s,s*.72,0,Math.PI,TAU);g.closePath();g.fill();
+  g.fillStyle=E.rgba(P.main,.96*al);g.beginPath();g.ellipse(x,y-s*1.1,s*.82,s*.56,0,Math.PI,TAU);g.closePath();g.fill();
+  g.globalCompositeOperation='lighter';g.fillStyle=E.rgba(P.core,.95*al*pu);
+  g.beginPath();g.arc(x-s*.32,y-s*1.5,Math.max(.9,s*.17),0,TAU);g.fill();
+  g.beginPath();g.arc(x+s*.28,y-s*1.38,Math.max(.8,s*.13),0,TAU);g.fill();
+  g.restore();
+ }
+ REG.grove=function(g,x,q,T,e,E){
+  const P=GROVE,{a,al}=level(q,T,10),grow=e==null?1:cl(e/.6,0,1),gk=easeBack(grow);
+  g.save();
+  try{
+   halo(g,E,x,P,T,al,a,q);
+   /* tán lá mờ sau lưng thú */
+   canopy(g,E,x,GY-84,42*(.96+.04*Math.sin(T*1.9)),P,T,al*1.05);
+   circle(g,E,x,P,T,al,{r:58,ph:10.7,runeDir:1});
+   /* sương rừng xanh nhạt sát đất (bán trong suốt) */
+   for(let k=0;k<7;k++){
+    const side=hash(k*1.9+7)*2-1,px=x+side*(58+10*Math.abs(side))+Math.sin(T*.4+k*1.7)*6,py=GY-2-hash(k+5)*20*grow,rx=22+hash(k+9)*16,ry=8+hash(k+13)*8;
+    E.blob(g,px,py,rx,ry,k%2?P.light:P.main,.2*al,T*.5,k*29,{wob:.35,speed:1,core:P.light});
+   }
+   /* rễ cổ thụ + nấm: hai bên và phía sau trận pháp (không che cung trước) */
+   const it=[];
+   for(let side=-1;side<=1;side+=2){
+    for(let k=0;k<4;k++){
+     const t=k/3,ang0=-.3+t*1.75,ang=(side<0?Math.PI+ang0:-ang0)+(hash(k+side*7+17)-.5)*.2,rp=58*(.97+hash(k*2+side+8)*.12),p=gp(x,ang,rp),
+      sd=Math.abs(Math.cos(ang)),h=(36+hash(k*3+side*5+6)*40)*(.55+.75*sd);
+     it.push({t:'r',x:p[0],y:p[1],h,lean:-side*(h*.3+hash(k+9)*8)+(p[0]-x)*.15,k:k+side*20});
+    }
+    for(let k=0;k<2;k++){
+     const an=side>0?-.45+hash(k*3.1+side+2)*1.3:Math.PI-(-.45+hash(k*3.1+side+2)*1.3),rp=68+hash(k+side*3+5)*8,p=gp(x,an,rp);
+     it.push({t:'m',x:p[0],y:p[1],s:11+hash(k*2+side*9+3)*4,k:k*3+side*7+60});
+    }
+   }
+   it.sort((u,v)=>u.y-v.y);
+   const dI=o=>{if(o.t==='r')rootv(g,E,o.x,o.y,o.h*gk,o.lean,T,o.k,P,al);else shroom(g,E,o.x,o.y,o.s*gk,o.k,P,T,al)};
+   it.filter(o=>o.y<GY).forEach(dI);
+   swirl(g,E,x,P,T,al,{n:6,H:112,R:50,turns:.8,spin:1.15,wmax:15,ph:.6});
+   swirl(g,E,x,P,T,al*.7,{n:3,H:92,R:60,turns:.7,spin:-.85,wmax:10,ph:2.4});
+   it.filter(o=>o.y>=GY).forEach(dI);
+   /* lá lớn xoáy quanh thú (vàng-lục, khác lá bạc hà của Phong Nguyên) */
+   for(let k=0;k<12;k++){
+    const sp=.04+hash(k*2.1+3)*.04,p=(T*sp+hash(k*5.7+2))%1,an=T*(.7+hash(k+1)*.5)*(k%2?1:-1)+k*1.9,rad=36+hash(k+4)*28+p*8;
+    leaf(g,E,x+Math.cos(an)*rad,GY-8-p*124+Math.sin(an)*rad*.3,7.5+hash(k+8)*4,an*.7+k,T*(1.6+hash(k+2)*1.6)+k,k%3?'#4fa028':'#9be34f',Math.sin(Math.PI*p)*al*1.1);
+   }
+   /* đom đóm rừng lập loè */
+   for(let k=0;k<12;k++){
+    const px=x+(hash(k*4.7+1)*2-1)*70+Math.sin(T*.7+k*2.1)*9,py=GY-18-hash(k*3.3+2)*104+Math.sin(T*.9+k*1.3)*8,
+     bl=Math.pow(Math.max(0,Math.sin(T*1.8+k*2.3)),2)*al;
+    E.glow(g,px,py,4.2,'#eaffa0',.7*bl);
+    g.save();g.globalCompositeOperation='lighter';g.fillStyle=E.rgba(P.core,.95*bl);g.fillRect(px-1.1,py-1.1,2.2,2.2);g.restore();
+   }
+   /* lúc vào trận: tán lá bừng sáng + lá bắn toả hình quạt */
+   if(a>0&&e!=null&&e<1){
+    const k=cl(e,0,1);
+    canopy(g,E,x,GY-84,42+30*k,P,T,a*(1-k)*.9);
+    for(let j=0;j<8;j++){
+     const an=-Math.PI/2+(j-3.5)*.4,d=8+k*76;
+     leaf(g,E,x+Math.cos(an)*d,GY-34+Math.sin(an)*d,6.5,an+k*3,k*9+j,'#9be34f',a*(1-k));
+    }
+   }
+   /* bào tử xanh bốc lên */
+   g.save();g.globalCompositeOperation='lighter';
+   for(let k=0;k<16;k++){
+    const p=(T*(.06+hash(k)*.06)+hash(k*3.1))%1,px=x+(hash(k*5.3)*2-1)*68+Math.sin(T*1.4+k*1.7)*5,py=GY-6-p*124;
+    g.fillStyle=E.rgba(k%3?P.light:P.main,Math.sin(Math.PI*p)*.9*al);g.fillRect(px-1,py-1,2.4,2.4);
+   }
+   g.restore();
+   sparks(g,E,x,P,T,al,12,125);
+  }finally{g.restore()}
+ };
 })();
