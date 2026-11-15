@@ -48,9 +48,9 @@ function rollDrops(e,bonus){
 const POTION_TURNS=20;                         /* mỗi bình dùng được bao nhiêu trận THẮNG (thua hoặc chạy trốn không tính) */
 const BUFF_MUL={exp:2,xu:2,drop:2};            /* hệ số nhân — sửa tại đây */
 const POTIONS=[
- {id:'bt_exp', buff:'exp', n:'Bình Tụ Linh Dịch', i:'🧪', d:'×'+BUFF_MUL.exp+' EXP trong '+POTION_TURNS+' trận thắng.', price:600},
- {id:'bt_xu',  buff:'xu',  n:'Bình Kim Phú Dịch', i:'🏺', d:'×'+BUFF_MUL.xu+' xu thưởng trong '+POTION_TURNS+' trận thắng.', price:500},
- {id:'bt_drop',buff:'drop',n:'Bình Thiên Cơ Dịch',i:'⚗️', d:'×'+BUFF_MUL.drop+' tỉ lệ rơi vật phẩm trong '+POTION_TURNS+' trận thắng.', price:800}
+ {id:'bt_exp', buff:'exp', n:'x'+BUFF_MUL.exp+' EXP', e:'🧪', i:'<img class="pxi eqimg" alt="" src="img-item-bt-exp.webp">', d:'×'+BUFF_MUL.exp+' EXP trong '+POTION_TURNS+' trận thắng.', price:600},
+ {id:'bt_xu',  buff:'xu',  n:'x'+BUFF_MUL.xu+' Xu', e:'🏺', i:'<img class="pxi eqimg" alt="" src="img-item-bt-xu.webp">', d:'×'+BUFF_MUL.xu+' xu thưởng trong '+POTION_TURNS+' trận thắng.', price:500},
+ {id:'bt_drop',buff:'drop',n:'x'+BUFF_MUL.drop+' Tỉ lệ rơi đồ', e:'⚗️', i:'<img class="pxi eqimg" alt="" src="img-item-bt-drop.webp">', d:'×'+BUFF_MUL.drop+' tỉ lệ rơi vật phẩm trong '+POTION_TURNS+' trận thắng.', price:800}
 ];
 const buffs={exp:0,xu:0,drop:0};
 const BUFF_NAME={exp:'EXP',xu:'Xu',drop:'Tỉ lệ rơi'};
@@ -61,7 +61,7 @@ function buffLine(){
  const o=Object.keys(buffs).filter(k=>buffs[k]>0).map(k=>BUFF_NAME[k]+' ×'+BUFF_MUL[k]+' ('+buffs[k]+' trận thắng)');
  return o.length?o.join(' · '):'Chưa có thuốc nào đang dùng'}
 for(const P of POTIONS){
- ITEMS[P.id]={n:P.n,i:P.i,d:P.d,use:()=>{buffs[P.buff]+=POTION_TURNS;log('🧪 Dùng <b>'+P.n+'</b>: '+BUFF_NAME[P.buff]+' ×'+BUFF_MUL[P.buff]+', còn <b>'+buffs[P.buff]+'</b> trận thắng.');
+ ITEMS[P.id]={n:P.n,i:P.i,e:P.e,d:P.d,use:()=>{buffs[P.buff]+=POTION_TURNS;log('🧪 Dùng <b>'+P.n+'</b>: '+BUFF_NAME[P.buff]+' ×'+BUFF_MUL[P.buff]+', còn <b>'+buffs[P.buff]+'</b> trận thắng.');
   popToast('🧪 ĐÃ DÙNG THUỐC',P.i+' <b>'+P.n+'</b><br>'+BUFF_NAME[P.buff]+' ×'+BUFF_MUL[P.buff]+' · còn <b>'+buffs[P.buff]+'</b> trận thắng','ok')}};
  SELL_PRICE[P.id]=Math.round(P.price/4)}
 
