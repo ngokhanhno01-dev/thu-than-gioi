@@ -227,6 +227,84 @@
           ".validate": false
         }
       }
+    },
+    "dungeon": {
+      "rooms": {
+        "$rid": {
+          ".read": "auth != null && $rid.matches(/^[A-Z0-9]{5}$/)",
+          ".write": "auth != null && $rid.matches(/^[A-Z0-9]{5}$/) && !root.child('banned').child(auth.uid).exists() && ((!data.exists() && newData.child('host').val() === auth.uid) || (data.exists() && data.child('host').val() === auth.uid))",
+          ".validate": "newData.hasChildren(['host', 'hostName', 'zone', 'rank', 'st', 't'])",
+          "host": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "hostName": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+          },
+          "zone": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 16"
+          },
+          "rank": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+          },
+          "st": {
+            ".validate": "newData.val() === 'lobby' || newData.val() === 'fight' || newData.val() === 'done'"
+          },
+          "t": {
+            ".validate": "newData.val() === now"
+          },
+          "m": {
+            "$uid": {
+              ".write": "auth != null && !root.child('banned').child(auth.uid).exists() && ((auth.uid === $uid && (!newData.exists() || root.child('dungeon').child('rooms').child($rid).child('st').val() === 'lobby')) || (!newData.exists() && root.child('dungeon').child('rooms').child($rid).child('host').val() === auth.uid))",
+              ".validate": "newData.hasChildren(['name', 'lv', 'sp', 'bl', 'pi'])",
+              "name": {
+                ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+              },
+              "lv": {
+                ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100"
+              },
+              "sp": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 16"
+              },
+              "bl": {
+                ".validate": "newData.isString() && (newData.val() === 'ho' || newData.val() === 'vu' || newData.val() === 'long' || newData.val() === 'tuoc' || newData.val() === 'lan' || newData.val() === 'hu')"
+              },
+              "pi": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 4"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      },
+      "inv": {
+        "$to": {
+          ".read": "auth != null && auth.uid === $to",
+          "$rid": {
+            ".write": "auth != null && !root.child('banned').child(auth.uid).exists() && $rid.matches(/^[A-Z0-9]{5}$/) && ((auth.uid === $to && !newData.exists()) || (newData.exists() && root.child('dungeon').child('rooms').child($rid).child('host').val() === auth.uid && (!data.exists() || data.child('t').val() < now - 600000)))",
+            ".validate": "newData.hasChildren(['from', 'z', 'k', 't'])",
+            "from": {
+              ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 20"
+            },
+            "z": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 16"
+            },
+            "k": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 2"
+            },
+            "t": {
+              ".validate": "newData.val() === now"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
     }
   }
 }

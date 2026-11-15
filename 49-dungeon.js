@@ -1,5 +1,5 @@
-/* ===== 49-dungeon.js — PHÓ BẢN NHÓM · BƯỚC 1: LẬP NHÓM (tối đa 5 người) [v3] =====
-   Nút "🏰 Phó bản nhóm" nằm ngay dưới hàng Thám hiểm / Đấu trường / Cửa hàng. Bấm mở khung Phó bản:
+/* ===== 49-dungeon.js — PHÓ BẢN NHÓM · BƯỚC 1: LẬP NHÓM (tối đa 5 người) =====
+   Nút "🏰" nằm trên hàng trên cùng (cạnh "👥"). Bấm mở khung Phó bản:
      - Tạo phòng: chọn vùng (boss của vùng đó) + độ khó (Trấn Thủ / Chúa Tể / Thiên Ma) -> được MÃ PHÒNG 5 ký tự.
      - Vào phòng: nhập mã phòng, hoặc bấm ✔ ở "Lời mời" do bạn bè gửi.
      - Trưởng nhóm mời bạn trong danh sách 👥 Bạn bè, mời người ra khỏi phòng (✖), hoặc giải tán phòng. Tối đa 5 người kể cả trưởng nhóm.
@@ -8,8 +8,6 @@
      dungeon/rooms/{MÃ}     = {host, hostName, zone, rank, st:'lobby', t, m:{ uid:{name,lv,sp,bl,pi} }}
      dungeon/inv/{uid}/{MÃ} = {from, z, k, t}   lời mời gửi tới uid (chỉ người nhận đọc được)
    Tự dọn: đóng game / mất mạng thì thành viên tự rời phòng; trưởng nhóm mất mạng thì phòng tự đóng (onDisconnect).
-   Lưu ý: onDisconnect phải đăng ký SAU khi phòng đã được tạo (luật chỉ cho xóa phòng đã tồn tại của chính host).
-   v3: khi Firebase từ chối, bảng báo rõ bước nào bị chặn (đọc phòng / tạo phòng / đăng ký tự đóng) kèm mã [v3] để biết bản mới đã nạp.
    Không sửa file cũ: bọc TTGNET.start/setName của 20-online.js như 21-card.js / 22-friends.js.
    Nạp SAU 22-friends.js và 26-arena.js, TRƯỚC 19-save.js. Luật cần dán: RTDB_RULES_FINAL.json (mục "dungeon"). */
 (()=>{
@@ -47,7 +45,7 @@ const pName=pi=>{try{return PL[Math.max(0,Math.min(4,Math.floor(pi)))][1]}catch(
 /* ---------- CSS ---------- */
 {const s=document.createElement('style');
  s.textContent=
- '#dg-btn{position:relative;margin-top:6px}'+
+ '#dg-btn{position:relative}'+
  '#dg-btn b{display:none;position:absolute;top:-9px;right:-9px;min-width:18px;padding:0 4px;font-size:14px!important;line-height:18px;text-align:center;color:#fff;background:#e34e48;border:2px solid #040a0e}'+
  '#dg-btn.has b{display:block}'+
  '#dg-panel{position:fixed;left:50%;transform:translateX(-50%);top:calc(48px + env(safe-area-inset-top,0px));z-index:91;width:min(94vw,340px);max-height:min(76vh,520px);display:none;flex-direction:column;box-sizing:border-box;border:3px solid #f6c66a;background-color:#14272d;background-image:repeating-conic-gradient(#1a3335 0 25%,#12262e 0 50%);background-size:4px 4px;box-shadow:0 3px 0 0 #040a0e,0 0 0 2px #040a0e,inset 0 0 0 2px #78613a;color:#f5edcf}'+
@@ -80,12 +78,10 @@ const pName=pi=>{try{return PL[Math.max(0,Math.min(4,Math.floor(pi)))][1]}catch(
 /* ---------- Khung giao diện ---------- */
 function buildUI(){
   if($('dg-panel'))return;
-  /* nút "🏰 Phó bản nhóm": chèn ngay dưới hàng Thám hiểm / Đấu trường / Cửa hàng */
-  const sm=$('s-main'),grid=sm&&sm.querySelector('.grid');
-  if(grid&&grid.parentNode){
-    const b=document.createElement('button');b.type='button';b.className='jade';b.id='dg-btn';b.title='Phó bản nhóm: cùng bạn bè (tối đa 5 người) đánh boss';
-    b.innerHTML='<span class="ic">🏰</span>Phó bản nhóm<b></b>';
-    grid.parentNode.insertBefore(b,grid.nextSibling);
+  const box=$('ol-top');
+  if(box){
+    const b=document.createElement('button');b.type='button';b.className='ol-pill';b.id='dg-btn';b.title='Phó bản nhóm';b.innerHTML='🏰<b></b>';
+    const fs=$('ol-fs');box.insertBefore(b,fs&&fs.parentNode===box?fs:null);
     b.onclick=()=>toggle();
   }
   const p=document.createElement('div');p.id='dg-panel';
@@ -180,9 +176,7 @@ function onClick(e){
   else if(a==='openfr'){toggle(false);try{TTGFRIENDS.open()}catch(_){}}}
 
 const isPerm=e=>/permission/i.test(String((e&&(e.code||e.message))||e));
-const errTxt=(e,step)=>isPerm(e)
-  ?'[v3] Firebase từ chối'+(step?' ở bước "'+step+'"':'')+'. Có thể luật "dungeon" chưa được Publish đúng trên Firebase.'
-  :'[v3] Lỗi'+(step?' ở bước "'+step+'"':'')+': '+String((e&&(e.code||e.message))||e).slice(0,70);
+const errTxt=e=>isPerm(e)?'Không được phép (phòng đầy/đã bắt đầu, hoặc chưa dán luật "dungeon" trên Firebase).':'Lỗi mạng, thử lại nhé.';
 const genCode=()=>{let s='';for(let i=0;i<5;i++)s+=CODE_CH[Math.floor(Math.random()*CODE_CH.length)];return s};
 
 function memberData(){
@@ -196,21 +190,16 @@ async function createRoom(){
   if(selZone<0||selZone>zMax()||level<zStart(selZone)){setMsg('Thú chưa đủ cấp cho vùng này.');return}
   if(!bossOf(selZone)){setMsg('Vùng này chưa có boss.');return}
   working=true;setMsg('');
-  let step='';
   try{
     for(let i=0;i<6;i++){
       const code=genCode(),ref=rdb.ref('dungeon/rooms/'+code);
-      step='đọc phòng';
       const ex=await ref.once('value');if(ex.exists())continue;        /* trùng mã: đổi mã khác */
+      await ref.onDisconnect().remove();                               /* trưởng nhóm mất mạng -> phòng tự đóng */
       const d={host:me.uid,hostName:memberData().name,zone:selZone,rank:selRank,st:'lobby',t:SVR(),m:{}};d.m[me.uid]=memberData();
-      step='tạo phòng';
-      await ref.set(d);                                                /* tạo phòng TRƯỚC */
-      step='đăng ký tự đóng';
-      try{await ref.onDisconnect().remove()}                           /* rồi mới đăng ký: trưởng nhóm mất mạng -> phòng tự đóng */
-      catch(err){ref.remove().catch(()=>{});throw err}
+      try{await ref.set(d)}catch(err){ref.onDisconnect().cancel().catch(()=>{});throw err}
       attach(code);setMsg('Đã tạo phòng '+code+'. Gửi mã cho bạn bè hoặc mời từ danh sách bạn.',true);return}
     setMsg('Không tạo được phòng, thử lại nhé.');
-  }catch(e){console.warn('[dungeon] tạo phòng lỗi ('+step+')',e);setMsg(errTxt(e,step))}
+  }catch(e){console.warn('[dungeon] tạo phòng lỗi',e);setMsg(errTxt(e))}
   finally{working=false}}
 
 async function joinRoom(code){
@@ -219,9 +208,7 @@ async function joinRoom(code){
   if(!hasPet()){setMsg('Bạn cần nở thú trước.');return}
   if(rid){setMsg('Bạn đang ở trong một phòng rồi.');return}
   if(working)return;working=true;setMsg('');
-  let step='';
   try{
-    step='đọc phòng';
     const ref=rdb.ref('dungeon/rooms/'+code),r=(await ref.once('value')).val();
     if(!r){setMsg('Không tìm thấy phòng '+code+'.');removeInvite(code);return}
     if(r.st!=='lobby'){setMsg('Phòng này đã bắt đầu trận.');return}
@@ -230,12 +217,10 @@ async function joinRoom(code){
     if(!m[me.uid]&&Object.keys(m).length>=MAX_MEM){setMsg('Phòng đã đầy ('+MAX_MEM+'/'+MAX_MEM+').');return}
     if(level<zStart(r.zone)){setMsg('Chưa đủ cấp! Vùng '+zName(r.zone)+' cần thú cấp '+zStart(r.zone)+' (hiện cấp '+level+').');return}
     const mref=ref.child('m/'+me.uid);
-    step='đăng ký tự rời';
     await mref.onDisconnect().remove();                                /* mất mạng -> tự rời phòng */
-    step='vào phòng';
     try{await mref.set(memberData())}catch(err){mref.onDisconnect().cancel().catch(()=>{});throw err}
     attach(code);removeInvite(code);
-  }catch(e){console.warn('[dungeon] vào phòng lỗi ('+step+')',e);setMsg(errTxt(e,step))}
+  }catch(e){console.warn('[dungeon] vào phòng lỗi',e);setMsg(errTxt(e))}
   finally{working=false}}
 
 /* theo dõi phòng đang ở: phòng đóng / bị mời ra thì quay về màn đầu */
@@ -262,18 +247,18 @@ async function leave(){
     if(host){await ref.onDisconnect().cancel();await ref.remove()}
     else{const mref=ref.child('m/'+me.uid);await mref.onDisconnect().cancel();await mref.remove()}
     leaveLocal(host?'Đã giải tán phòng.':'Đã rời phòng.')
-  }catch(e){leaving=false;console.warn('[dungeon] rời phòng lỗi',e);setMsg(errTxt(e,'rời phòng'))}}
+  }catch(e){leaving=false;console.warn('[dungeon] rời phòng lỗi',e);setMsg(errTxt(e))}}
 
 function kick(uid){
   if(!room||room.host!==me.uid||uid===me.uid)return;
-  roomRef.child('m/'+uid).remove().then(()=>setMsg('Đã mời người đó ra khỏi phòng.',true)).catch(e=>setMsg(errTxt(e,'mời ra')))}
+  roomRef.child('m/'+uid).remove().then(()=>setMsg('Đã mời người đó ra khỏi phòng.',true)).catch(e=>setMsg(errTxt(e)))}
 
 function sendInvite(uid,nick){
   if(!room||room.host!==me.uid||!uid)return;
   if(Object.keys(room.m||{}).length>=MAX_MEM){setMsg('Phòng đã đủ '+MAX_MEM+' người.');return}
   rdb.ref('dungeon/inv/'+uid+'/'+rid).set({from:memberData().name,z:room.zone,k:room.rank,t:SVR()})
     .then(()=>{invited[uid]=Date.now();setMsg('Đã mời '+(nick||'bạn')+'.',true);render()})
-    .catch(e=>{console.warn('[dungeon] mời lỗi',e);setMsg(isPerm(e)?'Đã mời người này rồi (đợi 10 phút để mời lại).':errTxt(e,'gửi lời mời'))})}
+    .catch(e=>{console.warn('[dungeon] mời lỗi',e);setMsg(isPerm(e)?'Đã mời người này rồi (đợi 10 phút để mời lại).':errTxt(e))})}
 
 function removeInvite(code,show){
   if(!invRef||!code)return;
