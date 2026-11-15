@@ -26,8 +26,8 @@ Slug file = tên không dấu, nối gạch: "Phong Nguyên" → `phong-nguyen`.
 ## Loại 2: ICON NGUYÊN LIỆU (sheet "<Vùng> Materials": 6 vật phẩm 2 cột × 3 hàng, có chữ chú thích)
 - 6 vật phẩm = khoá px: `essence` (Tinh Hoa Boss), `bone` (Linh Cốt), `claw` (Móng Vuốt), `scale` (Vảy Giáp), `fang` (Nanh Thú), `eye` (Nhãn Châu).
 - Công cụ: `python3 -I tools/cut_mat_icons.py <slug-vùng> <ảnh> <thư-mục-ra>` (GrabCut + mặt nạ biên để loại sương mù nền).
-  Thêm 1 mục vào `PRESETS` (mẫu: `tuyet-nguyen` sheet xanh sáng, `suong-coc` sheet xám tối): màu nền, ngưỡng, `regions` (khung từng icon, TRÁNH chữ chú thích; seed là điểm chắc chắn thuộc icon),
-  `opt` (`disc` khoanh vật thể TRÒN viền chìm vào nền như Nhãn Cầu/đĩa xoáy Tinh Hoa; `hull` bao lồi), `excl` (khung xoá vệt khói sót, toạ độ canvas 256). Docstring đầu file giải thích từng khoá. Đo toạ độ bằng cách vẽ lưới lên ảnh.
+  Thêm 1 mục vào `PRESETS` (mẫu: `tuyet-nguyen` sáng; `suong-coc`, `huyen-uyen`, `loi-vuc` tối; `phong-nguyen` có thân đen cần `pfg` thấp ~22; `nguyet-cung`, `duong-son` nền có quầng/khói): màu nền, ngưỡng, `regions` (khung từng icon, TRÁNH chữ chú thích; seed là điểm chắc chắn thuộc icon),
+  `opt` (`disc` khoanh vật thể TRÒN viền chìm vào nền như Nhãn Cầu/đĩa xoáy Tinh Hoa; `clip` cắt mặt nạ theo hình tròn để bỏ quầng tối tràn ngoài; `hull` bao lồi), `excl` (khung xoá vệt khói sót, toạ độ canvas 256). Docstring đầu file giải thích từng khoá. Đo toạ độ bằng cách vẽ lưới lên ảnh.
 - Ra `img-mat-<slug>-{essence,bone,claw,scale,fang,eye}.webp`. Đăng ký trong `MAT_IMG[<z>]` (`12-equip.js`, khai báo TRƯỚC vòng lặp tạo `ITEMS` vì const chạy ngay lúc nạp). Vùng chưa có ảnh tự dùng icon pixel cũ.
 - Sheet tối, icon tương phản yếu với nền (Sương Cốc): hạ các ngưỡng `pfg/lum_pfg/fg/lum_fg/edge/frag_lum`; vật thể tròn tối viền chìm vào nền thì dùng `disc`.
 - Lỗi hay gặp: chân chữ ("g", "ế"…) của dòng chú thích hàng trên lọt vào khung hàng dưới (đẩy y0 xuống); sương mù lẫn vào sprite (đã có mặt nạ biên, vẫn phải soi); khung `EXCL` quá to cắt trúng thân sprite → luôn dùng khung nhỏ và xem lại.
@@ -42,3 +42,11 @@ Slug file = tên không dấu, nối gạch: "Phong Nguyên" → `phong-nguyen`.
 5. Mỗi bộ một commit, push main. Commit message tiếng Việt, kết thúc bằng 2 dòng Co-Authored-By / Claude-Session theo system-reminder của phiên.
 6. Báo lại ngắn: bộ nào, file nào, đã kiểm tra gì, và nói thẳng điểm còn chưa hoàn hảo (vd quầng sáng dày). Kết bằng "gửi tiếp ảnh bộ kế tiếp".
 Đừng nói là đã chạy game nếu chưa chạy; nói rõ đã kiểm tra bằng cách nào.
+
+## Mẹo làm nhanh theo loạt (đã chạy tốt cho vùng 2-7)
+- Bố cục sheet nguyên liệu gần như luôn giống nhau (896x1200): tiêu đề y<70, chú thích ~y 375-435 / 745-810 / 1070-1140. Preset mẫu để chép rồi chỉnh: `regions` essence (80,72,410,366), bone (505,74,830,362), claw (100,440,400,738), scale (525,455,805,735), fang (100,814,395,1060), eye (530,812,815,1062); seed ≈ (250,225), (660,225), (230,590), (660,610), (260,950), (670,940). Ngưỡng khởi điểm `pfg=30 lum_pfg=110 fg=70 lum_fg=110 edge=14 frag_lum=120`; sheet tối thì hạ, sheet có khói thì GIỮ NGUYÊN (nâng ngưỡng làm mất viền sprite). Màu nền đo bằng median vùng y 110-1100.
+- Chữ caption dòng trên lọt vào Nanh Thú/Nhãn Cầu → `y0` ≥ 812-815.
+- Khói/quầng gần màu nền không tách sạch được: chấp nhận, báo người dùng, đừng đẩy ngưỡng lên.
+- Nếu phiên KHÔNG push được (proxy 403 "not in authorized repository set", `add_repo` đòi link GitHub): đừng thử lại, giao zip (ảnh webp + `12-equip.js` + `tools/cut_mat_icons.py`) + ảnh preview qua SendUserFile để người dùng tự upload. `12-equip.js` và tool là file dùng chung nên luôn giao bản tích luỹ (đã có đủ các vùng trước); nhắc người dùng upload zip mới nhất sau cùng. Trước mỗi bộ: `git fetch` rồi `git reset --hard origin/main` (giữ riêng bản `cut_mat_icons.py` đang sửa), vì người dùng có thể đã upload.
+- Chuỗi lệnh gọn: thêm preset → cắt → `prev_mat` (xem 1 ảnh) → đăng ký `N:{…}` vào `MAT_IMG` bằng 1 đoạn python (thay `}};` cuối khối) → `node --check` → zip → SendUserFile.
+
