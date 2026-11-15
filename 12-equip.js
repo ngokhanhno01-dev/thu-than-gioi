@@ -139,7 +139,8 @@ const MAT_IMG={
  3:{essence:'img-mat-phong-nguyen-essence.webp',bone:'img-mat-phong-nguyen-bone.webp',claw:'img-mat-phong-nguyen-claw.webp',
     scale:'img-mat-phong-nguyen-scale.webp',fang:'img-mat-phong-nguyen-fang.webp',eye:'img-mat-phong-nguyen-eye.webp'},
  4:{essence:'img-mat-loi-vuc-essence.webp',bone:'img-mat-loi-vuc-bone.webp',claw:'img-mat-loi-vuc-claw.webp',scale:'img-mat-loi-vuc-scale.webp',fang:'img-mat-loi-vuc-fang.webp',eye:'img-mat-loi-vuc-eye.webp'},
- 5:{essence:'img-mat-nguyet-cung-essence.webp',bone:'img-mat-nguyet-cung-bone.webp',claw:'img-mat-nguyet-cung-claw.webp',scale:'img-mat-nguyet-cung-scale.webp',fang:'img-mat-nguyet-cung-fang.webp',eye:'img-mat-nguyet-cung-eye.webp'}};
+ 5:{essence:'img-mat-nguyet-cung-essence.webp',bone:'img-mat-nguyet-cung-bone.webp',claw:'img-mat-nguyet-cung-claw.webp',scale:'img-mat-nguyet-cung-scale.webp',fang:'img-mat-nguyet-cung-fang.webp',eye:'img-mat-nguyet-cung-eye.webp'},
+ 6:{essence:'img-mat-duong-son-essence.webp',bone:'img-mat-duong-son-bone.webp',claw:'img-mat-duong-son-claw.webp',scale:'img-mat-duong-son-scale.webp',fang:'img-mat-duong-son-fang.webp',eye:'img-mat-duong-son-eye.webp'}};
 const matIco=(z,px)=>{const f=MAT_IMG[z]&&MAT_IMG[z][px];return f?'<img class="pxi eqimg" alt="" src="'+f+'">':null};
 for(let z=0;z<17;z++){
  const Z=VAN_KIEP_ZONES[z],col=ZONE_COL[z];
