@@ -15,6 +15,7 @@ Khoá PRESETS:
   regions   (tên, x0, y0, x1, y1, (seed_x, seed_y)): khung từng icon, TRÁNH chữ chú thích; seed = điểm chắc chắn thuộc icon
   opt       theo icon: {'disc': (cx, cy, r)} khoanh vật thể TRÒN có viền chìm vào nền (Nhãn Cầu, đĩa xoáy Tinh Hoa);
             {'hull': True} lấy bao lồi của khối chính
+  cut_dark  trong opt theo icon: (d_max, diện tích) xoá mảng liền khối màu ≈ nền nằm TRONG icon (vịnh đen giữa các đám mây...)
   excl      theo icon: các khung xoá (toạ độ canvas 256x256) cho vệt khói còn sót; dùng khung NHỎ, xem lại kẻo cắt trúng thân
 """
 import sys
@@ -68,6 +69,13 @@ PRESETS = {
                  ('fang', 60, 796, 425, 1052, (245, 930)), ('eye', 470, 796, 885, 1052, (670, 925))],
         opt={'essence': {'disc': (222, 243, 114)}},
         excl={'scale': [(226, 58, 256, 82)]}),
+    'thien-khong': dict(
+        bg=(17, 17, 17), pfg=32, lum_pfg=60, fg=70, lum_fg=95, edge=12, frag_lum=110, smart_fill=True,
+        regions=[('essence', 100, 112, 400, 375, (250, 250)), ('bone', 520, 112, 830, 375, (660, 260)),
+                 ('claw', 110, 466, 420, 712, (240, 590)), ('scale', 520, 466, 815, 712, (650, 600)),
+                 ('fang', 110, 792, 400, 1052, (250, 930)), ('eye', 510, 788, 830, 1052, (665, 930))],
+        opt={'essence': {'cut_dark': (26, 20)}, 'eye': {'cut_dark': (26, 30)}},
+        excl={'scale': [(234, 194, 252, 210), (224, 224, 237, 237)]}),
 }
 
 ZONE, SRC = sys.argv[1], sys.argv[2]
@@ -131,6 +139,14 @@ for nm, x0, y0, x1, y1, (sx, sy) in P['regions']:
         cx_, cy_, r_ = o['disc']
         m |= (xx - (cx_ - x0)) ** 2 + (yy - (cy_ - y0)) ** 2 <= r_ ** 2
     m = fill_holes(m, sub)
+    if o.get('cut_dark'):                       # (d_max, diện tích tối thiểu): vùng liền khối màu ≈ nền nằm trong icon -> trong suốt
+        dthr, amin = o['cut_dark']
+        dd = np.abs(sub.astype(np.float32) - bgc).max(axis=2)
+        dl, dn = ndi.label(m & (dd < dthr))
+        for i in range(1, dn + 1):
+            comp = dl == i
+            if comp.sum() >= amin:
+                m &= ~comp
     if o.get('hull'):
         lb, nb = ndi.label(m)
         if nb:
