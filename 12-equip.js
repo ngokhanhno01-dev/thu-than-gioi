@@ -146,7 +146,8 @@ const MAT_IMG={
  9:{essence:'img-mat-ngoc-dong-essence.webp',bone:'img-mat-ngoc-dong-bone.webp',claw:'img-mat-ngoc-dong-claw.webp',scale:'img-mat-ngoc-dong-scale.webp',fang:'img-mat-ngoc-dong-fang.webp',eye:'img-mat-ngoc-dong-eye.webp'},
  10:{essence:'img-mat-thanh-lam-essence.webp',bone:'img-mat-thanh-lam-bone.webp',claw:'img-mat-thanh-lam-claw.webp',scale:'img-mat-thanh-lam-scale.webp',fang:'img-mat-thanh-lam-fang.webp',eye:'img-mat-thanh-lam-eye.webp'},
  11:{essence:'img-mat-xich-hoa-dia-essence.webp',bone:'img-mat-xich-hoa-dia-bone.webp',claw:'img-mat-xich-hoa-dia-claw.webp',scale:'img-mat-xich-hoa-dia-scale.webp',fang:'img-mat-xich-hoa-dia-fang.webp',eye:'img-mat-xich-hoa-dia-eye.webp'},
- 12:{essence:'img-mat-hac-am-lam-essence.webp',bone:'img-mat-hac-am-lam-bone.webp',claw:'img-mat-hac-am-lam-claw.webp',scale:'img-mat-hac-am-lam-scale.webp',fang:'img-mat-hac-am-lam-fang.webp',eye:'img-mat-hac-am-lam-eye.webp'}};
+ 12:{essence:'img-mat-hac-am-lam-essence.webp',bone:'img-mat-hac-am-lam-bone.webp',claw:'img-mat-hac-am-lam-claw.webp',scale:'img-mat-hac-am-lam-scale.webp',fang:'img-mat-hac-am-lam-fang.webp',eye:'img-mat-hac-am-lam-eye.webp'},
+ 13:{essence:'img-mat-tu-tinh-hai-essence.webp',bone:'img-mat-tu-tinh-hai-bone.webp',claw:'img-mat-tu-tinh-hai-claw.webp',scale:'img-mat-tu-tinh-hai-scale.webp',fang:'img-mat-tu-tinh-hai-fang.webp',eye:'img-mat-tu-tinh-hai-eye.webp'}};
 const matIco=(z,px)=>{const f=MAT_IMG[z]&&MAT_IMG[z][px];return f?'<img class="pxi eqimg" alt="" src="'+f+'">':null};
 for(let z=0;z<17;z++){
  const Z=VAN_KIEP_ZONES[z],col=ZONE_COL[z];
