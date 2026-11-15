@@ -1,5 +1,5 @@
 /* ===== 49-dungeon.js — PHÓ BẢN NHÓM · BƯỚC 1: LẬP NHÓM (tối đa 5 người) =====
-   Nút "🏰" nằm trên hàng trên cùng (cạnh "👥"). Bấm mở khung Phó bản:
+   Nút "🏰 Phó bản nhóm" nằm ngay dưới hàng Thám hiểm / Đấu trường / Cửa hàng. Bấm mở khung Phó bản:
      - Tạo phòng: chọn vùng (boss của vùng đó) + độ khó (Trấn Thủ / Chúa Tể / Thiên Ma) -> được MÃ PHÒNG 5 ký tự.
      - Vào phòng: nhập mã phòng, hoặc bấm ✔ ở "Lời mời" do bạn bè gửi.
      - Trưởng nhóm mời bạn trong danh sách 👥 Bạn bè, mời người ra khỏi phòng (✖), hoặc giải tán phòng. Tối đa 5 người kể cả trưởng nhóm.
@@ -45,7 +45,7 @@ const pName=pi=>{try{return PL[Math.max(0,Math.min(4,Math.floor(pi)))][1]}catch(
 /* ---------- CSS ---------- */
 {const s=document.createElement('style');
  s.textContent=
- '#dg-btn{position:relative}'+
+ '#dg-btn{position:relative;margin-top:6px}'+
  '#dg-btn b{display:none;position:absolute;top:-9px;right:-9px;min-width:18px;padding:0 4px;font-size:14px!important;line-height:18px;text-align:center;color:#fff;background:#e34e48;border:2px solid #040a0e}'+
  '#dg-btn.has b{display:block}'+
  '#dg-panel{position:fixed;left:50%;transform:translateX(-50%);top:calc(48px + env(safe-area-inset-top,0px));z-index:91;width:min(94vw,340px);max-height:min(76vh,520px);display:none;flex-direction:column;box-sizing:border-box;border:3px solid #f6c66a;background-color:#14272d;background-image:repeating-conic-gradient(#1a3335 0 25%,#12262e 0 50%);background-size:4px 4px;box-shadow:0 3px 0 0 #040a0e,0 0 0 2px #040a0e,inset 0 0 0 2px #78613a;color:#f5edcf}'+
@@ -78,10 +78,12 @@ const pName=pi=>{try{return PL[Math.max(0,Math.min(4,Math.floor(pi)))][1]}catch(
 /* ---------- Khung giao diện ---------- */
 function buildUI(){
   if($('dg-panel'))return;
-  const box=$('ol-top');
-  if(box){
-    const b=document.createElement('button');b.type='button';b.className='ol-pill';b.id='dg-btn';b.title='Phó bản nhóm';b.innerHTML='🏰<b></b>';
-    const fs=$('ol-fs');box.insertBefore(b,fs&&fs.parentNode===box?fs:null);
+  /* nút "🏰 Phó bản nhóm": chèn ngay dưới hàng Thám hiểm / Đấu trường / Cửa hàng */
+  const sm=$('s-main'),grid=sm&&sm.querySelector('.grid');
+  if(grid&&grid.parentNode){
+    const b=document.createElement('button');b.type='button';b.className='jade';b.id='dg-btn';b.title='Phó bản nhóm: cùng bạn bè (tối đa 5 người) đánh boss';
+    b.innerHTML='<span class="ic">🏰</span>Phó bản nhóm<b></b>';
+    grid.parentNode.insertBefore(b,grid.nextSibling);
     b.onclick=()=>toggle();
   }
   const p=document.createElement('div');p.id='dg-panel';
