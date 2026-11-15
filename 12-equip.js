@@ -128,14 +128,19 @@ const EQ_STAT_NAME={hp:'Sinh Lực',atk:'Công',def:'Thủ',spd:'Tốc',mag:'Ph�
 const _r1=x=>Math.round(x*10)/10;
 
 /* ---------- Nguyên liệu: 5 quái + 1 boss mỗi vùng ---------- */
+/* Ảnh icon nguyên liệu theo vùng z (khoá = px của EQ_CAT, 'essence' = Tinh Hoa boss). Vùng chưa có ảnh dùng icon pixel vẽ bằng code. */
+const MAT_IMG={
+ 0:{essence:'img-mat-tuyet-nguyen-essence.webp',bone:'img-mat-tuyet-nguyen-bone.webp',claw:'img-mat-tuyet-nguyen-claw.webp',
+    scale:'img-mat-tuyet-nguyen-scale.webp',fang:'img-mat-tuyet-nguyen-fang.webp',eye:'img-mat-tuyet-nguyen-eye.webp'}};
+const matIco=(z,px)=>{const f=MAT_IMG[z]&&MAT_IMG[z][px];return f?'<img class="pxi eqimg" alt="" src="'+f+'">':null};
 for(let z=0;z<17;z++){
  const Z=VAN_KIEP_ZONES[z],col=ZONE_COL[z];
  Z.mobs.forEach((mn,s)=>{
   const id=ZM_ID(z,s),c=EQ_CAT[s];
-  ITEMS[id]={n:c.n+' '+mn,i:pxImg(c.px,col),e:c.i,col,d:'Nguyên liệu bộ '+Z.name+', chỉ rơi từ '+mn+'. '+(s<EQ_SHARED?'Dùng rèn '+EQ_SLOTS[s].n+'.':'Dùng chung để rèn mọi món của bộ.')+' (mục 🛡️ Trang bị → Rèn)',use:null};
+  ITEMS[id]={n:c.n+' '+mn,i:matIco(z,c.px)||pxImg(c.px,col),e:c.i,col,d:'Nguyên liệu bộ '+Z.name+', chỉ rơi từ '+mn+'. '+(s<EQ_SHARED?'Dùng rèn '+EQ_SLOTS[s].n+'.':'Dùng chung để rèn mọi món của bộ.')+' (mục 🛡️ Trang bị → Rèn)',use:null};
   SELL_PRICE[id]=6+z*2;HL_ITEM[id]=col});
  const bn=Z.bosses[0],bid=ZB_ID(z);
- ITEMS[bid]={n:'Tinh Hoa '+bn,i:pxImg('essence',col),e:'✨',col,d:'Tinh hoa của chủ vùng '+Z.name+', chỉ rơi từ boss '+bn+'. Dùng rèn mọi món của bộ. (mục 🛡️ Trang bị → Rèn)',use:null};
+ ITEMS[bid]={n:'Tinh Hoa '+bn,i:matIco(z,'essence')||pxImg('essence',col),e:'✨',col,d:'Tinh hoa của chủ vùng '+Z.name+', chỉ rơi từ boss '+bn+'. Dùng rèn mọi món của bộ. (mục 🛡️ Trang bị → Rèn)',use:null};
  SELL_PRICE[bid]=30+z*5;HL_ITEM[bid]=col}
 for(let k=0;k<17;k++)ITEMS['mat'+k].d='Chỉ dùng nâng cấp huyết mạch cho thú vùng '+EPI[k][0]+' (mở mục 🩸 Huyết mạch).';
 const eqIsMat=id=>/^z[mb]\d/.test(id);
