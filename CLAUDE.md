@@ -25,9 +25,11 @@ Slug file = tên không dấu, nối gạch: "Phong Nguyên" → `phong-nguyen`.
 
 ## Loại 2: ICON NGUYÊN LIỆU (sheet "<Vùng> Materials": 6 vật phẩm 2 cột × 3 hàng, có chữ chú thích)
 - 6 vật phẩm = khoá px: `essence` (Tinh Hoa Boss), `bone` (Linh Cốt), `claw` (Móng Vuốt), `scale` (Vảy Giáp), `fang` (Nanh Thú), `eye` (Nhãn Châu).
-- Công cụ: `python3 -I tools/cut_mat_icons.py <ảnh> <thư-mục-ra> img-mat-<slug>` (GrabCut + mặt nạ biên để loại sương mù nền).
-  Sửa `REG` (khung từng icon, TRÁNH chữ chú thích; seed là điểm chắc chắn thuộc icon) và `EXCL` (khung xoá vệt khói sót, toạ độ canvas 256) cho khớp sheet mới.
+- Công cụ: `python3 -I tools/cut_mat_icons.py <slug-vùng> <ảnh> <thư-mục-ra>` (GrabCut + mặt nạ biên để loại sương mù nền).
+  Thêm 1 mục vào `PRESETS` (mẫu: `tuyet-nguyen` sheet xanh sáng, `suong-coc` sheet xám tối): màu nền, ngưỡng, `regions` (khung từng icon, TRÁNH chữ chú thích; seed là điểm chắc chắn thuộc icon),
+  `opt` (`disc` khoanh vật thể TRÒN viền chìm vào nền như Nhãn Cầu/đĩa xoáy Tinh Hoa; `hull` bao lồi), `excl` (khung xoá vệt khói sót, toạ độ canvas 256). Docstring đầu file giải thích từng khoá. Đo toạ độ bằng cách vẽ lưới lên ảnh.
 - Ra `img-mat-<slug>-{essence,bone,claw,scale,fang,eye}.webp`. Đăng ký trong `MAT_IMG[<z>]` (`12-equip.js`, khai báo TRƯỚC vòng lặp tạo `ITEMS` vì const chạy ngay lúc nạp). Vùng chưa có ảnh tự dùng icon pixel cũ.
+- Sheet tối, icon tương phản yếu với nền (Sương Cốc): hạ các ngưỡng `pfg/lum_pfg/fg/lum_fg/edge/frag_lum`; vật thể tròn tối viền chìm vào nền thì dùng `disc`.
 - Lỗi hay gặp: chân chữ ("g", "ế"…) của dòng chú thích hàng trên lọt vào khung hàng dưới (đẩy y0 xuống); sương mù lẫn vào sprite (đã có mặt nạ biên, vẫn phải soi); khung `EXCL` quá to cắt trúng thân sprite → luôn dùng khung nhỏ và xem lại.
 - Tên trong ảnh có thể khác tên trong game (ảnh "Nhãn Cầu" vs game "Nhãn Châu"): KHÔNG tự đổi tên game, chỉ báo người dùng.
 
