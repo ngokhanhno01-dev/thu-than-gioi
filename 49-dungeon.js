@@ -194,9 +194,9 @@ async function createRoom(){
     for(let i=0;i<6;i++){
       const code=genCode(),ref=rdb.ref('dungeon/rooms/'+code);
       const ex=await ref.once('value');if(ex.exists())continue;        /* trùng mã: đổi mã khác */
-      await ref.onDisconnect().remove();                               /* trưởng nhóm mất mạng -> phòng tự đóng */
       const d={host:me.uid,hostName:memberData().name,zone:selZone,rank:selRank,st:'lobby',t:SVR(),m:{}};d.m[me.uid]=memberData();
-      try{await ref.set(d)}catch(err){ref.onDisconnect().cancel().catch(()=>{});throw err}
+      await ref.set(d);                                                /* tạo phòng TRƯỚC */
+      try{await ref.onDisconnect().remove()}catch(_){}                 /* RỒI MỚI đăng ký: trưởng nhóm mất mạng -> phòng tự đóng (luật chỉ cho xóa khi phòng đã tồn tại) */
       attach(code);setMsg('Đã tạo phòng '+code+'. Gửi mã cho bạn bè hoặc mời từ danh sách bạn.',true);return}
     setMsg('Không tạo được phòng, thử lại nhé.');
   }catch(e){console.warn('[dungeon] tạo phòng lỗi',e);setMsg(errTxt(e))}
