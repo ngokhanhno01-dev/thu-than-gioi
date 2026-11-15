@@ -135,7 +135,9 @@ const MAT_IMG={
  1:{essence:'img-mat-suong-coc-essence.webp',bone:'img-mat-suong-coc-bone.webp',claw:'img-mat-suong-coc-claw.webp',
     scale:'img-mat-suong-coc-scale.webp',fang:'img-mat-suong-coc-fang.webp',eye:'img-mat-suong-coc-eye.webp'},
  2:{essence:'img-mat-van-dao-essence.webp',bone:'img-mat-van-dao-bone.webp',claw:'img-mat-van-dao-claw.webp',
-    scale:'img-mat-van-dao-scale.webp',fang:'img-mat-van-dao-fang.webp',eye:'img-mat-van-dao-eye.webp'}};
+    scale:'img-mat-van-dao-scale.webp',fang:'img-mat-van-dao-fang.webp',eye:'img-mat-van-dao-eye.webp'},
+ 3:{essence:'img-mat-phong-nguyen-essence.webp',bone:'img-mat-phong-nguyen-bone.webp',claw:'img-mat-phong-nguyen-claw.webp',
+    scale:'img-mat-phong-nguyen-scale.webp',fang:'img-mat-phong-nguyen-fang.webp',eye:'img-mat-phong-nguyen-eye.webp'}};
 const matIco=(z,px)=>{const f=MAT_IMG[z]&&MAT_IMG[z][px];return f?'<img class="pxi eqimg" alt="" src="'+f+'">':null};
 for(let z=0;z<17;z++){
  const Z=VAN_KIEP_ZONES[z],col=ZONE_COL[z];
