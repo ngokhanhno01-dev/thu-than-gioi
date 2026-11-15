@@ -8,6 +8,7 @@
      dungeon/rooms/{MÃ}     = {host, hostName, zone, rank, st:'lobby', t, m:{ uid:{name,lv,sp,bl,pi} }}
      dungeon/inv/{uid}/{MÃ} = {from, z, k, t}   lời mời gửi tới uid (chỉ người nhận đọc được)
    Tự dọn: đóng game / mất mạng thì thành viên tự rời phòng; trưởng nhóm mất mạng thì phòng tự đóng (onDisconnect).
+   Lưu ý: onDisconnect phải đăng ký SAU khi phòng đã được tạo (luật chỉ cho xóa phòng đã tồn tại của chính host).
    Không sửa file cũ: bọc TTGNET.start/setName của 20-online.js như 21-card.js / 22-friends.js.
    Nạp SAU 22-friends.js và 26-arena.js, TRƯỚC 19-save.js. Luật cần dán: RTDB_RULES_FINAL.json (mục "dungeon"). */
 (()=>{
@@ -196,9 +197,10 @@ async function createRoom(){
     for(let i=0;i<6;i++){
       const code=genCode(),ref=rdb.ref('dungeon/rooms/'+code);
       const ex=await ref.once('value');if(ex.exists())continue;        /* trùng mã: đổi mã khác */
-      await ref.onDisconnect().remove();                               /* trưởng nhóm mất mạng -> phòng tự đóng */
       const d={host:me.uid,hostName:memberData().name,zone:selZone,rank:selRank,st:'lobby',t:SVR(),m:{}};d.m[me.uid]=memberData();
-      try{await ref.set(d)}catch(err){ref.onDisconnect().cancel().catch(()=>{});throw err}
+      await ref.set(d);                                                /* tạo phòng TRƯỚC */
+      try{await ref.onDisconnect().remove()}                           /* rồi mới đăng ký: trưởng nhóm mất mạng -> phòng tự đóng */
+      catch(err){ref.remove().catch(()=>{});throw err}
       attach(code);setMsg('Đã tạo phòng '+code+'. Gửi mã cho bạn bè hoặc mời từ danh sách bạn.',true);return}
     setMsg('Không tạo được phòng, thử lại nhé.');
   }catch(e){console.warn('[dungeon] tạo phòng lỗi',e);setMsg(errTxt(e))}
