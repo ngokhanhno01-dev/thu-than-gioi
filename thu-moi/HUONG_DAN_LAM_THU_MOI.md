@@ -31,14 +31,14 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 2b. Tiến độ Sương Cốc (vùng 1)
 
-**Trạng thái: 1/10 xong (01 Vụ Hồ đã thêm vào nhánh). Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng cần xác nhận bảng này (chưa phản đối). Vụ Hồ xong (người dùng chấp nhận các điểm nhỏ, đã thay bằng bản tách từ ảnh gốc 1376×768), con kế: 02 Sương Ngư (cá chép, chờ người dùng đồng ý và soạn prompt). Cập nhật lần cuối: 16/11/2026.**
+**Trạng thái: 1/10 xong (01 Vụ Hồ đã thêm vào nhánh). Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng cần xác nhận bảng này (chưa phản đối). Vụ Hồ xong (người dùng chấp nhận các điểm nhỏ, đã thay bằng bản tách từ ảnh gốc 1376×768), đang làm: 02 Sương Ngư (cá chép): đã soạn prompt, chờ người dùng gửi ảnh gốc chưa tách nền từ Canva. Cập nhật lần cuối: 16/11/2026.**
 
 Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục. Bảng màu: xanh ngọc đậm (deep teal), xanh ngọc (jade green), xanh rêu, xám xanh của sương, trắng sương, viền navy. Cấm tím / hồng. Quái cũ của vùng (không đặt tên trùng, và nên chọn con vật khung khác: quái cũ đã dùng nai, dơi, bò, ếch, cóc, nhện): Sương Vũ Lộc, Mù Sương Dơi, Vụ Giáp Ngưu, Bạch Thủy Ếch, Sương Nham Thiềm, Sương Mộc Nhện, Vạn Trượng Vụ Thú.
 
 | # | Tên | Con vật khung | Môi trường | Dáng cơ thể | Ảnh |
 |---|---|---|---|---|---|
 | 01 | Vụ Hồ (xong) | cáo | mặt đất | thú bốn chân nhỏ nhanh nhẹn, tai to, đuôi xù như sương, dễ thương | `suong-coc-01-vu-ho.png` |
-| 02 | Sương Ngư | cá chép | dưới nước | cá nhìn ngang, vây như lá, đuôi dải sương, vảy ngọc | |
+| 02 | Sương Ngư (đang làm) | cá chép | dưới nước | cá nhìn ngang, vây như lá, đuôi dải sương, vảy ngọc | |
 | 03 | Sương Xuyên | tê tê | lòng đất | thú bốn chân thấp cuộn tròn được, vảy đá phủ rêu, móng đào | |
 | 04 | Vụ Điệp | bướm đêm | trên trời (côn trùng) | cánh rộng đối xứng, vảy cánh là sương, râu lông vũ | |
 | 05 | Vụ Hạc | hạc | chim cao, lội nước | chim cao thanh mảnh, cổ dài, cánh xoè, đuôi như dải sương | |
