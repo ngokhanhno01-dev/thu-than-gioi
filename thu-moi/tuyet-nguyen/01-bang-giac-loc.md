@@ -1,10 +1,10 @@
 # 01 · Băng Giác Lộc (Tuyết Nguyên)
 
-![Băng Giác Lộc](01-bang-giac-loc.png)
+![Băng Giác Lộc](../../01-bang-giac-loc.png)
 
 - **Vùng:** Tuyết Nguyên (vùng 0)
 - **Loài:** Băng Giác Lộc (nai sừng băng), con số 1 trong 10 loài của vùng
-- **Ảnh:** 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Tạo bằng Canva Pro, nền trắng, chưa tách nền, chưa cắt riêng từng bậc.
+- **Ảnh:** `01-bang-giac-loc.png` (ở thư mục gốc của nhánh), 632×632, 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Tạo bằng Canva Pro, **đã tách nền (nền trong suốt)**, chưa cắt riêng từng bậc.
 
 | Bậc | Tên |
 |---|---|
