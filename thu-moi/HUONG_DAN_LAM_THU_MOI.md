@@ -31,7 +31,7 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 2b. Tiến độ Sương Cốc (vùng 1)
 
-**Trạng thái: 1/10 xong (01 Vụ Hồ đã thêm vào nhánh). Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng cần xác nhận bảng này (chưa phản đối). Vụ Hồ xong, con kế: 02 Sương Ngư (cá chép, chờ người dùng đồng ý và soạn prompt). Cập nhật lần cuối: 16/11/2026.**
+**Trạng thái: 1/10 xong (01 Vụ Hồ đã thêm vào nhánh). Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng cần xác nhận bảng này (chưa phản đối). Vụ Hồ xong (người dùng chấp nhận các điểm nhỏ, đã thay bằng bản tách từ ảnh gốc 1376×768), con kế: 02 Sương Ngư (cá chép, chờ người dùng đồng ý và soạn prompt). Cập nhật lần cuối: 16/11/2026.**
 
 Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục. Bảng màu: xanh ngọc đậm (deep teal), xanh ngọc (jade green), xanh rêu, xám xanh của sương, trắng sương, viền navy. Cấm tím / hồng. Quái cũ của vùng (không đặt tên trùng, và nên chọn con vật khung khác: quái cũ đã dùng nai, dơi, bò, ếch, cóc, nhện): Sương Vũ Lộc, Mù Sương Dơi, Vụ Giáp Ngưu, Bạch Thủy Ếch, Sương Nham Thiềm, Sương Mộc Nhện, Vạn Trượng Vụ Thú.
 
