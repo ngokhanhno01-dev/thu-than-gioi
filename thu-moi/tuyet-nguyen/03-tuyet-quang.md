@@ -6,11 +6,7 @@
 - **Loài:** Tuyết Quang (linh hồn cực quang), con số 3 trong 10 loài của vùng. Thú sáng tạo, không dựa trên con vật có thật. Dáng dài, cong, uốn lượn, khác dáng tròn của Tuyết Cầu và dáng góc cạnh của Tuyết Tinh.
 - **Ảnh:** `03-tuyet-quang.png` (ở thư mục gốc của nhánh), 688×384, 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Pixel art kiểu Pokémon, **nền trong suốt**, chưa cắt riêng từng bậc. Không có vạch bóng đổ dưới chân.
 
-| Bậc | Tên (đề xuất) |
-|---|---|
-| Bậc 1 | Tuyết Quang |
-| Bậc 2 | Băng Quang |
-| Bậc 3 | Cực Quang Thần |
+- **Tên:** Tuyết Quang, dùng chung cho cả 3 bậc (không đặt tên riêng từng bậc).
 
 ## Đặc điểm hình ảnh
 - Bảng màu toàn tông xanh băng / xanh dương / cyan / trắng băng. Ảnh chưa có màu lục cực quang như prompt đã mở ra.
@@ -21,4 +17,3 @@
 ## Lưu ý khi cắt
 - Bậc 3 lớn và rộng nhất, nhũ băng treo thấp bên dưới: chừa lề rộng phía dưới và bên phải (có hai bông tuyết nhỏ rời ngoài thân).
 - Bậc 1 và Bậc 2 viền nhạt, mềm; Bậc 3 viền navy đậm rõ. Khi đặt cạnh nhau trong game, nét viền của Bậc 3 sẽ đậm hơn hai bậc trước.
-- Tên các bậc là đề xuất, cách đặt tên bậc của game vẫn chưa chốt.

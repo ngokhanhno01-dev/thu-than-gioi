@@ -6,11 +6,7 @@
 - **Loài:** Tuyết Tinh (bông tuyết sáu cánh kết tinh), con số 2 trong 10 loài của vùng. Thú sáng tạo, không dựa trên con vật có thật. Dáng góc cạnh, đối xứng, khác hẳn dáng tròn của Tuyết Cầu.
 - **Ảnh:** `02-tuyet-tinh.png` (ở thư mục gốc của nhánh), 688×384, 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Pixel art kiểu Pokémon, **nền trong suốt**, chưa cắt riêng từng bậc. Không có vạch bóng đổ dưới chân.
 
-| Bậc | Tên (đề xuất) |
-|---|---|
-| Bậc 1 | Tuyết Tinh |
-| Bậc 2 | Băng Tinh |
-| Bậc 3 | Băng Tâm Vương |
+- **Tên:** Tuyết Tinh, dùng chung cho cả 3 bậc (không đặt tên riêng từng bậc).
 
 ## Đặc điểm hình ảnh
 - Bảng màu xanh băng / xanh dương / cyan / trắng băng, viền navy đậm, đổ bóng theo mảng.
@@ -20,4 +16,3 @@
 
 ## Lưu ý khi cắt
 - Bậc 2 và Bậc 3 có mảnh băng lơ lửng ngoài thân; Bậc 3 xòe rộng nhất (cánh + vương miện): chừa lề rộng hơn Bậc 1 để khỏi mất hiệu ứng.
-- Tên các bậc là đề xuất, cách đặt tên bậc của game vẫn chưa chốt.

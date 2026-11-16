@@ -6,11 +6,7 @@
 - **Loài:** Tuyết Cầu (quả cầu tuyết), con số 1 trong 10 loài của vùng. Thú sáng tạo, không dựa trên con vật có thật.
 - **Ảnh:** `01-tuyet-cau.png` (ở thư mục gốc của nhánh), 688×384, 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Pixel art kiểu Pokémon, **nền trong suốt**, chưa cắt riêng từng bậc. Đã xóa dấu sao hồng của trình tạo ảnh ở góc dưới phải.
 
-| Bậc | Tên (đề xuất) |
-|---|---|
-| Bậc 1 | Tuyết Cầu |
-| Bậc 2 | Băng Miện |
-| Bậc 3 | Băng Hoàn Thần |
+- **Tên:** Tuyết Cầu, dùng chung cho cả 3 bậc (không đặt tên riêng từng bậc).
 
 ## Đặc điểm hình ảnh
 - Bảng màu xanh băng / xanh dương / navy / trắng băng, viền navy đậm, đổ bóng theo mảng.
@@ -21,4 +17,3 @@
 ## Lưu ý khi cắt
 - Bậc 2 có quả cầu tuyết lơ lửng và dải khăn ra ngoài thân; Bậc 3 có hào quang và áo choàng rộng: chừa lề rộng hơn Bậc 1 để khỏi mất hiệu ứng.
 - Dưới chân mỗi bậc có một vạch bóng đổ màu navy (mảnh rời trong ảnh). Quyết định giữ hay bỏ khi đưa vào game.
-- Tên các bậc là đề xuất, cách đặt tên bậc của game vẫn chưa chốt.
