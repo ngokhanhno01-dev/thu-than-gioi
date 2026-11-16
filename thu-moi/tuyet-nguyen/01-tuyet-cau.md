@@ -1,16 +1,16 @@
-# 01 · Tuyết Cầu Linh (Tuyết Nguyên)
+# 01 · Tuyết Cầu (Tuyết Nguyên)
 
-![Tuyết Cầu Linh](../../01-tuyet-cau-linh.png)
+![Tuyết Cầu](../../01-tuyet-cau.png)
 
 - **Vùng:** Tuyết Nguyên (vùng 0)
-- **Loài:** Tuyết Cầu Linh (linh hồn quả cầu tuyết), con số 1 trong 10 loài của vùng. Thú sáng tạo, không dựa trên con vật có thật.
-- **Ảnh:** `01-tuyet-cau-linh.png` (ở thư mục gốc của nhánh), 688×384, 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Phong cách pixel art kiểu Pokémon, **đã tách nền (nền trong suốt)**, chưa cắt riêng từng bậc. Đã xóa dấu sao hồng của trình tạo ảnh ở góc dưới phải.
+- **Loài:** Tuyết Cầu (quả cầu tuyết), con số 1 trong 10 loài của vùng. Thú sáng tạo, không dựa trên con vật có thật.
+- **Ảnh:** `01-tuyet-cau.png` (ở thư mục gốc của nhánh), 688×384, 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Pixel art kiểu Pokémon, **nền trong suốt**, chưa cắt riêng từng bậc. Đã xóa dấu sao hồng của trình tạo ảnh ở góc dưới phải.
 
 | Bậc | Tên (đề xuất) |
 |---|---|
-| Bậc 1 | Tuyết Cầu Linh |
-| Bậc 2 | Băng Miện Linh |
-| Bậc 3 | Cực Quang Thần Linh |
+| Bậc 1 | Tuyết Cầu |
+| Bậc 2 | Băng Miện |
+| Bậc 3 | Băng Hoàn Thần |
 
 ## Đặc điểm hình ảnh
 - Bảng màu xanh băng / xanh dương / navy / trắng băng, viền navy đậm, đổ bóng theo mảng.

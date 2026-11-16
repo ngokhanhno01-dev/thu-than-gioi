@@ -1,16 +1,16 @@
-# 02 · Lục Hoa Linh (Tuyết Nguyên)
+# 02 · Tuyết Tinh (Tuyết Nguyên)
 
-![Lục Hoa Linh](../../02-luc-hoa-linh.png)
+![Tuyết Tinh](../../02-tuyet-tinh.png)
 
 - **Vùng:** Tuyết Nguyên (vùng 0)
-- **Loài:** Lục Hoa Linh (linh hồn bông tuyết sáu cánh), con số 2 trong 10 loài của vùng. Thú sáng tạo, không dựa trên con vật có thật. Dáng góc cạnh, đối xứng, khác hẳn dáng tròn của Tuyết Cầu Linh.
-- **Ảnh:** `02-luc-hoa-linh.png` (ở thư mục gốc của nhánh), 688×384, 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Pixel art kiểu Pokémon, **nền trong suốt**, chưa cắt riêng từng bậc. Không có vạch bóng đổ dưới chân.
+- **Loài:** Tuyết Tinh (bông tuyết sáu cánh kết tinh), con số 2 trong 10 loài của vùng. Thú sáng tạo, không dựa trên con vật có thật. Dáng góc cạnh, đối xứng, khác hẳn dáng tròn của Tuyết Cầu.
+- **Ảnh:** `02-tuyet-tinh.png` (ở thư mục gốc của nhánh), 688×384, 1 ảnh gồm 3 bậc xếp ngang, trái → phải = Bậc 1 → 2 → 3. Pixel art kiểu Pokémon, **nền trong suốt**, chưa cắt riêng từng bậc. Không có vạch bóng đổ dưới chân.
 
 | Bậc | Tên (đề xuất) |
 |---|---|
-| Bậc 1 | Lục Hoa Linh |
-| Bậc 2 | Tuyết Tinh Linh |
-| Bậc 3 | Băng Tâm Thần Linh |
+| Bậc 1 | Tuyết Tinh |
+| Bậc 2 | Băng Tinh |
+| Bậc 3 | Băng Tâm Vương |
 
 ## Đặc điểm hình ảnh
 - Bảng màu xanh băng / xanh dương / cyan / trắng băng, viền navy đậm, đổ bóng theo mảng.
