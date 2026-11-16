@@ -16,7 +16,7 @@
 ## Điểm chưa ổn
 - Bậc 1 nhìn gần như chính diện, không quay trái như prompt yêu cầu (người dùng chấp nhận, không sửa).
 - Bậc 3: mặt và thân bị quầng sương dày bao quanh, thân hơi chìm vào đuôi; mép phải của quầng sương chạm sát mép ảnh gốc nên bị cắt phẳng (người dùng chấp nhận).
-- Vạch bóng đổ dưới chân ám tím nhẹ ở Bậc 1.
+- Vạch bóng đổ dưới chân mờ, một phần bị xoá do ám hồng (chi tiết nhỏ, người dùng chấp nhận).
 - Không phải lưới pixel đều, giống các con trước.
 
 ## Lưu ý khi cắt
