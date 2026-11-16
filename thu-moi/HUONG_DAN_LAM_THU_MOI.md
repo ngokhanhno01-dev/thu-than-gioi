@@ -12,6 +12,8 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 2. Tiến độ Tuyết Nguyên (10 con)
 
+**Trạng thái: 7/10 xong. Đang làm: 08 Tuyết Nhĩ (đã chọn hướng, đang chờ ảnh từ Canva). Cập nhật lần cuối: 16/11/2026.**
+
 | # | Tên (1 tên chung cả 3 bậc) | Ý tưởng / dáng | Ảnh |
 |---|---|---|---|
 | 01 | Tuyết Cầu | quả cầu tuyết tròn, dễ thương | `01-tuyet-cau.png` |
@@ -20,8 +22,8 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 | 04 | Golem Băng Giá | golem đá nặng, đứng hai chân | `04-golem-bang-gia.png` |
 | 05 | Băng Đăng | đèn lồng băng biết bay | `05-bang-dang.png` |
 | 06 | Băng Kỳ Lân | kỳ lân thần thoại bốn chân, chạy nhanh | `06-bang-ky-lan.png` |
-| 07 | (chưa làm) | dự kiến: thân dài bò sát (sợi dây băng, hoặc sâu tuyết thân là các đốt băng). Người dùng chưa chọn hướng | |
-| 08 | (chưa làm) | dự kiến: dạng cây / nấm băng | |
+| 07 | Băng Tích | bò sát băng thân dài thấp, đuôi dài đầu pha lê, hàng gai băng dọc lưng, có hiệu ứng bông tuyết / tia sáng / sương mũi. Chỉ 4 chân (chưa đủ 6 như dự định, người dùng chưa yêu cầu sửa). Bậc 3 lấy từ bản hàng dưới (ngậm miệng) | `07-bang-tich.png` |
+| 08 | Tuyết Nhĩ (đang làm) | nấm tuyết: mũ tròn xoè rộng nhiều nếp lượn như tai, thân ngắn mập, hai chân nhỏ. Dáng ô rộng, khác Tuyết Cầu (quả cầu). Người dùng đã chọn hướng này (16/11), chờ soạn prompt và ảnh | |
 | 09 | (chưa làm) | dự kiến: nhỏ nhắn, cầm / mang vật dụng | |
 | 10 | (chưa làm) | dự kiến: khổng lồ, kiểu boss của vùng | |
 
@@ -87,6 +89,8 @@ Bài học đã gộp vào prompt mẫu: viền lệch giữa các bậc (Tuyế
 
 ## 7. Nhịp làm việc mỗi con
 Đề xuất ý tưởng + dáng (nhấn mạnh khác con trước) → soạn prompt từ mẫu ở mục 4 → người dùng làm ảnh trên Canva và gửi lại → kiểm + tách nền/xoá dấu sao → thêm vào nhánh → báo ngắn (file, commit, nhận xét thật) → đề xuất con kế tiếp. Khi người dùng nói "xấu", đừng cãi: đưa 2-3 hướng khác và chọn 1 hướng mạnh nhất, nêu vì sao.
+
+**Yêu cầu của người dùng (16/11/2026): sau MỖI bước, Claude tự cập nhật bảng tiến độ ở mục 2 (dòng "Trạng thái" và dòng của con đang làm), không đợi người dùng nhắc.** Các mốc cần cập nhật: người dùng chọn hướng thiết kế, đã soạn prompt, nhận ảnh, đã thêm ảnh + ghi chú vào nhánh, chuyển sang con kế tiếp. Nếu người dùng không nói gì mà phiên mới bắt đầu, đọc file này để biết đang ở bước nào và cập nhật cho đúng.
 
 ## 8. Việc còn lại sau khi đủ 10 con
 - Chốt các câu hỏi mở trong `THIET_KE_BAT_THU_EVO.md` (Evo có 3 bậc không, công thức ghép, tỉ lệ bắt, thú/trứng/thuộc hạ/boss hiện tại giữ hay bỏ).
