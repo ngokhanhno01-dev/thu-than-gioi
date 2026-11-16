@@ -31,16 +31,16 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 2b. Tiến độ Sương Cốc (vùng 1)
 
-**Trạng thái: 2/10 xong (01 Vụ Hồ và 02 Sương Ngư đã có ghi chú trên nhánh). Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng cần xác nhận bảng này (chưa phản đối). Vụ Hồ xong. Sương Ngư: người dùng gửi ảnh đã xoá nền còn đốm tím / hồng, Claude đã xoá đốm, alpha cứng, ghi chú `thu-moi/suong-coc/02-suong-ngu.md` đã đẩy; **ảnh `suong-coc-02-suong-ngu.png` (887×443) cần người dùng tự upload lên thư mục gốc của nhánh** (công cụ GitHub của phiên này không đẩy được file nhị phân). Kế tiếp: 03 Sương Xuyên (tê tê), chờ người dùng xác nhận hướng và prompt. Cập nhật lần cuối: 16/11/2026.**
+**Trạng thái: 3/10 xong (01 Vụ Hồ, 02 Sương Ngư, 03 Sương Xuyên đã có ghi chú trên nhánh; ảnh `suong-coc-01` đến `03` đã có ở thư mục gốc). Đang làm 04 Vụ Điệp (bướm đêm): đã đề xuất hướng thiết kế và soạn prompt (mục 2c), chờ người dùng làm ảnh trên Canva và gửi lại. Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng chưa phản đối bảng này. Cập nhật lần cuối: 16/11/2026.**
 
 Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục. Bảng màu: xanh ngọc đậm (deep teal), xanh ngọc (jade green), xanh rêu, xám xanh của sương, trắng sương, viền navy. Cấm tím / hồng. Quái cũ của vùng (không đặt tên trùng, và nên chọn con vật khung khác: quái cũ đã dùng nai, dơi, bò, ếch, cóc, nhện): Sương Vũ Lộc, Mù Sương Dơi, Vụ Giáp Ngưu, Bạch Thủy Ếch, Sương Nham Thiềm, Sương Mộc Nhện, Vạn Trượng Vụ Thú.
 
 | # | Tên | Con vật khung | Môi trường | Dáng cơ thể | Ảnh |
 |---|---|---|---|---|---|
 | 01 | Vụ Hồ (xong) | cáo | mặt đất | thú bốn chân nhỏ nhanh nhẹn, tai to, đuôi xù như sương, dễ thương | `suong-coc-01-vu-ho.png` |
-| 02 | Sương Ngư (xong, chờ upload ảnh) | cá chép | dưới nước | cá nhìn ngang, vây như lá, đuôi dải sương, vảy ngọc | `suong-coc-02-suong-ngu.png` |
-| 03 | Sương Xuyên | tê tê | lòng đất | thú bốn chân thấp cuộn tròn được, vảy đá phủ rêu, móng đào | |
-| 04 | Vụ Điệp | bướm đêm | trên trời (côn trùng) | cánh rộng đối xứng, vảy cánh là sương, râu lông vũ | |
+| 02 | Sương Ngư (xong) | cá chép | dưới nước | cá nhìn ngang, vây như lá, đuôi dải sương, vảy ngọc | `suong-coc-02-suong-ngu.png` |
+| 03 | Sương Xuyên (xong) | tê tê | lòng đất | thú bốn chân thấp cuộn tròn được, vảy đá phủ rêu, móng đào | `suong-coc-03-suong-xuyen.png` |
+| 04 | Vụ Điệp (đang làm: đã soạn prompt, chờ ảnh) | bướm đêm | trên trời (côn trùng) | cánh rộng đối xứng, vảy cánh là sương, râu lông vũ | |
 | 05 | Vụ Hạc | hạc | chim cao, lội nước | chim cao thanh mảnh, cổ dài, cánh xoè, đuôi như dải sương | |
 | 06 | Vụ Long | rồng thần thoại | trời / nước | thân dài uốn lượn, bốn chân ngắn, râu và bờm sương | |
 | 07 | Lục Giáp | bọ cánh cứng | khe đá (côn trùng giáp) | sáu chân, dáng thấp rộng, vỏ giáp ngọc, sừng | |
@@ -49,6 +49,13 @@ Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục
 | 10 | Vạn Trượng Vụ Thú | thú ghép giả tưởng | boss | thú khổng lồ bốn chân bằng sương và đá, giữ tên boss cũ của vùng | |
 
 Ghi chú từng con để ở `thu-moi/suong-coc/NN-slug.md` (tạo thư mục mới cho vùng này; ảnh vẫn để ở thư mục gốc của nhánh).
+
+## 2c. Thiết kế + prompt 04 Vụ Điệp (Sương Cốc)
+
+- Khung: **bướm đêm** (bản giả tưởng). Môi trường: trên trời. Dáng: cánh rộng đối xứng, thân nhỏ mập phủ lông trắng sương, râu lông vũ. Khác 01-03 (đều là thú thân dài / bốn chân / cá) ở chỗ là **côn trùng bay, hai cánh to chiếm phần lớn dáng**.
+- Họa tiết cánh dùng **gân lá ngọc + mép cánh là vảy sương**, KHÔNG dùng đốm mắt giả (tránh lẫn với mắt thật, người dùng từng chê chớp sáng đè mắt).
+- Tên "Vụ Điệp" không trùng quái cũ (quái cũ có "Hồng Liên Phấn Điệp" thuộc vùng khác, màu hồng).
+- Prompt đã đưa người dùng ở phiên này (xem lịch sử hội thoại); tóm tắt: bảng màu deep navy, deep teal, jade green, moss green, mist white; cấm tím / hồng / xám trung tính; mắt cyan có điểm sáng; hiệu ứng ít và đặc.
 
 ## 3. Quy tắc người dùng đã chốt
 1. **Mỗi con 1 tên duy nhất dùng chung cho cả 3 bậc**, không đặt tên riêng từng bậc. Bỏ chữ "Linh" ở cuối tên.
