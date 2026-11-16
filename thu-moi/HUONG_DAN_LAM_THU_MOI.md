@@ -12,7 +12,7 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 2. Tiến độ Tuyết Nguyên (10 con)
 
-**Trạng thái: 7/10 xong. Đang làm: 08 Tuyết Nhĩ (đã chọn hướng, đang chờ ảnh từ Canva). Cập nhật lần cuối: 16/11/2026.**
+**Trạng thái: 8/10 xong (08 đã nhận ảnh, đã xử lý; chờ người dùng upload `08-tuyet-nhi.png` + ghi chú lên nhánh). Kế tiếp: 09. Cập nhật lần cuối: 16/11/2026.**
 
 | # | Tên (1 tên chung cả 3 bậc) | Ý tưởng / dáng | Ảnh |
 |---|---|---|---|
@@ -23,7 +23,7 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 | 05 | Băng Đăng | đèn lồng băng biết bay | `05-bang-dang.png` |
 | 06 | Băng Kỳ Lân | kỳ lân thần thoại bốn chân, chạy nhanh | `06-bang-ky-lan.png` |
 | 07 | Băng Tích | bò sát băng thân dài thấp, đuôi dài đầu pha lê, hàng gai băng dọc lưng, có hiệu ứng bông tuyết / tia sáng / sương mũi. Chỉ 4 chân (chưa đủ 6 như dự định, người dùng chưa yêu cầu sửa). Bậc 3 lấy từ bản hàng dưới (ngậm miệng) | `07-bang-tich.png` |
-| 08 | Tuyết Nhĩ (đang làm) | nấm tuyết: mũ tròn xoè rộng nhiều nếp lượn như tai, thân ngắn mập, hai chân nhỏ. Dáng ô rộng, khác Tuyết Cầu (quả cầu). Người dùng đã chọn hướng này (16/11), chờ soạn prompt và ảnh | |
+| 08 | Tuyết Nhĩ | nấm tuyết: mũ tròn xoè rộng nhiều nếp lượn như tai, thân ngắn mập, hai chân nhỏ. Dáng ô rộng, khác Tuyết Cầu (quả cầu). Bậc 3 mũ nhiều tầng + sừng pha lê. Chưa ổn: bông tuyết tím-hồng, chớp sáng đè mắt phải Bậc 3, Bậc 1-2 nhìn thẳng | `08-tuyet-nhi.png` |
 | 09 | (chưa làm) | dự kiến: nhỏ nhắn, cầm / mang vật dụng | |
 | 10 | (chưa làm) | dự kiến: khổng lồ, kiểu boss của vùng | |
 
