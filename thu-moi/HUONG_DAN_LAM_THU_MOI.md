@@ -6,13 +6,13 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 1. Bối cảnh
 - Game đang thiết kế cơ chế mới: **Bắt thú theo vùng + Tiến hóa 3 bậc + Evo (ghép 2 con thành 1)**. Xem `THIET_KE_BAT_THU_EVO.md` (vẫn chỉ là ghi chú, CHƯA làm vào code).
-- 17 vùng, mỗi vùng 10 thú. Đang làm **Tuyết Nguyên (vùng 0)**, đủ 10 con rồi mới sang vùng khác.
+- 17 vùng, mỗi vùng 10 thú. Người dùng muốn làm **cả 17 vùng**, lần lượt từng vùng, từng con một, đủ 10 con rồi mới sang vùng kế. **Tuyết Nguyên (vùng 0) đã xong 10/10. Đang làm Sương Cốc (vùng 1)**, xem mục 2b. Danh sách 17 vùng ở `CLAUDE.md` của `main`; chủ đề / quái / lore từng vùng ở `VAN_KIEP_ZONES` trong `06-mobs.js`.
 - Mỗi con có **3 bậc trong 1 ảnh xếp ngang** (trái → phải = Bậc 1 → 2 → 3).
 - Người dùng tạo ảnh bằng **Canva Pro (AI)** theo prompt do Claude soạn, rồi gửi ảnh cho Claude. Claude kiểm ảnh, thêm vào nhánh, báo ngắn gọn và đề xuất con kế tiếp.
 
 ## 2. Tiến độ Tuyết Nguyên (10 con)
 
-**Trạng thái: 10/10 xong, Tuyết Nguyên đủ 10 con (10 đã nhận ảnh, đã xử lý; chờ người dùng upload `10-bang-son-cu-thu.png` + ghi chú lên nhánh). Kế tiếp: chốt các việc ở mục 8 hoặc sang vùng 1. Cập nhật lần cuối: 16/11/2026.**
+**Trạng thái: Tuyết Nguyên 10/10 xong (08, 09, 10 đã gửi; kiểm remote xem ảnh `08`-`10` đã upload đủ chưa). Vùng kế: Sương Cốc, xem mục 2b. Cập nhật lần cuối: 16/11/2026.**
 
 | # | Tên (1 tên chung cả 3 bậc) | Ý tưởng / dáng | Ảnh |
 |---|---|---|---|
@@ -29,12 +29,43 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 Ảnh nằm ở **thư mục gốc của nhánh**; ghi chú từng con ở `thu-moi/tuyet-nguyen/NN-slug.md` (đọc 1-2 file mẫu để làm theo).
 
+## 2b. Tiến độ Sương Cốc (vùng 1)
+
+**Trạng thái: 0/10 xong. Người dùng đã CHỐT bảng 10 con bên dưới (16/11/2026). Đang làm: 01 Sương Lộ (đã soạn prompt, chờ ảnh từ Canva). Cập nhật lần cuối: 16/11/2026.**
+
+Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục. Bảng màu: xanh ngọc đậm (deep teal), xanh ngọc (jade green), xanh rêu, xám xanh của sương, trắng sương, viền navy. Cấm tím / hồng. Quái cũ của vùng (không đặt tên trùng): Sương Vũ Lộc, Mù Sương Dơi, Vụ Giáp Ngưu, Bạch Thủy Ếch, Sương Nham Thiềm, Sương Mộc Nhện, Vạn Trượng Vụ Thú.
+
+| # | Tên | Môi trường | Dáng cơ thể | Ảnh |
+|---|---|---|---|---|
+| 01 | Sương Lộ (đang làm) | mặt đất / cỏ | giọt sương nhỏ hình giọt nước, đội lá, dễ thương | |
+| 02 | Sương Ngư | dưới nước | cá nhìn ngang, vây là lá, đuôi như dải sương | |
+| 03 | Sương Xuyên | lòng đất | thú đào hang bốn chân thấp, mũi khoan đá, móng đào | |
+| 04 | Vụ Điệp | trên trời | sinh vật cánh rộng như bướm đêm, vảy cánh là sương | |
+| 05 | Vụ Mộc | thực vật | cây non biết đi, rễ làm chân, thẳng đứng | |
+| 06 | Vụ Long | trời / nước | rồng sương thân dài uốn lượn, thần thoại | |
+| 07 | Lục Giáp | khe đá | bọ giáp ngọc sáu chân, dáng thấp rộng, vỏ cứng | |
+| 08 | Sương Chung | linh khí | chuông cổ lơ lửng, lõi sáng | |
+| 09 | Vụ Đồng | rừng sương | tiểu đồng nhỏ, đội dù lá, xách giỏ rêu phát sáng | |
+| 10 | Vạn Trượng Vụ Thú | boss | thú khổng lồ bằng sương và đá, giữ tên boss cũ của vùng | |
+
+Ghi chú từng con để ở `thu-moi/suong-coc/NN-slug.md` (tạo thư mục mới cho vùng này; ảnh vẫn để ở thư mục gốc của nhánh).
+
 ## 3. Quy tắc người dùng đã chốt
 1. **Mỗi con 1 tên duy nhất dùng chung cho cả 3 bậc**, không đặt tên riêng từng bậc. Bỏ chữ "Linh" ở cuối tên.
 2. Tên kiểu Hán-Việt hai từ, ưu tiên bắt đầu bằng "Tuyết" / "Băng" cho hợp vùng (ngoại lệ do người dùng tự chọn: "Golem Băng Giá"). Không trùng tên con khác.
 3. **Sáng tạo, không bám khuôn con vật có thật** (người dùng bỏ con nai vì "lấy khuôn thế giới động vật"). Pokémon rất đa dạng: **mỗi con phải khác dáng cơ thể** các con trước (tròn, đối xứng, uốn lượn, nặng hai chân, vật thể bay, bốn chân thần thoại...). Sinh thú thần thoại hoặc vật thể sống là ổn.
 4. Phong cách: **pixel art kiểu Pokémon (Gen 5)**, sắc cạnh, viền navy dày, đổ bóng theo mảng, thân sáng. Người dùng từng chê: quá mịn, quá nhợt trắng, quá giống nai thật.
 5. Người dùng thích nhất: Tuyết Cầu, Băng Đăng, Băng Kỳ Lân (liền khối, dễ nhìn, dễ thương hoặc ngầu). Từng chê hướng "các khối băng rời nhau" là xấu.
+
+## 3b. NGUYÊN TẮC ĐA DẠNG (người dùng nhấn mạnh, BẮT BUỘC cho mọi vùng, không để người dùng nhắc lại)
+Mục tiêu: bộ 10 con của MỖI vùng phải **đa dạng như Pokémon**, loài nào cũng có, không lặp ý. Người dùng đã chê bản đề xuất đầu của Sương Cốc vì "toàn đồ vật (chuông, gương, hồ lô, lá), đơn điệu".
+1. **Phủ đủ môi trường sống** trong 10 con của một vùng: trên trời (bay lượn), dưới nước, mặt đất / cỏ, lòng đất (đào hang), thực vật (cây / hoa biết đi), khe đá / giáp trụ (côn trùng-giáp), thần thoại (rồng, kỳ thú), linh khí / ma quái / vật thể sống (chuông, đèn, bóng), người nhỏ / tiểu đồng, và 1 boss khổng lồ. Mỗi con ghi rõ **môi trường** và **dáng cơ thể** trong bảng đề xuất.
+2. **Mỗi con một kiểu cơ thể khác nhau** trong cùng vùng: giọt tròn, nhìn ngang kiểu cá, bốn chân thấp, cánh rộng, đứng thẳng, thân dài uốn lượn, sáu chân, lơ lửng, hai chân, thú lớn... Không có hai con cùng dáng. Cũng tránh trùng dáng với vùng trước (vd Golem Băng Giá và Băng Sơn Cự Thú đã trùng dáng golem, người dùng chấp nhận nhưng không muốn lặp lại).
+3. **Tối đa 2-3 con là vật thể sống** (chuông, đèn lồng, gương...) trong 10 con. Phần còn lại phải là sinh vật: cá, bướm đêm, thú đào hang, cây biết đi, bọ giáp, rồng, tiểu đồng... Đây là lỗi người dùng đã chê.
+4. **Vẫn tuân quy tắc "không bám khuôn con vật thật"**: lấy kiểu cơ thể / môi trường làm khung rồi biến thành sinh vật tưởng tượng (vd cá có vây là lá, đuôi là dải sương; thú đào hang có mũi khoan đá). Không vẽ con vật thật nguyên xi (nai, ngựa...).
+5. **Chủ đề vùng quyết định chất liệu và màu**, không quyết định dáng: dáng phải đa dạng, còn chất liệu, bảng màu, họa tiết đồng bộ theo vùng (Tuyết Nguyên = băng; Sương Cốc = sương, rêu, ngọc xanh). Tên Hán-Việt hai từ, bắt đầu bằng từ chủ đề vùng (Tuyết / Băng; Sương / Vụ ...), trừ boss có thể giữ tên boss cũ của vùng (`VAN_KIEP_ZONES`).
+6. **Trước khi đề xuất bảng 10 con**, tự kiểm: (a) đủ môi trường chưa, (b) có hai con trùng dáng không, (c) quá nhiều vật thể không, (d) tên trùng quái / thú cũ không (đối chiếu `06-mobs.js`, tên file `img-mobs-*`). Đề xuất một bảng 10 con có cột Môi trường + Dáng, cho người dùng chốt, rồi làm từng con (một con một lần).
+7. Prompt cho mỗi vùng: chép prompt mẫu ở mục 4, ĐỔI bảng màu sang tông của vùng (vẫn cấm tím / hồng / chớp sáng đè mắt, thêm "NO neutral grey" nếu vùng không dùng xám), đổi phần "Creature concept" theo môi trường và dáng.
 
 ## 4. Prompt mẫu (đã chạy tốt, dán vào Canva rồi chỉ đổi đoạn "Creature concept")
 ```
@@ -80,7 +111,7 @@ Bài học đã gộp vào prompt mẫu: viền lệch giữa các bậc (Tuyế
 5. Nhận xét thật với người dùng: điểm tốt và điểm chưa ổn (viền lệch, mắt khó đọc, thân tối, hợp phong cách game chưa...). Đừng nói quá.
 
 ## 6. Thêm vào nhánh (git)
-- Ảnh: `NN-slug.png` ở **thư mục gốc**. Ghi chú: `thu-moi/tuyet-nguyen/NN-slug.md` gồm: vùng, loài + mô tả dáng, tên (1 tên chung), ảnh (file, kích thước, nền trong suốt chưa, đã xoá dấu sao chưa), đặc điểm hình ảnh từng bậc, lưu ý khi cắt (hiệu ứng ngoài thân, điểm cần chừa lề, điểm lệch phong cách).
+- Ảnh: `NN-slug.png` ở **thư mục gốc** (với vùng khác Tuyết Nguyên, số NN là số con trong vùng nên dễ trùng tên file: đặt `<slug-vùng>-NN-slug.png`, vd `suong-coc-01-suong-lo.png`; Tuyết Nguyên giữ nguyên tên cũ). Ghi chú: `thu-moi/<slug-vùng>/NN-slug.md` (vd `thu-moi/tuyet-nguyen/`, `thu-moi/suong-coc/`) gồm: vùng, loài + mô tả dáng, tên (1 tên chung), ảnh (file, kích thước, nền trong suốt chưa, đã xoá dấu sao chưa), đặc điểm hình ảnh từng bậc, lưu ý khi cắt (hiệu ứng ngoài thân, điểm cần chừa lề, điểm lệch phong cách).
 - Slug = tên không dấu nối gạch: "Băng Kỳ Lân" → `bang-ky-lan`.
 - Quyền ghi: gọi `add_repo` với `access:"push"`, clone `--depth 1` vào `/home/claude/thu-than-gioi`. Lấy nhánh bằng `git fetch --depth=20 origin ghi-chu-co-che-bat-thu-evo` rồi `git checkout -B ghi-chu-co-che-bat-thu-evo FETCH_HEAD` (không dùng `origin/...` vì fetch kiểu này không tạo tham chiếu).
 - Mỗi con một commit, tiếng Việt, kết thúc bằng 2 dòng Co-Authored-By / Claude-Session theo system-reminder của phiên. Đẩy bằng `git -c push.negotiate=true push origin ghi-chu-co-che-bat-thu-evo`, rồi kiểm lại bằng `git ls-remote origin refs/heads/ghi-chu-co-che-bat-thu-evo` so với `git rev-parse HEAD`.
