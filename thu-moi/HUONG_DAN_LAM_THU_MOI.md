@@ -31,29 +31,29 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 2b. Tiến độ Sương Cốc (vùng 1)
 
-**Trạng thái: 0/10 xong. Người dùng đã CHỐT bảng 10 con bên dưới (16/11/2026). Đang làm: 01 Sương Lộ (đã soạn prompt, chờ ảnh từ Canva). Cập nhật lần cuối: 16/11/2026.**
+**Trạng thái: 0/10 xong. Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng cần xác nhận bảng này. Đang làm: 01 Vụ Hồ (chờ prompt / ảnh từ Canva). Cập nhật lần cuối: 16/11/2026.**
 
-Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục. Bảng màu: xanh ngọc đậm (deep teal), xanh ngọc (jade green), xanh rêu, xám xanh của sương, trắng sương, viền navy. Cấm tím / hồng. Quái cũ của vùng (không đặt tên trùng): Sương Vũ Lộc, Mù Sương Dơi, Vụ Giáp Ngưu, Bạch Thủy Ếch, Sương Nham Thiềm, Sương Mộc Nhện, Vạn Trượng Vụ Thú.
+Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục. Bảng màu: xanh ngọc đậm (deep teal), xanh ngọc (jade green), xanh rêu, xám xanh của sương, trắng sương, viền navy. Cấm tím / hồng. Quái cũ của vùng (không đặt tên trùng, và nên chọn con vật khung khác: quái cũ đã dùng nai, dơi, bò, ếch, cóc, nhện): Sương Vũ Lộc, Mù Sương Dơi, Vụ Giáp Ngưu, Bạch Thủy Ếch, Sương Nham Thiềm, Sương Mộc Nhện, Vạn Trượng Vụ Thú.
 
-| # | Tên | Môi trường | Dáng cơ thể | Ảnh |
-|---|---|---|---|---|
-| 01 | Sương Lộ (đang làm) | mặt đất / cỏ | giọt sương nhỏ hình giọt nước, đội lá, dễ thương | |
-| 02 | Sương Ngư | dưới nước | cá nhìn ngang, vây là lá, đuôi như dải sương | |
-| 03 | Sương Xuyên | lòng đất | thú đào hang bốn chân thấp, mũi khoan đá, móng đào | |
-| 04 | Vụ Điệp | trên trời | sinh vật cánh rộng như bướm đêm, vảy cánh là sương | |
-| 05 | Vụ Mộc | thực vật | cây non biết đi, rễ làm chân, thẳng đứng | |
-| 06 | Vụ Long | trời / nước | rồng sương thân dài uốn lượn, thần thoại | |
-| 07 | Lục Giáp | khe đá | bọ giáp ngọc sáu chân, dáng thấp rộng, vỏ cứng | |
-| 08 | Sương Chung | linh khí | chuông cổ lơ lửng, lõi sáng | |
-| 09 | Vụ Đồng | rừng sương | tiểu đồng nhỏ, đội dù lá, xách giỏ rêu phát sáng | |
-| 10 | Vạn Trượng Vụ Thú | boss | thú khổng lồ bằng sương và đá, giữ tên boss cũ của vùng | |
+| # | Tên | Con vật khung | Môi trường | Dáng cơ thể | Ảnh |
+|---|---|---|---|---|---|
+| 01 | Vụ Hồ (đang làm) | cáo | mặt đất | thú bốn chân nhỏ nhanh nhẹn, tai to, đuôi xù như sương, dễ thương | |
+| 02 | Sương Ngư | cá chép | dưới nước | cá nhìn ngang, vây như lá, đuôi dải sương, vảy ngọc | |
+| 03 | Sương Xuyên | tê tê | lòng đất | thú bốn chân thấp cuộn tròn được, vảy đá phủ rêu, móng đào | |
+| 04 | Vụ Điệp | bướm đêm | trên trời (côn trùng) | cánh rộng đối xứng, vảy cánh là sương, râu lông vũ | |
+| 05 | Vụ Hạc | hạc | chim cao, lội nước | chim cao thanh mảnh, cổ dài, cánh xoè, đuôi như dải sương | |
+| 06 | Vụ Long | rồng thần thoại | trời / nước | thân dài uốn lượn, bốn chân ngắn, râu và bờm sương | |
+| 07 | Lục Giáp | bọ cánh cứng | khe đá (côn trùng giáp) | sáu chân, dáng thấp rộng, vỏ giáp ngọc, sừng | |
+| 08 | Vụ Quy | rùa | đầm sương (bò sát) | thân tròn nặng, mai phủ rêu và cây nhỏ, chân to | |
+| 09 | Sương Viên | vượn | cây rừng sương | thú có vú đứng thẳng, tay dài, đuôi cuộn, lông sương | |
+| 10 | Vạn Trượng Vụ Thú | thú ghép giả tưởng | boss | thú khổng lồ bốn chân bằng sương và đá, giữ tên boss cũ của vùng | |
 
 Ghi chú từng con để ở `thu-moi/suong-coc/NN-slug.md` (tạo thư mục mới cho vùng này; ảnh vẫn để ở thư mục gốc của nhánh).
 
 ## 3. Quy tắc người dùng đã chốt
 1. **Mỗi con 1 tên duy nhất dùng chung cho cả 3 bậc**, không đặt tên riêng từng bậc. Bỏ chữ "Linh" ở cuối tên.
 2. Tên kiểu Hán-Việt hai từ, ưu tiên bắt đầu bằng "Tuyết" / "Băng" cho hợp vùng (ngoại lệ do người dùng tự chọn: "Golem Băng Giá"). Không trùng tên con khác.
-3. **Sáng tạo, không bám khuôn con vật có thật** (người dùng bỏ con nai vì "lấy khuôn thế giới động vật"). Pokémon rất đa dạng: **mỗi con phải khác dáng cơ thể** các con trước (tròn, đối xứng, uốn lượn, nặng hai chân, vật thể bay, bốn chân thần thoại...). Sinh thú thần thoại hoặc vật thể sống là ổn.
+3. **CƠ CHẾ MỚI (người dùng sửa lại 16/11/2026, thay quy tắc cũ "không bám khuôn con vật thật"): ĐƯỢC lấy hình dáng động vật thật, côn trùng, chim, bò sát, cá, thú có vú, và cả con vật giả tưởng / thần thoại** làm khung cho thú. Lý do: thiết kế dạng vật thể / giọt sương quá đơn giản, thêm chi tiết cỡ nào cũng không ổn. Vẫn phải **tạo hình riêng của game** (pixel Gen 5, chất liệu và họa tiết theo chủ đề vùng, không phải bản sao thật). Pokémon rất đa dạng: **mỗi con phải khác dáng cơ thể** các con trước (tròn, đối xứng, uốn lượn, nặng hai chân, bay, bốn chân...). Ghi chú: người dùng từng bỏ con nai ở Tuyết Nguyên vì quá giống thật, nên vẫn thêm nét riêng (sừng / vảy / cánh / hoa văn theo chủ đề vùng), đừng vẽ y nguyên con vật.
 4. Phong cách: **pixel art kiểu Pokémon (Gen 5)**, sắc cạnh, viền navy dày, đổ bóng theo mảng, thân sáng. Người dùng từng chê: quá mịn, quá nhợt trắng, quá giống nai thật.
 5. Người dùng thích nhất: Tuyết Cầu, Băng Đăng, Băng Kỳ Lân (liền khối, dễ nhìn, dễ thương hoặc ngầu). Từng chê hướng "các khối băng rời nhau" là xấu.
 
@@ -61,16 +61,16 @@ Ghi chú từng con để ở `thu-moi/suong-coc/NN-slug.md` (tạo thư mục m
 Mục tiêu: bộ 10 con của MỖI vùng phải **đa dạng như Pokémon**, loài nào cũng có, không lặp ý. Người dùng đã chê bản đề xuất đầu của Sương Cốc vì "toàn đồ vật (chuông, gương, hồ lô, lá), đơn điệu".
 1. **Phủ đủ môi trường sống** trong 10 con của một vùng: trên trời (bay lượn), dưới nước, mặt đất / cỏ, lòng đất (đào hang), thực vật (cây / hoa biết đi), khe đá / giáp trụ (côn trùng-giáp), thần thoại (rồng, kỳ thú), linh khí / ma quái / vật thể sống (chuông, đèn, bóng), người nhỏ / tiểu đồng, và 1 boss khổng lồ. Mỗi con ghi rõ **môi trường** và **dáng cơ thể** trong bảng đề xuất.
 2. **Mỗi con một kiểu cơ thể khác nhau** trong cùng vùng: giọt tròn, nhìn ngang kiểu cá, bốn chân thấp, cánh rộng, đứng thẳng, thân dài uốn lượn, sáu chân, lơ lửng, hai chân, thú lớn... Không có hai con cùng dáng. Cũng tránh trùng dáng với vùng trước (vd Golem Băng Giá và Băng Sơn Cự Thú đã trùng dáng golem, người dùng chấp nhận nhưng không muốn lặp lại).
-3. **Tối đa 2-3 con là vật thể sống** (chuông, đèn lồng, gương...) trong 10 con. Phần còn lại phải là sinh vật: cá, bướm đêm, thú đào hang, cây biết đi, bọ giáp, rồng, tiểu đồng... Đây là lỗi người dùng đã chê.
-4. **Vẫn tuân quy tắc "không bám khuôn con vật thật"**: lấy kiểu cơ thể / môi trường làm khung rồi biến thành sinh vật tưởng tượng (vd cá có vây là lá, đuôi là dải sương; thú đào hang có mũi khoan đá). Không vẽ con vật thật nguyên xi (nai, ngựa...).
+3. **Hạn chế vật thể sống** (chuông, đèn lồng, gương, giọt nước...): tối đa 1-2 con trong 10 con, và nên có tay chân / mặt rõ. Phần lớn là **sinh vật thật hoặc giả tưởng**: thú có vú, chim, cá, bò sát, côn trùng, rồng... (người dùng đã chê dạng giọt sương "quá đơn giản").
+4. **Được lấy khuôn động vật** (xem quy tắc 3 mục 3): chọn con vật làm khung theo môi trường rồi gắn chất liệu / họa tiết của vùng (vd cáo có đuôi sương, tê tê vảy đá rêu, bướm đêm cánh sương). Nhớ nêu tên con vật làm khung trong bảng đề xuất.
 5. **Chủ đề vùng quyết định chất liệu và màu**, không quyết định dáng: dáng phải đa dạng, còn chất liệu, bảng màu, họa tiết đồng bộ theo vùng (Tuyết Nguyên = băng; Sương Cốc = sương, rêu, ngọc xanh). Tên Hán-Việt hai từ, bắt đầu bằng từ chủ đề vùng (Tuyết / Băng; Sương / Vụ ...), trừ boss có thể giữ tên boss cũ của vùng (`VAN_KIEP_ZONES`).
-6. **Trước khi đề xuất bảng 10 con**, tự kiểm: (a) đủ môi trường chưa, (b) có hai con trùng dáng không, (c) quá nhiều vật thể không, (d) tên trùng quái / thú cũ không (đối chiếu `06-mobs.js`, tên file `img-mobs-*`). Đề xuất một bảng 10 con có cột Môi trường + Dáng, cho người dùng chốt, rồi làm từng con (một con một lần).
+6. **Trước khi đề xuất bảng 10 con**, tự kiểm: (a) đủ môi trường chưa, (b) có hai con trùng dáng không, (c) quá nhiều vật thể không, (d) tên trùng quái / thú cũ không (đối chiếu `06-mobs.js`, tên file `img-mobs-*`). Đề xuất một bảng 10 con có cột Con vật khung + Môi trường + Dáng, cho người dùng chốt, rồi làm từng con (một con một lần).
 7. Prompt cho mỗi vùng: chép prompt mẫu ở mục 4, ĐỔI bảng màu sang tông của vùng (vẫn cấm tím / hồng / chớp sáng đè mắt, thêm "NO neutral grey" nếu vùng không dùng xám), đổi phần "Creature concept" theo môi trường và dáng.
 
 ## 4. Prompt mẫu (đã chạy tốt, dán vào Canva rồi chỉ đổi đoạn "Creature concept")
 ```
-Pokémon-style pixel art evolution line sprite sheet. ONE original fantasy
-creature (NOT based on any real animal) in 3 evolution stages side by side in a
+Pokémon-style pixel art evolution line sprite sheet. ONE original creature
+inspired by <TÊN CON VẬT KHUNG> (a stylized fantasy version, not a realistic copy) in 3 evolution stages side by side in a
 single row, left to right = Stage 1, Stage 2, Stage 3. Wide landscape image,
 three equal sections, all facing left, all on the same ground line (or floating
 if the creature flies), clear empty space between stages, nothing overlapping.
