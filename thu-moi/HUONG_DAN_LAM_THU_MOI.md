@@ -12,7 +12,7 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 2. Tiến độ Tuyết Nguyên (10 con)
 
-**Trạng thái: 9/10 xong (09 đã nhận ảnh, đã xử lý; chờ người dùng upload `09-bang-linh.png` + ghi chú lên nhánh). Kế tiếp: 10 (boss của vùng). Cập nhật lần cuối: 16/11/2026.**
+**Trạng thái: 10/10 xong, Tuyết Nguyên đủ 10 con (10 đã nhận ảnh, đã xử lý; chờ người dùng upload `10-bang-son-cu-thu.png` + ghi chú lên nhánh). Kế tiếp: chốt các việc ở mục 8 hoặc sang vùng 1. Cập nhật lần cuối: 16/11/2026.**
 
 | # | Tên (1 tên chung cả 3 bậc) | Ý tưởng / dáng | Ảnh |
 |---|---|---|---|
@@ -25,7 +25,7 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 | 07 | Băng Tích | bò sát băng thân dài thấp, đuôi dài đầu pha lê, hàng gai băng dọc lưng, có hiệu ứng bông tuyết / tia sáng / sương mũi. Chỉ 4 chân (chưa đủ 6 như dự định, người dùng chưa yêu cầu sửa). Bậc 3 lấy từ bản hàng dưới (ngậm miệng) | `07-bang-tich.png` |
 | 08 | Tuyết Nhĩ | nấm tuyết: mũ tròn xoè rộng nhiều nếp lượn như tai, thân ngắn mập, hai chân nhỏ. Dáng ô rộng, khác Tuyết Cầu (quả cầu). Bậc 3 mũ nhiều tầng + sừng pha lê. Chưa ổn: bông tuyết tím-hồng, chớp sáng đè mắt phải Bậc 3, Bậc 1-2 nhìn thẳng | `08-tuyet-nhi.png` |
 | 09 | Băng Linh | linh hồn băng nhỏ nhắn đội mũ trùm pha lê, áo choàng, mang đèn lồng và gậy / trượng; dáng người đứng thẳng, mảnh. Tên do người dùng đổi từ "Tuyết Lữ". Chưa ổn: không quay trái hẳn, đèn lồng gần Băng Đăng | `09-bang-linh.png` |
-| 10 | (chưa làm) | dự kiến: khổng lồ, kiểu boss của vùng | |
+| 10 | Băng Sơn Cự Thú (boss) | khổng lồ làm toàn bằng tinh thể băng ghép lại, dáng golem hai chân (người dùng biết trùng dáng với 04, chọn giữ). Tên 4 từ là chủ ý. Chưa ổn: mắt Bậc 3 khó đọc, vụn băng ám tím | `10-bang-son-cu-thu.png` |
 
 Ảnh nằm ở **thư mục gốc của nhánh**; ghi chú từng con ở `thu-moi/tuyet-nguyen/NN-slug.md` (đọc 1-2 file mẫu để làm theo).
 
