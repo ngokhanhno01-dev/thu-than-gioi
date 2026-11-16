@@ -31,14 +31,14 @@ Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm.
 
 ## 2b. Tiến độ Sương Cốc (vùng 1)
 
-**Trạng thái: 1/10 xong (01 Vụ Hồ đã thêm vào nhánh). Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng cần xác nhận bảng này (chưa phản đối). Vụ Hồ xong (người dùng chấp nhận các điểm nhỏ, đã thay bằng bản tách từ ảnh gốc 1376×768), đang làm: 02 Sương Ngư (cá chép): đã soạn prompt, chờ người dùng gửi ảnh gốc chưa tách nền từ Canva. Cập nhật lần cuối: 16/11/2026.**
+**Trạng thái: 2/10 xong (01 Vụ Hồ và 02 Sương Ngư đã có ghi chú trên nhánh). Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng cần xác nhận bảng này (chưa phản đối). Vụ Hồ xong. Sương Ngư: người dùng gửi ảnh đã xoá nền còn đốm tím / hồng, Claude đã xoá đốm, alpha cứng, ghi chú `thu-moi/suong-coc/02-suong-ngu.md` đã đẩy; **ảnh `suong-coc-02-suong-ngu.png` (887×443) cần người dùng tự upload lên thư mục gốc của nhánh** (công cụ GitHub của phiên này không đẩy được file nhị phân). Kế tiếp: 03 Sương Xuyên (tê tê), chờ người dùng xác nhận hướng và prompt. Cập nhật lần cuối: 16/11/2026.**
 
 Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục. Bảng màu: xanh ngọc đậm (deep teal), xanh ngọc (jade green), xanh rêu, xám xanh của sương, trắng sương, viền navy. Cấm tím / hồng. Quái cũ của vùng (không đặt tên trùng, và nên chọn con vật khung khác: quái cũ đã dùng nai, dơi, bò, ếch, cóc, nhện): Sương Vũ Lộc, Mù Sương Dơi, Vụ Giáp Ngưu, Bạch Thủy Ếch, Sương Nham Thiềm, Sương Mộc Nhện, Vạn Trượng Vụ Thú.
 
 | # | Tên | Con vật khung | Môi trường | Dáng cơ thể | Ảnh |
 |---|---|---|---|---|---|
 | 01 | Vụ Hồ (xong) | cáo | mặt đất | thú bốn chân nhỏ nhanh nhẹn, tai to, đuôi xù như sương, dễ thương | `suong-coc-01-vu-ho.png` |
-| 02 | Sương Ngư (đang làm) | cá chép | dưới nước | cá nhìn ngang, vây như lá, đuôi dải sương, vảy ngọc | |
+| 02 | Sương Ngư (xong, chờ upload ảnh) | cá chép | dưới nước | cá nhìn ngang, vây như lá, đuôi dải sương, vảy ngọc | `suong-coc-02-suong-ngu.png` |
 | 03 | Sương Xuyên | tê tê | lòng đất | thú bốn chân thấp cuộn tròn được, vảy đá phủ rêu, móng đào | |
 | 04 | Vụ Điệp | bướm đêm | trên trời (côn trùng) | cánh rộng đối xứng, vảy cánh là sương, râu lông vũ | |
 | 05 | Vụ Hạc | hạc | chim cao, lội nước | chim cao thanh mảnh, cổ dài, cánh xoè, đuôi như dải sương | |
@@ -107,13 +107,14 @@ Bài học đã gộp vào prompt mẫu: viền lệch giữa các bậc (Tuyế
    - Pixel viền ám tím do nền: chỉ những pixel cách nền ≤ 3px có `R-G > 40` và `B-G > 20` mới tô lại bằng màu viền (10,14,134). **ĐỪNG dùng ngưỡng lỏng** (như `R-G > 8`): màu viền navy thật của ảnh là xanh hơi tím (tới ~(39,23,156)), ngưỡng lỏng sẽ tô nhầm hàng nghìn pixel viền và phá viền.
    - Cắt sát bounding box, chừa lề ~24px.
    - **Không thu nhỏ** ảnh (không có lưới pixel đều, thu nhỏ làm viền mờ). Nếu người dùng cần đúng 688×384 hoặc cần cắt riêng 3 bậc thì làm theo yêu cầu và nói rõ.
+   - Nếu người dùng đã tự xoá nền (ảnh RGBA, viền bán trong suốt) mà còn đốm tím / hồng bên trong: tô lại pixel đó bằng màu lân cận (mask `R-G>25 và B-G>10`, nở 1px; thêm lượt bắt tím nhạt theo hue 245-340° với độ sáng > 0.62, tránh viền navy tối), mảng đốm rời hẳn thì xoá, rồi alpha cứng 0/255 (ngưỡng 128). (Làm với Sương Ngư.)
 4. **Soi trước khi commit:** dựng ảnh xem thử trên nền tối VÀ nền sáng, phóng to vài chỗ viền, đếm lại mảnh rời. Đọc ảnh xem thử 1 lần, không xem từng file riêng.
 5. Nhận xét thật với người dùng: điểm tốt và điểm chưa ổn (viền lệch, mắt khó đọc, thân tối, hợp phong cách game chưa...). Đừng nói quá.
 
 ## 6. Thêm vào nhánh (git)
 - Ảnh: `NN-slug.png` ở **thư mục gốc** (với vùng khác Tuyết Nguyên, số NN là số con trong vùng nên dễ trùng tên file: đặt `<slug-vùng>-NN-slug.png`, vd `suong-coc-01-suong-lo.png`; Tuyết Nguyên giữ nguyên tên cũ). Ghi chú: `thu-moi/<slug-vùng>/NN-slug.md` (vd `thu-moi/tuyet-nguyen/`, `thu-moi/suong-coc/`) gồm: vùng, loài + mô tả dáng, tên (1 tên chung), ảnh (file, kích thước, nền trong suốt chưa, đã xoá dấu sao chưa), đặc điểm hình ảnh từng bậc, lưu ý khi cắt (hiệu ứng ngoài thân, điểm cần chừa lề, điểm lệch phong cách).
 - Slug = tên không dấu nối gạch: "Băng Kỳ Lân" → `bang-ky-lan`.
-- Quyền ghi: gọi `add_repo` với `access:"push"`, clone `--depth 1` vào `/home/claude/thu-than-gioi`. Lấy nhánh bằng `git fetch --depth=20 origin ghi-chu-co-che-bat-thu-evo` rồi `git checkout -B ghi-chu-co-che-bat-thu-evo FETCH_HEAD` (không dùng `origin/...` vì fetch kiểu này không tạo tham chiếu).
+- Quyền ghi: gọi `add_repo` với `access:"push"`, clone `--depth 1` vào `/home/claude/thu-than-gioi`. Lấy nhánh bằng `git fetch --depth=20 origin ghi-chu-co-che-bat-thu-evo` rồi `git checkout -B ghi-chu-co-che-bat-thu-evo FETCH_HEAD` (không dùng `origin/...` vì fetch kiểu này không tạo tham chiếu). Nếu phiên chỉ có công cụ GitHub (create_or_update_file / push_files) và bash không có mạng: chỉ đẩy được file văn bản (ghi chú, hướng dẫn), **ảnh PNG phải nhờ người dùng tự upload**.
 - Mỗi con một commit, tiếng Việt, kết thúc bằng 2 dòng Co-Authored-By / Claude-Session theo system-reminder của phiên. Đẩy bằng `git -c push.negotiate=true push origin ghi-chu-co-che-bat-thu-evo`, rồi kiểm lại bằng `git ls-remote origin refs/heads/ghi-chu-co-che-bat-thu-evo` so với `git rev-parse HEAD`.
 - Bẫy đã gặp: (a) `git rm` file cuối trong thư mục làm mất thư mục, phải `mkdir -p` trước khi ghi file mới; (b) hook báo "unpushed commits / no remote branch" dù đã đẩy thành công: sửa bằng `git config --add remote.origin.fetch '+refs/heads/ghi-chu-co-che-bat-thu-evo:refs/remotes/origin/ghi-chu-co-che-bat-thu-evo'`, `git fetch origin` nhánh đó rồi `git branch -u origin/ghi-chu-co-che-bat-thu-evo`.
 - Không bao giờ nói đã đẩy nếu chưa kiểm remote.
