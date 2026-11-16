@@ -1,137 +1,34 @@
-# Hướng dẫn cho Claude: làm thú mới cho vùng Tuyết Nguyên (game "thu-than-gioi")
+# Làm thú mới cho game "thu-than-gioi" (ĐỌC FILE NÀY TRƯỚC, CHỈ CẦN FILE NÀY ĐỂ BẮT ĐẦU)
 
-Tài liệu bàn giao giữa các phiên Claude. Đọc hết trước khi làm. Trả lời người dùng ngắn gọn bằng tiếng Việt, nói thẳng điểm chưa ổn của ảnh, không hỏi lại nhiều.
+Trả lời người dùng ngắn gọn bằng tiếng Việt, nói thẳng điểm chưa ổn, không hỏi lại nhiều. Làm trên nhánh `ghi-chu-co-che-bat-thu-evo`, KHÔNG push `main`.
 
-> Lưu ý: file `CLAUDE.md` ở nhánh `main` là hướng dẫn thay icon trang bị / nguyên liệu và dặn push thẳng lên `main`. **Việc thú mới này khác**: làm trên nhánh `ghi-chu-co-che-bat-thu-evo`, KHÔNG push lên `main`.
+## 0. TIẾT KIỆM QUOTA (bắt buộc, đã có phiên hết quota chỉ vì đọc)
+- **KHÔNG liệt kê thư mục gốc của nhánh** (hàng trăm ảnh, ~200 KB kết quả). Luôn gọi `get_file_contents` bằng đường dẫn trực tiếp. Chỉ được liệt kê thư mục con nhỏ như `thu-moi/<vùng>`.
+- **KHÔNG đọc**: `CLAUDE.md` (của việc icon trang bị, bảo push main, sai việc này), `THIET_KE_BAT_THU_EVO.md` (chỉ khi người dùng hỏi về cơ chế), `GHI_CHU_*.md`, mọi file `.js`, đặc biệt `06-mobs.js` (144 KB). Kiểm tên trùng bằng danh sách quái cũ trong `TIEN_DO.md`, không mở `06-mobs.js`.
+- Chỉ đọc đúng file cần cho bước đang làm (mục 4). Ghi chú mẫu: đọc **1 file mới nhất**, không đọc hết.
+- `thu-moi/HUONG_DAN_LAM_THU_MOI.md` này là bản duy nhất; file cùng tên ở thư mục gốc chỉ là con trỏ.
+- Không đọc lại file vừa tự ghi; không in lại nội dung dài vào hội thoại.
 
 ## 1. Bối cảnh
-- Game đang thiết kế cơ chế mới: **Bắt thú theo vùng + Tiến hóa 3 bậc + Evo (ghép 2 con thành 1)**. Xem `THIET_KE_BAT_THU_EVO.md` (vẫn chỉ là ghi chú, CHƯA làm vào code).
-- 17 vùng, mỗi vùng 10 thú. Người dùng muốn làm **cả 17 vùng**, lần lượt từng vùng, từng con một, đủ 10 con rồi mới sang vùng kế. **Tuyết Nguyên (vùng 0) đã xong 10/10. Đang làm Sương Cốc (vùng 1)**, xem mục 2b. Danh sách 17 vùng ở `CLAUDE.md` của `main`; chủ đề / quái / lore từng vùng ở `VAN_KIEP_ZONES` trong `06-mobs.js`.
-- Mỗi con có **3 bậc trong 1 ảnh xếp ngang** (trái → phải = Bậc 1 → 2 → 3).
-- Người dùng tạo ảnh bằng **Canva Pro (AI)** theo prompt do Claude soạn, rồi gửi ảnh cho Claude. Claude kiểm ảnh, thêm vào nhánh, báo ngắn gọn và đề xuất con kế tiếp.
+Game đang thiết kế **Bắt thú theo vùng + Tiến hóa 3 bậc + Evo**. 17 vùng × 10 thú, làm lần lượt từng vùng, từng con, đủ 10 con mới sang vùng kế. Mỗi con = **1 ảnh xếp ngang 3 bậc** (trái → phải = Bậc 1 → 2 → 3). Người dùng làm ảnh bằng **Canva Pro (AI)** theo prompt Claude soạn, gửi ảnh lại; Claude kiểm ảnh, tách nền, thêm vào nhánh. Claude KHÔNG tự tạo được ảnh.
 
-## 2. Tiến độ Tuyết Nguyên (10 con)
+## 2. Quy tắc người dùng đã chốt
+1. **Mỗi con 1 tên duy nhất cho cả 3 bậc.** Tên Hán-Việt hai từ, bắt đầu bằng từ chủ đề vùng (Tuyết / Băng; Sương / Vụ...). Boss được giữ tên boss cũ của vùng. Không trùng quái / thú cũ.
+2. **Được lấy khuôn động vật** (thật hoặc thần thoại) làm khung, nhưng phải có nét riêng theo chủ đề vùng (vảy, cánh, sừng, họa tiết), không vẽ y nguyên con vật. Người dùng từng bỏ con nai vì quá giống thật.
+3. **Đa dạng như Pokémon**: trong 10 con phủ đủ môi trường (trời, nước, mặt đất, lòng đất, thực vật, khe đá / giáp, thần thoại, linh khí, người nhỏ, boss). **Mỗi con một dáng cơ thể khác nhau**, không trùng dáng con trước. **Vật thể sống (chuông, đèn, gương...) tối đa 1-2 con / vùng**, nên có tay chân / mặt rõ. Người dùng đã chê bộ "toàn đồ vật".
+4. Phong cách: **pixel art Gen 5 Pokémon**, sắc cạnh, viền navy dày, đổ bóng theo mảng, thân sáng. Từng bị chê: quá mịn, quá nhợt trắng, "các khối rời nhau". Thích: Tuyết Cầu, Băng Đăng, Băng Kỳ Lân (liền khối, dễ nhìn).
+5. Chủ đề vùng quyết định chất liệu + bảng màu, không quyết định dáng. Cấm tím / hồng, chớp sáng đè mắt.
+6. Khi người dùng nói "xấu": đừng cãi, đưa 2-3 hướng khác, chọn 1 hướng mạnh nhất và nói vì sao.
+7. Trước khi đề xuất bảng 10 con cho vùng mới: tự kiểm đủ môi trường, không trùng dáng, ít vật thể, tên không trùng quái cũ. Bảng có cột Con vật khung / Môi trường / Dáng.
 
-**Trạng thái: Tuyết Nguyên 10/10 xong (08, 09, 10 đã gửi; kiểm remote xem ảnh `08`-`10` đã upload đủ chưa). Vùng kế: Sương Cốc, xem mục 2b. Cập nhật lần cuối: 16/11/2026.**
+## 3. Nhịp làm việc mỗi con
+Đề xuất ý tưởng + dáng (khác con trước) → soạn prompt → người dùng làm ảnh Canva, gửi lại → kiểm + tách nền + xoá dấu sao → thêm ảnh + ghi chú vào nhánh → báo ngắn (file, nhận xét thật) → đề xuất con kế.
+**Sau MỖI bước, tự cập nhật `thu-moi/TIEN_DO.md`** (dòng Trạng thái + dòng con đang làm), không đợi người dùng nhắc. Mốc: chọn hướng, đã soạn prompt, nhận ảnh, đã thêm vào nhánh, sang con kế.
 
-| # | Tên (1 tên chung cả 3 bậc) | Ý tưởng / dáng | Ảnh |
-|---|---|---|---|
-| 01 | Tuyết Cầu | quả cầu tuyết tròn, dễ thương | `01-tuyet-cau.png` |
-| 02 | Tuyết Tinh | bông tuyết sáu cánh, đối xứng góc cạnh | `02-tuyet-tinh.png` |
-| 03 | Tuyết Quang | thân dài uốn lượn (cực quang) | `03-tuyet-quang.png` |
-| 04 | Golem Băng Giá | golem đá nặng, đứng hai chân | `04-golem-bang-gia.png` |
-| 05 | Băng Đăng | đèn lồng băng biết bay | `05-bang-dang.png` |
-| 06 | Băng Kỳ Lân | kỳ lân thần thoại bốn chân, chạy nhanh | `06-bang-ky-lan.png` |
-| 07 | Băng Tích | bò sát băng thân dài thấp, đuôi dài đầu pha lê, hàng gai băng dọc lưng, có hiệu ứng bông tuyết / tia sáng / sương mũi. Chỉ 4 chân (chưa đủ 6 như dự định, người dùng chưa yêu cầu sửa). Bậc 3 lấy từ bản hàng dưới (ngậm miệng) | `07-bang-tich.png` |
-| 08 | Tuyết Nhĩ | nấm tuyết: mũ tròn xoè rộng nhiều nếp lượn như tai, thân ngắn mập, hai chân nhỏ. Dáng ô rộng, khác Tuyết Cầu (quả cầu). Bậc 3 mũ nhiều tầng + sừng pha lê. Chưa ổn: bông tuyết tím-hồng, chớp sáng đè mắt phải Bậc 3, Bậc 1-2 nhìn thẳng | `08-tuyet-nhi.png` |
-| 09 | Băng Linh | linh hồn băng nhỏ nhắn đội mũ trùm pha lê, áo choàng, mang đèn lồng và gậy / trượng; dáng người đứng thẳng, mảnh. Tên do người dùng đổi từ "Tuyết Lữ". Chưa ổn: không quay trái hẳn, đèn lồng gần Băng Đăng | `09-bang-linh.png` |
-| 10 | Băng Sơn Cự Thú (boss) | khổng lồ làm toàn bằng tinh thể băng ghép lại, dáng golem hai chân (người dùng biết trùng dáng với 04, chọn giữ). Tên 4 từ là chủ ý. Chưa ổn: mắt Bậc 3 khó đọc, vụn băng ám tím | `10-bang-son-cu-thu.png` |
-
-Ảnh nằm ở **thư mục gốc của nhánh**; ghi chú từng con ở `thu-moi/tuyet-nguyen/NN-slug.md` (đọc 1-2 file mẫu để làm theo).
-
-## 2b. Tiến độ Sương Cốc (vùng 1)
-
-**Trạng thái: 3/10 xong (01 Vụ Hồ, 02 Sương Ngư, 03 Sương Xuyên đã có ghi chú trên nhánh; ảnh `suong-coc-01` đến `03` đã có ở thư mục gốc). Đang làm 04 Vụ Điệp (bướm đêm): đã đề xuất hướng thiết kế và soạn prompt (mục 2c), chờ người dùng làm ảnh trên Canva và gửi lại. Bảng 10 con đã được làm lại lần 2 sau khi người dùng đổi cơ chế sang cho phép khuôn động vật (bản đầu "Sương Lộ / giọt sương" bị bỏ vì quá đơn giản); người dùng chưa phản đối bảng này. Cập nhật lần cuối: 16/11/2026.**
-
-Chủ đề: sương dày, rêu, khe đá, ngọc xanh. Buff vùng: Hồi phục. Bảng màu: xanh ngọc đậm (deep teal), xanh ngọc (jade green), xanh rêu, xám xanh của sương, trắng sương, viền navy. Cấm tím / hồng. Quái cũ của vùng (không đặt tên trùng, và nên chọn con vật khung khác: quái cũ đã dùng nai, dơi, bò, ếch, cóc, nhện): Sương Vũ Lộc, Mù Sương Dơi, Vụ Giáp Ngưu, Bạch Thủy Ếch, Sương Nham Thiềm, Sương Mộc Nhện, Vạn Trượng Vụ Thú.
-
-| # | Tên | Con vật khung | Môi trường | Dáng cơ thể | Ảnh |
-|---|---|---|---|---|---|
-| 01 | Vụ Hồ (xong) | cáo | mặt đất | thú bốn chân nhỏ nhanh nhẹn, tai to, đuôi xù như sương, dễ thương | `suong-coc-01-vu-ho.png` |
-| 02 | Sương Ngư (xong) | cá chép | dưới nước | cá nhìn ngang, vây như lá, đuôi dải sương, vảy ngọc | `suong-coc-02-suong-ngu.png` |
-| 03 | Sương Xuyên (xong) | tê tê | lòng đất | thú bốn chân thấp cuộn tròn được, vảy đá phủ rêu, móng đào | `suong-coc-03-suong-xuyen.png` |
-| 04 | Vụ Điệp (đang làm: đã soạn prompt, chờ ảnh) | bướm đêm | trên trời (côn trùng) | cánh rộng đối xứng, vảy cánh là sương, râu lông vũ | |
-| 05 | Vụ Hạc | hạc | chim cao, lội nước | chim cao thanh mảnh, cổ dài, cánh xoè, đuôi như dải sương | |
-| 06 | Vụ Long | rồng thần thoại | trời / nước | thân dài uốn lượn, bốn chân ngắn, râu và bờm sương | |
-| 07 | Lục Giáp | bọ cánh cứng | khe đá (côn trùng giáp) | sáu chân, dáng thấp rộng, vỏ giáp ngọc, sừng | |
-| 08 | Vụ Quy | rùa | đầm sương (bò sát) | thân tròn nặng, mai phủ rêu và cây nhỏ, chân to | |
-| 09 | Sương Viên | vượn | cây rừng sương | thú có vú đứng thẳng, tay dài, đuôi cuộn, lông sương | |
-| 10 | Vạn Trượng Vụ Thú | thú ghép giả tưởng | boss | thú khổng lồ bốn chân bằng sương và đá, giữ tên boss cũ của vùng | |
-
-Ghi chú từng con để ở `thu-moi/suong-coc/NN-slug.md` (tạo thư mục mới cho vùng này; ảnh vẫn để ở thư mục gốc của nhánh).
-
-## 2c. Thiết kế + prompt 04 Vụ Điệp (Sương Cốc)
-
-- Khung: **bướm đêm** (bản giả tưởng). Môi trường: trên trời. Dáng: cánh rộng đối xứng, thân nhỏ mập phủ lông trắng sương, râu lông vũ. Khác 01-03 (đều là thú thân dài / bốn chân / cá) ở chỗ là **côn trùng bay, hai cánh to chiếm phần lớn dáng**.
-- Họa tiết cánh dùng **gân lá ngọc + mép cánh là vảy sương**, KHÔNG dùng đốm mắt giả (tránh lẫn với mắt thật, người dùng từng chê chớp sáng đè mắt).
-- Tên "Vụ Điệp" không trùng quái cũ (quái cũ có "Hồng Liên Phấn Điệp" thuộc vùng khác, màu hồng).
-- Prompt đã đưa người dùng ở phiên này (xem lịch sử hội thoại); tóm tắt: bảng màu deep navy, deep teal, jade green, moss green, mist white; cấm tím / hồng / xám trung tính; mắt cyan có điểm sáng; hiệu ứng ít và đặc.
-
-## 3. Quy tắc người dùng đã chốt
-1. **Mỗi con 1 tên duy nhất dùng chung cho cả 3 bậc**, không đặt tên riêng từng bậc. Bỏ chữ "Linh" ở cuối tên.
-2. Tên kiểu Hán-Việt hai từ, ưu tiên bắt đầu bằng "Tuyết" / "Băng" cho hợp vùng (ngoại lệ do người dùng tự chọn: "Golem Băng Giá"). Không trùng tên con khác.
-3. **CƠ CHẾ MỚI (người dùng sửa lại 16/11/2026, thay quy tắc cũ "không bám khuôn con vật thật"): ĐƯỢC lấy hình dáng động vật thật, côn trùng, chim, bò sát, cá, thú có vú, và cả con vật giả tưởng / thần thoại** làm khung cho thú. Lý do: thiết kế dạng vật thể / giọt sương quá đơn giản, thêm chi tiết cỡ nào cũng không ổn. Vẫn phải **tạo hình riêng của game** (pixel Gen 5, chất liệu và họa tiết theo chủ đề vùng, không phải bản sao thật). Pokémon rất đa dạng: **mỗi con phải khác dáng cơ thể** các con trước (tròn, đối xứng, uốn lượn, nặng hai chân, bay, bốn chân...). Ghi chú: người dùng từng bỏ con nai ở Tuyết Nguyên vì quá giống thật, nên vẫn thêm nét riêng (sừng / vảy / cánh / hoa văn theo chủ đề vùng), đừng vẽ y nguyên con vật.
-4. Phong cách: **pixel art kiểu Pokémon (Gen 5)**, sắc cạnh, viền navy dày, đổ bóng theo mảng, thân sáng. Người dùng từng chê: quá mịn, quá nhợt trắng, quá giống nai thật.
-5. Người dùng thích nhất: Tuyết Cầu, Băng Đăng, Băng Kỳ Lân (liền khối, dễ nhìn, dễ thương hoặc ngầu). Từng chê hướng "các khối băng rời nhau" là xấu.
-
-## 3b. NGUYÊN TẮC ĐA DẠNG (người dùng nhấn mạnh, BẮT BUỘC cho mọi vùng, không để người dùng nhắc lại)
-Mục tiêu: bộ 10 con của MỖI vùng phải **đa dạng như Pokémon**, loài nào cũng có, không lặp ý. Người dùng đã chê bản đề xuất đầu của Sương Cốc vì "toàn đồ vật (chuông, gương, hồ lô, lá), đơn điệu".
-1. **Phủ đủ môi trường sống** trong 10 con của một vùng: trên trời (bay lượn), dưới nước, mặt đất / cỏ, lòng đất (đào hang), thực vật (cây / hoa biết đi), khe đá / giáp trụ (côn trùng-giáp), thần thoại (rồng, kỳ thú), linh khí / ma quái / vật thể sống (chuông, đèn, bóng), người nhỏ / tiểu đồng, và 1 boss khổng lồ. Mỗi con ghi rõ **môi trường** và **dáng cơ thể** trong bảng đề xuất.
-2. **Mỗi con một kiểu cơ thể khác nhau** trong cùng vùng: giọt tròn, nhìn ngang kiểu cá, bốn chân thấp, cánh rộng, đứng thẳng, thân dài uốn lượn, sáu chân, lơ lửng, hai chân, thú lớn... Không có hai con cùng dáng. Cũng tránh trùng dáng với vùng trước (vd Golem Băng Giá và Băng Sơn Cự Thú đã trùng dáng golem, người dùng chấp nhận nhưng không muốn lặp lại).
-3. **Hạn chế vật thể sống** (chuông, đèn lồng, gương, giọt nước...): tối đa 1-2 con trong 10 con, và nên có tay chân / mặt rõ. Phần lớn là **sinh vật thật hoặc giả tưởng**: thú có vú, chim, cá, bò sát, côn trùng, rồng... (người dùng đã chê dạng giọt sương "quá đơn giản").
-4. **Được lấy khuôn động vật** (xem quy tắc 3 mục 3): chọn con vật làm khung theo môi trường rồi gắn chất liệu / họa tiết của vùng (vd cáo có đuôi sương, tê tê vảy đá rêu, bướm đêm cánh sương). Nhớ nêu tên con vật làm khung trong bảng đề xuất.
-5. **Chủ đề vùng quyết định chất liệu và màu**, không quyết định dáng: dáng phải đa dạng, còn chất liệu, bảng màu, họa tiết đồng bộ theo vùng (Tuyết Nguyên = băng; Sương Cốc = sương, rêu, ngọc xanh). Tên Hán-Việt hai từ, bắt đầu bằng từ chủ đề vùng (Tuyết / Băng; Sương / Vụ ...), trừ boss có thể giữ tên boss cũ của vùng (`VAN_KIEP_ZONES`).
-6. **Trước khi đề xuất bảng 10 con**, tự kiểm: (a) đủ môi trường chưa, (b) có hai con trùng dáng không, (c) quá nhiều vật thể không, (d) tên trùng quái / thú cũ không (đối chiếu `06-mobs.js`, tên file `img-mobs-*`). Đề xuất một bảng 10 con có cột Con vật khung + Môi trường + Dáng, cho người dùng chốt, rồi làm từng con (một con một lần).
-7. Prompt cho mỗi vùng: chép prompt mẫu ở mục 4, ĐỔI bảng màu sang tông của vùng (vẫn cấm tím / hồng / chớp sáng đè mắt, thêm "NO neutral grey" nếu vùng không dùng xám), đổi phần "Creature concept" theo môi trường và dáng.
-
-## 4. Prompt mẫu (đã chạy tốt, dán vào Canva rồi chỉ đổi đoạn "Creature concept")
-```
-Pokémon-style pixel art evolution line sprite sheet. ONE original creature
-inspired by <TÊN CON VẬT KHUNG> (a stylized fantasy version, not a realistic copy) in 3 evolution stages side by side in a
-single row, left to right = Stage 1, Stage 2, Stage 3. Wide landscape image,
-three equal sections, all facing left, all on the same ground line (or floating
-if the creature flies), clear empty space between stages, nothing overlapping.
-
-Art style: Gen 5 Pokémon battle sprite quality, crisp hard pixel edges, NO
-anti-aliasing, NO blur, NO glow, NO semi-transparent effects, every pixel fully
-opaque. The SAME thick dark navy outline on ALL three stages, same line weight.
-Rich cel shading with 5-6 shades per color area. Palette strictly: deep navy,
-royal blue, sky blue, cyan, ice white. The body must stay bright: mainly sky
-blue, cyan and ice white, use dark navy only for the outline and small
-shadows. No purple, no pink, no grey.
-
-Creature concept: <MÔ TẢ CON MỚI: chất liệu + dáng cơ thể khác các con trước>
-- Stage 1: <nhỏ, dễ thương, mắt tròn to>
-- Stage 2: <lớn hơn, chi tiết hơn, dáng khác Bậc 1>
-- Stage 3: <to nhất, uy nghi, hiệu ứng ít và đặc (pixel đặc)>
-EYES: on every stage the eye must be large and clearly readable: bright cyan
-with a white highlight on a dark navy socket, at least 3x3 pixels, visible
-even at small size. The same eye design on all 3 stages.
-All 3 stages share the same face, the same eyes and the same colors, each
-stage clearly bigger and more elaborate than the previous one.
-Size: Stage 1 is about half the height of Stage 3.
-
-Background: one flat solid pure magenta (#FF00FF). No text, no labels,
-no arrows, no shadow, no frame.
-```
-Bài học đã gộp vào prompt mẫu: viền lệch giữa các bậc (Tuyết Quang), thân quá tối (Golem), mắt mất ở Bậc 2-3 (Băng Đăng), hiệu ứng mờ trong suốt và pixel tím lẻ (nai đầu tiên), dáng bốn chân bị ra giống nai/ngựa (thêm "NOT a deer, NOT a horse" khi cần). Màu lục cho cực quang mà Canva vẫn bỏ qua: nếu cần màu ngoài palette thì ghi rõ tên màu và chỗ dùng.
-
-## 5. Quy trình khi nhận ảnh từ người dùng
-Ảnh nằm ở `/mnt/user-data/attachments/...` (đường dẫn trong tin nhắn). Công cụ có sẵn: numpy, scipy, PIL, cv2; Bash không cài được gói mới. File tạm để trong thư mục scratchpad của phiên.
-1. Kiểm tra: kích thước, chế độ, alpha, các mảnh rời (`scipy.ndimage.label` trên alpha > 16). 
-2. **Dấu sao hồng ở góc dưới phải** (mảnh rời màu ~ (252,130,248), khoảng x>=640, y>=340 trên ảnh 688×384) là dấu trình tạo ảnh: **xoá** (xoá mảnh đó, nở 2px). Các mảnh rời khác (bong bóng, mảnh băng, bông tuyết nhỏ, vạch bóng đổ) là thiết kế: **giữ**.
-3. Nếu ảnh còn **nền magenta** (~(248,3,250), nhiễu nhẹ): tách theo khoảng cách màu `< 70` tới nền (tính cả lỗ kín như vòng đuôi), alpha **cứng 0/255**, không làm mờ.
-   - Pixel viền ám tím do nền: chỉ những pixel cách nền ≤ 3px có `R-G > 40` và `B-G > 20` mới tô lại bằng màu viền (10,14,134). **ĐỪNG dùng ngưỡng lỏng** (như `R-G > 8`): màu viền navy thật của ảnh là xanh hơi tím (tới ~(39,23,156)), ngưỡng lỏng sẽ tô nhầm hàng nghìn pixel viền và phá viền.
-   - Cắt sát bounding box, chừa lề ~24px.
-   - **Không thu nhỏ** ảnh (không có lưới pixel đều, thu nhỏ làm viền mờ). Nếu người dùng cần đúng 688×384 hoặc cần cắt riêng 3 bậc thì làm theo yêu cầu và nói rõ.
-   - Nếu người dùng đã tự xoá nền (ảnh RGBA, viền bán trong suốt) mà còn đốm tím / hồng bên trong: tô lại pixel đó bằng màu lân cận (mask `R-G>25 và B-G>10`, nở 1px; thêm lượt bắt tím nhạt theo hue 245-340° với độ sáng > 0.62, tránh viền navy tối), mảng đốm rời hẳn thì xoá, rồi alpha cứng 0/255 (ngưỡng 128). (Làm với Sương Ngư.)
-4. **Soi trước khi commit:** dựng ảnh xem thử trên nền tối VÀ nền sáng, phóng to vài chỗ viền, đếm lại mảnh rời. Đọc ảnh xem thử 1 lần, không xem từng file riêng.
-5. Nhận xét thật với người dùng: điểm tốt và điểm chưa ổn (viền lệch, mắt khó đọc, thân tối, hợp phong cách game chưa...). Đừng nói quá.
-
-## 6. Thêm vào nhánh (git)
-- Ảnh: `NN-slug.png` ở **thư mục gốc** (với vùng khác Tuyết Nguyên, số NN là số con trong vùng nên dễ trùng tên file: đặt `<slug-vùng>-NN-slug.png`, vd `suong-coc-01-suong-lo.png`; Tuyết Nguyên giữ nguyên tên cũ). Ghi chú: `thu-moi/<slug-vùng>/NN-slug.md` (vd `thu-moi/tuyet-nguyen/`, `thu-moi/suong-coc/`) gồm: vùng, loài + mô tả dáng, tên (1 tên chung), ảnh (file, kích thước, nền trong suốt chưa, đã xoá dấu sao chưa), đặc điểm hình ảnh từng bậc, lưu ý khi cắt (hiệu ứng ngoài thân, điểm cần chừa lề, điểm lệch phong cách).
-- Slug = tên không dấu nối gạch: "Băng Kỳ Lân" → `bang-ky-lan`.
-- Quyền ghi: gọi `add_repo` với `access:"push"`, clone `--depth 1` vào `/home/claude/thu-than-gioi`. Lấy nhánh bằng `git fetch --depth=20 origin ghi-chu-co-che-bat-thu-evo` rồi `git checkout -B ghi-chu-co-che-bat-thu-evo FETCH_HEAD` (không dùng `origin/...` vì fetch kiểu này không tạo tham chiếu). Nếu phiên chỉ có công cụ GitHub (create_or_update_file / push_files) và bash không có mạng: chỉ đẩy được file văn bản (ghi chú, hướng dẫn), **ảnh PNG phải nhờ người dùng tự upload**.
-- Mỗi con một commit, tiếng Việt, kết thúc bằng 2 dòng Co-Authored-By / Claude-Session theo system-reminder của phiên. Đẩy bằng `git -c push.negotiate=true push origin ghi-chu-co-che-bat-thu-evo`, rồi kiểm lại bằng `git ls-remote origin refs/heads/ghi-chu-co-che-bat-thu-evo` so với `git rev-parse HEAD`.
-- Bẫy đã gặp: (a) `git rm` file cuối trong thư mục làm mất thư mục, phải `mkdir -p` trước khi ghi file mới; (b) hook báo "unpushed commits / no remote branch" dù đã đẩy thành công: sửa bằng `git config --add remote.origin.fetch '+refs/heads/ghi-chu-co-che-bat-thu-evo:refs/remotes/origin/ghi-chu-co-che-bat-thu-evo'`, `git fetch origin` nhánh đó rồi `git branch -u origin/ghi-chu-co-che-bat-thu-evo`.
-- Không bao giờ nói đã đẩy nếu chưa kiểm remote.
-
-## 7. Nhịp làm việc mỗi con
-Đề xuất ý tưởng + dáng (nhấn mạnh khác con trước) → soạn prompt từ mẫu ở mục 4 → người dùng làm ảnh trên Canva và gửi lại → kiểm + tách nền/xoá dấu sao → thêm vào nhánh → báo ngắn (file, commit, nhận xét thật) → đề xuất con kế tiếp. Khi người dùng nói "xấu", đừng cãi: đưa 2-3 hướng khác và chọn 1 hướng mạnh nhất, nêu vì sao.
-
-**Yêu cầu của người dùng (16/11/2026): sau MỖI bước, Claude tự cập nhật bảng tiến độ ở mục 2 (dòng "Trạng thái" và dòng của con đang làm), không đợi người dùng nhắc.** Các mốc cần cập nhật: người dùng chọn hướng thiết kế, đã soạn prompt, nhận ảnh, đã thêm ảnh + ghi chú vào nhánh, chuyển sang con kế tiếp. Nếu người dùng không nói gì mà phiên mới bắt đầu, đọc file này để biết đang ở bước nào và cập nhật cho đúng.
-
-## 8. Việc còn lại sau khi đủ 10 con
-- Chốt các câu hỏi mở trong `THIET_KE_BAT_THU_EVO.md` (Evo có 3 bậc không, công thức ghép, tỉ lệ bắt, thú/trứng/thuộc hạ/boss hiện tại giữ hay bỏ).
-- Chốt cách cắt ảnh 3 bậc thành sprite riêng, xử lý vạch bóng đổ, kích thước sprite trong game (sprite thú hiện có là 128×128, `img-mobs-*.png`).
-- Làm tiếp các vùng khác theo cùng quy trình (danh sách 17 vùng ở `CLAUDE.md` của `main`).
+## 4. Đọc file nào, khi nào
+| Bước | File cần đọc |
+|---|---|
+| Bắt đầu phiên | `thu-moi/TIEN_DO.md` (nhỏ, luôn đọc) |
+| Soạn prompt | `thu-moi/PROMPT_MAU.md` |
+| Nhận ảnh / thêm vào nhánh | `thu-moi/XU_LY_ANH_VA_GIT.md` + 1 ghi chú mẫu mới nhất ở `thu-moi/<vùng>/` |
+| Chỉnh prompt 1 con đã soạn | `thu-moi/<vùng>/NN-slug-prompt.md` nếu có |
