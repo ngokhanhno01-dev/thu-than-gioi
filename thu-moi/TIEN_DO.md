@@ -1,6 +1,6 @@
 # Tiến độ làm thú mới (cập nhật sau MỖI bước)
 
-**Đang làm: Sương Cốc (vùng 1). Con 04 Vụ Điệp đã xử lý ảnh + ghi chú (`thu-moi/suong-coc/04-vu-diep.md`); ảnh `suong-coc-04-vu-diep.png` chờ người dùng tự upload lên thư mục gốc nhánh (đặt đúng tên, KHÔNG đè ảnh 03). Tiếp theo: con 05 Vụ Hạc, chưa đề xuất hướng / soạn prompt. Cập nhật lần cuối: 16/11/2026.**
+**Đang làm: Sương Cốc (vùng 1), con 05 Vụ Hạc. Trạng thái: đã đề xuất hướng + soạn prompt (`thu-moi/suong-coc/05-vu-hac-prompt.md`), chờ người dùng làm ảnh Canva và gửi lại. Còn nợ: ảnh `suong-coc-04-vu-diep.png` người dùng tự upload lên thư mục gốc nhánh (đặt đúng tên, KHÔNG đè ảnh 03). Cập nhật lần cuối: 16/11/2026.**
 
 Ảnh ở thư mục gốc nhánh (tên `<slug-vùng>-NN-slug.png`, riêng Tuyết Nguyên giữ tên cũ `NN-slug.png`); ghi chú ở `thu-moi/<slug-vùng>/NN-slug.md`. Công cụ GitHub của phiên chỉ đẩy được file văn bản, **ảnh PNG người dùng tự upload**.
 
@@ -21,7 +21,7 @@ Quái cũ của vùng (KHÔNG đặt tên trùng): Sương Vũ Lộc, Mù Sươn
 | 02 | Sương Ngư | cá chép | dưới nước | cá nhìn ngang, vây lá, đuôi dải sương | xong |
 | 03 | Sương Xuyên | tê tê | lòng đất | 4 chân thấp, vảy đá rêu, móng đào | xong |
 | 04 | Vụ Điệp | bướm đêm | trên trời | cánh rộng đối xứng, vảy sương, râu lông vũ | xong (ghi chú đã đẩy; ảnh chờ người dùng upload) |
-| 05 | Vụ Hạc | hạc | chim cao, lội nước | cổ dài, cánh xoè, đuôi dải sương | |
+| 05 | Vụ Hạc | hạc | chim cao, lội nước | cổ dài, cánh xoè, đuôi dải sương | đã soạn prompt, chờ ảnh |
 | 06 | Vụ Long | rồng thần thoại | trời / nước | thân dài uốn lượn, 4 chân ngắn, râu bờm sương | |
 | 07 | Lục Giáp | bọ cánh cứng | khe đá | 6 chân, thấp rộng, vỏ giáp ngọc, sừng | |
 | 08 | Vụ Quy | rùa | đầm sương | thân tròn nặng, mai rêu và cây nhỏ | |
