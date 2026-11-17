@@ -1,5 +1,5 @@
 # 06 · Phong Chu (Phong Nguyên)
-Ảnh: phong-nguyen-06-phong-chu.png (1346x655, nền trong suốt, đã xóa sao; chờ upload)
+Ảnh: phong-nguyen-06-phong-chu.png (1346x655, nền trong suốt, đã xóa sao; đã upload)
 Khung + môi trường + dáng: nhện thần, chân tạo lưỡi gió; hang cây; dáng bò nhiều chân
 Bậc 1: nhện bông xù trắng, mắt to
 Bậc 2: chân dạng lá, vân gió

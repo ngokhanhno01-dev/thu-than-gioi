@@ -1,6 +1,6 @@
 # Tiến độ vùng Phong Nguyên
 
-**Trạng thái: XONG xử lý ảnh + ghi chú 10/10; PNG 10/10 chờ người dùng upload tại `thu-moi/phong-nguyen/`.** Cập nhật: 17/11/2026.
+**Trạng thái: XONG xử lý ảnh + ghi chú 10/10; PNG 10/10 đã upload tại `thu-moi/phong-nguyen/`.** Cập nhật: 17/11/2026.
 
 ## Chủ đề và nhận xét hình ảnh
 - Bảng màu thực tế trong 10 ảnh: xanh ngọc / teal, mint, cyan sáng, trắng băng, xanh lá (lá rơi), navy đậm cho viền. Hiệu ứng vùng: lốc xoáy, vệt gió, lá bay, rune xanh sáng.
@@ -11,18 +11,18 @@
 ## Danh sách 10 thú
 | STT | Tên | Khung / môi trường / dáng | Kích thước PNG | Trạng thái |
 |---:|---|---|---:|---|
-| 1 | Phong Điệp | bướm thần khổng lồ, cánh lá; trên không; dáng bay, hai cặp cánh xòe | 1343x555 | Xong; chờ upload PNG |
-| 2 | Phong Thiền | ve sầu giáp gió, cánh trong suốt; ngọn cây; dáng côn trùng đứng, một cặp cánh lớn | 1340x738 | Xong; chờ upload PNG |
-| 3 | Phong Oa | ếch chiến binh, chân bật lốc xoáy; suối rừng; dáng ngồi xổm bốn chi | 1408x712 | Xong; chờ upload PNG |
-| 4 | Phong Miêu | mèo rừng, bờm lá sắc nhọn; mặt đất; dáng bốn chân thấp, đuôi dài | 1552x691 | Xong; chờ upload PNG |
-| 5 | Phong Ngạc | cá sấu cổ đại, giáp vỏ cây; đầm lầy; dáng bò thấp, đuôi dài | 1282x578 | Xong; chờ upload PNG |
-| 6 | Phong Chu | nhện thần, chân tạo lưỡi gió; hang cây; dáng bò nhiều chân | 1346x655 | Xong; chờ upload PNG |
-| 7 | Phong Tằm | tằm linh, kén lá và tơ gió; thực vật; dáng sâu cuộn | 1348x719 | Xong; chờ upload PNG |
-| 8 | Phong Thử | chuột chũi, móng vuốt đào đất; lòng đất; dáng đứng hai chân, đuôi xoắn | 1408x753 | Xong; chờ upload PNG |
-| 9 | Phong Đường | bọ ngựa chiến, lưỡi hái lá; rừng sâu; dáng đứng hai chân sau, hai lưỡi hái | 1380x601 | Xong; chờ upload PNG |
-| 10 | Phong Nguyên Cổ Thú | cổ thú đại thụ mang sức mạnh bão tố (boss); trung tâm vùng; dáng thú bốn chân, cây mọc trên lưng | 1748x746 | Xong; chờ upload PNG |
+| 1 | Phong Điệp | bướm thần khổng lồ, cánh lá; trên không; dáng bay, hai cặp cánh xòe | 1343x555 | Xong; PNG đã upload |
+| 2 | Phong Thiền | ve sầu giáp gió, cánh trong suốt; ngọn cây; dáng côn trùng đứng, một cặp cánh lớn | 1340x738 | Xong; PNG đã upload |
+| 3 | Phong Oa | ếch chiến binh, chân bật lốc xoáy; suối rừng; dáng ngồi xổm bốn chi | 1408x712 | Xong; PNG đã upload |
+| 4 | Phong Miêu | mèo rừng, bờm lá sắc nhọn; mặt đất; dáng bốn chân thấp, đuôi dài | 1552x691 | Xong; PNG đã upload |
+| 5 | Phong Ngạc | cá sấu cổ đại, giáp vỏ cây; đầm lầy; dáng bò thấp, đuôi dài | 1282x578 | Xong; PNG đã upload |
+| 6 | Phong Chu | nhện thần, chân tạo lưỡi gió; hang cây; dáng bò nhiều chân | 1346x655 | Xong; PNG đã upload |
+| 7 | Phong Tằm | tằm linh, kén lá và tơ gió; thực vật; dáng sâu cuộn | 1348x719 | Xong; PNG đã upload |
+| 8 | Phong Thử | chuột chũi, móng vuốt đào đất; lòng đất; dáng đứng hai chân, đuôi xoắn | 1408x753 | Xong; PNG đã upload |
+| 9 | Phong Đường | bọ ngựa chiến, lưỡi hái lá; rừng sâu; dáng đứng hai chân sau, hai lưỡi hái | 1380x601 | Xong; PNG đã upload |
+| 10 | Phong Nguyên Cổ Thú | cổ thú đại thụ mang sức mạnh bão tố (boss); trung tâm vùng; dáng thú bốn chân, cây mọc trên lưng | 1748x746 | Xong; PNG đã upload |
 
 ## File trong vùng
 - 10 ghi chú: `01-phong-diep.md` đến `10-phong-nguyen-co-thu.md`.
-- PNG: `phong-nguyen-NN-slug.png` trong `thu-moi/phong-nguyen/` (người dùng tự upload).
+- PNG: `phong-nguyen-NN-slug.png` trong `thu-moi/phong-nguyen/` (đã đẩy lên nhánh).
 - Chưa làm lại con nào. Cân nhắc làm lại: 05 Bậc 1, 10 (giống IP), 08 (chữ RUNE trên giáp Bậc 2).

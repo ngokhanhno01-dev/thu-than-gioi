@@ -1,5 +1,5 @@
 # 02 · Phong Thiền (Phong Nguyên)
-Ảnh: phong-nguyen-02-phong-thien.png (1340x738, nền trong suốt, đã xóa sao; chờ upload)
+Ảnh: phong-nguyen-02-phong-thien.png (1340x738, nền trong suốt, đã xóa sao; đã upload)
 Khung + môi trường + dáng: ve sầu giáp gió, cánh trong suốt; ngọn cây; dáng côn trùng đứng, một cặp cánh lớn
 Bậc 1: bọ tròn dễ thương, mắt to, đuôi khói nhỏ
 Bậc 2: thân đứng, giáp ngực xoáy, cánh trong

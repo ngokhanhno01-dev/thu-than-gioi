@@ -1,5 +1,5 @@
 # 10 · Phong Nguyên Cổ Thú (Phong Nguyên)
-Ảnh: phong-nguyen-10-phong-nguyen-co-thu.png (1748x746, nền trong suốt, đã xóa sao; chờ upload)
+Ảnh: phong-nguyen-10-phong-nguyen-co-thu.png (1748x746, nền trong suốt, đã xóa sao; đã upload)
 Khung + môi trường + dáng: cổ thú đại thụ mang sức mạnh bão tố (boss); trung tâm vùng; dáng thú bốn chân, cây mọc trên lưng
 Bậc 1: thú con có sừng gió, cành lá nhỏ trên lưng
 Bậc 2: sừng gió dài, cây to hơn, giáp xoáy

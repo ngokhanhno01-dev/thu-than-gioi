@@ -1,5 +1,5 @@
 # 07 · Phong Tằm (Phong Nguyên)
-Ảnh: phong-nguyen-07-phong-tam.png (1348x719, nền trong suốt, đã xóa sao; chờ upload)
+Ảnh: phong-nguyen-07-phong-tam.png (1348x719, nền trong suốt, đã xóa sao; đã upload)
 Khung + môi trường + dáng: tằm linh, kén lá và tơ gió; thực vật; dáng sâu cuộn
 Bậc 1: sâu con đội mũ tròn, mắt to
 Bậc 2: thân cong, rune trên đốt, vây xanh

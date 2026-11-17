@@ -1,5 +1,5 @@
 # 08 · Phong Thử (Phong Nguyên)
-Ảnh: phong-nguyen-08-phong-thu.png (1408x753, nền trong suốt, đã xóa sao; chờ upload)
+Ảnh: phong-nguyen-08-phong-thu.png (1408x753, nền trong suốt, đã xóa sao; đã upload)
 Khung + môi trường + dáng: chuột chũi, móng vuốt đào đất; lòng đất; dáng đứng hai chân, đuôi xoắn
 Bậc 1: chuột con bay lơ lửng, vòng tay vòng chân sáng
 Bậc 2: giáp vai, vòng cổ gai, móng bạc

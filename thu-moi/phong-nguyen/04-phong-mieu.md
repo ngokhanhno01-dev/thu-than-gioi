@@ -1,5 +1,5 @@
 # 04 · Phong Miêu (Phong Nguyên)
-Ảnh: phong-nguyen-04-phong-mieu.png (1552x691, nền trong suốt, đã xóa sao; chờ upload)
+Ảnh: phong-nguyen-04-phong-mieu.png (1552x691, nền trong suốt, đã xóa sao; đã upload)
 Khung + môi trường + dáng: mèo rừng, bờm lá sắc nhọn; mặt đất; dáng bốn chân thấp, đuôi dài
 Bậc 1: mèo con, hoa văn mảnh, một bông tai
 Bậc 2: bờm gió, vòng chân bạc, rune trên thân

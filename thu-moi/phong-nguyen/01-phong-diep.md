@@ -1,5 +1,5 @@
 # 01 · Phong Điệp (Phong Nguyên)
-Ảnh: phong-nguyen-01-phong-diep.png (1343x555, nền trong suốt, đã xóa sao; chờ upload)
+Ảnh: phong-nguyen-01-phong-diep.png (1343x555, nền trong suốt, đã xóa sao; đã upload)
 Khung + môi trường + dáng: bướm thần khổng lồ, cánh lá; trên không; dáng bay, hai cặp cánh xòe
 Bậc 1: bướm con mắt to, cánh mỏng, bay lơ lửng
 Bậc 2: cánh xoáy lớn, ruy băng gió, vài lá

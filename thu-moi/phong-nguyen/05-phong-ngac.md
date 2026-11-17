@@ -1,5 +1,5 @@
 # 05 · Phong Ngạc (Phong Nguyên)
-Ảnh: phong-nguyen-05-phong-ngac.png (1282x578, nền trong suốt, đã xóa sao; chờ upload)
+Ảnh: phong-nguyen-05-phong-ngac.png (1282x578, nền trong suốt, đã xóa sao; đã upload)
 Khung + môi trường + dáng: cá sấu cổ đại, giáp vỏ cây; đầm lầy; dáng bò thấp, đuôi dài
 Bậc 1: cá sấu con đứng, lá nhỏ ở cổ
 Bậc 2: mão cánh, giáp vai bạc, miệng há
