@@ -2,7 +2,7 @@
 
 **Cập nhật: 17/11/2026.**
 
-**Hoàn tất 6/17 vùng (60/170 thú): Tuyết Nguyên (đã LÀM LẠI bằng khung v4, đã upload đủ; ảnh và ghi chú cũ đã xóa), Sương Cốc (ĐÃ LÀM LẠI v4 ngày 17/11/2026, 10 ảnh mới đã duyệt; PNG mới chờ upload, ảnh và ghi chú cũ CHƯA xóa), Vân Đảo, Phong Nguyên, Lôi Vực, Nguyệt Cung (PNG Nguyệt Cung chờ upload). Việc kế tiếp: vùng 6 Dương Sơn. Mẫu prompt chốt cho các vùng sau: `thu-moi/MAU_PROMPT_1_CON.md`.**
+**Hoàn tất 6/17 vùng (60/170 thú), tất cả đã đủ PNG trên nhánh: Tuyết Nguyên (làm lại v4; ảnh và ghi chú cũ đã xóa), Sương Cốc (làm lại v4; ảnh và ghi chú cũ CHƯA xóa), Vân Đảo (ảnh và ghi chú cũ CHƯA xóa), Phong Nguyên (bản cũ, ĐANG LÀM LẠI v4), Lôi Vực, Nguyệt Cung. Việc đang làm: làm lại Phong Nguyên bằng khung v4 (đã chốt bảng 10 thú, đã soạn 10 prompt, chờ ảnh mới). Việc kế tiếp: vùng 6 Dương Sơn. Mẫu prompt chốt cho các vùng sau: `thu-moi/MAU_PROMPT_1_CON.md` và `thu-moi/tuyet-nguyen/01-10-prompts.md`.**
 
 Vị trí file: Tuyết Nguyên bản mới là `thu-moi/tuyet-nguyen/tuyet-nguyen-NN-slug.png` + `tuyet-nguyen-NN-slug.md` (đủ 10 con). Từ Sương Cốc trở đi, PNG `<slug-vùng>-NN-slug.png` và ghi chú cùng nằm trong `thu-moi/<slug-vùng>/`.
 
@@ -10,7 +10,7 @@ Khi làm vùng mới: dán prompt trong `thu-moi/PROMPT_LAM_VUNG_MOI.md` (cũng 
 
 ## 17 vùng (số z) và trạng thái
 
-0 Tuyết Nguyên (XONG 10/10, làm lại v4, đủ PNG), 1 Sương Cốc (XONG 10/10, làm lại v4, PNG mới chờ upload, bản cũ chờ xóa), 2 Vân Đảo (XONG 10/10, đủ PNG), 3 Phong Nguyên (XONG 10/10, đủ PNG), 4 Lôi Vực (XONG 10/10, đủ PNG), 5 Nguyệt Cung (XONG 10/10, PNG chờ upload), 6 Dương Sơn, 7 Huyền Uyên, 8 Kim Khoáng, 9 Ngọc Động, 10 Thanh Lâm, 11 Xích Hỏa Địa, 12 Hắc Ám Lâm, 13 Tử Tinh Hải, 14 Thiên Không, 15 Linh Hoa Viên, 16 Thần Điện.
+0 Tuyết Nguyên (XONG 10/10, làm lại v4, đủ PNG), 1 Sương Cốc (XONG 10/10, làm lại v4, đủ PNG, bản cũ chờ xóa), 2 Vân Đảo (XONG 10/10, đủ PNG, bản cũ chờ xóa), 3 Phong Nguyên (bản cũ XONG 10/10 đủ PNG; ĐANG LÀM LẠI v4, chờ ảnh mới), 4 Lôi Vực (XONG 10/10, đủ PNG), 5 Nguyệt Cung (XONG 10/10, đủ PNG), 6 Dương Sơn, 7 Huyền Uyên, 8 Kim Khoáng, 9 Ngọc Động, 10 Thanh Lâm, 11 Xích Hỏa Địa, 12 Hắc Ám Lâm, 13 Tử Tinh Hải, 14 Thiên Không, 15 Linh Hoa Viên, 16 Thần Điện.
 
 ## Tuyết Nguyên (làm lại v4)
 
@@ -18,11 +18,11 @@ Khi làm vùng mới: dán prompt trong `thu-moi/PROMPT_LAM_VUNG_MOI.md` (cũng 
 
 ## Sương Cốc (làm lại v4, 17/11/2026)
 
-10 con mới: Sương Thát (rái cá), Vụ Dực (dực long), Sương Xuyên (tê tê), Sương Khải (cá giáp), Sương Diệp (tam diệp trùng), Vụ Tiêu (Tiêu Đồ rồng-ốc), Sương Viên (vượn), Vụ Tùng (thông linh), Sương Nha (hổ răng kiếm), Vạn Trượng Vụ Thú (boss, Thao Thiết). Bảng màu obsidian / teal / jade / rêu / sương / cyan; nền tạo ảnh magenta. Chi tiết: `suong-coc/TIEN_DO_VUNG.md`. Bản cũ (Vụ Hồ, Sương Ngư, Sương Xuyên, Vụ Điệp, Vụ Hạc, Vụ Long, Lục Giáp, Vụ Quy, Sương Viên, Vạn Trượng Vụ Thú) chưa xóa, chờ người dùng xác nhận. Lưu ý: `suong-coc-03-suong-xuyen.png` mới trùng tên bản cũ.
+10 con mới: Sương Thát (rái cá), Vụ Dực (dực long), Sương Xuyên (tê tê), Sương Khải (cá giáp), Sương Diệp (tam diệp trùng), Vụ Tiêu (Tiêu Đồ rồng-ốc), Sương Viên (vượn), Vụ Tùng (thông linh), Sương Nha (hổ răng kiếm), Vạn Trượng Vụ Thú (boss, Thao Thiết). Bảng màu obsidian / teal / jade / rêu / sương / cyan; nền tạo ảnh magenta. Đủ PNG + ghi chú trên nhánh. Chi tiết: `suong-coc/TIEN_DO_VUNG.md`. Bản cũ (Vụ Hồ, Sương Ngư, Sương Xuyên, Vụ Điệp, Vụ Hạc, Vụ Long, Lục Giáp, Vụ Quy, Sương Viên, Vạn Trượng Vụ Thú) chưa xóa, chờ người dùng xác nhận. Lưu ý: `suong-coc-03-suong-xuyen.png` mới trùng tên bản cũ.
 
 ## Vân Đảo
 
-10 con: Vân Hồ, Vân Điểu, Vân Kình, Vân Lân, Vân Quy, Vân Xà, Vân Phong, Vân Liên, Vân Tinh, Vân Thiên Long. Ảnh đã xử lý, có ghi chú, PNG đã upload (`thu-moi/van-dao/`). Bảng màu tím / hồng là hợp lệ của vùng này (ngoại lệ so với quy tắc cấm tím / hồng của vùng lạnh; tông màu theo từng vùng).
+10 con (bản v4 mới): Vân Canh (khủng long cổ dài), Vân Loa (ốc anh vũ), Vân Địa Lãn (lười đất), Vân Giáp (glyptodon), Vân Trãi (Giải Trãi), Vân Khổng (khổng tước), Vân Đĩnh (Meganeura), Vân Châu (sứa pha lê), Vân Đăng (đèn lồng linh khí), Vân Đảo Côn Bằng (boss). Đủ PNG + ghi chú `van-dao-NN-slug.*`; kế hoạch và kết quả xử lý ảnh ở `van-dao/LAM_LAI_V4.md`. Bản cũ (Vân Hồ, Vân Điểu, Vân Kình, Vân Lân, Vân Quy, Vân Xà, Vân Phong, Vân Liên, Vân Tinh, Vân Thiên Long) chưa xóa, chờ người dùng xác nhận. Bảng màu tím / hồng là hợp lệ của vùng này (ngoại lệ so với quy tắc cấm tím / hồng của vùng lạnh; tông màu theo từng vùng). Lưu ý: tên chính xác từng con xem ghi chú trong `van-dao/`.
 
 ## Lôi Vực
 
@@ -30,11 +30,13 @@ Khi làm vùng mới: dán prompt trong `thu-moi/PROMPT_LAM_VUNG_MOI.md` (cũng 
 
 ## Nguyệt Cung
 
-10 con: Nguyệt Thố, Nguyệt Hạc, Nguyệt Thiềm, Nguyệt Đằng, Nguyệt Nga, Nguyệt Kình, Nguyệt Tượng, Nguyệt Quy, Nguyệt Tiên, Nguyệt Thực Tế Quân (boss, sói trăng). Nền cam, thú xanh / tím / bạc. Chi tiết: `nguyet-cung/TIEN_DO_VUNG.md`.
+10 con: Nguyệt Thố, Nguyệt Hạc, Nguyệt Thiềm, Nguyệt Đằng, Nguyệt Nga, Nguyệt Kình, Nguyệt Tượng, Nguyệt Quy, Nguyệt Tiên, Nguyệt Thực Tế Quân (boss, sói trăng). Nền cam, thú xanh / tím / bạc. Đủ PNG trên nhánh. Chi tiết: `nguyet-cung/TIEN_DO_VUNG.md`.
 
-## Phong Nguyên
+## Phong Nguyên (ĐANG LÀM LẠI v4, 17/11/2026)
 
-10 con: Phong Điệp, Phong Thiền, Phong Oa, Phong Miêu, Phong Ngạc, Phong Chu, Phong Tằm, Phong Thử, Phong Đường, Phong Nguyên Cổ Thú. Ảnh đã xử lý, có ghi chú; PNG đã upload vào `thu-moi/phong-nguyen/`. Bảng màu xanh ngọc / teal, mint, trắng băng, xanh lá, navy; nền tạo ảnh magenta. Nhắc: 05 Bậc 1 giống Totodile, 10 giống Suicune, 08 có chữ RUNE trên giáp (chi tiết ở `phong-nguyen/TIEN_DO_VUNG.md`).
+Bản cũ (đã có PNG + ghi chú, CHƯA xóa, chờ người dùng xác nhận): Phong Điệp, Phong Thiền, Phong Oa, Phong Miêu, Phong Ngạc, Phong Chu, Phong Tằm, Phong Thử, Phong Đường, Phong Nguyên Cổ Thú. Lý do làm lại: khung cũ nên Bậc 2-3 chỉ phóng to, mắt không dữ, ít chi tiết; 05 giống Totodile, 10 giống Suicune.
+
+Bảng 10 con mới (đã duyệt 17/11/2026): Phong Túc (chim khủng bố), Phong Phi (chồn bay), Phong Giác (Elasmotherium), Phong Liêm (Phi Liêm thần gió), Phong Ngư (cá bay cạn), Phong Tiêu (chồn đất canh gác), Phong Bi (đá bia xoắn ốc), Phong Lô (cỏ lau thần), Phong Tích (thằn lằn cổ dù), Phong Nguyên Vũ Xà (boss, rắn lông vũ). Bảng màu obsidian / navy / teal / mint / lục cỏ / trắng mây, nhấn kem-vàng; nền tạo ảnh magenta. Trạng thái: đã soạn 10 prompt (gửi file cho người dùng), chờ ảnh mới. Chi tiết: `phong-nguyen/TIEN_DO_VUNG.md`.
 
 ## Bàn giao phiên sau
 
