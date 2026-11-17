@@ -4,26 +4,48 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Thú Thần Giới - game mới</title>
 <style>
-html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none}
+html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges}
 #sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+/* Lớp nút ảo (DOM, nằm trên canvas). Mỗi nút: left/top theo px, phóng to/thu nhỏ bằng transform scale */
+#ui{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;pointer-events:none;font-family:sans-serif}
+@media (orientation:portrait){#ui{display:none}}
+#ui>*{pointer-events:auto}
+.ub{position:absolute;left:0;top:0;transform-origin:0 0;touch-action:none;white-space:nowrap;box-sizing:border-box;height:18px;display:flex;align-items:center;padding:0 5px;font:bold 9px/1 sans-serif;color:#fff;background:#1c3a46;border:1px solid #8a6d2f;border-radius:3px;-webkit-tap-highlight-color:transparent}
+.ub.c2{background:#1f7a3a;border-color:#4fc97a}
+.ub.c3{background:#2b2030;border-color:#f0c93a;color:#ffe9a0}
+.ub.c4{background:#a05c14;border-color:#f0a63a}
+#ui.ed .ub{outline:1px dashed rgba(255,255,255,.75)}
+#ui .ub.sel{outline:2px solid #ff0;z-index:9}
+#edb{position:absolute;left:calc(4px + env(safe-area-inset-left,0px));top:calc(4px + env(safe-area-inset-top,0px));opacity:.55;z-index:20}
+#edt{position:absolute;left:50%;transform:translateX(-50%);top:calc(4px + env(safe-area-inset-top,0px));display:none;align-items:center;gap:5px;background:rgba(0,0,0,.82);color:#fff;font:11px sans-serif;padding:3px 6px;border-radius:4px;z-index:20;white-space:nowrap}
+#edb,#edt button{font:bold 11px sans-serif;padding:3px 8px;border:1px solid #888;border-radius:3px;background:#333;color:#fff}
+#edz{min-width:34px;text-align:center}
+#tst{position:absolute;left:50%;transform:translateX(-50%);top:calc(30px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 8px;border-radius:3px;opacity:0;transition:opacity .2s;pointer-events:none!important;z-index:30;white-space:nowrap}
 </style></head><body>
 <canvas id="g"></canvas><div id="sa"></div>
+<div id="ui">
+ <button id="edb">✎ Sắp xếp</button>
+ <div id="edt"><span id="edn"></span><button id="edm">−</button><span id="edz"></span><button id="edp">+</button><button id="edd">Mặc định</button><button id="edx">Xong</button></div>
+ <div id="tst"></div>
+</div>
 <script src="51-thu-moi.js"></script>
 <script>
 /* GAME MỚI (khung ban đầu). Màn ngang, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
-   Kích thước logic W×H thay đổi theo máy (H khoảng 360), bố cục bám theo cạnh màn hình. Thú vẽ đúng 128px = 1:1.
-   Chạm lần đầu (hoặc nút Toàn màn hình) -> vào toàn màn hình + khóa ngang.
-   Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase. */
+   Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
+   Chạm lần đầu -> vào toàn màn hình + khóa ngang.
+   Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase.
+   NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ toàn màn hình).
+   Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ từng nút. Bố cục lưu ở khóa ttg_moi_layout_v1. */
 (function(){
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
-var ID='1a',KEY='ttg_moi_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false;
+var ID='1a',KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;}catch(e){}
-function save(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};}
 function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
 function full(){var e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(!f||isFS())return;
  try{var p=f.call(e);if(p&&p.then)p.then(function(){try{screen.orientation.lock('landscape').catch(function(){});}catch(x){}}).catch(function(){});}catch(x){}}
+function exitFull(){var f=document.exitFullscreen||document.webkitExitFullscreen;if(f){try{var p=f.call(document);if(p&&p.catch)p.catch(function(){});}catch(x){}}}
 function resize(){
  DPR=window.devicePixelRatio||1;
  var pw=Math.round(innerWidth*DPR),ph=Math.round(innerHeight*DPR);
@@ -31,7 +53,8 @@ function resize(){
  cv.width=W;cv.height=H;cv.style.width=(W*K/DPR)+'px';cv.style.height=(H*K/DPR)+'px';
  var cs=getComputedStyle(sa),f=DPR/K;
  I={l:Math.round(parseFloat(cs.paddingLeft)*f)||0,r:Math.round(parseFloat(cs.paddingRight)*f)||0,t:Math.round(parseFloat(cs.paddingTop)*f)||0,b:Math.round(parseFloat(cs.paddingBottom)*f)||0};
- ctx.imageSmoothingEnabled=false;}
+ ctx.imageSmoothingEnabled=false;
+ layoutUI();}
 function gy(){return H-I.b-62;}
 function px(w){var a=I.l+10,b=W-I.r-10;return Math.round(a+(b-a)*(w==='me'?.27:.73));}
 function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
@@ -39,15 +62,72 @@ function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='m
 function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;hit('me');
  setTimeout(function(){if(st===s0&&st.en>0)hit('en');},650);
  setTimeout(function(){if(st!==s0)return;st.busy=false;st.msg=st.en<=0?'Thắng!':st.me<=0?'Thua':'';},1300);}
-function btns(){var y=H-I.b-48,h=40,L=I.l+10,R=W-I.r-10,a=[{k:'atk',t:'Đánh',x:L,y:y,w:96,h:h},{k:'bm',t:'Bạn: bậc '+bm,x:L+104,y:y,w:112,h:h},
- {k:'be',t:'Địch: bậc '+be,x:R-216,y:y,w:112,h:h},{k:'rs',t:'Làm lại',x:R-96,y:y,w:96,h:h}];
- if(!isFS())a.push({k:'fs',t:'Toàn màn hình',x:Math.round(W/2-64),y:y,w:128,h:h});return a;}
-function at(e){var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height,f=null;
- btns().forEach(function(b){if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)f=b;});return f;}
-cv.addEventListener('pointerdown',function(e){e.preventDefault();var b=at(e);if(!b)return;
- if(b.k==='atk')atk();else if(b.k==='bm'){bm=bm%3+1;save();}else if(b.k==='be'){be=be%3+1;save();}else if(b.k==='rs')reset();});
+
+/* ===== NÚT ẢO + CHẾ ĐỘ SẮP XẾP ===== */
+var UI=[
+ {id:'fr',t:'👥',n:'Bạn bè',c:1},{id:'fs',t:'⛶',n:'Toàn màn hình',c:1},{id:'ml',t:'✉️',n:'Thư',c:1},
+ {id:'cs',t:'🧬 Chỉ số',n:'Chỉ số',c:1},{id:'hm',t:'🩸 Huyết mạch',n:'Huyết mạch',c:1},{id:'tb',t:'🛡️ Trang bị',n:'Trang bị',c:1},{id:'dh',t:'🏅 Danh hiệu',n:'Danh hiệu',c:1},{id:'bl',t:'🎒 9/100',n:'Balo',c:1},
+ {id:'tx',t:'🧭 Thám hiểm',n:'Thám hiểm',c:2},{id:'dt',t:'⚔️ Đấu trường',n:'Đấu trường',c:2},{id:'ch',t:'🏪 Cửa hàng',n:'Cửa hàng',c:2},{id:'pb',t:'🏰 Phó bản nhóm',n:'Phó bản nhóm',c:2},
+ {id:'sb',t:'👑 Săn boss: BẬT',n:'Săn boss',c:3},{id:'ts',t:'♻️ Tái Sinh',n:'Tái Sinh',c:4},
+ {id:'cm',t:'💬',n:'Chat',c:1},{id:'sn',t:'🔊',n:'Âm thanh',c:1}];
+var ui=document.getElementById('ui'),edb=document.getElementById('edb'),edt=document.getElementById('edt'),edn=document.getElementById('edn'),edz=document.getElementById('edz'),tst=document.getElementById('tst');
+var els={},lay={},ed=false,sel=null,drag=null,tt=0;
+try{lay=JSON.parse(localStorage.getItem(LKEY)||'{}')||{};}catch(e){lay={};}
+function saveLay(){try{localStorage.setItem(LKEY,JSON.stringify(lay));}catch(e){}}
+function toast(s){tst.textContent=s;tst.style.opacity=1;clearTimeout(tt);tt=setTimeout(function(){tst.style.opacity=0;},900);}
+function byId(id){for(var i=0;i<UI.length;i++)if(UI[i].id===id)return UI[i];return null;}
+UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.c;e.textContent=u.t;e.setAttribute('data-id',u.id);ui.appendChild(e);els[u.id]=e;
+ e.addEventListener('pointerdown',function(ev){
+  if(!ed)return;
+  ev.preventDefault();selectB(u.id);var r=e.getBoundingClientRect();
+  drag={id:u.id,dx:ev.clientX-r.left,dy:ev.clientY-r.top,pid:ev.pointerId};
+  try{e.setPointerCapture(ev.pointerId);}catch(x){}});
+ e.addEventListener('pointermove',function(ev){
+  if(!drag||drag.id!==u.id||ev.pointerId!==drag.pid)return;
+  setPos(u.id,ev.clientX-drag.dx,ev.clientY-drag.dy);});
+ e.addEventListener('pointerup',function(ev){
+  if(drag&&drag.id===u.id){drag=null;saveLay();return;}
+  if(ed)return;
+  if(u.id==='fs'){triedFS=true;if(isFS())exitFull();else full();}
+  else toast(u.n+' (chưa gắn chức năng)');});
+ e.addEventListener('pointercancel',function(){if(drag){drag=null;saveLay();}});
+});
+function setPos(id,x,y){var e=els[id],p=lay[id],w=e.offsetWidth*p.s,h=e.offsetHeight*p.s;
+ x=Math.max(0,Math.min(innerWidth-w,x));y=Math.max(0,Math.min(innerHeight-h,y));
+ p.x=x/innerWidth;p.y=y/innerHeight;place(id);}
+function place(id){var e=els[id],p=lay[id];e.style.left=Math.round(p.x*innerWidth)+'px';e.style.top=Math.round(p.y*innerHeight)+'px';e.style.transform='scale('+p.s+')';}
+/* Bố cục mặc định: dồn hết vào thanh dưới màn hình ngang, chia dòng, căn giữa */
+function defaults(){
+ var cs=getComputedStyle(sa),L=parseFloat(cs.paddingLeft)||0,R=parseFloat(cs.paddingRight)||0,B=parseFloat(cs.paddingBottom)||0;
+ var avail=innerWidth-L-R-8,gap=3,rows=[],row=[],rw=0,h=18;
+ UI.forEach(function(u){var w=els[u.id].offsetWidth;
+  if(row.length&&rw+gap+w>avail){rows.push({r:row,w:rw});row=[];rw=0;}
+  rw+=(row.length?gap:0)+w;row.push(u);});
+ if(row.length)rows.push({r:row,w:rw});
+ var total=rows.length*h+(rows.length-1)*gap,y=innerHeight-B-4-total;lay={};
+ rows.forEach(function(rr){var x=L+4+(avail-rr.w)/2;
+  rr.r.forEach(function(u){lay[u.id]={x:x/innerWidth,y:y/innerHeight,s:1};x+=els[u.id].offsetWidth+gap;});
+  y+=h+gap;});}
+function layoutUI(){
+ if(innerWidth<=innerHeight)return;
+ var ok=true;UI.forEach(function(u){if(!lay[u.id]||typeof lay[u.id].x!=='number'||!(lay[u.id].s>0))ok=false;});
+ if(!ok){defaults();saveLay();}
+ UI.forEach(function(u){place(u.id);});}
+function selectB(id){sel=id;UI.forEach(function(u){els[u.id].classList.toggle('sel',u.id===id);});
+ edn.textContent=id?byId(id).n:'Chạm 1 nút để chọn, kéo để di chuyển';
+ edz.textContent=id&&lay[id]?Math.round(lay[id].s*100)+'%':'';}
+function setEd(on){ed=on;ui.classList.toggle('ed',on);edt.style.display=on?'flex':'none';edb.style.display=on?'none':'block';drag=null;selectB(null);}
+function scaleSel(d){if(!sel||!lay[sel])return;var p=lay[sel];p.s=Math.max(.4,Math.min(3,Math.round((p.s+d)*10)/10));
+ setPos(sel,p.x*innerWidth,p.y*innerHeight);saveLay();selectB(sel);}
+edb.addEventListener('click',function(){setEd(true);});
+document.getElementById('edx').addEventListener('click',function(){saveLay();setEd(false);});
+document.getElementById('edm').addEventListener('click',function(){scaleSel(-.1);});
+document.getElementById('edp').addEventListener('click',function(){scaleSel(.1);});
+document.getElementById('edd').addEventListener('click',function(){var s=sel;defaults();saveLay();UI.forEach(function(u){place(u.id);});selectB(s);});
+document.addEventListener('contextmenu',function(e){e.preventDefault();});
 /* Toàn màn hình phải gọi trong pointerup (cảm ứng chỉ tính là "chạm thật" lúc nhấc tay). */
-cv.addEventListener('pointerup',function(e){var b=at(e);if(!triedFS||(b&&b.k==='fs')){triedFS=true;full();}});
+document.addEventListener('pointerup',function(){if(!triedFS&&!ed){triedFS=true;full();}});
+
 function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
  if(A&&A.w===w){var p=(ts-A.t)/300;if(p<1)o=Math.round(Math.sin(p*Math.PI)*28);else A=null;}
  var bob=dead?0:Math.round(Math.sin(ts/380+(w==='me'?0:2))*2);
@@ -68,8 +148,7 @@ function draw(ts){
  ctx.textAlign='center';ctx.textBaseline='top';ctx.font='10px sans-serif';ctx.fillStyle='#123';ctx.fillText('thú 128px · x'+K+' · '+W+'×'+H,W/2,I.t+6);
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
  st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
- if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+60,gy()-170));}
- btns().forEach(function(b){ctx.fillStyle='#3a4a80';ctx.fillRect(b.x,b.y,b.w,b.h);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.t,b.x+b.w/2,b.y+b.h/2);});}
+ if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+60,gy()-170));}}
 function loop(ts){draw(ts);requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
 document.addEventListener('fullscreenchange',function(){setTimeout(resize,150);});document.addEventListener('webkitfullscreenchange',function(){setTimeout(resize,150);});
