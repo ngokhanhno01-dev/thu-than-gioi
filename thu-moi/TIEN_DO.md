@@ -23,3 +23,7 @@ Khi làm vùng mới: dán prompt trong `thu-moi/PROMPT_LAM_VUNG_MOI.md` (cũng 
 ## Phong Nguyên
 
 10 con: Phong Điệp, Phong Thiền, Phong Oa, Phong Miêu, Phong Ngạc, Phong Chu, Phong Tằm, Phong Thử, Phong Đường, Phong Nguyên Cổ Thú. Ảnh đã xử lý, có ghi chú; PNG đã upload vào `thu-moi/phong-nguyen/`. Bảng màu xanh ngọc / teal, mint, trắng băng, xanh lá, navy; nền tạo ảnh magenta. Nhắc: 05 Bậc 1 giống Totodile, 10 giống Suicune, 08 có chữ RUNE trên giáp (chi tiết ở `phong-nguyen/TIEN_DO_VUNG.md`).
+
+## Bàn giao phiên sau
+
+Prompt bàn giao (xử lý 10 ảnh Lôi Vực rồi làm vùng 5 Nguyệt Cung): `thu-moi/PROMPT_PHIEN_TIEP.md`. Script hậu xử lý ảnh (xóa viền màu nền, đảo bậc, xóa sao sót): `tools/hau_xu_ly_anh_thu.py`.
