@@ -32,9 +32,7 @@ Khi làm vùng mới: dán prompt trong `thu-moi/PROMPT_LAM_VUNG_MOI.md` (cũng 
 
 10 con: Nguyệt Thố, Nguyệt Hạc, Nguyệt Thiềm, Nguyệt Đằng, Nguyệt Nga, Nguyệt Kình, Nguyệt Tượng, Nguyệt Quy, Nguyệt Tiên, Nguyệt Thực Tế Quân (boss, sói trăng). Nền cam, thú xanh / tím / bạc. Đủ PNG trên nhánh. Chi tiết: `nguyet-cung/TIEN_DO_VUNG.md`.
 
-## Phong Nguyên (ĐANG LÀM LẠI v4, 17/11/2026)
-
-Bản cũ (đã có PNG + ghi chú, CHƯA xóa, chờ người dùng xác nhận): Phong Điệp, Phong Thiền, Phong Oa, Phong Miêu, Phong Ngạc, Phong Chu, Phong Tằm, Phong Thử, Phong Đường, Phong Nguyên Cổ Thú. Lý do làm lại: khung cũ nên Bậc 2-3 chỉ phóng to, mắt không dữ, ít chi tiết; 05 giống Totodile, 10 giống Suicune.
+## Phong Nguyên (LÀM LẠI v4, 17/11/2026)
 
 Bảng 10 con mới (đã duyệt 17/11/2026): Phong Túc (chim khủng bố), Phong Phi (chồn bay), Phong Giác (Elasmotherium), Phong Liêm (Phi Liêm thần gió), Phong Ngư (cá bay cạn), Phong Tiêu (chồn đất canh gác), Phong Bi (đá bia xoắn ốc), Phong Lô (cỏ lau thần), Phong Tích (thằn lằn cổ dù), Phong Nguyên Vũ Xà (boss, rắn lông vũ). Bảng màu obsidian / navy / teal / mint / lục cỏ / trắng mây, nhấn kem-vàng; nền tạo ảnh magenta. Trạng thái: đã soạn 10 prompt (gửi file cho người dùng), chờ ảnh mới. Chi tiết: `phong-nguyen/TIEN_DO_VUNG.md`.
 
