@@ -17,7 +17,7 @@ Game có Bắt thú theo vùng + Tiến hóa 3 bậc + Evo. 17 vùng x 10 thú. 
 1. Mỗi con 1 tên cho cả 3 bậc, Hán-Việt hai từ, bắt đầu bằng từ chủ đề vùng. Boss giữ tên boss cũ. Không trùng quái cũ (danh sách ở file tiến độ vùng).
 2. Được lấy khuôn động vật (thật / thần thoại) làm khung nhưng phải có nét riêng theo vùng; không vẽ y nguyên (từng bỏ con nai vì quá giống thật).
 3. Đa dạng như Pokémon: phủ đủ môi trường (trời, nước, mặt đất, lòng đất, thực vật, khe đá/giáp, thần thoại, linh khí, người nhỏ, boss), mỗi con một dáng khác nhau; vật thể sống tối đa 1-2 con / vùng.
-4. Phong cách pixel art Gen 5 Pokémon: sắc cạnh, viền navy dày đồng đều 3 bậc, đổ bóng theo mảng, thân sáng. Đây là game THẦN THÚ nên NHIỀU CHI TIẾT, đặc biệt Bậc 3: hoa văn chạm khắc, cổ ngữ / rune, phụ kiện theo vùng (vòng cổ, bông tai, vòng chân, mão...), hiệu ứng theo vùng quanh thú. Chê: quá mịn, quá nhợt trắng, các khối rời nhau (chi tiết phải phủ lên thân liền khối, hiệu ứng nằm quanh, không che mặt và mắt). Thích: Tuyết Cầu, Băng Đăng, Băng Kỳ Lân (liền khối).
+4. Phong cách pixel art Gen 5 Pokémon: sắc cạnh, viền navy dày đồng đều 3 bậc, đổ bóng theo mảng, thân sáng. Đây là game THẦN THÚ nên NHIỀU CHI TIẾT, đặc biệt Bậc 3: hoa văn chạm khắc, cổ ngữ / rune, phụ kiện theo vùng (vòng cổ, bông tai, vòng chân, mão...), hiệu ứng theo vùng quanh thú. Chê: quá mịn, quá nhợt trắng, các khối rời nhau (chi tiết phải phủ lên thân liền khối, hiệu ứng nằm quanh, không che mặt và mắt). Thích: Tuyết Cầu, Băng Đăng, Băng Kỳ Lân (liền khối). CHỐT mới (17/11/2026, bản mẫu Lôi Vực): Bậc 2-3 không phải bản phóng to, mắt Bậc 2-3 dữ tợn, Bậc 3 chi tiết đa dạng từng vùng thân, thân xen mảng đen; xem `PROMPT_LAM_VUNG_MOI.md` và `MAU_PROMPT_1_CON.md`.
 5. Chủ đề vùng quyết định chất liệu, bảng màu, hiệu ứng và phụ kiện; không quyết định dáng. Bảng màu và hiệu ứng lấy từ ảnh vùng người dùng gửi. Quy tắc "cấm tím / hồng" chỉ áp cho vùng lạnh (Tuyết Nguyên, Sương Cốc); Vân Đảo dùng tím / hồng là hợp lệ (đã chốt). Cấm chớp sáng đè mắt.
 6. Người dùng nói xấu: đừng cãi, đưa 2-3 hướng khác, chọn 1 và nói vì sao.
 7. Bảng 10 con của vùng mới: tự kiểm đủ môi trường, không trùng dáng, ít vật thể, tên không trùng quái cũ; cột Khung / Môi trường / Dáng.
@@ -48,4 +48,4 @@ Lưu ý khi cắt: hiệu ứng ngoài thân cần chừa lề, mảnh rời là
 ```
 
 ## 6. Khung prompt tạo ảnh
-Khung prompt Canva / Gemini (v2: nhiều chi tiết, rune, phụ kiện, hiệu ứng và tông màu theo vùng, nền ngược tông) nằm duy nhất trong `thu-moi/PROMPT_LAM_VUNG_MOI.md`. Không chép khung sang đây. Bảng màu đã dùng và bài học cũ: `thu-moi/PROMPT_MAU.md`.
+Khung prompt Canva / Gemini (v4 chốt, mẫu 1 con ở `thu-moi/MAU_PROMPT_1_CON.md`; v2: nhiều chi tiết, rune, phụ kiện, hiệu ứng và tông màu theo vùng, nền ngược tông) nằm duy nhất trong `thu-moi/PROMPT_LAM_VUNG_MOI.md`. Không chép khung sang đây. Bảng màu đã dùng và bài học cũ: `thu-moi/PROMPT_MAU.md`.

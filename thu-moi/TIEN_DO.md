@@ -2,7 +2,7 @@
 
 **Cập nhật: 17/11/2026.**
 
-**Hoàn tất 4/17 vùng (40/170 thú) đủ PNG trên nhánh: Tuyết Nguyên, Sương Cốc, Vân Đảo, Phong Nguyên. Vùng tiếp theo: 4 Lôi Vực (`loi-vuc`).**
+**Hoàn tất 4/17 vùng (40/170 thú) đủ PNG trên nhánh: Tuyết Nguyên, Sương Cốc, Vân Đảo, Phong Nguyên. Vùng đang làm: 4 Lôi Vực (`loi-vuc`): đã có 10 prompt bản chốt v4 (`thu-moi/loi-vuc/01-10-prompts.md`), chờ người dùng tạo ảnh. Mẫu prompt chốt cho các vùng sau: `thu-moi/MAU_PROMPT_1_CON.md`.**
 
 Vị trí file: Tuyết Nguyên giữ tên cũ `NN-slug.png` ở thư mục gốc nhánh. Từ Sương Cốc trở đi, PNG `<slug-vùng>-NN-slug.png` và ghi chú `NN-slug.md` cùng nằm trong `thu-moi/<slug-vùng>/`.
 
