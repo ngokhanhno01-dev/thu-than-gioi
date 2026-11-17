@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Hau xu ly SAU xu_ly_anh_thu.py --batch (chay tren thu muc PNG da tach nen).
-Dung:  python3 -I hau_xu_ly_anh_thu.py <thu_muc_vao> <thu_muc_ra> [--bg magenta|teal|auto] [--dao slug1,slug2]
-  1. Xoa pixel con lai mau nen (vien/quang): magenta -> pixel hong/tim; teal -> pixel xanh lo/teal
+Dung:  python3 -I hau_xu_ly_anh_thu.py <thu_muc_vao> <thu_muc_ra> [--bg magenta|teal|orange] [--dao slug1,slug2]
+  1. Xoa pixel con lai mau nen (vien/quang): magenta -> pixel hong/tim; teal -> pixel xanh lo/teal; orange -> pixel cam/vang (thu KHONG duoc co mau am)
      (an toan khi thu KHONG co mau do; neu thu co xanh teal thi KHONG dung --bg teal).
   2. Bo manh roi < 30px; xoa dau sao Gemini con sot (manh < 1500px, bbox <= 70px, goc duoi phai).
   3. --dao: dao thu tu 3 bac (khi anh ra Bac 3 -> 1, vd Phong Mieu) bang cach cat theo 2 cot thua nhat
@@ -15,7 +15,10 @@ from scipy import ndimage as ndi
 
 def bad_mask(arr, a, bg):
     R, G, B = [arr[..., i].astype(int) for i in range(3)]
-    if bg == 'teal':
+    if bg == 'orange':
+        m = a & (R - B > 110) & (R > 190) & (R - G > 40)
+        m2 = a & (R - B > 45) & (R - G > 15)
+    elif bg == 'teal':
         m = a & (G - R > 40) & (B - R > 40)
         m2 = a & (G - R > 15) & (B - R > 15)
     else:
