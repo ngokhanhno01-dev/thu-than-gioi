@@ -15,6 +15,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 .ub.c2{background:#1f7a3a;border-color:#4fc97a}
 .ub.c3{background:#2b2030;border-color:#f0c93a;color:#ffe9a0}
 .ub.c4{background:#a05c14;border-color:#f0a63a}
+.ub.c5{background:#3a2a5c;border-color:#a98cf0}
 #ui.ed .ub{outline:1px dashed rgba(255,255,255,.75)}
 #ui .ub.sel{outline:2px solid #ff0;z-index:9}
 #edb{position:absolute;left:calc(4px + env(safe-area-inset-left,0px));top:calc(4px + env(safe-area-inset-top,0px));opacity:.55;z-index:20}
@@ -37,19 +38,23 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 /* GAME MỚI (khung ban đầu). Màn ngang, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
    Chạm lần đầu -> vào toàn màn hình + khóa ngang.
-   Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase.
+   Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
    VỊ TRÍ THÚ: thú bên trái đứng ngay giữa nút "Chỉ số" (theo vị trí nút thật trên màn hình, kéo nút là thú đi theo).
    Thú bên phải đối xứng với thú trái qua giữa màn hình (W - x trái).
-   NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ toàn màn hình).
+   ĐỔI BẬC: 2 nút "Bạn: bậc N" và "Địch: bậc N" (id tm, te), bấm để xoay vòng 1 -> 2 -> 3 -> 1 (MAXB = 3).
+   Nút mới thêm vào danh sách sẽ tự xếp vào chỗ trống cuối thanh dưới, KHÔNG làm mất bố cục đã sắp xếp.
+   NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ toàn màn hình và 2 nút đổi bậc).
    Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút (ô gõ ngay trên màn hình).
    Bố cục + tên nút lưu ở khóa ttg_moi_layout_v1 (trường t = tên tự đặt).
    Lúc đang gõ tên (typing=true) KHÔNG tính lại bố cục, để bàn phím không làm xô lệch nút. */
 (function(){
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID='1a',KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false,typing=false;
-var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16;
+var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16,MAXB=3;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;}catch(e){}
+if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
+function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
 function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
 function full(){var e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(!f||isFS())return;
@@ -89,15 +94,18 @@ var UI=[
  {id:'cs',t:'🧬 Chỉ số',n:'Chỉ số',c:1},{id:'hm',t:'🩸 Huyết mạch',n:'Huyết mạch',c:1},{id:'tb',t:'🛡️ Trang bị',n:'Trang bị',c:1},{id:'dh',t:'🏅 Danh hiệu',n:'Danh hiệu',c:1},{id:'bl',t:'🎒 9/100',n:'Balo',c:1},
  {id:'tx',t:'🧭 Thám hiểm',n:'Thám hiểm',c:2},{id:'dt',t:'⚔️ Đấu trường',n:'Đấu trường',c:2},{id:'ch',t:'🏪 Cửa hàng',n:'Cửa hàng',c:2},{id:'pb',t:'🏰 Phó bản nhóm',n:'Phó bản nhóm',c:2},
  {id:'sb',t:'👑 Săn boss: BẬT',n:'Săn boss',c:3},{id:'ts',t:'♻️ Tái Sinh',n:'Tái Sinh',c:4},
- {id:'cm',t:'💬',n:'Chat',c:1},{id:'sn',t:'🔊',n:'Âm thanh',c:1}];
+ {id:'cm',t:'💬',n:'Chat',c:1},{id:'sn',t:'🔊',n:'Âm thanh',c:1},
+ {id:'tm',t:'',n:'Đổi bậc bạn',c:5},{id:'te',t:'',n:'Đổi bậc địch',c:5}];
+/* Chữ mặc định của nút (2 nút đổi bậc có chữ thay đổi theo bậc hiện tại) */
+function dt(u){return u.id==='tm'?'Bạn: bậc '+bm:u.id==='te'?'Địch: bậc '+be:u.t;}
 var ui=document.getElementById('ui'),edb=document.getElementById('edb'),edt=document.getElementById('edt'),edn=document.getElementById('edn'),edz=document.getElementById('edz'),tst=document.getElementById('tst'),edq=document.getElementById('edq'),edi=document.getElementById('edi');
 var els={},lay={},ed=false,sel=null,drag=null,tt=0;
 try{lay=JSON.parse(localStorage.getItem(LKEY)||'{}')||{};}catch(e){lay={};}
 function saveLay(){try{localStorage.setItem(LKEY,JSON.stringify(lay));}catch(e){}}
 function toast(s){tst.textContent=s;tst.style.opacity=1;clearTimeout(tt);tt=setTimeout(function(){tst.style.opacity=0;},900);}
 function byId(id){for(var i=0;i<UI.length;i++)if(UI[i].id===id)return UI[i];return null;}
-function label(id){var p=lay[id];els[id].textContent=(p&&p.t)?p.t:byId(id).t;}
-UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.c;e.textContent=u.t;e.setAttribute('data-id',u.id);ui.appendChild(e);els[u.id]=e;
+function label(id){var p=lay[id];els[id].textContent=(p&&p.t)?p.t:dt(byId(id));}
+UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.c;e.textContent=dt(u);e.setAttribute('data-id',u.id);ui.appendChild(e);els[u.id]=e;
  e.addEventListener('pointerdown',function(ev){
   if(!ed||typing)return;
   ev.preventDefault();selectB(u.id);var r=e.getBoundingClientRect();
@@ -110,6 +118,8 @@ UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.
   if(drag&&drag.id===u.id){drag=null;saveLay();return;}
   if(ed)return;
   if(u.id==='fs'){triedFS=true;if(isFS())exitFull();else full();}
+  else if(u.id==='tm'){bm=bm%MAXB+1;saveB();label('tm');toast('Bạn: bậc '+bm);}
+  else if(u.id==='te'){be=be%MAXB+1;saveB();label('te');toast('Địch: bậc '+be);}
   else toast(els[u.id].textContent+' (chưa gắn chức năng)');});
  e.addEventListener('pointercancel',function(){if(drag){drag=null;saveLay();}});
 });
@@ -120,7 +130,7 @@ function place(id){var e=els[id],p=lay[id];label(id);e.style.left=Math.round(p.x
 /* Bố cục mặc định: dồn hết vào thanh dưới màn hình ngang, chia dòng, căn giữa. Giữ nguyên tên tự đặt. */
 function defaults(){
  var cs=getComputedStyle(sa),L=parseFloat(cs.paddingLeft)||0,R=parseFloat(cs.paddingRight)||0,B=parseFloat(cs.paddingBottom)||0;
- var old={};UI.forEach(function(u){if(lay[u.id]&&lay[u.id].t)old[u.id]=lay[u.id].t;els[u.id].textContent=old[u.id]||u.t;});
+ var old={};UI.forEach(function(u){if(lay[u.id]&&lay[u.id].t)old[u.id]=lay[u.id].t;els[u.id].textContent=old[u.id]||dt(u);});
  var avail=innerWidth-L-R-8,gap=3,rows=[],row=[],rw=0,h=18;
  UI.forEach(function(u){var w=els[u.id].offsetWidth;
   if(row.length&&rw+gap+w>avail){rows.push({r:row,w:rw});row=[];rw=0;}
@@ -130,10 +140,21 @@ function defaults(){
  rows.forEach(function(rr){var x=L+4+(avail-rr.w)/2;
   rr.r.forEach(function(u){lay[u.id]={x:x/innerWidth,y:y/innerHeight,s:1};if(old[u.id])lay[u.id].t=old[u.id];x+=els[u.id].offsetWidth+gap;});
   y+=h+gap;});}
+function okL(id){var p=lay[id];return !!(p&&typeof p.x==='number'&&p.s>0);}
+/* Nút mới chưa có trong bố cục đã lưu: xếp nối vào cuối dòng dưới cùng (chỗ trống), không đụng các nút khác */
+function addMissing(miss){
+ var by=-1,rx=0;
+ UI.forEach(function(u){if(okL(u.id)){var y=lay[u.id].y*innerHeight;if(y>by)by=y;}});
+ UI.forEach(function(u){if(okL(u.id)){var y=lay[u.id].y*innerHeight;if(Math.abs(y-by)<3){var r=lay[u.id].x*innerWidth+els[u.id].offsetWidth*lay[u.id].s;if(r>rx)rx=r;}}});
+ var x=rx+3;
+ miss.forEach(function(u){label(u.id);var w=els[u.id].offsetWidth;
+  if(x+w>innerWidth-4){x=4;by+=21;}
+  lay[u.id]={x:x/innerWidth,y:by/innerHeight,s:1};x+=w+3;});}
 function layoutUI(){
  if(innerWidth<=innerHeight)return;
- var ok=true;UI.forEach(function(u){if(!lay[u.id]||typeof lay[u.id].x!=='number'||!(lay[u.id].s>0))ok=false;});
- if(!ok){defaults();saveLay();}
+ var miss=UI.filter(function(u){return !okL(u.id);});
+ if(miss.length===UI.length){defaults();saveLay();}
+ else if(miss.length){addMissing(miss);saveLay();}
  UI.forEach(function(u){place(u.id);});}
 function selectB(id){sel=id;UI.forEach(function(u){els[u.id].classList.toggle('sel',u.id===id);});
  edn.textContent=id?('Nút: '+els[id].textContent):'Chạm 1 nút để chọn, kéo để di chuyển';
