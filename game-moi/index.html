@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8">
 <base href="../">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-visual">
 <title>Thú Thần Giới - game mới</title>
 <style>
 html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
@@ -18,8 +18,10 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 #ui.ed .ub{outline:1px dashed rgba(255,255,255,.75)}
 #ui .ub.sel{outline:2px solid #ff0;z-index:9}
 #edb{position:absolute;left:calc(4px + env(safe-area-inset-left,0px));top:calc(4px + env(safe-area-inset-top,0px));opacity:.55;z-index:20}
-#edt{position:absolute;left:50%;transform:translateX(-50%);top:calc(4px + env(safe-area-inset-top,0px));display:none;align-items:center;gap:5px;background:rgba(0,0,0,.82);color:#fff;font:11px sans-serif;padding:3px 6px;border-radius:4px;z-index:20;white-space:nowrap}
-#edb,#edt button{font:bold 11px sans-serif;padding:3px 8px;border:1px solid #888;border-radius:3px;background:#333;color:#fff}
+#edt,#edq{position:absolute;left:50%;transform:translateX(-50%);top:calc(4px + env(safe-area-inset-top,0px));display:none;align-items:center;gap:5px;background:rgba(0,0,0,.85);color:#fff;font:11px sans-serif;padding:3px 6px;border-radius:4px;z-index:20;white-space:nowrap}
+#edq{z-index:25}
+#edb,#edt button,#edq button{font:bold 11px sans-serif;padding:3px 8px;border:1px solid #888;border-radius:3px;background:#333;color:#fff}
+#edq input{font:14px sans-serif;width:210px;padding:3px 6px;border:1px solid #888;border-radius:3px;background:#fff;color:#000;-webkit-user-select:text;user-select:text}
 #edz{min-width:34px;text-align:center}
 #tst{position:absolute;left:50%;transform:translateX(-50%);top:calc(30px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 8px;border-radius:3px;opacity:0;transition:opacity .2s;pointer-events:none!important;z-index:30;white-space:nowrap}
 </style></head><body>
@@ -27,6 +29,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <div id="ui">
  <button id="edb">✎ Sắp xếp</button>
  <div id="edt"><span id="edn"></span><button id="edm">−</button><span id="edz"></span><button id="edp">+</button><button id="edr">Đổi tên</button><button id="edd">Mặc định</button><button id="edx">Xong</button></div>
+ <div id="edq"><input id="edi" maxlength="30" placeholder="Tên nút (trống = tên gốc)" autocomplete="off"><button id="edo">OK</button><button id="edc">Hủy</button></div>
  <div id="tst"></div>
 </div>
 <script src="51-thu-moi.js"></script>
@@ -36,11 +39,12 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Chạm lần đầu -> vào toàn màn hình + khóa ngang.
    Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase.
    NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ toàn màn hình).
-   Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút.
-   Bố cục + tên nút lưu ở khóa ttg_moi_layout_v1 (trường t = tên tự đặt). */
+   Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút (ô gõ ngay trên màn hình).
+   Bố cục + tên nút lưu ở khóa ttg_moi_layout_v1 (trường t = tên tự đặt).
+   Lúc đang gõ tên (typing=true) KHÔNG tính lại bố cục, để bàn phím không làm xô lệch nút. */
 (function(){
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
-var ID='1a',KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false;
+var ID='1a',KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false,typing=false;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;}catch(e){}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};}
 function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
@@ -48,6 +52,7 @@ function full(){var e=document.documentElement,f=e.requestFullscreen||e.webkitRe
  try{var p=f.call(e);if(p&&p.then)p.then(function(){try{screen.orientation.lock('landscape').catch(function(){});}catch(x){}}).catch(function(){});}catch(x){}}
 function exitFull(){var f=document.exitFullscreen||document.webkitExitFullscreen;if(f){try{var p=f.call(document);if(p&&p.catch)p.catch(function(){});}catch(x){}}}
 function resize(){
+ if(typing)return;
  DPR=window.devicePixelRatio||1;
  var pw=Math.round(innerWidth*DPR),ph=Math.round(innerHeight*DPR);
  K=Math.max(1,Math.round(ph/360));W=Math.floor(pw/K);H=Math.floor(ph/K);
@@ -71,7 +76,7 @@ var UI=[
  {id:'tx',t:'🧭 Thám hiểm',n:'Thám hiểm',c:2},{id:'dt',t:'⚔️ Đấu trường',n:'Đấu trường',c:2},{id:'ch',t:'🏪 Cửa hàng',n:'Cửa hàng',c:2},{id:'pb',t:'🏰 Phó bản nhóm',n:'Phó bản nhóm',c:2},
  {id:'sb',t:'👑 Săn boss: BẬT',n:'Săn boss',c:3},{id:'ts',t:'♻️ Tái Sinh',n:'Tái Sinh',c:4},
  {id:'cm',t:'💬',n:'Chat',c:1},{id:'sn',t:'🔊',n:'Âm thanh',c:1}];
-var ui=document.getElementById('ui'),edb=document.getElementById('edb'),edt=document.getElementById('edt'),edn=document.getElementById('edn'),edz=document.getElementById('edz'),tst=document.getElementById('tst');
+var ui=document.getElementById('ui'),edb=document.getElementById('edb'),edt=document.getElementById('edt'),edn=document.getElementById('edn'),edz=document.getElementById('edz'),tst=document.getElementById('tst'),edq=document.getElementById('edq'),edi=document.getElementById('edi');
 var els={},lay={},ed=false,sel=null,drag=null,tt=0;
 try{lay=JSON.parse(localStorage.getItem(LKEY)||'{}')||{};}catch(e){lay={};}
 function saveLay(){try{localStorage.setItem(LKEY,JSON.stringify(lay));}catch(e){}}
@@ -80,7 +85,7 @@ function byId(id){for(var i=0;i<UI.length;i++)if(UI[i].id===id)return UI[i];retu
 function label(id){var p=lay[id];els[id].textContent=(p&&p.t)?p.t:byId(id).t;}
 UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.c;e.textContent=u.t;e.setAttribute('data-id',u.id);ui.appendChild(e);els[u.id]=e;
  e.addEventListener('pointerdown',function(ev){
-  if(!ed)return;
+  if(!ed||typing)return;
   ev.preventDefault();selectB(u.id);var r=e.getBoundingClientRect();
   drag={id:u.id,dx:ev.clientX-r.left,dy:ev.clientY-r.top,pid:ev.pointerId};
   try{e.setPointerCapture(ev.pointerId);}catch(x){}});
@@ -122,19 +127,25 @@ function selectB(id){sel=id;UI.forEach(function(u){els[u.id].classList.toggle('s
 function setEd(on){ed=on;ui.classList.toggle('ed',on);edt.style.display=on?'flex':'none';edb.style.display=on?'none':'block';drag=null;selectB(null);}
 function scaleSel(d){if(!sel||!lay[sel])return;var p=lay[sel];p.s=Math.max(.4,Math.min(3,Math.round((p.s+d)*10)/10));
  setPos(sel,p.x*innerWidth,p.y*innerHeight);saveLay();selectB(sel);}
-function renameSel(){
+/* Đổi tên: ô gõ nằm ngay trên màn hình (thay thanh công cụ trong lúc gõ) */
+function openRename(){
  if(!sel||!lay[sel]){toast('Chạm chọn 1 nút trước');return;}
- var v=prompt('Tên mới cho nút (để trống = về tên gốc):',els[sel].textContent);
- if(v===null)return;v=v.trim();
- if(v)lay[sel].t=v.slice(0,30);else delete lay[sel].t;
- label(sel);setPos(sel,lay[sel].x*innerWidth,lay[sel].y*innerHeight);saveLay();selectB(sel);}
+ typing=true;edt.style.display='none';edq.style.display='flex';
+ edi.value=els[sel].textContent;edi.focus();try{edi.select();}catch(e){}}
+function closeRename(ok){
+ if(ok&&sel&&lay[sel]){var v=edi.value.trim();if(v)lay[sel].t=v.slice(0,30);else delete lay[sel].t;label(sel);saveLay();}
+ edi.blur();edq.style.display='none';edt.style.display='flex';typing=false;
+ setTimeout(function(){resize();if(sel&&lay[sel])setPos(sel,lay[sel].x*innerWidth,lay[sel].y*innerHeight);saveLay();selectB(sel);},350);}
 edb.addEventListener('click',function(){setEd(true);});
 document.getElementById('edx').addEventListener('click',function(){saveLay();setEd(false);});
 document.getElementById('edm').addEventListener('click',function(){scaleSel(-.1);});
 document.getElementById('edp').addEventListener('click',function(){scaleSel(.1);});
-document.getElementById('edr').addEventListener('click',renameSel);
+document.getElementById('edr').addEventListener('click',openRename);
+document.getElementById('edo').addEventListener('click',function(){closeRename(true);});
+document.getElementById('edc').addEventListener('click',function(){closeRename(false);});
+edi.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();closeRename(true);}else if(e.key==='Escape'){closeRename(false);}});
 document.getElementById('edd').addEventListener('click',function(){var s=sel;defaults();saveLay();UI.forEach(function(u){place(u.id);});selectB(s);});
-document.addEventListener('contextmenu',function(e){e.preventDefault();});
+document.addEventListener('contextmenu',function(e){if(!e.target||e.target.tagName!=='INPUT')e.preventDefault();});
 /* Toàn màn hình phải gọi trong pointerup (cảm ứng chỉ tính là "chạm thật" lúc nhấc tay). */
 document.addEventListener('pointerup',function(){if(!triedFS&&!ed){triedFS=true;full();}});
 
