@@ -38,6 +38,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
    Chạm lần đầu -> vào toàn màn hình + khóa ngang.
    Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase.
+   AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
    NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ toàn màn hình).
    Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút (ô gõ ngay trên màn hình).
    Bố cục + tên nút lưu ở khóa ttg_moi_layout_v1 (trường t = tên tự đặt).
@@ -45,8 +46,9 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 (function(){
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID='1a',KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false,typing=false;
+var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;}catch(e){}
-function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};}
+function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
 function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
 function full(){var e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(!f||isFS())return;
  try{var p=f.call(e);if(p&&p.then)p.then(function(){try{screen.orientation.lock('landscape').catch(function(){});}catch(x){}}).catch(function(){});}catch(x){}}
@@ -65,9 +67,15 @@ function gy(){return H-I.b-62;}
 function px(w){var a=I.l+10,b=W-I.r-10;return Math.round(a+(b-a)*(w==='me'?.27:.73));}
 function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
  st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+d});A={w:w,t:n};}
+/* Một lượt: mình đánh -> (nếu địch còn sống) địch đánh lại -> kiểm tra thắng/thua.
+   Hết trận: giữ busy=true, hiện kết quả END_WAIT ms rồi reset() (st mới, busy=false) để auto đánh tiếp. */
 function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;hit('me');
  setTimeout(function(){if(st===s0&&st.en>0)hit('en');},650);
- setTimeout(function(){if(st!==s0)return;st.busy=false;st.msg=st.en<=0?'Thắng!':st.me<=0?'Thua':'';},1300);}
+ setTimeout(function(){if(st!==s0)return;
+  if(st.en<=0||st.me<=0){st.msg=st.en<=0?'Thắng!':'Thua';
+   setTimeout(function(){if(st===s0)reset();},END_WAIT);}
+  else{st.busy=false;nextAt=performance.now()+GAP;}},1300);}
+function autoTick(){if(AUTO&&st&&!st.busy&&performance.now()>=nextAt)atk();}
 
 /* ===== NÚT ẢO + CHẾ ĐỘ SẮP XẾP ===== */
 var UI=[
@@ -170,7 +178,7 @@ function draw(ts){
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
  st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
  if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+60,gy()-170));}}
-function loop(ts){draw(ts);requestAnimationFrame(loop);}
+function loop(ts){autoTick();draw(ts);requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
 document.addEventListener('fullscreenchange',function(){setTimeout(resize,150);});document.addEventListener('webkitfullscreenchange',function(){setTimeout(resize,150);});
 reset();resize();requestAnimationFrame(loop);
