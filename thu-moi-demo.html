@@ -39,9 +39,9 @@ THU_MOI.zones.forEach(function(z){
   list.appendChild(r);});});
 function all(){document.querySelectorAll('#list canvas').forEach(paint);battle();}
 function bar(x,px,py,w,p,col){x.fillStyle='#000';x.fillRect(px,py,w,5);x.fillStyle=col;x.fillRect(px+1,py+1,(w-2)*p,3);}
-/* Công thức theo game thật (06-mobs.js drawPet): size = 120 * PET_DRAW_SCALE(0.84) * PET_GROW_MAX(1.03) * stageScale.
-   Thú mới chỉ có 3 bậc: GIẢ ĐỊNH TẠM bậc 1/2/3 = stageScale 0.30 / 0.67 / 1.00 (bậc 1/5/10 của thú cũ). Chưa phải quyết định cơ chế. */
-var STAGE_SC={1:.30,2:.67,3:1};
+/* Cỡ khung trong trận = 120 * 0.84 * 1.03 = ~104px. Cỡ tương đối giữa 3 bậc đã nằm sẵn trong ảnh cắt (cùng tỉ lệ thu), nên hệ số bậc = 1/1/1.
+   Muốn bậc nào to/nhỏ hơn thì sửa số ở STAGE_SC. */
+var STAGE_SC={1:1,2:1,3:1};
 function petSize(b){return 120*.84*1.03*STAGE_SC[b]*mult;}
 function battle(){var c=document.getElementById('bt'),x=c.getContext('2d');
  var g=x.createLinearGradient(0,0,0,250);g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');x.fillStyle=g;x.fillRect(0,0,360,250);
