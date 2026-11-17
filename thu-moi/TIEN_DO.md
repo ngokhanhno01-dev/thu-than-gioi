@@ -2,7 +2,7 @@
 
 **Tiếp theo: Vân Đảo (vùng 2). Sương Cốc đã hoàn tất concept và ghi chú 10/10. Trên nhánh hiện có 9/10 PNG; còn thiếu `suong-coc-06-vu-long.png`, người dùng cần upload vào thư mục gốc. Cập nhật: 17/11/2026.**
 
-**Việc còn lại của Sương Cốc:** upload PNG `suong-coc-06-vu-long.png`. Không cần soạn lại prompt hoặc concept 01-10.
+**Việc còn lại của Sương Cốc:** upload PNG `suong-coc-06-vu-long.png`. Không cần soạn lại prompt hoặc concept 01-10.(đã xong )
 
 Ảnh ở thư mục gốc nhánh, tên `<slug-vùng>-NN-slug.png` (riêng Tuyết Nguyên giữ tên cũ `NN-slug.png`); ghi chú `thu-moi/<slug-vùng>/NN-slug.md`.
 
