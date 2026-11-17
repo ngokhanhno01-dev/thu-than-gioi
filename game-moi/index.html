@@ -26,7 +26,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <canvas id="g"></canvas><div id="sa"></div>
 <div id="ui">
  <button id="edb">✎ Sắp xếp</button>
- <div id="edt"><span id="edn"></span><button id="edm">−</button><span id="edz"></span><button id="edp">+</button><button id="edd">Mặc định</button><button id="edx">Xong</button></div>
+ <div id="edt"><span id="edn"></span><button id="edm">−</button><span id="edz"></span><button id="edp">+</button><button id="edr">Đổi tên</button><button id="edd">Mặc định</button><button id="edx">Xong</button></div>
  <div id="tst"></div>
 </div>
 <script src="51-thu-moi.js"></script>
@@ -36,7 +36,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Chạm lần đầu -> vào toàn màn hình + khóa ngang.
    Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase.
    NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ toàn màn hình).
-   Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ từng nút. Bố cục lưu ở khóa ttg_moi_layout_v1. */
+   Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút.
+   Bố cục + tên nút lưu ở khóa ttg_moi_layout_v1 (trường t = tên tự đặt). */
 (function(){
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID='1a',KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false;
@@ -76,6 +77,7 @@ try{lay=JSON.parse(localStorage.getItem(LKEY)||'{}')||{};}catch(e){lay={};}
 function saveLay(){try{localStorage.setItem(LKEY,JSON.stringify(lay));}catch(e){}}
 function toast(s){tst.textContent=s;tst.style.opacity=1;clearTimeout(tt);tt=setTimeout(function(){tst.style.opacity=0;},900);}
 function byId(id){for(var i=0;i<UI.length;i++)if(UI[i].id===id)return UI[i];return null;}
+function label(id){var p=lay[id];els[id].textContent=(p&&p.t)?p.t:byId(id).t;}
 UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.c;e.textContent=u.t;e.setAttribute('data-id',u.id);ui.appendChild(e);els[u.id]=e;
  e.addEventListener('pointerdown',function(ev){
   if(!ed)return;
@@ -89,16 +91,17 @@ UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.
   if(drag&&drag.id===u.id){drag=null;saveLay();return;}
   if(ed)return;
   if(u.id==='fs'){triedFS=true;if(isFS())exitFull();else full();}
-  else toast(u.n+' (chưa gắn chức năng)');});
+  else toast(els[u.id].textContent+' (chưa gắn chức năng)');});
  e.addEventListener('pointercancel',function(){if(drag){drag=null;saveLay();}});
 });
 function setPos(id,x,y){var e=els[id],p=lay[id],w=e.offsetWidth*p.s,h=e.offsetHeight*p.s;
  x=Math.max(0,Math.min(innerWidth-w,x));y=Math.max(0,Math.min(innerHeight-h,y));
  p.x=x/innerWidth;p.y=y/innerHeight;place(id);}
-function place(id){var e=els[id],p=lay[id];e.style.left=Math.round(p.x*innerWidth)+'px';e.style.top=Math.round(p.y*innerHeight)+'px';e.style.transform='scale('+p.s+')';}
-/* Bố cục mặc định: dồn hết vào thanh dưới màn hình ngang, chia dòng, căn giữa */
+function place(id){var e=els[id],p=lay[id];label(id);e.style.left=Math.round(p.x*innerWidth)+'px';e.style.top=Math.round(p.y*innerHeight)+'px';e.style.transform='scale('+p.s+')';}
+/* Bố cục mặc định: dồn hết vào thanh dưới màn hình ngang, chia dòng, căn giữa. Giữ nguyên tên tự đặt. */
 function defaults(){
  var cs=getComputedStyle(sa),L=parseFloat(cs.paddingLeft)||0,R=parseFloat(cs.paddingRight)||0,B=parseFloat(cs.paddingBottom)||0;
+ var old={};UI.forEach(function(u){if(lay[u.id]&&lay[u.id].t)old[u.id]=lay[u.id].t;els[u.id].textContent=old[u.id]||u.t;});
  var avail=innerWidth-L-R-8,gap=3,rows=[],row=[],rw=0,h=18;
  UI.forEach(function(u){var w=els[u.id].offsetWidth;
   if(row.length&&rw+gap+w>avail){rows.push({r:row,w:rw});row=[];rw=0;}
@@ -106,7 +109,7 @@ function defaults(){
  if(row.length)rows.push({r:row,w:rw});
  var total=rows.length*h+(rows.length-1)*gap,y=innerHeight-B-4-total;lay={};
  rows.forEach(function(rr){var x=L+4+(avail-rr.w)/2;
-  rr.r.forEach(function(u){lay[u.id]={x:x/innerWidth,y:y/innerHeight,s:1};x+=els[u.id].offsetWidth+gap;});
+  rr.r.forEach(function(u){lay[u.id]={x:x/innerWidth,y:y/innerHeight,s:1};if(old[u.id])lay[u.id].t=old[u.id];x+=els[u.id].offsetWidth+gap;});
   y+=h+gap;});}
 function layoutUI(){
  if(innerWidth<=innerHeight)return;
@@ -114,15 +117,22 @@ function layoutUI(){
  if(!ok){defaults();saveLay();}
  UI.forEach(function(u){place(u.id);});}
 function selectB(id){sel=id;UI.forEach(function(u){els[u.id].classList.toggle('sel',u.id===id);});
- edn.textContent=id?byId(id).n:'Chạm 1 nút để chọn, kéo để di chuyển';
+ edn.textContent=id?('Nút: '+els[id].textContent):'Chạm 1 nút để chọn, kéo để di chuyển';
  edz.textContent=id&&lay[id]?Math.round(lay[id].s*100)+'%':'';}
 function setEd(on){ed=on;ui.classList.toggle('ed',on);edt.style.display=on?'flex':'none';edb.style.display=on?'none':'block';drag=null;selectB(null);}
 function scaleSel(d){if(!sel||!lay[sel])return;var p=lay[sel];p.s=Math.max(.4,Math.min(3,Math.round((p.s+d)*10)/10));
  setPos(sel,p.x*innerWidth,p.y*innerHeight);saveLay();selectB(sel);}
+function renameSel(){
+ if(!sel||!lay[sel]){toast('Chạm chọn 1 nút trước');return;}
+ var v=prompt('Tên mới cho nút (để trống = về tên gốc):',els[sel].textContent);
+ if(v===null)return;v=v.trim();
+ if(v)lay[sel].t=v.slice(0,30);else delete lay[sel].t;
+ label(sel);setPos(sel,lay[sel].x*innerWidth,lay[sel].y*innerHeight);saveLay();selectB(sel);}
 edb.addEventListener('click',function(){setEd(true);});
 document.getElementById('edx').addEventListener('click',function(){saveLay();setEd(false);});
 document.getElementById('edm').addEventListener('click',function(){scaleSel(-.1);});
 document.getElementById('edp').addEventListener('click',function(){scaleSel(.1);});
+document.getElementById('edr').addEventListener('click',renameSel);
 document.getElementById('edd').addEventListener('click',function(){var s=sel;defaults();saveLay();UI.forEach(function(u){place(u.id);});selectB(s);});
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
 /* Toàn màn hình phải gọi trong pointerup (cảm ứng chỉ tính là "chạm thật" lúc nhấc tay). */
