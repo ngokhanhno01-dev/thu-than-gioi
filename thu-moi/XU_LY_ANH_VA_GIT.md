@@ -2,16 +2,27 @@
 
 Chỉ đọc file này khi đã nhận ảnh từ người dùng.
 
-## A. Xử lý ảnh
-Ảnh ở `/mnt/user-data/attachments/...` (đường dẫn trong tin nhắn). Có numpy, scipy, PIL, cv2; không cài được gói mới. File tạm để trong thư mục scratchpad.
-1. Kiểm tra kích thước, chế độ, alpha, mảnh rời (`scipy.ndimage.label` trên alpha > 16).
-2. **Dấu sao hồng góc dưới phải** (mảnh rời ~ (252,130,248), x>=640, y>=340 trên ảnh 688×384): XOÁ (nở 2px). Các mảnh rời khác (bong bóng, mảnh băng, đốm sương, vạch bóng đổ) là thiết kế: GIỮ.
-3. Còn **nền magenta** (~(248,3,250)): tách theo khoảng cách màu < 70 tới nền (tính cả lỗ kín), alpha **cứng 0/255**, không làm mờ.
-   - Viền ám tím: chỉ pixel cách nền ≤ 3px có `R-G > 40` và `B-G > 20` mới tô lại màu viền (10,14,134). KHÔNG dùng ngưỡng lỏng (viền navy thật tới ~(39,23,156), tô nhầm sẽ phá viền).
-   - Cắt sát bounding box, chừa lề ~24px. **Không thu nhỏ ảnh** (không có lưới pixel đều). Chỉ resize / cắt riêng 3 bậc khi người dùng yêu cầu, và nói rõ.
-   - Ảnh người dùng đã tự xoá nền (RGBA) mà còn đốm tím / hồng: tô lại bằng màu lân cận (mask `R-G>25 và B-G>10`, nở 1px; thêm lượt bắt tím nhạt hue 245-340°, độ sáng > 0.62, tránh viền navy tối); mảng đốm rời hẳn thì xoá; rồi alpha cứng (ngưỡng 128). Với vùng Sương Cốc còn đổi sương ám hồng sang xanh xám trắng.
-4. **Soi trước khi commit**: dựng ảnh xem thử nền tối VÀ nền sáng, phóng to vài chỗ viền, đếm mảnh rời. Đọc ảnh xem thử đúng 1 lần.
-5. Nhận xét thật: điểm tốt và điểm chưa ổn (viền lệch, mắt khó đọc, thân tối, hợp phong cách chưa). Không nói quá.
+## A. Xử lý ảnh (3 bước, 1 lệnh cho cả lô)
+Công cụ: `tools/xu_ly_anh_thu.py` (bản v2). Có numpy, scipy, PIL; không cài được gói mới. Ảnh người dùng gửi nằm ở `/mnt/user-data/uploads/` (hoặc `/mnt/user-data/attachments/`, xem đường dẫn trong tin nhắn). Thứ tự ảnh hiển thị trong tin nhắn có thể ngược với danh sách file: đối chiếu bằng TÊN file, đừng đoán.
+
+1. **Lấy script vào máy làm việc**: bash không có mạng nên `get_file_contents` (owner `ngokhanhno01-dev`, repo `thu-than-gioi`, ref `refs/heads/ghi-chu-co-che-bat-thu-evo`, path `tools/xu_ly_anh_thu.py`) rồi `create_file` vào `/home/claude/xu_ly_anh_thu.py`, chép nguyên văn. Có git + mạng thì dùng thẳng file trong clone. KHÔNG tự viết lại thuật toán từ đầu.
+2. **Chạy cả lô** (10 ảnh ~ vài giây):
+   `python3 -I xu_ly_anh_thu.py --batch /mnt/user-data/uploads /home/claude/out --sheet /home/claude/xem`
+   Mỗi ảnh in 1 dòng báo cáo: kích thước, số mảnh, màu nền, `dau sao: da xoa`. Nếu thấy `KHONG THAY` thì mở góc dưới phải ảnh gốc kiểm tra. Một ảnh: `python3 -I xu_ly_anh_thu.py vao.png ra.png --preview xem.png`.
+3. **Soi 1 lần**: công cụ tự ghép bảng xem thử `xem_0.jpg`, `xem_1.jpg` (5 ảnh / bảng, trái = nền tối, phải = nền sáng). `view` mỗi bảng đúng 1 lần. Nhìn trên NỀN SÁNG: chỗ thủng, mảnh rời, viền ám màu. Ổn thì copy PNG sang `/mnt/user-data/outputs/` và `present_files` (PNG không đẩy lên GitHub được, người dùng tự upload).
+
+Công cụ tự nhận nền: nền magenta (~(248,3,250)) hay nền tím Gemini (~(79,67,102)) đều xử lý đúng, không cần cờ. Ép tay nếu cần: `--fringe` / `--no-fringe`; ảnh người dùng đã tự xoá nền: `--rgba`.
+
+### Bẫy đã gặp (bản cũ làm hỏng ảnh, đừng lặp lại)
+- **Tách nền theo ngưỡng khoảng cách toàn ảnh (d >= 70) làm THỦNG thân**: các vùng tối gần màu nền tím (bia đá của Quy, mái đình + thân Kình, bóng tối của Lân) thành trong suốt, chỉ lộ ra khi xem trên nền sáng. Bản v2 chỉ coi là nền vùng rất gần màu nền (d < 32) chạm biên hoặc >= 150 px, rồi nới 2 px quanh mép.
+- **Xoá dấu sao quá tay**: bản cũ xoá MỌI mảnh nhỏ ở góc dưới phải, mất tàn mây / tia sáng / đốm sương là thiết kế (Kình, Lân, Xà, Liên, Tinh). Dấu sao thật chỉ là 1 mảnh ~820 px, gần vuông (~48x48). v2 chỉ xoá đúng mảnh 500-1200 px, <= 90 px, gần vuông.
+- **Tô lại "viền ám tím" khi nền KHÔNG phải magenta** sẽ tô nhầm tinh thể / rune hồng sát mép thành navy. Chỉ bật cho nền magenta (v2 tự quyết).
+- Số "pixel ám hồng" không phải chỉ báo lỗi (ảnh vốn có rune/tinh thể hồng), v2 không in nữa.
+- Không thu nhỏ ảnh (không có lưới pixel đều). Chỉ cắt riêng 3 bậc khi người dùng yêu cầu, và nói rõ.
+- Alpha cứng 0/255, không làm mờ. Giới hạn đã biết: quầng sáng đèn lồng và sương hồng mờ bị cắt cứng, không còn mờ dần; mảnh rời khác (bong bóng, mảnh băng, đốm sương, vạch bóng đổ) là thiết kế: GIỮ.
+- Đã kiểm thử v2 trên 10 ảnh Vân Đạo (nền tím, 1376x768 / 1024x1024 / 1264x848 / 1792x592), kết quả đã được duyệt.
+
+4. **Nhận xét thật** khi báo người dùng: điểm tốt và điểm chưa ổn (viền lệch, mắt khó đọc, thân tối, hợp phong cách chưa, quầng sáng bị cắt). Nói rõ nếu đã chỉnh công cụ hoặc chạy nhiều lượt, và chỉ gửi bản cuối. Không nói quá.
 
 ## B. Thêm vào nhánh
 - Ảnh: `<slug-vùng>-NN-slug.png` ở thư mục gốc (vd `suong-coc-04-vu-diep.png`). Slug = tên không dấu nối gạch.
