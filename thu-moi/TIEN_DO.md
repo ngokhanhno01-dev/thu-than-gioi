@@ -2,19 +2,19 @@
 
 **Cập nhật: 17/11/2026.**
 
-**Hoàn tất 6/17 vùng (60/170 thú): Tuyết Nguyên (đã LÀM LẠI bằng khung v4, 10 ảnh mới đã duyệt 17/11/2026; ảnh và ghi chú CŨ đã xóa khỏi nhánh), Sương Cốc, Vân Đảo, Phong Nguyên, Lôi Vực, Nguyệt Cung (PNG Nguyệt Cung chờ upload). Việc kế tiếp: upload PNG + ghi chú Tuyết Nguyên mới vào `thu-moi/tuyet-nguyen/` (hiện thư mục này đang trống trên nhánh); rồi làm vùng 6 Dương Sơn. Mẫu prompt chốt cho các vùng sau: `thu-moi/MAU_PROMPT_1_CON.md`.**
+**Hoàn tất 6/17 vùng (60/170 thú): Tuyết Nguyên (đã LÀM LẠI bằng khung v4, 10 ảnh mới đã duyệt và đã upload đủ 17/11/2026; ảnh và ghi chú cũ đã xóa), Sương Cốc, Vân Đảo, Phong Nguyên, Lôi Vực, Nguyệt Cung (PNG Nguyệt Cung chờ upload). Việc kế tiếp: làm lại Sương Cốc bằng khung v4 (prompt bàn giao: `PROMPT_LAM_LAI_SUONG_COC.md`, người dùng giữ), rồi vùng 6 Dương Sơn. Mẫu prompt chốt cho các vùng sau: `thu-moi/MAU_PROMPT_1_CON.md`.**
 
-Vị trí file: Tuyết Nguyên bản MỚI là `thu-moi/tuyet-nguyen/tuyet-nguyen-NN-slug.png` + `tuyet-nguyen-NN-slug.md` (chờ upload). Từ Sương Cốc trở đi, PNG `<slug-vùng>-NN-slug.png` và ghi chú cùng nằm trong `thu-moi/<slug-vùng>/`.
+Vị trí file: Tuyết Nguyên bản mới là `thu-moi/tuyet-nguyen/tuyet-nguyen-NN-slug.png` + `tuyet-nguyen-NN-slug.md` (đủ 10 con). Từ Sương Cốc trở đi, PNG `<slug-vùng>-NN-slug.png` và ghi chú cùng nằm trong `thu-moi/<slug-vùng>/`.
 
 Khi làm vùng mới: dán prompt trong `thu-moi/PROMPT_LAM_VUNG_MOI.md` (cũng là nguồn khung prompt tạo ảnh) vào chat mới, kèm ảnh vùng.
 
 ## 17 vùng (số z) và trạng thái
 
-0 Tuyết Nguyên (XONG 10/10, làm lại v4, PNG mới chờ upload), 1 Sương Cốc (XONG 10/10, đủ PNG), 2 Vân Đảo (XONG 10/10, đủ PNG), 3 Phong Nguyên (XONG 10/10, đủ PNG), 4 Lôi Vực (XONG 10/10, đủ PNG), 5 Nguyệt Cung (XONG 10/10, PNG chờ upload), 6 Dương Sơn, 7 Huyền Uyên, 8 Kim Khoáng, 9 Ngọc Động, 10 Thanh Lâm, 11 Xích Hỏa Địa, 12 Hắc Ám Lâm, 13 Tử Tinh Hải, 14 Thiên Không, 15 Linh Hoa Viên, 16 Thần Điện.
+0 Tuyết Nguyên (XONG 10/10, làm lại v4, đủ PNG), 1 Sương Cốc (XONG 10/10 bản cũ, ĐANG CHUẨN BỊ LÀM LẠI v4), 2 Vân Đảo (XONG 10/10, đủ PNG), 3 Phong Nguyên (XONG 10/10, đủ PNG), 4 Lôi Vực (XONG 10/10, đủ PNG), 5 Nguyệt Cung (XONG 10/10, PNG chờ upload), 6 Dương Sơn, 7 Huyền Uyên, 8 Kim Khoáng, 9 Ngọc Động, 10 Thanh Lâm, 11 Xích Hỏa Địa, 12 Hắc Ám Lâm, 13 Tử Tinh Hải, 14 Thiên Không, 15 Linh Hoa Viên, 16 Thần Điện.
 
 ## Tuyết Nguyên (làm lại v4)
 
-10 con mới: Tuyết Cầu (chim cánh cụt), Tuyết Hùng (gấu), Băng Lộc (tuần lộc), Tuyết Báo (báo tuyết), Băng Hải (hải cẩu), Tuyết Cú (cú), Băng Dương (dê núi), Băng Linh (linh khí), Băng Nham (golem), Băng Sơn Cự Thú (boss, voi ma mút). Bảng màu: obsidian, royal blue, sky blue, ice white, cyan cực quang; nền tạo ảnh magenta. Chi tiết: `tuyet-nguyen/TIEN_DO_VUNG.md` (sau khi upload). Bản cũ (Tuyết Cầu, Tuyết Tinh, Tuyết Quang, Golem Băng Giá, Băng Đăng, Băng Kỳ Lân, Băng Tích, Tuyết Nhĩ, Băng Linh, Băng Sơn Cự Thú) đã xóa 17/11/2026 theo yêu cầu người dùng.
+10 con: Tuyết Cầu (chim cánh cụt), Tuyết Hùng (gấu), Băng Lộc (tuần lộc), Tuyết Báo (báo tuyết), Băng Hải (hải cẩu), Tuyết Cú (cú), Băng Dương (dê núi), Băng Linh (linh khí), Băng Nham (golem), Băng Sơn Cự Thú (boss, voi ma mút). Bảng màu: obsidian, royal blue, sky blue, ice white, cyan cực quang; nền tạo ảnh magenta. Chi tiết: `tuyet-nguyen/TIEN_DO_VUNG.md`. Bản cũ (Tuyết Cầu, Tuyết Tinh, Tuyết Quang, Golem Băng Giá, Băng Đăng, Băng Kỳ Lân, Băng Tích, Tuyết Nhĩ, Băng Linh, Băng Sơn Cự Thú) đã xóa 17/11/2026.
 
 ## Vân Đảo
 
@@ -34,4 +34,4 @@ Khi làm vùng mới: dán prompt trong `thu-moi/PROMPT_LAM_VUNG_MOI.md` (cũng 
 
 ## Bàn giao phiên sau
 
-Prompt bàn giao: `thu-moi/PROMPT_PHIEN_TIEP.md`. Script hậu xử lý ảnh (xóa viền màu nền, đảo bậc, xóa sao sót): `tools/hau_xu_ly_anh_thu.py`. Lưu ý: `tools/xu_ly_anh_thu.py` (bước tách nền) hiện KHÔNG có trên nhánh; lần Tuyết Nguyên đã tự viết lại bước tách nền magenta.
+Prompt bàn giao: `thu-moi/PROMPT_PHIEN_TIEP.md`. Script hậu xử lý ảnh (xóa viền màu nền, đảo bậc, xóa sao sót): `tools/hau_xu_ly_anh_thu.py`. Lưu ý: `tools/xu_ly_anh_thu.py` (bước tách nền) hiện KHÔNG có trên nhánh (người dùng lỡ xóa); bản thay thế nằm trong `PROMPT_LAM_LAI_SUONG_COC.md`.
