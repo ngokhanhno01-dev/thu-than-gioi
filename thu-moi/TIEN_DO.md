@@ -2,7 +2,7 @@
 
 **Cập nhật: 17/11/2026.**
 
-**Hoàn tất 5/17 vùng (50/170 thú) đủ PNG trên nhánh: Tuyết Nguyên, Sương Cốc, Vân Đảo, Phong Nguyên, Lôi Vực. Vùng kế tiếp: 5 Nguyệt Cung (`nguyet-cung`), chờ ảnh vùng. Mẫu prompt chốt cho các vùng sau: `thu-moi/MAU_PROMPT_1_CON.md`.**
+**Hoàn tất 6/17 vùng (60/170 thú): Tuyết Nguyên, Sương Cốc, Vân Đảo, Phong Nguyên, Lôi Vực, Nguyệt Cung (PNG Nguyệt Cung chờ upload). Việc kế tiếp: làm lại Tuyết Nguyên bằng prompt v4. Mẫu prompt chốt cho các vùng sau: `thu-moi/MAU_PROMPT_1_CON.md`.**
 
 Vị trí file: Tuyết Nguyên giữ tên cũ `NN-slug.png` ở thư mục gốc nhánh. Từ Sương Cốc trở đi, PNG `<slug-vùng>-NN-slug.png` và ghi chú `NN-slug.md` cùng nằm trong `thu-moi/<slug-vùng>/`.
 
@@ -23,6 +23,10 @@ Khi làm vùng mới: dán prompt trong `thu-moi/PROMPT_LAM_VUNG_MOI.md` (cũng 
 ## Lôi Vực
 
 10 con: Lôi Ưng, Lôi Ngư, Lôi Ngưu, Lôi Mãng, Lôi Cô, Lôi Giáp, Lôi Sư, Lôi Linh, Lôi Đồng, Lôi Vực Chiến Thần (boss). Bảng màu đen / tím / vàng, nền tạo ảnh teal. Chi tiết và điểm chưa ổn: `loi-vuc/TIEN_DO_VUNG.md`.
+
+## Nguyệt Cung
+
+10 con: Nguyệt Thố, Nguyệt Hạc, Nguyệt Thiềm, Nguyệt Đằng, Nguyệt Nga, Nguyệt Kình, Nguyệt Tượng, Nguyệt Quy, Nguyệt Tiên, Nguyệt Thực Tế Quân (boss, sói trăng). Nền cam, thú xanh / tím / bạc. Chi tiết: `nguyet-cung/TIEN_DO_VUNG.md`.
 
 ## Phong Nguyên
 
