@@ -13,13 +13,17 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script>
 /* GAME MỚI (khung ban đầu). Màn ngang, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360), bố cục bám theo cạnh màn hình. Thú vẽ đúng 128px = 1:1.
+   Chạm lần đầu (hoặc nút Toàn màn hình) -> vào toàn màn hình + khóa ngang.
    Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase. */
 (function(){
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
-var ID='1a',KEY='ttg_moi_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null;
+var ID='1a',KEY='ttg_moi_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};}
+function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
+function full(){var e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(!f||isFS())return;
+ try{var p=f.call(e);if(p&&p.then)p.then(function(){try{screen.orientation.lock('landscape').catch(function(){});}catch(x){}}).catch(function(){});}catch(x){}}
 function resize(){
  DPR=window.devicePixelRatio||1;
  var pw=Math.round(innerWidth*DPR),ph=Math.round(innerHeight*DPR);
@@ -35,12 +39,15 @@ function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='m
 function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;hit('me');
  setTimeout(function(){if(st===s0&&st.en>0)hit('en');},650);
  setTimeout(function(){if(st!==s0)return;st.busy=false;st.msg=st.en<=0?'Thắng!':st.me<=0?'Thua':'';},1300);}
-function btns(){var y=H-I.b-48,h=40,L=I.l+10,R=W-I.r-10;
- return [{k:'atk',t:'Đánh',x:L,y:y,w:96,h:h},{k:'bm',t:'Bạn: bậc '+bm,x:L+104,y:y,w:112,h:h},
- {k:'be',t:'Địch: bậc '+be,x:R-216,y:y,w:112,h:h},{k:'rs',t:'Làm lại',x:R-96,y:y,w:96,h:h}];}
-cv.addEventListener('pointerdown',function(e){e.preventDefault();var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;
- btns().forEach(function(b){if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){
-  if(b.k==='atk')atk();else if(b.k==='bm'){bm=bm%3+1;save();}else if(b.k==='be'){be=be%3+1;save();}else reset();}});});
+function btns(){var y=H-I.b-48,h=40,L=I.l+10,R=W-I.r-10,a=[{k:'atk',t:'Đánh',x:L,y:y,w:96,h:h},{k:'bm',t:'Bạn: bậc '+bm,x:L+104,y:y,w:112,h:h},
+ {k:'be',t:'Địch: bậc '+be,x:R-216,y:y,w:112,h:h},{k:'rs',t:'Làm lại',x:R-96,y:y,w:96,h:h}];
+ if(!isFS())a.push({k:'fs',t:'Toàn màn hình',x:Math.round(W/2-64),y:y,w:128,h:h});return a;}
+function at(e){var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height,f=null;
+ btns().forEach(function(b){if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)f=b;});return f;}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();var b=at(e);if(!b)return;
+ if(b.k==='atk')atk();else if(b.k==='bm'){bm=bm%3+1;save();}else if(b.k==='be'){be=be%3+1;save();}else if(b.k==='rs')reset();});
+/* Toàn màn hình phải gọi trong pointerup (cảm ứng chỉ tính là "chạm thật" lúc nhấc tay). */
+cv.addEventListener('pointerup',function(e){var b=at(e);if(!triedFS||(b&&b.k==='fs')){triedFS=true;full();}});
 function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
  if(A&&A.w===w){var p=(ts-A.t)/300;if(p<1)o=Math.round(Math.sin(p*Math.PI)*28);else A=null;}
  var bob=dead?0:Math.round(Math.sin(ts/380+(w==='me'?0:2))*2);
@@ -65,6 +72,7 @@ function draw(ts){
  btns().forEach(function(b){ctx.fillStyle='#3a4a80';ctx.fillRect(b.x,b.y,b.w,b.h);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.t,b.x+b.w/2,b.y+b.h/2);});}
 function loop(ts){draw(ts);requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
+document.addEventListener('fullscreenchange',function(){setTimeout(resize,150);});document.addEventListener('webkitfullscreenchange',function(){setTimeout(resize,150);});
 reset();resize();requestAnimationFrame(loop);
 })();
 </script></body></html>
