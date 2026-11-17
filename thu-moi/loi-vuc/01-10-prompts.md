@@ -17,7 +17,7 @@ Mỗi prompt: dán nguyên khối trong ``` vào Canva / Gemini. Sau khi tạo x
 | 07 | Lôi Sư | a stylized thunder guardian lion in the style of a Chinese stone guardian lion; thần thoại |
 | 08 | Lôi Linh | a stylized ball-lightning spirit; linh khí |
 | 09 | Lôi Đồng | a stylized small thunder-boy spirit; người nhỏ |
-| 10 | Lôi Vực Lôi Thần (tên tạm, giữ tên boss cũ nếu có) | a stylized giant thunder god; boss, trung tâm Lôi Vực |
+| 10 | Lôi Vực Chiến Thần | a stylized giant thunder god; boss, trung tâm Lôi Vực |
 
 ## 01 · Lôi Ưng  (file ảnh: loi-vuc-01-loi-ung.png)
 ```
@@ -478,7 +478,7 @@ creature, not even as a tint. No labels, no arrows, no shadow, no gradient, no
 frame.
 ```
 
-## 10 · Lôi Vực Lôi Thần (tên tạm, giữ tên boss cũ nếu có)  (file ảnh: loi-vuc-10-loi-vuc-loi-than.png)
+## 10 · Lôi Vực Chiến Thần  (file ảnh: loi-vuc-10-loi-vuc-chien-than.png)
 ```
 Pokémon-style pixel art evolution line sprite sheet of a DIVINE SPIRIT BEAST
 from a Vietnamese-Chinese cultivation (tu tien) fantasy game. ONE original
