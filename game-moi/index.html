@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<base href="../">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Thú Thần Giới - game mới</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none}
+canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges}
+#sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+</style></head><body>
+<canvas id="g"></canvas><div id="sa"></div>
+<script src="51-thu-moi.js"></script>
+<script>
+/* GAME MỚI (khung ban đầu). Màn ngang, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
+   Kích thước logic W×H thay đổi theo máy (H khoảng 360), bố cục bám theo cạnh màn hình. Thú vẽ đúng 128px = 1:1.
+   Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase. */
+(function(){
+var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
+var ID='1a',KEY='ttg_moi_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null;
+try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be}));}catch(e){}}
+function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};}
+function resize(){
+ DPR=window.devicePixelRatio||1;
+ var pw=Math.round(innerWidth*DPR),ph=Math.round(innerHeight*DPR);
+ K=Math.max(1,Math.round(ph/360));W=Math.floor(pw/K);H=Math.floor(ph/K);
+ cv.width=W;cv.height=H;cv.style.width=(W*K/DPR)+'px';cv.style.height=(H*K/DPR)+'px';
+ var cs=getComputedStyle(sa),f=DPR/K;
+ I={l:Math.round(parseFloat(cs.paddingLeft)*f)||0,r:Math.round(parseFloat(cs.paddingRight)*f)||0,t:Math.round(parseFloat(cs.paddingTop)*f)||0,b:Math.round(parseFloat(cs.paddingBottom)*f)||0};
+ ctx.imageSmoothingEnabled=false;}
+function gy(){return H-I.b-62;}
+function px(w){var a=I.l+10,b=W-I.r-10;return Math.round(a+(b-a)*(w==='me'?.27:.73));}
+function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
+ st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+d});A={w:w,t:n};}
+function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;hit('me');
+ setTimeout(function(){if(st===s0&&st.en>0)hit('en');},650);
+ setTimeout(function(){if(st!==s0)return;st.busy=false;st.msg=st.en<=0?'Thắng!':st.me<=0?'Thua':'';},1300);}
+function btns(){var y=H-I.b-48,h=40,L=I.l+10,R=W-I.r-10;
+ return [{k:'atk',t:'Đánh',x:L,y:y,w:96,h:h},{k:'bm',t:'Bạn: bậc '+bm,x:L+104,y:y,w:112,h:h},
+ {k:'be',t:'Địch: bậc '+be,x:R-216,y:y,w:112,h:h},{k:'rs',t:'Làm lại',x:R-96,y:y,w:96,h:h}];}
+cv.addEventListener('pointerdown',function(e){e.preventDefault();var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;
+ btns().forEach(function(b){if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h){
+  if(b.k==='atk')atk();else if(b.k==='bm'){bm=bm%3+1;save();}else if(b.k==='be'){be=be%3+1;save();}else reset();}});});
+function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
+ if(A&&A.w===w){var p=(ts-A.t)/300;if(p<1)o=Math.round(Math.sin(p*Math.PI)*28);else A=null;}
+ var bob=dead?0:Math.round(Math.sin(ts/380+(w==='me'?0:2))*2);
+ ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x-40,gy()-2,80,4);
+ ctx.save();if(dead)ctx.globalAlpha=.35;
+ if(w==='me'){ctx.translate(x+o,0);ctx.scale(-1,1);THU_MOI.draw(ctx,ID,b,0,gy()+bob,128);}
+ else THU_MOI.draw(ctx,ID,b,x-o,gy()+bob,128);
+ ctx.restore();}
+function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
+ ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
+function draw(ts){
+ if(innerHeight>innerWidth){ctx.fillStyle='#161826';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Xoay ngang màn hình để chơi',W/2,H/2);return;}
+ var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(0,0,W,gy());
+ ctx.fillStyle='#e8f1fa';ctx.fillRect(0,gy(),W,H-gy());ctx.fillStyle='#c4d6ea';ctx.fillRect(0,gy(),W,2);
+ pet('en',ts);pet('me',ts);
+ var bw=Math.min(220,Math.floor(W*.3)),nm=THU_MOI.byId[ID].ten;
+ bar(I.l+12,I.t+24,bw,st.me/100,'#3c3',nm+' (bạn)');bar(W-I.r-12-bw,I.t+24,bw,st.en/100,'#c33',nm+' (địch)');
+ ctx.textAlign='center';ctx.textBaseline='top';ctx.font='10px sans-serif';ctx.fillStyle='#123';ctx.fillText('thú 128px · x'+K+' · '+W+'×'+H,W/2,I.t+6);
+ st.fx=st.fx.filter(function(f){return ts-f.t<900;});
+ st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
+ if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+60,gy()-170));}
+ btns().forEach(function(b){ctx.fillStyle='#3a4a80';ctx.fillRect(b.x,b.y,b.w,b.h);ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.t,b.x+b.w/2,b.y+b.h/2);});}
+function loop(ts){draw(ts);requestAnimationFrame(loop);}
+window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
+reset();resize();requestAnimationFrame(loop);
+})();
+</script></body></html>
