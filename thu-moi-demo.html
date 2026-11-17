@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thú mới - xem thử</title>
+<style>
+body{margin:0;font:14px system-ui,sans-serif;background:#161826;color:#dde}
+body.sang{background:#eaeef8;color:#223}
+header{padding:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;top:0;background:inherit;z-index:2}
+button{padding:8px 12px;border:0;border-radius:6px;background:#3a4a80;color:#fff;font-size:14px}
+h2{margin:14px 10px 6px;font-size:16px}
+.row{display:flex;flex-wrap:wrap;gap:10px;padding:0 10px}
+.card{background:rgba(128,140,180,.18);border-radius:8px;padding:6px;text-align:center}
+.card canvas{display:block;image-rendering:pixelated;max-width:100%}
+.boss{color:#f90;font-weight:700}
+#bt{display:block;width:100%;max-width:640px;margin:6px auto;image-rendering:pixelated;border-radius:8px}
+</style></head><body>
+<header><b>Thú mới</b><button id="bg">Nền sáng/tối</button>
+<button id="bs">Cỡ trận: 1x</button><span>Bậc trận:</span>
+<button class="bb" data-b="1">1</button><button class="bb" data-b="2">2</button><button class="bb" data-b="3">3</button></header>
+<h2>Mô phỏng trận đấu (không phải code game thật)</h2>
+<canvas id="bt" width="320" height="180"></canvas>
+<div id="list"></div>
+<script src="51-thu-moi.js"></script>
+<script>
+var S=2, bacTran=3, mult=1;
+function card(t,b){var c=document.createElement('canvas');c.width=c.height=128*S;
+ c.dataset.id=t.id;c.dataset.b=b;return c;}
+function paint(c){var x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);
+ x.strokeStyle='rgba(255,255,255,.25)';x.beginPath();x.moveTo(0,c.height-.5);x.lineTo(c.width,c.height-.5);x.stroke();
+ THU_MOI.draw(x,c.dataset.id,+c.dataset.b,c.width/2,c.height,c.width);}
+var list=document.getElementById('list');
+THU_MOI.zones.forEach(function(z){
+ var h=document.createElement('h2');h.textContent='Vùng '+(z.z)+' - '+z.ten;list.appendChild(h);
+ z.thu.forEach(function(t){var r=document.createElement('div');r.className='row';
+  var l=document.createElement('div');l.style.width='100%';
+  l.innerHTML=t.id+' '+t.ten+(t.boss?' <span class="boss">BOSS</span>':'');r.appendChild(l);
+  [1,2,3].forEach(function(b){var d=document.createElement('div');d.className='card';
+   d.appendChild(card(t,b));d.appendChild(document.createTextNode('Bậc '+b));r.appendChild(d);});
+  list.appendChild(r);});});
+function all(){document.querySelectorAll('#list canvas').forEach(paint);battle();}
+function bar(x,px,py,w,p,col){x.fillStyle='#000';x.fillRect(px,py,w,5);x.fillStyle=col;x.fillRect(px+1,py+1,(w-2)*p,3);}
+function battle(){var c=document.getElementById('bt'),x=c.getContext('2d');
+ var g=x.createLinearGradient(0,0,0,180);g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');x.fillStyle=g;x.fillRect(0,0,320,180);
+ x.fillStyle='#e8f1fa';x.fillRect(0,130,320,50);x.fillStyle='#c4d6ea';x.fillRect(0,130,320,2);
+ var s=96*mult,ids=Object.keys(THU_MOI.byId),id=ids[0];
+ THU_MOI.draw(x,id,bacTran,80,160,s);
+ x.save();x.translate(320,0);x.scale(-1,1);THU_MOI.draw(x,id,bacTran,80,160,s);x.restore();
+ x.font='10px sans-serif';x.fillStyle='#123';x.fillText('Bạn: '+THU_MOI.byId[id].ten+' (bậc '+bacTran+')',8,14);
+ x.fillText('Địch (lật ngang)',236,14);
+ bar(x,8,20,90,.7,'#3c3');bar(x,222,20,90,.4,'#c33');}
+THU_MOI.onload=function(){all();};
+document.getElementById('bg').onclick=function(){document.body.classList.toggle('sang');};
+document.getElementById('bs').onclick=function(){mult=mult===1?1.5:mult===1.5?.75:1;this.textContent='Cỡ trận: '+mult+'x';battle();};
+document.querySelectorAll('.bb').forEach(function(b){b.onclick=function(){bacTran=+b.dataset.b;battle();};});
+all();
+</script></body></html>
