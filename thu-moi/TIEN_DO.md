@@ -2,7 +2,7 @@
 
 **Cập nhật: 17/11/2026.**
 
-**Hoàn tất 4/17 vùng (40/170 thú) đủ PNG trên nhánh: Tuyết Nguyên, Sương Cốc, Vân Đảo, Phong Nguyên. Vùng tiếp theo: 4 Lôi Vực.**
+**Hoàn tất 4/17 vùng (40/170 thú) đủ PNG trên nhánh: Tuyết Nguyên, Sương Cốc, Vân Đảo, Phong Nguyên. Vùng tiếp theo: 4 Lôi Vực (`loi-vuc`).**
 
 Vị trí file: Tuyết Nguyên giữ tên cũ `NN-slug.png` ở thư mục gốc nhánh. Từ Sương Cốc trở đi, PNG `<slug-vùng>-NN-slug.png` và ghi chú `NN-slug.md` cùng nằm trong `thu-moi/<slug-vùng>/`.
 

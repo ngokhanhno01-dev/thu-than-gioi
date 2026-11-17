@@ -1,6 +1,6 @@
 # PROMPT LÀM TRỌN MỘT VÙNG THÚ (dán nguyên nội dung dưới vào chat mới)
 
-Đổi `<VÙNG>` / `<slug-vùng>` / số vùng cho đúng (vùng tiếp theo: 3 Phong Nguyên, `phong-nguyen`). Gửi kèm ẢNH VÙNG ngay trong tin nhắn đầu. File này là NGUỒN DUY NHẤT của khung prompt tạo ảnh (không chép khung sang file khác).
+Đổi `<VÙNG>` / `<slug-vùng>` / số vùng cho đúng (vùng tiếp theo: 4 Lôi Vực, `loi-vuc`). Gửi kèm ẢNH VÙNG ngay trong tin nhắn đầu. File này là NGUỒN DUY NHẤT của khung prompt tạo ảnh (không chép khung sang file khác).
 
 ---
 
@@ -81,6 +81,9 @@ anywhere on the creature, not even as a tint. No text, no labels, no arrows, no
 shadow, no gradient, no frame.
 ```
 Bài học vẫn dùng: Bậc 1 hay ra loài khác (ghi rõ là bản thu nhỏ của Bậc 3); viền navy hay mỏng ở Bậc 3 (giữ câu "clearly visible on Stage 3 too"); sương / mây phải là hình đặc có viền, không phải sương mờ; dáng 4 chân hay ra nai / ngựa (thêm "NOT a deer, NOT a horse" khi cần); màu ngoài palette thì ghi rõ tên màu và chỗ dùng; mỏ / móng / sừng ghi rõ màu để khỏi ra xám.
+
+Bài học thêm từ Phong Nguyên (đưa vào prompt từng con): ghi rõ "NO text, NO letters, NO writing anywhere (runes are abstract glyphs only)" vì có con bị ra chữ thật; ghi rõ "all 3 stages in one row, Stage 1 on the LEFT, Stage 3 on the RIGHT" vì có ảnh bị xếp ngược; cấm quầng sáng / vòng tròn tím hồng quanh thú; mắt Bậc 3 phải to bằng Bậc 1-2, mở, có điểm sáng (không nhắm, không chấm trắng nhỏ); Bậc 3 phải có rune + phụ kiện (không chỉ có hiệu ứng); giữ chất liệu đúng khung (vd. vỏ cây, không ra băng / bạc); tránh dáng giống thú Pokémon có sẵn (cá sấu đứng kiểu Totodile, thú bốn chân kiểu Suicune): thêm nét riêng khác hẳn; Bậc 1 giữ cùng đặc điểm với Bậc 2-3 (đuôi, mũ, số chân).
+Lôi Vực: tông chủ đạo dự kiến vàng / tím / xanh điện, nên nền KHÔNG dùng magenta hay tím (dễ lẫn rune tím); chọn sau khi xem ảnh vùng, gợi ý xanh lá đậm hoặc xanh teal đậm, và ghi rõ ở đầu file prompt.
 
 ## CÁCH TRẢ LỜI
 Tiếng Việt, ngắn (tối đa 10 dòng), nói thẳng điểm chưa ổn, không kể từng bước. Mình làm trên điện thoại và hay hết quota nên gộp thao tác: nhiều file = 1 `push_files`, nhiều ảnh = 1 lệnh. Mình chê thì đừng cãi, đưa 2-3 hướng khác và chọn 1 kèm lý do.
