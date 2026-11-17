@@ -39,6 +39,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Chạm lần đầu -> vào toàn màn hình + khóa ngang.
    Lưu riêng (khóa ttg_moi_v1), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
+   VỊ TRÍ THÚ: thú bên trái đứng ngay giữa nút "Chỉ số" (theo vị trí nút thật trên màn hình, kéo nút là thú đi theo).
+   Thú bên phải đối xứng với thú trái qua giữa màn hình (W - x trái).
    NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ toàn màn hình).
    Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút (ô gõ ngay trên màn hình).
    Bố cục + tên nút lưu ở khóa ttg_moi_layout_v1 (trường t = tên tự đặt).
@@ -46,7 +48,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 (function(){
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID='1a',KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false,typing=false;
-var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200;
+var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;}catch(e){}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
 function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
@@ -64,7 +66,11 @@ function resize(){
  ctx.imageSmoothingEnabled=false;
  layoutUI();}
 function gy(){return H-I.b-62;}
-function px(w){var a=I.l+10,b=W-I.r-10;return Math.round(a+(b-a)*(w==='me'?.27:.73));}
+/* Tâm ngang (đơn vị pixel game) của nút neo "Chỉ số". Không đo được thì dùng 16% chiều rộng. */
+function anchorX(){var e=els[ANCHOR];
+ if(e&&innerWidth>innerHeight){var r=e.getBoundingClientRect();if(r.width>0)return (r.left+r.width/2)*DPR/K;}
+ return W*ANCHOR_DEF;}
+function px(w){var c=anchorX();return Math.round(w==='me'?c:W-c);}
 function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
  st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+d});A={w:w,t:n};}
 /* Một lượt: mình đánh -> (nếu địch còn sống) địch đánh lại -> kiểm tra thắng/thua.
