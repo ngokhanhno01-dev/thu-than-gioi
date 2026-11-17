@@ -3,7 +3,7 @@
 **Nền khi tạo ảnh (1 màu cho cả vùng): xanh teal phẳng #00C2C2.** Lý do: thú vùng này tím / đen / vàng, ảnh vùng là bầu trời tím đen bão sét, không có màu teal nào trên thú nên tách nền dễ nhất; tránh magenta và tím vì lẫn với tinh thể và rune tím.
 
 **Bảng màu (từ ảnh vùng):** đen obsidian #0E0A1F xen kẽ nhiều mảng với tím chàm #2A1B5E / tím #5B3FA8 / tím nhạt #9B7BFF, sét mảnh và rune vàng #FFD23F, trắng vàng #FFF3B0. Đen chiếm khoảng 35-40% thân để sét vàng và tinh thể tím nổi bật.
-**Hiệu ứng (đã sửa lần 2):** sét chỉ là nét MẢNH 1-2 pixel, khắc thành đường vân trên thân / sừng / giáp và vài tia ngắn luôn chạm vào thân, KHÔNG vẽ sét to dẹt rời thân; vàng chỉ chiếm tối đa 10% thú; mảng mây bão có viền, tinh thể tím, tia lửa vàng, trụ đá nhỏ lơ lửng.
+**Chi tiết + nét (lần 3): mỗi con có SURFACE DETAIL riêng (từng chiếc lông, vảy, mảnh giáp, đốt...) và mọi đường chi tiết phải rõ, sắc, rộng tối thiểu 2 pixel, tương phản mạnh trên mảng đen. Hiệu ứng (đã sửa lần 2):** sét chỉ là nét MẢNH 1-2 pixel, khắc thành đường vân trên thân / sừng / giáp và vài tia ngắn luôn chạm vào thân, KHÔNG vẽ sét to dẹt rời thân; vàng chỉ chiếm tối đa 10% thú; mảng mây bão có viền, tinh thể tím, tia lửa vàng, trụ đá nhỏ lơ lửng.
 Mỗi prompt: dán nguyên khối trong ``` vào Canva / Gemini. Sau khi tạo xong gửi ảnh lại, mình tách nền.
 
 | STT | Tên | Khung / môi trường |
@@ -36,6 +36,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): EVERY feather drawn individually: layered rows of overlapping feathers on wings, chest and tail, each feather with a visible center line and a lighter edge; small feather scales on the legs; hooked beak with ridges.
 Creature concept: a flying bird, wings spread wide, long forked tail feathers, hooked beak, clawed feet tucked in, floating in the air (no ground line).
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -57,7 +58,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -84,6 +85,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): EVERY scale drawn individually in neat overlapping rows along the whole body, each scale outlined with a light edge; fin rays as clear parallel lines; ridged armor plates along the back.
 Creature concept: a long horizontal swimming fish with a big head, fan tail and two tendril fins, floating in a stormy-mist pool (drawn as solid outlined cloud shapes).
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -105,7 +107,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -132,6 +134,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): thick shaggy fur drawn as visible jagged strands and tufts across the body and hump; rings and ridges on the horns; cracked-skin plates on the shoulders; layered fur tufts on the legs.
 Creature concept: a heavy four-legged ox with a hump, thick short legs, two big curved horns, short tail, standing on the ground.
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -153,7 +156,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -180,6 +183,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): clear segmented rings along the whole body, each ring with ridged plates and small spikes, rough cracked-stone skin texture between the rings, ridged horns around the head.
 Creature concept: a long thick segmented body rising from cracked dark earth, round head with a ring of small horns, no legs, no arms.
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -201,7 +205,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -228,6 +232,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): clear radiating gill lines under the cap, spotted and veined cap texture, rough bark-like texture on the stem, tiny mushroom clusters.
 Creature concept: a round mushroom creature, big domed cap, stubby body and two short legs, two tiny arms, standing on the ground.
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -249,7 +254,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -276,6 +281,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): EVERY armor scale drawn individually, overlapping like roof tiles in clear rows, each scale outlined and edged in a lighter color; scaly skin on legs and tail; tough ridged claws.
 Creature concept: a low four-legged armored creature with a long tail, big overlapping scale armor on the back, small pointed snout, claws, standing on the ground, side view.
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -297,7 +303,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -324,6 +330,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): mane drawn as many separate sharp strands layered in rows, short fur on the body drawn as small strokes, carved stone-like face details, ridged claws on the paws.
 Creature concept: a four-legged guardian lion standing, thick curly mane shaped like lightning, round face, short snout, ball-like paws, tail with a tuft.
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -345,7 +352,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -372,6 +379,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): carved plates and cracked-shell texture on the orb, clear concentric lines on the orbiting rings, tiny crystal facets.
 Creature concept: a floating round spirit orb with a small face, two tiny hands, tiny orbiting spark, no legs (floating, no ground line).
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -393,7 +401,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -420,6 +428,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): cloth folds on the tunic, layered armor plates with rivets, hair drawn as separate strands, leather straps and drum skin texture with stitch lines.
 Creature concept: a small humanoid spirit standing on two legs, big head, hair tuft shaped like a lightning bolt, holding a small drum, standing on the ground.
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -441,7 +450,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
@@ -468,6 +477,7 @@ the creature. The SAME thick dark navy-black outline on ALL three stages, same
 line weight, clearly visible on Stage 3 too. Rich cel shading with 5-6 shades
 per color area. Palette: near-black obsidian #0E0A1F (armor plates, underbelly, horns, claws, hooves, patches of body, about 35-40% of the creature), deep indigo #2A1B5E and violet #5B3FA8 (main body), light violet #9B7BFF (highlights, crystals), bright lightning gold #FFD23F and pale yellow-white #FFF3B0 (lightning bolts, runes, eyes, accessories, sparks). Black and violet are interleaved in patches so gold and crystal details pop against the dark parts. NO green, NO teal, NO cyan anywhere on the creature.
 
+SURFACE DETAIL (must be clearly visible on Stage 2 and especially Stage 3; Stage 1 shows a simpler version of the same texture): layered plate armor with rivets and carved edges, chainmail-like scale texture at the joints, thick cloth and fur trim, cracked stone texture on the hammer, clear engraved patterns on every plate.
 Creature concept: a huge two-legged armored humanoid with a horned helmet, broad shoulders, a big hammer in one hand, standing on the ground, side view facing left.
 - Stage 1: a small cute baby version of Stage 3, same species, same silhouette
   and same number of legs / horns / crest, large eyes, a few simple markings
@@ -489,7 +499,7 @@ same colors, each stage clearly bigger and more elaborate than the previous.
 Stage 1 is about half the height of Stage 3. Original design, NOT resembling
 any existing Pokémon.
 
-LIGHTNING RULE: lightning is drawn ONLY as THIN jagged lines 1-2 pixels wide, pale yellow-white core with a thin gold edge, engraved as veins along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet.
+LIGHTNING AND LINE RULE: all detail lines (engraved lightning veins, rune lines, armor edges, feather and scale edges) must be CLEAN, SHARP and CLEARLY VISIBLE: at least 2 pixels wide, continuous (no broken scribbles), high contrast, pale yellow-white or gold lines drawn on the black and dark-violet parts, light-violet edge lines on the dark parts. Lightning is drawn as a few clean 2-pixel jagged lines engraved along the feathers / scales / horns / armor, plus a few short arcs that always TOUCH the creature (tips of wings, horns, tail, limbs) or link two crystals. NO messy thin scribbles floating around the creature, NO big fat cartoon lightning-bolt icons, NO large yellow wedge or spike shapes, NO detached floating bolts. Gold covers at most 10% of the creature (small accents only); the body stays mostly black and violet. More detail is wanted: dense texture and many fine details are fine as long as the main silhouette and the face stay clear.
 
 NO text, NO letters, NO numbers, NO writing anywhere (runes are abstract glyphs
 only).
