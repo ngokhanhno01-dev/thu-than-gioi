@@ -16,13 +16,15 @@
 #ttg-boot .panel{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:clamp(2px,.8vh,4px);
   padding:0 18px calc(max(2px,.8vh) + env(safe-area-inset-bottom,0px));box-sizing:border-box;opacity:0;transition:opacity .5s ease}
 /* KHUNG THANH TIẾN TRÌNH: ảnh khung img-boot-frame.webp (1429x254, nền trong suốt) đè lên ô fill. --fw = bề ngang khung, đổi 1 chỗ này để to/nhỏ cả khung. */
-#ttg-boot .frame{--fw:min(34vw,400px);position:relative;width:var(--fw);aspect-ratio:1429/254;transition:filter .5s ease}
-#ttg-boot .frame .slot{position:absolute;left:calc(12.526% - 2px);top:calc(31.102% - 1px);width:calc(74.808% + 4px);height:calc(42.52% + 2px);overflow:hidden;background:linear-gradient(180deg,rgba(6,26,38,.78),rgba(10,50,62,.62))}
+#ttg-boot .frame{--fh:clamp(28px,10vh,44px);--fw:min(54vw,620px);position:relative;width:var(--fw);height:var(--fh);transition:filter .5s ease}
+/* Khung 3 phần (border-image): 2 đầu rồng/phượng giữ nguyên tỉ lệ theo chiều cao --fh, đoạn giữa kéo dài theo --fw. Gốc 1429x254: đầu trái 430px, đầu phải 389px. */
+#ttg-boot .frame .slot{position:absolute;left:calc(var(--fh)*179/254 - 2px);right:calc(var(--fh)*181/254 - 2px);top:calc(31.102% - 1px);height:calc(42.52% + 2px);overflow:hidden;background:linear-gradient(180deg,rgba(6,26,38,.78),rgba(10,50,62,.62))}
 #ttg-boot .frame .slot i{position:absolute;left:0;top:0;bottom:0;width:0;overflow:hidden}
 #ttg-boot .frame .slot canvas{position:absolute;left:0;top:0;height:100%}
 #ttg-boot .frame .tip{position:absolute;top:-10%;bottom:-10%;left:0;width:6px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(255,255,255,.95),rgba(170,255,240,.5) 45%,rgba(170,255,240,0) 75%);filter:blur(1px);opacity:0;transition:opacity .4s}
-#ttg-boot .frame .fr{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;z-index:2}
-#ttg-boot #tb-pct{position:absolute;z-index:3;left:12.526%;top:31.102%;width:74.808%;height:42.52%;display:flex;align-items:center;justify-content:center;font-size:clamp(9px,3.1vh,13px);line-height:1;color:#fff;letter-spacing:.5px;
+#ttg-boot .frame .fr{position:absolute;inset:0;box-sizing:border-box;pointer-events:none;z-index:2;border-style:solid;border-width:0 calc(var(--fh)*389/254) 0 calc(var(--fh)*430/254);
+  border-image:url(img-boot-frame.webp) 0 389 0 430 fill / 0 calc(var(--fh)*389/254) 0 calc(var(--fh)*430/254) stretch}
+#ttg-boot #tb-pct{position:absolute;z-index:3;left:calc(var(--fh)*179/254);right:calc(var(--fh)*181/254);top:31.102%;height:42.52%;display:flex;align-items:center;justify-content:center;font-size:clamp(8px,2.8vh,12px);line-height:1;color:#fff;letter-spacing:.5px;
   text-shadow:0 0 3px #04141c,1px 1px 0 #04141c,-1px 1px 0 #04141c,1px -1px 0 #04141c,-1px -1px 0 #04141c}
 #ttg-boot .enter{display:none;padding:clamp(1px,.5vh,3px) clamp(8px,1.8vw,14px);font-size:clamp(9px,min(2.8vh,1.7vw),14px);line-height:1.1;color:#ffe9a0;letter-spacing:.4px;white-space:nowrap;
   background:rgba(4,10,14,.55);border:1px solid rgba(242,199,106,.5);border-radius:3px;
@@ -83,7 +85,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
   <div class="gate" id="tb-gate"><div id="tb-gt">Chạm vào màn hình để xoay ngang</div></div>
   <div class="scene" id="tb-scene">
     <div class="pic"></div><div class="mist m1"></div><div class="mist m2"></div><div class="glow"></div><div class="moon"></div><canvas id="tb-fx"></canvas><div class="shade"></div>
-    <div class="panel" id="tb-panel"><div class="enter" id="tb-enter">Chạm vào màn hình để vào Thú Thần Giới</div><div class="frame" id="tb-frame"><div class="slot" id="tb-slot"><i id="boot-fill"><canvas id="tb-wave"></canvas></i><div class="tip" id="tb-tip"></div></div><img class="fr" src="img-boot-frame.webp" alt=""><span id="tb-pct">0%</span></div></div>
+    <div class="panel" id="tb-panel"><div class="enter" id="tb-enter">Chạm vào màn hình để vào Thú Thần Giới</div><div class="frame" id="tb-frame"><div class="slot" id="tb-slot"><i id="boot-fill"><canvas id="tb-wave"></canvas></i><div class="tip" id="tb-tip"></div></div><div class="fr"></div><span id="tb-pct">0%</span></div></div>
   </div>
 </div>
 <script>
