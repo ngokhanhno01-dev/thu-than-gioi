@@ -5,7 +5,8 @@
   var DIR = 'thu-game/';
   var zones = [
     { z: 0, slug: 'tuyet-nguyen', ten: 'Tuyết Nguyên', thu: [
-      { id: '1a', slug: '01-tuyet-cau', ten: 'Tuyết Cầu', boss: false }
+      { id: '1a', slug: '01-tuyet-cau', ten: 'Tuyết Cầu', boss: false },
+      { id: '1b', slug: '02-tuyet-hung', ten: 'Tuyết Hùng', boss: false }
     ] }
   ];
   var byId = {}, cache = {};
