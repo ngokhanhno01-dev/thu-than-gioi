@@ -407,13 +407,18 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
    Thêm vùng video mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). Hiện BGV_ZONE đang TRỐNG (Sương Cốc đã chuyển sang nền ảnh, video đã xóa); cơ chế video vẫn giữ nguyên.
    NỀN ẢNH + HIỆU ỨNG: ảnh tĩnh phủ kín phần trống trong viền (giữ đúng tỉ lệ, cắt bớt phần thừa trên/dưới, không kéo méo), hiệu ứng vẽ bằng canvas, nằm SAU thú.
    Thêm vùng ảnh mới: thêm vào BG_FX_ZONE (khóa zone -> {image: đường dẫn ảnh, fit: true = hiện đủ cả ảnh (hai bên lấp gương) | bỏ đi = phủ kín và cắt bớt, fy: vị trí cắt dọc 0=giữ phần trên .. 1=giữ phần dưới, fx: danh sách hiệu ứng, stars: chỗ sao lấp lánh, crystals: chỗ tinh thể lóe, mistY: độ cao 2 lớp sương (0..1 trên ảnh), mistOpacity: độ đậm sương riêng của vùng}).
-   Hiệu ứng có sẵn: 'snow' tuyết rơi | 'mist' sương trôi | 'aurora' cực quang đổi sáng nhẹ | 'twinkle' sao lấp lánh | 'sparkle' tinh thể lóe | 'firefly' hạt sáng/đom đóm bay lơ lửng. Tọa độ stars/crystals là tỉ lệ 0..1 trên ảnh gốc (x ngang, y dọc). */
+   Hiệu ứng có sẵn: 'snow' tuyết rơi | 'mist' sương trôi | 'aurora' cực quang đổi sáng nhẹ | 'twinkle' sao lấp lánh | 'sparkle' tinh thể lóe | 'firefly' hạt sáng/đom đóm bay lơ lửng | 'streak' vệt gió | 'leaf' lá bay | 'spark' tia điện chớp | 'star' sao lấp lánh ngẫu nhiên (nửa trên) | 'glint' ánh lóe chữ thập (theo crystals nếu có). Màu riêng theo vùng: streakRgb, leafRgb, sparkRgb, glintRgb, flyRgb, mistRgb ('r,g,b'). Tọa độ stars/crystals là tỉ lệ 0..1 trên ảnh gốc (x ngang, y dọc). */
 var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,
  BGV_ZONE={},
  BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fit:true,fy:.55,fx:['aurora','twinkle','sparkle','snow'],
   stars:[[.178,.142],[.255,.185],[.67,.074],[.724,.232],[.88,.109]],
   crystals:[[.06,.9],[.03,.82],[.945,.9],[.97,.84],[.27,.66],[.285,.73],[.745,.68],[.765,.7]]},
- 'suong-coc':{image:'game-moi/bg-suong-coc.webp',fit:true,fy:.55,fx:['mist','firefly'],mistY:[.5,.62],mistOpacity:.26}},
+ 'suong-coc':{image:'game-moi/bg-suong-coc.webp',fit:true,fy:.55,fx:['mist','firefly'],mistY:[.5,.62],mistOpacity:.26},
+ 'phong-nguyen':{image:'game-moi/bg-phong-nguyen.webp',fit:true,fy:.55,fx:['streak','leaf'],streakRgb:'235,248,255',leafRgb:'150,215,110'},
+ 'loi-vuc':{image:'game-moi/bg-loi-vuc.webp',fit:true,fy:.55,fx:['spark','glint'],sparkRgb:'255,230,150',glintRgb:'215,185,255',
+  crystals:[[.047,.65],[.135,.6],[.069,.86],[.918,.646],[.915,.88],[.658,.85],[.24,.71],[.352,.59],[.342,.94]]},
+ 'nguyet-cung':{image:'game-moi/bg-nguyet-cung.webp',fit:true,fy:.55,fx:['star','firefly'],flyRgb:'255,236,170'},
+ 'van-dao':{image:'game-moi/bg-van-dao.webp',fit:true,fy:.55,fx:['mist','glint','firefly'],mistY:[.55,.7],mistOpacity:.2,mistRgb:'228,208,255',glintRgb:'228,200,255',flyRgb:'215,175,255'}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
  bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],bgFly=[],BG_IMGS={};
 /* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. Khi khung lấn mép (BG_BLEED) thì vùng nền tự mở rộng đúng bằng phần lấn: dày hiệu dụng = BG_EDGE - BG_BLEED. */
@@ -433,7 +438,21 @@ var BG_FX_CFG={
  sparkleOpacity:.85,/* độ sáng tinh thể lóe */
  flyCount:14,       /* số hạt sáng/đom đóm (máy yếu thì giảm, ví dụ 8) */
  flySpeed:.012,     /* tốc độ hạt sáng trôi ngang */
- flyOpacity:.8      /* độ sáng hạt sáng */
+ flyOpacity:.8,     /* độ sáng hạt sáng */
+ streakCount:12,    /* 'streak' vệt gió: số vệt (máy yếu giảm còn 8) */
+ streakSpeed:1,     /* tốc độ vệt gió (1 = như bản gốc 04-scenes.js) */
+ streakOpacity:.4,  /* độ mờ vệt gió */
+ leafCount:16,      /* 'leaf' lá bay: số lá */
+ leafSpeed:1,       /* tốc độ lá rơi/bay */
+ leafOpacity:.85,   /* độ đậm của lá */
+ sparkCount:12,     /* 'spark' tia lửa điện: số điểm chớp */
+ sparkSpeed:9,      /* tốc độ chớp của tia điện */
+ sparkOpacity:.95,  /* độ sáng tia điện */
+ starCount:28,      /* 'star' sao lấp lánh ngẫu nhiên: số sao */
+ starArea:.5,       /* sao chỉ vẽ ở 50% phía trên ảnh */
+ starTwinkle:.8,    /* độ sáng tối đa của sao */
+ glintCount:12,     /* 'glint' ánh lóe chữ thập: số điểm */
+ glintOpacity:.9    /* độ sáng ánh lóe */
 };
 /* Vùng nền trong khung trên (đơn vị game, tính từ mép trái/trên của màn hình): trả về {l,t,r,b} = độ dày viền hiệu dụng mỗi cạnh. */
 function bgInset(th){var s=Math.min(FSC,(th-20)/500),ov=1,q=BG_BLEED;
@@ -486,7 +505,7 @@ function bgFxBuild(o,conf,rw,rh,m){
   g.save();g.translate((ox+2*dw)*m,0);g.scale(-1,1);g.drawImage(o.img,0,0,dw*m,dh*m);g.restore();
  }else g.drawImage(o.img,ox*m,oy*m,dw*m,dh*m);
  bgBase=c;bgGeo={ox:ox,oy:oy,dw:dw,dh:dh};
- bgSpr={snow:[bgSoft(2*m,'255,255,255'),bgSoft(3.2*m,'255,255,255'),bgSoft(4.6*m,'240,250,255')],mist:bgSoft(128,'205,230,255'),star:bgStar(24*m),spark:bgStar(10*m),aur:bgAur(),fly:bgSoft(12*m,'200,255,210')};
+ bgSpr={snow:[bgSoft(2*m,'255,255,255'),bgSoft(3.2*m,'255,255,255'),bgSoft(4.6*m,'240,250,255')],mist:bgSoft(128,conf.mistRgb||'205,230,255'),star:bgStar(24*m),spark:bgStar(10*m),aur:bgAur(),fly:bgSoft(12*m,conf.flyRgb||'200,255,210')};
  if(!bgSnow.length){bgSnow=[[],[],[]];for(var i=0;i<BG_FX_CFG.snowCount;i++){var q=i%5,k=q<3?0:q-2;bgSnow[k].push({x:Math.random(),y:Math.random()*BG_FX_CFG.snowArea,v:.55+.3*k+Math.random()*.2,ph:Math.random()*6.28});}}
  if(!bgFly.length){for(var n=0;n<BG_FX_CFG.flyCount;n++)bgFly.push({x:Math.random(),y:.3+Math.random()*.65,v:.4+Math.random()*.6,ph:Math.random()*6.28});}
 }
@@ -530,6 +549,29 @@ function bgDrawFx(ts,x,y,w,h){
   for(j=0;j<arr.length;j++){p=arr[j];p.y+=C.snowSpeed*p.v*dt/1000;p.x+=(.006+.006*Math.sin(T*.6+p.ph))*p.v*dt/1000;
    if(p.y> C.snowArea){p.y=-.02;p.x=Math.random();}if(p.x>1.02)p.x=-.02;
    ctx.drawImage(sp,x+w*p.x-d/2,y+h*p.y-d/2,d,d);}}}
+ /* ===== Hiệu ứng chép từ scPt (04-scenes.js), quy theo cỡ khung ===== */
+ var u=w/360,v=h/270,R=function(n){var r=Math.sin(n*127.1+311.7)*43758.5453;return r-Math.floor(r);},rgb;
+ /* vệt gió: các vạch ngang mảnh chạy từ trái sang phải */
+ if(F.indexOf('streak')>=0){rgb=conf.streakRgb||'235,248,255';ctx.strokeStyle='rgba('+rgb+','+C.streakOpacity+')';ctx.lineWidth=1;ctx.globalAlpha=1;
+  for(i=0;i<C.streakCount;i++){sx=(T*110*C.streakSpeed*(1+i%3*.5)+i*67)%(360+80)-40;sy=14+i*(236/C.streakCount);
+   ctx.beginPath();ctx.moveTo(x+sx*u,y+sy*v);ctx.lineTo(x+(sx+22+i%3*10)*u,y+sy*v);ctx.stroke();}}
+ /* lá bay: mảnh nhỏ xoay, trôi chéo xuống */
+ if(F.indexOf('leaf')>=0){ctx.fillStyle='rgba('+(conf.leafRgb||'150,215,110')+','+C.leafOpacity+')';ctx.globalAlpha=1;
+  for(i=0;i<C.leafCount;i++){sx=(i*47+T*9*C.leafSpeed+Math.sin(T*.8+i)*16)%360;sy=(T*(13+i%3*5)*C.leafSpeed+i*31)%270;
+   ctx.save();ctx.translate(x+sx*u,y+sy*v);ctx.rotate(T+i);ctx.fillRect(-3,-1,6,2);ctx.restore();}}
+ /* tia điện: chớp nhanh từng điểm nhỏ ở nửa trên (chỗ sét) */
+ if(F.indexOf('spark')>=0){ctx.fillStyle='rgba('+(conf.sparkRgb||'255,230,150')+','+C.sparkOpacity+')';ctx.globalAlpha=1;
+  for(i=0;i<C.sparkCount;i++){if(Math.sin(T*C.sparkSpeed+i*3)>.6)ctx.fillRect(x+R(i)*w,y+R(i+7)*h*.6,2,2+i%3);}}
+ /* sao lấp lánh: chấm nhỏ, chỉ ở nửa trên ảnh */
+ if(F.indexOf('star')>=0){ctx.fillStyle='#fff';
+  for(i=0;i<C.starCount;i++){ctx.globalAlpha=C.starTwinkle*(.2+.7*Math.abs(Math.sin(T*1.3+i)));
+   ctx.fillRect(Math.round(x+R(i)*w),Math.round(y+G.oy+R(i+3)*G.dh*C.starArea),i%5?1:2,i%5?1:2);}}
+ /* ánh lóe chữ thập: theo tọa độ crystals nếu vùng có, không thì rải ngẫu nhiên */
+ if(F.indexOf('glint')>=0){ctx.fillStyle='rgba('+(conf.glintRgb||'255,255,255')+',1)';
+  for(i=0;i<C.glintCount;i++){a=Math.sin(T*2+i*1.7);if(a<.1)continue;
+   if(conf.crystals){p=conf.crystals[i%conf.crystals.length];sx=x+G.ox+p[0]*G.dw;sy=y+G.oy+p[1]*G.dh;if(sx<x||sx>x+w)continue;}
+   else{sx=x+R(i+20)*w;sy=y+h*(.26+R(i+40)*.6);}
+   ctx.globalAlpha=C.glintOpacity*a;ctx.fillRect(sx-3,sy,7,1);ctx.fillRect(sx,sy-3,1,7);}}
  ctx.restore();
 }
 document.addEventListener('visibilitychange',function(){bgLast=0;if(document.hidden){BGV.pause();BGV2.pause();if(bgRaf){cancelAnimationFrame(bgRaf);bgRaf=0;}if(mainRaf){cancelAnimationFrame(mainRaf);mainRaf=0;}}else{if(bgOn){try{bgCur.play();}catch(e){}if(!bgRaf)bgRaf=requestAnimationFrame(function(){bgTick(bgGen);});}if(!mainRaf)mainRaf=requestAnimationFrame(loop);}});
