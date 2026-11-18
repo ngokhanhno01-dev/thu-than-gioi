@@ -15,6 +15,18 @@
       { id: '1h', slug: '08-bang-linh', ten: 'Băng Linh', boss: false },
       { id: '1i', slug: '09-bang-nham', ten: 'Băng Nham', boss: false },
       { id: '1j', slug: '10-bang-son-cu-thu', ten: 'Băng Sơn Cự Thú', boss: true }
+    ] },
+    { z: 1, slug: 'suong-coc', ten: 'Sương Cốc', thu: [
+      { id: '2a', slug: '01-suong-that', ten: 'Sương Thát', boss: false },
+      { id: '2b', slug: '02-vu-duc', ten: 'Vụ Dực', boss: false },
+      { id: '2c', slug: '03-suong-xuyen', ten: 'Sương Xuyên', boss: false },
+      { id: '2d', slug: '04-suong-khai', ten: 'Sương Khải', boss: false },
+      { id: '2e', slug: '05-suong-diep', ten: 'Sương Diệp', boss: false },
+      { id: '2f', slug: '06-vu-tieu', ten: 'Vụ Tiêu', boss: false },
+      { id: '2g', slug: '07-suong-vien', ten: 'Sương Viên', boss: false },
+      { id: '2h', slug: '08-vu-tung', ten: 'Vụ Tùng', boss: false },
+      { id: '2i', slug: '09-suong-nha', ten: 'Sương Nha', boss: false },
+      { id: '2j', slug: '10-van-truong-vu-thu', ten: 'Vạn Trượng Vụ Thú', boss: true }
     ] }
   ];
   var byId = {}, cache = {};
