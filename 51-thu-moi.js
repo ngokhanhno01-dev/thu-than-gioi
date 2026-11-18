@@ -51,6 +51,18 @@
       { id: '4h', slug: '08-loi-linh', ten: 'Lôi Linh', boss: false },
       { id: '4i', slug: '09-loi-dong', ten: 'Lôi Đồng', boss: false },
       { id: '4j', slug: '10-loi-vuc-chien-than', ten: 'Lôi Vực Chiến Thần', boss: true }
+    ] },
+    { z: 3, slug: 'phong-nguyen', ten: 'Phong Nguyên', thu: [
+      { id: '6a', slug: '01-phong-tuc', ten: 'Phong Túc', boss: false },
+      { id: '6b', slug: '02-phong-phi', ten: 'Phong Phi', boss: false },
+      { id: '6c', slug: '03-phong-giac', ten: 'Phong Giác', boss: false },
+      { id: '6d', slug: '04-phong-liem', ten: 'Phong Liêm', boss: false },
+      { id: '6e', slug: '05-phong-ngu', ten: 'Phong Ngư', boss: false },
+      { id: '6f', slug: '06-phong-tieu', ten: 'Phong Tiêu', boss: false },
+      { id: '6g', slug: '07-phong-bi', ten: 'Phong Bi', boss: false },
+      { id: '6h', slug: '08-phong-lo', ten: 'Phong Lô', boss: false },
+      { id: '6i', slug: '09-phong-tich', ten: 'Phong Tích', boss: false },
+      { id: '6j', slug: '10-phong-nguyen-vu-xa', ten: 'Phong Nguyên Vũ Xà', boss: true }
     ] }
   ];
   var byId = {}, cache = {};

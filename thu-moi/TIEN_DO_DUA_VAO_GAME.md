@@ -58,6 +58,18 @@ Trạng thái áp dụng D: ĐÃ cắt lại toàn bộ vùng 1, 2, 3 (30 con, 1
 - 4j Lôi Vực Chiến Thần, BOSS (chờ duyệt): kiểu D, tỉ lệ thu 0.1422; bậc 1 cao 50px, bậc 2 cao 81px, bậc 3 cao 115px.
 - **Vùng 4 Lôi Vực đã đủ 10 con (4a-4j).** Ảnh người dùng gửi vào chat, alpha khớp từng pixel với bản trong `thu-moi/loi-vuc/`. Tất cả dùng `--kieu-d --gan-gan-nhat`: không dùng cờ gán gần nhất thì mảnh tinh thể / mây của bậc 3 bị gán nhầm vào bậc 2 (đã so mắt trên 02, 03, 05, 06, 08, 09). PNG đã đẩy thẳng vào `thu-game/loi-vuc/`.
 
+- 6a Phong Túc (chờ duyệt): kiểu D, tỉ lệ thu 0.1451; bậc 1 cao 51px, bậc 2 cao 78px, bậc 3 cao 113px.
+- 6b Phong Phi (chờ duyệt): kiểu D, tỉ lệ thu 0.1625; bậc 1 cao 59px, bậc 2 cao 75px, bậc 3 cao 108px.
+- 6c Phong Giác (chờ duyệt): kiểu D, tỉ lệ thu 0.1449; bậc 1 cao 42px, bậc 2 cao 60px, bậc 3 cao 81px.
+- 6d Phong Liêm (chờ duyệt): kiểu D, tỉ lệ thu 0.1491; bậc 1 cao 54px, bậc 2 cao 73px, bậc 3 cao 119px.
+- 6e Phong Ngư (chờ duyệt): kiểu D, tỉ lệ thu 0.1459; bậc 1 cao 40px, bậc 2 cao 72px, bậc 3 cao 121px.
+- 6f Phong Tiêu (chờ duyệt): kiểu D, tỉ lệ thu 0.1442; bậc 1 cao 62px, bậc 2 cao 87px, bậc 3 cao 120px.
+- 6g Phong Bi (chờ duyệt): kiểu D, tỉ lệ thu 0.1452; bậc 1 cao 59px, bậc 2 cao 82px, bậc 3 cao 121px.
+- 6h Phong Lô (chờ duyệt): kiểu D, tỉ lệ thu 0.1424; bậc 1 cao 51px, bậc 2 cao 89px, bậc 3 cao 121px.
+- 6i Phong Tích (chờ duyệt): kiểu D, tỉ lệ thu 0.1472; bậc 1 cao 48px, bậc 2 cao 80px, bậc 3 cao 117px.
+- 6j Phong Nguyên Vũ Xà, BOSS (chờ duyệt): kiểu D, tỉ lệ thu 0.1386; bậc 1 cao 63px, bậc 2 cao 93px, bậc 3 cao 121px.
+- **Vùng 6 Phong Nguyên (z3) đã đủ 10 con (6a-6j), làm TRƯỚC vùng 5** vì người dùng gửi ảnh v4 trước. Ảnh gửi vào chat, alpha khớp từng pixel với `thu-moi/phong-nguyen/` trên nhánh. Tất cả dùng `--kieu-d --gan-gan-nhat` (không dùng cờ gán gần nhất thì lá / mây của bậc 3 dính vào bậc 2; đã so mắt trên 6a, 6d, 6g, 6h, 6j). PNG đã đẩy thẳng vào `thu-game/phong-nguyen/`.
+
 ## PNG (từ 1e trở đi đã đẩy thẳng bằng git; 1a-1d đã upload tay)
 Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png; 02-tuyet-hung-b1.png, -b2.png, -b3.png; 03-bang-loc-b1.png, -b2.png, -b3.png; 04-tuyet-bao-b1.png, -b2.png, -b3.png; 05-bang-hai-b1.png, -b2.png, -b3.png; 06-tuyet-cu-b1.png, -b2.png, -b3.png; 07-bang-duong, 08-bang-linh, 09-bang-nham, 10-bang-son-cu-thu (mỗi con -b1/-b2/-b3.png)
 
@@ -65,4 +77,4 @@ Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png;
 - Chưa thêm dòng `<script src="51-thu-moi.js"></script>` vào index.html (sau 50-skin.js). Trang demo tự nạp file này nên vẫn chạy.
 
 ## Việc kế tiếp
-Chờ duyệt vùng 1-4 (1a-4j), rồi vùng 5 Nguyệt Cung: 5a Nguyệt Thố (nói "tiếp", gửi PNG kèm tên file). Vùng 6 Phong Nguyên làm cuối, chỉ khi ảnh v4 đã có.
+Chờ duyệt vùng 1, 2, 3, 4, 6. Còn lại vùng 5 Nguyệt Cung: 5a Nguyệt Thố (nói "tiếp", gửi PNG kèm tên file). Sau vùng 5 là tổng kết 60 con.
