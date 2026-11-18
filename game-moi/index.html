@@ -17,12 +17,10 @@
 <link rel="preload" as="image" href="img-boot-ngang.webp">
 <link rel="preload" as="image" href="img-boot-frame.webp">
 <style id="boot-css">
-/* MÀN CHỜ (game ngang). Màn dọc: nền tối + chữ "xoay ngang". Màn ngang: ảnh nền phủ toàn màn hình, thanh tiến trình ở đáy;
+/* MÀN CHỜ (game chỉ có màn ngang): ảnh nền phủ toàn màn hình, thanh tiến trình ở đáy;
    tải xong thì chữ "Chạm vào màn hình để vào Thú Thần Giới" nổi giữa màn hình, chạm bất kỳ đâu để vào. Không có nút. */
 #ttg-boot{position:fixed;inset:0;z-index:2147483000;overflow:hidden;background:#161826;color:#e8fff4;font-family:'VT323',monospace;text-align:center;transition:opacity .6s ease;-webkit-tap-highlight-color:transparent}
 #ttg-boot.out{opacity:0;pointer-events:none}
-#ttg-boot .gate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#161826}
-#ttg-boot .gate div{font:bold clamp(20px,6.2vw,32px)/1.3 sans-serif;color:#fff;max-width:90vw}
 #ttg-boot .scene{position:absolute;inset:0}
 #ttg-boot .pic{position:absolute;inset:0;background:#0b1020 url(img-boot-ngang.webp) 50% 50%/cover no-repeat}
 #ttg-boot .shade{position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(to top,rgba(4,10,14,.9) 0%,rgba(4,10,14,.55) 50%,rgba(4,10,14,0) 100%)}
@@ -59,7 +57,6 @@
 #ttg-boot.ready .frame{filter:drop-shadow(0 0 7px rgba(120,255,220,.75))}
 @keyframes tb-in{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
 @keyframes tb-blink{0%,100%{opacity:1}50%{opacity:.35}}
-@media (orientation:portrait){#ttg-boot .gate{display:flex}#ttg-boot .scene{display:none}}
 </style>
 <link rel="manifest" href="pwa-moi.webmanifest" crossorigin="use-credentials">
 <meta name="theme-color" content="#0b1020">
@@ -73,7 +70,6 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 #sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 /* Lớp nút ảo (DOM, nằm trên canvas). Mỗi nút: left/top theo px, phóng to/thu nhỏ bằng transform scale */
 #ui{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;pointer-events:none;font-family:sans-serif}
-@media (orientation:portrait){#ui{display:none}}
 #ui>*{pointer-events:auto}
 .ub{position:absolute;left:0;top:0;transform-origin:0 0;touch-action:none;white-space:nowrap;box-sizing:border-box;height:18px;display:flex;align-items:center;padding:0 5px;font:bold 9px/1 sans-serif;color:#fff;background:#1c3a46;border:1px solid #8a6d2f;border-radius:3px;-webkit-tap-highlight-color:transparent}
 .ub.c2{background:#1f7a3a;border-color:#4fc97a}
@@ -99,7 +95,6 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 #tst{position:absolute;left:50%;transform:translateX(-50%);top:calc(30px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 8px;border-radius:3px;opacity:0;transition:opacity .2s;pointer-events:none!important;z-index:30;white-space:nowrap}
 </style></head><body>
 <div id="ttg-boot" role="status" aria-live="polite">
-  <div class="gate" id="tb-gate"><div id="tb-gt">Hãy xoay ngang điện thoại để chơi</div></div>
   <div class="scene" id="tb-scene">
     <div class="pic"></div><div class="mist m1"></div><div class="mist m2"></div><div class="glow"></div><div class="moon"></div><canvas id="tb-fx"></canvas><div class="shade"></div>
     <div class="panel" id="tb-panel"><div class="enter" id="tb-enter">Chạm vào màn hình để vào Thú Thần Giới</div><div class="frame" id="tb-frame"><div class="slot" id="tb-slot"><i id="boot-fill"><canvas id="tb-wave"></canvas></i><div class="tip" id="tb-tip"></div></div><div class="fr"></div><span id="tb-pct">0%</span></div></div>
@@ -196,10 +191,10 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 </div>
 <script src="51-thu-moi.js"></script>
 <script>
-/* GAME MỚI (khung ban đầu). Màn ngang, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
+/* GAME MỚI (khung ban đầu). CHỈ CÓ MÀN NGANG, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
    CHỈ CHẠY KHI ĐÃ CÀI THÀNH APP (đoạn guard ở đầu file; mở bằng trình duyệt thường sẽ bị chuyển về trang-chu/ để tải).
-   App tự toàn màn hình + khóa ngang theo pwa-moi.webmanifest, nên game KHÔNG gọi requestFullscreen nữa (tránh thông báo của Chrome).
+   App tự toàn màn hình + khóa ngang theo pwa-moi.webmanifest, nên game KHÔNG gọi requestFullscreen nữa (tránh thông báo của Chrome) và KHÔNG xử lý màn dọc.
    Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
    VỊ TRÍ THÚ: thú bên trái đứng ngay giữa nút "Chỉ số" (theo vị trí nút thật trên màn hình, kéo nút là thú đi theo).
@@ -234,7 +229,7 @@ function resize(){
 function gy(){return H-I.b-62;}
 /* Tâm ngang (đơn vị pixel game) của nút neo "Chỉ số". Không đo được thì dùng 16% chiều rộng. */
 function anchorX(){var e=els[ANCHOR];
- if(e&&innerWidth>innerHeight){var r=e.getBoundingClientRect();if(r.width>0)return (r.left+r.width/2)*DPR/K;}
+ if(e){var r=e.getBoundingClientRect();if(r.width>0)return (r.left+r.width/2)*DPR/K;}
  return W*ANCHOR_DEF;}
 function px(w){var c=anchorX();return Math.round(w==='me'?c:W-c);}
 function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
@@ -314,7 +309,6 @@ function addMissing(miss){
   if(x+w>innerWidth-4){x=4;by+=21;}
   lay[u.id]={x:x/innerWidth,y:by/innerHeight,s:1};x+=w+3;});}
 function layoutUI(){
- if(innerWidth<=innerHeight)return;
  var miss=UI.filter(function(u){return !okL(u.id);});
  if(miss.length===UI.length){defaults();saveLay();}
  else if(miss.length){addMissing(miss);saveLay();}
@@ -370,7 +364,6 @@ function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
 function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
 function draw(ts){
- if(innerHeight>innerWidth){ctx.fillStyle='#161826';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('Xoay ngang màn hình để chơi',W/2,H/2);return;}
  var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(0,0,W,gy());
  ctx.fillStyle='#e8f1fa';ctx.fillRect(0,gy(),W,H-gy());ctx.fillStyle='#c4d6ea';ctx.fillRect(0,gy(),W,2);
  pet('en',ts);pet('me',ts);
