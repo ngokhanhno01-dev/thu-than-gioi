@@ -397,24 +397,99 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
    Video 1920x872 (tỉ lệ 2.2:1, đã cắt từ 16:9 gốc, giữ ~80% chiều cao), kéo vừa KHÍT phần trống BÊN TRONG viền khung (object-fit:fill, không phóng to/cắt thêm); viền khung vẽ đè lên.
    Video đã làm sẵn vòng lặp liền (cuối hòa vào đầu). Để lặp không khựng, dùng 2 thẻ video (BGV hiện, BGV2 chờ ở giây 0); chỉ còn ~0,07s thì bật cái kia (đang chờ sẵn ở giây 0) rồi đổi chỗ NGAY (không đổi sớm, nếu không hình sẽ nhảy lùi).
    Thêm vùng mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). */
-var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen-v2.mp4','suong-coc':'vid-sanh-suong-coc.mp4'},bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0;
-/* độ dày viền khung THẬT (đo ở giữa mỗi cạnh ảnh khung-game.webp, đơn vị px ảnh gốc) */
+var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,
+ BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen-v2.mp4','suong-coc':'vid-sanh-suong-coc.mp4'},
+ BG_FX_ZONE={'tuyet-nguyen':{image:'bg-tuyet-nguyen.webp',fx:['snow','gust','crystal','aurora','sky-rings','swaying-pines']}},
+ bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false;
+/* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn video. */
 var BG_EDGE={l:37,r:37,t:32,b:29};
-function bgWant(){var t=THU_MOI.byId[ID];return SCENE==='sanh'&&!!t&&!!BGV_ZONE[t.zone];}
+/* Nạp ảnh tĩnh; khi ảnh sẵn sàng sẽ tự ưu tiên ảnh, nếu lỗi vẫn chạy video cũ. */
+var BG_IMG=new Image(),bgImgReady=false,bgFxClock=0,bgFxLast=0;
+BG_IMG.onload=function(){bgImgReady=true;bgSync();};
+BG_IMG.onerror=function(){bgImgReady=false;bgSync();};
+BG_IMG.src=BG_FX_ZONE['tuyet-nguyen'].image;
+/* Cấu hình nhẹ cho điện thoại: số hạt, tốc độ, độ mờ. */
+var BG_FX_CFG={snowCount:30,snowSpeed:.020,snowOpacity:.72,gustEvery:15000,gustDuration:2600,
+ crystalCount:11,crystalOpacity:.72,auroraOpacity:.18,ringOpacity:.24,pineOpacity:.16};
+var BG_SNOW=[],BG_CRYSTALS=[];
+for(var bi=0;bi<BG_FX_CFG.snowCount;bi++)BG_SNOW.push({x:Math.random(),y:Math.random(),r:.45+Math.random()*1.05,v:.5+Math.random()*.8,d:(Math.random()-.5)*.18,p:Math.random()*6.28});
+for(var bj=0;bj<BG_FX_CFG.crystalCount;bj++)BG_CRYSTALS.push({x:.035+Math.random()*.93,y:.08+Math.random()*.78,p:Math.random()*6.28,s:1+Math.random()*1.8});
+function bgWant(){var t=THU_MOI.byId[ID];return SCENE==='sanh'&&!!t&&!!BGV_ZONE[t.zone]&&!(BG_FX_ZONE[t.zone]&&bgImgReady);}
 function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,s=Math.min(FSC,(th-20)/500),ov=1;
  var l=Math.round(BG_EDGE.l*s)-ov,r=Math.round(BG_EDGE.r*s)-ov,t=Math.round(BG_EDGE.t*s)-ov,b=Math.round(BG_EDGE.b*s)-ov;
  [BGV,BGV2].forEach(function(v){v.style.left=Math.round((I.l+l)*f)+'px';v.style.top=Math.round(t*f)+'px';v.style.width=Math.round((fw-l-r)*f)+'px';v.style.height=Math.round((th-t-b)*f)+'px';});}
 function bgShow(c,n){c.style.opacity=1;n.style.opacity=0;}
-function bgTick(g){if(!bgOn||g!==bgGen)return;
+function bgTick(g){if(!bgOn||g!==bgGen)return;if(document.hidden){requestAnimationFrame(function(){bgTick(g);});return;}
  var c=bgCur,n=bgNxt;
  if(!bgSw&&c.duration&&c.duration-c.currentTime<0.07){bgSw=true;try{n.currentTime=0;}catch(e){}var p=n.play();if(p&&p.catch)p.catch(function(){bgSw=false;});}
  if(bgSw&&n.currentTime>0.01&&!n.paused){bgShow(n,c);c.pause();try{c.currentTime=0;}catch(e){}bgCur=n;bgNxt=c;bgSw=false;}
  requestAnimationFrame(function(){bgTick(g);});}
-function bgSync(){var w=bgWant(),f=w?BGV_ZONE[THU_MOI.byId[ID].zone]:'';if(w===bgOn&&f===bgFile)return;bgOn=w;bgFile=f;var g=++bgGen;/* đổi thú sang vùng khác (khác video) cũng chạy lại đoạn này */
+function bgSync(){
+ var t=THU_MOI.byId[ID],zone=t&&t.zone,conf=zone&&BG_FX_ZONE[zone];
+ bgImageOn=!!(SCENE==='sanh'&&conf&&bgImgReady&&BG_IMG.naturalWidth>0);
+ var w=bgWant(),f=w?BGV_ZONE[zone]:'';
+ if(w===bgOn&&f===bgFile&&bgImageOn===bgLastImageOn)return;
+ bgLastImageOn=bgImageOn;bgOn=w;bgFile=f;var g=++bgGen;
  if(w){[BGV,BGV2].forEach(function(v){if(v.getAttribute('src')!==f){v.setAttribute('src',f);v.load();}v.style.display='block';});
   bgLayout();bgCur=BGV;bgNxt=BGV2;bgSw=false;bgShow(BGV,BGV2);try{BGV2.pause();BGV2.currentTime=0;}catch(e){}
   var p=BGV.play();if(p&&p.catch)p.catch(function(){});requestAnimationFrame(function(){bgTick(g);});}
- else{BGV.style.display='none';BGV2.style.display='none';BGV.pause();BGV2.pause();}}
+ else{BGV.style.display='none';BGV2.style.display='none';BGV.pause();BGV2.pause();}
+}
+/* Nền phủ nhẹ ở hai mép; ảnh nguyên vẹn nằm giữa để không cắt núi và cực quang. */
+function bgDrawStill(x,y,w,h){
+ if(!bgImageOn)return;
+ var iw=BG_IMG.naturalWidth,ih=BG_IMG.naturalHeight,scale=Math.min(w/iw,h/ih),dw=iw*scale,dh=ih*scale;
+ ctx.save();ctx.fillStyle='#102b59';ctx.fillRect(x,y,w,h);ctx.globalAlpha=.38;ctx.drawImage(BG_IMG,x,y,w,h);
+ ctx.globalAlpha=1;ctx.drawImage(BG_IMG,x+(w-dw)/2,y+(h-dh)/2,dw,dh);ctx.restore();
+}
+function bgPine(x,y,h,lean,alpha){
+ ctx.save();ctx.translate(x,y);ctx.globalAlpha=alpha;ctx.strokeStyle='#c9f2ff';ctx.lineWidth=1;ctx.lineCap='round';
+ ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(lean*.35,-h*.48,lean,-h);ctx.stroke();
+ for(var k=1;k<=4;k++){var yy=-h*k/5,ww=h*(.13+.035*k),off=lean*k/5;
+  ctx.beginPath();ctx.moveTo(off,yy);ctx.lineTo(off-ww,yy+h*.16);ctx.moveTo(off,yy);ctx.lineTo(off+ww,yy+h*.16);ctx.stroke();}
+ ctx.restore();
+}
+function bgDrawFx(ts,x,y,w,h){
+ if(document.hidden){bgFxLast=0;return;}
+ var dt=bgFxLast?Math.min(40,ts-bgFxLast):16;bgFxLast=ts;bgFxClock+=dt;
+ var tm=bgFxClock,wind=Math.sin(tm/1100)*.20;
+ ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+ /* Cực quang lung linh: các dải sáng dịch chuyển rất nhẹ. */
+ ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=BG_FX_CFG.auroraOpacity*(.84+.16*Math.sin(tm/1800));
+ for(var a=0;a<3;a++){ctx.beginPath();for(var q=0;q<=28;q++){var xx=x+w*q/28,yy=y+h*(.13+a*.075)+Math.sin(q*.23+tm/2400+a*1.7)*h*.032+Math.sin(q*.09-tm/3100)*h*.022;if(q===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);}
+  ctx.strokeStyle=a===1?'#9af7ff':'#55bfff';ctx.lineWidth=h*(.027+a*.008);ctx.shadowColor='#53dfff';ctx.shadowBlur=8;ctx.stroke();}
+ ctx.restore();
+ /* Hai vòng thiên thể bên cực quang: vòng ma pháp băng và hạt sáng chuyển động. */
+ ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=BG_FX_CFG.ringOpacity;
+ [.19,.80].forEach(function(rx,i){var cx=x+w*rx,cy=y+h*.20,rr=h*(.105+i*.012),pulse=.97+.035*Math.sin(tm/1200+i);
+  ctx.strokeStyle='#b9f2ff';ctx.lineWidth=1;ctx.shadowColor='#8deaff';ctx.shadowBlur=7;
+  ctx.beginPath();ctx.ellipse(cx,cy,rr*pulse,rr*.72*pulse,Math.sin(tm/4200+i)*.07,0,Math.PI*2);ctx.stroke();
+  ctx.beginPath();ctx.ellipse(cx,cy,rr*.68,rr*.49,Math.sin(-tm/3700+i)*.1,0,Math.PI*2);ctx.stroke();
+  for(var z=0;z<5;z++){var ang=tm/2600+z*Math.PI*2/5+i,sx=cx+Math.cos(ang)*rr*pulse,sy=cy+Math.sin(ang)*rr*.72*pulse;
+   ctx.fillStyle='#efffff';ctx.fillRect(sx-1,sy-1,2,2);}});
+ ctx.restore();
+ /* Tinh thể băng chớp sáng luân phiên từng viên. */
+ BG_CRYSTALS.forEach(function(p){var alpha=(.12+.88*Math.max(0,Math.sin(tm/570+p.p)))*BG_FX_CFG.crystalOpacity;
+  var cx=x+w*p.x,cy=y+h*p.y,r=p.s;ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle='#e4fbff';ctx.shadowColor='#83eaff';ctx.shadowBlur=5;
+  ctx.beginPath();ctx.moveTo(cx,cy-r*2);ctx.lineTo(cx+r*.7,cy);ctx.lineTo(cx,cy+r*2);ctx.lineTo(cx-r*.7,cy);ctx.closePath();ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx-r*1.7,cy);ctx.lineTo(cx+r*1.7,cy);ctx.moveTo(cx,cy-r*1.7);ctx.lineTo(cx,cy+r*1.7);ctx.stroke();ctx.restore();});
+ /* Tuyết rơi; gió mạnh thỉnh thoảng cuốn tuyết bay ngang. */
+ var phase=tm%BG_FX_CFG.gustEvery,gust=phase<BG_FX_CFG.gustDuration?Math.sin(phase/BG_FX_CFG.gustDuration*Math.PI):0;
+ ctx.save();ctx.globalAlpha=BG_FX_CFG.snowOpacity;ctx.fillStyle='#eefaff';ctx.strokeStyle='rgba(220,246,255,.62)';
+ BG_SNOW.forEach(function(p){p.y+=BG_FX_CFG.snowSpeed*p.v*dt/1000;p.x+=(p.d+wind*.12+gust*.85)*dt/1800;
+  if(p.y>1.03){p.y=-.03;p.x=Math.random();}if(p.x>1.03)p.x=-.03;if(p.x<-.03)p.x=1.03;
+  var sx=x+w*p.x,sy=y+h*p.y;ctx.beginPath();ctx.arc(sx,sy,p.r,0,Math.PI*2);ctx.fill();
+  if(gust>.08){ctx.beginPath();ctx.moveTo(sx-7*gust,sy);ctx.lineTo(sx-1,sy);ctx.stroke();}});
+ ctx.restore();
+ /* Nhánh thông hai mép rung nhẹ theo gió, tránh khu vực đứng của thú. */
+ var sway=Math.sin(tm/760)*2+wind*3;
+ ctx.save();ctx.globalCompositeOperation='screen';
+ bgPine(x+w*.035,y+h*.91,h*.28,sway,BG_FX_CFG.pineOpacity);
+ bgPine(x+w*.965,y+h*.91,h*.32,-sway,BG_FX_CFG.pineOpacity);
+ bgPine(x+w*.075,y+h*.94,h*.18,-sway*.7,BG_FX_CFG.pineOpacity*.7);
+ ctx.restore();ctx.restore();
+}
+document.addEventListener('visibilitychange',function(){bgFxLast=0;if(document.hidden){BGV.pause();BGV2.pause();}else if(bgOn){try{bgCur.play();}catch(e){}}});
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
 function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.round(Math.sin(ts/380)*2);
  dp(ID,bm,x,gy()+bob);}
@@ -422,7 +497,8 @@ function draw(ts){bgSync();
  var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
  ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);
  /* nền khung trên: trời + đất (sau này mỗi vùng đổi nền ở đây) */
- if(bgOn){ctx.clearRect(fx,0,fw,th);}else{
+ var bgFxConf=THU_MOI.byId[ID]&&BG_FX_ZONE[THU_MOI.byId[ID].zone],bgFxOn=SCENE==='sanh'&&!!bgImageOn&&!!bgFxConf;
+  if(bgOn||bgImageOn){ctx.clearRect(fx,0,fw,th);if(bgImageOn){var bs=Math.min(FSC,(th-20)/500),bl=Math.round(BG_EDGE.l*bs)-1,br=Math.round(BG_EDGE.r*bs)-1,bt=Math.round(BG_EDGE.t*bs)-1,bb=Math.round(BG_EDGE.b*bs)-1;bgDrawStill(fx+bl,bt,fw-bl-br,th-bt-bb);if(bgFxOn)bgDrawFx(ts,fx+bl,bt,fw-bl-br,th-bt-bb);}}else{
  var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(fx,0,fw,gy());
  ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());if(SCENE!=='sanh'){ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);}}
  /* nền khung dưới (chứa nút) */
