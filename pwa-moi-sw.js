@@ -1,7 +1,7 @@
 /* Service worker của bản cài đặt (PWA) Thú Thần Giới.
    Ưu tiên MẠNG (luôn lấy bản mới nhất khi có mạng), mất mạng thì dùng bản đã lưu lần trước.
    Chỉ lưu file cùng trang web, chỉ lưu phản hồi 200; không đụng tới Firebase hay các yêu cầu khác (POST...). */
-var CACHE = 'ttg-moi-v1';
+var CACHE = 'ttg-moi-v2';
 self.addEventListener('install', function (e) { self.skipWaiting(); });
 self.addEventListener('activate', function (e) {
   e.waitUntil(caches.keys().then(function (ks) {
