@@ -46,6 +46,18 @@ Trạng thái áp dụng D: ĐÃ cắt lại toàn bộ vùng 1, 2, 3 (30 con, 1
 - **Tên theo ghi chú .md trong `van-dao/`** (khác prompt): 3a "Vân Cảnh" (prompt ghi Vân Canh), 3g "Vân Đình" (prompt ghi Vân Đĩnh). Chỉ là tên tạm, sửa trong `51-thu-moi.js`.
 - **Công cụ:** vùng này các bậc chồng nhau về x (đảo đá, mây, đèn lồng rơi lẫn giữa bậc 2 và 3), cắt theo tâm x sẽ gán nhầm mảnh sang bậc 2. Đã thêm cờ `--gan-gan-nhat` cho `tools/cat_3_bac.py` (gán mảnh rời cho thân có pixel gần nhất); không dùng cờ thì chạy y như cũ. Vùng 1-2 cắt không dùng cờ, đã xem bảng thử thấy sạch.
 
+- 4a Lôi Ưng (chờ duyệt): kiểu D, tỉ lệ thu 0.1535; bậc 1 cao 51px, bậc 2 cao 84px, bậc 3 cao 121px.
+- 4b Lôi Ngư (chờ duyệt): kiểu D, tỉ lệ thu 0.158; bậc 1 cao 43px, bậc 2 cao 58px, bậc 3 cao 94px.
+- 4c Lôi Ngưu (chờ duyệt): kiểu D, tỉ lệ thu 0.143; bậc 1 cao 47px, bậc 2 cao 68px, bậc 3 cao 94px.
+- 4d Lôi Mãng (chờ duyệt): kiểu D, tỉ lệ thu 0.1508; bậc 1 cao 52px, bậc 2 cao 86px, bậc 3 cao 121px.
+- 4e Lôi Cô (chờ duyệt): kiểu D, tỉ lệ thu 0.1451; bậc 1 cao 53px, bậc 2 cao 85px, bậc 3 cao 122px.
+- 4f Lôi Giáp (chờ duyệt): kiểu D, tỉ lệ thu 0.1488; bậc 1 cao 43px, bậc 2 cao 61px, bậc 3 cao 90px.
+- 4g Lôi Sư (chờ duyệt): kiểu D, tỉ lệ thu 0.1576; bậc 1 cao 56px, bậc 2 cao 76px, bậc 3 cao 99px.
+- 4h Lôi Linh (chờ duyệt): kiểu D, tỉ lệ thu 0.1562; bậc 1 cao 52px, bậc 2 cao 80px, bậc 3 cao 121px.
+- 4i Lôi Đồng (chờ duyệt): kiểu D, tỉ lệ thu 0.1434; bậc 1 cao 62px, bậc 2 cao 92px, bậc 3 cao 118px.
+- 4j Lôi Vực Chiến Thần, BOSS (chờ duyệt): kiểu D, tỉ lệ thu 0.1422; bậc 1 cao 50px, bậc 2 cao 81px, bậc 3 cao 115px.
+- **Vùng 4 Lôi Vực đã đủ 10 con (4a-4j).** Ảnh người dùng gửi vào chat, alpha khớp từng pixel với bản trong `thu-moi/loi-vuc/`. Tất cả dùng `--kieu-d --gan-gan-nhat`: không dùng cờ gán gần nhất thì mảnh tinh thể / mây của bậc 3 bị gán nhầm vào bậc 2 (đã so mắt trên 02, 03, 05, 06, 08, 09). PNG đã đẩy thẳng vào `thu-game/loi-vuc/`.
+
 ## PNG (từ 1e trở đi đã đẩy thẳng bằng git; 1a-1d đã upload tay)
 Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png; 02-tuyet-hung-b1.png, -b2.png, -b3.png; 03-bang-loc-b1.png, -b2.png, -b3.png; 04-tuyet-bao-b1.png, -b2.png, -b3.png; 05-bang-hai-b1.png, -b2.png, -b3.png; 06-tuyet-cu-b1.png, -b2.png, -b3.png; 07-bang-duong, 08-bang-linh, 09-bang-nham, 10-bang-son-cu-thu (mỗi con -b1/-b2/-b3.png)
 
@@ -53,4 +65,4 @@ Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png;
 - Chưa thêm dòng `<script src="51-thu-moi.js"></script>` vào index.html (sau 50-skin.js). Trang demo tự nạp file này nên vẫn chạy.
 
 ## Việc kế tiếp
-Chờ duyệt vùng 1, 2, 3 (1a-3j), rồi vùng 4 Lôi Vực: 4a Lôi Ưng (nói "tiếp").
+Chờ duyệt vùng 1-4 (1a-4j), rồi vùng 5 Nguyệt Cung: 5a Nguyệt Thố (nói "tiếp", gửi PNG kèm tên file). Vùng 6 Phong Nguyên làm cuối, chỉ khi ảnh v4 đã có.

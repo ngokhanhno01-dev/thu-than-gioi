@@ -39,6 +39,18 @@
       { id: '3h', slug: '08-van-chau', ten: 'Vân Châu', boss: false },
       { id: '3i', slug: '09-van-dang', ten: 'Vân Đăng', boss: false },
       { id: '3j', slug: '10-van-dao-con-bang', ten: 'Vân Đảo Côn Bằng', boss: true }
+    ] },
+    { z: 4, slug: 'loi-vuc', ten: 'Lôi Vực', thu: [
+      { id: '4a', slug: '01-loi-ung', ten: 'Lôi Ưng', boss: false },
+      { id: '4b', slug: '02-loi-ngu', ten: 'Lôi Ngư', boss: false },
+      { id: '4c', slug: '03-loi-nguu', ten: 'Lôi Ngưu', boss: false },
+      { id: '4d', slug: '04-loi-mang', ten: 'Lôi Mãng', boss: false },
+      { id: '4e', slug: '05-loi-co', ten: 'Lôi Cô', boss: false },
+      { id: '4f', slug: '06-loi-giap', ten: 'Lôi Giáp', boss: false },
+      { id: '4g', slug: '07-loi-su', ten: 'Lôi Sư', boss: false },
+      { id: '4h', slug: '08-loi-linh', ten: 'Lôi Linh', boss: false },
+      { id: '4i', slug: '09-loi-dong', ten: 'Lôi Đồng', boss: false },
+      { id: '4j', slug: '10-loi-vuc-chien-than', ten: 'Lôi Vực Chiến Thần', boss: true }
     ] }
   ];
   var byId = {}, cache = {};
