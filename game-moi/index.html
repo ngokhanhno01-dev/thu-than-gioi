@@ -434,8 +434,9 @@ var BG_FX_CFG={
  mistSpeed:.10,    /* tốc độ sương trôi ngang */
  auroraOpacity:.10, /* độ sáng thêm của cực quang khi lung linh */
  auroraSpeed:.005,   /* tốc độ lung linh của cực quang */
- starOpacity:.1.3,    /* độ sáng sao lấp lánh */
- sparkleOpacity:1.3,/* độ sáng tinh thể lóe */
+ starOpacity:.9,    /* độ sáng sao lấp lánh (0..1) */
+ sparkleOpacity:1,  /* độ sáng tinh thể lóe (0..1) */
+ sparkleSize:18,    /* kích thước tinh thể lóe khi sáng nhất (trước là 10; to hơn cho dễ nhìn) */
  flyCount:40,       /* số hạt sáng/đom đóm (máy yếu thì giảm, ví dụ 8) */
  flySpeed:.012,     /* tốc độ hạt sáng trôi ngang */
  flyOpacity:1,     /* độ sáng hạt sáng */
@@ -563,7 +564,7 @@ function bgDrawFx(ts,x,y,w,h){
   ctx.globalAlpha=C.starOpacity*(.3+.7*a);ctx.drawImage(S.star,sx-sz/2,sy-sz/2,sz,sz);}}
  /* tinh thể lóe sáng từng lúc */
  if(F.indexOf('sparkle')>=0&&conf.crystals){for(i=0;i<conf.crystals.length;i++){p=conf.crystals[i];sx=x+G.ox+p[0]*G.dw;sy=y+G.oy+p[1]*G.dh;
-  if(sy<y||sy>y+h||sx<x||sx>x+w)continue;a=Math.pow(Math.max(0,Math.sin(T*1.1+i*2.3)),6);if(a<.05)continue;sz=4+6*a;
+  if(sy<y||sy>y+h||sx<x||sx>x+w)continue;a=Math.pow(Math.max(0,Math.sin(T*1.1+i*2.3)),6);if(a<.05)continue;sz=C.sparkleSize*(.45+.55*a);
   ctx.globalAlpha=C.sparkleOpacity*a;ctx.drawImage(S.spark,sx-sz/2,sy-sz/2,sz,sz);}}
  /* hạt sáng/đom đóm: bay lơ lửng chậm, nhấp nháy, nằm ở nửa dưới khung (gần mặt đất) */
  if(F.indexOf('firefly')>=0){for(i=0;i<bgFly.length;i++){p=bgFly[i];p.x+=C.flySpeed*p.v*dt/1000;if(p.x>1.03)p.x=-.03;
