@@ -64,8 +64,8 @@ var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_M
 var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16,MAXB=3;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
-var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]hd=0/.test(location.search))HD=false;if(/[?&]hd=1/.test(location.search))HD=true;/* HD (mặc định BẬT): canvas theo độ phân giải máy + dùng ảnh thú 256 nếu có (thiếu thì dùng 128). Thêm ?hd=0 vào link để tắt và so sánh */
-function dp(id,b,cx,by){if(HD){THU_MOI.setFrame(256);var ok=THU_MOI.draw(ctx,id,b,cx,by,128);THU_MOI.setFrame(128);if(ok)return;}THU_MOI.draw(ctx,id,b,cx,by,128);}
+var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]hd=0/.test(location.search))HD=false;if(/[?&]hd=1/.test(location.search))HD=true;/* HD (mặc định BẬT): canvas theo độ phân giải máy + dùng ảnh thú 192 nếu có (thiếu thì dùng 128). Thêm ?hd=0 vào link để tắt và so sánh */
+function dp(id,b,cx,by){if(HD){THU_MOI.setFrame(192);var ok=THU_MOI.draw(ctx,id,b,cx,by,128);THU_MOI.setFrame(128);if(ok)return;}THU_MOI.draw(ctx,id,b,cx,by,128);}
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
 function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
@@ -109,7 +109,7 @@ var UI=[
  {id:'cm',t:'💬',n:'Chat',c:1},{id:'sn',t:'🔊',n:'Âm thanh',c:1},
  {id:'tt',t:'',n:'Đổi thú',c:5},{id:'tm',t:'',n:'Đổi bậc bạn',c:5},{id:'te',t:'',n:'Đổi bậc địch',c:5},{id:'kh',t:'',n:'Đổi khung 128/HD',c:5}];
 /* Chữ mặc định của nút (2 nút đổi bậc có chữ thay đổi theo bậc hiện tại) */
-function dt(u){return u.id==='tt'?'Thú: '+THU_MOI.byId[ID].ten:u.id==='tm'?'Bạn: bậc '+bm:u.id==='te'?'Địch: bậc '+be:u.id==='kh'?'Khung: '+(HD?'HD 256':'128'):u.t;}
+function dt(u){return u.id==='tt'?'Thú: '+THU_MOI.byId[ID].ten:u.id==='tm'?'Bạn: bậc '+bm:u.id==='te'?'Địch: bậc '+be:u.id==='kh'?'Khung: '+(HD?'HD 192':'128'):u.t;}
 var ui=document.getElementById('ui'),edb=document.getElementById('edb'),edt=document.getElementById('edt'),edn=document.getElementById('edn'),edz=document.getElementById('edz'),tst=document.getElementById('tst'),edq=document.getElementById('edq'),edi=document.getElementById('edi');
 var els={},lay={},ed=false,sel=null,drag=null,tt=0;
 try{lay=JSON.parse(localStorage.getItem(LKEY)||'{}')||{};}catch(e){lay={};}
@@ -132,7 +132,7 @@ UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.
   if(u.id==='fs'){triedFS=true;if(isFS())exitFull();else full();}
   else if(u.id==='tt'){openList();}
   else if(u.id==='tm'){bm=bm%MAXB+1;saveB();label('tm');toast('Bạn: bậc '+bm);}
-  else if(u.id==='kh'){HD=!HD;try{localStorage.setItem('ttg_moi_hd',HD?'1':'0');}catch(x){}resize();label('kh');toast(HD?'Khung HD 256 (nét)':'Khung 128 (cũ)');}
+  else if(u.id==='kh'){HD=!HD;try{localStorage.setItem('ttg_moi_hd',HD?'1':'0');}catch(x){}resize();label('kh');toast(HD?'Khung HD 192 (nét)':'Khung 128 (cũ)');}
   else if(u.id==='te'){be=be%MAXB+1;saveB();label('te');toast('Địch: bậc '+be);}
   else toast(els[u.id].textContent+' (chưa gắn chức năng)');});
  e.addEventListener('pointercancel',function(){if(drag){drag=null;saveLay();}});
@@ -229,7 +229,7 @@ function draw(ts){
  pet('en',ts);pet('me',ts);
  var bw=Math.min(220,Math.floor(W*.3)),nm=THU_MOI.byId[ID].ten;
  bar(I.l+12,I.t+24,bw,st.me/100,'#3c3',nm+' (bạn)');bar(W-I.r-12-bw,I.t+24,bw,st.en/100,'#c33',nm+' (địch)');
- ctx.textAlign='center';ctx.textBaseline='top';ctx.font='10px sans-serif';ctx.fillStyle='#123';ctx.fillText((HD?'HD 256→128':'thú 128px')+' · x'+K+' · '+W+'×'+H+' · v4',W/2,I.t+6);
+ ctx.textAlign='center';ctx.textBaseline='top';ctx.font='10px sans-serif';ctx.fillStyle='#123';ctx.fillText((HD?'HD 192→128':'thú 128px')+' · x'+K+' · '+W+'×'+H+' · v4',W/2,I.t+6);
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
  st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
  if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+60,gy()-170));}}

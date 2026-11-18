@@ -6,8 +6,9 @@ D = thu 2 bước LANCZOS, tô màu gần nhất vào vùng trong suốt rồi U
 Lý do: bản cũ (LANCZOS 1 phát từ ~1770px xuống 128px) bị mờ. Đã so mắt trên 1d: A (cũ) mờ; B (2 bước + sắc mạnh) lởm chởm; C (thêm tương phản/bão hòa) gắt; D mịn viền, nét hơn A; E (D + gom 32 màu) gần như không khác D mà có rủi ro vỡ dải màu hào quang nên không dùng. Không bỏ cờ --kieu-d, không tự đổi tham số khi chưa được người dùng cho phép.
 Trạng thái áp dụng D: ĐÃ cắt lại toàn bộ vùng 1, 2, 3 (30 con, 1a-3j) theo kiểu D. Các con có tham số riêng đã dùng đúng lại (1b/1j: `3:870-1000`, 2a: `2:440-470`, vùng 3: `--gan-gan-nhat`, 3b: `3:870-1000`). Đã đối chiếu: chạy cách cũ trên ảnh nguồn trong repo cho ra đúng từng pixel bản đang có, nên ảnh nguồn đúng là bản đã duyệt. Vùng 4, 5, 6 dùng D ngay từ đầu.
 
-## Cỡ khung đã chốt
-128x128 (hằng FRAME trong 51-thu-moi.js). Cùng 1 tỉ lệ thu cho 3 bậc/con; kiểu D ở trên (alpha cứng ngưỡng 110). Chân chạm đáy, căn giữa ngang, lề 3px cho bậc lớn nhất.
+## Cỡ khung đã chốt: 192x192 (người dùng chốt 18/11/2026)
+Hằng FRAME = 192 trong 51-thu-moi.js. Ảnh 192 nằm cạnh ảnh cũ với hậu tố `-192`: `thu-game/<vùng>/NN-slug-b1-192.png` (-b2-192, -b3-192). Ảnh 128 (không hậu tố) và 256 thử (-256, chỉ 6j) GIỮ NGUYÊN, không xóa. Lệnh cắt: `python3 tools/cat_3_bac.py <anh-goc> <thư-mục-ra> <NN-slug> 192 --kieu-d [--gan-gan-nhat] [tham số ép bậc]` rồi đổi tên đầu ra thành `NN-slug-bN-192.png`. Lý do chọn 192: game vẽ x3 trên điện thoại nên 192 phóng đúng 2 lần, nét gần bằng 256, nhẹ hơn ~nửa.
+(Ghi chú cũ về 128 bên dưới là lịch sử.) Cùng 1 tỉ lệ thu cho 3 bậc/con; kiểu D; Cùng 1 tỉ lệ thu cho 3 bậc/con; kiểu D ở trên (alpha cứng ngưỡng 110). Chân chạm đáy, căn giữa ngang, lề 3px cho bậc lớn nhất.
 
 ## Đã xong
 - 1a Tuyết Cầu (mẫu, đang chờ duyệt). Cắt tại khe trống alpha=0 (x=321-446 và x=898-951 của ảnh gốc), không cắt vào hình.
@@ -70,6 +71,16 @@ Trạng thái áp dụng D: ĐÃ cắt lại toàn bộ vùng 1, 2, 3 (30 con, 1
 - 6j Phong Nguyên Vũ Xà, BOSS (chờ duyệt): THAY LẦN 3 bằng ảnh Đằng Xà do ChatGPT làm (rắn cuộn tròn trên mây, cánh dơi màng, bậc 3 sửa riêng cho cuộn gọn). Tách nền chroma-key magenta nối biên + `hau_xu_ly_anh_thu.py --bg magenta`, rồi `cat_3_bac.py ... 128 --kieu-d --gan-gan-nhat`. Tỉ lệ thu 0.1874 (bản trước 0.1437, to hơn ~30%); bậc 1 cao 76px, bậc 2 cao 106px, bậc 3 cao 122px (rộng 119px); 0 pixel ám magenta. Đã so mắt nền sáng/tối: 3 bậc không dính nhau. Điểm chưa ổn: vài viên ngọc hồng nhỏ trên xích bậc 3 bị xóa vì gần màu nền; bậc 1 hơi lớn so với bậc 3 (62%, nhỏ hơn nửa như prompt đòi). Chưa kiểm trong game thật.
 - **Vùng 6 Phong Nguyên (z3) đã đủ 10 con (6a-6j), làm TRƯỚC vùng 5** vì người dùng gửi ảnh v4 trước. Ảnh gửi vào chat, alpha khớp từng pixel với `thu-moi/phong-nguyen/` trên nhánh. Tất cả dùng `--kieu-d --gan-gan-nhat` (không dùng cờ gán gần nhất thì lá / mây của bậc 3 dính vào bậc 2; đã so mắt trên 6a, 6d, 6g, 6h, 6j). PNG đã đẩy thẳng vào `thu-game/phong-nguyen/`.
 
+## Đợt 18/11/2026 (khung 192)
+- Cắt lại 49 con (vùng 1, 2, 3, 4 và 6a-6i) ở 192: chạy lại ở 128 từ ảnh nguồn trong repo cho ra đúng từng pixel bản 128 đang có (147/150 ảnh trùng), nên ảnh nguồn và tham số đúng.
+- 6j Phong Nguyên Vũ Xà: ảnh nguồn trong `thu-moi/phong-nguyen/` là BẢN CŨ (không trùng bản 128 đang dùng, 3 ảnh lệch), nên bản 192 của 6j được thu từ bản 256 đã duyệt (LANCZOS + alpha cứng 110). Chất lượng ổn nhưng nên đưa lại ảnh nguồn Đằng Xà đúng vào `thu-moi/phong-nguyen/` rồi cắt lại.
+- Vùng 5 Nguyệt Cung (5a-5j, 10 con) làm ở 192 với `--kieu-d --gan-gan-nhat`; đã so mắt bảng nền sáng/tối: 3 bậc không dính nhau, chân chạm đáy. Chưa kiểm trong game thật trên điện thoại.
+  Tên tạm theo file: Nguyệt Thố, Nguyệt Hạc, Nguyệt Thiềm, Nguyệt Đằng, Nguyệt Nga, Nguyệt Kình, Nguyệt Tượng, Nguyệt Quy, Nguyệt Tiên, Nguyệt Thực Tế Quân (Boss).
+  Điểm chưa ổn vùng 5: 5c Nguyệt Thiềm và 5f Nguyệt Kình thân dẹt rộng nên bậc 1 thấp (63px, 68px); 5d Nguyệt Đằng có nhiều cánh hoa nhỏ rời, chưa xem kỹ ở cỡ đúng.
+- Đã thêm đúng 1 dòng `<script src="51-thu-moi.js">` vào `index.html` (sau 50-skin.js); file chỉ khai báo, không móc vào chức năng nào.
+- `game-moi/index.html`: chế độ HD giờ dùng ảnh 192 (trước là 256).
+- **Đủ 60 con (6 vùng), mỗi con 3 bậc ở 192.** Chờ bạn duyệt.
+
 ## Thử khung 256 (chỉ để so mắt, KHÔNG đổi cỡ đã chốt)
 - 6j Phong Nguyên Vũ Xà có thêm bản 256: `thu-game/phong-nguyen/10-phong-nguyen-vu-xa-b1-256.png`, `-b2-256.png`, `-b3-256.png` (tỉ lệ thu 0.384; bậc 3 cao 250px, ~127KB/ảnh so với ~38KB bản 128). Xem trong `game-moi/index.html` (chế độ HD bật sẵn, thêm `?hd=0` để so với bản 128). `thu-moi-demo.html` đã xóa (18/11/2026), game-moi thay thế. Khung chốt vẫn là 128 cho tới khi người dùng quyết.
 
@@ -77,7 +88,7 @@ Trạng thái áp dụng D: ĐÃ cắt lại toàn bộ vùng 1, 2, 3 (30 con, 1
 Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png; 02-tuyet-hung-b1.png, -b2.png, -b3.png; 03-bang-loc-b1.png, -b2.png, -b3.png; 04-tuyet-bao-b1.png, -b2.png, -b3.png; 05-bang-hai-b1.png, -b2.png, -b3.png; 06-tuyet-cu-b1.png, -b2.png, -b3.png; 07-bang-duong, 08-bang-linh, 09-bang-nham, 10-bang-son-cu-thu (mỗi con -b1/-b2/-b3.png)
 
 ## Chưa làm
-- Chưa thêm dòng `<script src="51-thu-moi.js"></script>` vào index.html (sau 50-skin.js). Trang demo tự nạp file này nên vẫn chạy.
+- (Đã xong) dòng script 51-thu-moi.js đã có trong index.html.
 
 ## Việc kế tiếp
-Chờ duyệt vùng 1, 2, 3, 4, 6. Còn lại vùng 5 Nguyệt Cung: 5a Nguyệt Thố (nói "tiếp", gửi PNG kèm tên file). Sau vùng 5 là tổng kết 60 con.
+Bạn duyệt cả 60 con ở `game-moi/index.html` (nút Khung đổi 192/128). Còn lại: đưa lại ảnh nguồn 6j đúng (xem trên), đổi tên chính thức (chỉ sửa trong 51-thu-moi.js). Bước sau (sửa cơ chế, bỏ thú và trứng cũ) tính riêng.

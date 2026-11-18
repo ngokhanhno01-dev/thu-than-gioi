@@ -1,7 +1,7 @@
 // 51-thu-moi.js - Đăng ký thú mới (chỉ khai báo + hàm vẽ, không tự chạy, không móc vào chức năng nào)
 // Ảnh nạp LƯỜI: chỉ nạp khi vẽ lần đầu. Tên là TÊN TẠM, đổi tên chỉ sửa ở file này.
 (function () {
-  var FRAME = 128; // cạnh khung chốt (px) - ảnh bậc 128x128, chân chạm đáy. Bản thử 256 có hậu tố -256 (xem setFrame)
+  var FRAME = 192; // cạnh khung CHỐT (px) = 192 (người dùng chốt 18/11/2026). Ảnh 192 có hậu tố -192; bản 128 cũ (không hậu tố) và 256 thử (-256) giữ nguyên để so sánh
   var DIR = 'thu-game/';
   var zones = [
     { z: 0, slug: 'tuyet-nguyen', ten: 'Tuyết Nguyên', thu: [
@@ -52,6 +52,18 @@
       { id: '4i', slug: '09-loi-dong', ten: 'Lôi Đồng', boss: false },
       { id: '4j', slug: '10-loi-vuc-chien-than', ten: 'Lôi Vực Chiến Thần', boss: true }
     ] },
+    { z: 5, slug: 'nguyet-cung', ten: 'Nguyệt Cung', thu: [
+      { id: '5a', slug: '01-nguyet-tho', ten: 'Nguyệt Thố', boss: false },
+      { id: '5b', slug: '02-nguyet-hac', ten: 'Nguyệt Hạc', boss: false },
+      { id: '5c', slug: '03-nguyet-thiem', ten: 'Nguyệt Thiềm', boss: false },
+      { id: '5d', slug: '04-nguyet-dang', ten: 'Nguyệt Đằng', boss: false },
+      { id: '5e', slug: '05-nguyet-nga', ten: 'Nguyệt Nga', boss: false },
+      { id: '5f', slug: '06-nguyet-kinh', ten: 'Nguyệt Kình', boss: false },
+      { id: '5g', slug: '07-nguyet-tuong', ten: 'Nguyệt Tượng', boss: false },
+      { id: '5h', slug: '08-nguyet-quy', ten: 'Nguyệt Quy', boss: false },
+      { id: '5i', slug: '09-nguyet-tien', ten: 'Nguyệt Tiên', boss: false },
+      { id: '5j', slug: '10-nguyet-thuc-te-quan', ten: 'Nguyệt Thực Tế Quân', boss: true }
+    ] },
     { z: 3, slug: 'phong-nguyen', ten: 'Phong Nguyên', thu: [
       { id: '6a', slug: '01-phong-tuc', ten: 'Phong Túc', boss: false },
       { id: '6b', slug: '02-phong-phi', ten: 'Phong Phi', boss: false },
@@ -78,21 +90,21 @@
     if (!e) {
       e = cache[k] = new Image();
       e.onload = function () { if (THU_MOI.onload) THU_MOI.onload(id, bac); };
-      e.src = DIR + t.zone + '/' + t.slug + '-b' + bac + (FRAME === 256 ? '-256' : '') + '.png';
+      e.src = DIR + t.zone + '/' + t.slug + '-b' + bac + (FRAME === 128 ? '' : '-' + FRAME) + '.png';
     }
     return e.complete && e.naturalWidth ? e : null;
   }
   // Quy ước như drawStage: chân tại (cx, by), size = cạnh khung hiển thị. Trả true nếu đã vẽ.
   function draw(ctx, id, bac, cx, by, size) {
     var im = getImg(id, bac); if (!im) return false;
-    size = size || FRAME; // khung 256 vẽ ở size 256 là 1:1
+    size = size || FRAME; // vẽ ở size = khung là 1:1
     var old = ctx.imageSmoothingEnabled;
-    ctx.imageSmoothingEnabled = (FRAME === 256 && size < FRAME); // ảnh 256 vẽ nhỏ lại thì làm mượt, còn lại giữ pixel cứng
+    ctx.imageSmoothingEnabled = (FRAME !== 128 && size < FRAME); // ảnh 192/256 vẽ nhỏ lại thì làm mượt, còn lại giữ pixel cứng
     if (ctx.imageSmoothingEnabled) ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(im, Math.round(cx - size / 2), Math.round(by - size), size, size);
     ctx.imageSmoothingEnabled = old;
     return true;
   }
-  function setFrame(n) { FRAME = n === 256 ? 256 : 128; THU_MOI.FRAME = FRAME; } // chỉ để xem thử
+  function setFrame(n) { FRAME = (n === 256 || n === 192) ? n : 128; THU_MOI.FRAME = FRAME; } // chỉ để xem thử
   window.THU_MOI = { FRAME: FRAME, setFrame: setFrame, zones: zones, byId: byId, draw: draw, onload: null };
 })();

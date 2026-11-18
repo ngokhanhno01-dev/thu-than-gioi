@@ -1,3 +1,12 @@
+=== CẬP NHẬT 18/11/2026 (ĐỌC TRƯỚC, GHI ĐÈ PHẦN CŨ BÊN DƯỚI) ===
+- Khung CHỐT = 192x192 (không còn 128). Mọi chỗ ghi 128 / "làm 2 bản thử 128 và 256" bên dưới đã LỖI THỜI: bỏ bước chọn cỡ.
+- Ảnh 192 đặt cạnh ảnh cũ, đuôi `NN-slug-b1-192.png`, `-b2-192.png`, `-b3-192.png` trong `thu-game/<slug-vùng>/`. Không xóa ảnh 128 / 256.
+- Lệnh cắt: `python3 tools/cat_3_bac.py <anh-goc> <thư-mục-ra> <NN-slug> 192 --kieu-d [--gan-gan-nhat]` (kiểu D bắt buộc, xem TIEN_DO_DUA_VAO_GAME.md).
+- Trạng thái: đã đưa đủ 60 con (6 vùng) ở 192, đăng ký trong 51-thu-moi.js (FRAME = 192), index.html đã có dòng script. Bước 0 và các bước 1a-6j đã XONG, đừng làm lại.
+- Việc còn lại chỉ là: sửa lỗi theo góp ý của mình, đưa ảnh nguồn 6j đúng, đổi tên chính thức. Không sửa cơ chế game.
+- Có git + token thì đẩy PNG thẳng được (git push origin demo-thu-moi), vẫn kiểm bằng git ls-remote.
+=== HẾT CẬP NHẬT ===
+
 Mình làm game "Thú Thần Giới" (HTML/JS, pixel art). Repo GitHub: ngokhanhno01-dev/thu-than-gioi. Chỉ làm trên nhánh `demo-thu-moi`, KHÔNG push `main`. Trả lời tiếng Việt, ngắn (tối đa 10 dòng), nói thẳng điểm chưa ổn, mình chê thì đừng cãi, đưa 2-3 hướng và chọn 1 kèm lý do. Mình làm trên điện thoại, hay hết quota nên gộp thao tác (nhiều file = 1 commit, nhiều ảnh = 1 lệnh).
 
 MỤC ĐÍCH DUY NHẤT: đưa thú mới vào game = cắt ảnh 3 bậc, chỉnh kích thước, đăng ký vào game. KHÔNG sửa cơ chế / chức năng game. KHÔNG xóa, sửa, đổi tên bất cứ thứ gì có sẵn: thú và trứng cũ (img-sprites-*, img-eggs-*, 05-hatch.js, 08-eggs.js...), quái và boss cũ (img-mobs-*, 06-mobs.js), ảnh gốc trong `thu-moi/` (chỉ đọc). Tên thú hiện là TÊN TẠM, giữ nguyên; sau này đổi tên (thú 3 chữ, boss 4 chữ) chỉ sửa trong file đăng ký.
