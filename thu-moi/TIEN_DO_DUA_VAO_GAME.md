@@ -71,7 +71,7 @@ Trạng thái áp dụng D: ĐÃ cắt lại toàn bộ vùng 1, 2, 3 (30 con, 1
 - **Vùng 6 Phong Nguyên (z3) đã đủ 10 con (6a-6j), làm TRƯỚC vùng 5** vì người dùng gửi ảnh v4 trước. Ảnh gửi vào chat, alpha khớp từng pixel với `thu-moi/phong-nguyen/` trên nhánh. Tất cả dùng `--kieu-d --gan-gan-nhat` (không dùng cờ gán gần nhất thì lá / mây của bậc 3 dính vào bậc 2; đã so mắt trên 6a, 6d, 6g, 6h, 6j). PNG đã đẩy thẳng vào `thu-game/phong-nguyen/`.
 
 ## Thử khung 256 (chỉ để so mắt, KHÔNG đổi cỡ đã chốt)
-- 6j Phong Nguyên Vũ Xà có thêm bản 256: `thu-game/phong-nguyen/10-phong-nguyen-vu-xa-b1-256.png`, `-b2-256.png`, `-b3-256.png` (tỉ lệ thu 0.384; bậc 3 cao 250px, ~127KB/ảnh so với ~38KB bản 128). Xem trên `thu-moi-demo.html` bằng nút "Khung" (128/256). Khung chốt vẫn là 128 cho tới khi người dùng quyết.
+- 6j Phong Nguyên Vũ Xà có thêm bản 256: `thu-game/phong-nguyen/10-phong-nguyen-vu-xa-b1-256.png`, `-b2-256.png`, `-b3-256.png` (tỉ lệ thu 0.384; bậc 3 cao 250px, ~127KB/ảnh so với ~38KB bản 128). Xem trong `game-moi/index.html` (chế độ HD bật sẵn, thêm `?hd=0` để so với bản 128). `thu-moi-demo.html` đã xóa (18/11/2026), game-moi thay thế. Khung chốt vẫn là 128 cho tới khi người dùng quyết.
 
 ## PNG (từ 1e trở đi đã đẩy thẳng bằng git; 1a-1d đã upload tay)
 Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png; 02-tuyet-hung-b1.png, -b2.png, -b3.png; 03-bang-loc-b1.png, -b2.png, -b3.png; 04-tuyet-bao-b1.png, -b2.png, -b3.png; 05-bang-hai-b1.png, -b2.png, -b3.png; 06-tuyet-cu-b1.png, -b2.png, -b3.png; 07-bang-duong, 08-bang-linh, 09-bang-nham, 10-bang-son-cu-thu (mỗi con -b1/-b2/-b3.png)
