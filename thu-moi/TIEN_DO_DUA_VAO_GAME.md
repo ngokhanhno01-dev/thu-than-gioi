@@ -26,6 +26,19 @@
 - 2i Sương Nha (chờ duyệt): tỉ lệ thu 0.1442; bậc 1 cao 37px, bậc 2 cao 59px, bậc 3 cao 91px; sạch.
 - 2j Vạn Trượng Vụ Thú, BOSS (chờ duyệt): tỉ lệ thu 0.1435; bậc 1 cao 47px, bậc 2 cao 70px, bậc 3 cao 115px; sạch.
 - **Vùng 2 Sương Cốc đã đủ 10 con (2a-2j).** Ảnh do người dùng gửi thẳng vào chat (tên file khớp mã), không dùng file bản cũ trong repo. PNG đã đẩy thẳng bằng git vào `thu-game/suong-coc/`.
+- 3a Vân Cảnh (chờ duyệt): tỉ lệ thu 0.1477; bậc 1 cao 42px, bậc 2 cao 68px, bậc 3 cao 113px.
+- 3b Vân Loa (chờ duyệt): tỉ lệ thu 0.1451; bậc 1 cao 48px, bậc 2 cao 80px, bậc 3 cao 110px.
+- 3c Vân Địa Lãn (chờ duyệt): tỉ lệ thu 0.1493; bậc 1 cao 51px, bậc 2 cao 88px, bậc 3 cao 122px.
+- 3d Vân Giáp (chờ duyệt): tỉ lệ thu 0.1566; bậc 1 cao 40px, bậc 2 cao 62px, bậc 3 cao 97px.
+- 3e Vân Trãi (chờ duyệt): tỉ lệ thu 0.1595; bậc 1 cao 53px, bậc 2 cao 78px, bậc 3 cao 108px.
+- 3f Vân Khổng (chờ duyệt): tỉ lệ thu 0.1501; bậc 1 cao 57px, bậc 2 cao 85px, bậc 3 cao 122px.
+- 3g Vân Đình (chờ duyệt): tỉ lệ thu 0.1537; bậc 1 cao 35px, bậc 2 cao 76px, bậc 3 cao 121px.
+- 3h Vân Châu (chờ duyệt): tỉ lệ thu 0.144; bậc 1 cao 52px, bậc 2 cao 88px, bậc 3 cao 122px.
+- 3i Vân Đăng (chờ duyệt): tỉ lệ thu 0.1451; bậc 1 cao 58px, bậc 2 cao 87px, bậc 3 cao 122px.
+- 3j Vân Đảo Côn Bằng, BOSS (chờ duyệt): tỉ lệ thu 0.1435; bậc 1 cao 30px, bậc 2 cao 61px, bậc 3 cao 112px.
+- **Vùng 3 Vân Đảo đã đủ 10 con (3a-3j).** Ảnh người dùng gửi vào chat, đối chiếu khớp từng pixel alpha với bản v4 trong `thu-moi/van-dao/`. Nền teal: không còn pixel ám màu nền. PNG đã đẩy thẳng vào `thu-game/van-dao/`.
+- **Tên theo ghi chú .md trong `van-dao/`** (khác prompt): 3a "Vân Cảnh" (prompt ghi Vân Canh), 3g "Vân Đình" (prompt ghi Vân Đĩnh). Chỉ là tên tạm, sửa trong `51-thu-moi.js`.
+- **Công cụ:** vùng này các bậc chồng nhau về x (đảo đá, mây, đèn lồng rơi lẫn giữa bậc 2 và 3), cắt theo tâm x sẽ gán nhầm mảnh sang bậc 2. Đã thêm cờ `--gan-gan-nhat` cho `tools/cat_3_bac.py` (gán mảnh rời cho thân có pixel gần nhất); không dùng cờ thì chạy y như cũ. Vùng 1-2 cắt không dùng cờ, đã xem bảng thử thấy sạch.
 
 ## PNG (từ 1e trở đi đã đẩy thẳng bằng git; 1a-1d đã upload tay)
 Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png; 02-tuyet-hung-b1.png, -b2.png, -b3.png; 03-bang-loc-b1.png, -b2.png, -b3.png; 04-tuyet-bao-b1.png, -b2.png, -b3.png; 05-bang-hai-b1.png, -b2.png, -b3.png; 06-tuyet-cu-b1.png, -b2.png, -b3.png; 07-bang-duong, 08-bang-linh, 09-bang-nham, 10-bang-son-cu-thu (mỗi con -b1/-b2/-b3.png)
@@ -34,4 +47,4 @@ Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png;
 - Chưa thêm dòng `<script src="51-thu-moi.js"></script>` vào index.html (sau 50-skin.js). Trang demo tự nạp file này nên vẫn chạy.
 
 ## Việc kế tiếp
-Chờ duyệt vùng 1 và vùng 2 (1a-2j), rồi vùng 3 Vân Đảo: 3a Vân Canh (nói "tiếp").
+Chờ duyệt vùng 1, 2, 3 (1a-3j), rồi vùng 4 Lôi Vực: 4a Lôi Ưng (nói "tiếp").

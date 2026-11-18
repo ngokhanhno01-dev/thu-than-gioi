@@ -4,6 +4,7 @@ Dùng: python3 tools/cat_3_bac.py <anh-goc.png> <thu-game/slug-vung> <NN-slug> [
 - Tách theo thành phần liên thông (alpha>0), gán vào bậc theo vị trí x; mảnh rời gán theo tâm gần nhất.
 - Cùng 1 tỉ lệ thu cho cả 3 bậc, lề 3px cho bậc lớn nhất, căn giữa ngang, chân chạm đáy.
 - LANCZOS rồi alpha cứng 0/255 (ngưỡng 110 như SOLID_ALPHA ở 02-sprites-engine.js).
+Cờ --gan-gan-nhat: mảnh rời (đảo đá, mây, đèn lồng) gán theo thân gần nhất thay vì theo tâm x.
 Tham số cuối dạng 'stage:xmin-xmax' (vd 3:880-1010) ép mảnh có tâm x trong khoảng đó vào bậc chỉ định."""
 import sys, numpy as np
 from PIL import Image
@@ -23,12 +24,16 @@ assert len(big) >= 3, f'chỉ thấy {len(big)} thân lớn'
 big = sorted(sorted(big, key=lambda i: -sizes[i])[:3], key=lambda i: objs[i][1].start)
 cen = [(objs[i][1].start + objs[i][1].stop) / 2 for i in big]
 stage = {}
+NEAR = '--gan-gan-nhat' in sys.argv  # mảnh rời gán cho thân có pixel GẦN NHẤT (không theo tâm x); dùng khi các bậc chồng nhau về x
+if NEAR: dist = [ndi.distance_transform_edt(lab != (i + 1)) for i in big]
 for i in range(n):
     o = objs[i]; c = (o[1].start + o[1].stop) / 2
     if i in big: stage[i + 1] = big.index(i) + 1; continue
     s = None
     for st, lo, hi in force:
         if lo <= c <= hi: s = st
+    if s is None and NEAR:
+        s = 1 + int(np.argmin([dist[k][lab == i + 1].min() for k in range(3)]))
     if s is None: s = 1 + int(np.argmin([abs(c - x) for x in cen]))
     stage[i + 1] = s
 masks = {s: np.isin(lab, [k for k, v in stage.items() if v == s]) for s in (1, 2, 3)}

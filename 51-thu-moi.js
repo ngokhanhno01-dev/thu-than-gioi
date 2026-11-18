@@ -27,6 +27,18 @@
       { id: '2h', slug: '08-vu-tung', ten: 'Vụ Tùng', boss: false },
       { id: '2i', slug: '09-suong-nha', ten: 'Sương Nha', boss: false },
       { id: '2j', slug: '10-van-truong-vu-thu', ten: 'Vạn Trượng Vụ Thú', boss: true }
+    ] },
+    { z: 2, slug: 'van-dao', ten: 'Vân Đảo', thu: [
+      { id: '3a', slug: '01-van-canh', ten: 'Vân Cảnh', boss: false },
+      { id: '3b', slug: '02-van-loa', ten: 'Vân Loa', boss: false },
+      { id: '3c', slug: '03-van-dia-lan', ten: 'Vân Địa Lãn', boss: false },
+      { id: '3d', slug: '04-van-giap', ten: 'Vân Giáp', boss: false },
+      { id: '3e', slug: '05-van-trai', ten: 'Vân Trãi', boss: false },
+      { id: '3f', slug: '06-van-khong', ten: 'Vân Khổng', boss: false },
+      { id: '3g', slug: '07-van-dinh', ten: 'Vân Đình', boss: false },
+      { id: '3h', slug: '08-van-chau', ten: 'Vân Châu', boss: false },
+      { id: '3i', slug: '09-van-dang', ten: 'Vân Đăng', boss: false },
+      { id: '3j', slug: '10-van-dao-con-bang', ten: 'Vân Đảo Côn Bằng', boss: true }
     ] }
   ];
   var byId = {}, cache = {};
