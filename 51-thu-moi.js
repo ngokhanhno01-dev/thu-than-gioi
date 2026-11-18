@@ -87,7 +87,8 @@
     var im = getImg(id, bac); if (!im) return false;
     size = size || FRAME; // khung 256 vẽ ở size 256 là 1:1
     var old = ctx.imageSmoothingEnabled;
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = (FRAME === 256 && size < FRAME); // ảnh 256 vẽ nhỏ lại thì làm mượt, còn lại giữ pixel cứng
+    if (ctx.imageSmoothingEnabled) ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(im, Math.round(cx - size / 2), Math.round(by - size), size, size);
     ctx.imageSmoothingEnabled = old;
     return true;
