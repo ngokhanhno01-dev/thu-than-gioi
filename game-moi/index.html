@@ -399,11 +399,11 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
    Video đã làm sẵn vòng lặp liền (cuối hòa vào đầu). Để lặp không khựng, dùng 2 thẻ video (BGV hiện, BGV2 chờ ở giây 0); chỉ còn ~0,07s thì bật cái kia (đang chờ sẵn ở giây 0) rồi đổi chỗ NGAY (không đổi sớm, nếu không hình sẽ nhảy lùi).
    Thêm vùng video mới: thêm vào BGV_ZONE (khóa zone của thú -> file video).
    NỀN ẢNH + HIỆU ỨNG: ảnh tĩnh phủ kín phần trống trong viền (giữ đúng tỉ lệ, cắt bớt phần thừa trên/dưới, không kéo méo), hiệu ứng vẽ bằng canvas, nằm SAU thú.
-   Thêm vùng ảnh mới: thêm vào BG_FX_ZONE (khóa zone -> {image: đường dẫn ảnh, fy: vị trí cắt dọc 0=giữ phần trên .. 1=giữ phần dưới, fx: danh sách hiệu ứng, stars: chỗ sao lấp lánh, crystals: chỗ tinh thể lóe}).
+   Thêm vùng ảnh mới: thêm vào BG_FX_ZONE (khóa zone -> {image: đường dẫn ảnh, fit: true = hiện đủ cả ảnh (hai bên lấp gương) | bỏ đi = phủ kín và cắt bớt, fy: vị trí cắt dọc 0=giữ phần trên .. 1=giữ phần dưới, fx: danh sách hiệu ứng, stars: chỗ sao lấp lánh, crystals: chỗ tinh thể lóe}).
    Hiệu ứng có sẵn: 'snow' tuyết rơi | 'mist' sương trôi | 'aurora' cực quang đổi sáng nhẹ | 'twinkle' sao lấp lánh | 'sparkle' tinh thể lóe. Tọa độ stars/crystals là tỉ lệ 0..1 trên ảnh gốc (x ngang, y dọc). */
 var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,
  BGV_ZONE={'suong-coc':'vid-sanh-suong-coc.mp4'},
- BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fy:.55,fx:['snow','mist','aurora','twinkle','sparkle'],
+ BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fit:true,fy:.55,fx:['snow','mist','aurora','twinkle','sparkle'],
   stars:[[.178,.142],[.255,.185],[.67,.074],[.724,.232],[.88,.109]],
   crystals:[[.06,.9],[.03,.82],[.945,.9],[.97,.84],[.27,.66],[.285,.73],[.745,.68],[.765,.7]]}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
@@ -464,7 +464,12 @@ function bgAur(){var c=bgMk(64,32),g=c.getContext('2d'),v=g.createLinearGradient
 function bgFxBuild(o,conf,rw,rh,m){
  var iw=o.img.naturalWidth,ih=o.img.naturalHeight,sc=Math.max(rw/iw,rh/ih),dw=iw*sc,dh=ih*sc,ox=(rw-dw)/2,oy=(rh-dh)*(conf.fy==null?.5:conf.fy);
  var c=bgMk(rw*m,rh*m),g=c.getContext('2d');g.imageSmoothingEnabled=true;try{g.imageSmoothingQuality='high';}catch(e){}
- g.drawImage(o.img,ox*m,oy*m,dw*m,dh*m);
+ if(conf.fit){/* fit: hiện ĐỦ chiều cao ảnh, hai bên thừa thì lấp bằng ảnh lật gương (không méo, không mất phần trên) */
+  sc=rh/ih;dw=iw*sc;dh=rh;ox=(rw-dw)/2;oy=0;
+  g.drawImage(o.img,ox*m,0,dw*m,dh*m);
+  g.save();g.translate(ox*m,0);g.scale(-1,1);g.drawImage(o.img,0,0,dw*m,dh*m);g.restore();
+  g.save();g.translate((ox+2*dw)*m,0);g.scale(-1,1);g.drawImage(o.img,0,0,dw*m,dh*m);g.restore();
+ }else g.drawImage(o.img,ox*m,oy*m,dw*m,dh*m);
  bgBase=c;bgGeo={ox:ox,oy:oy,dw:dw,dh:dh};
  bgSpr={snow:[bgSoft(2*m,'255,255,255'),bgSoft(3.2*m,'255,255,255'),bgSoft(4.6*m,'240,250,255')],mist:bgSoft(128,'205,230,255'),star:bgStar(24*m),spark:bgStar(10*m),aur:bgAur()};
  if(!bgSnow.length){bgSnow=[[],[],[]];for(var i=0;i<BG_FX_CFG.snowCount;i++){var q=i%5,k=q<3?0:q-2;bgSnow[k].push({x:Math.random(),y:Math.random(),v:.55+.3*k+Math.random()*.2,ph:Math.random()*6.28});}}
@@ -482,9 +487,9 @@ function bgDrawFx(ts,x,y,w,h){
   ctx.drawImage(S.aur,x+G.ox+G.dw*(i?.5:.02)+Math.sin(T*.3+i)*G.dw*.015,y+G.oy,G.dw*.48,G.dh*.34);}}
  /* sương: 2 lớp trôi ngang lệch tốc độ, mỗi lớp 3 mảng, mờ dần ở hai đầu nên không bị giật khi quay vòng */
  if(F.indexOf('mist')>=0){var ML=[[.68,.55,1,.7],[.82,.65,1.8,1]];
-  for(i=0;i<2;i++){var L=ML[i],bw=G.dw*.55,bh=G.dh*L[1]*.3;
+  for(i=0;i<2;i++){var L=ML[i],bw=w*.42,bh=G.dh*L[1]*.3;
    for(j=0;j<3;j++){var f=(T*C.mistSpeed*L[2]+j/3)%1;ctx.globalAlpha=C.mistOpacity*L[3]*Math.sin(f*Math.PI);
-    ctx.drawImage(S.mist,x+G.ox+(f*1.5-.25)*G.dw-bw/2,y+G.oy+G.dh*L[0]-bh/2,bw,bh);}}}
+    ctx.drawImage(S.mist,x+(f*1.5-.25)*w-bw/2,y+G.oy+G.dh*L[0]-bh/2,bw,bh);}}}
  /* sao lấp lánh */
  if(F.indexOf('twinkle')>=0&&conf.stars){for(i=0;i<conf.stars.length;i++){p=conf.stars[i];sx=x+G.ox+p[0]*G.dw;sy=y+G.oy+p[1]*G.dh;
   if(sy<y||sy>y+h||sx<x||sx>x+w)continue;a=.5+.5*Math.sin(T*(1.3+i*.37)+i*1.9);sz=8+14*a;
