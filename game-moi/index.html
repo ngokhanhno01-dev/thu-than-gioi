@@ -200,6 +200,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    App tự toàn màn hình + khóa ngang theo pwa-moi.webmanifest, nên game KHÔNG gọi requestFullscreen nữa (tránh thông báo của Chrome) và KHÔNG xử lý màn dọc.
    BỐ CỤC MÀN HÌNH: KHUNG TRÊN (cao TH(), chứa thú + nền vùng) và KHUNG DƯỚI (cao BP, chứa các nút), cùng dùng ảnh khung-game.webp (1744x608, nền trong suốt).
    Vẽ khung bằng cách cắt 9 mảnh (slice9): góc 280x250 pixel ảnh gốc, các cạnh giữa kéo dài. Khung trên vẽ tỉ lệ 0.48, khung dưới thu nhỏ vừa chiều cao BP.
+   KHUNG TRÀN MÉP (BG_BLEED): ảnh khung có dải viền ngoài (vạch vàng mảnh + dải xanh đậm) làm khung trông chừa lề. Vẽ khung lấn ra ngoài mép màn hình một đoạn BG_BLEED (px ảnh gốc) để bỏ bớt dải đó, viền vàng sát mép màn hình hơn.
+   Khung trên chỉ lấn trái/phải/trên; khung dưới chỉ lấn trái/phải/dưới (cạnh giáp nhau giữ nguyên). Vùng nền bên trong tự dời theo.
    Thứ tự vẽ: nền -> khung -> thú -> thanh máu -> hiệu ứng (thú nằm TRÊN khung nên chân thú không bị viền che). Chưa có ảnh khung thì vẽ viền vàng mảnh tạm.
    Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
@@ -217,6 +219,8 @@ var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getEleme
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,typing=false;
 var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,PET_X=.218,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
 var BP=70,GAPB=2,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
+/* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */
+var BG_BLEED={l:12,r:12,t:10,b:10};
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
 var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]hd=0/.test(location.search))HD=false;if(/[?&]hd=1/.test(location.search))HD=true;/* HD (mặc định BẬT): canvas theo độ phân giải máy + dùng ảnh thú 192 nếu có (thiếu thì dùng 128). Thêm ?hd=0 vào link để tắt và so sánh */
@@ -241,8 +245,11 @@ function buildFrame(){
  FL=document.createElement('canvas');FL.width=cv.width;FL.height=cv.height;
  var c=FL.getContext('2d');c.imageSmoothingEnabled=true;try{c.imageSmoothingQuality='high';}catch(e){}
  if(frOK&&FR.naturalWidth>0){
-  s9(c,m,fx,0,fw,th,Math.min(FSC,(th-20)/500));
-  s9(c,m,fx,pt,fw,BP,BP/500);
+  var s1=Math.min(FSC,(th-20)/500),s2=BP/500,q=BG_BLEED;
+  /* khung trên: lấn ra trái, phải, trên (cạnh dưới giữ nguyên vì giáp khung dưới + thú đứng trên đó) */
+  s9(c,m,fx-q.l*s1,-q.t*s1,fw+(q.l+q.r)*s1,th+q.t*s1,s1);
+  /* khung dưới: lấn ra trái, phải, dưới (cạnh trên giữ nguyên) */
+  s9(c,m,fx-q.l*s2,pt,fw+(q.l+q.r)*s2,BP+q.b*s2,s2);
  }else{/* chưa có ảnh khung: viền vàng mảnh tạm */
   c.strokeStyle='#c9a24a';c.lineWidth=Math.max(1,2*m);
   c.strokeRect(fx*m+m,m,fw*m-2*m,th*m-2*m);c.strokeRect(fx*m+m,pt*m+m,fw*m-2*m,BP*m-2*m);
@@ -408,7 +415,7 @@ var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn
   crystals:[[.06,.9],[.03,.82],[.945,.9],[.97,.84],[.27,.66],[.285,.73],[.745,.68],[.765,.7]]}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
  bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],BG_IMGS={};
-/* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. */
+/* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. Khi khung lấn mép (BG_BLEED) thì vùng nền tự mở rộng đúng bằng phần lấn: dày hiệu dụng = BG_EDGE - BG_BLEED. */
 var BG_EDGE={l:37,r:37,t:32,b:29};
 /* ===== CẤU HÌNH HIỆU ỨNG (chỉnh ở đây) ===== */
 var BG_FX_CFG={
@@ -422,14 +429,16 @@ var BG_FX_CFG={
  starOpacity:.9,    /* độ sáng sao lấp lánh */
  sparkleOpacity:.85 /* độ sáng tinh thể lóe */
 };
+/* Vùng nền trong khung trên (đơn vị game, tính từ mép trái/trên của màn hình): trả về {l,t,r,b} = độ dày viền hiệu dụng mỗi cạnh. */
+function bgInset(th){var s=Math.min(FSC,(th-20)/500),ov=1,q=BG_BLEED;
+ return {l:Math.round((BG_EDGE.l-q.l)*s)-ov,r:Math.round((BG_EDGE.r-q.r)*s)-ov,t:Math.round((BG_EDGE.t-q.t)*s)-ov,b:Math.round(BG_EDGE.b*s)-ov};}
 /* Nạp ảnh nền của vùng (nạp 1 lần khi vùng đó được dùng). Lỗi/chưa nạp xong thì vẫn chạy video hoặc nền trời cũ. */
 function bgImgFor(z){var c=BG_FX_ZONE[z];if(!c)return null;var o=BG_IMGS[z];
  if(!o){o=BG_IMGS[z]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;};o.img.src=c.image;}
  return o;}
 function bgUseImg(z){var c=BG_FX_ZONE[z],o=c&&bgImgFor(z);return !!(o&&o.ok&&o.img.naturalWidth>0&&!(BGV_ZONE[z]&&c.pri==='video'));}
 function bgWant(){var t=THU_MOI.byId[ID];return SCENE==='sanh'&&!!t&&!!BGV_ZONE[t.zone]&&!bgUseImg(t.zone);}
-function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,s=Math.min(FSC,(th-20)/500),ov=1;
- var l=Math.round(BG_EDGE.l*s)-ov,r=Math.round(BG_EDGE.r*s)-ov,t=Math.round(BG_EDGE.t*s)-ov,b=Math.round(BG_EDGE.b*s)-ov;
+function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,e=bgInset(th),l=e.l,r=e.r,t=e.t,b=e.b;
  [BGV,BGV2].forEach(function(v){v.style.left=Math.round((I.l+l)*f)+'px';v.style.top=Math.round(t*f)+'px';v.style.width=Math.round((fw-l-r)*f)+'px';v.style.height=Math.round((th-t-b)*f)+'px';});}
 function bgShow(c,n){c.style.opacity=1;n.style.opacity=0;}
 function bgTick(g){if(!bgOn||g!==bgGen)return;if(document.hidden){requestAnimationFrame(function(){bgTick(g);});return;}
@@ -513,7 +522,7 @@ function draw(ts){bgSync();
  var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
  ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);
  /* nền khung trên: trời + đất (sau này mỗi vùng đổi nền ở đây) */
-  if(bgOn||bgImageOn){ctx.clearRect(fx,0,fw,th);if(bgImageOn){var bs=Math.min(FSC,(th-20)/500),bl=Math.round(BG_EDGE.l*bs)-1,br=Math.round(BG_EDGE.r*bs)-1,bt=Math.round(BG_EDGE.t*bs)-1,bb=Math.round(BG_EDGE.b*bs)-1;bgDrawFx(ts,fx+bl,bt,fw-bl-br,th-bt-bb);}}else{
+  if(bgOn||bgImageOn){ctx.clearRect(fx,0,fw,th);if(bgImageOn){var be2=bgInset(th),bl=be2.l,br=be2.r,bt=be2.t,bb=be2.b;bgDrawFx(ts,fx+bl,bt,fw-bl-br,th-bt-bb);}}else{
  var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(fx,0,fw,gy());
  ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());if(SCENE!=='sanh'){ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);}}
  /* nền khung dưới (chứa nút) */
