@@ -409,8 +409,8 @@ BG_IMG.onload=function(){bgImgReady=true;bgSync();};
 BG_IMG.onerror=function(){bgImgReady=false;bgSync();};
 BG_IMG.src=BG_FX_ZONE['tuyet-nguyen'].image;
 /* Cấu hình nhẹ cho điện thoại: số hạt, tốc độ, độ mờ. */
-var BG_FX_CFG={snowCount:30,snowSpeed:.020,snowOpacity:.72,gustEvery:15000,gustDuration:2600,
- crystalCount:11,crystalOpacity:.72,auroraOpacity:.18,ringOpacity:.24,pineOpacity:.16};
+var BG_FX_CFG={snowCount:84,snowSpeed:.034,snowOpacity:.82,gustEvery:17500,gustDuration:3200,
+ crystalCount:24,crystalOpacity:.82,ringOpacity:.13};
 var BG_SNOW=[],BG_CRYSTALS=[];
 for(var bi=0;bi<BG_FX_CFG.snowCount;bi++)BG_SNOW.push({x:Math.random(),y:Math.random(),r:.45+Math.random()*1.05,v:.5+Math.random()*.8,d:(Math.random()-.5)*.18,p:Math.random()*6.28});
 for(var bj=0;bj<BG_FX_CFG.crystalCount;bj++)BG_CRYSTALS.push({x:.035+Math.random()*.93,y:.08+Math.random()*.78,p:Math.random()*6.28,s:1+Math.random()*1.8});
@@ -453,42 +453,74 @@ function bgPine(x,y,h,lean,alpha){
 function bgDrawFx(ts,x,y,w,h){
  if(document.hidden){bgFxLast=0;return;}
  var dt=bgFxLast?Math.min(40,ts-bgFxLast):16;bgFxLast=ts;bgFxClock+=dt;
- var tm=bgFxClock,wind=Math.sin(tm/1100)*.20;
+ var tm=bgFxClock,phase=tm%BG_FX_CFG.gustEvery;
+ /* Gió lên từ từ, đạt đỉnh rồi tan; không giật ngang liên tục. */
+ var gust=phase<BG_FX_CFG.gustDuration?Math.pow(Math.sin(phase/BG_FX_CFG.gustDuration*Math.PI),2):0;
+ var wind=.10*Math.sin(tm/3600)+gust*.95;
  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
- /* Cực quang lung linh: các dải sáng dịch chuyển rất nhẹ. */
- ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=BG_FX_CFG.auroraOpacity*(.84+.16*Math.sin(tm/1800));
- for(var a=0;a<3;a++){ctx.beginPath();for(var q=0;q<=28;q++){var xx=x+w*q/28,yy=y+h*(.13+a*.075)+Math.sin(q*.23+tm/2400+a*1.7)*h*.032+Math.sin(q*.09-tm/3100)*h*.022;if(q===0)ctx.moveTo(xx,yy);else ctx.lineTo(xx,yy);}
-  ctx.strokeStyle=a===1?'#9af7ff':'#55bfff';ctx.lineWidth=h*(.027+a*.008);ctx.shadowColor='#53dfff';ctx.shadowBlur=8;ctx.stroke();}
- ctx.restore();
- /* Hai vòng thiên thể bên cực quang: vòng ma pháp băng và hạt sáng chuyển động. */
- ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=BG_FX_CFG.ringOpacity;
- [.19,.80].forEach(function(rx,i){var cx=x+w*rx,cy=y+h*.20,rr=h*(.105+i*.012),pulse=.97+.035*Math.sin(tm/1200+i);
-  ctx.strokeStyle='#b9f2ff';ctx.lineWidth=1;ctx.shadowColor='#8deaff';ctx.shadowBlur=7;
-  ctx.beginPath();ctx.ellipse(cx,cy,rr*pulse,rr*.72*pulse,Math.sin(tm/4200+i)*.07,0,Math.PI*2);ctx.stroke();
-  ctx.beginPath();ctx.ellipse(cx,cy,rr*.68,rr*.49,Math.sin(-tm/3700+i)*.1,0,Math.PI*2);ctx.stroke();
-  for(var z=0;z<5;z++){var ang=tm/2600+z*Math.PI*2/5+i,sx=cx+Math.cos(ang)*rr*pulse,sy=cy+Math.sin(ang)*rr*.72*pulse;
-   ctx.fillStyle='#efffff';ctx.fillRect(sx-1,sy-1,2,2);}});
- ctx.restore();
- /* Tinh thể băng chớp sáng luân phiên từng viên. */
- BG_CRYSTALS.forEach(function(p){var alpha=(.12+.88*Math.max(0,Math.sin(tm/570+p.p)))*BG_FX_CFG.crystalOpacity;
-  var cx=x+w*p.x,cy=y+h*p.y,r=p.s;ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle='#e4fbff';ctx.shadowColor='#83eaff';ctx.shadowBlur=5;
-  ctx.beginPath();ctx.moveTo(cx,cy-r*2);ctx.lineTo(cx+r*.7,cy);ctx.lineTo(cx,cy+r*2);ctx.lineTo(cx-r*.7,cy);ctx.closePath();ctx.stroke();
-  ctx.beginPath();ctx.moveTo(cx-r*1.7,cy);ctx.lineTo(cx+r*1.7,cy);ctx.moveTo(cx,cy-r*1.7);ctx.lineTo(cx,cy+r*1.7);ctx.stroke();ctx.restore();});
- /* Tuyết rơi; gió mạnh thỉnh thoảng cuốn tuyết bay ngang. */
- var phase=tm%BG_FX_CFG.gustEvery,gust=phase<BG_FX_CFG.gustDuration?Math.sin(phase/BG_FX_CFG.gustDuration*Math.PI):0;
- ctx.save();ctx.globalAlpha=BG_FX_CFG.snowOpacity;ctx.fillStyle='#eefaff';ctx.strokeStyle='rgba(220,246,255,.62)';
- BG_SNOW.forEach(function(p){p.y+=BG_FX_CFG.snowSpeed*p.v*dt/1000;p.x+=(p.d+wind*.12+gust*.85)*dt/1800;
-  if(p.y>1.03){p.y=-.03;p.x=Math.random();}if(p.x>1.03)p.x=-.03;if(p.x<-.03)p.x=1.03;
-  var sx=x+w*p.x,sy=y+h*p.y;ctx.beginPath();ctx.arc(sx,sy,p.r,0,Math.PI*2);ctx.fill();
-  if(gust>.08){ctx.beginPath();ctx.moveTo(sx-7*gust,sy);ctx.lineTo(sx-1,sy);ctx.stroke();}});
- ctx.restore();
- /* Nhánh thông hai mép rung nhẹ theo gió, tránh khu vực đứng của thú. */
- var sway=Math.sin(tm/760)*2+wind*3;
+
+ /* Vòng thiên thể mảnh và mờ, chuyển động chậm như quỹ đạo băng; không phủ lên cực quang. */
  ctx.save();ctx.globalCompositeOperation='screen';
- bgPine(x+w*.035,y+h*.91,h*.28,sway,BG_FX_CFG.pineOpacity);
- bgPine(x+w*.965,y+h*.91,h*.32,-sway,BG_FX_CFG.pineOpacity);
- bgPine(x+w*.075,y+h*.94,h*.18,-sway*.7,BG_FX_CFG.pineOpacity*.7);
- ctx.restore();ctx.restore();
+ [.205,.805].forEach(function(rx,i){
+  var cx=x+w*rx,cy=y+h*.205,rr=h*(.075+i*.008),rot=tm/12000*(i?-.7:1);
+  ctx.globalAlpha=BG_FX_CFG.ringOpacity;
+  ctx.strokeStyle='#bceeff';ctx.lineWidth=.8;ctx.shadowColor='#8deaff';ctx.shadowBlur=5;
+  ctx.beginPath();ctx.ellipse(cx,cy,rr,rr*.48,rot,0,Math.PI*2);ctx.stroke();
+  ctx.globalAlpha=BG_FX_CFG.ringOpacity*.65;
+  ctx.beginPath();ctx.ellipse(cx,cy,rr*.72,rr*.34,-rot*.7,0,Math.PI*2);ctx.stroke();
+  var a=tm/6500+i*2.4;
+  for(var z=0;z<2;z++){var ang=a+z*Math.PI;
+   var sx=cx+Math.cos(ang)*rr,sy=cy+Math.sin(ang)*rr*.48;
+   ctx.globalAlpha=.22+.18*Math.sin(tm/900+i+z);
+   ctx.fillStyle='#efffff';ctx.beginPath();ctx.arc(sx,sy,1.1,0,Math.PI*2);ctx.fill();}
+ });
+ ctx.restore();
+
+ /* Tinh thể có sẵn trong cảnh chỉ lóe sáng tại từng điểm, không vẽ hình kim cương to nổi trên nền. */
+ BG_CRYSTALS.forEach(function(p){
+  var pulse=Math.pow(Math.max(0,Math.sin(tm/900+p.p)),9);
+  if(pulse<.08)return;
+  var cx=x+w*p.x,cy=y+h*p.y,r=2.2+p.s*1.5;
+  ctx.save();ctx.globalCompositeOperation='screen';ctx.globalAlpha=pulse*BG_FX_CFG.crystalOpacity;
+  ctx.strokeStyle='#e9fbff';ctx.fillStyle='#ffffff';ctx.shadowColor='#9cecff';ctx.shadowBlur=5+p.s*2;
+  ctx.lineWidth=.8;
+  ctx.beginPath();ctx.moveTo(cx,cy-r*1.8);ctx.quadraticCurveTo(cx+r*.12,cy-r*.15,cx+r*1.8,cy);
+  ctx.quadraticCurveTo(cx+r*.12,cy+r*.15,cx,cy+r*1.8);
+  ctx.quadraticCurveTo(cx-r*.12,cy+r*.15,cx-r*1.8,cy);
+  ctx.quadraticCurveTo(cx-r*.12,cy-r*.15,cx,cy-r*1.8);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,.8+p.p%1,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+ });
+
+ /* Tuyết nhiều lớp: hạt xa nhỏ và chậm, hạt gần lớn hơn; gió chỉ tác động rõ khi có cơn. */
+ ctx.save();ctx.globalCompositeOperation='screen';ctx.fillStyle='#f1fbff';ctx.strokeStyle='rgba(226,247,255,.58)';
+ BG_SNOW.forEach(function(p){
+  var depth=p.v;
+  p.y+=BG_FX_CFG.snowSpeed*depth*dt/1000;
+  p.x+=(p.d*.12+wind*(.10+depth*.30))*dt/1000;
+  if(p.y>1.025){p.y=-.025;p.x=Math.random();}
+  if(p.x>1.025)p.x=-.025;if(p.x<-.025)p.x=1.025;
+  var sx=x+w*p.x,sy=y+h*p.y,rad=p.r*(.55+depth*.48);
+  ctx.globalAlpha=BG_FX_CFG.snowOpacity*(.35+depth*.42);
+  ctx.beginPath();ctx.arc(sx,sy,rad,0,Math.PI*2);ctx.fill();
+  if(gust>.38&&depth>.85){
+   ctx.globalAlpha=gust*.36;ctx.lineWidth=.7+rad*.22;
+   ctx.beginPath();ctx.moveTo(sx-rad*2.5,sy-rad*.35);ctx.lineTo(sx+rad*1.4,sy+rad*.2);ctx.stroke();
+  }
+ });
+ ctx.restore();
+
+ /* Bụi tuyết mịn cuộn ngang sát mặt đất trong những cơn gió. */
+ if(gust>.18){
+  ctx.save();ctx.globalAlpha=gust*.12;ctx.strokeStyle='#e4f7ff';ctx.lineWidth=1;
+  for(var q=0;q<9;q++){
+   var yy=y+h*(.76+q*.023)+Math.sin(tm/500+q)*3;
+   var xx=x+((tm*.055+q*91)%(w+100))-50;
+   ctx.beginPath();ctx.moveTo(xx,yy);ctx.bezierCurveTo(xx+18,yy-3,xx+34,yy+4,xx+58,yy);ctx.stroke();
+  }
+  ctx.restore();
+ }
+ ctx.restore();
 }
 document.addEventListener('visibilitychange',function(){bgFxLast=0;if(document.hidden){BGV.pause();BGV2.pause();}else if(bgOn){try{bgCur.play();}catch(e){}}});
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
