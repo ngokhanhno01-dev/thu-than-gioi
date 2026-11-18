@@ -16,6 +16,7 @@
 </script>
 <link rel="preload" as="image" href="img-boot-ngang.webp">
 <link rel="preload" as="image" href="img-boot-frame.webp">
+<link rel="preload" as="image" href="khung-game.webp">
 <style id="boot-css">
 /* MÀN CHỜ (game chỉ có màn ngang): ảnh nền phủ toàn màn hình, thanh tiến trình ở đáy;
    tải xong thì chữ "Chạm vào màn hình để vào Thú Thần Giới" nổi giữa màn hình, chạm bất kỳ đâu để vào. Không có nút. */
@@ -78,8 +79,9 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 .ub.c5{background:#3a2a5c;border-color:#a98cf0}
 #ui.ed .ub{outline:1px dashed rgba(255,255,255,.75)}
 #ui .ub.sel{outline:2px solid #ff0;z-index:9}
-#edb{position:absolute;left:calc(4px + env(safe-area-inset-left,0px));top:calc(4px + env(safe-area-inset-top,0px));opacity:.55;z-index:20}
-#edt,#edq{position:absolute;left:50%;transform:translateX(-50%);top:calc(4px + env(safe-area-inset-top,0px));display:none;align-items:center;gap:5px;background:rgba(0,0,0,.85);color:#fff;font:11px sans-serif;padding:3px 6px;border-radius:4px;z-index:20;white-space:nowrap}
+/* 2 nút "Sắp xếp" và "Chọn thú" dời sang phải họa tiết rồng ở góc khung */
+#edb{position:absolute;left:calc(146px + env(safe-area-inset-left,0px));top:calc(48px + env(safe-area-inset-top,0px));opacity:.55;z-index:20}
+#edt,#edq{position:absolute;left:50%;transform:translateX(-50%);top:calc(20px + env(safe-area-inset-top,0px));display:none;align-items:center;gap:5px;background:rgba(0,0,0,.85);color:#fff;font:11px sans-serif;padding:3px 6px;border-radius:4px;z-index:20;white-space:nowrap}
 #edq{z-index:25}
 #edb,#edt button,#edq button{font:bold 11px sans-serif;padding:3px 8px;border:1px solid #888;border-radius:3px;background:#333;color:#fff}
 #edq input{font:14px sans-serif;width:210px;padding:3px 6px;border:1px solid #888;border-radius:3px;background:#fff;color:#000;-webkit-user-select:text;user-select:text}
@@ -91,7 +93,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 #tl .g{display:flex;flex-wrap:wrap;gap:4px}
 #tl .it,#tl .x{padding:5px 9px;border:1px solid #666;border-radius:4px;background:#2c3550;color:#fff;font:bold 12px sans-serif}
 #tl .it.on{border-color:#ffe066;background:#4a3f12;color:#ffe9a0}
-#tp{position:absolute;left:calc(4px + env(safe-area-inset-left,0px));top:calc(30px + env(safe-area-inset-top,0px));z-index:20;font:bold 11px sans-serif;padding:3px 8px;border:1px solid #a98cf0;border-radius:3px;background:#3a2a5c;color:#fff;opacity:.85;touch-action:manipulation}
+#tp{position:absolute;left:calc(146px + env(safe-area-inset-left,0px));top:calc(74px + env(safe-area-inset-top,0px));z-index:20;font:bold 11px sans-serif;padding:3px 8px;border:1px solid #a98cf0;border-radius:3px;background:#3a2a5c;color:#fff;opacity:.85;touch-action:manipulation}
 #tst{position:absolute;left:50%;transform:translateX(-50%);top:calc(30px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 8px;border-radius:3px;opacity:0;transition:opacity .2s;pointer-events:none!important;z-index:30;white-space:nowrap}
 </style></head><body>
 <div id="ttg-boot" role="status" aria-live="polite">
@@ -195,6 +197,9 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
    CHỈ CHẠY KHI ĐÃ CÀI THÀNH APP (đoạn guard ở đầu file; mở bằng trình duyệt thường sẽ bị chuyển về trang-chu/ để tải).
    App tự toàn màn hình + khóa ngang theo pwa-moi.webmanifest, nên game KHÔNG gọi requestFullscreen nữa (tránh thông báo của Chrome) và KHÔNG xử lý màn dọc.
+   BỐ CỤC MÀN HÌNH: KHUNG TRÊN (cao TH(), chứa thú + nền vùng) và KHUNG DƯỚI (cao BP, chứa các nút), cùng dùng ảnh khung-game.webp (1744x608, nền trong suốt).
+   Vẽ khung bằng cách cắt 9 mảnh (slice9): góc 280x250 pixel ảnh gốc, các cạnh giữa kéo dài. Khung trên vẽ tỉ lệ 0.48, khung dưới thu nhỏ vừa chiều cao BP.
+   Thứ tự vẽ: nền -> khung -> thú -> thanh máu -> hiệu ứng (thú nằm TRÊN khung nên chân thú không bị viền che). Chưa có ảnh khung thì vẽ viền vàng mảnh tạm.
    Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
    VỊ TRÍ THÚ: thú bên trái đứng ngay giữa nút "Chỉ số" (theo vị trí nút thật trên màn hình, kéo nút là thú đi theo).
@@ -202,7 +207,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    ĐỔI BẬC: 2 nút "Bạn: bậc N" và "Địch: bậc N" (id tm, te), bấm để xoay vòng 1 -> 2 -> 3 -> 1 (MAXB = 3).
    Nút mới thêm vào danh sách sẽ tự xếp vào chỗ trống cuối thanh dưới, KHÔNG làm mất bố cục đã sắp xếp.
    NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ và 2 nút đổi bậc).
-   Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút (ô gõ ngay trên màn hình).
+   Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút (ô gõ ngay trên màn hình). Nút "Mặc định" xếp lại toàn bộ nút vào KHUNG DƯỚI.
    Bố cục + tên nút lưu ở khóa ttg_moi_layout_v1 (trường t = tên tự đặt).
    Lúc đang gõ tên (typing=true) KHÔNG tính lại bố cục, để bàn phím không làm xô lệch nút. */
 (function(){
@@ -210,12 +215,36 @@ if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,typing=false;
 var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16,MAXB=3;
+var BP=70,GAPB=2,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
 var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]hd=0/.test(location.search))HD=false;if(/[?&]hd=1/.test(location.search))HD=true;/* HD (mặc định BẬT): canvas theo độ phân giải máy + dùng ảnh thú 192 nếu có (thiếu thì dùng 128). Thêm ?hd=0 vào link để tắt và so sánh */
 function dp(id,b,cx,by){THU_MOI.setFrame(192);THU_MOI.draw(ctx,id,b,cx,by,128);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
+function TH(){return H-I.b-BP-GAPB;}/* chiều cao khung trên */
+function gy(){return TH()-FLOOR;}/* đường chân thú */
+/* ===== KHUNG (ảnh khung-game.webp, cắt 9 mảnh) ===== */
+var FR=new Image();FR.onload=function(){frOK=true;buildFrame();};FR.onerror=function(){frOK=false;};FR.src='khung-game.webp';
+function s9(c,m,x,y,w,h,s){
+ var SW=FR.naturalWidth,SH=FR.naturalHeight,L=280,R=280,T=250,B=250,l=L*s,r=R*s,t=T*s,b=B*s;
+ var xs=[x,x+l,x+w-r,x+w],ys=[y,y+t,y+h-b,y+h],sx=[0,L,SW-R,SW],sy=[0,T,SH-B,SH];
+ for(var j=0;j<3;j++)for(var i=0;i<3;i++){if(i===1&&j===1)continue;
+  var dx=Math.round(xs[i]*m),dy=Math.round(ys[j]*m),dw=Math.round(xs[i+1]*m)-dx,dh=Math.round(ys[j+1]*m)-dy;
+  if(dw<=0||dh<=0)continue;
+  c.drawImage(FR,sx[i],sy[j],sx[i+1]-sx[i],sy[j+1]-sy[j],dx,dy,dw,dh);}}
+function buildFrame(){
+ if(!cv.width||!cv.height)return;
+ var m=HD?K:1,fx=I.l,fw=W-I.l-I.r,th=TH(),pt=th+GAPB;
+ FL=document.createElement('canvas');FL.width=cv.width;FL.height=cv.height;
+ var c=FL.getContext('2d');c.imageSmoothingEnabled=true;try{c.imageSmoothingQuality='high';}catch(e){}
+ if(frOK&&FR.naturalWidth>0){
+  s9(c,m,fx,0,fw,th,Math.min(FSC,(th-20)/500));
+  s9(c,m,fx,pt,fw,BP,BP/500);
+ }else{/* chưa có ảnh khung: viền vàng mảnh tạm */
+  c.strokeStyle='#c9a24a';c.lineWidth=Math.max(1,2*m);
+  c.strokeRect(fx*m+m,m,fw*m-2*m,th*m-2*m);c.strokeRect(fx*m+m,pt*m+m,fw*m-2*m,BP*m-2*m);
+ }}
 function resize(){
  if(typing)return;
  DPR=window.devicePixelRatio||1;
@@ -225,8 +254,8 @@ function resize(){
  var cs=getComputedStyle(sa),f=DPR/K;
  I={l:Math.round(parseFloat(cs.paddingLeft)*f)||0,r:Math.round(parseFloat(cs.paddingRight)*f)||0,t:Math.round(parseFloat(cs.paddingTop)*f)||0,b:Math.round(parseFloat(cs.paddingBottom)*f)||0};
  ctx.imageSmoothingEnabled=false;
+ buildFrame();
  layoutUI();}
-function gy(){return H-I.b-62;}
 /* Tâm ngang (đơn vị pixel game) của nút neo "Chỉ số". Không đo được thì dùng 16% chiều rộng. */
 function anchorX(){var e=els[ANCHOR];
  if(e){var r=e.getBoundingClientRect();if(r.width>0)return (r.left+r.width/2)*DPR/K;}
@@ -285,17 +314,17 @@ function setPos(id,x,y){var e=els[id],p=lay[id],w=e.offsetWidth*p.s,h=e.offsetHe
  x=Math.max(0,Math.min(innerWidth-w,x));y=Math.max(0,Math.min(innerHeight-h,y));
  p.x=x/innerWidth;p.y=y/innerHeight;place(id);}
 function place(id){var e=els[id],p=lay[id];label(id);e.style.left=Math.round(p.x*innerWidth)+'px';e.style.top=Math.round(p.y*innerHeight)+'px';e.style.transform='scale('+p.s+')';}
-/* Bố cục mặc định: dồn hết vào thanh dưới màn hình ngang, chia dòng, căn giữa. Giữ nguyên tên tự đặt. */
+/* Bố cục mặc định: dồn hết vào KHUNG DƯỚI (chừa 40px hai bên cho họa tiết góc), chia dòng, căn giữa. Giữ nguyên tên tự đặt. */
 function defaults(){
- var cs=getComputedStyle(sa),L=parseFloat(cs.paddingLeft)||0,R=parseFloat(cs.paddingRight)||0,B=parseFloat(cs.paddingBottom)||0;
+ var f=K/DPR,cs=getComputedStyle(sa),L=parseFloat(cs.paddingLeft)||0,R=parseFloat(cs.paddingRight)||0;
  var old={};UI.forEach(function(u){if(lay[u.id]&&lay[u.id].t)old[u.id]=lay[u.id].t;els[u.id].textContent=old[u.id]||dt(u);});
- var avail=innerWidth-L-R-8,gap=3,rows=[],row=[],rw=0,h=18;
+ var M=40*f,avail=innerWidth-L-R-2*M,gap=3,rows=[],row=[],rw=0,h=18;
  UI.forEach(function(u){var w=els[u.id].offsetWidth;
   if(row.length&&rw+gap+w>avail){rows.push({r:row,w:rw});row=[];rw=0;}
   rw+=(row.length?gap:0)+w;row.push(u);});
  if(row.length)rows.push({r:row,w:rw});
- var total=rows.length*h+(rows.length-1)*gap,y=innerHeight-B-4-total;lay={};
- rows.forEach(function(rr){var x=L+4+(avail-rr.w)/2;
+ var total=rows.length*h+(rows.length-1)*gap,pt=(TH()+GAPB)*f,ph=BP*f,y=pt+Math.max(2,(ph-total)/2);lay={};
+ rows.forEach(function(rr){var x=L+M+(avail-rr.w)/2;
   rr.r.forEach(function(u){lay[u.id]={x:x/innerWidth,y:y/innerHeight,s:1};if(old[u.id])lay[u.id].t=old[u.id];x+=els[u.id].offsetWidth+gap;});
   y+=h+gap;});}
 function okL(id){var p=lay[id];return !!(p&&typeof p.x==='number'&&p.s>0);}
@@ -364,15 +393,22 @@ function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
 function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
 function draw(ts){
- var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(0,0,W,gy());
- ctx.fillStyle='#e8f1fa';ctx.fillRect(0,gy(),W,H-gy());ctx.fillStyle='#c4d6ea';ctx.fillRect(0,gy(),W,2);
+ var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
+ ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);
+ /* nền khung trên: trời + đất (sau này mỗi vùng đổi nền ở đây) */
+ var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(fx,0,fw,gy());
+ ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);
+ /* nền khung dưới (chứa nút) */
+ var pg=ctx.createLinearGradient(0,pt,0,pt+BP);pg.addColorStop(0,'#151a3a');pg.addColorStop(1,'#0c1026');ctx.fillStyle=pg;ctx.fillRect(fx,pt,fw,BP);
+ /* khung (đã dựng sẵn ở độ phân giải máy) */
+ if(FL){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
  pet('en',ts);pet('me',ts);
- var bw=Math.min(220,Math.floor(W*.3)),nm=THU_MOI.byId[ID].ten;
- bar(I.l+12,I.t+24,bw,st.me/100,'#3c3',nm+' (bạn)');bar(W-I.r-12-bw,I.t+24,bw,st.en/100,'#c33',nm+' (địch)');
- ctx.textAlign='center';ctx.textBaseline='top';ctx.font='10px sans-serif';ctx.fillStyle='#123';ctx.fillText((HD?'HD 192→128':'thú 128px')+' · x'+K+' · '+W+'×'+H+' · v4',W/2,I.t+6);
+ var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),nm=THU_MOI.byId[ID].ten,by=I.t+32;
+ bar(I.l+ox,by,bw,st.me/100,'#3c3',nm+' (bạn)');bar(W-I.r-ox-bw,by,bw,st.en/100,'#c33',nm+' (địch)');
+ ctx.textAlign='center';ctx.textBaseline='top';ctx.font='10px sans-serif';ctx.fillStyle='#123';ctx.fillText((HD?'HD 192→128':'thú 128px')+' · x'+K+' · '+W+'×'+H+' · v5',W/2,I.t+50);
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
  st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
- if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+60,gy()-170));}}
+ if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+70,gy()-170));}}
 function loop(ts){autoTick();draw(ts);requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
 reset();resize();requestAnimationFrame(loop);
