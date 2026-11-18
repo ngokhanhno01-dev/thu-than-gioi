@@ -70,6 +70,8 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none
 canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges}
 #bgv,#bgv2{position:fixed;left:0;top:0;width:0;height:0;object-fit:fill;display:none;pointer-events:none;background:#000}#bgv2{opacity:0}/* nền VIDEO của khung trên: 2 thẻ video chồng nhau (A hiện, B chờ sẵn ở giây 0) để lặp không khựng; đứng TRƯỚC canvas trong HTML nên nằm sau canvas, không dùng z-index âm vì nền đen của body sẽ che; canvas được xóa trong suốt ở vùng khung trên thì video lộ ra */
 #sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+/* ẨN TOÀN BỘ NÚT để làm lại (code nút vẫn còn, chỉ không hiện/không bấm được). Muốn hiện lại: xóa dòng ngay dưới. */
+#ui .ub,#edb,#edt,#edq,#tp,#tl{display:none!important}
 /* Lớp nút ảo (DOM, nằm trên canvas). Mỗi nút: left/top theo px, phóng to/thu nhỏ bằng transform scale */
 #ui{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;pointer-events:none;font-family:sans-serif}
 #ui>*{pointer-events:auto}
