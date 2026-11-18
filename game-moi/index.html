@@ -426,42 +426,42 @@ var bgRaf=0,mainRaf=0;
 var BG_EDGE={l:37,r:37,t:32,b:29};
 /* ===== CẤU HÌNH HIỆU ỨNG (chỉnh ở đây) ===== */
 var BG_FX_CFG={
- snowCount:24,      /* số hạt tuyết (máy yếu thì giảm, ví dụ 20) */
- snowArea:.78,      /* tuyết chỉ rơi ở 78% phía trên khung */
+ snowCount:50,      /* số hạt tuyết (máy yếu thì giảm, ví dụ 20) */
+ snowArea:.80,      /* tuyết chỉ rơi ở 78% phía trên khung */
  snowSpeed:.05,     /* tốc độ rơi (phần chiều cao khung mỗi giây) */
- snowOpacity:.85,   /* độ đậm của tuyết */
- mistOpacity:.14,   /* độ đậm của sương (0 = tắt) */
+ snowOpacity:1.5,   /* độ đậm của tuyết */
+ mistOpacity:.50,   /* độ đậm của sương (0 = tắt) */
  mistSpeed:.010,    /* tốc độ sương trôi ngang */
- auroraOpacity:.10, /* độ sáng thêm của cực quang khi lung linh */
- auroraSpeed:.55,   /* tốc độ lung linh của cực quang */
- starOpacity:.9,    /* độ sáng sao lấp lánh */
- sparkleOpacity:.85,/* độ sáng tinh thể lóe */
- flyCount:14,       /* số hạt sáng/đom đóm (máy yếu thì giảm, ví dụ 8) */
+ auroraOpacity:1, /* độ sáng thêm của cực quang khi lung linh */
+ auroraSpeed:2,   /* tốc độ lung linh của cực quang */
+ starOpacity:1.5,    /* độ sáng sao lấp lánh */
+ sparkleOpacity:1.5,/* độ sáng tinh thể lóe */
+ flyCount:40,       /* số hạt sáng/đom đóm (máy yếu thì giảm, ví dụ 8) */
  flySpeed:.012,     /* tốc độ hạt sáng trôi ngang */
- flyOpacity:.8,     /* độ sáng hạt sáng */
+ flyOpacity:1,     /* độ sáng hạt sáng */
  streakCount:12,    /* 'streak' vệt gió: số vệt (máy yếu giảm còn 8) */
  streakSpeed:1,     /* tốc độ vệt gió (1 = như bản gốc 04-scenes.js) */
- streakOpacity:.4,  /* độ mờ vệt gió */
- leafCount:16,      /* 'leaf' lá bay: số lá */
+ streakOpacity:.3,  /* độ mờ vệt gió */
+ leafCount:25,      /* 'leaf' lá bay: số lá */
  leafSpeed:1,       /* tốc độ lá rơi/bay */
  leafOpacity:.85,   /* độ đậm của lá */
  sparkCount:12,     /* 'spark' tia lửa điện: số điểm chớp */
  sparkSpeed:9,      /* tốc độ chớp của tia điện */
  sparkOpacity:.95,  /* độ sáng tia điện */
- starCount:28,      /* 'star' sao lấp lánh ngẫu nhiên: số sao */
+ starCount:40,      /* 'star' sao lấp lánh ngẫu nhiên: số sao */
  starArea:.5,       /* sao chỉ vẽ ở 50% phía trên ảnh */
  starTwinkle:.8,    /* độ sáng tối đa của sao */
- glintCount:12,     /* 'glint' ánh lóe chữ thập: số điểm */
- glintOpacity:.9,   /* độ sáng ánh lóe */
+ glintCount:20,     /* 'glint' ánh lóe chữ thập: số điểm */
+ glintOpacity:1.3,   /* độ sáng ánh lóe */
  boltMax:2,         /* 'bolt' tia sét: tối đa mấy tia cùng lúc */
- boltEvery:[1.3,3.4],/* khoảng cách giữa 2 lần sét đánh (giây, ngẫu nhiên trong khoảng này) */
- boltLife:.6,       /* một tia sét tồn tại bao lâu (giây) */
- boltLen:[.58,.8],  /* độ dài tia (tỉ lệ chiều cao ảnh; trước là .36-.52) */
+ boltEvery:[1.7,3.7],/* khoảng cách giữa 2 lần sét đánh (giây, ngẫu nhiên trong khoảng này) */
+ boltLife:1,       /* một tia sét tồn tại bao lâu (giây) */
+ boltLen:[.7,.9],  /* độ dài tia (tỉ lệ chiều cao ảnh; trước là .36-.52) */
  boltBranch:4,      /* số nhánh rẽ mỗi tia (0 = không nhánh) */
  boltTwig:.6,       /* xác suất mỗi nhánh có thêm nhánh con nhỏ (0 = không) */
- boltWidth:1.3,       /* độ dày tia (1 = mảnh như trong ảnh, 1.5 = dày hơn) */
+ boltWidth:1.6,       /* độ dày tia (1 = mảnh như trong ảnh, 1.5 = dày hơn) */
  boltOpacity:1,     /* độ sáng tia sét */
- boltFlash:.16      /* độ sáng bầu trời lúc sét chớp (0 = tắt) */
+ boltFlash:.23      /* độ sáng bầu trời lúc sét chớp (0 = tắt) */
 };
 /* Vùng nền trong khung trên (đơn vị game, tính từ mép trái/trên của màn hình): trả về {l,t,r,b} = độ dày viền hiệu dụng mỗi cạnh. */
 function bgInset(th){var s=Math.min(FSC,(th-20)/500),ov=1,q=BG_BLEED;
