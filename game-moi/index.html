@@ -395,7 +395,7 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
 /* NỀN VIDEO khung trên (thử cho vùng Tuyết Nguyên, ở sảnh). Các vùng khác chưa có thì vẫn nền trời như cũ.
    Video 1920x872 (tỉ lệ 2.2:1, đã cắt từ 16:9 gốc, giữ ~80% chiều cao), kéo vừa KHÍT phần trống BÊN TRONG viền khung (object-fit:fill, không phóng to/cắt thêm); viền khung vẽ đè lên.
-   Video đã làm sẵn vòng lặp liền (cuối hòa vào đầu). Để lặp không khựng, dùng 2 thẻ video (BGV hiện, BGV2 chờ ở giây 0); gần hết thì bật cái kia rồi đổi chỗ.
+   Video đã làm sẵn vòng lặp liền (cuối hòa vào đầu). Để lặp không khựng, dùng 2 thẻ video (BGV hiện, BGV2 chờ ở giây 0); chỉ còn ~0,07s thì bật cái kia (đang chờ sẵn ở giây 0) rồi đổi chỗ NGAY (không đổi sớm, nếu không hình sẽ nhảy lùi).
    Thêm vùng mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). */
 var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen-v2.mp4'},bgCur=BGV,bgNxt=BGV2,bgSw=false;
 /* độ dày viền khung THẬT (đo ở giữa mỗi cạnh ảnh khung-game.webp, đơn vị px ảnh gốc) */
@@ -407,8 +407,8 @@ function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,s=Math.min(FSC,(th-20)/500)
 function bgShow(c,n){c.style.opacity=1;n.style.opacity=0;}
 function bgTick(){if(!bgOn)return;
  var c=bgCur,n=bgNxt;
- if(!bgSw&&c.duration&&c.currentTime>c.duration-0.25){bgSw=true;try{n.currentTime=0;}catch(e){}var p=n.play();if(p&&p.catch)p.catch(function(){bgSw=false;});}
- if(bgSw&&n.currentTime>0.03&&!n.paused){bgShow(n,c);c.pause();try{c.currentTime=0;}catch(e){}bgCur=n;bgNxt=c;bgSw=false;}
+ if(!bgSw&&c.duration&&c.duration-c.currentTime<0.07){bgSw=true;try{n.currentTime=0;}catch(e){}var p=n.play();if(p&&p.catch)p.catch(function(){bgSw=false;});}
+ if(bgSw&&n.currentTime>0.01&&!n.paused){bgShow(n,c);c.pause();try{c.currentTime=0;}catch(e){}bgCur=n;bgNxt=c;bgSw=false;}
  requestAnimationFrame(bgTick);}
 function bgSync(){var w=bgWant();if(w===bgOn)return;bgOn=w;
  if(w){var f=BGV_ZONE[THU_MOI.byId[ID].zone];[BGV,BGV2].forEach(function(v){if(v.getAttribute('src')!==f)v.setAttribute('src',f);v.style.display='block';});
