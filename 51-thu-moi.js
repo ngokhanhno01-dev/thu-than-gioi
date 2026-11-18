@@ -6,7 +6,8 @@
   var zones = [
     { z: 0, slug: 'tuyet-nguyen', ten: 'Tuyết Nguyên', thu: [
       { id: '1a', slug: '01-tuyet-cau', ten: 'Tuyết Cầu', boss: false },
-      { id: '1b', slug: '02-tuyet-hung', ten: 'Tuyết Hùng', boss: false }
+      { id: '1b', slug: '02-tuyet-hung', ten: 'Tuyết Hùng', boss: false },
+      { id: '1c', slug: '03-bang-loc', ten: 'Băng Lộc', boss: false }
     ] }
   ];
   var byId = {}, cache = {};
