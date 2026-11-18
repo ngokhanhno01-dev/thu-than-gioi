@@ -50,7 +50,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Lúc đang gõ tên (typing=true) KHÔNG tính lại bố cục, để bàn phím không làm xô lệch nút. */
 (function(){
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
-var ID='1a',KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false,typing=false;
+var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID='1a';var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false,typing=false;
 var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16,MAXB=3;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;}catch(e){}
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
