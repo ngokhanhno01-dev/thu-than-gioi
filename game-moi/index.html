@@ -597,18 +597,19 @@ function bgDrawFx(ts,x,y,w,h){
    else{sx=x+R(i+20)*w;sy=y+h*(.26+R(i+40)*.6);}
    ctx.globalAlpha=C.glintOpacity*a;ctx.fillRect(sx-3,sy,7,1);ctx.fillRect(sx,sy-3,1,7);}}
 
- /* tia sét: đánh từ trên xuống (mọc dần ~0,1s), chớp 2 nhịp rồi tắt; có nhánh rẽ, vầng sáng tím + lõi trắng ấm, bầu trời sáng lên theo nhịp chớp */
+ /* tia sét: đánh từ trên xuống (mọc dần ~0,1s), chớp 2 nhịp rồi tắt; có nhánh rẽ, vầng sáng neon vàng (boltGlow/boltMid/boltCore = 'r,g,b' riêng từng vùng) + lõi trắng vàng, bầu trời sáng lên theo nhịp chớp */
  if(F.indexOf('bolt')>=0&&conf.boltX){
   if(T>=bgBoltNext&&bgBolts.length<C.boltMax){bgBolts.push(bgBoltNew(conf,T));bgBoltNext=T+C.boltEvery[0]+Math.random()*(C.boltEvery[1]-C.boltEvery[0]);}
   for(i=bgBolts.length-1;i>=0;i--){var B=bgBolts[i],f=(T-B.t0)/C.boltLife;if(f>=1){bgBolts.splice(i,1);continue;}
    var grow=Math.min(1,f/.12),I=(f<.12?f/.12:Math.pow(1-(f-.12)/.88,1.6))*(.7+.3*Math.abs(Math.sin(f*31)))+.5*Math.exp(-Math.pow((f-.32)/.05,2));
    I=Math.min(1,I)*C.boltOpacity;if(I<.02)continue;
    var ox=x+G.ox+B.bx*G.dw,oy=y+G.oy+B.by*G.dh,s=G.dh,sc=G.dh/270*C.boltWidth,nM=Math.max(2,Math.ceil(B.pts.length*grow)),b,bn;
-   if(C.boltFlash>0){var fg=ctx.createLinearGradient(0,y,0,y+h*.65);fg.addColorStop(0,'rgba(185,140,255,'+(C.boltFlash*I)+')');fg.addColorStop(1,'rgba(185,140,255,0)');
+   if(C.boltFlash>0){var fg=ctx.createLinearGradient(0,y,0,y+h*.65);var fr=conf.boltFlashRgb||'255,200,90';fg.addColorStop(0,'rgba('+fr+','+(C.boltFlash*I)+')');fg.addColorStop(1,'rgba('+fr+',0)');
     ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1;ctx.fillStyle=fg;ctx.fillRect(x,y,w,h*.65);}
    ctx.lineCap='round';ctx.lineJoin='round';
-   var PS=[[11,'rgba(140,90,255,'+(.16*I)+')','lighter'],[5,'rgba(200,160,255,'+(.4*I)+')','lighter'],[1.8,'rgba(255,244,225,'+(.95*I)+')','source-over']];
-   for(var ps=0;ps<3;ps++){ctx.globalCompositeOperation=PS[ps][2];ctx.strokeStyle=PS[ps][1];ctx.globalAlpha=1;
+   var bg1=conf.boltGlow||'255,160,20',bg2=conf.boltMid||'255,214,60',bg3=conf.boltCore||'255,252,225';/* neon vàng: 4 lớp chồng cộng sáng, rộng + mờ ngoài, hẹp + chói trong */
+   var PS=[[24,'rgba('+bg1+','+(.09*I)+')','lighter'],[12,'rgba('+bg1+','+(.22*I)+')','lighter'],[5.5,'rgba('+bg2+','+(.65*I)+')','lighter'],[2,'rgba('+bg3+','+I+')','source-over']];
+   for(var ps=0;ps<4;ps++){ctx.globalCompositeOperation=PS[ps][2];ctx.strokeStyle=PS[ps][1];ctx.globalAlpha=1;
     ctx.lineWidth=PS[ps][0]*sc;ctx.beginPath();bgBoltPath(B.pts,nM,ox,oy,s);ctx.stroke();
     ctx.lineWidth=PS[ps][0]*sc*.55;ctx.beginPath();
     for(b=0;b<B.br.length;b++){if(B.br[b].i>=nM)continue;bn=Math.min(1,(nM-B.br[b].i)/6);bgBoltPath(B.br[b].pts,Math.max(2,Math.ceil(B.br[b].pts.length*bn)),ox,oy,s);}
