@@ -457,8 +457,9 @@ var BG_FX_CFG={
  boltEvery:[1.3,3.4],/* khoảng cách giữa 2 lần sét đánh (giây, ngẫu nhiên trong khoảng này) */
  boltLife:.6,       /* một tia sét tồn tại bao lâu (giây) */
  boltLen:[.36,.52], /* độ dài tia (tỉ lệ chiều cao ảnh) */
- boltBranch:3,      /* số nhánh rẽ mỗi tia (0 = không nhánh) */
- boltWidth:1,       /* độ dày tia (1 = vừa, 1.5 = dày hơn) */
+ boltBranch:5,      /* số nhánh rẽ mỗi tia (0 = không nhánh) */
+ boltTwig:.6,       /* xác suất mỗi nhánh có thêm nhánh con nhỏ (0 = không) */
+ boltWidth:1,       /* độ dày tia (1 = mảnh như trong ảnh, 1.5 = dày hơn) */
  boltOpacity:1,     /* độ sáng tia sét */
  boltFlash:.16      /* độ sáng bầu trời lúc sét chớp (0 = tắt) */
 };
@@ -524,15 +525,16 @@ function bgBoltSeg(x0,y0,x1,y1,lv,amp){var out=[[x0,y0]];
  return out;}
 function bgBoltNew(conf,T){var C=BG_FX_CFG,L=C.boltLen[0]+Math.random()*(C.boltLen[1]-C.boltLen[0]),
   X=conf.boltX||[.5],bx=X[Math.floor(Math.random()*X.length)]+(Math.random()-.5)*.03,by=.03+Math.random()*.06,
-  pts=bgBoltSeg(0,0,(Math.random()-.5)*.2,L,5,L*.17),br=[],n=C.boltBranch,i,k,q,d,e;
- for(k=0;k<n;k++){i=Math.floor(pts.length*(.22+.5*Math.random()));q=pts[i];d=Math.random()<.5?-1:1;
-  e=bgBoltSeg(q[0],q[1],q[0]+d*(.05+Math.random()*.1),q[1]+L*(.2+Math.random()*.3),3,L*.07);br.push({i:i,pts:e});}
+  pts=bgBoltSeg(0,0,(Math.random()-.5)*.16,L,5,L*.2),br=[],n=C.boltBranch,i,k,q,d,e,t,j;
+ for(k=0;k<n;k++){i=Math.floor(pts.length*(.12+.62*Math.random()));q=pts[i];d=(k%2?-1:1)*(Math.random()<.8?1:-1);/* nhánh rẽ xen kẽ hai bên */
+  e=bgBoltSeg(q[0],q[1],q[0]+d*(.04+Math.random()*.1),q[1]+L*(.18+Math.random()*.32),3,L*.075);br.push({i:i,pts:e});
+  if(Math.random()<C.boltTwig){j=2+Math.floor(Math.random()*(e.length-4));t=e[j];/* nhánh con nhỏ, mũi nhọn */
+   br.push({i:i+j,pts:bgBoltSeg(t[0],t[1],t[0]+d*(.02+Math.random()*.05),t[1]+L*(.07+Math.random()*.12),2,L*.04)});}}
  return {t0:T,bx:bx,by:by,pts:pts,br:br};}
-/* vẽ đường cong mềm qua n điểm đầu của pts (nối qua trung điểm để không còn góc nhọn) */
-function bgBoltPath(pts,n,ox,oy,s){var i,m=pts.length;if(n>m)n=m;if(n<2)return;
- ctx.moveTo(ox+pts[0][0]*s,oy+pts[0][1]*s);
- for(i=1;i<n-1;i++)ctx.quadraticCurveTo(ox+pts[i][0]*s,oy+pts[i][1]*s,ox+(pts[i][0]+pts[i+1][0])/2*s,oy+(pts[i][1]+pts[i+1][1])/2*s);
- ctx.lineTo(ox+pts[n-1][0]*s,oy+pts[n-1][1]*s);}
+/* vẽ đường gấp khúc (KHÔNG làm cong, giữ góc nhọn như tia sét thật); nét thon dần về cuối tia: wd = độ dày ở gốc, tp = mức thon (1 = nhọn hẳn), c = số đoạn mỗi khúc cùng độ dày */
+function bgBoltPath(pts,n,ox,oy,s,wd,tp,c){var m=Math.min(n,pts.length),i,j,e,u;if(m<2)return;
+ for(i=0;i<m-1;i+=c){e=Math.min(i+c,m-1);u=(i+c/2)/(m-1);ctx.lineWidth=Math.max(.3,wd*(1-tp*u));
+  ctx.beginPath();ctx.moveTo(ox+pts[i][0]*s,oy+pts[i][1]*s);for(j=i+1;j<=e;j++)ctx.lineTo(ox+pts[j][0]*s,oy+pts[j][1]*s);ctx.stroke();}}
 function bgDrawFx(ts,x,y,w,h){
  var o=bgImg,conf=bgConf,m=HD?K:1;
  if(!bgBase||bgKW!==w||bgKH!==h||bgKM!==m||bgKI!==o){bgKW=w;bgKH=h;bgKM=m;bgKI=o;bgFxBuild(o,conf,w,h,m);}
@@ -603,17 +605,16 @@ function bgDrawFx(ts,x,y,w,h){
   for(i=bgBolts.length-1;i>=0;i--){var B=bgBolts[i],f=(T-B.t0)/C.boltLife;if(f>=1){bgBolts.splice(i,1);continue;}
    var grow=Math.min(1,f/.12),I=(f<.12?f/.12:Math.pow(1-(f-.12)/.88,1.6))*(.7+.3*Math.abs(Math.sin(f*31)))+.5*Math.exp(-Math.pow((f-.32)/.05,2));
    I=Math.min(1,I)*C.boltOpacity;if(I<.02)continue;
-   var ox=x+G.ox+B.bx*G.dw,oy=y+G.oy+B.by*G.dh,s=G.dh,sc=G.dh/270*C.boltWidth,nM=Math.max(2,Math.ceil(B.pts.length*grow)),b,bn;
+   var ox=x+G.ox+B.bx*G.dw,oy=y+G.oy+B.by*G.dh,s=G.dh,sc=G.dh/330*C.boltWidth,nM=Math.max(2,Math.ceil(B.pts.length*grow)),b,bn;
    if(C.boltFlash>0){var fg=ctx.createLinearGradient(0,y,0,y+h*.65);var fr=conf.boltFlashRgb||'255,200,90';fg.addColorStop(0,'rgba('+fr+','+(C.boltFlash*I)+')');fg.addColorStop(1,'rgba('+fr+',0)');
     ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1;ctx.fillStyle=fg;ctx.fillRect(x,y,w,h*.65);}
    ctx.lineCap='round';ctx.lineJoin='round';
-   var bg1=conf.boltGlow||'255,160,20',bg2=conf.boltMid||'255,214,60',bg3=conf.boltCore||'255,252,225';/* neon vàng: 4 lớp chồng cộng sáng, rộng + mờ ngoài, hẹp + chói trong */
-   var PS=[[24,'rgba('+bg1+','+(.09*I)+')','lighter'],[12,'rgba('+bg1+','+(.22*I)+')','lighter'],[5.5,'rgba('+bg2+','+(.65*I)+')','lighter'],[2,'rgba('+bg3+','+I+')','source-over']];
-   for(var ps=0;ps<4;ps++){ctx.globalCompositeOperation=PS[ps][2];ctx.strokeStyle=PS[ps][1];ctx.globalAlpha=1;
-    ctx.lineWidth=PS[ps][0]*sc;ctx.beginPath();bgBoltPath(B.pts,nM,ox,oy,s);ctx.stroke();
-    ctx.lineWidth=PS[ps][0]*sc*.55;ctx.beginPath();
-    for(b=0;b<B.br.length;b++){if(B.br[b].i>=nM)continue;bn=Math.min(1,(nM-B.br[b].i)/6);bgBoltPath(B.br[b].pts,Math.max(2,Math.ceil(B.br[b].pts.length*bn)),ox,oy,s);}
-    ctx.stroke();}
+   var bg1=conf.boltGlow||'255,160,20',bg2=conf.boltMid||'255,214,60',bg3=conf.boltCore||'255,252,225';/* 3 lớp: vầng sáng mờ, viền vàng mảnh, lõi trắng rất mảnh */
+   var PS=[[7,'rgba('+bg1+','+(.16*I)+')','lighter'],[2.6,'rgba('+bg2+','+(.7*I)+')','lighter'],[1.1,'rgba('+bg3+','+I+')','source-over']];
+   ctx.lineCap='round';ctx.lineJoin='miter';ctx.miterLimit=3;
+   for(var ps=0;ps<3;ps++){ctx.globalCompositeOperation=PS[ps][2];ctx.strokeStyle=PS[ps][1];ctx.globalAlpha=1;
+    bgBoltPath(B.pts,nM,ox,oy,s,PS[ps][0]*sc,.92,4);
+    for(b=0;b<B.br.length;b++){if(B.br[b].i>=nM)continue;bn=Math.min(1,(nM-B.br[b].i)/6);bgBoltPath(B.br[b].pts,Math.max(2,Math.ceil(B.br[b].pts.length*bn)),ox,oy,s,PS[ps][0]*sc*.6,.96,2);}}
    ctx.globalCompositeOperation='source-over';ctx.lineCap='butt';
   }}
  ctx.restore();
