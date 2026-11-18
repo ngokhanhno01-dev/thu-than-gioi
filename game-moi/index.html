@@ -65,7 +65,7 @@ var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16,MAXB=3;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
 var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]hd=0/.test(location.search))HD=false;if(/[?&]hd=1/.test(location.search))HD=true;/* HD (mặc định BẬT): canvas theo độ phân giải máy + dùng ảnh thú 192 nếu có (thiếu thì dùng 128). Thêm ?hd=0 vào link để tắt và so sánh */
-function dp(id,b,cx,by){if(HD){THU_MOI.setFrame(192);var ok=THU_MOI.draw(ctx,id,b,cx,by,128);THU_MOI.setFrame(128);if(ok)return;}THU_MOI.draw(ctx,id,b,cx,by,128);}
+function dp(id,b,cx,by){THU_MOI.setFrame(192);THU_MOI.draw(ctx,id,b,cx,by,128);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
 function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}

@@ -92,3 +92,6 @@ Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png;
 
 ## Việc kế tiếp
 Bạn duyệt cả 60 con ở `game-moi/index.html` (nút Khung đổi 192/128). Còn lại: đổi tên chính thức (chỉ sửa trong 51-thu-moi.js). Bước sau (sửa cơ chế, bỏ thú và trứng cũ) tính riêng.
+
+## Dọn ảnh cũ (18/11/2026)
+Đã xóa toàn bộ PNG 128 (không hậu tố) và 6 PNG 256 trong `thu-game/` theo yêu cầu người dùng. Chỉ còn 180 ảnh `-192.png` (60 con x 3 bậc). Ảnh nguồn trong `thu-moi/` không đụng. `game-moi/index.html` luôn vẽ ảnh 192 (nút Khung chỉ còn đổi độ phân giải canvas). Muốn lấy lại ảnh cũ: xem commit `0e73656` trở về trước.
