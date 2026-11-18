@@ -68,6 +68,7 @@
 <style>
 html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges}
+#bgv{position:fixed;left:0;top:0;width:0;height:0;object-fit:cover;display:none;pointer-events:none;background:#000}/* nền VIDEO của khung trên (đứng TRƯỚC canvas trong HTML nên nằm sau canvas, không dùng z-index âm vì nền đen của body sẽ che; canvas được xóa trong suốt ở vùng khung trên thì video lộ ra) */
 #sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 /* Lớp nút ảo (DOM, nằm trên canvas). Mỗi nút: left/top theo px, phóng to/thu nhỏ bằng transform scale */
 #ui{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;pointer-events:none;font-family:sans-serif}
@@ -182,7 +183,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 })();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',function(){navigator.serviceWorker.register('pwa-moi-sw.js').catch(function(){})});</script>
-<canvas id="g"></canvas><div id="sa"></div>
+<video id="bgv" muted loop playsinline preload="auto" tabindex="-1" disablepictureinpicture src="vid-sanh-tuyet-nguyen.mp4"></video><canvas id="g"></canvas><div id="sa"></div>
 <div id="ui">
  <button id="edb">✎ Sắp xếp</button>
  <div id="edt"><span id="edn"></span><button id="edm">−</button><span id="edz"></span><button id="edp">+</button><button id="edr">Đổi tên</button><button id="edd">Mặc định</button><button id="edx">Xong</button></div>
@@ -256,6 +257,7 @@ function resize(){
  I={l:Math.round(parseFloat(cs.paddingLeft)*f)||0,r:Math.round(parseFloat(cs.paddingRight)*f)||0,t:Math.round(parseFloat(cs.paddingTop)*f)||0,b:Math.round(parseFloat(cs.paddingBottom)*f)||0};
  ctx.imageSmoothingEnabled=false;
  buildFrame();
+ bgLayout();
  layoutUI();}
 /* VỊ TRÍ THÚ CỐ ĐỊNH, KHÔNG phụ thuộc nút nào (nút sau này đổi/bỏ thoải mái). PET_X = tâm thú trái tính theo tỉ lệ bề ngang khung (0 = mép trái khung, 0.5 = giữa). Thú phải đối xứng: 1 - PET_X. */
 function px(w){var fw=W-I.l-I.r;return Math.round(I.l+fw*(w==='me'?PET_X:1-PET_X));}
@@ -391,15 +393,24 @@ function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
  ctx.restore();}
 function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
+/* NỀN VIDEO khung trên (thử cho vùng Tuyết Nguyên, ở sảnh). Các vùng khác chưa có thì vẫn nền trời như cũ.
+   Video 1920x678 (tỉ lệ khung trên), phủ kín vùng khung trên bằng object-fit:cover; viền khung vẽ đè lên. Thêm vùng mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). */
+var BGV=document.getElementById('bgv'),bgOn=false,BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen.mp4'};
+function bgWant(){var t=THU_MOI.byId[ID];return SCENE==='sanh'&&!!t&&!!BGV_ZONE[t.zone];}
+function bgLayout(){var f=K/DPR;BGV.style.left=Math.round(I.l*f)+'px';BGV.style.top='0px';BGV.style.width=Math.round((W-I.l-I.r)*f)+'px';BGV.style.height=Math.round(TH()*f)+'px';}
+function bgSync(){var w=bgWant();if(w===bgOn)return;bgOn=w;
+ if(w){var f=BGV_ZONE[THU_MOI.byId[ID].zone];if(BGV.getAttribute('src')!==f)BGV.setAttribute('src',f);bgLayout();BGV.style.display='block';var p=BGV.play();if(p&&p.catch)p.catch(function(){});}
+ else{BGV.style.display='none';BGV.pause();}}
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
 function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.round(Math.sin(ts/380)*2);
  dp(ID,bm,x,gy()+bob);}
-function draw(ts){
+function draw(ts){bgSync();
  var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
  ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);
  /* nền khung trên: trời + đất (sau này mỗi vùng đổi nền ở đây) */
+ if(bgOn){ctx.clearRect(fx,0,fw,th);}else{
  var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(fx,0,fw,gy());
- ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());if(SCENE!=='sanh'){ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);}
+ ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());if(SCENE!=='sanh'){ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);}}
  /* nền khung dưới (chứa nút) */
  var pg=ctx.createLinearGradient(0,pt,0,pt+BP);pg.addColorStop(0,'#151a3a');pg.addColorStop(1,'#0c1026');ctx.fillStyle=pg;ctx.fillRect(fx,pt,fw,BP);
  /* khung (đã dựng sẵn ở độ phân giải máy) */
