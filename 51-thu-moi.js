@@ -10,7 +10,11 @@
       { id: '1c', slug: '03-bang-loc', ten: 'Băng Lộc', boss: false },
       { id: '1d', slug: '04-tuyet-bao', ten: 'Tuyết Báo', boss: false },
       { id: '1e', slug: '05-bang-hai', ten: 'Băng Hải', boss: false },
-      { id: '1f', slug: '06-tuyet-cu', ten: 'Tuyết Cú', boss: false }
+      { id: '1f', slug: '06-tuyet-cu', ten: 'Tuyết Cú', boss: false },
+      { id: '1g', slug: '07-bang-duong', ten: 'Băng Dương', boss: false },
+      { id: '1h', slug: '08-bang-linh', ten: 'Băng Linh', boss: false },
+      { id: '1i', slug: '09-bang-nham', ten: 'Băng Nham', boss: false },
+      { id: '1j', slug: '10-bang-son-cu-thu', ten: 'Băng Sơn Cự Thú', boss: true }
     ] }
   ];
   var byId = {}, cache = {};
