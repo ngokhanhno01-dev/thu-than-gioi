@@ -439,7 +439,9 @@ function bgSync(){
 function bgDrawStill(x,y,w,h){
  if(!bgImageOn)return;
  var iw=BG_IMG.naturalWidth,ih=BG_IMG.naturalHeight,scale=Math.min(w/iw,h/ih),dw=iw*scale,dh=ih*scale;
- ctx.save();ctx.fillStyle='#102b59';ctx.fillRect(x,y,w,h);ctx.globalAlpha=.38;ctx.drawImage(BG_IMG,x,y,w,h);
+ ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.fillStyle='#102b59';ctx.fillRect(x,y,w,h);
+ /* Hai mép chỉ là nền kéo mờ từ CHÍNH ảnh mới, không vẽ thêm một ảnh sắc nét lệch vị trí. */
+ ctx.globalAlpha=.48;ctx.filter='blur(14px)';ctx.drawImage(BG_IMG,x,y,w,h);ctx.filter='none';
  ctx.globalAlpha=1;ctx.drawImage(BG_IMG,x+(w-dw)/2,y+(h-dh)/2,dw,dh);ctx.restore();
 }
 function bgPine(x,y,h,lean,alpha){
