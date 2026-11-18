@@ -9,12 +9,13 @@
 - 1c Băng Lộc (chờ duyệt): cắt bằng `tools/cat_3_bac.py`, 3 thân tách sẵn (không mảnh rời, không cần gán tay). Tỉ lệ thu 0.144; bậc 3 cao 122px (khống chế bởi chiều cao, gạc + dải sáng), bậc 1 cao 59px, bậc 2 cao 87px. Xem thử trên game mới: `game-moi/index.html?thu=1c`.
 - 1d Tuyết Báo (chờ duyệt): cắt bằng `tools/cat_3_bac.py`; 3 thân + 3 mảnh tinh thể rời (2 thuộc bậc 3, 1 thuộc bậc 2) tự gán đúng theo tâm gần nhất. Tỉ lệ thu 0.1644; bậc 1 cao 41px, bậc 2 cao 65px, bậc 3 cao 88px (bị giới hạn bởi chiều ngang 122px, đuôi dài).
 - 1e Băng Hải (chờ duyệt): cắt bằng `tools/cat_3_bac.py`, 3 thân tách sẵn, không mảnh rời. Tỉ lệ thu 0.1546; bậc 1 cao 39px, bậc 2 cao 56px, bậc 3 cao 90px (bị giới hạn bởi chiều ngang 122px, đuôi tinh thể dài). Xem thử: `game-moi/index.html?thu=1e`.
+- 1f Tuyết Cú (chờ duyệt): cắt bằng `tools/cat_3_bac.py`, 3 thân (có đế đá băng, giữ nguyên vì là thiết kế). Tỉ lệ thu 0.1409; bậc 1 cao 58px, bậc 2 cao 83px, bậc 3 cao 112px (cánh xòe rộng 122px nên bị khống chế chiều ngang). Xem thử: `game-moi/index.html?thu=1f`.
 
 ## PNG (từ 1e trở đi đã đẩy thẳng bằng git; 1a-1d đã upload tay)
-Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png; 02-tuyet-hung-b1.png, -b2.png, -b3.png; 03-bang-loc-b1.png, -b2.png, -b3.png; 04-tuyet-bao-b1.png, -b2.png, -b3.png; 05-bang-hai-b1.png, -b2.png, -b3.png
+Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png; 02-tuyet-hung-b1.png, -b2.png, -b3.png; 03-bang-loc-b1.png, -b2.png, -b3.png; 04-tuyet-bao-b1.png, -b2.png, -b3.png; 05-bang-hai-b1.png, -b2.png, -b3.png; 06-tuyet-cu-b1.png, -b2.png, -b3.png
 
 ## Chưa làm
 - Chưa thêm dòng `<script src="51-thu-moi.js"></script>` vào index.html (sau 50-skin.js). Trang demo tự nạp file này nên vẫn chạy.
 
 ## Việc kế tiếp
-Chờ duyệt 1a-1e, rồi 1f Tuyết Cú (nói "tiếp").
+Chờ duyệt 1a-1f, rồi 1g Băng Dương (nói "tiếp").
