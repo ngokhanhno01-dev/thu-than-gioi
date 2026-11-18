@@ -26,9 +26,9 @@ h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .btn.main::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:shine 3.4s ease-in-out infinite}
 @keyframes shine{0%,55%{left:-60%}100%{left:130%}}
 .btn.main:active{transform:scale(.98)}
-.btn.sub{color:#eafff6;background:rgba(10,30,40,.55);box-shadow:0 0 0 1.5px rgba(111,209,160,.7) inset;backdrop-filter:blur(3px)}
 .btn[hidden]{display:none}
 .note{margin:0;font-size:12.5px;color:#b9d8cd;text-shadow:0 1px 4px #000}
+.note.need{font-size:14px;color:#ffe9a0}
 .ok{color:var(--teal);font-weight:700}
 /* hộp hướng dẫn cài tay */
 .help{position:fixed;inset:0;z-index:10;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.6)}
@@ -53,7 +53,6 @@ h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
   <div class="btns">
     <button class="btn main" id="btn-install" type="button">⬇ Tải về máy</button>
     <a class="btn main" id="btn-open" href="../game-moi/index.html?from=pwa" hidden>▶ Vào chơi</a>
-    <a class="btn sub" id="btn-web" href="../game-moi/index.html">Chơi ngay trên trình duyệt</a>
   </div>
   <p class="note" id="note">Không cần cửa hàng ứng dụng • Không tốn dung lượng đáng kể • Gỡ bất cứ lúc nào</p>
 </main>
@@ -69,18 +68,20 @@ h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
     <h3>iPhone / iPad (Safari)</h3>
     <ol><li>Bấm nút <b>Chia sẻ</b> (hình vuông có mũi tên lên) ở thanh dưới.</li><li>Kéo xuống, chọn <b>"Thêm vào MH chính"</b>.</li><li>Bấm <b>Thêm</b>.</li></ol>
   </div>
-  <div class="warn">Mở game từ biểu tượng ở màn hình chính để chơi toàn màn hình, không còn thanh địa chỉ.</div>
+  <div class="warn">Game chỉ chơi được khi mở từ biểu tượng ở màn hình chính (toàn màn hình, không còn thanh địa chỉ). Nếu bạn đã cài rồi, hãy mở game từ biểu tượng đó.</div>
   <button class="x" id="help-x" type="button">Đã hiểu</button>
 </div></div>
 
 <script>
 (function(){
-  var $=function(i){return document.getElementById(i)},bi=$('btn-install'),bo=$('btn-open'),bw=$('btn-web'),note=$('note'),help=$('help'),dp=null;
+  var $=function(i){return document.getElementById(i)},bi=$('btn-install'),bo=$('btn-open'),note=$('note'),help=$('help'),dp=null;
   var ua=navigator.userAgent||'',isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
       inApp=/FBAN|FBAV|Zalo|Instagram|Line\/|MicroMessenger|; wv\)/i.test(ua),
       standalone=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-  function showInstalled(msg){bi.hidden=true;bo.hidden=false;bw.hidden=true;note.innerHTML='<span class="ok">'+(msg||'Đã cài đặt trên máy bạn.')+'</span> Mở game từ biểu tượng ở màn hình chính.'}
-  if(standalone){bi.hidden=true;bo.hidden=false;bw.hidden=true;note.innerHTML='<span class="ok">Bạn đang dùng bản đã tải về.</span>'}
+  /* Game chỉ chơi được khi đã cài. Đang ở trình duyệt thường thì không có nút vào game; sau khi cài xong phải mở từ biểu tượng ở màn hình chính. */
+  function showInstalled(msg){bi.hidden=true;bo.hidden=true;note.className='note';note.innerHTML='<span class="ok">'+(msg||'Đã cài đặt trên máy bạn.')+'</span> Hãy mở game từ biểu tượng ở màn hình chính.'}
+  if(standalone){bi.hidden=true;bo.hidden=false;note.innerHTML='<span class="ok">Bạn đang dùng bản đã tải về.</span>'}
+  else if(/[?&]can-cai=1/.test(location.search)){note.className='note need';note.textContent='Game chỉ chơi được khi đã tải về máy. Bấm "Tải về máy" rồi mở game từ biểu tượng ở màn hình chính.'}
   if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('../pwa-moi-sw.js').catch(function(){});
   addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e});
   addEventListener('appinstalled',function(){dp=null;showInstalled('Đã tải về máy thành công!')});

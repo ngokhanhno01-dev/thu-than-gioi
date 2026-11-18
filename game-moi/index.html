@@ -1,14 +1,27 @@
 <!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8">
 <base href="../">
+<script>
+/* CHỈ CHƠI BẢN ĐÃ TẢI VỀ MÁY (PWA). Mở bằng trình duyệt thường -> tự chuyển về trang chủ để tải. */
+(function(){
+  function mm(q){try{return matchMedia(q).matches}catch(e){return false}}
+  var app=mm('(display-mode: fullscreen)')||mm('(display-mode: standalone)')||mm('(display-mode: minimal-ui)')||mm('(display-mode: window-controls-overlay)')||navigator.standalone===true;
+  window.TTG_APP=app;
+  if(!app){
+    window.TTG_BLOCK=true;
+    document.documentElement.style.visibility='hidden';
+    try{location.replace(new URL('trang-chu/?can-cai=1',document.baseURI).href)}catch(e){location.href='../trang-chu/?can-cai=1'}
+  }
+})();
+</script>
 <link rel="preload" as="image" href="img-boot-ngang.webp">
 <link rel="preload" as="image" href="img-boot-frame.webp">
 <style id="boot-css">
-/* MÀN CHỜ (game ngang). Màn dọc: nền tối + chữ "chạm để xoay ngang". Màn ngang: ảnh nền phủ toàn màn hình, thanh tiến trình ở đáy;
+/* MÀN CHỜ (game ngang). Màn dọc: nền tối + chữ "xoay ngang". Màn ngang: ảnh nền phủ toàn màn hình, thanh tiến trình ở đáy;
    tải xong thì chữ "Chạm vào màn hình để vào Thú Thần Giới" nổi giữa màn hình, chạm bất kỳ đâu để vào. Không có nút. */
 #ttg-boot{position:fixed;inset:0;z-index:2147483000;overflow:hidden;background:#161826;color:#e8fff4;font-family:'VT323',monospace;text-align:center;transition:opacity .6s ease;-webkit-tap-highlight-color:transparent}
 #ttg-boot.out{opacity:0;pointer-events:none}
-#ttg-boot .gate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#161826;cursor:pointer}
+#ttg-boot .gate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#161826}
 #ttg-boot .gate div{font:bold clamp(20px,6.2vw,32px)/1.3 sans-serif;color:#fff;max-width:90vw}
 #ttg-boot .scene{position:absolute;inset:0}
 #ttg-boot .pic{position:absolute;inset:0;background:#0b1020 url(img-boot-ngang.webp) 50% 50%/cover no-repeat}
@@ -86,7 +99,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 #tst{position:absolute;left:50%;transform:translateX(-50%);top:calc(30px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 8px;border-radius:3px;opacity:0;transition:opacity .2s;pointer-events:none!important;z-index:30;white-space:nowrap}
 </style></head><body>
 <div id="ttg-boot" role="status" aria-live="polite">
-  <div class="gate" id="tb-gate"><div id="tb-gt">Chạm vào màn hình để xoay ngang</div></div>
+  <div class="gate" id="tb-gate"><div id="tb-gt">Hãy xoay ngang điện thoại để chơi</div></div>
   <div class="scene" id="tb-scene">
     <div class="pic"></div><div class="mist m1"></div><div class="mist m2"></div><div class="glow"></div><div class="moon"></div><canvas id="tb-fx"></canvas><div class="shade"></div>
     <div class="panel" id="tb-panel"><div class="enter" id="tb-enter">Chạm vào màn hình để vào Thú Thần Giới</div><div class="frame" id="tb-frame"><div class="slot" id="tb-slot"><i id="boot-fill"><canvas id="tb-wave"></canvas></i><div class="tip" id="tb-tip"></div></div><div class="fr"></div><span id="tb-pct">0%</span></div></div>
@@ -94,36 +107,25 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 </div>
 <script>
 /* Màn chờ game-moi. TTGBOOT.ready() (gọi khi ảnh thú đã nạp xong) -> thanh chạy tới 100% rồi chữ "Chạm vào màn hình để vào..." nổi giữa màn hình;
-   chạm vào đâu cũng vào game. Quá 30 giây chưa xong cũng cho vào. Màn dọc: chạm vào màn đen để vào toàn màn hình + khóa ngang (nếu máy cho phép). */
+   chạm vào đâu cũng vào game. Quá 30 giây chưa xong cũng cho vào. Game chỉ chạy trong bản đã cài (app tự toàn màn hình + khóa ngang theo manifest), nên KHÔNG gọi requestFullscreen nữa. */
 (function(){
   var el=document.getElementById('ttg-boot'),fill=document.getElementById('boot-fill'),pctEl=document.getElementById('tb-pct'),
-    gt=document.getElementById('tb-gt'),n=0,pct=0,floor=0,ready=false,done=false,shown=false,t0=Date.now(),start=t0,panel=document.getElementById('tb-panel');
+    n=0,pct=0,floor=0,ready=false,done=false,shown=false,t0=Date.now(),start=t0,panel=document.getElementById('tb-panel');
   var tip=document.getElementById('tb-tip');
   function paint(){var p=Math.max(0,Math.min(100,pct));fill.style.width=p+'%';pctEl.textContent=Math.floor(p)+'%';tip.style.left=p+'%';tip.style.opacity=(p>0&&p<99.5)?1:0}
   var MIN=5000; /* thanh chạy theo thời gian: tối thiểu 5 giây mới tới 100% */
   var iv=setInterval(function(){
     var now=Date.now();
-    if(now<start){panel.style.opacity=0;pct=0;paint();return}   /* đang chờ thông báo "thoát toàn màn hình" của Chrome biến mất */
     panel.style.opacity=1;
     var base=Math.min(100,(now-start)/MIN*100);
     pct=ready?base:Math.min(base,90);
     paint();
     if(ready&&pct>=100&&!shown){shown=true;pct=100;paint();el.className='ready'}
   },50);
-  function onFS(){if(isFS()){start=Date.now()+3800;panel.style.opacity=0}} /* Chrome hiện thông báo ~3-4 giây ở đáy màn hình khi vào toàn màn hình: ẩn thanh cho tới khi nó tắt */
-  document.addEventListener('fullscreenchange',onFS);document.addEventListener('webkitfullscreenchange',onFS);
   document.addEventListener('DOMContentLoaded',function(){floor=Math.max(floor,35)});
   window.addEventListener('load',function(){floor=Math.max(floor,75)});
   function hide(){if(done||!el)return;done=true;clearInterval(iv);el.className='out';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},700)}
   function setReady(){if(done)return;ready=true}
-  function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement)}
-  function rotate(){
-    var e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;
-    try{if(f&&!isFS()){var p=f.call(e);if(p&&p.then)p.then(function(){try{screen.orientation.lock('landscape').catch(function(){})}catch(x){}}).catch(function(){})}
-      else if(isFS()){screen.orientation.lock('landscape').catch(function(){})}}catch(x){}
-    setTimeout(function(){if(!done&&innerHeight>innerWidth)gt.textContent='Hãy xoay ngang điện thoại để chơi'},1200);
-  }
-  document.getElementById('tb-gate').addEventListener('click',rotate);
   document.getElementById('tb-scene').addEventListener('click',function(){if(shown)hide()});
   window.TTGBOOT={hide:hide,ready:setReady};
   setTimeout(setReady,30000);
@@ -196,20 +198,22 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script>
 /* GAME MỚI (khung ban đầu). Màn ngang, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
-   Chạm lần đầu -> vào toàn màn hình + khóa ngang.
+   CHỈ CHẠY KHI ĐÃ CÀI THÀNH APP (đoạn guard ở đầu file; mở bằng trình duyệt thường sẽ bị chuyển về trang-chu/ để tải).
+   App tự toàn màn hình + khóa ngang theo pwa-moi.webmanifest, nên game KHÔNG gọi requestFullscreen nữa (tránh thông báo của Chrome).
    Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
    VỊ TRÍ THÚ: thú bên trái đứng ngay giữa nút "Chỉ số" (theo vị trí nút thật trên màn hình, kéo nút là thú đi theo).
    Thú bên phải đối xứng với thú trái qua giữa màn hình (W - x trái).
    ĐỔI BẬC: 2 nút "Bạn: bậc N" và "Địch: bậc N" (id tm, te), bấm để xoay vòng 1 -> 2 -> 3 -> 1 (MAXB = 3).
    Nút mới thêm vào danh sách sẽ tự xếp vào chỗ trống cuối thanh dưới, KHÔNG làm mất bố cục đã sắp xếp.
-   NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ toàn màn hình và 2 nút đổi bậc).
+   NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ và 2 nút đổi bậc).
    Bấm "✎ Sắp xếp" để kéo nút đi chỗ khác, phóng to/thu nhỏ, đổi tên từng nút (ô gõ ngay trên màn hình).
    Bố cục + tên nút lưu ở khóa ttg_moi_layout_v1 (trường t = tên tự đặt).
    Lúc đang gõ tên (typing=true) KHÔNG tính lại bố cục, để bàn phím không làm xô lệch nút. */
 (function(){
+if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
-var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,triedFS=false,typing=false;
+var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,typing=false;
 var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16,MAXB=3;
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
@@ -217,10 +221,6 @@ var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]h
 function dp(id,b,cx,by){THU_MOI.setFrame(192);THU_MOI.draw(ctx,id,b,cx,by,128);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
-function isFS(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
-function full(){var e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(!f||isFS())return;
- try{var p=f.call(e);if(p&&p.then)p.then(function(){try{screen.orientation.lock('landscape').catch(function(){});}catch(x){}}).catch(function(){});}catch(x){}}
-function exitFull(){var f=document.exitFullscreen||document.webkitExitFullscreen;if(f){try{var p=f.call(document);if(p&&p.catch)p.catch(function(){});}catch(x){}}}
 function resize(){
  if(typing)return;
  DPR=window.devicePixelRatio||1;
@@ -278,7 +278,7 @@ UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.
  e.addEventListener('pointerup',function(ev){
   if(drag&&drag.id===u.id){drag=null;saveLay();return;}
   if(ed)return;
-  if(u.id==='fs'){triedFS=true;if(isFS())exitFull();else full();}
+  if(u.id==='fs'){toast('Đang chơi toàn màn hình');}
   else if(u.id==='tt'){openList();}
   else if(u.id==='tm'){bm=bm%MAXB+1;saveB();label('tm');toast('Bạn: bậc '+bm);}
   else if(u.id==='kh'){HD=!HD;try{localStorage.setItem('ttg_moi_hd',HD?'1':'0');}catch(x){}resize();label('kh');toast(HD?'Khung HD 192 (nét)':'Khung 128 (cũ)');}
@@ -344,8 +344,6 @@ document.getElementById('edc').addEventListener('click',function(){closeRename(f
 edi.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();closeRename(true);}else if(e.key==='Escape'){closeRename(false);}});
 document.getElementById('edd').addEventListener('click',function(){var s=sel;defaults();saveLay();UI.forEach(function(u){place(u.id);});selectB(s);});
 document.addEventListener('contextmenu',function(e){if(!e.target||e.target.tagName!=='INPUT')e.preventDefault();});
-/* Toàn màn hình phải gọi trong pointerup (cảm ứng chỉ tính là "chạm thật" lúc nhấc tay). */
-document.addEventListener('pointerup',function(){if(!triedFS&&!ed){triedFS=true;full();}});
 
 /* Danh sách chọn thú: bấm nút "Thú: ..." mở bảng, liệt kê theo vùng từ THU_MOI.zones (thú mới thêm vào 51-thu-moi.js tự có mặt) */
 var tlAt=0;/* lúc mở bảng: bỏ qua click giả của cảm ứng rơi vào bảng ngay sau khi mở */
@@ -384,7 +382,6 @@ function draw(ts){
  if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+60,gy()-170));}}
 function loop(ts){autoTick();draw(ts);requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
-document.addEventListener('fullscreenchange',function(){setTimeout(resize,150);});document.addEventListener('webkitfullscreenchange',function(){setTimeout(resize,150);});
 reset();resize();requestAnimationFrame(loop);
 /* Màn chờ: nạp ảnh bậc đang chọn của 2 bên (vẽ ra ngoài màn để kích hoạt nạp lười) rồi mới cho hiện nút BẮT ĐẦU. Quá 30 giây màn chờ tự cho vào. */
 (function chk(){THU_MOI.setFrame(192);var a=THU_MOI.draw(ctx,ID,bm,-999,-999,128),b=THU_MOI.draw(ctx,ID,be,-999,-999,128);if(a&&b&&window.TTGBOOT)TTGBOOT.ready();else setTimeout(chk,100);})();
