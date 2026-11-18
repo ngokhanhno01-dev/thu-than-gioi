@@ -183,7 +183,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 })();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',function(){navigator.serviceWorker.register('pwa-moi-sw.js').catch(function(){})});</script>
-<video id="bgv" muted playsinline preload="auto" tabindex="-1" disablepictureinpicture src="vid-sanh-tuyet-nguyen-v2.mp4"></video><video id="bgv2" muted playsinline preload="auto" tabindex="-1" disablepictureinpicture src="vid-sanh-tuyet-nguyen-v2.mp4"></video><canvas id="g"></canvas><div id="sa"></div>
+<video id="bgv" muted playsinline preload="none" tabindex="-1" disablepictureinpicture></video><video id="bgv2" muted playsinline preload="none" tabindex="-1" disablepictureinpicture></video><canvas id="g"></canvas><div id="sa"></div>
 <div id="ui">
  <button id="edb">✎ Sắp xếp</button>
  <div id="edt"><span id="edn"></span><button id="edm">−</button><span id="edz"></span><button id="edp">+</button><button id="edr">Đổi tên</button><button id="edd">Mặc định</button><button id="edx">Xong</button></div>
@@ -398,7 +398,7 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
    Video đã làm sẵn vòng lặp liền (cuối hòa vào đầu). Để lặp không khựng, dùng 2 thẻ video (BGV hiện, BGV2 chờ ở giây 0); chỉ còn ~0,07s thì bật cái kia (đang chờ sẵn ở giây 0) rồi đổi chỗ NGAY (không đổi sớm, nếu không hình sẽ nhảy lùi).
    Thêm vùng mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). */
 var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,
- BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen-v2.mp4','suong-coc':'vid-sanh-suong-coc.mp4'},
+ BGV_ZONE={'suong-coc':'vid-sanh-suong-coc.mp4'},
  BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fx:['snow','gust','crystal','aurora','sky-rings','swaying-pines']}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false;
 /* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn video. */
