@@ -8,7 +8,8 @@
       { id: '1a', slug: '01-tuyet-cau', ten: 'Tuyết Cầu', boss: false },
       { id: '1b', slug: '02-tuyet-hung', ten: 'Tuyết Hùng', boss: false },
       { id: '1c', slug: '03-bang-loc', ten: 'Băng Lộc', boss: false },
-      { id: '1d', slug: '04-tuyet-bao', ten: 'Tuyết Báo', boss: false }
+      { id: '1d', slug: '04-tuyet-bao', ten: 'Tuyết Báo', boss: false },
+      { id: '1e', slug: '05-bang-hai', ten: 'Băng Hải', boss: false }
     ] }
   ];
   var byId = {}, cache = {};
