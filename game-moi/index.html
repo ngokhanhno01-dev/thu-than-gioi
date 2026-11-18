@@ -214,7 +214,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,typing=false;
-var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,PET_X=.218,MAXB=3;
+var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,PET_X=.218,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
 var BP=70,GAPB=2,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
@@ -300,6 +300,7 @@ UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.
   if(drag&&drag.id===u.id){drag=null;saveLay();return;}
   if(ed)return;
   if(u.id==='fs'){toast('Đang chơi toàn màn hình');}
+  else if(u.id==='dt'){SCENE=SCENE==='sanh'?'tran':'sanh';if(SCENE==='tran')reset();toast(SCENE==='tran'?'Trận mẫu (bấm Đấu trường để về sảnh)':'Sảnh chính');}
   else if(u.id==='tt'){openList();}
   else if(u.id==='tm'){bm=bm%MAXB+1;saveB();label('tm');toast('Bạn: bậc '+bm);}
   else if(u.id==='kh'){HD=!HD;try{localStorage.setItem('ttg_moi_hd',HD?'1':'0');}catch(x){}resize();label('kh');toast(HD?'Khung HD 192 (nét)':'Khung 128 (cũ)');}
@@ -389,6 +390,10 @@ function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
  ctx.restore();}
 function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
+/* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
+function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.round(Math.sin(ts/380)*2);
+ ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x-40,gy()-2,80,4);
+ dp(ID,bm,x,gy()+bob);}
 function draw(ts){
  var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
  ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);
@@ -399,6 +404,7 @@ function draw(ts){
  var pg=ctx.createLinearGradient(0,pt,0,pt+BP);pg.addColorStop(0,'#151a3a');pg.addColorStop(1,'#0c1026');ctx.fillStyle=pg;ctx.fillRect(fx,pt,fw,BP);
  /* khung (đã dựng sẵn ở độ phân giải máy) */
  if(FL){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
+ if(SCENE==='sanh'){petSanh(ts);return;}
  pet('en',ts);pet('me',ts);
  var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),nm=THU_MOI.byId[ID].ten,by=I.t+32;
  bar(I.l+ox,by,bw,st.me/100,'#3c3',nm+' (bạn)');bar(W-I.r-ox-bw,by,bw,st.en/100,'#c33',nm+' (địch)');
@@ -406,7 +412,7 @@ function draw(ts){
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
  st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
  if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+70,gy()-170));}}
-function loop(ts){autoTick();draw(ts);requestAnimationFrame(loop);}
+function loop(ts){if(SCENE==='tran')autoTick();draw(ts);requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
 reset();resize();requestAnimationFrame(loop);
 /* Màn chờ: nạp ảnh bậc đang chọn của 2 bên (vẽ ra ngoài màn để kích hoạt nạp lười) rồi mới cho hiện nút BẮT ĐẦU. Quá 30 giây màn chờ tự cho vào. */
