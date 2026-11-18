@@ -407,7 +407,7 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
    Thêm vùng video mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). Hiện BGV_ZONE đang TRỐNG (Sương Cốc đã chuyển sang nền ảnh, video đã xóa); cơ chế video vẫn giữ nguyên.
    NỀN ẢNH + HIỆU ỨNG: ảnh tĩnh phủ kín phần trống trong viền (giữ đúng tỉ lệ, cắt bớt phần thừa trên/dưới, không kéo méo), hiệu ứng vẽ bằng canvas, nằm SAU thú.
    Thêm vùng ảnh mới: thêm vào BG_FX_ZONE (khóa zone -> {image: đường dẫn ảnh, fit: true = hiện đủ cả ảnh (hai bên lấp gương) | bỏ đi = phủ kín và cắt bớt, fy: vị trí cắt dọc 0=giữ phần trên .. 1=giữ phần dưới, fx: danh sách hiệu ứng, stars: chỗ sao lấp lánh, crystals: chỗ tinh thể lóe, mistY: độ cao 2 lớp sương (0..1 trên ảnh), mistOpacity: độ đậm sương riêng của vùng}).
-   Hiệu ứng có sẵn: 'snow' tuyết rơi | 'mist' sương trôi | 'aurora' cực quang đổi sáng nhẹ | 'twinkle' sao lấp lánh | 'sparkle' tinh thể lóe | 'firefly' hạt sáng/đom đóm bay lơ lửng | 'streak' vệt gió | 'leaf' lá bay | 'spark' tia điện chớp | 'star' sao lấp lánh ngẫu nhiên (nửa trên) | 'glint' ánh lóe chữ thập (theo crystals nếu có). Màu riêng theo vùng: streakRgb, leafRgb, sparkRgb, glintRgb, flyRgb, mistRgb ('r,g,b'). Tọa độ stars/crystals là tỉ lệ 0..1 trên ảnh gốc (x ngang, y dọc). */
+   Hiệu ứng có sẵn: 'snow' tuyết rơi | 'mist' sương trôi | 'aurora' cực quang đổi sáng nhẹ | 'twinkle' sao lấp lánh | 'sparkle' tinh thể lóe | 'firefly' hạt sáng/đom đóm bay lơ lửng | 'streak' vệt gió | 'leaf' lá bay | 'spark' tia điện chớp | 'star' sao lấp lánh ngẫu nhiên (nửa trên) | 'bolt' tia sét uốn lượn từ trời đánh xuống (boltX = chỗ sét, tỉ lệ ngang 0..1) | 'glint' ánh lóe chữ thập (theo crystals nếu có). Màu riêng theo vùng: streakRgb, leafRgb, sparkRgb, glintRgb, flyRgb, mistRgb ('r,g,b'). Tọa độ stars/crystals là tỉ lệ 0..1 trên ảnh gốc (x ngang, y dọc). */
 var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,
  BGV_ZONE={},
  BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fit:true,fy:.55,fx:['aurora','twinkle','sparkle','snow'],
@@ -415,12 +415,12 @@ var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn
   crystals:[[.06,.9],[.03,.82],[.945,.9],[.97,.84],[.27,.66],[.285,.73],[.745,.68],[.765,.7]]},
  'suong-coc':{image:'game-moi/bg-suong-coc.webp',fit:true,fy:.55,fx:['mist','firefly'],mistY:[.5,.62],mistOpacity:.26},
  'phong-nguyen':{image:'game-moi/bg-phong-nguyen.webp',fit:true,fy:.55,fx:['streak','leaf'],streakRgb:'235,248,255',leafRgb:'150,215,110'},
- 'loi-vuc':{image:'game-moi/bg-loi-vuc.webp',fit:true,fy:.55,fx:['spark','glint'],sparkRgb:'255,230,150',glintRgb:'215,185,255',
+ 'loi-vuc':{image:'game-moi/bg-loi-vuc.webp',fit:true,fy:.55,fx:['bolt','spark','glint'],boltX:[.08,.17,.47,.57,.69,.88],sparkRgb:'255,230,150',glintRgb:'215,185,255',
   crystals:[[.047,.65],[.135,.6],[.069,.86],[.918,.646],[.915,.88],[.658,.85],[.24,.71],[.352,.59],[.342,.94]]},
  'nguyet-cung':{image:'game-moi/bg-nguyet-cung.webp',fit:true,fy:.55,fx:['star','firefly'],flyRgb:'255,236,170'},
  'van-dao':{image:'game-moi/bg-van-dao.webp',fit:true,fy:.55,fx:['mist','glint','firefly'],mistY:[.55,.7],mistOpacity:.2,mistRgb:'228,208,255',glintRgb:'228,200,255',flyRgb:'215,175,255'}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
- bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],bgFly=[],BG_IMGS={};
+ bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],bgFly=[],bgBolts=[],bgBoltNext=0,BG_IMGS={};
 /* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. Khi khung lấn mép (BG_BLEED) thì vùng nền tự mở rộng đúng bằng phần lấn: dày hiệu dụng = BG_EDGE - BG_BLEED. */
 var bgRaf=0,mainRaf=0;
 var BG_EDGE={l:37,r:37,t:32,b:29};
@@ -452,7 +452,15 @@ var BG_FX_CFG={
  starArea:.5,       /* sao chỉ vẽ ở 50% phía trên ảnh */
  starTwinkle:.8,    /* độ sáng tối đa của sao */
  glintCount:12,     /* 'glint' ánh lóe chữ thập: số điểm */
- glintOpacity:.9    /* độ sáng ánh lóe */
+ glintOpacity:.9,   /* độ sáng ánh lóe */
+ boltMax:2,         /* 'bolt' tia sét: tối đa mấy tia cùng lúc */
+ boltEvery:[1.3,3.4],/* khoảng cách giữa 2 lần sét đánh (giây, ngẫu nhiên trong khoảng này) */
+ boltLife:.6,       /* một tia sét tồn tại bao lâu (giây) */
+ boltLen:[.36,.52], /* độ dài tia (tỉ lệ chiều cao ảnh) */
+ boltBranch:3,      /* số nhánh rẽ mỗi tia (0 = không nhánh) */
+ boltWidth:1,       /* độ dày tia (1 = vừa, 1.5 = dày hơn) */
+ boltOpacity:1,     /* độ sáng tia sét */
+ boltFlash:.16      /* độ sáng bầu trời lúc sét chớp (0 = tắt) */
 };
 /* Vùng nền trong khung trên (đơn vị game, tính từ mép trái/trên của màn hình): trả về {l,t,r,b} = độ dày viền hiệu dụng mỗi cạnh. */
 function bgInset(th){var s=Math.min(FSC,(th-20)/500),ov=1,q=BG_BLEED;
@@ -509,6 +517,22 @@ function bgFxBuild(o,conf,rw,rh,m){
  if(!bgSnow.length){bgSnow=[[],[],[]];for(var i=0;i<BG_FX_CFG.snowCount;i++){var q=i%5,k=q<3?0:q-2;bgSnow[k].push({x:Math.random(),y:Math.random()*BG_FX_CFG.snowArea,v:.55+.3*k+Math.random()*.2,ph:Math.random()*6.28});}}
  if(!bgFly.length){for(var n=0;n<BG_FX_CFG.flyCount;n++)bgFly.push({x:Math.random(),y:.3+Math.random()*.65,v:.4+Math.random()*.6,ph:Math.random()*6.28});}
 }
+/* TIA SÉT: dựng đường gấp khúc bằng chia đôi dịch điểm giữa (đoạn dài lệch nhiều, đoạn ngắn lệch ít => uốn lượn tự nhiên), khi vẽ thì làm cong mềm. Tọa độ điểm tính theo đơn vị chiều cao ảnh, gốc là điểm bắt đầu. */
+function bgBoltSeg(x0,y0,x1,y1,lv,amp){var out=[[x0,y0]];
+ (function f(ax,ay,bx,by,l,a){if(!l){out.push([bx,by]);return;}
+  var mx=(ax+bx)/2+(Math.random()-.5)*2*a,my=(ay+by)/2+(Math.random()-.5)*a*.4;f(ax,ay,mx,my,l-1,a*.58);f(mx,my,bx,by,l-1,a*.58);})(x0,y0,x1,y1,lv,amp);
+ return out;}
+function bgBoltNew(conf,T){var C=BG_FX_CFG,L=C.boltLen[0]+Math.random()*(C.boltLen[1]-C.boltLen[0]),
+  X=conf.boltX||[.5],bx=X[Math.floor(Math.random()*X.length)]+(Math.random()-.5)*.03,by=.03+Math.random()*.06,
+  pts=bgBoltSeg(0,0,(Math.random()-.5)*.2,L,5,L*.17),br=[],n=C.boltBranch,i,k,q,d,e;
+ for(k=0;k<n;k++){i=Math.floor(pts.length*(.22+.5*Math.random()));q=pts[i];d=Math.random()<.5?-1:1;
+  e=bgBoltSeg(q[0],q[1],q[0]+d*(.05+Math.random()*.1),q[1]+L*(.2+Math.random()*.3),3,L*.07);br.push({i:i,pts:e});}
+ return {t0:T,bx:bx,by:by,pts:pts,br:br};}
+/* vẽ đường cong mềm qua n điểm đầu của pts (nối qua trung điểm để không còn góc nhọn) */
+function bgBoltPath(pts,n,ox,oy,s){var i,m=pts.length;if(n>m)n=m;if(n<2)return;
+ ctx.moveTo(ox+pts[0][0]*s,oy+pts[0][1]*s);
+ for(i=1;i<n-1;i++)ctx.quadraticCurveTo(ox+pts[i][0]*s,oy+pts[i][1]*s,ox+(pts[i][0]+pts[i+1][0])/2*s,oy+(pts[i][1]+pts[i+1][1])/2*s);
+ ctx.lineTo(ox+pts[n-1][0]*s,oy+pts[n-1][1]*s);}
 function bgDrawFx(ts,x,y,w,h){
  var o=bgImg,conf=bgConf,m=HD?K:1;
  if(!bgBase||bgKW!==w||bgKH!==h||bgKM!==m||bgKI!==o){bgKW=w;bgKH=h;bgKM=m;bgKI=o;bgFxBuild(o,conf,w,h,m);}
@@ -572,6 +596,25 @@ function bgDrawFx(ts,x,y,w,h){
    if(conf.crystals){p=conf.crystals[i%conf.crystals.length];sx=x+G.ox+p[0]*G.dw;sy=y+G.oy+p[1]*G.dh;if(sx<x||sx>x+w)continue;}
    else{sx=x+R(i+20)*w;sy=y+h*(.26+R(i+40)*.6);}
    ctx.globalAlpha=C.glintOpacity*a;ctx.fillRect(sx-3,sy,7,1);ctx.fillRect(sx,sy-3,1,7);}}
+
+ /* tia sét: đánh từ trên xuống (mọc dần ~0,1s), chớp 2 nhịp rồi tắt; có nhánh rẽ, vầng sáng tím + lõi trắng ấm, bầu trời sáng lên theo nhịp chớp */
+ if(F.indexOf('bolt')>=0&&conf.boltX){
+  if(T>=bgBoltNext&&bgBolts.length<C.boltMax){bgBolts.push(bgBoltNew(conf,T));bgBoltNext=T+C.boltEvery[0]+Math.random()*(C.boltEvery[1]-C.boltEvery[0]);}
+  for(i=bgBolts.length-1;i>=0;i--){var B=bgBolts[i],f=(T-B.t0)/C.boltLife;if(f>=1){bgBolts.splice(i,1);continue;}
+   var grow=Math.min(1,f/.12),I=(f<.12?f/.12:Math.pow(1-(f-.12)/.88,1.6))*(.7+.3*Math.abs(Math.sin(f*31)))+.5*Math.exp(-Math.pow((f-.32)/.05,2));
+   I=Math.min(1,I)*C.boltOpacity;if(I<.02)continue;
+   var ox=x+G.ox+B.bx*G.dw,oy=y+G.oy+B.by*G.dh,s=G.dh,sc=G.dh/270*C.boltWidth,nM=Math.max(2,Math.ceil(B.pts.length*grow)),b,bn;
+   if(C.boltFlash>0){var fg=ctx.createLinearGradient(0,y,0,y+h*.65);fg.addColorStop(0,'rgba(185,140,255,'+(C.boltFlash*I)+')');fg.addColorStop(1,'rgba(185,140,255,0)');
+    ctx.globalCompositeOperation='lighter';ctx.globalAlpha=1;ctx.fillStyle=fg;ctx.fillRect(x,y,w,h*.65);}
+   ctx.lineCap='round';ctx.lineJoin='round';
+   var PS=[[11,'rgba(140,90,255,'+(.16*I)+')','lighter'],[5,'rgba(200,160,255,'+(.4*I)+')','lighter'],[1.8,'rgba(255,244,225,'+(.95*I)+')','source-over']];
+   for(var ps=0;ps<3;ps++){ctx.globalCompositeOperation=PS[ps][2];ctx.strokeStyle=PS[ps][1];ctx.globalAlpha=1;
+    ctx.lineWidth=PS[ps][0]*sc;ctx.beginPath();bgBoltPath(B.pts,nM,ox,oy,s);ctx.stroke();
+    ctx.lineWidth=PS[ps][0]*sc*.55;ctx.beginPath();
+    for(b=0;b<B.br.length;b++){if(B.br[b].i>=nM)continue;bn=Math.min(1,(nM-B.br[b].i)/6);bgBoltPath(B.br[b].pts,Math.max(2,Math.ceil(B.br[b].pts.length*bn)),ox,oy,s);}
+    ctx.stroke();}
+   ctx.globalCompositeOperation='source-over';ctx.lineCap='butt';
+  }}
  ctx.restore();
 }
 document.addEventListener('visibilitychange',function(){bgLast=0;if(document.hidden){BGV.pause();BGV2.pause();if(bgRaf){cancelAnimationFrame(bgRaf);bgRaf=0;}if(mainRaf){cancelAnimationFrame(mainRaf);mainRaf=0;}}else{if(bgOn){try{bgCur.play();}catch(e){}if(!bgRaf)bgRaf=requestAnimationFrame(function(){bgTick(bgGen);});}if(!mainRaf)mainRaf=requestAnimationFrame(loop);}});
