@@ -68,7 +68,7 @@
 <style>
 html,body{margin:0;height:100%;background:#000;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
 canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges}
-#bgv{position:fixed;left:0;top:0;width:0;height:0;object-fit:cover;display:none;pointer-events:none;background:#000}/* nền VIDEO của khung trên (đứng TRƯỚC canvas trong HTML nên nằm sau canvas, không dùng z-index âm vì nền đen của body sẽ che; canvas được xóa trong suốt ở vùng khung trên thì video lộ ra) */
+#bgv,#bgv2{position:fixed;left:0;top:0;width:0;height:0;object-fit:fill;display:none;pointer-events:none;background:#000}#bgv2{opacity:0}/* nền VIDEO của khung trên: 2 thẻ video chồng nhau (A hiện, B chờ sẵn ở giây 0) để lặp không khựng; đứng TRƯỚC canvas trong HTML nên nằm sau canvas, không dùng z-index âm vì nền đen của body sẽ che; canvas được xóa trong suốt ở vùng khung trên thì video lộ ra */
 #sa{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 /* Lớp nút ảo (DOM, nằm trên canvas). Mỗi nút: left/top theo px, phóng to/thu nhỏ bằng transform scale */
 #ui{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;pointer-events:none;font-family:sans-serif}
@@ -183,7 +183,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 })();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',function(){navigator.serviceWorker.register('pwa-moi-sw.js').catch(function(){})});</script>
-<video id="bgv" muted loop playsinline preload="auto" tabindex="-1" disablepictureinpicture src="vid-sanh-tuyet-nguyen.mp4"></video><canvas id="g"></canvas><div id="sa"></div>
+<video id="bgv" muted playsinline preload="auto" tabindex="-1" disablepictureinpicture src="vid-sanh-tuyet-nguyen-v2.mp4"></video><video id="bgv2" muted playsinline preload="auto" tabindex="-1" disablepictureinpicture src="vid-sanh-tuyet-nguyen-v2.mp4"></video><canvas id="g"></canvas><div id="sa"></div>
 <div id="ui">
  <button id="edb">✎ Sắp xếp</button>
  <div id="edt"><span id="edn"></span><button id="edm">−</button><span id="edz"></span><button id="edp">+</button><button id="edr">Đổi tên</button><button id="edd">Mặc định</button><button id="edx">Xong</button></div>
@@ -394,13 +394,27 @@ function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
 function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
 /* NỀN VIDEO khung trên (thử cho vùng Tuyết Nguyên, ở sảnh). Các vùng khác chưa có thì vẫn nền trời như cũ.
-   Video 1920x678 (tỉ lệ khung trên), phủ kín vùng khung trên bằng object-fit:cover; viền khung vẽ đè lên. Thêm vùng mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). */
-var BGV=document.getElementById('bgv'),bgOn=false,BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen.mp4'};
+   Video 1920x872 (tỉ lệ 2.2:1, đã cắt từ 16:9 gốc, giữ ~80% chiều cao), kéo vừa KHÍT phần trống BÊN TRONG viền khung (object-fit:fill, không phóng to/cắt thêm); viền khung vẽ đè lên.
+   Video đã làm sẵn vòng lặp liền (cuối hòa vào đầu). Để lặp không khựng, dùng 2 thẻ video (BGV hiện, BGV2 chờ ở giây 0); gần hết thì bật cái kia rồi đổi chỗ.
+   Thêm vùng mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). */
+var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen-v2.mp4'},bgCur=BGV,bgNxt=BGV2,bgSw=false;
+/* độ dày viền khung THẬT (đo ở giữa mỗi cạnh ảnh khung-game.webp, đơn vị px ảnh gốc) */
+var BG_EDGE={l:37,r:37,t:32,b:29};
 function bgWant(){var t=THU_MOI.byId[ID];return SCENE==='sanh'&&!!t&&!!BGV_ZONE[t.zone];}
-function bgLayout(){var f=K/DPR;BGV.style.left=Math.round(I.l*f)+'px';BGV.style.top='0px';BGV.style.width=Math.round((W-I.l-I.r)*f)+'px';BGV.style.height=Math.round(TH()*f)+'px';}
+function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,s=Math.min(FSC,(th-20)/500),ov=1;
+ var l=Math.round(BG_EDGE.l*s)-ov,r=Math.round(BG_EDGE.r*s)-ov,t=Math.round(BG_EDGE.t*s)-ov,b=Math.round(BG_EDGE.b*s)-ov;
+ [BGV,BGV2].forEach(function(v){v.style.left=Math.round((I.l+l)*f)+'px';v.style.top=Math.round(t*f)+'px';v.style.width=Math.round((fw-l-r)*f)+'px';v.style.height=Math.round((th-t-b)*f)+'px';});}
+function bgShow(c,n){c.style.opacity=1;n.style.opacity=0;}
+function bgTick(){if(!bgOn)return;
+ var c=bgCur,n=bgNxt;
+ if(!bgSw&&c.duration&&c.currentTime>c.duration-0.25){bgSw=true;try{n.currentTime=0;}catch(e){}var p=n.play();if(p&&p.catch)p.catch(function(){bgSw=false;});}
+ if(bgSw&&n.currentTime>0.03&&!n.paused){bgShow(n,c);c.pause();try{c.currentTime=0;}catch(e){}bgCur=n;bgNxt=c;bgSw=false;}
+ requestAnimationFrame(bgTick);}
 function bgSync(){var w=bgWant();if(w===bgOn)return;bgOn=w;
- if(w){var f=BGV_ZONE[THU_MOI.byId[ID].zone];if(BGV.getAttribute('src')!==f)BGV.setAttribute('src',f);bgLayout();BGV.style.display='block';var p=BGV.play();if(p&&p.catch)p.catch(function(){});}
- else{BGV.style.display='none';BGV.pause();}}
+ if(w){var f=BGV_ZONE[THU_MOI.byId[ID].zone];[BGV,BGV2].forEach(function(v){if(v.getAttribute('src')!==f)v.setAttribute('src',f);v.style.display='block';});
+  bgLayout();bgCur=BGV;bgNxt=BGV2;bgSw=false;bgShow(BGV,BGV2);try{BGV2.pause();BGV2.currentTime=0;}catch(e){}
+  var p=BGV.play();if(p&&p.catch)p.catch(function(){});requestAnimationFrame(bgTick);}
+ else{BGV.style.display='none';BGV2.style.display='none';BGV.pause();BGV2.pause();}}
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
 function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.round(Math.sin(ts/380)*2);
  dp(ID,bm,x,gy()+bob);}
