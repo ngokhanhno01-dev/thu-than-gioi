@@ -413,7 +413,7 @@ var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn
  BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fit:true,fy:.55,fx:['aurora','twinkle','sparkle','snow'],
   stars:[[.178,.142],[.255,.185],[.67,.074],[.724,.232],[.88,.109]],
   crystals:[[.06,.9],[.03,.82],[.945,.9],[.97,.84],[.27,.66],[.285,.73],[.745,.68],[.765,.7]]},
- 'suong-coc':{image:'game-moi/bg-suong-coc.webp',fy:.78,fx:['mist','firefly'],mistY:[.5,.62],mistOpacity:.26}},
+ 'suong-coc':{image:'game-moi/bg-suong-coc.webp',fit:true,fy:.55,fx:['mist','firefly'],mistY:[.5,.62],mistOpacity:.26}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
  bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],bgFly=[],BG_IMGS={};
 /* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. Khi khung lấn mép (BG_BLEED) thì vùng nền tự mở rộng đúng bằng phần lấn: dày hiệu dụng = BG_EDGE - BG_BLEED. */
