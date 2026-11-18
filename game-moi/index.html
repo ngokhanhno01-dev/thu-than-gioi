@@ -404,17 +404,18 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
    ƯU TIÊN: vùng có cả ảnh lẫn video -> dùng ảnh (khi ảnh đã nạp xong). Muốn giữ video thì thêm pri:'video' vào cấu hình vùng đó trong BG_FX_ZONE.
    NỀN VIDEO: video 1920x872 (tỉ lệ 2.2:1), kéo vừa KHÍT phần trống BÊN TRONG viền khung (object-fit:fill); viền khung vẽ đè lên.
    Video đã làm sẵn vòng lặp liền (cuối hòa vào đầu). Để lặp không khựng, dùng 2 thẻ video (BGV hiện, BGV2 chờ ở giây 0); chỉ còn ~0,07s thì bật cái kia (đang chờ sẵn ở giây 0) rồi đổi chỗ NGAY (không đổi sớm, nếu không hình sẽ nhảy lùi).
-   Thêm vùng video mới: thêm vào BGV_ZONE (khóa zone của thú -> file video).
+   Thêm vùng video mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). Hiện BGV_ZONE đang TRỐNG (Sương Cốc đã chuyển sang nền ảnh, video đã xóa); cơ chế video vẫn giữ nguyên.
    NỀN ẢNH + HIỆU ỨNG: ảnh tĩnh phủ kín phần trống trong viền (giữ đúng tỉ lệ, cắt bớt phần thừa trên/dưới, không kéo méo), hiệu ứng vẽ bằng canvas, nằm SAU thú.
-   Thêm vùng ảnh mới: thêm vào BG_FX_ZONE (khóa zone -> {image: đường dẫn ảnh, fit: true = hiện đủ cả ảnh (hai bên lấp gương) | bỏ đi = phủ kín và cắt bớt, fy: vị trí cắt dọc 0=giữ phần trên .. 1=giữ phần dưới, fx: danh sách hiệu ứng, stars: chỗ sao lấp lánh, crystals: chỗ tinh thể lóe}).
-   Hiệu ứng có sẵn: 'snow' tuyết rơi | 'mist' sương trôi | 'aurora' cực quang đổi sáng nhẹ | 'twinkle' sao lấp lánh | 'sparkle' tinh thể lóe. Tọa độ stars/crystals là tỉ lệ 0..1 trên ảnh gốc (x ngang, y dọc). */
+   Thêm vùng ảnh mới: thêm vào BG_FX_ZONE (khóa zone -> {image: đường dẫn ảnh, fit: true = hiện đủ cả ảnh (hai bên lấp gương) | bỏ đi = phủ kín và cắt bớt, fy: vị trí cắt dọc 0=giữ phần trên .. 1=giữ phần dưới, fx: danh sách hiệu ứng, stars: chỗ sao lấp lánh, crystals: chỗ tinh thể lóe, mistY: độ cao 2 lớp sương (0..1 trên ảnh), mistOpacity: độ đậm sương riêng của vùng}).
+   Hiệu ứng có sẵn: 'snow' tuyết rơi | 'mist' sương trôi | 'aurora' cực quang đổi sáng nhẹ | 'twinkle' sao lấp lánh | 'sparkle' tinh thể lóe | 'firefly' hạt sáng/đom đóm bay lơ lửng. Tọa độ stars/crystals là tỉ lệ 0..1 trên ảnh gốc (x ngang, y dọc). */
 var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,
- BGV_ZONE={'suong-coc':'vid-sanh-suong-coc.mp4'},
+ BGV_ZONE={},
  BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fit:true,fy:.55,fx:['aurora','twinkle','sparkle','snow'],
   stars:[[.178,.142],[.255,.185],[.67,.074],[.724,.232],[.88,.109]],
-  crystals:[[.06,.9],[.03,.82],[.945,.9],[.97,.84],[.27,.66],[.285,.73],[.745,.68],[.765,.7]]}},
+  crystals:[[.06,.9],[.03,.82],[.945,.9],[.97,.84],[.27,.66],[.285,.73],[.745,.68],[.765,.7]]},
+ 'suong-coc':{image:'game-moi/bg-suong-coc.webp',fy:.78,fx:['mist','firefly'],mistY:[.5,.62],mistOpacity:.26}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
- bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],BG_IMGS={};
+ bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],bgFly=[],BG_IMGS={};
 /* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. Khi khung lấn mép (BG_BLEED) thì vùng nền tự mở rộng đúng bằng phần lấn: dày hiệu dụng = BG_EDGE - BG_BLEED. */
 var bgRaf=0,mainRaf=0;
 var BG_EDGE={l:37,r:37,t:32,b:29};
@@ -429,7 +430,10 @@ var BG_FX_CFG={
  auroraOpacity:.10, /* độ sáng thêm của cực quang khi lung linh */
  auroraSpeed:.55,   /* tốc độ lung linh của cực quang */
  starOpacity:.9,    /* độ sáng sao lấp lánh */
- sparkleOpacity:.85 /* độ sáng tinh thể lóe */
+ sparkleOpacity:.85,/* độ sáng tinh thể lóe */
+ flyCount:14,       /* số hạt sáng/đom đóm (máy yếu thì giảm, ví dụ 8) */
+ flySpeed:.012,     /* tốc độ hạt sáng trôi ngang */
+ flyOpacity:.8      /* độ sáng hạt sáng */
 };
 /* Vùng nền trong khung trên (đơn vị game, tính từ mép trái/trên của màn hình): trả về {l,t,r,b} = độ dày viền hiệu dụng mỗi cạnh. */
 function bgInset(th){var s=Math.min(FSC,(th-20)/500),ov=1,q=BG_BLEED;
@@ -482,8 +486,9 @@ function bgFxBuild(o,conf,rw,rh,m){
   g.save();g.translate((ox+2*dw)*m,0);g.scale(-1,1);g.drawImage(o.img,0,0,dw*m,dh*m);g.restore();
  }else g.drawImage(o.img,ox*m,oy*m,dw*m,dh*m);
  bgBase=c;bgGeo={ox:ox,oy:oy,dw:dw,dh:dh};
- bgSpr={snow:[bgSoft(2*m,'255,255,255'),bgSoft(3.2*m,'255,255,255'),bgSoft(4.6*m,'240,250,255')],mist:bgSoft(128,'205,230,255'),star:bgStar(24*m),spark:bgStar(10*m),aur:bgAur()};
+ bgSpr={snow:[bgSoft(2*m,'255,255,255'),bgSoft(3.2*m,'255,255,255'),bgSoft(4.6*m,'240,250,255')],mist:bgSoft(128,'205,230,255'),star:bgStar(24*m),spark:bgStar(10*m),aur:bgAur(),fly:bgSoft(12*m,'200,255,210')};
  if(!bgSnow.length){bgSnow=[[],[],[]];for(var i=0;i<BG_FX_CFG.snowCount;i++){var q=i%5,k=q<3?0:q-2;bgSnow[k].push({x:Math.random(),y:Math.random()*BG_FX_CFG.snowArea,v:.55+.3*k+Math.random()*.2,ph:Math.random()*6.28});}}
+ if(!bgFly.length){for(var n=0;n<BG_FX_CFG.flyCount;n++)bgFly.push({x:Math.random(),y:.3+Math.random()*.65,v:.4+Math.random()*.6,ph:Math.random()*6.28});}
 }
 function bgDrawFx(ts,x,y,w,h){
  var o=bgImg,conf=bgConf,m=HD?K:1;
@@ -502,10 +507,10 @@ function bgDrawFx(ts,x,y,w,h){
    for(j=0;j<=24;j++){var q=j/24,px=ax+q*aw,py=ay+Math.sin(q*6.283+T*.35+i*2.1)*amp+Math.sin(q*3.1416-T*.22+i)*amp*.35;if(!j)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
    ctx.stroke();
   }ctx.lineCap='butt';}
- /* sương: 2 lớp trôi ngang lệch tốc độ, mỗi lớp 3 mảng, mờ dần ở hai đầu nên không bị giật khi quay vòng */
- if(F.indexOf('mist')>=0){var ML=[[.68,.55,1,.7],[.82,.65,1.8,1]];
+ /* sương: 2 lớp trôi ngang lệch tốc độ, mỗi lớp 3 mảng, mờ dần ở hai đầu nên không bị giật khi quay vòng. Vùng có thể tự đặt độ cao (mistY) và độ đậm (mistOpacity). */
+ if(F.indexOf('mist')>=0){var my=conf.mistY||[.68,.82],mo=conf.mistOpacity!=null?conf.mistOpacity:C.mistOpacity,ML=[[my[0],.55,1,.7],[my[1],.65,1.8,1]];
   for(i=0;i<2;i++){var L=ML[i],bw=w*.42,bh=G.dh*L[1]*.3;
-   for(j=0;j<3;j++){var f=(T*C.mistSpeed*L[2]+j/3)%1;ctx.globalAlpha=C.mistOpacity*L[3]*Math.sin(f*Math.PI);
+   for(j=0;j<3;j++){var f=(T*C.mistSpeed*L[2]+j/3)%1;ctx.globalAlpha=mo*L[3]*Math.sin(f*Math.PI);
     ctx.drawImage(S.mist,x+(f*1.5-.25)*w-bw/2,y+G.oy+G.dh*L[0]-bh/2,bw,bh);}}}
  /* sao lấp lánh */
  if(F.indexOf('twinkle')>=0&&conf.stars){for(i=0;i<conf.stars.length;i++){p=conf.stars[i];sx=x+G.ox+p[0]*G.dw;sy=y+G.oy+p[1]*G.dh;
@@ -515,6 +520,11 @@ function bgDrawFx(ts,x,y,w,h){
  if(F.indexOf('sparkle')>=0&&conf.crystals){for(i=0;i<conf.crystals.length;i++){p=conf.crystals[i];sx=x+G.ox+p[0]*G.dw;sy=y+G.oy+p[1]*G.dh;
   if(sy<y||sy>y+h||sx<x||sx>x+w)continue;a=Math.pow(Math.max(0,Math.sin(T*1.1+i*2.3)),6);if(a<.05)continue;sz=4+6*a;
   ctx.globalAlpha=C.sparkleOpacity*a;ctx.drawImage(S.spark,sx-sz/2,sy-sz/2,sz,sz);}}
+ /* hạt sáng/đom đóm: bay lơ lửng chậm, nhấp nháy, nằm ở nửa dưới khung (gần mặt đất) */
+ if(F.indexOf('firefly')>=0){for(i=0;i<bgFly.length;i++){p=bgFly[i];p.x+=C.flySpeed*p.v*dt/1000;if(p.x>1.03)p.x=-.03;
+  sx=x+w*p.x+Math.sin(T*.7*p.v+p.ph)*w*.012;sy=y+h*p.y+Math.sin(T*.5*p.v+p.ph*1.3)*h*.03;
+  a=.5+.5*Math.sin(T*(1.2+p.v)+p.ph);sz=5+5*p.v;
+  ctx.globalAlpha=C.flyOpacity*a*Math.min(1,Math.min(p.x+.03,1.03-p.x)*12);ctx.drawImage(S.fly,sx-sz/2,sy-sz/2,sz,sz);}}
  /* tuyết: 3 cỡ hạt (xa nhỏ/chậm, gần lớn/nhanh), trôi nhẹ sang phải */
  if(F.indexOf('snow')>=0){for(k=0;k<3;k++){var arr=bgSnow[k],sp=S.snow[k],d=sp.width/m;ctx.globalAlpha=C.snowOpacity*(.5+.2*k);
   for(j=0;j<arr.length;j++){p=arr[j];p.y+=C.snowSpeed*p.v*dt/1000;p.x+=(.006+.006*Math.sin(T*.6+p.ph))*p.v*dt/1000;
