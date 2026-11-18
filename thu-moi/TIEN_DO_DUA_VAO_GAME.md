@@ -1,7 +1,13 @@
 # TIẾN ĐỘ ĐƯA THÚ MỚI VÀO GAME
 
+## Kiểu cắt đã chốt: D (BẮT BUỘC cho mọi con từ nay)
+Lệnh: `python3 tools/cat_3_bac.py <anh-goc> thu-game/<slug-vung> <NN-slug> 128 --kieu-d` (thêm `--gan-gan-nhat` nếu các bậc chồng nhau về x).
+D = thu 2 bước LANCZOS, tô màu gần nhất vào vùng trong suốt rồi UnsharpMask (radius 0.9, percent 70, threshold 3), làm mịn alpha (gaussian 0.7) rồi alpha cứng 0/255 ngưỡng 110, bỏ nhú 1px và mảnh lẻ dưới 4px.
+Lý do: bản cũ (LANCZOS 1 phát từ ~1770px xuống 128px) bị mờ. Đã so mắt trên 1d: A (cũ) mờ; B (2 bước + sắc mạnh) lởm chởm; C (thêm tương phản/bão hòa) gắt; D mịn viền, nét hơn A; E (D + gom 32 màu) gần như không khác D mà có rủi ro vỡ dải màu hào quang nên không dùng. Không bỏ cờ --kieu-d, không tự đổi tham số khi chưa được người dùng cho phép.
+Trạng thái áp dụng D: 1d đã cắt lại theo D. Các con khác (1a-1c, 1e-1j, vùng 2, vùng 3) vẫn là bản LANCZOS cũ, chờ người dùng nói "áp dụng D" để cắt lại hàng loạt (ảnh gốc ở `thu-moi/`, ghi đè PNG trong `thu-game/`; vùng 2 và 3 dùng ảnh v4 đã đối chiếu, nghi ngờ thì hỏi).
+
 ## Cỡ khung đã chốt
-128x128 (hằng FRAME trong 51-thu-moi.js). Cùng 1 tỉ lệ thu cho 3 bậc/con; LANCZOS rồi alpha cứng (ngưỡng 110). Chân chạm đáy, căn giữa ngang, lề 3px cho bậc lớn nhất.
+128x128 (hằng FRAME trong 51-thu-moi.js). Cùng 1 tỉ lệ thu cho 3 bậc/con; kiểu D ở trên (alpha cứng ngưỡng 110). Chân chạm đáy, căn giữa ngang, lề 3px cho bậc lớn nhất.
 
 ## Đã xong
 - 1a Tuyết Cầu (mẫu, đang chờ duyệt). Cắt tại khe trống alpha=0 (x=321-446 và x=898-951 của ảnh gốc), không cắt vào hình.

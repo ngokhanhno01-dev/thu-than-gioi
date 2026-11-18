@@ -4,10 +4,11 @@ Dùng: python3 tools/cat_3_bac.py <anh-goc.png> <thu-game/slug-vung> <NN-slug> [
 - Tách theo thành phần liên thông (alpha>0), gán vào bậc theo vị trí x; mảnh rời gán theo tâm gần nhất.
 - Cùng 1 tỉ lệ thu cho cả 3 bậc, lề 3px cho bậc lớn nhất, căn giữa ngang, chân chạm đáy.
 - LANCZOS rồi alpha cứng 0/255 (ngưỡng 110 như SOLID_ALPHA ở 02-sprites-engine.js).
+Cờ --kieu-d (LUÔN DÙNG): kiểu D đã chốt = thu 2 bước + làm sắc nhẹ + làm mịn viền alpha + bỏ pixel lẻ (xem TIEN_DO_DUA_VAO_GAME.md). Không có cờ = LANCZOS cũ (chỉ để so sánh).
 Cờ --gan-gan-nhat: mảnh rời (đảo đá, mây, đèn lồng) gán theo thân gần nhất thay vì theo tâm x.
 Tham số cuối dạng 'stage:xmin-xmax' (vd 3:880-1010) ép mảnh có tâm x trong khoảng đó vào bậc chỉ định."""
 import sys, numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 from scipy import ndimage as ndi
 src, outdir, name = sys.argv[1:4]
 F = int(sys.argv[4]) if len(sys.argv) > 4 and sys.argv[4].isdigit() else 128
@@ -24,6 +25,7 @@ assert len(big) >= 3, f'chỉ thấy {len(big)} thân lớn'
 big = sorted(sorted(big, key=lambda i: -sizes[i])[:3], key=lambda i: objs[i][1].start)
 cen = [(objs[i][1].start + objs[i][1].stop) / 2 for i in big]
 stage = {}
+KIEU_D = '--kieu-d' in sys.argv
 NEAR = '--gan-gan-nhat' in sys.argv  # mảnh rời gán cho thân có pixel GẦN NHẤT (không theo tâm x); dùng khi các bậc chồng nhau về x
 if NEAR: dist = [ndi.distance_transform_edt(lab != (i + 1)) for i in big]
 for i in range(n):
@@ -49,8 +51,22 @@ for s in (1, 2, 3):
     x0, y0, x1, y1 = boxes[s]; B = A.copy(); B[~masks[s]] = 0
     crop = Image.fromarray(B[y0:y1, x0:x1], 'RGBA')
     w, h = max(1, round(crop.width * sc)), max(1, round(crop.height * sc))
-    r = np.array(crop.resize((w, h), Image.LANCZOS))
-    r[:, :, 3] = np.where(r[:, :, 3] >= 110, 255, 0); r[r[:, :, 3] == 0] = 0
+    if KIEU_D:
+        mid = crop.resize((w * 3, h * 3), Image.LANCZOS) if crop.width > w * 3 else crop  # thu 2 bước
+        r = np.array(mid.resize((w, h), Image.LANCZOS))
+        ia = ndi.distance_transform_edt(r[:, :, 3] == 0, return_distances=False, return_indices=True)
+        rgb = Image.fromarray(r[ia[0], ia[1], :3], 'RGB')  # tô màu gần nhất vào vùng trong suốt để làm sắc không ám viền
+        r[:, :, :3] = np.array(rgb.filter(ImageFilter.UnsharpMask(radius=0.9, percent=70, threshold=3)))
+        m = ndi.gaussian_filter(r[:, :, 3].astype(float), 0.7) >= 110  # làm mịn viền alpha
+        m = ndi.binary_opening(m, structure=np.ones((2, 2))) | ndi.binary_erosion(m)  # bỏ nhú 1px
+        lb, k = ndi.label(m, structure=np.ones((3, 3)))
+        for j, z in enumerate(ndi.sum(m, lb, range(1, k + 1))):
+            if z < 4: m[lb == j + 1] = False  # bỏ pixel/mảnh lẻ dưới 4px
+        r[:, :, 3] = np.where(m, 255, 0)
+    else:
+        r = np.array(crop.resize((w, h), Image.LANCZOS))
+        r[:, :, 3] = np.where(r[:, :, 3] >= 110, 255, 0)
+    r[r[:, :, 3] == 0] = 0
     ys, xs = np.where(r[:, :, 3] > 0); r = r[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
     h, w = r.shape[:2]; assert w <= F and h <= F
     fr = np.zeros((F, F, 4), np.uint8); ox = (F - w) // 2; oy = F - h
