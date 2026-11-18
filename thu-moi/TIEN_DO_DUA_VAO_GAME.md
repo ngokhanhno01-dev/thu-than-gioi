@@ -67,7 +67,7 @@ Trạng thái áp dụng D: ĐÃ cắt lại toàn bộ vùng 1, 2, 3 (30 con, 1
 - 6g Phong Bi (chờ duyệt): kiểu D, tỉ lệ thu 0.1452; bậc 1 cao 59px, bậc 2 cao 82px, bậc 3 cao 121px.
 - 6h Phong Lô (chờ duyệt): kiểu D, tỉ lệ thu 0.1424; bậc 1 cao 51px, bậc 2 cao 89px, bậc 3 cao 121px.
 - 6i Phong Tích (chờ duyệt): kiểu D, tỉ lệ thu 0.1472; bậc 1 cao 48px, bậc 2 cao 80px, bậc 3 cao 117px.
-- 6j Phong Nguyên Vũ Xà, BOSS (chờ duyệt): kiểu D, tỉ lệ thu 0.1386; bậc 1 cao 63px, bậc 2 cao 93px, bậc 3 cao 121px.
+- 6j Phong Nguyên Vũ Xà, BOSS (chờ duyệt): LÀM LẠI bằng ảnh mới (cánh lông vũ, thay bản cũ có vòng sáng + gió phát sáng). Kiểu D + `--gan-gan-nhat`, tỉ lệ thu 0.1548; bậc 1 cao 49px, bậc 2 cao 93px, bậc 3 cao 120px; bậc 3 tối ~28% (bản cũ ~20%), mảnh lẻ <30px còn 5 (bản cũ 9). Ảnh gốc mới tách nền từ magenta bằng công cụ tự viết + `hau_xu_ly_anh_thu.py --bg magenta`; PNG tách nền chưa có trong `thu-moi/phong-nguyen/` (file đó vẫn là ảnh cũ, chỉ đọc), người dùng giữ bản `phong-nguyen-10-phong-nguyen-vu-xa_v5-tach-nen.png`.
 - **Vùng 6 Phong Nguyên (z3) đã đủ 10 con (6a-6j), làm TRƯỚC vùng 5** vì người dùng gửi ảnh v4 trước. Ảnh gửi vào chat, alpha khớp từng pixel với `thu-moi/phong-nguyen/` trên nhánh. Tất cả dùng `--kieu-d --gan-gan-nhat` (không dùng cờ gán gần nhất thì lá / mây của bậc 3 dính vào bậc 2; đã so mắt trên 6a, 6d, 6g, 6h, 6j). PNG đã đẩy thẳng vào `thu-game/phong-nguyen/`.
 
 ## PNG (từ 1e trở đi đã đẩy thẳng bằng git; 1a-1d đã upload tay)
