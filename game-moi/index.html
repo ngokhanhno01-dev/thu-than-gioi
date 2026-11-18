@@ -410,16 +410,18 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
    Hiệu ứng có sẵn: 'snow' tuyết rơi | 'mist' sương trôi | 'aurora' cực quang đổi sáng nhẹ | 'twinkle' sao lấp lánh | 'sparkle' tinh thể lóe. Tọa độ stars/crystals là tỉ lệ 0..1 trên ảnh gốc (x ngang, y dọc). */
 var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,
  BGV_ZONE={'suong-coc':'vid-sanh-suong-coc.mp4'},
- BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fit:true,fy:.55,fx:['snow','mist','aurora','twinkle','sparkle'],
+ BG_FX_ZONE={'tuyet-nguyen':{image:'game-moi/bg-tuyet-nguyen.webp',fit:true,fy:.55,fx:['aurora','twinkle','sparkle','snow'],
   stars:[[.178,.142],[.255,.185],[.67,.074],[.724,.232],[.88,.109]],
   crystals:[[.06,.9],[.03,.82],[.945,.9],[.97,.84],[.27,.66],[.285,.73],[.745,.68],[.765,.7]]}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
  bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],BG_IMGS={};
 /* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. Khi khung lấn mép (BG_BLEED) thì vùng nền tự mở rộng đúng bằng phần lấn: dày hiệu dụng = BG_EDGE - BG_BLEED. */
+var bgRaf=0,mainRaf=0;
 var BG_EDGE={l:37,r:37,t:32,b:29};
 /* ===== CẤU HÌNH HIỆU ỨNG (chỉnh ở đây) ===== */
 var BG_FX_CFG={
- snowCount:40,      /* số hạt tuyết (máy yếu thì giảm, ví dụ 25) */
+ snowCount:24,      /* số hạt tuyết (máy yếu thì giảm, ví dụ 20) */
+ snowArea:.78,      /* tuyết chỉ rơi ở 78% phía trên khung */
  snowSpeed:.05,     /* tốc độ rơi (phần chiều cao khung mỗi giây) */
  snowOpacity:.85,   /* độ đậm của tuyết */
  mistOpacity:.14,   /* độ đậm của sương (0 = tắt) */
@@ -441,7 +443,7 @@ function bgWant(){var t=THU_MOI.byId[ID];return SCENE==='sanh'&&!!t&&!!BGV_ZONE[
 function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,e=bgInset(th),l=e.l,r=e.r,t=e.t,b=e.b;
  [BGV,BGV2].forEach(function(v){v.style.left=Math.round((I.l+l)*f)+'px';v.style.top=Math.round(t*f)+'px';v.style.width=Math.round((fw-l-r)*f)+'px';v.style.height=Math.round((th-t-b)*f)+'px';});}
 function bgShow(c,n){c.style.opacity=1;n.style.opacity=0;}
-function bgTick(g){if(!bgOn||g!==bgGen)return;if(document.hidden){requestAnimationFrame(function(){bgTick(g);});return;}
+function bgTick(g){if(!bgOn||g!==bgGen)return;if(document.hidden){bgRaf=0;return;}
  var c=bgCur,n=bgNxt;
  if(!bgSw&&c.duration&&c.duration-c.currentTime<0.07){bgSw=true;try{n.currentTime=0;}catch(e){}var p=n.play();if(p&&p.catch)p.catch(function(){bgSw=false;});}
  if(bgSw&&n.currentTime>0.01&&!n.paused){bgShow(n,c);c.pause();try{c.currentTime=0;}catch(e){}bgCur=n;bgNxt=c;bgSw=false;}
@@ -455,8 +457,8 @@ function bgSync(){
  bgLastImageOn=bgImageOn;bgOn=w;bgFile=f;var g=++bgGen;
  if(w){[BGV,BGV2].forEach(function(v){if(v.getAttribute('src')!==f){v.setAttribute('src',f);v.load();}v.style.display='block';});
   bgLayout();bgCur=BGV;bgNxt=BGV2;bgSw=false;bgShow(BGV,BGV2);try{BGV2.pause();BGV2.currentTime=0;}catch(e){}
-  var p=BGV.play();if(p&&p.catch)p.catch(function(){});requestAnimationFrame(function(){bgTick(g);});}
- else{BGV.style.display='none';BGV2.style.display='none';BGV.pause();BGV2.pause();}
+  var p=BGV.play();if(p&&p.catch)p.catch(function(){});bgRaf=requestAnimationFrame(function(){bgTick(g);});}
+ else{if(bgRaf){cancelAnimationFrame(bgRaf);bgRaf=0;}BGV.style.display='none';BGV2.style.display='none';BGV.pause();BGV2.pause();}
 }
 /* ===== NỀN ẢNH + HIỆU ỨNG (nhẹ: không bóng mờ, không hòa trộn màu, hạt vẽ bằng hình tròn mờ dựng sẵn) ===== */
 function bgMk(w,h){var c=document.createElement('canvas');c.width=Math.max(2,Math.round(w));c.height=Math.max(2,Math.round(h));return c;}
@@ -481,7 +483,7 @@ function bgFxBuild(o,conf,rw,rh,m){
  }else g.drawImage(o.img,ox*m,oy*m,dw*m,dh*m);
  bgBase=c;bgGeo={ox:ox,oy:oy,dw:dw,dh:dh};
  bgSpr={snow:[bgSoft(2*m,'255,255,255'),bgSoft(3.2*m,'255,255,255'),bgSoft(4.6*m,'240,250,255')],mist:bgSoft(128,'205,230,255'),star:bgStar(24*m),spark:bgStar(10*m),aur:bgAur()};
- if(!bgSnow.length){bgSnow=[[],[],[]];for(var i=0;i<BG_FX_CFG.snowCount;i++){var q=i%5,k=q<3?0:q-2;bgSnow[k].push({x:Math.random(),y:Math.random(),v:.55+.3*k+Math.random()*.2,ph:Math.random()*6.28});}}
+ if(!bgSnow.length){bgSnow=[[],[],[]];for(var i=0;i<BG_FX_CFG.snowCount;i++){var q=i%5,k=q<3?0:q-2;bgSnow[k].push({x:Math.random(),y:Math.random()*BG_FX_CFG.snowArea,v:.55+.3*k+Math.random()*.2,ph:Math.random()*6.28});}}
 }
 function bgDrawFx(ts,x,y,w,h){
  var o=bgImg,conf=bgConf,m=HD?K:1;
@@ -492,8 +494,14 @@ function bgDrawFx(ts,x,y,w,h){
  var T=bgClock/1000,G=bgGeo,S=bgSpr,C=BG_FX_CFG,F=conf.fx||[],i,j,k,p,a,sz,sx,sy;
  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.imageSmoothingEnabled=true;
  /* cực quang: 2 dải sáng mờ chồng lên ảnh, đổi độ sáng nhẹ lệch pha */
- if(F.indexOf('aurora')>=0){for(i=0;i<2;i++){a=C.auroraOpacity*(.5+.5*Math.sin(T*C.auroraSpeed+i*2.3));ctx.globalAlpha=a;
-  ctx.drawImage(S.aur,x+G.ox+G.dw*(i?.5:.02)+Math.sin(T*.3+i)*G.dw*.015,y+G.oy,G.dw*.48,G.dh*.34);}}
+ if(F.indexOf('aurora')>=0){ctx.lineCap='round';
+  for(i=0;i<2;i++){a=C.auroraOpacity*(.45+.55*Math.sin(T*C.auroraSpeed+i*2.3));
+   var ax=x+G.ox+G.dw*.02,aw=G.dw*.96,ay=y+G.oy+G.dh*(i?.23:.08),amp=G.dh*(i?.022:.03);
+   var ag=ctx.createLinearGradient(ax,0,ax+aw,0);ag.addColorStop(0,'rgba(110,255,220,0)');ag.addColorStop(.12,'rgba(110,255,225,.5)');ag.addColorStop(.5,'rgba(80,210,255,.72)');ag.addColorStop(.88,'rgba(110,255,225,.5)');ag.addColorStop(1,'rgba(110,255,220,0)');
+   ctx.globalAlpha=a;ctx.strokeStyle=ag;ctx.lineWidth=G.dh*(i?.065:.085);ctx.beginPath();
+   for(j=0;j<=24;j++){var q=j/24,px=ax+q*aw,py=ay+Math.sin(q*6.283+T*.35+i*2.1)*amp+Math.sin(q*3.1416-T*.22+i)*amp*.35;if(!j)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
+   ctx.stroke();
+  }ctx.lineCap='butt';}
  /* sương: 2 lớp trôi ngang lệch tốc độ, mỗi lớp 3 mảng, mờ dần ở hai đầu nên không bị giật khi quay vòng */
  if(F.indexOf('mist')>=0){var ML=[[.68,.55,1,.7],[.82,.65,1.8,1]];
   for(i=0;i<2;i++){var L=ML[i],bw=w*.42,bh=G.dh*L[1]*.3;
@@ -510,11 +518,11 @@ function bgDrawFx(ts,x,y,w,h){
  /* tuyết: 3 cỡ hạt (xa nhỏ/chậm, gần lớn/nhanh), trôi nhẹ sang phải */
  if(F.indexOf('snow')>=0){for(k=0;k<3;k++){var arr=bgSnow[k],sp=S.snow[k],d=sp.width/m;ctx.globalAlpha=C.snowOpacity*(.5+.2*k);
   for(j=0;j<arr.length;j++){p=arr[j];p.y+=C.snowSpeed*p.v*dt/1000;p.x+=(.006+.006*Math.sin(T*.6+p.ph))*p.v*dt/1000;
-   if(p.y>1.02){p.y=-.02;p.x=Math.random();}if(p.x>1.02)p.x=-.02;
+   if(p.y> C.snowArea){p.y=-.02;p.x=Math.random();}if(p.x>1.02)p.x=-.02;
    ctx.drawImage(sp,x+w*p.x-d/2,y+h*p.y-d/2,d,d);}}}
  ctx.restore();
 }
-document.addEventListener('visibilitychange',function(){bgLast=0;if(document.hidden){BGV.pause();BGV2.pause();}else if(bgOn){try{bgCur.play();}catch(e){}}});
+document.addEventListener('visibilitychange',function(){bgLast=0;if(document.hidden){BGV.pause();BGV2.pause();if(bgRaf){cancelAnimationFrame(bgRaf);bgRaf=0;}if(mainRaf){cancelAnimationFrame(mainRaf);mainRaf=0;}}else{if(bgOn){try{bgCur.play();}catch(e){}if(!bgRaf)bgRaf=requestAnimationFrame(function(){bgTick(bgGen);});}if(!mainRaf)mainRaf=requestAnimationFrame(loop);}});
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
 function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.round(Math.sin(ts/380)*2);
  dp(ID,bm,x,gy()+bob);}
@@ -537,9 +545,9 @@ function draw(ts){bgSync();
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
  st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
  if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+70,gy()-170));}}
-function loop(ts){if(SCENE==='tran')autoTick();draw(ts);requestAnimationFrame(loop);}
+function loop(ts){mainRaf=0;if(document.hidden)return;if(SCENE==='tran')autoTick();draw(ts);mainRaf=requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
-reset();resize();requestAnimationFrame(loop);
+reset();resize();if(!document.hidden)mainRaf=requestAnimationFrame(loop);
 /* Màn chờ: nạp ảnh bậc đang chọn của 2 bên (vẽ ra ngoài màn để kích hoạt nạp lười) rồi mới cho hiện nút BẮT ĐẦU. Quá 30 giây màn chờ tự cho vào. */
 (function chk(){THU_MOI.setFrame(192);var a=THU_MOI.draw(ctx,ID,bm,-999,-999,128),b=THU_MOI.draw(ctx,ID,be,-999,-999,128);if(a&&b&&window.TTGBOOT)TTGBOOT.ready();else setTimeout(chk,100);})();
 })();
