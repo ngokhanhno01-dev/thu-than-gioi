@@ -194,6 +194,7 @@ document.addEventListener('contextmenu',function(e){if(!e.target||e.target.tagNa
 document.addEventListener('pointerup',function(){if(!triedFS&&!ed){triedFS=true;full();}});
 
 /* Danh sách chọn thú: bấm nút "Thú: ..." mở bảng, liệt kê theo vùng từ THU_MOI.zones (thú mới thêm vào 51-thu-moi.js tự có mặt) */
+var tlAt=0;/* lúc mở bảng: bỏ qua click giả của cảm ứng rơi vào bảng ngay sau khi mở */
 function closeList(){document.getElementById('tl').style.display='none';}
 function pick(id){ID=id;saveB();label('tt');reset();closeList();toast('Thú: '+THU_MOI.byId[ID].ten);}
 function openList(){var tl=document.getElementById('tl'),b=document.getElementById('tlb');b.innerHTML='';
@@ -201,9 +202,9 @@ function openList(){var tl=document.getElementById('tl'),b=document.getElementBy
   var g=document.createElement('div');g.className='g';
   z.thu.forEach(function(t){var x=document.createElement('button');x.className='it'+(t.id===ID?' on':'');x.textContent=(t.boss?'👑 ':'')+t.ten;x.addEventListener('click',function(){pick(t.id);});g.appendChild(x);});
   b.appendChild(g);});
- tl.style.display='flex';}
-document.getElementById('tlx').addEventListener('click',closeList);
-document.getElementById('tl').addEventListener('click',function(e){if(e.target===this)closeList();});
+ tlAt=performance.now();tl.style.display='flex';}
+document.getElementById('tlx').addEventListener('click',function(){if(performance.now()-tlAt>500)closeList();});
+document.getElementById('tl').addEventListener('click',function(e){if(e.target===this&&performance.now()-tlAt>500)closeList();});
 function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
  if(A&&A.w===w){var p=(ts-A.t)/300;if(p<1)o=Math.round(Math.sin(p*Math.PI)*28);else A=null;}
  var bob=dead?0:Math.round(Math.sin(ts/380+(w==='me'?0:2))*2);
