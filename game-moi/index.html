@@ -10,18 +10,32 @@
 #ttg-boot .gate{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;background:#161826;cursor:pointer}
 #ttg-boot .gate div{font:bold clamp(20px,6.2vw,32px)/1.3 sans-serif;color:#fff;max-width:90vw}
 #ttg-boot .scene{position:absolute;inset:0}
-#ttg-boot .pic{position:absolute;inset:0;background:#0b1020 url(img-boot-ngang.webp) 50% 50%/cover no-repeat;animation:tb-in 1s ease both}
+#ttg-boot .pic{position:absolute;inset:0;background:#0b1020 url(img-boot-ngang.webp) 50% 50%/cover no-repeat}
 #ttg-boot .shade{position:absolute;left:0;right:0;bottom:0;height:26%;background:linear-gradient(to top,rgba(4,10,14,.9) 0%,rgba(4,10,14,.55) 50%,rgba(4,10,14,0) 100%)}
-#ttg-boot .panel{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:clamp(3px,1.2vh,6px);
-  padding:0 18px calc(max(6px,2.4vh) + env(safe-area-inset-bottom,0px));box-sizing:border-box}
-#ttg-boot .bar{position:relative;width:min(62vw,640px);height:clamp(10px,3.6vh,16px);border:2px solid #f2c76a;background:#0a1418;
-  box-shadow:0 0 0 1px #040a0e,0 0 10px rgba(242,199,106,.4);overflow:hidden}
-#ttg-boot .bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:repeating-linear-gradient(90deg,#6fd1a0 0 6px,#3f9c74 6px 8px);box-shadow:0 0 8px #6fd1a0}
-#ttg-boot .bar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(9px,2.6vh,12px);line-height:1;color:#fff;
+#ttg-boot .panel{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:clamp(2px,.8vh,4px);
+  padding:0 18px calc(max(4px,1.6vh) + env(safe-area-inset-bottom,0px));box-sizing:border-box;opacity:0;transition:opacity .5s ease}
+#ttg-boot .row{display:flex;align-items:center;gap:8px}
+#ttg-boot .bar{position:relative;width:min(56vw,600px);height:clamp(4px,1.3vh,6px);border:2px solid #f2c76a;background:#0a1418;
+  box-shadow:0 0 0 1px #040a0e,0 0 8px rgba(242,199,106,.4);overflow:hidden}
+#ttg-boot .bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:repeating-linear-gradient(90deg,#6fd1a0 0 5px,#3f9c74 5px 7px);box-shadow:0 0 6px #6fd1a0}
+#ttg-boot #tb-pct{font-size:clamp(9px,2.6vh,11px);line-height:1;color:#fff;min-width:28px;text-align:left;
   text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000}
-#ttg-boot .enter{display:none;padding:clamp(2px,.8vh,4px) clamp(10px,2.4vw,18px);font-size:clamp(12px,min(4vh,2.4vw),20px);line-height:1.1;color:#ffe9a0;letter-spacing:.5px;white-space:nowrap;
-  background:rgba(4,10,14,.6);border:1px solid rgba(242,199,106,.55);border-radius:4px;
-  text-shadow:0 1px 0 #000,0 0 8px rgba(255,210,74,.7);animation:tb-blink 1.3s ease-in-out infinite;cursor:pointer}
+#ttg-boot .enter{display:none;padding:clamp(1px,.5vh,3px) clamp(8px,1.8vw,14px);font-size:clamp(9px,min(2.8vh,1.7vw),14px);line-height:1.1;color:#ffe9a0;letter-spacing:.4px;white-space:nowrap;
+  background:rgba(4,10,14,.55);border:1px solid rgba(242,199,106,.5);border-radius:3px;
+  text-shadow:0 1px 0 #000,0 0 6px rgba(255,210,74,.7);animation:tb-blink 1.3s ease-in-out infinite;cursor:pointer}
+/* HIỆU ỨNG NỀN: ảnh zoom chậm, sương trôi, quầng sáng logo, ánh trăng, sao + đom đóm (canvas) */
+#ttg-boot .pic{animation:tb-in 1s ease both,tb-kb 28s ease-in-out 1s infinite alternate}
+@keyframes tb-kb{from{transform:scale(1) translate3d(0,0,0)}to{transform:scale(1.08) translate3d(-1.2%,-1%,0)}}
+#ttg-boot .mist{position:absolute;left:-30%;right:-30%;pointer-events:none;mix-blend-mode:screen;opacity:.5;will-change:transform}
+#ttg-boot .mist.m1{top:52%;height:34%;background:radial-gradient(ellipse 40% 50% at 30% 50%,rgba(190,215,255,.34),rgba(190,215,255,0) 70%),radial-gradient(ellipse 35% 45% at 75% 55%,rgba(210,190,255,.28),rgba(210,190,255,0) 70%);animation:tb-mist 34s linear infinite alternate}
+#ttg-boot .mist.m2{top:66%;height:30%;background:radial-gradient(ellipse 45% 50% at 60% 50%,rgba(170,235,230,.26),rgba(170,235,230,0) 70%),radial-gradient(ellipse 30% 40% at 20% 55%,rgba(255,230,190,.2),rgba(255,230,190,0) 70%);animation:tb-mist 46s linear infinite alternate-reverse}
+@keyframes tb-mist{from{transform:translate3d(-8%,0,0)}to{transform:translate3d(8%,0,0)}}
+#ttg-boot .glow{position:absolute;left:50%;top:22%;width:34vh;height:34vh;transform:translate(-50%,-50%);pointer-events:none;mix-blend-mode:screen;
+  background:radial-gradient(circle,rgba(255,226,150,.45),rgba(255,226,150,0) 65%);animation:tb-glow 4.5s ease-in-out infinite}
+@keyframes tb-glow{0%,100%{opacity:.25;transform:translate(-50%,-50%) scale(.92)}50%{opacity:.8;transform:translate(-50%,-50%) scale(1.1)}}
+#ttg-boot .moon{position:absolute;left:64.5%;top:15%;width:9vh;height:9vh;transform:translate(-50%,-50%);pointer-events:none;mix-blend-mode:screen;
+  background:radial-gradient(circle,rgba(220,235,255,.55),rgba(220,235,255,0) 70%);animation:tb-glow 6s ease-in-out infinite reverse}
+#tb-fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 #ttg-boot.ready .enter{display:block}
 #ttg-boot.ready .bar{border-color:#6fd1a0;box-shadow:0 0 0 1px #040a0e,0 0 12px rgba(111,209,160,.7)}
 @keyframes tb-in{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
@@ -64,8 +78,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <div id="ttg-boot" role="status" aria-live="polite">
   <div class="gate" id="tb-gate"><div id="tb-gt">Chạm vào màn hình để xoay ngang</div></div>
   <div class="scene" id="tb-scene">
-    <div class="pic"></div><div class="shade"></div>
-    <div class="panel"><div class="enter" id="tb-enter">Chạm vào màn hình để vào Thú Thần Giới</div><div class="bar"><i id="boot-fill"></i><span id="tb-pct">0%</span></div></div>
+    <div class="pic"></div><div class="mist m1"></div><div class="mist m2"></div><div class="glow"></div><div class="moon"></div><canvas id="tb-fx"></canvas><div class="shade"></div>
+    <div class="panel" id="tb-panel"><div class="enter" id="tb-enter">Chạm vào màn hình để vào Thú Thần Giới</div><div class="row"><div class="bar"><i id="boot-fill"></i></div><span id="tb-pct">0%</span></div></div>
   </div>
 </div>
 <script>
@@ -73,15 +87,20 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    chạm vào đâu cũng vào game. Quá 30 giây chưa xong cũng cho vào. Màn dọc: chạm vào màn đen để vào toàn màn hình + khóa ngang (nếu máy cho phép). */
 (function(){
   var el=document.getElementById('ttg-boot'),fill=document.getElementById('boot-fill'),pctEl=document.getElementById('tb-pct'),
-    gt=document.getElementById('tb-gt'),n=0,pct=0,floor=0,ready=false,done=false,shown=false,t0=Date.now();
+    gt=document.getElementById('tb-gt'),n=0,pct=0,floor=0,ready=false,done=false,shown=false,t0=Date.now(),start=t0,panel=document.getElementById('tb-panel');
   function paint(){var p=Math.max(0,Math.min(100,pct));fill.style.width=p+'%';pctEl.textContent=Math.floor(p)+'%'}
-  var MIN=5000; /* thanh chạy theo thời gian: tối thiểu 5 giây mới tới 100%, dù ảnh nạp xong sớm */
+  var MIN=5000; /* thanh chạy theo thời gian: tối thiểu 5 giây mới tới 100% */
   var iv=setInterval(function(){
-    var base=Math.min(100,(Date.now()-t0)/MIN*100);
+    var now=Date.now();
+    if(now<start){panel.style.opacity=0;pct=0;paint();return}   /* đang chờ thông báo "thoát toàn màn hình" của Chrome biến mất */
+    panel.style.opacity=1;
+    var base=Math.min(100,(now-start)/MIN*100);
     pct=ready?base:Math.min(base,90);
     paint();
     if(ready&&pct>=100&&!shown){shown=true;pct=100;paint();el.className='ready'}
   },50);
+  function onFS(){if(isFS()){start=Date.now()+3800;panel.style.opacity=0}} /* Chrome hiện thông báo ~3-4 giây ở đáy màn hình khi vào toàn màn hình: ẩn thanh cho tới khi nó tắt */
+  document.addEventListener('fullscreenchange',onFS);document.addEventListener('webkitfullscreenchange',onFS);
   document.addEventListener('DOMContentLoaded',function(){floor=Math.max(floor,35)});
   window.addEventListener('load',function(){floor=Math.max(floor,75)});
   function hide(){if(done||!el)return;done=true;clearInterval(iv);el.className='out';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},700)}
@@ -97,6 +116,31 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
   document.getElementById('tb-scene').addEventListener('click',function(){if(shown)hide()});
   window.TTGBOOT={hide:hide,ready:setReady};
   setTimeout(setReady,30000);
+})();
+
+/* Hạt hiệu ứng màn chờ: sao nhấp nháy ở trời, đom đóm vàng/xanh bay lên, thỉnh thoảng có sao băng. Tự dừng khi màn chờ đóng. */
+(function(){
+  var cv=document.getElementById('tb-fx');if(!cv)return;var c=cv.getContext('2d'),W=0,H=0,D=1,P=[],S=[],sh=null,raf=0,last=0,nextSh=2500;
+  function size(){D=Math.min(2,window.devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*D;cv.height=H*D}
+  function spr(col){var s=document.createElement('canvas');s.width=s.height=32;var g=s.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,col+'1)');r.addColorStop(.25,col+'.6)');r.addColorStop(1,col+'0)');g.fillStyle=r;g.fillRect(0,0,32,32);return s}
+  var SP=[spr('rgba(255,225,140,'),spr('rgba(140,255,225,'),spr('rgba(200,170,255,')];
+  function init(){size();P=[];S=[];for(var i=0;i<34;i++)P.push({x:Math.random(),y:Math.random(),v:.012+Math.random()*.03,s:5+Math.random()*9,ph:Math.random()*6.28,k:Math.floor(Math.random()*3),a:.4+Math.random()*.6});
+    for(i=0;i<46;i++)S.push({x:Math.random(),y:Math.random()*.42,r:.4+Math.random()*1.1,ph:Math.random()*6.28,sp:1+Math.random()*2.5})}
+  function frame(t){
+    if(!document.getElementById('ttg-boot')){return}
+    raf=requestAnimationFrame(frame);var dt=Math.min(.05,(t-last)/1000||.016);last=t;var T=t/1000;
+    c.setTransform(D,0,0,D,0,0);c.clearRect(0,0,W,H);c.globalCompositeOperation='lighter';
+    for(var i=0;i<S.length;i++){var s=S[i],a=.35+.65*Math.abs(Math.sin(T*s.sp+s.ph));c.fillStyle='rgba(255,255,255,'+(a*.8)+')';c.beginPath();c.arc(s.x*W,s.y*H,s.r,0,6.283);c.fill()}
+    for(i=0;i<P.length;i++){var p=P[i];p.y-=p.v*dt;if(p.y<-.05){p.y=1.05;p.x=Math.random()}
+      var x=(p.x+Math.sin(T*.6+p.ph)*.015)*W,y=p.y*H,tw=.55+.45*Math.sin(T*2+p.ph),fade=Math.min(1,Math.min(p.y,1-p.y)*6);
+      c.globalAlpha=Math.max(0,p.a*tw*fade);c.drawImage(SP[p.k],x-p.s,y-p.s,p.s*2,p.s*2)}
+    c.globalAlpha=1;
+    nextSh-=dt*1000;if(!sh&&nextSh<=0){sh={x:.2+Math.random()*.6,y:.03+Math.random()*.15,l:0};nextSh=5000+Math.random()*5000}
+    if(sh){sh.l+=dt*1.6;var a2=Math.sin(Math.min(1,sh.l)*3.14),x0=sh.x*W+sh.l*W*.18,y0=sh.y*H+sh.l*H*.18;
+      var g=c.createLinearGradient(x0,y0,x0-W*.09,y0-H*.09);g.addColorStop(0,'rgba(255,255,255,'+a2+')');g.addColorStop(1,'rgba(255,255,255,0)');
+      c.strokeStyle=g;c.lineWidth=1.5;c.beginPath();c.moveTo(x0,y0);c.lineTo(x0-W*.09,y0-H*.09);c.stroke();if(sh.l>=1)sh=null}
+    c.globalCompositeOperation='source-over'}
+  init();window.addEventListener('resize',size);raf=requestAnimationFrame(frame);
 })();
 </script>
 <canvas id="g"></canvas><div id="sa"></div>
