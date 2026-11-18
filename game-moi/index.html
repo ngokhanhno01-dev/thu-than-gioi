@@ -1,6 +1,34 @@
 <!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8">
 <base href="../">
+<link rel="preload" as="image" href="img-boot-bg.webp">
+<style id="boot-css">
+#ttg-boot{position:fixed;inset:0;z-index:2147483000;overflow:hidden;background:#050b0f;color:#e8fff4;
+  font-family:'VT323',monospace;text-align:center;transition:opacity .6s ease}
+#ttg-boot.out{opacity:0;pointer-events:none}
+#ttg-boot .pic{position:absolute;inset:0;background:url(img-boot-bg.webp) 50% 30%/cover no-repeat;image-rendering:pixelated;animation:tb-in 1s ease both}
+#ttg-boot .shade{position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(to top,rgba(4,10,14,.96) 0%,rgba(4,10,14,.82) 45%,rgba(4,10,14,0) 100%)}
+#ttg-boot .panel{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;
+  padding:0 18px calc(34px + env(safe-area-inset-bottom,0px));box-sizing:border-box}
+#ttg-boot .msg{font-size:clamp(20px,5.4vw,26px);line-height:1.15;color:#e8fff4;max-width:94vw;min-height:2.4em;text-shadow:0 2px 0 #000,0 0 10px rgba(0,0,0,.8)}
+#ttg-boot .msg b{font-weight:400;color:#ffd24a;display:inline-block;min-width:3.6em;text-align:left}
+#ttg-boot .bar{position:relative;width:min(84vw,380px);height:24px;margin:12px 0 4px;border:3px solid #f2c76a;background:#0a1418;
+  box-shadow:0 0 0 2px #040a0e,0 0 16px rgba(242,199,106,.45);overflow:hidden}
+#ttg-boot .bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:repeating-linear-gradient(90deg,#6fd1a0 0 8px,#3f9c74 8px 10px);
+  box-shadow:0 0 12px #6fd1a0}
+#ttg-boot .bar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;color:#fff;
+  text-shadow:1px 1px 0 #000,-1px 1px 0 #000,1px -1px 0 #000,-1px -1px 0 #000}
+#ttg-boot .go{display:none;margin-top:10px;min-width:210px;padding:8px 26px 9px;font-family:inherit;font-size:34px;line-height:1;letter-spacing:2px;
+  color:#3a2606;background:linear-gradient(#ffe9a0,#f2c76a 55%,#d29a2e);border:3px solid #fff3c4;border-radius:0;cursor:pointer;
+  box-shadow:0 4px 0 #7a5410,0 0 0 2px #040a0e,0 0 22px rgba(255,210,74,.7);text-shadow:0 1px 0 rgba(255,255,255,.55);
+  animation:tb-pulse 1.1s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+#ttg-boot .go:active{transform:translateY(3px);box-shadow:0 1px 0 #7a5410,0 0 0 2px #040a0e}
+#ttg-boot.ready .go{display:block}
+#ttg-boot.ready .bar{border-color:#6fd1a0;box-shadow:0 0 0 2px #040a0e,0 0 18px rgba(111,209,160,.7)}
+@keyframes tb-in{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+@keyframes tb-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@media (min-aspect-ratio:3/4){#ttg-boot .pic{background-position:50% 25%}#ttg-boot .shade{height:36%}}
+</style>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no,interactive-widget=resizes-visual">
 <title>Thú Thần Giới - game mới</title>
 <style>
@@ -34,6 +62,46 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 #tp{position:absolute;left:calc(4px + env(safe-area-inset-left,0px));top:calc(30px + env(safe-area-inset-top,0px));z-index:20;font:bold 11px sans-serif;padding:3px 8px;border:1px solid #a98cf0;border-radius:3px;background:#3a2a5c;color:#fff;opacity:.85;touch-action:manipulation}
 #tst{position:absolute;left:50%;transform:translateX(-50%);top:calc(30px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 8px;border-radius:3px;opacity:0;transition:opacity .2s;pointer-events:none!important;z-index:30;white-space:nowrap}
 </style></head><body>
+<div id="ttg-boot" role="status" aria-live="polite">
+  <div class="pic"></div><div class="shade"></div>
+  <div class="panel">
+    <div class="msg" id="tb-msg">Đang tải thú mới, xin vui lòng chờ<b id="tb-dots">.</b></div>
+    <div class="bar"><i id="boot-fill"></i><span id="tb-pct">0%</span></div>
+    <button type="button" class="go" id="tb-go">▶ BẮT ĐẦU</button>
+  </div>
+</div>
+<script>
+/* Màn hình chờ khi mở/tải lại trang: nền ảnh + thanh tiến trình %.
+   game-moi gọi TTGBOOT.ready() khi ảnh thú đang chọn đã nạp xong (bản sao màn chờ của index.html trên main) -> thanh chạy tới 100% rồi hiện nút BẮT ĐẦU, người chơi bấm mới vào game.
+   TTGBOOT.hide() = tắt ngay (dùng khi cần hiện màn đăng nhập / đặt biệt danh). Sau 30 giây mà chưa xong cũng cho hiện nút. */
+(function(){
+  var el=document.getElementById('ttg-boot'),fill=document.getElementById('boot-fill'),pctEl=document.getElementById('tb-pct'),
+    dots=document.getElementById('tb-dots'),msg=document.getElementById('tb-msg'),go=document.getElementById('tb-go'),
+    n=0,pct=0,floor=0,ready=false,done=false,shown=false,t0=Date.now();
+  function paint(){var p=Math.max(0,Math.min(100,pct));fill.style.width=p+'%';pctEl.textContent=Math.floor(p)+'%'}
+  var dv=setInterval(function(){if(shown)return;n=(n+1)%7;dots.textContent=new Array(n+2).join('.')},350);
+  var iv=setInterval(function(){
+    var target;
+    if(ready)target=100;
+    else{var t=(Date.now()-t0)/1000;target=Math.max(floor,90*(1-Math.exp(-t/6)))}
+    var step=(target-pct)*(ready?.12:.06);
+    if(ready&&step<.5)step=.5;
+    if(!ready&&step<0)step=0;
+    pct=Math.min(target,pct+step);
+    paint();
+    if(ready&&pct>=100&&!shown){shown=true;pct=100;paint();clearInterval(dv);
+      msg.textContent='Đã tải xong! Nhấn Bắt đầu để vào game.';el.className='ready'}
+  },50);
+  document.addEventListener('DOMContentLoaded',function(){floor=Math.max(floor,35)});
+  window.addEventListener('load',function(){floor=Math.max(floor,75)});
+  function hide(){if(done||!el)return;done=true;clearInterval(iv);clearInterval(dv);el.className='out';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},700)}
+  function setReady(){if(done)return;ready=true}
+  go.onclick=function(){
+    hide()};
+  window.TTGBOOT={hide:hide,ready:setReady};
+  setTimeout(setReady,30000);
+})();
+</script>
 <canvas id="g"></canvas><div id="sa"></div>
 <div id="ui">
  <button id="edb">✎ Sắp xếp</button>
@@ -237,5 +305,7 @@ function loop(ts){autoTick();draw(ts);requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
 document.addEventListener('fullscreenchange',function(){setTimeout(resize,150);});document.addEventListener('webkitfullscreenchange',function(){setTimeout(resize,150);});
 reset();resize();requestAnimationFrame(loop);
+/* Màn chờ: nạp ảnh bậc đang chọn của 2 bên (vẽ ra ngoài màn để kích hoạt nạp lười) rồi mới cho hiện nút BẮT ĐẦU. Quá 30 giây màn chờ tự cho vào. */
+(function chk(){THU_MOI.setFrame(192);var a=THU_MOI.draw(ctx,ID,bm,-999,-999,128),b=THU_MOI.draw(ctx,ID,be,-999,-999,128);if(a&&b&&window.TTGBOOT)TTGBOOT.ready();else setTimeout(chk,100);})();
 })();
 </script></body></html>

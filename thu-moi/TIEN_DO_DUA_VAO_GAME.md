@@ -95,3 +95,6 @@ Bạn duyệt cả 60 con ở `game-moi/index.html` (nút Khung đổi 192/128).
 
 ## Dọn ảnh cũ (18/11/2026)
 Đã xóa toàn bộ PNG 128 (không hậu tố) và 6 PNG 256 trong `thu-game/` theo yêu cầu người dùng. Chỉ còn 180 ảnh `-192.png` (60 con x 3 bậc). Ảnh nguồn trong `thu-moi/` không đụng. `game-moi/index.html` luôn vẽ ảnh 192 (nút Khung chỉ còn đổi độ phân giải canvas). Muốn lấy lại ảnh cũ: xem commit `0e73656` trở về trước.
+
+## Giao diện: màn hình chờ (18/11/2026)
+Đã đưa màn chờ có sẵn của `main` (index.html: nền `img-boot-bg.webp` + thanh tiến trình % + nút BẮT ĐẦU) vào `game-moi/index.html`, giữ nguyên kiểu và mã của main (đổi chữ thành "Đang tải thú mới..."). `TTGBOOT.ready()` được gọi khi ảnh 192 của thú đang chọn (cả 2 bên) đã nạp xong; quá 30 giây thì tự cho hiện nút. Không đụng cơ chế game và không đụng `main`. Đã chạy thử bằng trình duyệt giả lập 780x360: thanh chạy, hiện nút, bấm thì vào game, 0 lỗi JS. Việc kế: trang trí phong cách (bạn chốt sau), chỉnh bố cục nút bị đè (Sắp xếp / Chọn thú).
