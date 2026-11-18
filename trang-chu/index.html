@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Thú Thần Giới - Tải về máy</title>
+<meta name="description" content="Thú Thần Giới - game nuôi và chiến đấu với thú thần. Tải về máy miễn phí, không cần cửa hàng ứng dụng.">
+<meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="../pwa-moi.webmanifest">
+<link rel="icon" href="../pwa-moi-icon-192.png">
+<link rel="apple-touch-icon" href="../pwa-moi-icon-192.png">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preload" as="image" href="../img-boot-ngang.webp">
+<style>
+:root{--gold:#f2c76a;--ink:#07101c;--teal:#6fd1a0}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0b1020;color:#eafff6;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+.bg{position:fixed;inset:0;background:#0b1020 url(../img-boot-ngang.webp) 50% 0%/cover no-repeat;animation:kb 30s ease-in-out infinite alternate;transform-origin:50% 30%}
+@keyframes kb{from{transform:scale(1)}to{transform:scale(1.07) translate3d(-1%,-.6%,0)}}
+.shade{position:fixed;inset:0;pointer-events:none;background:linear-gradient(to top,rgba(4,8,18,.94) 0%,rgba(4,8,18,.82) 22%,rgba(4,8,18,.25) 52%,rgba(4,8,18,0) 70%),radial-gradient(ellipse at 50% 20%,rgba(0,0,0,0) 40%,rgba(0,0,0,.35) 100%)}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+main{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:0 22px calc(26px + env(safe-area-inset-bottom,0px))}
+h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tag{margin:0;font-size:clamp(14px,3.8vw,18px);line-height:1.45;color:#dff7ee;text-shadow:0 1px 6px #000;max-width:30em}
+.btns{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;max-width:380px}
+.btn{appearance:none;border:0;width:100%;font:700 clamp(16px,4.4vw,19px)/1 system-ui,sans-serif;padding:16px 18px;border-radius:14px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:10px;touch-action:manipulation}
+.btn.main{color:#2a1a00;background:linear-gradient(180deg,#ffe8a6,#f2c76a 55%,#d9a13c);box-shadow:0 0 0 2px #7a5a1a inset,0 6px 22px rgba(242,199,106,.45),0 0 28px rgba(120,255,220,.25);position:relative;overflow:hidden}
+.btn.main::after{content:"";position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);animation:shine 3.4s ease-in-out infinite}
+@keyframes shine{0%,55%{left:-60%}100%{left:130%}}
+.btn.main:active{transform:scale(.98)}
+.btn.sub{color:#eafff6;background:rgba(10,30,40,.55);box-shadow:0 0 0 1.5px rgba(111,209,160,.7) inset;backdrop-filter:blur(3px)}
+.btn[hidden]{display:none}
+.note{margin:0;font-size:12.5px;color:#b9d8cd;text-shadow:0 1px 4px #000}
+.ok{color:var(--teal);font-weight:700}
+/* hộp hướng dẫn cài tay */
+.help{position:fixed;inset:0;z-index:10;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.6)}
+.help.on{display:flex}
+.help .box{width:100%;max-width:460px;max-height:86vh;overflow:auto;background:#101a2a;border:1px solid rgba(242,199,106,.5);border-radius:18px 18px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));text-align:left;font-size:15px;line-height:1.5}
+.help h2{margin:0 0 8px;font-size:18px;color:var(--gold)}
+.help h3{margin:14px 0 4px;font-size:15px;color:#cdbcff}
+.help ol{margin:0;padding-left:20px}
+.help li{margin:3px 0}
+.help .warn{margin:10px 0 0;padding:8px 10px;border-radius:8px;background:rgba(242,199,106,.12);color:#ffe9a0;font-size:13.5px}
+.help .x{margin-top:14px;width:100%;appearance:none;border:0;padding:13px;border-radius:12px;font:700 16px system-ui;background:#2c3550;color:#fff}
+@media (orientation:landscape) and (max-height:520px){
+  main{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  .tag{display:none}.btns{flex-direction:row;max-width:620px}.btn{padding:12px 14px;font-size:15px}.note{width:100%}
+  .bg{background-position:50% 50%}
+}
+</style></head><body>
+<div class="bg"></div><canvas id="fx"></canvas><div class="shade"></div>
+<main>
+  <h1>Thú Thần Giới</h1>
+  <p class="tag">Nuôi thú thần, tiến hóa, chiến đấu tự động.<br>Tải về máy miễn phí, chơi toàn màn hình ngang.</p>
+  <div class="btns">
+    <button class="btn main" id="btn-install" type="button">⬇ Tải về máy</button>
+    <a class="btn main" id="btn-open" href="../game-moi/index.html?from=pwa" hidden>▶ Vào chơi</a>
+    <a class="btn sub" id="btn-web" href="../game-moi/index.html">Chơi ngay trên trình duyệt</a>
+  </div>
+  <p class="note" id="note">Không cần cửa hàng ứng dụng • Không tốn dung lượng đáng kể • Gỡ bất cứ lúc nào</p>
+</main>
+
+<div class="help" id="help"><div class="box">
+  <h2 id="help-t">Cách tải về máy</h2>
+  <div class="warn" id="help-inapp" style="display:none">Bạn đang mở trong ứng dụng khác (Zalo, Facebook...). Hãy bấm menu <b>⋮</b> hoặc <b>…</b> và chọn <b>"Mở bằng trình duyệt"</b> (Chrome / Safari) trước, rồi làm theo hướng dẫn dưới đây.</div>
+  <div id="help-and">
+    <h3>Android (Chrome)</h3>
+    <ol><li>Bấm nút menu <b>⋮</b> ở góc trên bên phải.</li><li>Chọn <b>"Cài đặt ứng dụng"</b> hoặc <b>"Thêm vào Màn hình chính"</b>.</li><li>Bấm <b>Cài đặt</b>. Biểu tượng game sẽ xuất hiện ở màn hình chính.</li></ol>
+  </div>
+  <div id="help-ios">
+    <h3>iPhone / iPad (Safari)</h3>
+    <ol><li>Bấm nút <b>Chia sẻ</b> (hình vuông có mũi tên lên) ở thanh dưới.</li><li>Kéo xuống, chọn <b>"Thêm vào MH chính"</b>.</li><li>Bấm <b>Thêm</b>.</li></ol>
+  </div>
+  <div class="warn">Mở game từ biểu tượng ở màn hình chính để chơi toàn màn hình, không còn thanh địa chỉ.</div>
+  <button class="x" id="help-x" type="button">Đã hiểu</button>
+</div></div>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)},bi=$('btn-install'),bo=$('btn-open'),bw=$('btn-web'),note=$('note'),help=$('help'),dp=null;
+  var ua=navigator.userAgent||'',isIOS=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+      inApp=/FBAN|FBAV|Zalo|Instagram|Line\/|MicroMessenger|; wv\)/i.test(ua),
+      standalone=matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+  function showInstalled(msg){bi.hidden=true;bo.hidden=false;bw.hidden=true;note.innerHTML='<span class="ok">'+(msg||'Đã cài đặt trên máy bạn.')+'</span> Mở game từ biểu tượng ở màn hình chính.'}
+  if(standalone){bi.hidden=true;bo.hidden=false;bw.hidden=true;note.innerHTML='<span class="ok">Bạn đang dùng bản đã tải về.</span>'}
+  if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('../pwa-moi-sw.js').catch(function(){});
+  addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e});
+  addEventListener('appinstalled',function(){dp=null;showInstalled('Đã tải về máy thành công!')});
+  function openHelp(){
+    $('help-inapp').style.display=inApp?'block':'none';
+    $('help-ios').style.display=(isIOS||!/Android/.test(ua))?'block':'none';
+    $('help-and').style.display=isIOS?'none':'block';
+    help.className='help on';
+  }
+  bi.addEventListener('click',function(){
+    if(dp){var e=dp;dp=null;e.prompt();e.userChoice.then(function(c){if(c&&c.outcome==='accepted')showInstalled('Đang cài đặt...');else{note.textContent='Bạn đã hủy. Bấm lại "Tải về máy" khi muốn cài.';dp=e}}).catch(function(){})}
+    else openHelp()
+  });
+  $('help-x').addEventListener('click',function(){help.className='help'});
+  help.addEventListener('click',function(e){if(e.target===help)help.className='help'});
+  /* hạt sáng bay lên */
+  var cv=$('fx'),c=cv.getContext('2d'),W=0,H=0,D=1,P=[];
+  function size(){D=Math.min(2,devicePixelRatio||1);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*D;cv.height=H*D}
+  function spr(col){var s=document.createElement('canvas');s.width=s.height=32;var g=s.getContext('2d'),r=g.createRadialGradient(16,16,0,16,16,16);r.addColorStop(0,col+'1)');r.addColorStop(.25,col+'.6)');r.addColorStop(1,col+'0)');g.fillStyle=r;g.fillRect(0,0,32,32);return s}
+  var SP=[spr('rgba(255,225,140,'),spr('rgba(140,255,225,'),spr('rgba(200,170,255,')];
+  size();addEventListener('resize',size);
+  for(var i=0;i<30;i++)P.push({x:Math.random(),y:Math.random(),v:.012+Math.random()*.03,s:4+Math.random()*8,ph:Math.random()*6.28,k:i%3,a:.4+Math.random()*.6});
+  var last=0;
+  (function f(t){requestAnimationFrame(f);var dt=Math.min(.05,(t-last)/1000||.016);last=t;var T=t/1000;
+    c.setTransform(D,0,0,D,0,0);c.clearRect(0,0,W,H);c.globalCompositeOperation='lighter';
+    for(var i=0;i<P.length;i++){var p=P[i];p.y-=p.v*dt;if(p.y<-.05){p.y=1.05;p.x=Math.random()}
+      var x=(p.x+Math.sin(T*.6+p.ph)*.015)*W,y=p.y*H,tw=.55+.45*Math.sin(T*2+p.ph),fade=Math.min(1,Math.min(p.y,1-p.y)*6);
+      c.globalAlpha=Math.max(0,p.a*tw*fade);c.drawImage(SP[p.k],x-p.s,y-p.s,p.s*2,p.s*2)}
+    c.globalAlpha=1;c.globalCompositeOperation='source-over'})(0);
+})();
+</script>
+</body></html>

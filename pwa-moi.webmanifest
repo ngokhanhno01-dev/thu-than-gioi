@@ -1,0 +1,19 @@
+{
+  "name": "Thú Thần Giới",
+  "short_name": "Thú Thần Giới",
+  "description": "Thú Thần Giới - game nuôi và chiến đấu với thú thần, chơi ngang màn hình.",
+  "lang": "vi",
+  "id": "game-moi/index.html",
+  "start_url": "game-moi/index.html?from=pwa",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "icons": [
+    { "src": "pwa-moi-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "pwa-moi-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "pwa-moi-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
