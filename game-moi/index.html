@@ -202,8 +202,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Thứ tự vẽ: nền -> khung -> thú -> thanh máu -> hiệu ứng (thú nằm TRÊN khung nên chân thú không bị viền che). Chưa có ảnh khung thì vẽ viền vàng mảnh tạm.
    Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
-   VỊ TRÍ THÚ: thú bên trái đứng ngay giữa nút "Chỉ số" (theo vị trí nút thật trên màn hình, kéo nút là thú đi theo).
-   Thú bên phải đối xứng với thú trái qua giữa màn hình (W - x trái).
+   VỊ TRÍ THÚ: thú bên trái đứng ngay giữa nút "Chọn thú" (theo vị trí nút thật trên màn hình, kéo nút là thú đi theo).
+   Thú bên phải đối xứng với thú trái qua tâm khung ((I.l + W - I.r) - x trái).
    ĐỔI BẬC: 2 nút "Bạn: bậc N" và "Địch: bậc N" (id tm, te), bấm để xoay vòng 1 -> 2 -> 3 -> 1 (MAXB = 3).
    Nút mới thêm vào danh sách sẽ tự xếp vào chỗ trống cuối thanh dưới, KHÔNG làm mất bố cục đã sắp xếp.
    NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ và 2 nút đổi bậc).
@@ -256,11 +256,11 @@ function resize(){
  ctx.imageSmoothingEnabled=false;
  buildFrame();
  layoutUI();}
-/* Tâm ngang (đơn vị pixel game) của nút neo "Chỉ số". Không đo được thì dùng 16% chiều rộng. */
-function anchorX(){var e=els[ANCHOR];
+/* Tâm ngang (đơn vị pixel game) của nút neo "Chọn thú". Không đo được thì dùng 16% chiều rộng. */
+function anchorX(){var e=document.getElementById('tp');/* neo vào nút "Chọn thú" (id tp) */
  if(e){var r=e.getBoundingClientRect();if(r.width>0)return (r.left+r.width/2)*DPR/K;}
  return W*ANCHOR_DEF;}
-function px(w){var c=anchorX();return Math.round(w==='me'?c:W-c);}
+function px(w){var c=anchorX();return Math.round(w==='me'?c:(I.l+W-I.r)-c);}/* thú phải đối xứng thú trái qua TÂM KHUNG (giữa I.l và W-I.r) */
 function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
  st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+d});A={w:w,t:n};}
 /* Một lượt: mình đánh -> (nếu địch còn sống) địch đánh lại -> kiểm tra thắng/thua.
