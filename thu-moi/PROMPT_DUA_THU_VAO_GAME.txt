@@ -3,7 +3,7 @@
 - Ảnh 192 đặt cạnh ảnh cũ, đuôi `NN-slug-b1-192.png`, `-b2-192.png`, `-b3-192.png` trong `thu-game/<slug-vùng>/`. Không xóa ảnh 128 / 256.
 - Lệnh cắt: `python3 tools/cat_3_bac.py <anh-goc> <thư-mục-ra> <NN-slug> 192 --kieu-d [--gan-gan-nhat]` (kiểu D bắt buộc, xem TIEN_DO_DUA_VAO_GAME.md).
 - Trạng thái: đã đưa đủ 60 con (6 vùng) ở 192, đăng ký trong 51-thu-moi.js (FRAME = 192), index.html đã có dòng script. Bước 0 và các bước 1a-6j đã XONG, đừng làm lại.
-- Việc còn lại chỉ là: sửa lỗi theo góp ý của mình, đưa ảnh nguồn 6j đúng, đổi tên chính thức. Không sửa cơ chế game.
+- Việc còn lại chỉ là: sửa lỗi theo góp ý của mình, đổi tên chính thức (ảnh nguồn 6j đã đưa đúng, tên file có đuôi -chuan). Không sửa cơ chế game.
 - Có git + token thì đẩy PNG thẳng được (git push origin demo-thu-moi), vẫn kiểm bằng git ls-remote.
 === HẾT CẬP NHẬT ===
 

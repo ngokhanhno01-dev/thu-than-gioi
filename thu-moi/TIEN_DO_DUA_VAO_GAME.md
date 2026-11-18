@@ -73,7 +73,7 @@ Hằng FRAME = 192 trong 51-thu-moi.js. Ảnh 192 nằm cạnh ảnh cũ với h
 
 ## Đợt 18/11/2026 (khung 192)
 - Cắt lại 49 con (vùng 1, 2, 3, 4 và 6a-6i) ở 192: chạy lại ở 128 từ ảnh nguồn trong repo cho ra đúng từng pixel bản 128 đang có (147/150 ảnh trùng), nên ảnh nguồn và tham số đúng.
-- 6j Phong Nguyên Vũ Xà: ảnh nguồn trong `thu-moi/phong-nguyen/` là BẢN CŨ (không trùng bản 128 đang dùng, 3 ảnh lệch), nên bản 192 của 6j được thu từ bản 256 đã duyệt (LANCZOS + alpha cứng 110). Chất lượng ổn nhưng nên đưa lại ảnh nguồn Đằng Xà đúng vào `thu-moi/phong-nguyen/` rồi cắt lại.
+- 6j Phong Nguyên Vũ Xà: ảnh nguồn cũ trong `thu-moi/phong-nguyen/` là bản lỗi thời nên ĐÃ thêm ảnh nguồn đúng `phong-nguyen-10-phong-nguyen-vu-xa-chuan.png` (người dùng gửi 18/11, tách nền magenta + `hau_xu_ly_anh_thu.py --bg magenta`; file cũ giữ nguyên). Cắt 128 từ file này trùng từng pixel với bản 128 đang dùng, nên bản 192 của 6j giờ cắt THẲNG từ nguồn đúng (tỉ lệ thu 0.2857; bậc 1 cao 116px, bậc 2 cao 161px, bậc 3 cao 186px), không còn thu từ 256. Đã so mắt nền sáng/tối: 3 bậc không dính nhau, 0 pixel ám magenta. Vài viên ngọc hồng nhỏ bị xóa như trước.
 - Vùng 5 Nguyệt Cung (5a-5j, 10 con) làm ở 192 với `--kieu-d --gan-gan-nhat`; đã so mắt bảng nền sáng/tối: 3 bậc không dính nhau, chân chạm đáy. Chưa kiểm trong game thật trên điện thoại.
   Tên tạm theo file: Nguyệt Thố, Nguyệt Hạc, Nguyệt Thiềm, Nguyệt Đằng, Nguyệt Nga, Nguyệt Kình, Nguyệt Tượng, Nguyệt Quy, Nguyệt Tiên, Nguyệt Thực Tế Quân (Boss).
   Điểm chưa ổn vùng 5: 5c Nguyệt Thiềm và 5f Nguyệt Kình thân dẹt rộng nên bậc 1 thấp (63px, 68px); 5d Nguyệt Đằng có nhiều cánh hoa nhỏ rời, chưa xem kỹ ở cỡ đúng.
@@ -91,4 +91,4 @@ Vào thư mục `thu-game/tuyet-nguyen/`: 01-tuyet-cau-b1.png, -b2.png, -b3.png;
 - (Đã xong) dòng script 51-thu-moi.js đã có trong index.html.
 
 ## Việc kế tiếp
-Bạn duyệt cả 60 con ở `game-moi/index.html` (nút Khung đổi 192/128). Còn lại: đưa lại ảnh nguồn 6j đúng (xem trên), đổi tên chính thức (chỉ sửa trong 51-thu-moi.js). Bước sau (sửa cơ chế, bỏ thú và trứng cũ) tính riêng.
+Bạn duyệt cả 60 con ở `game-moi/index.html` (nút Khung đổi 192/128). Còn lại: đổi tên chính thức (chỉ sửa trong 51-thu-moi.js). Bước sau (sửa cơ chế, bỏ thú và trứng cũ) tính riêng.
