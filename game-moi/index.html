@@ -24,6 +24,13 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 #edb,#edt button,#edq button{font:bold 11px sans-serif;padding:3px 8px;border:1px solid #888;border-radius:3px;background:#333;color:#fff}
 #edq input{font:14px sans-serif;width:210px;padding:3px 6px;border:1px solid #888;border-radius:3px;background:#fff;color:#000;-webkit-user-select:text;user-select:text}
 #edz{min-width:34px;text-align:center}
+#tl{position:absolute;left:0;top:0;right:0;bottom:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55)}
+#tl .pn{background:#1b2030;border:1px solid #a98cf0;border-radius:6px;padding:8px 10px;max-width:86vw;max-height:84vh;overflow-y:auto;touch-action:pan-y;color:#fff;font:12px sans-serif}
+#tl .hd{display:flex;justify-content:space-between;align-items:center;gap:16px;font:bold 13px sans-serif}
+#tl h4{margin:8px 0 4px;font:bold 12px sans-serif;color:#cdbcff}
+#tl .g{display:flex;flex-wrap:wrap;gap:4px}
+#tl .it,#tl .x{padding:5px 9px;border:1px solid #666;border-radius:4px;background:#2c3550;color:#fff;font:bold 12px sans-serif}
+#tl .it.on{border-color:#ffe066;background:#4a3f12;color:#ffe9a0}
 #tst{position:absolute;left:50%;transform:translateX(-50%);top:calc(30px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 8px;border-radius:3px;opacity:0;transition:opacity .2s;pointer-events:none!important;z-index:30;white-space:nowrap}
 </style></head><body>
 <canvas id="g"></canvas><div id="sa"></div>
@@ -32,6 +39,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
  <div id="edt"><span id="edn"></span><button id="edm">−</button><span id="edz"></span><button id="edp">+</button><button id="edr">Đổi tên</button><button id="edd">Mặc định</button><button id="edx">Xong</button></div>
  <div id="edq"><input id="edi" maxlength="30" placeholder="Tên nút (trống = tên gốc)" autocomplete="off"><button id="edo">OK</button><button id="edc">Hủy</button></div>
  <div id="tst"></div>
+ <div id="tl"><div class="pn"><div class="hd"><span>Chọn thú</span><button class="x" id="tlx">Đóng</button></div><div id="tlb"></div></div></div>
 </div>
 <script src="51-thu-moi.js"></script>
 <script>
@@ -118,7 +126,7 @@ UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.
   if(drag&&drag.id===u.id){drag=null;saveLay();return;}
   if(ed)return;
   if(u.id==='fs'){triedFS=true;if(isFS())exitFull();else full();}
-  else if(u.id==='tt'){var ks=Object.keys(THU_MOI.byId);ID=ks[(ks.indexOf(ID)+1)%ks.length];saveB();label('tt');toast('Thú: '+THU_MOI.byId[ID].ten);}
+  else if(u.id==='tt'){openList();}
   else if(u.id==='tm'){bm=bm%MAXB+1;saveB();label('tm');toast('Bạn: bậc '+bm);}
   else if(u.id==='te'){be=be%MAXB+1;saveB();label('te');toast('Địch: bậc '+be);}
   else toast(els[u.id].textContent+' (chưa gắn chức năng)');});
@@ -185,6 +193,17 @@ document.addEventListener('contextmenu',function(e){if(!e.target||e.target.tagNa
 /* Toàn màn hình phải gọi trong pointerup (cảm ứng chỉ tính là "chạm thật" lúc nhấc tay). */
 document.addEventListener('pointerup',function(){if(!triedFS&&!ed){triedFS=true;full();}});
 
+/* Danh sách chọn thú: bấm nút "Thú: ..." mở bảng, liệt kê theo vùng từ THU_MOI.zones (thú mới thêm vào 51-thu-moi.js tự có mặt) */
+function closeList(){document.getElementById('tl').style.display='none';}
+function pick(id){ID=id;saveB();label('tt');reset();closeList();toast('Thú: '+THU_MOI.byId[ID].ten);}
+function openList(){var tl=document.getElementById('tl'),b=document.getElementById('tlb');b.innerHTML='';
+ THU_MOI.zones.forEach(function(z){var h=document.createElement('h4');h.textContent=z.ten;b.appendChild(h);
+  var g=document.createElement('div');g.className='g';
+  z.thu.forEach(function(t){var x=document.createElement('button');x.className='it'+(t.id===ID?' on':'');x.textContent=(t.boss?'👑 ':'')+t.ten;x.addEventListener('click',function(){pick(t.id);});g.appendChild(x);});
+  b.appendChild(g);});
+ tl.style.display='flex';}
+document.getElementById('tlx').addEventListener('click',closeList);
+document.getElementById('tl').addEventListener('click',function(e){if(e.target===this)closeList();});
 function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
  if(A&&A.w===w){var p=(ts-A.t)/300;if(p<1)o=Math.round(Math.sin(p*Math.PI)*28);else A=null;}
  var bob=dead?0:Math.round(Math.sin(ts/380+(w==='me'?0:2))*2);
