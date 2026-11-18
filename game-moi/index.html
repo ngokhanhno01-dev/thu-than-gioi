@@ -223,7 +223,8 @@ function dp(id,b,cx,by){THU_MOI.setFrame(192);THU_MOI.draw(ctx,id,b,cx,by,128);}
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
 function TH(){return H-I.b-BP-GAPB;}/* chiều cao khung trên */
-function gy(){return TH()-FLOOR;}/* đường chân thú */
+function edgeY(){var t=TH();return t-Math.round(28*Math.min(FSC,(t-20)/500));}/* mép trên của viền khung trên (viền dày 28px ảnh gốc, vẽ ở tỉ lệ s) */
+function gy(){return SCENE==='sanh'?edgeY()+1:TH()-FLOOR;}/* đường chân thú: sảnh = đứng ngay trên viền khung; trận mẫu = đứng trên đường nền như cũ */
 /* ===== KHUNG (ảnh khung-game.webp, cắt 9 mảnh) ===== */
 var FR=new Image();FR.onload=function(){frOK=true;buildFrame();};FR.onerror=function(){frOK=false;};FR.src='khung-game.webp';
 function s9(c,m,x,y,w,h,s){
@@ -392,14 +393,13 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
 function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.round(Math.sin(ts/380)*2);
- ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x-40,gy()-2,80,4);
  dp(ID,bm,x,gy()+bob);}
 function draw(ts){
  var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
  ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);
  /* nền khung trên: trời + đất (sau này mỗi vùng đổi nền ở đây) */
  var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(fx,0,fw,gy());
- ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);
+ ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());if(SCENE!=='sanh'){ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);}
  /* nền khung dưới (chứa nút) */
  var pg=ctx.createLinearGradient(0,pt,0,pt+BP);pg.addColorStop(0,'#151a3a');pg.addColorStop(1,'#0c1026');ctx.fillStyle=pg;ctx.fillRect(fx,pt,fw,BP);
  /* khung (đã dựng sẵn ở độ phân giải máy) */
