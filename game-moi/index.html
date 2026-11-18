@@ -202,8 +202,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Thứ tự vẽ: nền -> khung -> thú -> thanh máu -> hiệu ứng (thú nằm TRÊN khung nên chân thú không bị viền che). Chưa có ảnh khung thì vẽ viền vàng mảnh tạm.
    Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
-   VỊ TRÍ THÚ: thú bên trái đứng ngay giữa nút "Chọn thú" (theo vị trí nút thật trên màn hình, kéo nút là thú đi theo).
-   Thú bên phải đối xứng với thú trái qua tâm khung ((I.l + W - I.r) - x trái).
+   VỊ TRÍ THÚ: cố định theo tỉ lệ khung (PET_X = 0.218 bề ngang khung, đúng chỗ dưới nút "Chọn thú" lúc này), KHÔNG neo vào nút nào để sau này đổi/bỏ nút không ảnh hưởng.
+   Thú bên phải đối xứng với thú trái qua tâm khung (1 - PET_X).
    ĐỔI BẬC: 2 nút "Bạn: bậc N" và "Địch: bậc N" (id tm, te), bấm để xoay vòng 1 -> 2 -> 3 -> 1 (MAXB = 3).
    Nút mới thêm vào danh sách sẽ tự xếp vào chỗ trống cuối thanh dưới, KHÔNG làm mất bố cục đã sắp xếp.
    NÚT ẢO: các nút chức năng là nút DOM nằm trên canvas, CHƯA gắn chức năng (trừ nút ⛶ và 2 nút đổi bậc).
@@ -214,7 +214,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,typing=false;
-var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,ANCHOR='cs',ANCHOR_DEF=.16,MAXB=3;
+var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,PET_X=.218,MAXB=3;
 var BP=70,GAPB=2,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
@@ -256,11 +256,8 @@ function resize(){
  ctx.imageSmoothingEnabled=false;
  buildFrame();
  layoutUI();}
-/* Tâm ngang (đơn vị pixel game) của nút neo "Chọn thú". Không đo được thì dùng 16% chiều rộng. */
-function anchorX(){var e=document.getElementById('tp');/* neo vào nút "Chọn thú" (id tp) */
- if(e){var r=e.getBoundingClientRect();if(r.width>0)return (r.left+r.width/2)*DPR/K;}
- return W*ANCHOR_DEF;}
-function px(w){var c=anchorX();return Math.round(w==='me'?c:(I.l+W-I.r)-c);}/* thú phải đối xứng thú trái qua TÂM KHUNG (giữa I.l và W-I.r) */
+/* VỊ TRÍ THÚ CỐ ĐỊNH, KHÔNG phụ thuộc nút nào (nút sau này đổi/bỏ thoải mái). PET_X = tâm thú trái tính theo tỉ lệ bề ngang khung (0 = mép trái khung, 0.5 = giữa). Thú phải đối xứng: 1 - PET_X. */
+function px(w){var fw=W-I.l-I.r;return Math.round(I.l+fw*(w==='me'?PET_X:1-PET_X));}
 function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
  st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+d});A={w:w,t:n};}
 /* Một lượt: mình đánh -> (nếu địch còn sống) địch đánh lại -> kiểm tra thắng/thua.
