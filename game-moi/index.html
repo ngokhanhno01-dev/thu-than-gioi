@@ -397,7 +397,7 @@ function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=
    Video 1920x872 (tỉ lệ 2.2:1, đã cắt từ 16:9 gốc, giữ ~80% chiều cao), kéo vừa KHÍT phần trống BÊN TRONG viền khung (object-fit:fill, không phóng to/cắt thêm); viền khung vẽ đè lên.
    Video đã làm sẵn vòng lặp liền (cuối hòa vào đầu). Để lặp không khựng, dùng 2 thẻ video (BGV hiện, BGV2 chờ ở giây 0); chỉ còn ~0,07s thì bật cái kia (đang chờ sẵn ở giây 0) rồi đổi chỗ NGAY (không đổi sớm, nếu không hình sẽ nhảy lùi).
    Thêm vùng mới: thêm vào BGV_ZONE (khóa zone của thú -> file video). */
-var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen-v2.mp4'},bgCur=BGV,bgNxt=BGV2,bgSw=false;
+var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn=false,BGV_ZONE={'tuyet-nguyen':'vid-sanh-tuyet-nguyen-v2.mp4','suong-coc':'vid-sanh-suong-coc.mp4'},bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0;
 /* độ dày viền khung THẬT (đo ở giữa mỗi cạnh ảnh khung-game.webp, đơn vị px ảnh gốc) */
 var BG_EDGE={l:37,r:37,t:32,b:29};
 function bgWant(){var t=THU_MOI.byId[ID];return SCENE==='sanh'&&!!t&&!!BGV_ZONE[t.zone];}
@@ -405,15 +405,15 @@ function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,s=Math.min(FSC,(th-20)/500)
  var l=Math.round(BG_EDGE.l*s)-ov,r=Math.round(BG_EDGE.r*s)-ov,t=Math.round(BG_EDGE.t*s)-ov,b=Math.round(BG_EDGE.b*s)-ov;
  [BGV,BGV2].forEach(function(v){v.style.left=Math.round((I.l+l)*f)+'px';v.style.top=Math.round(t*f)+'px';v.style.width=Math.round((fw-l-r)*f)+'px';v.style.height=Math.round((th-t-b)*f)+'px';});}
 function bgShow(c,n){c.style.opacity=1;n.style.opacity=0;}
-function bgTick(){if(!bgOn)return;
+function bgTick(g){if(!bgOn||g!==bgGen)return;
  var c=bgCur,n=bgNxt;
  if(!bgSw&&c.duration&&c.duration-c.currentTime<0.07){bgSw=true;try{n.currentTime=0;}catch(e){}var p=n.play();if(p&&p.catch)p.catch(function(){bgSw=false;});}
  if(bgSw&&n.currentTime>0.01&&!n.paused){bgShow(n,c);c.pause();try{c.currentTime=0;}catch(e){}bgCur=n;bgNxt=c;bgSw=false;}
- requestAnimationFrame(bgTick);}
-function bgSync(){var w=bgWant();if(w===bgOn)return;bgOn=w;
- if(w){var f=BGV_ZONE[THU_MOI.byId[ID].zone];[BGV,BGV2].forEach(function(v){if(v.getAttribute('src')!==f)v.setAttribute('src',f);v.style.display='block';});
+ requestAnimationFrame(function(){bgTick(g);});}
+function bgSync(){var w=bgWant(),f=w?BGV_ZONE[THU_MOI.byId[ID].zone]:'';if(w===bgOn&&f===bgFile)return;bgOn=w;bgFile=f;var g=++bgGen;/* đổi thú sang vùng khác (khác video) cũng chạy lại đoạn này */
+ if(w){[BGV,BGV2].forEach(function(v){if(v.getAttribute('src')!==f){v.setAttribute('src',f);v.load();}v.style.display='block';});
   bgLayout();bgCur=BGV;bgNxt=BGV2;bgSw=false;bgShow(BGV,BGV2);try{BGV2.pause();BGV2.currentTime=0;}catch(e){}
-  var p=BGV.play();if(p&&p.catch)p.catch(function(){});requestAnimationFrame(bgTick);}
+  var p=BGV.play();if(p&&p.catch)p.catch(function(){});requestAnimationFrame(function(){bgTick(g);});}
  else{BGV.style.display='none';BGV2.style.display='none';BGV.pause();BGV2.pause();}}
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
 function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.round(Math.sin(ts/380)*2);
