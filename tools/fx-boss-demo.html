@@ -24,7 +24,6 @@ button:hover,button[aria-pressed="true"]{background:#3b315d;border-color:#aa94e8
 .timeButtons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:7px}
 .timeButtons button{min-height:32px;padding:5px 3px;text-align:center;font-size:11px}
 #info{min-height:48px;margin:9px 2px;color:#c3cce2;font-size:12px;white-space:pre-wrap}
-#info{min-height:48px;margin:9px 2px;color:#c3cce2;font-size:12px;white-space:pre-wrap}
 .hint{font-size:11px;color:#8994b2;margin:8px 2px 0}
 @media(max-width:650px){.layout{grid-template-columns:1fr}.panel{order:2}.skills{grid-template-columns:repeat(2,minmax(0,1fr))}button{font-size:12px}}
 </style>
@@ -139,7 +138,13 @@ function loop(now){
   api.drawAttack(g,T,{on:1,s:0,u,pa:true,cl:0,cr:false,miss:false,
    h:'',i:frame,kyNang:skill,text:''});
  }
- if(playing&&elapsed>=DURATION)playing=false;
+ if(playing&&elapsed>=DURATION){
+  /* Hết 1.68s: giữ khung cuối t=1.68 và đồng hồ khớp khung đang hiện. */
+  playing=false;fixedTime=DURATION;
+  seek.value=String(Math.round(DURATION*1000));
+  clock.value=DURATION.toFixed(2)+'s';clock.textContent=clock.value;
+  info.textContent=labels[skill][0]+' · khung cuối t=1.68s · Trúng ở 0.665 giây';
+ }
 }
 buttons.forEach(b=>b.addEventListener('click',()=>restart(b.dataset.skill)));
 document.querySelectorAll('[data-time]').forEach(b=>b.addEventListener('click',()=>showTime(b.dataset.time)));
