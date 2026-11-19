@@ -299,5 +299,5 @@ function add(t){
 function list(){dongBo();return thus.map(function(t){return Object.assign({},t);});}
 function getRaTran(){var t=rt&&byUid(rt);return t?Object.assign({},t):null;}   /* sau này nối vào trận đấu/sảnh bằng hàm này */
 
-window.TTGTHU={open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran};
+window.TTGTHU={open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,anh:anhThu};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();
