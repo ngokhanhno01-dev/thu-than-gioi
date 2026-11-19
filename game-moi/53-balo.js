@@ -1,15 +1,16 @@
 /* 53-balo.js - BALO của game-moi: nút Balo (khung vuông + icon) + bảng Balo + dữ liệu túi đồ.
-   Cần 52-nut-vuong.js (TTGNV) nạp trước. Ảnh khung bảng: game-moi/khung-balo.webp (1464x665).
+   Cần 52-nut-vuong.js (TTGNV) nạp trước. Ảnh khung bảng: game-moi/khung-balo.webp (1469x673, khung mới: 4x4 ô + 4 khung ngang + bảng thông tin bên phải).
    BẢNG: nửa TRÁI = Bóng bắt thú (danh sách thanh, sau này dùng khung thanh dài + bấm mở bảng nổi có nút Dùng/Đóng);
-         nửa PHẢI = lưới 24 ô Nguyên liệu (chia trang, tổng CAP ô) + khung thông tin item (icon phóng to, tên, mô tả, số lượng).
-   Mọi vị trí bên dưới tính theo pixel ẢNH GỐC 1464x665 (BW x BH), tự co theo cỡ màn hình bằng biến --u (= 1 px ảnh gốc).
+         nửa PHẢI = lưới 16 ô (4x4) Nguyên liệu (chia trang, tổng CAP ô) + bảng thông tin item (icon phóng to, tên, mô tả, số lượng)
+         + 4 khung ngang dưới lưới: khung 1 = sức chứa, khung 2 = chuyển trang, khung 3-4 để trống (chừa cho nút sau này).
+   Mọi vị trí bên dưới tính theo pixel ẢNH ĐÃ CẮT 1469x673 (BW x BH), tự co theo cỡ màn hình bằng biến --u (= 1 px ảnh gốc).
    DỮ LIỆU: kho đồ {id: số lượng} lưu ở khóa ttg_moi_balo_v1. Danh mục item (CAT) khai ở khối "DANH MỤC ITEM" bên dưới hoặc gọi TTGBALO.reg({...}).
    API: TTGBALO.open()/close(), .add(id,n) (n âm = trừ), .count(id), .reg(items).
    THỬ BẢNG: thêm ?balo=demo vào link -> có sẵn vài item mẫu (không lưu lại). */
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var KEY='ttg_moi_balo_v1',CAP=100,PAGE=24,BW=1464,BH=665,IMG='game-moi/khung-balo.webp';
+var KEY='ttg_moi_balo_v1',CAP=100,PAGE=16,BW=1469,BH=673,IMG='game-moi/khung-balo.webp?v=2';
 var demo=/[?&]balo=demo/.test(location.search);
 var LOAI={nl:'Nguyên liệu',bong:'Bóng bắt thú'};
 /* ===== DANH MỤC ITEM ===== mỗi item: id:{loai:'nl'|'bong', ten, mo (mô tả), ic (emoji tạm) hoặc img (đường dẫn ảnh icon), cap (cấp bóng)} */
@@ -34,11 +35,11 @@ function ids(loai){return Object.keys(inv).filter(function(id){return CAT[id]&&C
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function ic(it){return it.img?'<img src="'+esc(it.img)+'" alt="">':'<b>'+esc(it.ic||'?')+'</b>';}
 
-/* ===== CSS: {n} = n px ảnh gốc (tự co theo --u) ===== */
+/* ===== CSS: {n} = n px ảnh (tự co theo --u) ===== */
 var css=[
 '.bl{position:fixed;left:0;top:0;right:0;bottom:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.74);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
 '.bl.on{display:flex}',
-'.bl-fr{position:relative;width:min(98vw,calc(96vh*1464/665));aspect-ratio:1464/665;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
+'.bl-fr{position:relative;width:min(98vw,calc(96vh*1469/673));aspect-ratio:1469/673;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
 '.bl-fr>*{position:absolute;box-sizing:border-box}',
 '.bl button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
 '.bl-t{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:{36};letter-spacing:{4};color:#ffe9a0;text-shadow:0 0 {8} rgba(255,200,80,.6),0 {2} 0 #000}',
@@ -77,21 +78,21 @@ var stl=document.createElement('style');stl.textContent=css;document.head.append
 /* ===== DỰNG BẢNG (một lần) ===== */
 function box(c,x,y,w,h){var s=c.style;s.left=(x/BW*100)+'%';s.top=(y/BH*100)+'%';s.width=(w/BW*100)+'%';s.height=(h/BH*100)+'%';return c;}
 function mk(tag,cls,x,y,w,h,txt){var c=document.createElement(tag);if(cls)c.className=cls;if(txt!=null)c.textContent=txt;if(w)box(c,x,y,w,h);fr.appendChild(c);return c;}
-var COLS=[766,844,923,1002],ROWS=[159,239,319,399,479,558],SL=71;
+var COLS=[769,848,927,1006],ROWS=[166,245,325,405],SL=71; /* lưới 4 cột x 4 hàng, mỗi ô 71px ảnh */
 function build(){
   root=document.createElement('div');root.className='bl';
   fr=document.createElement('div');fr.className='bl-fr';root.appendChild(fr);
-  mk('div','bl-t',205,50,200,50,'BALO');
-  E.x=mk('button','bl-x',142,53,46,46,'✕');E.x.type='button';E.x.setAttribute('aria-label','Đóng');
-  E.cap=mk('div','bl-cap',1128,56,96,44);
-  var pg=mk('div','bl-pg',1226,56,112,44);
+  mk('div','bl-t',160,52,200,50,'BALO'); /* tên bảng, nằm ở dải trên bên trái */
+  E.x=mk('button','bl-x',1296,55,46,46,'✕'); /* nút đóng: khung mới không vẽ sẵn nút X nên đặt ở dải trên bên phải */E.x.type='button';E.x.setAttribute('aria-label','Đóng');
+  E.cap=mk('div','bl-cap',781,502,123,43); /* khung ngang số 1: sức chứa */
+  var pg=mk('div','bl-pg',941,502,123,43); /* khung ngang số 2: chuyển trang */
   E.pv=document.createElement('button');E.pv.type='button';E.pv.textContent='‹';E.pg=document.createElement('span');E.nx=document.createElement('button');E.nx.type='button';E.nx.textContent='›';
   pg.appendChild(E.pv);pg.appendChild(E.pg);pg.appendChild(E.nx);
-  mk('div','bl-pl',269,143,209,30,'Bóng bắt thú');
-  E.balls=mk('div','bl-balls',88,190,580,402);
+  mk('div','bl-pl',272,141,210,30,'Bóng bắt thú'); /* chữ trên thanh vàng */
+  E.balls=mk('div','bl-balls',92,186,568,410);
   E.slots=[];
   for(var r=0;r<6;r++)for(var c=0;c<4;c++){var b=mk('button','bl-sl',COLS[c],ROWS[r],SL,SL);b.type='button';(function(i){b.addEventListener('click',function(){clickSlot(i);});})(r*4+c);E.slots.push(b);}
-  E.dt=mk('div','bl-dt',1122,172,252,448);
+  E.dt=mk('div','bl-dt',1128,192,252,424); /* bảng thông tin item bên phải */
   document.body.appendChild(root);
   E.x.addEventListener('click',close);
   E.pv.addEventListener('click',function(){if(page>0){page--;render();}});
