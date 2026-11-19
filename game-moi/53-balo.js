@@ -11,7 +11,7 @@
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var KEY='ttg_moi_balo_v1',CAP=100,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=3';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
+var KEY='ttg_moi_balo_v1',CAP=100,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=3',OV_KHOA='game-moi/nut-mo-khoa.webp?v=1',OV_CHON='game-moi/nut-bo-chon.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
 var demo=/[?&](balo|thu)=demo/.test(location.search);   /* ?thu=demo cũng bật demo Balo để có sách kỹ năng mẫu cho panel Thú Thần (không lưu) */
 var LOAI={nl:'Nguyên liệu',bong:'Bóng bắt thú',sach:'Sách kỹ năng'};   /* sách kỹ năng nằm chung lưới 4x4 với nguyên liệu; danh mục sách khai ở 54-thu-than.js */
 /* ===== DANH MỤC ITEM ===== mỗi item: id:{loai:'nl'|'bong', ten, mo (mô tả), ic (emoji tạm) hoặc img (đường dẫn ảnh icon), cap (cấp bóng)} */
@@ -74,8 +74,9 @@ var css=[
 '.bl-sl img,.bl-row img,.dt-ic img{width:76%;height:76%;object-fit:contain}',
 '.bl-sl .q{position:absolute;right:{7};bottom:{3};font-weight:800;font-size:{17};color:#fff;text-shadow:0 0 {3} #000,{1} {1} 0 #000,-{1} {1} 0 #000}',
 '.bl-sl.sel::after{content:"";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{3} solid #ffe066;border-radius:{4};box-shadow:0 0 {12} rgba(255,224,102,.75),inset 0 0 {10} rgba(255,224,102,.35);pointer-events:none}',
-'.bl-bt{padding:0;border:0;border-radius:{34};background:transparent;cursor:pointer} /* chữ KHÓA/CHỌN/VỨT BỎ/SẮP XẾP đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt, trạng thái hiện bằng quầng sáng (.on) */','.bl-bt:active{background:rgba(255,224,102,.25)}',
-'.bl-bt.on{background:rgba(95,240,224,.2);box-shadow:inset 0 0 {14} rgba(95,240,224,.7),0 0 {10} rgba(95,240,224,.5)}',
+'.bl-bt{padding:0;border:0;border-radius:{34};background:transparent;cursor:pointer} /* chữ KHÓA/CHỌN/VỨT BỎ/SẮP XẾP đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt, trạng thái đổi bằng ảnh phủ .bl-ov */','.bl-bt:active{background:rgba(255,224,102,.25)}',
+'.bl-ov{display:none;pointer-events:none}',   /* ảnh nút MỞ KHÓA / BỎ CHỌN đè lên nút KHÓA / CHỌN khi đổi trạng thái */
+'.bl-ov.on{display:block}',
 '.bl-sl .lk,.bl-row .lk{position:absolute;left:{6};top:{4};font-size:{17};line-height:1;text-shadow:0 0 {3} #000}',
 '.bl-row .lk{position:static;font-size:{20}}',
 '.bl-sl.pk::after{content:"";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{3} solid #5ff0e0;border-radius:{4};box-shadow:0 0 {12} rgba(95,240,224,.7);pointer-events:none}',
@@ -114,6 +115,9 @@ function build(){
   for(var r=0;r<6;r++)for(var c=0;c<4;c++){var b=mk('button','bl-sl',COLS[c],ROWS[r],SL,SL);b.type='button';(function(i){b.addEventListener('click',function(){clickSlot(i);});})(r*4+c);E.slots.push(b);}
   E.dt=mk('div','bl-dt',1385,235,290,535); /* bảng thông tin item bên phải */
   /* 4 nút: vùng bấm trong suốt đặt lên 4 nút đã vẽ sẵn: [x,y,rộng,cao] (chữ trên nút nằm trong ảnh khung nên không đổi được; trạng thái hiện bằng quầng sáng + thông báo nổi) */
+  /* ảnh nút đổi trạng thái (cắt từ khung mới): [x,y,rộng,cao] khớp đúng vị trí nút KHÓA / CHỌN. Đổi ảnh thì giữ nguyên kích thước/vị trí */
+  E.ovK=mk('img','bl-ov',888,604,232,96);E.ovK.src=OV_KHOA;E.ovK.alt='';E.ovK.draggable=false;
+  E.ovC=mk('img','bl-ov',1120,604,232,96);E.ovC.src=OV_CHON;E.ovC.alt='';E.ovC.draggable=false;
   E.bt={};
   [['khoa',925,618,180,70,'Khóa',khoa],['chon',1138,618,190,70,'Chọn',chon],['vut',925,718,180,70,'Vứt bỏ',vut],['xep',1138,718,190,70,'Sắp xếp',xep]].forEach(function(d){
     var b=mk('button','bl-bt',d[1],d[2],d[3],d[4]);b.type='button';b.setAttribute('aria-label',d[5]);b.addEventListener('click',d[6]);E.bt[d[0]]=b;});
@@ -169,8 +173,8 @@ function render(){
     r.addEventListener('click',function(){pick(id);});E.balls.appendChild(r);});
   for(var k in picks)if(!CAT[k]||count(k)<=0)delete picks[k];
   var tg=targets(),allLk=!!(tg.length&&tg.every(function(x){return lock[x];}));
-  E.bt.khoa.setAttribute('aria-label',allLk?'Mở khóa':'Khóa');E.bt.khoa.classList.toggle('on',allLk);   /* chữ KHÓA đã vẽ sẵn: đang khóa thì nút sáng lam */
-  E.bt.chon.setAttribute('aria-label',multi?'Bỏ chọn':'Chọn');E.bt.chon.classList.toggle('on',multi);
+  E.bt.khoa.setAttribute('aria-label',allLk?'Mở khóa':'Khóa');E.ovK.classList.toggle('on',allLk);   /* đang chọn món đã khóa -> hiện nút MỞ KHÓA */
+  E.bt.chon.setAttribute('aria-label',multi?'Bỏ chọn':'Chọn');E.ovC.classList.toggle('on',multi);   /* đang chọn nhiều -> hiện nút BỎ CHỌN */
   var d=E.dt;
   if(sel){var s=CAT[sel];d.innerHTML='<div class="dt-ic">'+ic(s)+'</div><div class="dt-nm">'+esc(s.ten)+'</div><div class="dt-mt">'+esc(LOAI[s.loai]||'')+(s.cap?' · Cấp '+s.cap:'')+' · Số lượng: '+count(sel)+(lock[sel]?' · 🔒':'')+'</div><div class="dt-ds">'+esc(s.mo||'')+'</div>';}
   else d.innerHTML='<div class="dt-hint">Chạm một ô để xem thông tin</div>';
