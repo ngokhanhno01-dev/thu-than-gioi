@@ -1,6 +1,7 @@
 /* 52-nut-vuong.js - NÚT VUÔNG (khung game-moi/khung-nut.webp) xếp lưới ở KHUNG DƯỚI của game-moi.
    Mỗi nút: khung vàng + icon SVG ở giữa + chữ nhỏ bên dưới icon. Nút là DOM nằm trên canvas (z-index 6, trên #ui).
-   DÙNG:  TTGNV.add({id:'balo', ten:'Balo', icon:'<svg ...>', onTap:function(){...}});
+   DÙNG:  TTGNV.add({id:'balo', ten:'Balo', icon:'<svg ...>', onTap:function(){...}, r:0});
+   r (tùy chọn) = hàng muốn đứng (0 = hàng trên, 1 = hàng dưới); các nút cùng r xếp ngang cạnh nhau. Không có r thì xếp theo CFG.fill.
    Nút xếp theo CỘT (trên -> dưới rồi sang cột kế): nút 1 ở hàng trên cùng bên trái, nút 2 ngay dưới nó, nút 3 sang cột bên cạnh...
    Chỉnh to/nhỏ, khe, số hàng, chỗ chừa họa tiết góc: sửa CFG bên dưới (đơn vị game, giống BP = 70 của khung dưới trong index.html).
    index.html gọi TTGNV.layout(...) mỗi lần đổi cỡ màn hình (hàm resize) để đặt lại vị trí. */
@@ -41,9 +42,15 @@ function layout(m){
   M=m||M;if(!M)return;
   var f=M.K/M.DPR,s=CFG.size*f,g=CFG.gap*f,x0=(M.I.l+CFG.left)*f,pt=(M.th+M.GAPB)*f,rows=Math.max(1,CFG.rows),
       blk=rows*s+(rows-1)*g,y0=pt+Math.max(0,(M.BP*f-blk)/2);
+  var used={},pos=[];
+  /* lượt 1: nút có chỉ định hàng (o.r: 0 = hàng trên, 1 = hàng dưới) -> đứng ở ô trống đầu tiên của hàng đó, nên Balo và Thú Thần nằm CÙNG HÀNG */
+  list.forEach(function(it,i){if(it.o.r==null)return;var r=Math.min(Math.max(0,it.o.r|0),rows-1),c=0;while(used[c+','+r])c++;used[c+','+r]=1;pos[i]=[c,r];});
+  /* lượt 2: nút không chỉ định hàng -> xếp vào ô trống đầu tiên theo kiểu CFG.fill */
+  list.forEach(function(it,i){if(pos[i])return;var n=0,c,r;
+    for(;;n++){if(CFG.fill==='row'){r=Math.floor(n/6);c=n%6;}else{c=Math.floor(n/rows);r=n%rows;}if(!used[c+','+r])break;}
+    used[c+','+r]=1;pos[i]=[c,r];});
   list.forEach(function(it,i){
-    var c,r;if(CFG.fill==='row'){r=Math.floor(i/6);c=i%6;}else{c=Math.floor(i/rows);r=i%rows;}
-    var e=it.e,s2=e.style;
+    var c=pos[i][0],r=pos[i][1],e=it.e,s2=e.style;
     s2.display='block';s2.width=s+'px';s2.height=s+'px';s2.left=Math.round(x0+c*(s+g))+'px';s2.top=Math.round(y0+r*(s+g))+'px';
     s2.fontSize=(s*.17).toFixed(2)+'px';
   });}
