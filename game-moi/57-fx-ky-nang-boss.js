@@ -449,60 +449,104 @@
   /* 4 · Vũ Xà Triền: thân rắn có vảy cuộn quanh mục tiêu, đầu rõ và ngẩng cao. */
   function snakeHead(g,x,y,dir,a,T){
    if(a<=.01)return;
-   g.save();g.translate(x,y);g.scale(dir,1);g.globalAlpha=clamp(a,0,1);
-   const gr=g.createLinearGradient(-17,-11,18,8);
-   gr.addColorStop(0,'#17634e');gr.addColorStop(.52,'#58d29b');gr.addColorStop(1,'#e0fff0');
-   g.fillStyle=gr;g.beginPath();g.moveTo(-19,1);g.lineTo(-12,-8);g.lineTo(3,-11);
-   g.lineTo(14,-7);g.lineTo(20,-1);g.lineTo(10,7);g.lineTo(-4,9);g.lineTo(-15,6);g.closePath();g.fill();
-   g.strokeStyle='#eafff4';g.lineWidth=1.35;g.stroke();
-   g.fillStyle='#f5d86a';g.beginPath();g.ellipse(9,-5,3.4,2.6,0,0,TAU);g.fill();
-   g.fillStyle='#102a25';g.beginPath();g.ellipse(10,-5,1.1,2.2,0,0,TAU);g.fill();
-   stroke(g,[[-10,5],[-3,9],[7,8]],'#14543f',1.3,.9,false);
-   stroke(g,[[17,1],[25,3+Math.sin(T*20)*1],[31,1]],'#f5a6bd',1.25,.96,true);
-   stroke(g,[[25,3+Math.sin(T*20)*1],[30,5]],'#ffd5e0',.9,.92,true);
+   g.save();g.translate(x,y);g.scale(dir,1);g.globalAlpha=clamp(a,0,1);g.lineJoin='round';
+   const grad=g.createLinearGradient(-27,-17,31,13);
+   grad.addColorStop(0,'#174d3c');grad.addColorStop(.4,'#3da775');grad.addColorStop(.78,'#9cf0c3');grad.addColorStop(1,'#eafff4');
+   g.fillStyle=grad;g.beginPath();g.moveTo(-27,1);g.quadraticCurveTo(-22,-10,-13,-15);
+   g.lineTo(-2,-18);g.quadraticCurveTo(12,-18,21,-11);g.lineTo(31,-4);
+   g.lineTo(34,1);g.quadraticCurveTo(27,8,17,11);g.lineTo(2,14);
+   g.lineTo(-13,11);g.quadraticCurveTo(-24,9,-27,1);g.closePath();g.fill();
+   g.strokeStyle='#eafff4';g.lineWidth=1.8;g.stroke();
+   /* Raised crown fins and a dark dorsal ridge make the head silhouette read at small scale. */
+   g.fillStyle=E.rgba('#18523f',a*.94);g.beginPath();g.moveTo(-17,-12);g.lineTo(-23,-23);g.lineTo(-7,-16);g.closePath();g.fill();
+   g.beginPath();g.moveTo(-6,-16);g.lineTo(1,-25);g.lineTo(7,-16);g.closePath();g.fill();
+   stroke(g,[[-20,-7],[-8,-15],[6,-16],[20,-11]],'#c9ffe0',1.25,a*.88,true);
+   /* Visible eye, slit pupil, brow, nostril and jaw. */
+   g.fillStyle=E.rgba('#f8dc76',a);g.beginPath();g.ellipse(13,-8,5.2,4.2,-.15,0,TAU);g.fill();
+   g.fillStyle=E.rgba('#142d27',a);g.beginPath();g.ellipse(14,-8,1.45,3.1,.08,0,TAU);g.fill();
+   g.fillStyle=E.rgba('#ffffff',a*.96);g.beginPath();g.arc(12,-9.5,1.1,0,TAU);g.fill();
+   stroke(g,[[7,-13],[13,-15],[20,-12]],'#164936',2,a*.95,false);
+   g.fillStyle=E.rgba('#164936',a*.88);g.beginPath();g.arc(28,-2,1.35,0,TAU);g.fill();
+   g.fillStyle=E.rgba('#113b31',a*.9);g.beginPath();g.moveTo(7,5);g.quadraticCurveTo(19,3,32,1);
+   g.lineTo(26,8);g.quadraticCurveTo(15,12,7,9);g.closePath();g.fill();
+   stroke(g,[[5,9],[16,12],[26,8]],'#c8ffe0',1.4,a*.92,true);
+   stroke(g,[[29,5],[34,8+Math.sin(T*18)*1.2],[39,6]],'#f28eae',1.7,a*.96,true);
+   stroke(g,[[34,8+Math.sin(T*18)*1.2],[39,10]],'#ffe0e9',.9,a*.92,true);
+   for(let i=0;i<3;i++)stroke(g,[[-11+i*5,2],[-8+i*5,4],[-6+i*5,3]],'#e2fff0',.8,a*.72,true);
    g.restore();
-   glow(g,x+dir*4,y-2,16,'#78f3bb',a*.28,'#eafff3');
+   glow(g,x+dir*7,y-3,20,'#78f3bb',a*.3,'#eafff3');
   }
   function fxSnake(g,T,t,S,st){
-    const q=aim(S),x=q.x,s=q.scale,C=COL.wind,r=E.rng(st.seed^0x570401),hit=t>=TH,
-     tighten=ph(t,.14,TH+.05),
-     bodyFade=t<TH-.06?1:(1-.9*eo(ph(t,TH-.06,TH+.02)))*(1-ph(t,TH+.02,TH+.18));
+   const q=aim(S),x=q.x,s=q.scale,C=COL.wind,r=E.rng(st.seed^0x570401),
+    tighten=ph(t,.12,TH+.04),bodyFade=t<TH-.07?1:(1-ph(t,TH-.07,TH+.01)),
+    radius=Math.min(63,Math.max(42,Math.min(x-30,330-x))),
+    coil=1-.24*eo(tighten),hx=clamp(x+q.dir*48*s,48,312),hy=GY-137;
+   /* Ground seal and wind are visible from the first frame; the body closes tighter before impact. */
+   const pre=1-ph(t,TH-.08,TH+.16);
+   ring(g,x,GY-4,34+8*eo(tighten),7,C.light,.34*pre,1.35);
+   groundCore(g,x,GY-3,C.light,.13*pre,24+8*eo(tighten));
    if(bodyFade>.01){
-     const points=[],n=112,coil=1-.29*eo(tighten);
+    const points=[],depth=[],n=160,turns=2.4;
     for(let i=0;i<n;i++){
-      const v=i/(n-1),a=v*TAU*2.75+T*1.35,
-       rx=(62-8*v)*coil*s,
-       yy=GY-57+v*42+Math.sin(a)*9*s;
-     points.push(point(x+Math.cos(a)*rx,yy));
+     const v=i/(n-1),ang=v*TAU*turns+T*.48,
+      rx=(radius-7*v)*coil*s,
+      yy=GY-56+v*38+Math.sin(ang)*15*s;
+     points.push(point(x+Math.cos(ang)*rx,yy));depth.push(Math.sin(ang));
     }
-     stroke(g,points,'#123c33',13*s*coil,bodyFade*.95,false);
-     stroke(g,points,C.deep,9.5*s*coil,bodyFade*.98,false);
-     ribbon(g,points,7.5*s*coil,C.main,bodyFade*.92,C.light);
-    stroke(g,points,C.core,1.3,bodyFade*.74,true);
-    /* Small raised scales follow the whole coil; the dark edge keeps its silhouette legible. */
-    const hx=clamp(x+q.dir*42*s,24,336),hy=GY-126;
-     const neck=[point(x+q.dir*52*s,GY-58),point(x+q.dir*54*s,GY-79),
-      point(x+q.dir*49*s,GY-105),point(hx-q.dir*8*s,hy+5)];
-     stroke(g,neck,'#123c33',17*s*coil,bodyFade*.98,false);
-     stroke(g,neck,C.deep,12*s*coil,bodyFade*.98,false);
-     ribbon(g,neck,9.5*s*coil,C.main,bodyFade*.96,C.light);
-    stroke(g,neck,C.core,1.2,bodyFade*.74,true);
-    for(let i=1;i<5;i++){
-     const f=i/5,xx=lerp(neck[0][0],neck[3][0],f),yy=lerp(neck[0][1],neck[3][1],f);
-     stroke(g,[point(xx-3,yy),point(xx+3,yy-2)],'#a4f5c9',1.1,bodyFade*.72,true);
-    }
-    for(let i=3;i<points.length-3;i+=3){
-     const p=points[i],before=points[i-1],after=points[i+1],
-      ang=Math.atan2(after[1]-before[1],after[0]-before[0]);
+    /* Paint far loops dark first, then near loops with a green back and pale belly stripe. */
+    const paintSide=(front,color,width,alpha,mode,offset)=>{
+     if(alpha<=.01)return;
+     g.save();g.globalAlpha=clamp(alpha,0,1);g.globalCompositeOperation=mode||'source-over';
+     g.strokeStyle=color;g.lineWidth=width;g.lineCap='round';g.lineJoin='round';g.beginPath();let open=false;
+     for(let i=1;i<points.length;i++){
+      const isFront=(depth[i]+depth[i-1])>=0;
+      if(isFront!==front){open=false;continue}
+      if(!open){g.moveTo(points[i-1][0],points[i-1][1]+(offset||0));open=true}
+      g.lineTo(points[i][0],points[i][1]+(offset||0));
+     }
+     g.stroke();g.restore();
+    };
+    paintSide(false,'#103d32',18*s*coil,bodyFade*.76,'source-over',0);
+    paintSide(false,C.deep,13*s*coil,bodyFade*.92,'source-over',0);
+    paintSide(false,C.main,7*s*coil,bodyFade*.7,'source-over',0);
+    paintSide(true,'#103d32',21*s*coil,bodyFade*.98,'source-over',0);
+    paintSide(true,C.deep,16*s*coil,bodyFade*.96,'source-over',0);
+    paintSide(true,C.main,12.5*s*coil,bodyFade*.98,'source-over',0);
+    paintSide(true,C.light,5.5*s*coil,bodyFade*.9,'lighter',0);
+    paintSide(true,'#d9ffea',2.2*s*coil,bodyFade*.92,'lighter',4*s);
+    /* Overlapping raised scales and short ribs make the coils visibly segmented. */
+    for(let i=4;i<points.length-4;i+=3){
+     const p=points[i],before=points[i-1],after=points[i+1],ang=Math.atan2(after[1]-before[1],after[0]-before[0]),front=depth[i]>=0;
      g.save();g.translate(p[0],p[1]);g.rotate(ang);
-     g.fillStyle=E.rgba(i%2?'#287b60':'#9cf6c7',bodyFade*.83);
-     g.beginPath();g.ellipse(0,0,4.2*s,2.7*s,0,0,TAU);g.fill();
-     g.strokeStyle=E.rgba('#eafff4',bodyFade*.66);g.lineWidth=.7;
-     g.beginPath();g.moveTo(-2*s,0);g.lineTo(2*s,0);g.stroke();g.restore();
+     g.fillStyle=E.rgba(front?(i%2?C.light:'#9bf0bf'):C.deep,bodyFade*(front?.88:.78));
+     g.beginPath();g.ellipse(0,0,4.9*s,3.35*s,0,0,TAU);g.fill();
+     g.strokeStyle=E.rgba(front?'#eafff4':'#4b9b72',bodyFade*(front?.82:.64));g.lineWidth=.8;
+     g.beginPath();g.arc(0,0,4.25*s,.12,Math.PI-.12);g.stroke();
+     g.beginPath();g.moveTo(-2.1*s,0);g.lineTo(2.1*s,0);g.stroke();g.restore();
+    }
+    /* A thick rising neck joins the coil to a large raised head. */
+    const neck=[point(x+q.dir*48*s,GY-54),point(x+q.dir*57*s,GY-77),
+     point(x+q.dir*58*s,GY-103),point(hx-q.dir*13,hy+11)];
+    stroke(g,neck,'#103d32',23*s,bodyFade*.98,false);
+    stroke(g,neck,C.deep,17*s,bodyFade*.98,false);
+    ribbon(g,neck,13*s,C.main,bodyFade*.98,C.light);
+    stroke(g,neck.map(p=>point(p[0],p[1]+4*s)),C.light,4.2*s,bodyFade*.88,true);
+    stroke(g,neck.map(p=>point(p[0],p[1]+4*s)),'#e3fff0',1.2,bodyFade*.9,true);
+    for(let i=1;i<7;i++){
+     const v=i/7,xx=lerp(neck[0][0],neck[3][0],v),yy=lerp(neck[0][1],neck[3][1],v);
+     stroke(g,[point(xx-4*s,yy),point(xx+4*s,yy-2*s)],i%2?C.light:C.deep,1.7,bodyFade*.82,i%2===0);
     }
     snakeHead(g,hx,hy,q.dir,bodyFade,T);
-    for(let side of [-1,1])fogPuff(g,x+side*43*s,GY-20,17,7,bodyFade*.22,T,st.seed+110+side,
-     {deep:C.deep,main:C.main,light:C.light,core:C.core});
+    for(const side of [-1,1]){
+     fogPuff(g,x+side*(radius-4)*s,GY-32,19,9,bodyFade*.28,T,st.seed+110+side,
+      {deep:C.deep,main:C.main,light:C.light,core:C.core});
+     const gust=[];
+     for(let j=0;j<16;j++){
+      const v=j/15,ang=T*1.35+v*TAU*.7+side*.8;
+      gust.push(point(x+side*(radius+9-20*v)*s+Math.cos(ang)*4,GY-61+v*43+Math.sin(ang)*5));
+     }
+     ribbon(g,gust,2.8,C.light,bodyFade*.3,C.core);
+    }
    }
    if(t>=TH&&t<=END){
     if(E.once(st,'snake-burst')){
@@ -513,6 +557,12 @@
       speed:[22,83],ang:[0,TAU],size:[1.2,2.8],life:[.42,.76],
       gy:-8,drag:.5,shape:'streak',c:C.light,c2:'#ffffff',a:.94,add:true});
     }
+    if(t>=TH+.18)burst(st,'snake-aftershock-one',x,GY-28,S.miss?10:18,{
+     speed:[28,78],ang:[-Math.PI*.78,-Math.PI*.22],size:[2,4.8],life:[.42,.78],
+     gy:92,drag:.5,shape:'leaf',c:C.main,c2:C.core,a:.92,vr:[-8,8],fl:8});
+    if(t>=TH+.38)burst(st,'snake-aftershock-two',x,GY-13,S.miss?8:14,{
+     speed:[34,92],ang:[-Math.PI*.8,-Math.PI*.2],size:[1.4,3.2],life:[.38,.68],
+     gy:45,drag:.48,shape:'streak',c:C.light,c2:C.core,a:.93,add:true});
     for(let i=0;i<3;i++){
      const start=TH+i*.18,p=ph(t,start,start+.43),f=1-ph(t,start+.24,start+.66);
      if(p>0&&f>0)wave(g,x,GY-4,10+94*eo(p)*s*(1-i*.17),i===1?C.light:C.main,f*.69,2.1,T,st.seed+150+i,.2);
@@ -539,7 +589,6 @@
     groundCore(g,x,GY-3,C.light,fade*.18,31*s);
    }
   }
-
   /* 5 · Thiên Lôi Giáng: cột sét chính/phụ, chấn sóng, điện bò và khói cháy. */
   function fxLightning(g,T,t,S,st){
    const q=aim(S),x=q.x,s=q.scale,C=COL.bolt,r=E.rng(st.seed^0x570500);
