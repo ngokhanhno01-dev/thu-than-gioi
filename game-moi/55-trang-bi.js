@@ -1,27 +1,27 @@
 /* 55-trang-bi.js - Khung TRANG BỊ của thú (mở từ nút "Trang Bị" trong panel Thú Thần, 54-thu-than.js).
-   Ảnh khung: game-moi/khung-trang-bi.webp (1456x669). Hiển thị đúng cỡ gốc (1 pixel ảnh = 1 pixel máy) để không bị mờ, màn nhỏ thì tự co.
-   MỌI TỌA ĐỘ tính theo PIXEL ẢNH ĐÃ CẮT 1456x669 (BW x BH), tự co theo màn hình bằng biến --u (= 1 px ảnh).
-   TIẾN ĐỘ: KHUNG + đóng (nút X / bấm ra ngoài / Esc) + chữ "Trang Bị" + thú RA TRẬN đứng trên bục bên trái (có nhịp thở như ở sảnh).
+   Ảnh khung: game-moi/khung-trang-bi.webp (1798x798, khung xanh-vàng mới: chữ TRANG BỊ, nút X, chữ THÔNG TIN, 2 nút TRANG BỊ / VỨT BỎ đã VẼ SẴN trong ảnh). Hiển thị đúng cỡ gốc (1 pixel ảnh = 1 pixel máy) để không bị mờ, màn nhỏ thì tự co.
+   MỌI TỌA ĐỘ tính theo PIXEL ẢNH ĐÃ CẮT 1798x798 (BW x BH). Cỡ chữ/độ dày trong CSS ({n}) vẫn tính theo thang cũ 1456 (UB) nên không phải chỉnh lại; --u = clientWidth/UB.
+   TIẾN ĐỘ: KHUNG + đóng (nút X / bấm ra ngoài / Esc) + thú RA TRẬN đứng trên bục bên trái (có nhịp thở như ở sảnh).
    Không có thú ra trận (TTGTHU.getRaTran() = null) thì KHÔNG hiện thú, chỉ hiện chữ "Chưa có Thú ra trận".
    CHƯA LÀM: 8 ô trang bị 2 bên, lưới 4x6 đồ, bảng thông tin bên phải, 2 nút dưới bảng.
    Mở nằm ĐÈ LÊN panel Thú Thần (đóng khung này thì quay lại Thú Thần); đóng panel Thú Thần/mở Balo thì khung này cũng đóng.
    API: TTGTB.open() / .close() / .isOpen() */
 (function(){
 'use strict';
-var BW=1456,BH=669,IMG='game-moi/khung-trang-bi.webp?v=1';
+var BW=1798,BH=798,UB=1456,IMG='game-moi/khung-trang-bi.webp?v=2';   /* UB = thang đơn vị cũ cho cỡ chữ ({n}) */
 var isOpen=false,openAt=0,root=null,fr=null,E={};
-/* ===== THÚ TRÊN BỤC (chỗ chỉnh số, px ảnh khung 1456x669) =====
+/* ===== THÚ TRÊN BỤC (chỗ chỉnh số, px ảnh khung 1798x798) =====
    cx = tâm ngang bục, by = đường chân thú (mặt bục), size = cạnh ảnh thú (ảnh gốc 192px, to quá sẽ mờ). */
-var PET={cx:377,by:480,size:250};
-var TXT={x:190,y:300,w:370,h:120};   /* khối chữ "Chưa có Thú ra trận" (giữa 2 cột ô trang bị, phía trên bục) */
+var PET={cx:464,by:548,size:305};
+var TXT={x:250,y:280,w:430,h:120};   /* khối chữ "Chưa có Thú ra trận" (giữa 2 cột ô trang bị, phía trên bục) */
 /* NHỊP THỞ: giống sảnh (index.html petSanh: nhấp nhô sin(ts/380)*2 px trên ảnh thú 128px => biên độ 2/128 cỡ thú, chu kỳ ~2,39s).
    Ở đây dùng CSS: chạy lên-xuống qua lại (alternate) mỗi nửa chu kỳ 1,194s. Muốn thở mạnh/yếu: đổi BOB (px ảnh khung). */
-var BOB=PET.size*2/128;
+var BOB=(PET.size*UB/BW)*2/128;   /* tính theo đơn vị --u (thang UB) */
 
 var css=[
 '.tb{--fh:"Noto Serif","Palatino Linotype",Georgia,"Times New Roman",serif;position:fixed;left:0;top:0;right:0;bottom:0;z-index:62;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.74);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
 '.tb.on{display:flex}',
-'.tb-fr{position:relative;width:min(98vw,calc(96vh*1456/669));aspect-ratio:1456/669;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
+'.tb-fr{position:relative;width:min(98vw,calc(96vh*1798/798));aspect-ratio:1798/798;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
 '.tb-fr>*{position:absolute;box-sizing:border-box}',
 '.tb button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
 '.tb-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}',   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
@@ -37,16 +37,16 @@ function box(c,x,y,w,h){var s=c.style;s.left=(x/BW*100)+'%';s.top=(y/BH*100)+'%'
 function mk(tag,cls,x,y,w,h,txt){var c=document.createElement(tag);if(cls)c.className=cls;if(txt!=null)c.textContent=txt;if(w)box(c,x,y,w,h);fr.appendChild(c);return c;}
 /* KHÔNG PHÓNG TO QUÁ CỠ GỐC (như panel Thú Thần): muốn khung to hơn thì đổi MAXSCALE lên >1 */
 var MAXSCALE=1;
-function unit(){if(!fr)return;var d=window.devicePixelRatio||1;fr.style.maxWidth=(BW*MAXSCALE/d)+'px';fr.style.setProperty('--u',(fr.clientWidth/BW)+'px');}
+function unit(){if(!fr)return;var d=window.devicePixelRatio||1;fr.style.maxWidth=(BW*MAXSCALE/d)+'px';fr.style.setProperty('--u',(fr.clientWidth/UB)+'px');}
 
 function build(){
   root=document.createElement('div');root.className='tb';
   fr=document.createElement('div');fr.className='tb-fr';root.appendChild(fr);
-  mk('div','tb-t',271,146,209,30,'Trang Bị');   /* thanh vàng trên-trái (x271-480,y146-176) */
+  /* thanh vàng trên-trái (x313-602,y172-217) để trống (chừa cho sau này, vd tên thú); tiêu đề TRANG BỊ đã vẽ sẵn trong khung */
   E.pet=mk('div','tb-pet',PET.cx-PET.size/2,PET.by-PET.size,PET.size,PET.size);
   E.emp=mk('div','tb-emp',TXT.x,TXT.y,TXT.w,TXT.h,'Chưa có Thú ra trận');
-  /* nút X vẽ sẵn trong ảnh (tâm ~ x1394,y78): vùng bấm trong suốt 120x120 */
-  var x=mk('button','tb-x',1334,18,120,120);x.type='button';x.setAttribute('aria-label','Đóng');x.addEventListener('click',close);
+  /* nút X vẽ sẵn trong ảnh (tâm ~ x1691,y86): vùng bấm trong suốt 130x130 */
+  var x=mk('button','tb-x',1626,22,130,130);x.type='button';x.setAttribute('aria-label','Đóng');x.addEventListener('click',close);
   document.body.appendChild(root);
   /* bấm ra ngoài khung thì đóng (chặn 400ms đầu để cú chạm mở không đóng luôn) */
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
