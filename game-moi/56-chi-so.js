@@ -171,3 +171,7 @@ var api={CFG:CFG,CHINH:CHINH,PHU:PHU,HE:HE,HE_TEN:HE_TEN,BANG_HE:BANG_HE,heHeSo:
 root.TTGCS=Object.assign(root.TTGCS||{},api);
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
 })(typeof window!=='undefined'?window:globalThis);
+
+/* Nạp 56b-loai.js ngay sau file này (đồng bộ, đúng thứ tự, như một thẻ script đặt liền sau). Chỉ chạy trong trình duyệt, bỏ qua khi test bằng node.
+   Nếu sau này thêm thẻ <script src="game-moi/56b-loai.js"> vào index.html thì dòng này tự bỏ qua (đã có TTGCS.loai) hoặc xóa đi. */
+if(typeof document!=='undefined'&&document.write&&!(window.TTGCS&&window.TTGCS.loai)){document.write('<script src="game-moi/56b-loai.js"><\/script>');}
