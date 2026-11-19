@@ -1,5 +1,5 @@
 /* 52-nut-vuong.js - NÚT VUÔNG (khung game-moi/khung-nut.webp) xếp lưới ở KHUNG DƯỚI của game-moi.
-   Mỗi nút: khung vàng + icon SVG ở giữa + chữ nhỏ bên dưới icon. Nút là DOM nằm trên canvas (z-index 6, trên #ui).
+   Mỗi nút: khung vàng-xanh đêm (khung-nut.webp, ô giữa trong suốt) + quầng sáng + icon SVG sáng có phát sáng + chữ sáng bên dưới icon. Nút là DOM nằm trên canvas (z-index 6, trên #ui).
    DÙNG:  TTGNV.add({id:'balo', ten:'Balo', icon:'<svg ...>', onTap:function(){...}, r:0});
    r (tùy chọn) = hàng muốn đứng (0 = hàng trên, 1 = hàng dưới); các nút cùng r xếp ngang cạnh nhau. Không có r thì xếp theo CFG.fill.
    Nút xếp theo CỘT (trên -> dưới rồi sang cột kế): nút 1 ở hàng trên cùng bên trái, nút 2 ngay dưới nó, nút 3 sang cột bên cạnh...
@@ -13,7 +13,7 @@ var CFG={
   rows:2,     /* số hàng trong khung dưới */
   left:34,    /* chừa bên trái cho họa tiết góc khung dưới */
   fill:'col', /* 'col' = xếp theo cột (nút 2 nằm dưới nút 1) | 'row' = xếp theo hàng */
-  frame:'game-moi/khung-nut.webp'
+  frame:'game-moi/khung-nut.webp?v=2'
 };
 var list=[],M=null;
 var st=document.createElement('style');
@@ -21,17 +21,19 @@ st.textContent=[
 '.nv{position:fixed;left:0;top:0;z-index:6;display:none;margin:0;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;transition:transform .08s ease}',
 '.nv:focus{outline:none}',
 '.nv:active{transform:scale(.92)}',
-'.nv .nv-bg{position:absolute;left:17%;right:17%;top:16%;bottom:16%;border-radius:12%;background:radial-gradient(ellipse at 50% 28%,#3b3a9c 0%,#1f1d5c 58%,#12123a 100%)}',
-'.nv .nv-ic{position:absolute;left:20%;right:20%;top:17%;height:47%;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 .1em rgba(255,214,120,.55))}',
+'.nv .nv-bg{position:absolute;left:21%;right:21%;top:21%;bottom:21%;border-radius:10%;background:radial-gradient(ellipse at 50% 42%,rgba(86,92,230,.55) 0%,rgba(40,44,140,.35) 55%,rgba(14,16,60,0) 100%)}',
+'.nv .nv-gl{position:absolute;left:14%;right:14%;top:12%;height:56%;border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,226,130,.5) 0%,rgba(255,190,80,.2) 45%,rgba(255,190,80,0) 72%);animation:nvg 2.4s ease-in-out infinite;pointer-events:none}',
+'@keyframes nvg{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.06)}}',
+'.nv .nv-ic{position:absolute;left:17%;right:17%;top:12%;height:48%;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 .08em #fff6c8) drop-shadow(0 0 .22em rgba(255,200,80,.95)) drop-shadow(0 0 .45em rgba(90,200,255,.7))}',
 '.nv .nv-ic svg,.nv .nv-ic img{width:100%;height:100%;display:block;object-fit:contain}',
-'.nv .nv-tx{position:absolute;left:12%;right:12%;top:63%;height:19%;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:.03em;line-height:1;white-space:nowrap;color:#ffe9a0;text-shadow:0 0 .14em #000,.07em 0 0 #000,-.07em 0 0 #000,0 .07em 0 #000,0 -.07em 0 #000}',
+'.nv .nv-tx{position:absolute;left:3%;right:3%;top:60%;height:19%;display:flex;align-items:center;justify-content:center;font-weight:800;letter-spacing:.02em;line-height:1;white-space:nowrap;color:#fffbe0;text-shadow:0 0 .1em #fff2a8,0 0 .28em #ffb830,0 0 .5em rgba(255,170,40,.85),.06em 0 0 #3a1a00,-.06em 0 0 #3a1a00,0 .06em 0 #3a1a00,0 -.06em 0 #3a1a00}',
 '.nv .nv-fr{position:absolute;left:0;top:0;width:100%;height:100%;background:url('+CFG.frame+') 0 0/100% 100% no-repeat;pointer-events:none}'
 ].join('\n');
 document.head.appendChild(st);
 
 function add(o){
   var e=document.createElement('button');e.type='button';e.className='nv';e.setAttribute('data-id',o.id);e.setAttribute('aria-label',o.ten||o.id);
-  e.innerHTML='<i class="nv-bg"></i><i class="nv-ic">'+(o.icon||'')+'</i><span class="nv-tx"></span><i class="nv-fr"></i>';
+  e.innerHTML='<i class="nv-bg"></i><i class="nv-gl"></i><i class="nv-ic">'+(o.icon||'')+'</i><i class="nv-fr"></i><span class="nv-tx"></span>';
   e.querySelector('.nv-tx').textContent=o.ten||'';
   e.addEventListener('click',function(){if(o.onTap)o.onTap(e);});
   document.body.appendChild(e);list.push({o:o,e:e});
