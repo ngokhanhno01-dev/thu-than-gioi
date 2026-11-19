@@ -44,13 +44,15 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 function ic(it){return it.img?'<img src="'+esc(it.img)+'" alt="">':'<b>'+esc(it.ic||'?')+'</b>';}
 
 /* ===== CSS: {n} = n px ảnh (tự co theo --u) ===== */
+/* PHÔNG CHỮ BÚT LÔNG (tiêu đề BALO + 4 nút): đặt file font vào game-moi/font-brush.ttf (hoặc .woff2). Chưa có file thì tự dùng Kaushan Script (Google Fonts), thiếu dấu tiếng Việt thì dùng Noto Serif. */
 var css=[
-'.bl{--fh:"Noto Serif","Palatino Linotype",Georgia,"Times New Roman",serif;position:fixed;left:0;top:0;right:0;bottom:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.74);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
+'@font-face{font-family:"FZBrush";src:url(game-moi/font-brush.woff2) format("woff2"),url(game-moi/font-brush.ttf) format("truetype");font-display:swap}',
+'.bl{--fh:"Noto Serif","Palatino Linotype",Georgia,"Times New Roman",serif;--fb:"FZBrush","Kaushan Script","Noto Serif",Georgia,serif;position:fixed;left:0;top:0;right:0;bottom:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.74);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
 '.bl.on{display:flex}',
 '.bl-fr{position:relative;width:min(98vw,calc(96vh*1469/673));aspect-ratio:1469/673;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
 '.bl-fr>*{position:absolute;box-sizing:border-box}',
 '.bl button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
-'.bl-t{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:900;font-size:{34};letter-spacing:{6};line-height:1;color:#ffe9a0;text-shadow:0 0 {8} rgba(255,200,80,.55),0 {2} 0 #1a1030}',
+'.bl-t{display:flex;align-items:center;justify-content:center;font-family:var(--fb);font-weight:400;font-size:{50};letter-spacing:{2};line-height:1;color:#ffd86b;text-shadow:0 0 {10} rgba(255,140,20,.85),0 0 {4} rgba(255,210,90,.9),0 {3} 0 #3a1500} /* chỉnh cỡ chữ BALO ở font-size */',
 '.bl-x{display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;border:{2.5} solid #d9a93c;background:radial-gradient(circle at 50% 30%,#3d3da0,#14143e);color:#ffe9a0;font-size:{24};line-height:1;cursor:pointer;box-shadow:0 0 {10} rgba(0,0,0,.6)}',
 '.bl-x:active{transform:scale(.92)}',
 '.bl-cap{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{19};color:#bfeee8;text-shadow:0 {2} 0 #000;white-space:nowrap}',
@@ -73,7 +75,7 @@ var css=[
 '.bl-sl img,.bl-row img,.dt-ic img{width:76%;height:76%;object-fit:contain}',
 '.bl-sl .q{position:absolute;right:{7};bottom:{3};font-weight:800;font-size:{17};color:#fff;text-shadow:0 0 {3} #000,{1} {1} 0 #000,-{1} {1} 0 #000}',
 '.bl-sl.sel::after{content:"";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{3} solid #ffe066;border-radius:{4};box-shadow:0 0 {12} rgba(255,224,102,.75),inset 0 0 {10} rgba(255,224,102,.35);pointer-events:none}',
-'.bl-bt{display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:{6};background:linear-gradient(180deg,rgba(255,224,102,.0),rgba(255,224,102,.0));font-family:var(--fh);font-weight:800;font-size:{20};letter-spacing:{1};line-height:1;color:#ffe9a0;text-shadow:0 {2} 0 #000;cursor:pointer;white-space:nowrap}',
+'.bl-bt{display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:{6};background:linear-gradient(180deg,rgba(255,224,102,.0),rgba(255,224,102,.0));font-family:var(--fb);font-weight:400;font-size:{28};letter-spacing:{1};line-height:1;color:#ffd86b;text-shadow:0 0 {8} rgba(255,140,20,.75),0 {2} 0 #3a1500;cursor:pointer;white-space:nowrap} /* chỉnh cỡ chữ 4 nút ở font-size */',
 '.bl-bt:active{background:rgba(255,224,102,.22)}',
 '.bl-bt.on{background:rgba(95,240,224,.22);color:#c9fff7;box-shadow:inset 0 0 {10} rgba(95,240,224,.5)}',
 '.bl-sl .lk,.bl-row .lk{position:absolute;left:{6};top:{4};font-size:{17};line-height:1;text-shadow:0 0 {3} #000}',
@@ -93,7 +95,7 @@ var css=[
 '.dt-ds{margin-top:{10};font-size:{19};line-height:1.35;color:#cfd6ff;text-align:center;overflow:hidden}',
 '.dt-hint{margin:auto;font-size:{20};line-height:1.4;color:#8a90c0;text-align:center}'
 ].join('\n').replace(/\{(\d+(?:\.\d+)?)\}/g,'calc(var(--u)*$1)');
-try{var lkf=document.createElement('link');lkf.rel='stylesheet';lkf.href='https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;800;900&subset=vietnamese&display=swap';document.head.appendChild(lkf);}catch(e){}
+try{var lkf=document.createElement('link');lkf.rel='stylesheet';lkf.href='https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;800;900&family=Kaushan+Script&display=swap';document.head.appendChild(lkf);}catch(e){}
 var stl=document.createElement('style');stl.textContent=css;document.head.appendChild(stl);
 
 /* ===== DỰNG BẢNG (một lần) ===== */
@@ -103,7 +105,7 @@ var COLS=[769,848,927,1006],ROWS=[166,245,325,405],SL=71; /* lưới 4 cột x 4
 function build(){
   root=document.createElement('div');root.className='bl';
   fr=document.createElement('div');fr.className='bl-fr';root.appendChild(fr);
-  mk('div','bl-t',160,52,200,50,'BALO'); /* tên bảng, nằm ở dải trên bên trái */
+  mk('div','bl-t',160,52,200,50,'Balo'); /* tên bảng, nằm ở dải trên bên trái */
   E.x=mk('button','bl-x',1296,55,46,46,'✕'); /* nút đóng: khung mới không vẽ sẵn nút X nên đặt ở dải trên bên phải */E.x.type='button';E.x.setAttribute('aria-label','Đóng');
   E.cap=mk('div','bl-cap',769,138,84,26); /* sức chứa: dải trống ngay trên lưới ô, sát góc trái */
   var pg=mk('div','bl-pg',940,138,136,26); /* chuyển trang: ngay trên lưới ô, sát góc phải */
@@ -116,7 +118,7 @@ function build(){
   E.dt=mk('div','bl-dt',1128,192,252,424); /* bảng thông tin item bên phải */
   /* 4 nút trong 4 khung ngang: [x,y] góc khung (rộng 147, cao 63), nút thụt vào 8px */
   E.bt={};
-  [['khoa',769,492,'KHÓA',khoa],['chon',929,492,'CHỌN',chon],['vut',769,572,'VỨT BỎ',vut],['xep',929,572,'SẮP XẾP',xep]].forEach(function(d){
+  [['khoa',769,492,'Khóa',khoa],['chon',929,492,'Chọn',chon],['vut',769,572,'Vứt bỏ',vut],['xep',929,572,'Sắp xếp',xep]].forEach(function(d){
     var b=mk('button','bl-bt',d[1]+9,d[2]+9,129,45,d[3]);b.type='button';b.addEventListener('click',d[4]);E.bt[d[0]]=b;});
   E.ts=mk('div','bl-ts',190,545,300,44);
   E.cf=mk('div','bl-cf',150,240,380,190);
@@ -169,8 +171,8 @@ function render(){
     r.innerHTML='<span class="i">'+ic(it)+'</span><span class="n">'+esc(it.ten)+'</span>'+(lock[id]?'<span class="lk">🔒</span>':'')+(it.cap?'<span class="l">Cấp '+it.cap+'</span>':'')+'<span class="q">x'+count(id)+'</span>';
     r.addEventListener('click',function(){pick(id);});E.balls.appendChild(r);});
   for(var k in picks)if(!CAT[k]||count(k)<=0)delete picks[k];
-  var tg=targets();E.bt.khoa.textContent=(tg.length&&tg.every(function(x){return lock[x];}))?'MỞ KHÓA':'KHÓA';
-  E.bt.chon.textContent=multi?'BỎ CHỌN':'CHỌN';E.bt.chon.classList.toggle('on',multi);
+  var tg=targets();E.bt.khoa.textContent=(tg.length&&tg.every(function(x){return lock[x];}))?'Mở khóa':'Khóa';
+  E.bt.chon.textContent=multi?'Bỏ chọn':'Chọn';E.bt.chon.classList.toggle('on',multi);
   var d=E.dt;
   if(sel){var s=CAT[sel];d.innerHTML='<div class="dt-ic">'+ic(s)+'</div><div class="dt-nm">'+esc(s.ten)+'</div><div class="dt-mt">'+esc(LOAI[s.loai]||'')+(s.cap?' · Cấp '+s.cap:'')+' · Số lượng: '+count(sel)+(lock[sel]?' · 🔒':'')+'</div><div class="dt-ds">'+esc(s.mo||'')+'</div>';}
   else d.innerHTML='<div class="dt-hint">Chạm một ô để xem thông tin</div>';
