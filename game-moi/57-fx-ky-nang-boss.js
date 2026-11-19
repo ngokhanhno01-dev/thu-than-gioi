@@ -131,112 +131,155 @@
   /* 1 · Băng Sơn Áp Đỉnh: khối băng nhiều mặt rơi, vỡ, cắm gai và tan. */
   function icePeak(g,x,base,w,h,a,T,seed){
    if(a<=.01)return;
-   const top=base-h;
-   const outline=[point(x-w*.5,base),point(x-w*.43,base-h*.43),point(x-w*.26,base-h*.35),
-    point(x-w*.11,base-h*.66),point(x-w*.04,top),point(x+w*.13,base-h*.57),
-    point(x+w*.28,base-h*.48),point(x+w*.39,base-h*.72),point(x+w*.48,base-h*.19),point(x+w*.5,base)];
+   const top=base-h,P=(px,py)=>[clamp(px,5,355),py];
+   const o=[P(x-w*.5,base),P(x-w*.44,base-h*.23),P(x-w*.34,base-h*.34),
+    P(x-w*.28,base-h*.58),P(x-w*.19,base-h*.48),P(x-w*.1,base-h*.8),
+    P(x-w*.035,top),P(x+w*.12,base-h*.62),P(x+w*.22,base-h*.55),
+    P(x+w*.31,base-h*.39),P(x+w*.4,base-h*.74),P(x+w*.47,base-h*.2),P(x+w*.5,base)];
    g.save();g.globalAlpha=clamp(a,0,1);g.lineJoin='round';
-   const gr=g.createLinearGradient(x-w*.55,base,x+w*.5,top);
-   gr.addColorStop(0,'#286282');gr.addColorStop(.35,'#60afd3');gr.addColorStop(.68,'#a8e7fa');gr.addColorStop(1,'#f5ffff');
-   poly(g,outline,gr,'#effcff',a,2);
-   poly(g,[point(x-w*.5,base),outline[1],outline[2],outline[4],point(x-w*.09,base)],
-    '#347fa4','#b8efff',a*.9,1);
-   poly(g,[point(x-w*.09,base),outline[4],outline[5],point(x+w*.23,base)],
-    'rgba(204,247,255,.74)','#efffff',a*.9,1);
-   poly(g,[point(x+w*.23,base),outline[5],outline[6],outline[7],outline[8],point(x+w*.5,base)],
-    '#4288a8','#d6f7ff',a*.83,1);
-   stroke(g,[outline[1],point(x-w*.2,base-h*.22),outline[4],point(x+w*.08,base-h*.32),outline[7],outline[8]],
-    '#eaffff',1.15,a*.9,true);
-   stroke(g,[point(x-w*.29,base-h*.35),point(x-w*.13,base-h*.28),point(x-w*.09,base-h*.12)],
-    '#8bdcf4',1.2,a*.86,true);
-   g.restore();
-   for(let i=0;i<5;i++){
-    const sx=x+(i-2)*w*.16,sy=base-h*(.27+(i%2)*.13);
-    const gl=1-ph(T,TH-.02,TH+.11);
-    stroke(g,[point(sx,sy),point(sx+(i%2?1:-1)*5,sy+8),point(sx-3,sy+14)],
-     '#edfcff',.9,gl*a*.82,true);
+   const gr=g.createLinearGradient(x-w*.52,base,x+w*.48,top);
+   gr.addColorStop(0,'#214b63');gr.addColorStop(.24,'#347b9b');
+   gr.addColorStop(.48,'#67b4d4');gr.addColorStop(.76,'#b6edfb');gr.addColorStop(1,'#f7ffff');
+   poly(g,o,gr,'#e8fbff',a,2.2);
+   /* Dark cut faces, a broad luminous spine and thinner ice planes create a heavy faceted silhouette. */
+   poly(g,[o[0],o[1],o[2],o[3],o[5],o[6],P(x-w*.08,base)],'#24556f','#8ed8f0',a*.94,1.15);
+   poly(g,[o[2],o[3],o[4],o[5],o[6]],'#4389aa','#b7efff',a*.92,1.05);
+   poly(g,[P(x-w*.08,base),o[6],o[7],P(x+w*.14,base)],'#b8f0ff','#f3ffff',a*.94,1.15);
+   poly(g,[P(x+w*.14,base),o[7],o[8],o[9],o[10],o[11],o[12]],'#32718f','#b5eafa',a*.9,1.1);
+   poly(g,[o[8],o[9],o[10],P(x+w*.26,base)],'#6eb7d0','#e5fbff',a*.82,.9);
+   poly(g,[o[1],o[2],o[4],P(x-w*.25,base-h*.13)],'rgba(27,73,96,.76)','#a6e8fb',a*.83,.9);
+   poly(g,[o[4],o[5],o[6],o[7],o[8]],'rgba(176,233,249,.65)','#f4ffff',a*.7,.8);
+   const edge=o.concat([o[0]]);
+   stroke(g,edge,'#8bdcf4',4,a*.32,true);
+   stroke(g,edge,'#f1ffff',1.25,a*.96,true);
+   stroke(g,[o[1],P(x-w*.24,base-h*.21),o[5],o[6],P(x+w*.08,base-h*.34),o[10],o[11]],'#f3ffff',1.25,a*.91,true);
+   stroke(g,[o[2],P(x-w*.17,base-h*.24),o[4],P(x-w*.08,base-h*.16)],'#91def4',1.1,a*.86,true);
+   stroke(g,[o[7],P(x+w*.22,base-h*.35),o[9],o[10]],'#dffaff',1.05,a*.82,true);
+   for(let i=0;i<4;i++){
+    const sx=x+(i-1.5)*w*.19,sy=base-h*(.28+(i%2)*.14),gl=1-ph(T,TH-.02,TH+.13);
+    stroke(g,[P(sx,sy),P(sx+(i%2?1:-1)*7,sy+11),P(sx-4,sy+19)],'#f4ffff',1.05,gl*a*.82,true);
    }
+   g.restore();
+   for(let i=0;i<3;i++){
+    const px=x+(i-1)*w*.25,py=base-h*(.34+i%2*.13);
+    if(py>22)glow(g,px,py,Math.max(5,4+w*.035),COL.ice.light,a*(.22+.08*Math.sin(T*3+i)),COL.ice.core);
+   }
+  }
+  function iceChunk(g,x,y,w,h,rot,a){
+   if(a<=.01)return;
+   g.save();g.translate(x,y);g.rotate(rot);g.lineJoin='round';
+   const grad=g.createLinearGradient(-w*.7,-h,w*.8,h);
+   grad.addColorStop(0,'#24546d');grad.addColorStop(.42,'#4f9dbb');grad.addColorStop(.78,'#9fe4ff');grad.addColorStop(1,'#efffff');
+   const p=[[-w*.65,h*.18],[-w*.26,-h*.75],[w*.16,-h],[w*.72,-h*.12],[w*.31,h*.62],[-w*.32,h*.48]];
+   poly(g,p,grad,'#dffaff',a,1.15);
+   poly(g,[p[0],p[1],p[2],[w*.04,h*.25]],'#285e78','#87d5ec',a*.86,.8);
+   stroke(g,[p[1],p[2],p[3]],'#f5ffff',1,a*.92,true);
+   stroke(g,[p[0],p[5],p[3]],'#83d6ef',.8,a*.75,true);
+   g.restore();
+   glow(g,x,y,Math.max(4,w*.32),COL.ice.light,a*.2,COL.ice.core);
   }
   function fxIce(g,T,t,S,st){
    const q=aim(S),x=q.x,s=q.scale,r=E.rng(st.seed^0x570101);
    if(t<TH){
-    const fall=Math.pow(ph(t,0,TH),1.7),slide=eo(ph(t,TH-.1,TH)),
-     cx=lerp(x-q.dir*102,x,slide),base=lerp(112,GY-50,fall),
-     h=lerp(100,145,fall),w=Math.min(lerp(88,152,fall)*s,2*Math.min(cx-20,340-cx));
-    blob(g,x,GY-3,10+82*fall,4+7*fall,'#23414e',.4,T,st.seed+1,'#94dff5',.28);
-    ring(g,x,GY-2,10+82*fall,4+10*fall,COL.ice.light,.58*(1-ph(t,.45,TH)),1.3);
-    /* Cold vapor frames the falling mass instead of covering its bright facets. */
+    const fall=Math.pow(ph(t,0,TH),.72),slide=eo(ph(t,.08,TH)),
+     cx=lerp(x-q.dir*24,x-q.dir*16,slide),base=lerp(-80,GY-18,fall),
+     h=lerp(224,238,fall)*s,w=Math.min(lerp(164,202,fall)*s,2*Math.min(cx-19,341-cx)),
+     warning=1-ph(t,TH-.04,TH+.15),shadow=46+94*fall;
+    /* A growing ground shadow, elliptical warning seal and fine cracks are visible even before the ice enters frame. */
+    blob(g,x,GY-3,shadow,9+9*fall,'#123c54',.68,T,st.seed+1,'#9fe4ff',.25);
+    groundCore(g,x,GY-4,COL.ice.light,(.3+.24*fall)*warning,34+62*fall);
+    ring(g,x,GY-2,34+84*fall,6+10*fall,COL.ice.light,.78*warning,1.7);
+    ring(g,x,GY-2,19+62*fall,3.5+7*fall,'#e8fbff',.58*warning,1.25);
+    for(let i=0;i<8;i++){
+     const an=i*TAU/8+T*.04,rx=16+shadow*.82,ry=4+fall*8;
+     const p=[point(x+Math.cos(an)*12,GY-2+Math.sin(an)*3),
+      point(x+Math.cos(an)*rx*.62,GY-2+Math.sin(an)*ry*.62),
+      point(x+Math.cos(an)*rx,GY-2+Math.sin(an)*ry)];
+     stroke(g,p,i%2?'#8bdcf4':'#d9f7ff',1.05,.42+.22*fall,true);
+    }
+    for(const side of [-1,1])fogPuff(g,x+side*43,GY-15,14,7,.3*warning,T,st.seed+33+side,COL.ice);
+    /* Narrow falling streaks make the off-screen mass readable at t=0 without hiding either face. */
     for(let i=0;i<5;i++){
-     const side=i%2?-1:1,yy=base-h*(.18+(i%3)*.19);
-      fogPuff(g,cx+side*(w*.46+7+i*2),yy,10+i%3*3,8+i%2*3,.36,T,st.seed+12+i,COL.mist);
+     const sx=x+(i-2)*13+Math.sin(T*3+i)*2,sy=10+(i%3)*8,drop=36+70*fall;
+     stroke(g,[point(sx,sy),point(sx+(i%2?3:-3),sy+drop)],'#bcefff',1.35,.4*warning,true);
     }
-    icePeak(g,cx,base,w,h,1-ph(t,TH-.018,TH+.11),T,st.seed+20);
-    for(let i=0;i<4;i++){
-     const xx=cx+(i-1.5)*w*.22;
-     const tail=[point(xx,base-h*.26),point(xx+(i%2?5:-5),base-h*.44),point(xx+(i%2?8:-8),base-h*.57)];
-     stroke(g,tail,'#b9efff',1.1,.25+.25*Math.sin(T*3+i),true);
+    if(base>-12){
+     /* The mountain starts above the frame and descends toward the target, growing into a much larger mass. */
+     icePeak(g,cx,base,w,h,1-ph(t,TH-.018,TH+.11),T,st.seed+20);
+     for(let i=0;i<6;i++){
+      const side=i%2?-1:1,yy=base-h*(.18+(i%3)*.18);
+      fogPuff(g,cx+side*(w*.43+8+i*1.5),yy,12+i%3*4,9+i%2*4,.38,T,st.seed+12+i,COL.mist);
+     }
+     for(let i=0;i<5;i++){
+      const xx=cx+(i-2)*w*.16;
+      stroke(g,[point(xx,base-h*.18),point(xx+(i%2?7:-7),base-h*.34),point(xx+(i%2?11:-11),base-h*.47)],'#dbf7ff',1.1,.28+.22*Math.sin(T*3+i),true);
+     }
     }
-    for(let n=0;n<E.rate(st,'ice-charge',ph(t,0,TH),20);n++){
+    for(let n=0;n<E.rate(st,'ice-charge',ph(t,0,TH),28);n++){
      const side=r.sign();
-     E.emit({x:x+side*r.range(25,68),y:r.range(34,143),vx:-side*r.range(8,28),vy:r.range(12,42),
-      gy:18,drag:.42,life:r.range(.32,.55),s0:r.range(1.1,2.2),s1:.45,
-      shape:n%3?'flake':'spark',c:COL.ice.light,c2:COL.ice.core,a:.88,add:true,tag:TAG});
+     E.emit({x:x+side*r.range(26,78),y:r.range(16,150),vx:-side*r.range(9,30),vy:r.range(18,48),
+      gy:20,drag:.42,life:r.range(.34,.58),s0:r.range(1.2,2.5),s1:.45,
+      shape:n%3?'flake':'spark',c:COL.ice.light,c2:COL.ice.core,a:.9,add:true,tag:TAG});
     }
    }
    const d=t-TH;
-   if(d>=0&&d<.58){
-    const pop=.46+.54*eo(ph(t,TH,TH+.22)),fade=1-ph(t,TH+.3,TH+.67);
+   if(d>=0&&d<.62){
+    const pop=.5+.5*eo(ph(t,TH,TH+.22)),fade=1-ph(t,TH+.54,END);
     if(E.once(st,'ice-impact')){
-     burst(st,'ice-fragments',x,GY-11,S.miss?24:48,{
-      speed:[48,124],ang:[-Math.PI*.88,-Math.PI*.12],size:[3,8],life:[.54,.92],
-      gy:240,drag:.34,shape:'shard',c:COL.ice.main,c2:COL.ice.core,a:.98,vr:[-9,9],floor:GY+3,bounce:.23});
-     burst(st,'ice-snow-burst',x,GY-4,S.miss?12:26,{
-      speed:[18,58],ang:[-Math.PI,-.02],size:[5,13],life:[.48,.88],
-      gy:-12,drag:.75,shape:'mist',c:COL.ice.light,c2:COL.ice.core,a:.66,add:true});
+     burst(st,'ice-fragments',x,GY-12,S.miss?28:58,{
+      speed:[72,190],ang:[-Math.PI*.92,-Math.PI*.08],size:[6,13],life:[.62,1.12],
+      gy:350,drag:.32,shape:'shard',c:COL.ice.deep,c2:COL.ice.core,a:1,vr:[-11,11],floor:GY+3,bounce:.24});
+     burst(st,'ice-snow-burst',x,GY-5,S.miss?18:34,{
+      speed:[20,68],ang:[-Math.PI,-.02],size:[6,15],life:[.55,.98],
+      gy:-10,drag:.72,shape:'mist',c:COL.ice.light,c2:COL.ice.core,a:.7,add:true});
     }
     for(let i=0;i<3;i++){
      const p=ph(t,TH+i*.13,TH+.35+i*.15),f=1-ph(t,TH+i*.13+.25,TH+.42+i*.15);
-     if(p>0&&f>0)wave(g,x,GY-3,12+102*eo(p)*s*(1-i*.16),i===1?COL.ice.core:COL.ice.light,f*.72,2.4,T,st.seed+40+i,.18);
+     if(p>0&&f>0)wave(g,x,GY-3,14+112*eo(p)*s*(1-i*.16),i===1?COL.ice.core:COL.ice.light,f*.72,2.5,T,st.seed+40+i,.18);
     }
     hitBloom(g,x,COL.ice,T,st.seed+35,1-ph(t,TH+.16,TH+.36),s);
-    groundCore(g,x,GY-5,COL.ice.light,fade*.3,37*s);
-    /* Broad ground cracks and a ring of tall side-spikes leave the beast readable. */
+    groundCore(g,x,GY-5,COL.ice.light,fade*.32,39*s);
+    /* Cracks and a side ring of ice spikes keep the target's face clear. */
+    for(let i=0;i<10;i++){
+     const side=i%2?-1:1,lane=(i>>1),L=(18+lane*8)*pop,off=side*(8+lane*4);
+     const p=[point(x+off,GY-2),point(x+side*(off+L*.42),GY-4-r.range(1,4)),
+      point(x+side*(off+L*.76),GY-1+r.range(-2,2)),point(x+side*(off+L),GY-4)];
+     stroke(g,p,'#377e9d',2.7*fade,.82,false);stroke(g,p,'#c9f4ff',.9*fade,.94,true);
+    }
     for(let i=0;i<8;i++){
-     const side=i%2?-1:1,v=(i>>1)+1,L=(18+v*8)*pop;
-     const p=[point(x+side*7,GY-2),point(x+side*(8+L*.38),GY-4-r.range(1,4)),
-      point(x+side*(9+L*.7),GY-1+r.range(-2,2)),point(x+side*(10+L),GY-4)];
-     stroke(g,p,'#377e9d',2.7*fade,.8,false);stroke(g,p,'#c9f4ff',.85*fade,.92,true);
+     const side=i<4?-1:1,j=i%4,off=side*(40+j*12),h=(42+(j%3)*14+(j===3?7:0))*pop;
+     if(h>4)E.crystal(g,x+off,GY+1,15+j%2*4,h,side*4,
+      {dark:'#285b76',mid:'#5499b8',light:'#b5eafa',edge:'#efffff'},fade*.96,{shine:.82,crack:.24});
     }
     for(let i=0;i<6;i++){
-     const side=i<3?-1:1,j=i%3,off=side*(34+j*18),h=(38+(2-j%2)*19)*pop;
-     if(h>4)E.crystal(g,x+off,GY+1,14+j%2*4,h,side*3,
-      {dark:'#32739b',mid:'#67bfe2',light:'#c7f4ff',edge:'#f1ffff'},fade*.94,{shine:.8,crack:.16});
-    }
-    if(t>=TH+.18)burst(st,'ice-aftershards',x,GY-7,S.miss?10:20,{
-     speed:[25,86],ang:[-Math.PI*.94,-Math.PI*.06],size:[2,5],life:[.46,.78],
-     gy:210,drag:.42,shape:'shard',c:'#73c9e9',c2:'#effcff',a:.94,floor:GY+3,bounce:.12});
-    for(let i=0;i<5;i++){
-     const side=i%2?-1:1,off=side*(18+i*12),a=fade*(.32+.1*Math.sin(T*2+i));
-     fogPuff(g,x+off,GY-5-i%2*5,16+i%3*3,7,a,T,st.seed+70+i,COL.ice);
+     const side=i%2?-1:1,off=side*(20+i*10),a=fade*(.28+.12*Math.sin(T*2+i));
+     fogPuff(g,x+off,GY-5-i%2*5,17+i%3*4,8,a,T,st.seed+70+i,COL.ice);
     }
    }
-   if(t>=TH+.28&&t<=END){
-    const after=1-ph(t,TH+.38,END);
-    /* Large broken slabs remain on the ground, then dissolve with the snow. */
-    for(let i=0;i<5;i++){
-     const side=i%2?-1:1,off=side*(21+(i>>1)*17),w=10+(i%3)*3,h=7+(i%2)*4;
-     const x0=x+off,y0=GY-3;
-     poly(g,[point(x0-w,y0),point(x0-2,y0-h),point(x0+w,y0-2),point(x0+w*.5,y0+1)],
-      '#397a9a','#d9f8ff',after*.7,1);
-     stroke(g,[point(x0-2,y0-h),point(x0+2,y0-3)],'#f1ffff',1,after*.75,true);
+   if(t>=TH&&t<=END){
+    const after=1-ph(t,TH+.58,END),travel=clamp((t-TH)/.72,0,1),span=Math.max(22,Math.min(x-22,338-x)*.86);
+    /* Big faceted chunks arc outward under gravity, bounce low, then fade with the snow. */
+    for(let i=0;i<10;i++){
+     const side=i%2?-1:1,lane=(i>>1),dist=44+lane*5+travel*(8+lane*1.5),xx=clamp(x+side*Math.min(span,dist),12,348),
+      vy=164+lane*18,yy=Math.min(GY-3,GY-12-vy*d+240*d*d),size=14+(i%4)*3.5,
+      rot=side*(.25+d*(2.1+lane*.12)+lane*.27),a=after*(.76+.04*(i%3));
+     iceChunk(g,xx,yy,size,size*.78,rot,a);
     }
-    for(let n=0;n<E.rate(st,'ice-settled-snow',ph(t,TH+.28,END),18);n++)
-     E.emit({x:x+r.range(-45,45),y:GY-r.range(0,16),vx:r.range(-14,14),vy:-r.range(8,34),
-      gy:74,drag:.48,life:r.range(.4,.72),s0:r.range(1,2),s1:.35,
-      shape:'flake',c:COL.ice.light,c2:'#ffffff',a:.88,add:true,tag:TAG});
+    burst(st,'ice-aftershards',x,GY-7,S.miss?12:22,{
+     speed:[34,104],ang:[-Math.PI*.94,-Math.PI*.06],size:[3,7],life:[.52,.9],
+     gy:250,drag:.4,shape:'shard',c:'#73c9e9',c2:'#effcff',a:.96,floor:GY+3,bounce:.14});
+    for(let i=0;i<5;i++){
+     const side=i%2?-1:1,off=side*(18+i*12),w=11+(i%3)*3,h=7+(i%2)*4,x0=clamp(x+off,14,346),y0=GY-3;
+     poly(g,[point(x0-w,y0),point(x0-2,y0-h),point(x0+w,y0-2),point(x0+w*.5,y0+1)],
+      '#315e75','#d9f8ff',after*.82,1.1);
+     stroke(g,[point(x0-2,y0-h),point(x0+2,y0-3)],'#f1ffff',1.1,after*.88,true);
+    }
+    for(let n=0;n<E.rate(st,'ice-settled-snow',ph(t,TH+.28,END),22);n++)
+     E.emit({x:x+r.range(-50,50),y:GY-r.range(0,18),vx:r.range(-16,16),vy:-r.range(8,38),
+      gy:86,drag:.46,life:r.range(.42,.78),s0:r.range(1.1,2.3),s1:.35,
+      shape:'flake',c:COL.ice.light,c2:'#ffffff',a:.9,add:true,tag:TAG});
    }
   }
-
   /* 2 · Sương Nuốt: màn sương dày khép quanh thân, đuôi xoáy hút về người đánh. */
   function fxMist(g,T,t,S,st){
    const q=aim(S),x=q.x,C=COL.mist,r=E.rng(st.seed^0x570201);
