@@ -177,7 +177,8 @@ function render(){
   if(sel){var s=CAT[sel];d.innerHTML='<div class="dt-ic">'+ic(s)+'</div><div class="dt-nm">'+esc(s.ten)+'</div><div class="dt-mt">'+esc(LOAI[s.loai]||'')+(s.cap?' · Cấp '+s.cap:'')+' · Số lượng: '+count(sel)+(lock[sel]?' · 🔒':'')+'</div><div class="dt-ds">'+esc(s.mo||'')+'</div>';}
   else d.innerHTML='<div class="dt-hint">Chạm một ô để xem thông tin</div>';
 }
-function open(){if(!root)build();isOpen=true;openAt=performance.now();root.classList.add('on');unit();render();}
+function open(){if(window.TTGTHU&&TTGTHU.close)TTGTHU.close();/* mở Balo -> đóng panel Thú Thần */
+  if(!root)build();isOpen=true;openAt=performance.now();root.classList.add('on');unit();render();}
 function close(){if(!root)return;E.cf.style.display='none';multi=false;picks={};isOpen=false;root.classList.remove('on');}
 
 /* ===== ICON NÚT BALO (SVG vẽ tay: balo xanh đêm, viền vàng, khóa tinh thể ngọc) ===== */
