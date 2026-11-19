@@ -1,49 +1,234 @@
 /* 54-thu-than.js - Nút "Thú Thần" + panel Thú Thần (chứa và trang bị thú đã bắt).
-   Cần 52-nut-vuong.js (TTGNV) nạp trước; nạp SAU 53-balo.js (để đóng Balo khi mở panel này).
-   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). BƯỚC 2 = khung ảnh game-moi/khung-thu.webp (2200x996, hiển thị đúng cỡ gốc 1 pixel ảnh = 1 pixel máy để không bị mờ) + đóng bằng nút X / bấm ngoài / Esc (xong). Bước 3 (bố cục: tên thú, chỉ số, ô kỹ năng, lưới thú, nút Ra trận) chưa làm: khung đang trống.
+   Cần 52-nut-vuong.js (TTGNV) nạp trước; nạp SAU 53-balo.js (để đóng Balo khi mở panel này) và sau 51-thu-moi.js (lấy ảnh thú).
+   Ảnh khung: game-moi/khung-thu.webp (2200x996). Hiển thị đúng cỡ gốc (1 pixel ảnh = 1 pixel máy) để không bị mờ; đóng bằng nút X / bấm ngoài / Esc.
+   MỌI TỌA ĐỘ bên dưới tính theo PIXEL ẢNH ĐÃ CẮT 2200x996 (BW x BH), tự co theo màn hình bằng biến --u (= 1 px ảnh).
+   TIẾN ĐỘ: BƯỚC 1 (nút + icon) xong. BƯỚC 2 (khung + đóng) xong. BƯỚC 3 (bố cục + chọn thú + ra trận) xong.
+   CHƯA LÀM: bậc thú SS..D (chỉ chừa trường bac), buff/debuff/kỹ năng có sẵn (3 ô tròn), gắn/gỡ sách kỹ năng (6 ô "+"), bảng nổi.
    QUY TẮC: mở Thú Thần thì đóng Balo, mở Balo thì đóng Thú Thần (53-balo.js gọi TTGTHU.close()).
-   API: TTGTHU.open() / .close() / .isOpen() */
+   DỮ LIỆU: danh sách thú {uid, id (loài, khớp THU_MOI.byId), ten, bac (tùy chọn: SS/S/A/B/C/D), tien (tiến hóa 1-3 = ảnh -b1/-b2/-b3, mặc định 1), chiso:{hp,tc,pt,td,mm}}
+            lưu ở khóa localStorage ttg_moi_thu_v1; uid thú ra trận lưu ở ttg_moi_thu_ratran_v1. Kho tạm KHÔNG giới hạn số thú.
+   API: TTGTHU.open() / .close() / .isOpen() / .add(thu) (trả về uid) / .list() / .getRaTran() (trả thú đang ra trận hoặc null).
+   THỬ: thêm ?thu=demo vào link -> có sẵn vài thú mẫu (không lưu lại). */
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var BW=2200,BH=996,IMG='game-moi/khung-thu.webp?v=4';   /* ảnh khung gốc 2200x996 (không phóng to, nén không mất chất lượng); mọi tọa độ bên dưới tính theo pixel ảnh này */
-var isOpen=false,openAt=0,root=null,fr=null;
+var BW=2200,BH=996,IMG='game-moi/khung-thu.webp?v=4';   /* ảnh khung gốc 2200x996 (không phóng to, nén không mất chất lượng) */
+var KEY='ttg_moi_thu_v1',KRT='ttg_moi_thu_ratran_v1';
+var demo=/[?&]thu=demo/.test(location.search);
+var isOpen=false,openAt=0,root=null,fr=null,E={};
+
+/* ===== CẤU HÌNH (chỗ chỉnh số) ===== */
+/* 5 chỉ số TRANG 1 (chỉ số chính): [khóa trong thu.chiso, tên hiển thị]. Muốn đổi chỉ số: sửa mảng này (đủ 5 thanh). */
+var STATS_CHINH=[['hp','HP'],['tc','Tấn công'],['pt','Phòng thủ'],['td','Tốc độ'],['mm','May mắn']];
+/* TRANG 2 (chỉ số phụ): khai báo sẵn, để TRỐNG vì chưa có. Sau này thêm vào đây (tối đa 5), vd [['bk','Bạo kích'],...] */
+var STATS_PHU=[];
+var PAGES=[{ten:'Chỉ số chính',ds:STATS_CHINH},{ten:'Chỉ số phụ',ds:STATS_PHU}];
+var ANH_THU=340;    /* cỡ ảnh thú lớn bên trái (px ảnh khung). Ảnh thú gốc 192px nên to quá sẽ mờ: chỉnh 288~384 */
+var BAR_Y=270,BAR_DY=56.5,BAR_X=921,BAR_W=442,BAR_H=36;             /* 5 thanh chỉ số */
+var GR_X=[1532,1671,1810,1949],GR_Y=[237,379,522,664],GR_W=127,GR_H=128;  /* lưới thú 4 cột x 4 hàng */
+var SK_X=[936,1071,1205],SK_Y=[631,770],SK_S=108;                    /* 6 ô kỹ năng (3 cột x 2 hàng) */
+var RAIL={x:2096,y:240,w:17,h:552};                                  /* rãnh cuộn bên phải lưới */
+
+/* ===== DỮ LIỆU ===== */
+var thus=[],rt=null,sel=null,page=0,row0=0;
+function uid(){return 't'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function demoData(){
+  var ids=['1a','1b','1d','2a','3a','4a','5a','6a','1c','2b','3b','4b','5b','6b','1e','2c','3c','4c','5c','6j'],bacs=['S','A','B','C','D','SS'];
+  return ids.map(function(id,i){var k=i+1;
+    return {uid:'demo'+i,id:id,tien:1+(i%3),bac:i%2?bacs[i%bacs.length]:undefined,
+      chiso:{hp:300+k*37,tc:40+k*7,pt:30+k*5,td:20+(k*11)%60,mm:5+(k*3)%30}};});
+}
+if(demo){thus=demoData();}
+else{try{var v=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(v))thus=v.filter(function(t){return t&&t.uid;});rt=localStorage.getItem(KRT)||null;}catch(e){}}
+function save(){if(demo)return;try{localStorage.setItem(KEY,JSON.stringify(thus));if(rt)localStorage.setItem(KRT,rt);else localStorage.removeItem(KRT);}catch(e){}}
+function byUid(u){for(var i=0;i<thus.length;i++)if(thus[i].uid===u)return thus[i];return null;}
+if(rt&&!byUid(rt))rt=null;
+function info(t){return (window.THU_MOI&&THU_MOI.byId&&THU_MOI.byId[t.id])||null;}
+function tenThu(t){var b=info(t);return t.ten||(b&&b.ten)||'?';}
+function anhThu(t){var b=info(t);return b?'thu-game/'+b.zone+'/'+b.slug+'-b'+(t.tien||1)+'-192.png':'';}   /* ảnh 192px, cùng đường dẫn 51-thu-moi.js */
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
 /* ===== CSS: {n} = n px ảnh (tự co theo --u) ===== */
 var css=[
-'.tt{position:fixed;left:0;top:0;right:0;bottom:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.74);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
+'.tt{--fh:"Noto Serif","Palatino Linotype",Georgia,"Times New Roman",serif;position:fixed;left:0;top:0;right:0;bottom:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.74);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
 '.tt.on{display:flex}',
 '.tt-fr{position:relative;width:min(98vw,calc(96vh*2200/996));aspect-ratio:2200/996;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
 '.tt-fr>*{position:absolute;box-sizing:border-box}',
 '.tt button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
-'.tt-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}'   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
+'.tt-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}',   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
+/* TRÁI: tên + ảnh thú */
+'.tt-nm{display:flex;align-items:center;justify-content:center;gap:{10};padding:0 {30};font-family:var(--fh);font-weight:800;font-size:{34};line-height:1;white-space:nowrap;overflow:hidden;color:#3b2406;text-shadow:0 {1} 0 rgba(255,246,200,.7)}',
+'.tt-nm i{font-style:normal;font-size:{30};color:#7a1f10}',
+'.tt-ph{display:flex;align-items:center;justify-content:center;overflow:hidden}',
+'.tt-ph img{width:{'+ANH_THU+'};height:{'+ANH_THU+'};object-fit:contain;filter:drop-shadow(0 {6} {10} rgba(0,0,0,.55));-webkit-user-drag:none;user-select:none}',
+'.tt-emp{text-align:center;font-size:{26};line-height:1.45;color:#7c83b8;padding:0 {20}}',
+/* GIỮA TRÊN: chỉ số */
+'.tt-cap{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{22};letter-spacing:{1};color:#bfeee8;text-shadow:0 {2} 0 #000}',
+'.tt-bar{display:flex;align-items:center;justify-content:space-between;padding:0 {26};font-weight:700;font-size:{25};line-height:1;color:#e8ecff;text-shadow:0 {2} 0 #000;white-space:nowrap}',
+'.tt-bar b{font-weight:800;color:#ffe9a0;font-size:{26}}',
+'.tt-bar span{color:#bfeee8}',
+'.tt-mid{display:flex;align-items:center;justify-content:center;text-align:center;font-size:{24};color:#7c83b8}',
+'.tt-pg{display:flex;align-items:center;justify-content:center;padding:0;border-radius:{10};border:{3} solid #c9992f;background:#1d1d5a;color:#ffe9a0;font-size:{36};line-height:1;cursor:pointer}',
+'.tt-pg:disabled{opacity:.3;cursor:default}',
+'.tt-pg:active:not(:disabled){transform:scale(.92)}',
+/* GIỮA DƯỚI: 6 ô kỹ năng */
+'.tt-sk{display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:{10};background:transparent;color:#ffd86b;font-size:{78};font-weight:300;line-height:1;text-shadow:0 0 {12} rgba(255,200,80,.6);cursor:pointer}',
+'.tt-sk:active{background:rgba(255,224,102,.18)}',
+'.tt-ts{display:none;align-items:center;justify-content:center;text-align:center;padding:0 {14};font-size:{28};font-weight:700;color:#ffe9a0;background:rgba(10,8,40,.94);border:{3} solid #c9992f;border-radius:{12};z-index:5;pointer-events:none}',
+/* PHẢI: lưới thú */
+'.tt-gr{touch-action:none;user-select:none;-webkit-user-select:none}',
+'.tt-gr>*{position:absolute;box-sizing:border-box}',
+'.tt-c{padding:0;border:0;background:transparent;cursor:pointer}',
+'.tt-c img{position:absolute;left:12%;top:11%;width:76%;height:70%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}',
+'.tt-c .b{position:absolute;left:{9};top:{7};font-family:var(--fh);font-weight:800;font-size:{22};line-height:1;color:#ffe9a0;text-shadow:0 0 {4} #000,{1} {1} 0 #000,-{1} {1} 0 #000}',
+'.tt-c .rt{position:absolute;left:8%;right:8%;bottom:{9};height:{25};display:flex;align-items:center;justify-content:center;border-radius:{6};background:linear-gradient(180deg,#ffe58a,#c58a1e);color:#3b2406;font-family:var(--fh);font-weight:800;font-size:{17};line-height:1;white-space:nowrap}',
+'.tt-c.sel::after{content:"";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{4} solid #ffe066;border-radius:{6};box-shadow:0 0 {16} rgba(255,224,102,.85),inset 0 0 {14} rgba(255,224,102,.4);pointer-events:none}',
+/* rãnh + thumb cuộn (phủ kín rãnh vẽ sẵn trong ảnh để không lộ thumb vẽ sẵn ở trên cùng) */
+'.tt-rail{border-radius:{9};background:#0d0e34;border:{2} solid #8a6a2a;touch-action:none;cursor:pointer}',
+'.tt-th{position:absolute;left:{2};right:{2};border-radius:{7};background:linear-gradient(90deg,#c9992f,#ffe58a,#c9992f);box-shadow:0 0 {6} rgba(255,224,102,.5)}',
+/* NÚT RA TRẬN */
+'.tt-go{display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:{14};background:transparent;font-family:var(--fh);font-weight:800;font-size:{42};letter-spacing:{1};color:#3b2406;text-shadow:0 {2} 0 rgba(255,246,200,.75);cursor:pointer;white-space:nowrap}',
+'.tt-go:active:not(:disabled){background:rgba(255,255,255,.18)}',
+'.tt-go:disabled{cursor:default;opacity:.55}'
 ].join('\n').replace(/\{(\d+(?:\.\d+)?)\}/g,'calc(var(--u)*$1)');
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
 /* ===== DỰNG PANEL (một lần) ===== */
 function box(c,x,y,w,h){var s=c.style;s.left=(x/BW*100)+'%';s.top=(y/BH*100)+'%';s.width=(w/BW*100)+'%';s.height=(h/BH*100)+'%';return c;}
-function mk(tag,cls,x,y,w,h){var c=document.createElement(tag);if(cls)c.className=cls;if(w)box(c,x,y,w,h);fr.appendChild(c);return c;}
+function mk(tag,cls,x,y,w,h,txt){var c=document.createElement(tag);if(cls)c.className=cls;if(txt!=null)c.textContent=txt;if(w)box(c,x,y,w,h);fr.appendChild(c);return c;}
+/* đặt phần tử con theo pixel ảnh, tính trong khung cha có gốc (ox,oy) cỡ (W,H) */
+function boxIn(c,x,y,w,h,ox,oy,W,H){var s=c.style;s.left=((x-ox)/W*100)+'%';s.top=((y-oy)/H*100)+'%';s.width=(w/W*100)+'%';s.height=(h/H*100)+'%';return c;}
 /* KHÔNG PHÓNG TO QUÁ CỠ GỐC: chiều rộng khung tối đa = BW / devicePixelRatio (CSS px) => đúng 1 pixel ảnh = 1 pixel màn hình, nét nhất.
    Màn nhỏ hơn thì tự thu nhỏ lại. Muốn khung to hơn (đổi nét lấy kích thước): đổi MAXSCALE lên >1 (vd 1.3). */
 var MAXSCALE=1;
 function unit(){if(!fr)return;var d=window.devicePixelRatio||1;fr.style.maxWidth=(BW*MAXSCALE/d)+'px';fr.style.setProperty('--u',(fr.clientWidth/BW)+'px');}
+var tt=0,lastDrag=0;
+function toast(t){E.ts.textContent=t;E.ts.style.display='flex';clearTimeout(tt);tt=setTimeout(function(){E.ts.style.display='none';},1500);}
+
 function build(){
+  var i,j;
   root=document.createElement('div');root.className='tt';
   fr=document.createElement('div');fr.className='tt-fr';root.appendChild(fr);
   /* nút X đã vẽ sẵn trong ảnh (tâm ~ x2101,y112 trên ảnh đã cắt): chỉ đặt vùng bấm trong suốt đè lên, đường kính 190 */
   var x=mk('button','tt-x',2006,17,190,190);x.type='button';x.setAttribute('aria-label','Đóng');x.addEventListener('click',close);
+
+  /* --- TRÁI: thanh vàng tên + bậc (x202-631,y211-272), ảnh thú trong ô vuông lớn (khung trong x214-618,y362-770) --- */
+  E.nm=mk('div','tt-nm',202,211,429,61);
+  E.ph=mk('div','tt-ph',214,362,404,408);
+  /* 3 ô tròn bên dưới (tâm (278,907),(418,907),(558,907), bán kính ~55): CHƯA LÀM (icon buff/debuff/kỹ năng có sẵn), để trống */
+
+  /* --- GIỮA TRÊN: chữ trang + 5 thanh chỉ số + 2 nút ‹ › --- */
+  E.cap=mk('div','tt-cap',921,240,442,28);
+  E.bars=[];
+  for(i=0;i<5;i++)E.bars.push(mk('div','tt-bar',BAR_X,BAR_Y+BAR_DY*i,BAR_W,BAR_H));
+  E.mid=mk('div','tt-mid',921,330,442,150);   /* chữ báo trang trống (vd "Chưa có chỉ số phụ") */
+  E.pv=mk('button','tt-pg',833,376,56,56,'‹');E.pv.type='button';E.pv.setAttribute('aria-label','Trang trước');
+  E.nx=mk('button','tt-pg',1395,376,56,56,'›');E.nx.type='button';E.nx.setAttribute('aria-label','Trang sau');
+  E.pv.addEventListener('click',function(){if(page>0){page--;renderStats();}});
+  E.nx.addEventListener('click',function(){if(page<PAGES.length-1){page++;renderStats();}});
+
+  /* --- GIỮA DƯỚI: 6 ô gắn kỹ năng (CHƯA làm chức năng: bấm "+" chỉ báo "Sắp có") --- */
+  for(j=0;j<2;j++)for(i=0;i<3;i++){var s=mk('button','tt-sk',SK_X[i],SK_Y[j],SK_S,SK_S,'+');s.type='button';s.setAttribute('aria-label','Gắn kỹ năng');
+    (function(k){s.addEventListener('click',function(){toast('Sắp có');});})(j*3+i);}   /* móc cho sau này: k = số ô 0..5 */
+  E.ts=mk('div','tt-ts',900,540,480,64);
+
+  /* --- PHẢI: lưới 4x4 thú (cuộn theo hàng) + rãnh cuộn --- */
+  var gx=GR_X[0],gy=GR_Y[0],gw=GR_X[3]+GR_W-gx,gh=GR_Y[3]+GR_H-gy;
+  E.gr=mk('div','tt-gr',gx,gy,gw,gh);
+  E.cells=[];
+  for(j=0;j<4;j++)for(i=0;i<4;i++){var c=document.createElement('button');c.type='button';c.className='tt-c';boxIn(c,GR_X[i],GR_Y[j],GR_W,GR_H,gx,gy,gw,gh);
+    (function(k){c.addEventListener('click',function(){if(performance.now()-lastDrag<250)return;var t=thus[(row0+((k/4)|0))*4+k%4];if(t){sel=t.uid;render();}});})(j*4+i);
+    E.gr.appendChild(c);E.cells.push(c);}
+  E.rail=mk('div','tt-rail',RAIL.x,RAIL.y,RAIL.w,RAIL.h);
+  E.th=document.createElement('div');E.th.className='tt-th';E.rail.appendChild(E.th);
+  gridScroll();
+
+  /* --- NÚT RA TRẬN: tấm vàng dưới-phải (x1654-1974,y851-941) --- */
+  E.go=mk('button','tt-go',1654,851,320,90);E.go.type='button';E.go.addEventListener('click',function(){if(sel&&sel!==rt){rt=sel;save();render();}});
+
   document.body.appendChild(root);
   /* bấm ra ngoài khung thì đóng (chặn 400ms đầu để cú chạm mở nút không đóng luôn) + phím Esc */
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
   document.addEventListener('keydown',function(e){if(isOpen&&e.key==='Escape')close();});
   window.addEventListener('resize',unit);
 }
+
+/* ===== CUỘN LƯỚI THEO HÀNG: lăn chuột / vuốt-kéo dọc trong lưới / kéo thumb hoặc bấm rãnh ===== */
+function maxRow(){return Math.max(0,Math.ceil(thus.length/4)-4);}
+function setRow(r){r=Math.max(0,Math.min(maxRow(),r));if(r!==row0){row0=r;renderGrid();}}
+function gridScroll(){
+  var acc=0,dn=null;
+  E.gr.addEventListener('wheel',function(e){
+    if(!maxRow())return;e.preventDefault();
+    acc+=e.deltaY*(e.deltaMode===1?40:1);
+    while(acc>=60){setRow(row0+1);acc-=60;}
+    while(acc<=-60){setRow(row0-1);acc+=60;}
+  },{passive:false});
+  E.gr.addEventListener('pointerdown',function(e){dn={y:e.clientY,row:row0,id:e.pointerId,drag:false};});
+  E.gr.addEventListener('pointermove',function(e){
+    if(!dn)return;var dy=e.clientY-dn.y;
+    if(!dn.drag&&Math.abs(dy)>8){dn.drag=true;try{E.gr.setPointerCapture(dn.id);}catch(x){}}   /* chỉ bắt con trỏ khi đã kéo thật, để bấm ô vẫn nhận click */
+    if(dn.drag)setRow(dn.row-Math.round(dy/(142.3*fr.clientWidth/BW)));   /* 142.3 = khoảng cách giữa 2 hàng (px ảnh) */
+  });
+  function up(){if(dn&&dn.drag)lastDrag=performance.now();dn=null;}
+  E.gr.addEventListener('pointerup',up);E.gr.addEventListener('pointercancel',up);
+  /* rãnh: bấm / kéo = nhảy tới hàng tương ứng */
+  var rd=false;
+  function rowAt(e){var r=E.rail.getBoundingClientRect();setRow(Math.round(Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))*maxRow()));}
+  E.rail.addEventListener('pointerdown',function(e){rd=true;try{E.rail.setPointerCapture(e.pointerId);}catch(x){}rowAt(e);});
+  E.rail.addEventListener('pointermove',function(e){if(rd)rowAt(e);});
+  E.rail.addEventListener('pointerup',function(){rd=false;});E.rail.addEventListener('pointercancel',function(){rd=false;});
+}
+
+/* ===== VẼ LẠI ===== */
+function renderGrid(){
+  var mr=maxRow(),i;
+  if(row0>mr)row0=mr;
+  for(i=0;i<16;i++){
+    var t=thus[row0*4+i],c=E.cells[i];
+    if(t){
+      var a=anhThu(t);
+      c.innerHTML=(a?'<img src="'+esc(a)+'" alt="">':'')+(t.bac?'<span class="b">'+esc(t.bac)+'</span>':'')+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
+      c.setAttribute('aria-label',tenThu(t));c.style.pointerEvents='';
+    }else{c.innerHTML='';c.removeAttribute('aria-label');c.style.pointerEvents='none';}
+    c.classList.toggle('sel',!!t&&t.uid===sel);
+  }
+  /* thumb: cao theo tỉ lệ 4 hàng / tổng số hàng (tối thiểu 12%); không cuộn được thì thumb phủ kín rãnh */
+  var tot=Math.max(4,Math.ceil(thus.length/4)),hp=Math.max(12,4/tot*100),tp=mr?(100-hp)*row0/mr:0;
+  E.th.style.height=hp+'%';E.th.style.top=tp+'%';
+}
+function renderStats(){
+  var t=byUid(sel),pg=PAGES[page],i;
+  E.cap.textContent=pg.ten;
+  E.pv.disabled=page<=0;E.nx.disabled=page>=PAGES.length-1;
+  for(i=0;i<5;i++){
+    var d=pg.ds[i],b=E.bars[i];
+    if(d&&t){var v=t.chiso&&t.chiso[d[0]];b.innerHTML='<b>'+esc(d[1])+'</b><span>'+(v==null?'-':esc(v))+'</span>';}
+    else if(d){b.innerHTML='<b>'+esc(d[1])+'</b><span>-</span>';}
+    else b.innerHTML='';
+  }
+  E.mid.textContent=pg.ds.length?'':'Chưa có '+pg.ten.toLowerCase();
+}
+function renderLeft(){
+  var t=byUid(sel);
+  if(t){E.nm.innerHTML=esc(tenThu(t))+(t.bac?'<i>['+esc(t.bac)+']</i>':'');
+    var a=anhThu(t);E.ph.innerHTML=a?'<img src="'+esc(a)+'" alt="'+esc(tenThu(t))+'">':'';}
+  else{E.nm.textContent='';E.ph.innerHTML='<div class="tt-emp">Chưa có thú nào<br>Bắt thú để cất vào đây</div>';}
+}
+function renderGo(){
+  var on=!!sel&&sel===rt;
+  E.go.textContent=on?'Đang ra trận':'Ra trận';
+  E.go.disabled=!sel||on;
+}
+function render(){if(!root)return;renderLeft();renderStats();renderGrid();renderGo();}
+
 function open(){
   if(window.TTGBALO&&TTGBALO.close)TTGBALO.close();   /* mở panel này -> đóng Balo */
   if(!root)build();
-  isOpen=true;openAt=performance.now();root.classList.add('on');unit();
+  if(!byUid(sel))sel=(rt&&byUid(rt))?rt:(thus[0]?thus[0].uid:null);   /* mặc định chọn thú đang ra trận, không có thì thú đầu tiên */
+  isOpen=true;openAt=performance.now();root.classList.add('on');unit();render();
 }
-function close(){if(!root)return;isOpen=false;root.classList.remove('on');}
+function close(){if(!root)return;isOpen=false;root.classList.remove('on');E.ts.style.display='none';}
 
 /* ===== ICON NÚT THÚ THẦN (SVG vẽ tay: dấu chân thú xanh đêm, viền vàng, tinh thể ngọc lam ở chính giữa) =====
    Cùng phong cách icon Balo (xanh đêm + viền vàng + tinh thể). id gradient dùng tiền tố tt để không trùng icon Balo. */
@@ -73,5 +258,18 @@ var btn=TTGNV.add({id:'thu-than',ten:'Thú Thần',icon:ICON,onTap:open,r:0});
 var tx=btn.querySelector('.nv-tx');
 if(tx){tx.style.fontSize='.82em';tx.style.letterSpacing='0';}   /* chỉnh .82em nếu chữ vẫn tràn / còn nhỏ */
 
-window.TTGTHU={open:open,close:close,isOpen:function(){return isOpen;}};
+/* ===== API CÔNG KHAI ===== */
+/* add(thu): thu = {id (loài, bắt buộc), ten?, bac?, tien?, chiso?:{hp,tc,pt,td,mm}}; không có uid thì tự tạo. Trả về uid. */
+function add(t){
+  t=Object.assign({},t||{});
+  if(!t.uid||byUid(t.uid))t.uid=uid();
+  if(!t.chiso)t.chiso={};
+  thus.push(t);save();
+  if(isOpen){if(!sel)sel=t.uid;render();}
+  return t.uid;
+}
+function list(){return thus.map(function(t){return Object.assign({},t);});}
+function getRaTran(){var t=rt&&byUid(rt);return t?Object.assign({},t):null;}   /* sau này nối vào trận đấu/sảnh bằng hàm này */
+
+window.TTGTHU={open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran};
 })();
