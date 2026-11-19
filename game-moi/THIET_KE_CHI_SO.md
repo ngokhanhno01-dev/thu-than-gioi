@@ -9,7 +9,7 @@
 - Gốc loài vùng z (z = 0,1,2... theo trường z trong 51-thu-moi.js), cấp 1, vai Cân bằng: hp 150, tc 40, pt 30, td 40, mm 10, tất cả hp/tc/pt/td nhân (1 + 0,3 x z). mm không nhân theo vùng.
 - Nhân theo vai: Tank hp 1,3 tc 0,8 pt 1,4 td 0,7 | Công hp 0,9 tc 1,4 pt 0,8 td 1,0 | Nhanh hp 0,85 tc 1,0 pt 0,8 td 1,5 | Cân bằng tất cả 1.
 - Boss: gốc x 1,6 (hp,tc,pt,td).
-- Ví dụ kiểm tra: Tuyết Hùng (Tank, z=0), cấp 15, tien 1, bậc C = hp 386, tc 63, pt 83, td 36, mm 10. Bậc SS cùng cấp = hp 521, tc 85, pt 112, td 48, mm 10 (làm tròn).
+- Ví dụ kiểm tra: Tuyết Hùng (Tank, z=0), cấp 15, tien 1, bậc C = hp 386, tc 63, pt 83, td 36, mm 10. Bậc SS cùng cấp = hp 521, tc 86, pt 112, td 48, mm 10 (làm tròn kiểu Math.round).
 
 ## 2. Hệ (ngũ hành)
 - 5 hệ: kim, moc, thuy, hoa, tho. Vòng khắc: Mộc > Thổ > Thủy > Hỏa > Kim > Mộc.
