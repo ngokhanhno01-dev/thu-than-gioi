@@ -1,12 +1,12 @@
 /* 54-thu-than.js - Nút "Thú Thần" + panel Thú Thần (chứa và trang bị thú đã bắt).
    Cần 52-nut-vuong.js (TTGNV) nạp trước; nạp SAU 53-balo.js (để đóng Balo khi mở panel này).
-   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). BƯỚC 2 = khung ảnh game-moi/khung-thu.webp (1478x673) + đóng bằng nút X / bấm ngoài / Esc (xong). Bước 3 (bố cục: tên thú, chỉ số, ô kỹ năng, lưới thú, nút Ra trận) chưa làm: khung đang trống.
+   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). BƯỚC 2 = khung ảnh game-moi/khung-thu.webp (2956x1346, hệ tọa độ 1478x673) + đóng bằng nút X / bấm ngoài / Esc (xong). Bước 3 (bố cục: tên thú, chỉ số, ô kỹ năng, lưới thú, nút Ra trận) chưa làm: khung đang trống.
    QUY TẮC: mở Thú Thần thì đóng Balo, mở Balo thì đóng Thú Thần (53-balo.js gọi TTGTHU.close()).
    API: TTGTHU.open() / .close() / .isOpen() */
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var BW=1478,BH=673,IMG='game-moi/khung-thu.webp?v=1';   /* ảnh khung ĐÃ CẮT 1478x673; mọi tọa độ bên dưới tính theo pixel ảnh này */
+var BW=1478,BH=673,IMG='game-moi/khung-thu.webp?v=2';   /* ảnh khung thật là 2956x1346 (gấp đôi cho nét), nhưng mọi tọa độ bên dưới vẫn tính theo hệ 1478x673 */
 var isOpen=false,openAt=0,root=null,fr=null;
 
 /* ===== CSS: {n} = n px ảnh (tự co theo --u) ===== */
