@@ -278,7 +278,7 @@
     wave(g,x,GY-3,16+19*eo(ph(t,0,TH)),C.light,fade*.46,1.6,T,st.seed+66,.17);
     groundCore(g,center,GY-4,C.light,fade*.22,28);
    }
-   if(t>=TH-.02&&t<=END){
+   if(t>=TH&&t<=END){
     if(E.once(st,'mist-hit')){
      burst(st,'mist-implosion',x,GY-25,S.miss?24:54,{
       speed:[16,62],ang:[0,TAU],size:[4,10],life:[.5,.84],
@@ -422,7 +422,8 @@
   }
   function fxSnake(g,T,t,S,st){
     const q=aim(S),x=q.x,s=q.scale,C=COL.wind,r=E.rng(st.seed^0x570401),hit=t>=TH,
-     tighten=ph(t,.14,TH+.05),bodyFade=hit?1-ph(t,TH,TH+.22):1;
+     tighten=ph(t,.14,TH+.05),
+     bodyFade=t<TH-.06?1:(1-.9*eo(ph(t,TH-.06,TH+.02)))*(1-ph(t,TH+.02,TH+.18));
    if(bodyFade>.01){
      const points=[],n=112,coil=1-.29*eo(tighten);
     for(let i=0;i<n;i++){
@@ -460,7 +461,7 @@
     for(let side of [-1,1])fogPuff(g,x+side*43*s,GY-20,17,7,bodyFade*.22,T,st.seed+110+side,
      {deep:C.deep,main:C.main,light:C.light,core:C.core});
    }
-   if(t>=TH-.02&&t<=END){
+   if(t>=TH&&t<=END){
     if(E.once(st,'snake-burst')){
      burst(st,'snake-wind-body',x,GY-44,S.miss?22:46,{
       speed:[27,84],ang:[-Math.PI*.94,-Math.PI*.06],size:[2.5,5],life:[.5,.88],
@@ -623,7 +624,7 @@
     stroke(g,line,C.light,1.25,.58*(1-ph(t,TH+.42,END)),true);
     glow(g,line[0][0],line[0][1],5,C.light,.21*after,C.core);
    }
-   if(t>=TH-.02&&t<=END){
+   if(t>=TH&&t<=END){
     if(E.once(st,'eclipse-hit')){
      burst(st,'eclipse-dark-wave',x,GY-6,S.miss?20:42,{
       speed:[14,54],ang:[0,TAU],size:[3,8],life:[.5,.86],
