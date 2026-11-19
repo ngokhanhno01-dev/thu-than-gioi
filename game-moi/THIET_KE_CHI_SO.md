@@ -39,17 +39,19 @@
 - Kháng hiệu ứng (khu) CHỈ tác dụng lên DEBUFF: mỗi debuff vừa gắn có khu% bị hủy; debuff theo giá trị (vd -15% tốc độ) thì giảm hiệu lực theo (1 - khu/100). Buff không bị ảnh hưởng.
 - Đóng băng và choáng đều là debuff mất lượt. Đóng băng bị khu chặn. Choáng bị kc (kháng choáng) chặn, không dùng khu. Sau khi bị đóng băng, mục tiêu miễn nhiễm đóng băng 2 lượt.
 - Buff/debuff VÙNG áp cho MỌI thú thuộc loài của vùng đó: thú, quái, boss, thú người chơi. Debuff vùng gắn lên đối thủ khi vào trận, kéo dài cả trận (vẫn bị giảm theo khu).
-- Boss: 2 buff (buff vùng + buff riêng), 1 debuff (debuff vùng), 2 kỹ năng (kỹ năng cơ bản của vùng + kỹ năng độc quyền).
+- Boss: 2 buff (buff vùng + buff riêng), 1 debuff (debuff vùng), đòn cơ bản của vùng (kỹ năng độc quyền: chờ chốt).
 
-## 7. Buff, debuff, kỹ năng 6 vùng (z = 0..5)
-Mỗi vùng: debuff / buff / kỹ năng cơ bản / boss (buff riêng + kỹ năng độc quyền). hồi chiêu = lượt.
-- z0 Tuyết Nguyên: debuff Hàn Khí (đối thủ -15% td) | buff Đông Cứng (mỗi đòn gắn 1 lớp lạnh, đủ 4 lớp thì đóng băng 1 lượt, xóa lớp) | KN Băng Tinh (130% tc, gắn thêm 1 lớp lạnh, cd 3, fx có sẵn bên main) | Boss Băng Sơn Cự Thú: buff riêng Băng Giáp (+20% pt), KN Băng Sơn Áp Đỉnh (180% tc, gắn 2 lớp lạnh, cd 5)
-- z1 Sương Cốc: debuff Sương Mù (đối thủ -15% cx) | buff Sương Tức (hồi 3% hp tối đa mỗi lượt) | KN Sương Phủ (120% tc, đối thủ -15% cx 2 lượt, cd 3) | Boss Vạn Trượng Vụ Thú: Sương Dày (+20% ne), KN Sương Nuốt (150% tc, hút 30% sát thương thành máu, cd 5)
-- z2 Vân Đảo: debuff Vân Nặng (đối thủ -10% tc) | buff Vân Hộ (đầu trận có khiên = 15% hp tối đa) | KN Vân Tỏa (100% tc, thêm khiên 20% hp 2 lượt, cd 4) | Boss Vân Đảo Côn Bằng: Phi Thiên (+25% ne 2 lượt đầu), KN Côn Bằng Triển Sí (200% tc, tự +30% td 2 lượt, cd 5)
-- z3 Phong Nguyên: debuff Cuồng Phong (đối thủ -10% ne) | buff Phong Tích (+15% td; mỗi đòn gắn 1 lớp gió, đủ 3 lớp thì thêm 1 đòn liên kích 60% tc) | KN Phong Nhận (3 nhát, mỗi nhát 50% tc, cd 3) | Boss Phong Nguyên Vũ Xà: Xà Hành (+20% td lượt đầu), KN Vũ Xà Triền (140% tc, đối thủ -50% td 2 lượt, cd 5)
-- z4 Lôi Vực: debuff Tĩnh Điện (đối thủ -15% khu) | buff Lôi Kích (+15% cm; mỗi lần chí mạng 20% làm choáng 1 lượt) | KN Sấm Rền (160% tc, 20% choáng, cd 4) | Boss Lôi Vực Chiến Thần: Lôi Giáp (pd +15% phản đòn), KN Thiên Lôi Giáng (220% tc, 40% choáng, cd 6)
-- z5 Nguyệt Cung: debuff Nguyệt Quang (đối thủ -20% cm) | buff Nguyệt Ảnh (+15% ne; né thành công thì lượt sau +30% tc) | KN Nguyệt Huy (140% tc, hồi 10% hp, cd 4) | Boss Nguyệt Thực Tế Quân: Nguyệt Thực (dưới 30% hp thì +30% tc và hút máu 15%), KN Nguyệt Thực Nuốt (200% tc, đối thủ -20% td, cd 5)
-- Hệ của kỹ năng = hệ chủ đạo của vùng (mục 8).
+## 7. Buff (nội tại), debuff, đòn cơ bản 6 vùng (z = 0..5)
+Giao diện thú có 3 ô tròn: ô 1 BUFF (nội tại), ô 2 DEBUFF, ô 3 ĐÒN CƠ BẢN.
+- Đòn cơ bản = đánh thường: sát thương theo chỉ số (hsKyNang = 1), KHÔNG hồi chiêu, KHÔNG hiệu ứng kèm. Mỗi vùng chỉ có một TÊN riêng (và hình ảnh đòn đánh riêng của vùng).
+- Mọi hiệu ứng đặc biệt (gắn lớp, hồi máu, khiên, choáng...) thuộc về BUFF nội tại, không thuộc đòn cơ bản.
+- z0 Tuyết Nguyên: debuff Hàn Khí (đối thủ -15% td) | buff Đông Cứng (mỗi đòn gắn 1 lớp lạnh, đủ 4 lớp thì đóng băng đối thủ 1 lượt, xóa lớp) | đòn cơ bản Băng Tinh | Boss Băng Sơn Cự Thú: buff riêng Băng Giáp (+20% pt)
+- z1 Sương Cốc: debuff Sương Mù (đối thủ -15% cx) | buff Sương Tức (hồi 3% hp tối đa mỗi lượt) | đòn cơ bản Sương Phủ | Boss Vạn Trượng Vụ Thú: Sương Dày (+20% ne)
+- z2 Vân Đảo: debuff Vân Nặng (đối thủ -10% tc) | buff Vân Hộ (đầu trận có khiên = 15% hp tối đa) | đòn cơ bản Vân Tỏa | Boss Vân Đảo Côn Bằng: Phi Thiên (+25% ne 2 lượt đầu)
+- z3 Phong Nguyên: debuff Cuồng Phong (đối thủ -10% ne) | buff Phong Tích (+15% td; mỗi đòn gắn 1 lớp gió, đủ 3 lớp thì thêm 1 đòn liên kích 60% tc) | đòn cơ bản Phong Nhận | Boss Phong Nguyên Vũ Xà: Xà Hành (+20% td lượt đầu)
+- z4 Lôi Vực: debuff Tĩnh Điện (đối thủ -15% khu) | buff Lôi Kích (+15% cm; mỗi lần chí mạng 20% làm choáng 1 lượt) | đòn cơ bản Sấm Rền | Boss Lôi Vực Chiến Thần: Lôi Giáp (pd +15% phản đòn)
+- z5 Nguyệt Cung: debuff Nguyệt Quang (đối thủ -20% cm) | buff Nguyệt Ảnh (+15% ne; né thành công thì lượt sau +30% tc) | đòn cơ bản Nguyệt Huy | Boss Nguyệt Thực Tế Quân: Nguyệt Thực (dưới 30% hp thì +30% tc và hút máu 15%)
+- (Bản cũ có "kỹ năng" kèm hồi chiêu và hệ số như Băng Tinh 130% tc cd 3, Băng Sơn Áp Đỉnh cd 5... ĐÃ BỎ khỏi đòn cơ bản. Kỹ năng độc quyền của boss: CHỜ CHỐT.)
 
 ## 8. Hệ chủ đạo 6 vùng và bảng loài mẫu Tuyết Nguyên (z0)
 - Hệ chủ đạo vùng (hệ của kỹ năng cơ bản vùng): z0 Tuyết Nguyên = bang, z1 Sương Cốc = thuy, z2 Vân Đảo = tien, z3 Phong Nguyên = phong, z4 Lôi Vực = loi, z5 Nguyệt Cung = tam.

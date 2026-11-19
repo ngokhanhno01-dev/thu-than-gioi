@@ -1,8 +1,9 @@
-/* 56c-buff.js - BUFF / DEBUFF VÙNG + BUFF RIÊNG BOSS (6 vùng z0..z5). Thuần dữ liệu + hàm tính, KHÔNG DOM, KHÔNG vẽ. Mở rộng window.TTGCS.
+/* 56c-buff.js - BUFF (NỘI TẠI) / DEBUFF VÙNG + BUFF RIÊNG BOSS + TÊN ĐÒN CƠ BẢN (6 vùng z0..z5). Thuần dữ liệu + hàm tính, KHÔNG DOM, KHÔNG vẽ. Mở rộng window.TTGCS.
    Nạp SAU 56b-loai.js. Nguồn sự thật: THIET_KE_CHI_SO.md mục 6-7. MỌI SỐ chỉnh ở bảng VUNG bên dưới.
    Quy tắc (mục 6): buff/debuff vùng áp cho MỌI thú thuộc loài của vùng (thú, quái, boss, thú người chơi).
    Debuff vùng gắn lên ĐỐI THỦ khi vào trận, kéo dài cả trận, và bị giảm theo (1 - khu/100) của người bị gắn. Buff không bị khu ảnh hưởng.
-   Boss: 2 buff (buff vùng + buff riêng) + 1 debuff (debuff vùng). (2 kỹ năng là bước D, chưa có ở đây.)
+   3 ô tròn của giao diện thú: buff (nội tại) | debuff | đòn cơ bản. Đòn cơ bản = đánh thường theo chỉ số (hsKyNang 1), KHÔNG hồi chiêu, KHÔNG hiệu ứng kèm: chỉ có TÊN riêng mỗi vùng.
+   Mọi hiệu ứng đặc biệt (lớp, hồi máu, khiên, choáng...) nằm trong buff nội tại. Boss: 2 buff (buff vùng + buff riêng) + 1 debuff (debuff vùng) + đòn cơ bản. (Kỹ năng độc quyền boss: chờ chốt.)
 
    Mỗi hiệu ứng gồm:
    - mod: [{stat,pct}] cộng THẲNG vào chỉ số (đưa vào ctx.mod của TTGCS.tinh). Chính hp/tc/pt/td/mm nhân (1+pct/100); chỉ số phụ cộng điểm %.
@@ -10,7 +11,7 @@
    - ev: [{...}] sự kiện trong trận do bước D (bộ máy trận) thực thi: tả bằng dữ liệu, ở đây KHÔNG chạy trận.
      loại ev: hoiLuot{pctHp} hồi %hp tối đa mỗi lượt | khienDau{pctHp} khiên đầu trận | lop{ten,du,moiDon,ra} mỗi đòn gắn 1 lớp, đủ `du` lớp thì kích `ra` (rồi xóa lớp)
               | chiMangRa{choang:{xs,luot}} khi chí mạng thì xs% làm choáng | neRa{stat,pct,luot} né thành công thì lượt sau cộng stat | tamKhiHp ... (xem tam)
-   API: TTGCS.vungBuff(z) | debuffVung(z) | buffBoss(z) | modTinh(thu, doiThu?, opt?) | modTam(thu, st) | suKien(thu) | hoiLuot(thu,hpMax) | khienDau(thu,hpMax) | VUNG_BUFF */
+   API: TTGCS.vungBuff(z) | debuffVung(z) | buffBoss(z) | modTinh(thu, doiThu?, opt?) | modTam(thu, st) | suKien(thu) | hoiLuot(thu,hpMax) | khienDau(thu,hpMax) | donCoBan(z) | VUNG_BUFF */
 (function(root){
 'use strict';
 
@@ -47,6 +48,10 @@ var VUNG={
     boss:{ten:'Nguyệt Thực',mod:[],tam:[{stat:'tc',pct:30,hpDuoi:30},{stat:'hutm',pct:15,hpDuoi:30}],ev:[]}
   }
 };
+
+/* tên đòn cơ bản (đánh thường) theo vùng; không số liệu riêng */
+var DON_CO_BAN=['Băng Tinh','Sương Phủ','Vân Tỏa','Phong Nhận','Sấm Rền','Nguyệt Huy'];
+function donCoBan(z){return DON_CO_BAN[z]?{ten:DON_CO_BAN[z],hsKyNang:1,hoiChieu:0}:null;}
 
 function copy(o){return o?JSON.parse(JSON.stringify(o)):null;}
 function zOf(thu){
@@ -119,7 +124,7 @@ function hoiLuot(thu,hpMax){return Math.floor(hpMax*tongEv(thu,'hoiLuot','pctHp'
 function khienDau(thu,hpMax){return Math.floor(hpMax*tongEv(thu,'khienDau','pctHp')/100);}
 
 root.TTGCS=Object.assign(root.TTGCS||{},{
-  VUNG_BUFF:VUNG,vungBuff:vungBuff,debuffVung:debuffVung,buffBoss:buffBoss,
+  VUNG_BUFF:VUNG,DON_CO_BAN:DON_CO_BAN,donCoBan:donCoBan,vungBuff:vungBuff,debuffVung:debuffVung,buffBoss:buffBoss,
   modTinh:modTinh,modTam:modTam,suKien:suKien,hoiLuot:hoiLuot,khienDau:khienDau
 });
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
