@@ -30,3 +30,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - `khung-nut.webp` thay bằng khung vàng + nền sao (cắt từ ảnh mẫu nut-mau.png, ô giữa trong suốt, ảnh vuông 373x373). Ô trong suốt chiếm 21%-79% mỗi cạnh.
 - Bỏ hộp nền nhỏ có viền; thay bằng quầng sáng mềm (`.nv-gl`, nhấp nháy chậm) + icon phát sáng (drop-shadow vàng/lam) + chữ trắng ngà viền nâu, phát sáng vàng. Chữ nằm trên lớp khung.
 - Icon Balo (vàng cam + túi lam) và Thú Thần (dấu chân ngọc lam + ngọc vàng) vẽ lại màu sáng. Chỉnh độ sáng ở CSS `.nv-ic` (filter), `.nv-gl`, `.nv-tx` trong 52-nut-vuong.js; cỡ chữ Thú Thần ở 54-thu-than.js (`.8em`).
+
+## Thanh nút to hơn (19/11/2026)
+- `BP` (cao khung dưới) 70 -> 88; nút vuông 29 -> 38, chừa góc trái 34 -> 42 (`CFG.left`). Khung trên còn cao 270 (trước 288), thú giữ nguyên cỡ.
+- Sức chứa: màn rộng 780 ≈ 17 ô/hàng x 2 hàng; màn 640 ≈ 13 ô/hàng. Hàng 0 (r:0) cho chức năng chính, hàng 1 (r:1) cho chức năng phụ. Quá nhiều nút thì làm vuốt ngang hoặc nút "Thêm".

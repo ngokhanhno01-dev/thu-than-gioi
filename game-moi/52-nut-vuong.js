@@ -3,15 +3,15 @@
    DÙNG:  TTGNV.add({id:'balo', ten:'Balo', icon:'<svg ...>', onTap:function(){...}, r:0});
    r (tùy chọn) = hàng muốn đứng (0 = hàng trên, 1 = hàng dưới); các nút cùng r xếp ngang cạnh nhau. Không có r thì xếp theo CFG.fill.
    Nút xếp theo CỘT (trên -> dưới rồi sang cột kế): nút 1 ở hàng trên cùng bên trái, nút 2 ngay dưới nó, nút 3 sang cột bên cạnh...
-   Chỉnh to/nhỏ, khe, số hàng, chỗ chừa họa tiết góc: sửa CFG bên dưới (đơn vị game, giống BP = 70 của khung dưới trong index.html).
+   Chỉnh to/nhỏ, khe, số hàng, chỗ chừa họa tiết góc: sửa CFG bên dưới (đơn vị game, giống BP = 88 của khung dưới trong index.html).
    index.html gọi TTGNV.layout(...) mỗi lần đổi cỡ màn hình (hàm resize) để đặt lại vị trí. */
 (function(){
 'use strict';
 var CFG={
-  size:29,    /* cạnh nút. 2 hàng: 2*size + gap phải nhỏ hơn BP (70) trừ viền khung */
+  size:38,    /* cạnh nút. 2 hàng: 2*size + gap phải nhỏ hơn BP (88 trong index.html) trừ viền khung (~9) */
   gap:2,      /* khe giữa các nút */
   rows:2,     /* số hàng trong khung dưới */
-  left:34,    /* chừa bên trái cho họa tiết góc khung dưới */
+  left:42,    /* chừa bên trái cho họa tiết góc khung dưới */
   fill:'col', /* 'col' = xếp theo cột (nút 2 nằm dưới nút 1) | 'row' = xếp theo hàng */
   frame:'game-moi/khung-nut.webp?v=2'
 };
