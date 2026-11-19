@@ -230,7 +230,7 @@ var BG_BLEED={l:12,r:12,t:10,b:10};
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
 if(bm<1||bm>MAXB)bm=1;if(be<1||be>MAXB)be=1;
 var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]hd=0/.test(location.search))HD=false;if(/[?&]hd=1/.test(location.search))HD=true;/* HD (mặc định BẬT): canvas theo độ phân giải máy + dùng ảnh thú 192 nếu có (thiếu thì dùng 128). Thêm ?hd=0 vào link để tắt và so sánh */
-function dp(id,b,cx,by){THU_MOI.setFrame(192);THU_MOI.draw(ctx,id,b,cx,by,128);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
+function dp(id,b,cx,by,fine){THU_MOI.setFrame(192);THU_MOI.draw(ctx,id,b,cx,by,128,fine);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
 function TH(){return H-I.b-BP-GAPB;}/* chiều cao khung trên */
@@ -629,8 +629,8 @@ function bgDrawFx(ts,x,y,w,h){
 }
 document.addEventListener('visibilitychange',function(){bgLast=0;if(document.hidden){BGV.pause();BGV2.pause();if(bgRaf){cancelAnimationFrame(bgRaf);bgRaf=0;}if(mainRaf){cancelAnimationFrame(mainRaf);mainRaf=0;}}else{if(bgOn){try{bgCur.play();}catch(e){}if(!bgRaf)bgRaf=requestAnimationFrame(function(){bgTick(bgGen);});}if(!mainRaf)mainRaf=requestAnimationFrame(loop);}});
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
-function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.round(Math.sin(ts/380)*2);
- dp(ID,bm,x,gy()+bob);}
+function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.sin(ts/380)*2;/* NHỊP THỞ mượt: không làm tròn (biên độ 2 điểm game, chu kỳ ~2,4s); đổi 2 để thở mạnh/yếu */
+ dp(ID,bm,x,gy()+bob,true);}
 function draw(ts){bgSync();
  var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
  ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);

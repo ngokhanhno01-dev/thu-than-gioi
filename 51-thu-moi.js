@@ -95,13 +95,14 @@
     return e.complete && e.naturalWidth ? e : null;
   }
   // Quy ước như drawStage: chân tại (cx, by), size = cạnh khung hiển thị. Trả true nếu đã vẽ.
-  function draw(ctx, id, bac, cx, by, size) {
+  function draw(ctx, id, bac, cx, by, size, fine) { // fine=true: KHÔNG làm tròn toạ độ (cho chuyển động mượt như nhịp thở ở sảnh)
     var im = getImg(id, bac); if (!im) return false;
     size = size || FRAME; // vẽ ở size = khung là 1:1
     var old = ctx.imageSmoothingEnabled;
     ctx.imageSmoothingEnabled = (FRAME !== 128 && size < FRAME); // ảnh 192/256 vẽ nhỏ lại thì làm mượt, còn lại giữ pixel cứng
     if (ctx.imageSmoothingEnabled) ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(im, Math.round(cx - size / 2), Math.round(by - size), size, size);
+    if (fine) ctx.drawImage(im, cx - size / 2, by - size, size, size);
+    else ctx.drawImage(im, Math.round(cx - size / 2), Math.round(by - size), size, size);
     ctx.imageSmoothingEnabled = old;
     return true;
   }
