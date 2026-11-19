@@ -1,6 +1,6 @@
 /* 56-chi-so.js - LÕI TÍNH CHỈ SỐ (thuần tính toán, KHÔNG DOM, KHÔNG vẽ). Xuất window.TTGCS.
    Nguồn sự thật: game-moi/THIET_KE_CHI_SO.md (mục 1-5). MỌI SỐ chỉnh ở khối CFG ngay dưới.
-   BƯỚC A: hệ (18 hệ), bậc (gacha), cấp/EXP, chỉ số, sát thương. CHƯA có: bảng loài (56b), buff vùng (56c), kỹ năng (56d), TTGLV (56e).
+   BƯỚC A: hệ (18 hệ), bậc (gacha), cấp/EXP, chỉ số, sát thương. Đã có 56b (bảng loài), 56c (buff vùng). CHƯA có: kỹ năng (56d), TTGLV (56e).
    Hàm có ngẫu nhiên đều nhận tham số rng (mặc định Math.random) để test bằng node.
    API: HE, HE_TEN, BANG_HE, heHeSo, heTotNhat, BAC, tungBac, hsBac, expCan, tranCap, expThuong, goc, tinh, satThuong, CFG */
 (function(root){

@@ -105,3 +105,7 @@ function heVung(z){return HE_VUNG[z]||null;}
 root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,HE_VUNG:HE_VUNG});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
 })(typeof window!=='undefined'?window:globalThis);
+
+/* Nạp 56c-buff.js ngay sau file này (đồng bộ, đúng thứ tự). Chỉ chạy trong trình duyệt, bỏ qua khi test bằng node.
+   Nếu sau này thêm thẻ <script src="game-moi/56c-buff.js"> vào index.html thì dòng này tự bỏ qua (đã có TTGCS.modTinh) hoặc xóa đi. */
+if(typeof document!=='undefined'&&document.write&&!(window.TTGCS&&window.TTGCS.modTinh)){document.write('<script src="game-moi/56c-buff.js"><\/script>');}
