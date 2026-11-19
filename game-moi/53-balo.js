@@ -12,8 +12,8 @@
 'use strict';
 if(!window.TTGNV)return;
 var KEY='ttg_moi_balo_v1',CAP=100,PAGE=16,BW=1469,BH=673,IMG='game-moi/khung-balo.webp?v=2';
-var demo=/[?&]balo=demo/.test(location.search);
-var LOAI={nl:'Nguyên liệu',bong:'Bóng bắt thú'};
+var demo=/[?&](balo|thu)=demo/.test(location.search);   /* ?thu=demo cũng bật demo Balo để có sách kỹ năng mẫu cho panel Thú Thần (không lưu) */
+var LOAI={nl:'Nguyên liệu',bong:'Bóng bắt thú',sach:'Sách kỹ năng'};   /* sách kỹ năng nằm chung lưới 4x4 với nguyên liệu; danh mục sách khai ở 54-thu-than.js */
 /* ===== DANH MỤC ITEM ===== mỗi item: id:{loai:'nl'|'bong', ten, mo (mô tả), ic (emoji tạm) hoặc img (đường dẫn ảnh icon), cap (cấp bóng)} */
 var CAT={};
 function reg(o){for(var k in o)CAT[k]=o[k];}
@@ -36,7 +36,7 @@ if(demo){
 function save(){if(demo)return;try{localStorage.setItem(KEY,JSON.stringify(inv));}catch(e){}}
 function count(id){return inv[id]|0;}
 function add(id,n){var c=count(id)+(n==null?1:n);if(c<=0)delete inv[id];else inv[id]=c;save();if(isOpen)render();return Math.max(0,c);}
-function ids(loai){var a=Object.keys(inv).filter(function(id){return CAT[id]&&CAT[id].loai===loai&&inv[id]>0;});
+function ids(loai){var a=Object.keys(inv).filter(function(id){var c=CAT[id];return c&&(loai==='luoi'?(c.loai==='nl'||c.loai==='sach'):c.loai===loai)&&inv[id]>0;});   /* 'luoi' = mọi món hiện trong lưới ô (nguyên liệu + sách kỹ năng) */
   if(sortMode===1)a.sort(function(x,y){return String(CAT[x].ten).localeCompare(String(CAT[y].ten),'vi');});
   else if(sortMode===2)a.sort(function(x,y){return inv[y]-inv[x];});
   return a;}
@@ -133,7 +133,7 @@ function build(){
 function unit(){if(fr)fr.style.setProperty('--u',(fr.clientWidth/BW)+'px');}
 function pages(){return Math.max(1,Math.ceil(CAP/PAGE));}
 function pick(id){sel=id;if(multi){if(picks[id])delete picks[id];else picks[id]=1;}render();}
-function clickSlot(i){var id=ids('nl')[page*PAGE+i];if(!id)return;pick(id);}
+function clickSlot(i){var id=ids('luoi')[page*PAGE+i];if(!id)return;pick(id);}
 function targets(){var a=multi?Object.keys(picks).filter(function(id){return CAT[id]&&count(id)>0;}):[];if(!a.length&&sel&&!multi)a=[sel];return a;}
 function toast(t){E.ts.textContent=t;E.ts.style.display='flex';clearTimeout(tt);tt=setTimeout(function(){E.ts.style.display='none';},1800);}
 /* KHÓA: món đã khóa không vứt được. Tất cả đang khóa -> mở khóa, ngược lại -> khóa hết */
@@ -157,7 +157,7 @@ function vut(){var t=targets();if(!t.length){toast('Chưa chọn vật phẩm');
 /* SẮP XẾP: bấm đổi kiểu xếp (nhặt -> tên -> số lượng) */
 function xep(){sortMode=(sortMode+1)%3;saveMeta();page=0;toast(SORTN[sortMode]);render();}
 function render(){
-  var nl=ids('nl'),bg=ids('bong'),i;
+  var nl=ids('luoi'),bg=ids('bong'),i;
   if(page>pages()-1)page=pages()-1;
   if(sel&&(!CAT[sel]||count(sel)<=0))sel=null;
   E.cap.textContent=nl.length+'/'+CAP;E.pg.textContent=(page+1)+'/'+pages();E.pv.disabled=page<=0;E.nx.disabled=page>=pages()-1;

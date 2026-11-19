@@ -7,6 +7,8 @@
    QUY TẮC: mở Thú Thần thì đóng Balo, mở Balo thì đóng Thú Thần (53-balo.js gọi TTGTHU.close()).
    DỮ LIỆU: danh sách thú {uid, id (loài, khớp THU_MOI.byId), ten, bac (tùy chọn: SS/S/A/B/C/D), tien (tiến hóa 1-3 = ảnh -b1/-b2/-b3, mặc định 1), chiso:{hp,tc,pt,td,mm}}
             lưu ở khóa localStorage ttg_moi_thu_v1; uid thú ra trận lưu ở ttg_moi_thu_ratran_v1. Kho tạm KHÔNG giới hạn số thú.
+   KỸ NĂNG (5a): mỗi thú có thu.kn = mảng 6 ô (id sách hoặc null). Bấm ô "+" -> danh sách sách kỹ năng trong Balo -> bấm 1 sách -> bảng nổi (Dùng/Đóng);
+                 bấm ô đã gắn -> bảng nổi (Gỡ/Đóng). Dùng = trừ 1 sách ở Balo, Gỡ = trả sách về Balo. Danh mục sách mẫu: khối SACH bên dưới (chỗ thêm/sửa kỹ năng).
    API: TTGTHU.open() / .close() / .isOpen() / .add(thu) (trả về uid) / .list() / .getRaTran() (trả thú đang ra trận hoặc null).
    THỬ: thêm ?thu=demo vào link -> có sẵn vài thú mẫu (không lưu lại). */
 (function(){
@@ -31,6 +33,22 @@ var BAR_Y=270,BAR_DY=56.5,BAR_X=921,BAR_W=442,BAR_H=36;             /* 5 thanh c
 var GR_X=[1532,1671,1810,1949],GR_Y=[237,379,522,664],GR_W=127,GR_H=128;  /* lưới thú 4 cột x 4 hàng */
 var SK_X=[936,1071,1205],SK_Y=[631,770],SK_S=108;                    /* 6 ô kỹ năng (3 cột x 2 hàng) */
 var RAIL={x:2096,y:240,w:17,h:552};                                  /* rãnh cuộn bên phải lưới */
+/* ----- KỸ NĂNG / SÁCH (5a) ----- */
+var NSK=6;                  /* số ô gắn kỹ năng */
+var NOI_IMG='';             /* ẢNH KHUNG BẢNG NỔI (nền xanh đã tách, ô giữa trong suốt): khi có file thì điền vd 'game-moi/khung-noi.webp'. Để trống = dùng khung vẽ bằng CSS tạm. */
+var POP_LS={x:880,y:215,w:560,h:640};    /* bảng danh sách sách (px ảnh khung) */
+var POP_IN={x:940,y:290,w:440,h:500};    /* bảng nổi thông tin kỹ năng */
+/* Danh mục sách kỹ năng MẪU. Mỗi sách là 1 item Balo: loai:'sach', ten (tên sách), kn (tên kỹ năng), mo (mô tả), cd (hồi chiêu, lượt), ic (emoji tạm) hoặc img. Muốn thêm: thêm dòng vào đây (hoặc TTGBALO.reg). */
+var SACH={
+  'sach-chem-gio':{loai:'sach',ten:'Sách Chém Gió',kn:'Chém Gió',ic:'🌪️',cd:3,mo:'Chém một đường gió sắc, gây 150% tấn công lên 1 mục tiêu.'},
+  'sach-bang-giap':{loai:'sach',ten:'Sách Băng Giáp',kn:'Băng Giáp',ic:'🛡️',cd:4,mo:'Phủ giáp băng, tăng 30% phòng thủ trong 3 lượt.'},
+  'sach-hoi-xuan':{loai:'sach',ten:'Sách Hồi Xuân',kn:'Hồi Xuân',ic:'🌿',cd:5,mo:'Hồi 25% máu tối đa cho bản thân.'},
+  'sach-loi-de':{loai:'sach',ten:'Sách Lôi Đế',kn:'Lôi Đế',ic:'⚡',cd:5,mo:'Triệu sấm sét gây 200% tấn công, có 20% làm choáng 1 lượt.'},
+  'sach-doc-vu':{loai:'sach',ten:'Sách Độc Vụ',kn:'Độc Vụ',ic:'☠️',cd:4,mo:'Phun sương độc, gây sát thương theo thời gian trong 3 lượt (debuff).'},
+  'sach-tang-toc':{loai:'sach',ten:'Sách Tăng Tốc',kn:'Tăng Tốc',ic:'💨',cd:3,mo:'Tăng 40% tốc độ trong 2 lượt (buff).'}
+};
+if(window.TTGBALO&&TTGBALO.reg)TTGBALO.reg(SACH);   /* đăng ký vào Balo (sách đã sở hữu từ trước vẫn nhận ra) */
+if(demo&&window.TTGBALO)Object.keys(SACH).forEach(function(k,i){TTGBALO.add(k,i%3+1);});   /* ?thu=demo: tặng sách mẫu (Balo demo, không lưu) */
 
 /* ===== DỮ LIỆU ===== */
 var thus=[],rt=null,sel=null,page=0,row0=0;
@@ -83,7 +101,7 @@ var css=[
 '.tt-sk{position:absolute}',
 '.tt-sk .n{position:absolute;left:{9};top:{6};font-family:var(--fh);font-weight:800;font-size:{24};line-height:1;color:#ffe9a0;text-shadow:0 0 {4} #000,{1} {1} 0 #000,-{1} {1} 0 #000;pointer-events:none}',
 '.tt-sk:active{background:rgba(255,224,102,.18)}',
-'.tt-ts{display:none;align-items:center;justify-content:center;text-align:center;padding:0 {14};font-size:{28};font-weight:700;color:#ffe9a0;background:rgba(10,8,40,.94);border:{3} solid #c9992f;border-radius:{12};z-index:5;pointer-events:none}',
+'.tt-ts{display:none;align-items:center;justify-content:center;text-align:center;padding:0 {14};font-size:{28};font-weight:700;color:#ffe9a0;background:rgba(10,8,40,.94);border:{3} solid #c9992f;border-radius:{12};z-index:9;pointer-events:none}',
 /* PHẢI: lưới thú */
 '.tt-gr{touch-action:none;user-select:none;-webkit-user-select:none}',
 '.tt-gr>*{position:absolute;box-sizing:border-box}',
@@ -98,7 +116,35 @@ var css=[
 /* NÚT RA TRẬN */
 '.tt-go{display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:{14};background:transparent;font-family:var(--fh);font-weight:800;font-size:{42};letter-spacing:{1};color:#3b2406;text-shadow:0 {2} 0 rgba(255,246,200,.75);cursor:pointer;white-space:nowrap}',
 '.tt-go:active:not(:disabled){background:rgba(255,255,255,.18)}',
-'.tt-go:disabled{cursor:default;opacity:.55}'
+'.tt-go:disabled{cursor:default;opacity:.55}',
+/* ô kỹ năng đã gắn + bảng danh sách sách + bảng nổi */
+'.tt-sk .ic{display:flex;align-items:center;justify-content:center;font-size:{62};font-weight:400;line-height:1;text-shadow:none}',
+'.tt-sk .ic img{width:{74};height:{74};object-fit:contain}',
+'.tt-ov{display:none;background:rgba(3,4,18,.55);z-index:6;border-radius:{20}}',
+'.tt-pop{display:none;z-index:7;flex-direction:column;padding:{18};color:#e8ecff;font-family:var(--fh);background:linear-gradient(180deg,rgba(44,40,118,.97),rgba(14,14,52,.98));border:{4} solid #d9a93c;border-radius:{18};box-shadow:0 0 {30} rgba(0,0,0,.7),inset 0 0 {24} rgba(120,110,255,.25)}',
+'.tt-pop.img{background:center/100% 100% no-repeat;border:0;box-shadow:none;padding:{70} {60}}',
+'.tt-pt{font-weight:800;font-size:{30};line-height:1.15;color:#ffe9a0;text-align:center;margin-bottom:{12};text-shadow:0 {2} 0 #000}',
+'.tt-pl{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;scrollbar-width:none}',
+'.tt-pl::-webkit-scrollbar{display:none}',
+'.tt-pe{display:flex;align-items:center;justify-content:center;height:100%;text-align:center;font-size:{26};line-height:1.4;color:#7c83b8}',
+'.tt-pr{display:flex;align-items:center;gap:{14};height:{84};margin-bottom:{8};padding:0 {14};border:{2} solid #b88a2e;border-radius:{10};background:linear-gradient(90deg,rgba(66,54,150,.7),rgba(24,24,80,.7));cursor:pointer}',
+'.tt-pr:active{box-shadow:0 0 0 {2} #ffe066}',
+'.tt-pr.dis{opacity:.5}',
+'.tt-pr .i,.tt-ii .i{display:flex;align-items:center;justify-content:center;flex:none;width:{60};height:{60};font-size:{40};border-radius:{8};background:rgba(8,8,40,.72)}',
+'.tt-pr .i img,.tt-ii .i img{width:80%;height:80%;object-fit:contain}',
+'.tt-pr .n{flex:1;font-weight:700;font-size:{27};min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}',
+'.tt-pr .q{font-weight:800;font-size:{27};color:#bfeee8}',
+'.tt-pr .g{font-size:{19};color:#ffe9a0}',
+'.tt-ii{display:flex;flex-direction:column;align-items:center;flex:1;min-height:0;overflow:hidden;text-align:center}',
+'.tt-ii .i{width:{128};height:{128};font-size:{84};border:{3} solid #c9992f;border-radius:{14};background:radial-gradient(circle at 50% 35%,#34348f,#12123a)}',
+'.tt-ii .n{margin-top:{12};font-weight:800;font-size:{34};line-height:1.15;color:#ffe9a0}',
+'.tt-ii .m{margin-top:{6};font-size:{23};color:#9fe8de}',
+'.tt-ii .d{margin-top:{12};font-size:{25};line-height:1.4;color:#cfd6ff;overflow:hidden}',
+'.tt-pb{display:flex;justify-content:center;gap:{22};margin-top:{14}}',
+'.tt-pb button{min-width:{150};height:{58};padding:0 {18};border-radius:{10};border:{2} solid #c9992f;background:#1d1d5a;color:#ffe9a0;font-family:var(--fh);font-weight:800;font-size:{28};cursor:pointer}',
+'.tt-pb button.p{background:linear-gradient(180deg,#ffe58a,#c58a1e);color:#3b2406}',
+'.tt-pb button.d{background:#6b1f2e;border-color:#e0707e;color:#ffd9dd}',
+'.tt-pb button:active{transform:scale(.95)}'
 ].join('\n').replace(/\{(\d+(?:\.\d+)?)\}/g,'calc(var(--u)*$1)');
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
@@ -140,9 +186,9 @@ function build(){
   E.nx.addEventListener('click',function(){if(page<PAGES.length-1){page++;renderStats();}});
 
   /* --- GIỮA DƯỚI: 6 ô gắn kỹ năng (CHƯA làm chức năng: bấm "+" chỉ báo "Sắp có") --- */
-  for(j=0;j<2;j++)for(i=0;i<3;i++){var s=mk('button','tt-sk',SK_X[i],SK_Y[j],SK_S,SK_S,'+');s.type='button';s.setAttribute('aria-label','Gắn kỹ năng '+(j*3+i+1));
-    var sn=document.createElement('span');sn.className='n';sn.textContent=j*3+i+1;s.appendChild(sn);   /* số thứ tự 1..6 ở góc ô */
-    (function(k){s.addEventListener('click',function(){toast('Sắp có');});})(j*3+i);}   /* móc cho sau này: k = số ô 0..5 */
+  E.sk=[];
+  for(j=0;j<2;j++)for(i=0;i<3;i++){var s=mk('button','tt-sk',SK_X[i],SK_Y[j],SK_S,SK_S);s.type='button';s.setAttribute('aria-label','Kỹ năng '+(j*3+i+1));E.sk.push(s);   /* nội dung (số thứ tự + dấu + hoặc icon kỹ năng) do renderSkills vẽ */
+    (function(k){s.addEventListener('click',function(){moSlot(k);});})(j*3+i);}   /* k = số ô 0..5 */
   E.ts=mk('div','tt-ts',900,540,480,64);
 
   /* --- PHẢI: lưới 4x4 thú (cuộn theo hàng) + rãnh cuộn --- */
@@ -150,7 +196,7 @@ function build(){
   E.gr=mk('div','tt-gr',gx,gy,gw,gh);
   E.cells=[];
   for(j=0;j<4;j++)for(i=0;i<4;i++){var c=document.createElement('button');c.type='button';c.className='tt-c';boxIn(c,GR_X[i],GR_Y[j],GR_W,GR_H,gx,gy,gw,gh);
-    (function(k){c.addEventListener('click',function(){if(performance.now()-lastDrag<250)return;var t=thus[(row0+((k/4)|0))*4+k%4];if(t){sel=t.uid;render();}});})(j*4+i);
+    (function(k){c.addEventListener('click',function(){if(performance.now()-lastDrag<250)return;var t=thus[(row0+((k/4)|0))*4+k%4];if(t){hidePop();sel=t.uid;render();}});})(j*4+i);
     E.gr.appendChild(c);E.cells.push(c);}
   E.rail=mk('div','tt-rail',RAIL.x,RAIL.y,RAIL.w,RAIL.h);
   E.th=document.createElement('div');E.th.className='tt-th';E.rail.appendChild(E.th);
@@ -159,10 +205,11 @@ function build(){
   /* --- NÚT RA TRẬN: tấm vàng dưới-phải (x1654-1974,y851-941) --- */
   E.go=mk('button','tt-go',1654,851,320,90);E.go.type='button';E.go.addEventListener('click',function(){if(sel&&sel!==rt){rt=sel;save();render();}});
 
+  buildPop();
   document.body.appendChild(root);
   /* bấm ra ngoài khung thì đóng (chặn 400ms đầu để cú chạm mở nút không đóng luôn) + phím Esc */
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
-  document.addEventListener('keydown',function(e){if(isOpen&&e.key==='Escape')close();});
+  document.addEventListener('keydown',function(e){if(isOpen&&e.key==='Escape'){if(popOn())hidePop();else close();}});   /* Esc: đóng bảng nổi trước, rồi mới đóng panel */
   window.addEventListener('resize',unit);
 }
 
@@ -233,7 +280,73 @@ function renderGo(){
   E.go.textContent=on?'Đang ra trận':'Ra trận';
   E.go.disabled=!sel||on;
 }
-function render(){if(!root)return;renderLeft();renderStats();renderGrid();renderGo();}
+function render(){if(!root)return;renderLeft();renderStats();renderGrid();renderGo();renderSkills();}
+
+/* ===== KỸ NĂNG: 6 ô + danh sách sách + bảng nổi (5a) ===== */
+function knOf(t){if(!Array.isArray(t.kn))t.kn=[];while(t.kn.length<NSK)t.kn.push(null);return t.kn;}
+function sachOf(id){return (window.TTGBALO&&TTGBALO.CAT&&TTGBALO.CAT[id])||SACH[id]||null;}
+function icSach(it){return it?(it.img?'<img src="'+esc(it.img)+'" alt="">':esc(it.ic||'?')):'?';}
+function renderSkills(){
+  var t=byUid(sel),kn=t?knOf(t):[];
+  E.sk.forEach(function(b,k){
+    var id=kn[k],it=id&&sachOf(id);
+    b.innerHTML='<span class="n">'+(k+1)+'</span>'+(id?'<span class="ic">'+icSach(it)+'</span>':'+');
+    b.classList.toggle('co',!!id);
+    b.setAttribute('aria-label',id?(it&&it.kn)||'Kỹ năng':'Gắn kỹ năng '+(k+1));
+  });
+}
+function buildPop(){
+  E.ov=mk('div','tt-ov',0,0,BW,BH);
+  E.ls=mk('div','tt-pop',POP_LS.x,POP_LS.y,POP_LS.w,POP_LS.h);
+  E.in=mk('div','tt-pop',POP_IN.x,POP_IN.y,POP_IN.w,POP_IN.h);
+  if(NOI_IMG){E.in.classList.add('img');E.in.style.backgroundImage='url('+NOI_IMG+')';}   /* có ảnh khung bảng nổi thì dùng */
+  E.ov.addEventListener('click',function(){if(E.in.style.display==='flex')E.in.style.display='none';else hidePop();});   /* bấm nền tối: đóng bảng nổi trước, rồi tới danh sách */
+}
+function popOn(){return !!E.ov&&E.ov.style.display==='block';}
+function hidePop(){if(!E.ov)return;E.ov.style.display=E.ls.style.display=E.in.style.display='none';}
+/* bấm ô kỹ năng k: trống -> mở danh sách sách; đã gắn -> bảng nổi (Gỡ/Đóng) */
+function moSlot(k){
+  var t=byUid(sel);if(!t){toast('Chưa có thú');return;}
+  var id=knOf(t)[k];
+  if(id)moInfo(id,k,'go');else moList(k);
+}
+function moList(k){
+  var t=byUid(sel),kn=knOf(t),C=(window.TTGBALO&&TTGBALO.CAT)||{},rows=[];
+  Object.keys(C).forEach(function(id){if(C[id].loai==='sach'&&TTGBALO.count(id)>0)rows.push(id);});
+  var h='<div class="tt-pt">Chọn sách kỹ năng · Ô '+(k+1)+'</div><div class="tt-pl">';
+  if(!rows.length)h+='<div class="tt-pe">Balo chưa có sách kỹ năng</div>';
+  rows.forEach(function(id){var it=C[id],co=kn.indexOf(id)>=0;
+    h+='<div class="tt-pr'+(co?' dis':'')+'" data-id="'+esc(id)+'"><span class="i">'+icSach(it)+'</span><span class="n">'+esc(it.ten)+'</span>'+(co?'<span class="g">Đã gắn</span>':'')+'<span class="q">x'+TTGBALO.count(id)+'</span></div>';});
+  h+='</div><div class="tt-pb"><button type="button">Đóng</button></div>';
+  E.ls.innerHTML=h;
+  var pl=E.ls.querySelectorAll('.tt-pr');
+  for(var i=0;i<pl.length;i++)(function(r){r.addEventListener('click',function(){moInfo(r.getAttribute('data-id'),k,'dung');});})(pl[i]);
+  E.ls.querySelector('.tt-pb button').addEventListener('click',hidePop);
+  E.in.style.display='none';E.ov.style.display='block';E.ls.style.display='flex';
+}
+/* bảng nổi thông tin kỹ năng. mode 'dung' (từ danh sách): Dùng/Đóng. mode 'go' (ô đã gắn): Gỡ/Đóng. */
+function moInfo(id,k,mode){
+  var it=sachOf(id),t=byUid(sel);if(!it||!t)return;
+  E.in.innerHTML='<div class="tt-ii"><span class="i">'+icSach(it)+'</span><div class="n">'+esc(it.kn||it.ten)+'</div><div class="m">'+esc(it.ten)+(it.cd?' · Hồi chiêu '+it.cd+' lượt':'')+'</div><div class="d">'+esc(it.mo||'')+'</div></div>'
+   +'<div class="tt-pb"><button type="button" class="'+(mode==='go'?'d':'p')+'">'+(mode==='go'?'Gỡ':'Dùng')+'</button><button type="button">Đóng</button></div>';
+  var bs=E.in.querySelectorAll('button');
+  bs[0].addEventListener('click',function(){mode==='go'?go(k):dung(id,k);});
+  bs[1].addEventListener('click',function(){E.in.style.display='none';if(mode==='go')hidePop();});
+  E.ov.style.display='block';E.in.style.display='flex';
+}
+/* DÙNG: trừ 1 sách ở Balo, gắn vào ô k (mỗi kỹ năng chỉ gắn 1 lần trên 1 thú) */
+function dung(id,k){
+  var t=byUid(sel);if(!t)return;var kn=knOf(t);
+  if(kn[k]){toast('Ô này đã có kỹ năng');return;}
+  if(kn.indexOf(id)>=0){toast('Thú đã có kỹ năng này');return;}
+  if(!window.TTGBALO||TTGBALO.count(id)<=0){toast('Balo hết sách này');return;}
+  TTGBALO.add(id,-1);kn[k]=id;save();hidePop();renderSkills();toast('Đã gắn kỹ năng');
+}
+/* GỠ: trả sách về Balo, trống ô k */
+function go(k){
+  var t=byUid(sel);if(!t)return;var kn=knOf(t),id=kn[k];if(!id)return;
+  if(window.TTGBALO)TTGBALO.add(id,1);kn[k]=null;save();hidePop();renderSkills();toast('Đã gỡ, sách về Balo');
+}
 
 /* ĐỒNG BỘ THÚ Ở SẢNH: game-moi/index.html lưu thú đang đứng ở sảnh vào khóa ttg_moi_v1 {thu:loài, bm:bậc 1-3}.
    Chưa có cơ chế bắt thú thật, nên mỗi loài thú từng dùng ở sảnh được coi là ĐÃ CÓ và tự vào danh sách (mỗi loài 1 con, uid 'canh-<loài>').
@@ -256,7 +369,7 @@ function open(){
   if(!byUid(sel))sel=(rt&&byUid(rt))?rt:(thus[0]?thus[0].uid:null);   /* mặc định chọn thú đang ra trận, không có thì thú đầu tiên */
   isOpen=true;openAt=performance.now();root.classList.add('on');unit();render();
 }
-function close(){if(window.TTGTB)TTGTB.close();if(!root)return;isOpen=false;root.classList.remove('on');E.ts.style.display='none';}
+function close(){if(window.TTGTB)TTGTB.close();if(!root)return;hidePop();isOpen=false;root.classList.remove('on');E.ts.style.display='none';}
 
 /* ===== ICON NÚT THÚ THẦN (SVG vẽ tay: dấu chân thú xanh đêm, viền vàng, tinh thể ngọc lam ở chính giữa) =====
    Cùng phong cách icon Balo (xanh đêm + viền vàng + tinh thể). id gradient dùng tiền tố tt để không trùng icon Balo. */
