@@ -56,8 +56,8 @@ var ICON='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs>'
 +'<path d="M56 4.5L57.2 8 60.7 9.2 57.2 10.4 56 14 54.8 10.4 51.3 9.2 54.8 8Z" fill="#c9fff7"/>'
 +'<path d="M8.5 6.5L9.3 8.7 11.5 9.5 9.3 10.3 8.5 12.5 7.7 10.3 5.5 9.5 7.7 8.7Z" fill="#fff3b8"/></svg>';
 
-/* Nút thêm sau nút Balo -> nằm ngay dưới Balo (xếp theo cột). Chữ "Thú Thần" dài hơn "Balo" nên thu nhỏ chữ để không tràn khung nút. */
-var btn=TTGNV.add({id:'thu-than',ten:'Thú Thần',icon:ICON,onTap:open});
+/* Nút thêm sau nút Balo, r:0 = CÙNG HÀNG (hàng trên) với Balo, nằm ngay bên phải. Chữ "Thú Thần" dài hơn "Balo" nên thu nhỏ chữ để không tràn khung nút. */
+var btn=TTGNV.add({id:'thu-than',ten:'Thú Thần',icon:ICON,onTap:open,r:0});
 var tx=btn.querySelector('.nv-tx');
 if(tx){tx.style.fontSize='.82em';tx.style.letterSpacing='0';}   /* chỉnh .82em nếu chữ vẫn tràn / còn nhỏ */
 
