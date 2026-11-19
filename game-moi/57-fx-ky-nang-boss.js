@@ -183,7 +183,7 @@
    if(t<TH){
     const fall=Math.pow(ph(t,0,TH),.72),slide=eo(ph(t,.08,TH)),
      cx=lerp(x-q.dir*24,x-q.dir*16,slide),base=lerp(-80,GY-18,fall),
-     h=lerp(224,238,fall)*s,w=Math.min(lerp(164,202,fall)*s,2*Math.min(cx-19,341-cx)),
+     h=lerp(148,160,fall)*s,w=Math.min(lerp(164,202,fall)*s,2*Math.min(cx-19,341-cx)),
      warning=1-ph(t,TH-.04,TH+.15),shadow=46+94*fall;
     /* A growing ground shadow, elliptical warning seal and fine cracks are visible even before the ice enters frame. */
     blob(g,x,GY-3,shadow,9+9*fall,'#123c54',.68,T,st.seed+1,'#9fe4ff',.25);
@@ -203,7 +203,7 @@
      const sx=x+(i-2)*13+Math.sin(T*3+i)*2,sy=10+(i%3)*8,drop=36+70*fall;
      stroke(g,[point(sx,sy),point(sx+(i%2?3:-3),sy+drop)],'#bcefff',1.35,.4*warning,true);
     }
-    if(base>-12){
+    if(base>60){
      /* The mountain starts above the frame and descends toward the target, growing into a much larger mass. */
      icePeak(g,cx,base,w,h,1-ph(t,TH-.018,TH+.11),T,st.seed+20);
      for(let i=0;i<6;i++){
@@ -227,7 +227,7 @@
     const pop=.5+.5*eo(ph(t,TH,TH+.22)),fade=1-ph(t,TH+.54,END);
     if(E.once(st,'ice-impact')){
      burst(st,'ice-fragments',x,GY-12,S.miss?28:58,{
-      speed:[72,190],ang:[-Math.PI*.92,-Math.PI*.08],size:[6,13],life:[.62,1.12],
+      speed:[52,105],ang:[-Math.PI*.75,-Math.PI*.25],size:[7,14],life:[.55,.82],
       gy:350,drag:.32,shape:'shard',c:COL.ice.deep,c2:COL.ice.core,a:1,vr:[-11,11],floor:GY+3,bounce:.24});
      burst(st,'ice-snow-burst',x,GY-5,S.miss?18:34,{
       speed:[20,68],ang:[-Math.PI,-.02],size:[6,15],life:[.55,.98],
@@ -248,7 +248,7 @@
     }
     for(let i=0;i<8;i++){
      const side=i<4?-1:1,j=i%4,off=side*(40+j*12),h=(42+(j%3)*14+(j===3?7:0))*pop;
-     if(h>4)E.crystal(g,x+off,GY+1,15+j%2*4,h,side*4,
+     if(h>4)E.crystal(g,clamp(x+off,18,342),GY+1,15+j%2*4,h,side*4,
       {dark:'#285b76',mid:'#5499b8',light:'#b5eafa',edge:'#efffff'},fade*.96,{shine:.82,crack:.24});
     }
     for(let i=0;i<6;i++){
@@ -266,7 +266,7 @@
      iceChunk(g,xx,yy,size,size*.78,rot,a);
     }
     burst(st,'ice-aftershards',x,GY-7,S.miss?12:22,{
-     speed:[34,104],ang:[-Math.PI*.94,-Math.PI*.06],size:[3,7],life:[.52,.9],
+     speed:[30,86],ang:[-Math.PI*.75,-Math.PI*.25],size:[3,7],life:[.5,.82],
      gy:250,drag:.4,shape:'shard',c:'#73c9e9',c2:'#effcff',a:.96,floor:GY+3,bounce:.14});
     for(let i=0;i<5;i++){
      const side=i%2?-1:1,off=side*(18+i*12),w=11+(i%3)*3,h=7+(i%2)*4,x0=clamp(x+off,14,346),y0=GY-3;
