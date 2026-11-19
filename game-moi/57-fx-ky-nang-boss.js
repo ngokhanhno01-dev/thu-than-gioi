@@ -333,12 +333,13 @@
   }
   function fxWings(g,T,t,S,st){
    const q=aim(S),x=q.x,s=q.scale,C=COL.wing,r=E.rng(st.seed^0x570300);
-   const open=.78+.22*eo(ph(t,0,.28)),fold=1-ph(t,TH+.34,TH+.76),
-    pre=t<TH?1:fold,span=Math.min(144,2*Math.min(x-18,342-x));
+    const move=eo(ph(t,.08,TH+.12)),cx=x-q.dir*72*(1-move),
+     open=.78+.22*eo(ph(t,0,.28)),fold=1-ph(t,TH+.34,TH+.76),
+     pre=t<TH?1:fold,span=Math.min(144,2*Math.min(cx-18,342-cx));
    if(pre>.01){
     /* A dark feather silhouette, a broad violet wing, and a bright feather fan. */
     for(const side of [-1,1]){
-     const rootX=x+side*14,rootY=GY-94;
+      const rootX=cx+side*14,rootY=GY-94;
      for(let i=0;i<9;i++){
       const f=i/8,len=(49+13*Math.sin(f*Math.PI*.86))*s*open,
        ang=side>0?-.28+f*.74:Math.PI+.28-f*.74;
@@ -349,7 +350,7 @@
        ang=side>0?-.42+f*.68:Math.PI+.42-f*.68;
       feather(g,rootX+side*2,rootY+4+i*2,len,ang,9-3*f,C.light,pre*.75);
      }
-     fogPuff(g,x+side*(span*.42),GY-83,25,10,pre*.26,T,st.seed+30+side,
+      fogPuff(g,cx+side*(span*.42),GY-83,25,10,pre*.26,T,st.seed+30+side,
       {deep:'#59478b',main:C.main,light:C.light,core:C.core});
     }
    }
@@ -358,8 +359,8 @@
    for(let k=0;k<4;k++){
     const line=[];
     for(let j=0;j<20;j++){
-     const v=j/19,xx=x+(v-.5)*span,
-      yy=GY-110+k*13+Math.sin(v*TAU+T*3+k)*5+q.dir*sweep*(v-.5)*12;
+      const v=j/19,xx=cx+(v-.5)*span,
+       yy=GY-110+k*13+Math.sin(v*TAU+T*3+k)*5+q.dir*move*(v-.5)*12;
      line.push(point(xx,yy));
     }
     const a=t<TH?.35:.58*fold;
@@ -420,8 +421,8 @@
    glow(g,x+dir*4,y-2,16,'#78f3bb',a*.28,'#eafff3');
   }
   function fxSnake(g,T,t,S,st){
-   const q=aim(S),x=q.x,s=q.scale,C=COL.wind,r=E.rng(st.seed^0x570401),hit=t>=TH,
-    tighten=ph(t,.14,TH+.05),bodyFade=hit?1-ph(t,TH+.1,TH+.37):1;
+    const q=aim(S),x=q.x,s=q.scale,C=COL.wind,r=E.rng(st.seed^0x570401),hit=t>=TH,
+     tighten=ph(t,.14,TH+.05),bodyFade=hit?1-ph(t,TH,TH+.22):1;
    if(bodyFade>.01){
      const points=[],n=112,coil=1-.29*eo(tighten);
     for(let i=0;i<n;i++){
