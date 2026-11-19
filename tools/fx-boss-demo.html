@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<base href="../">
+<title>FX Boss Demo — Thú Thần Giới</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:14px;background:#10121d;color:#eff2ff;font:14px/1.45 system-ui,sans-serif}
+main{max-width:850px;margin:auto}
+h1{font-size:19px;margin:0 0 4px}
+.sub{margin:0 0 12px;color:#aeb8d5}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 235px;gap:12px;align-items:start}
+canvas{display:block;width:100%;height:auto;border:1px solid #38425f;border-radius:12px;background:#090d18}
+.panel{padding:10px;border:1px solid #333d59;border-radius:12px;background:#181d2d}
+.panel h2{font-size:13px;margin:0 0 8px;color:#b9c3de}
+.skills{display:grid;gap:6px}
+button{font:inherit;color:#f7f8ff;background:#252d43;border:1px solid #485575;border-radius:9px;padding:9px 10px;min-height:42px;text-align:left;cursor:pointer}
+button:hover,button[aria-pressed="true"]{background:#3b315d;border-color:#aa94e8}
+#replay{width:100%;margin-top:10px;text-align:center;background:#674ec1;border-color:#967ce8;font-weight:700}
+#info{min-height:48px;margin:9px 2px;color:#c3cce2;font-size:12px;white-space:pre-wrap}
+.hint{font-size:11px;color:#8994b2;margin:8px 2px 0}
+@media(max-width:650px){.layout{grid-template-columns:1fr}.panel{order:2}.skills{grid-template-columns:repeat(2,minmax(0,1fr))}button{font-size:12px}}
+</style>
+</head>
+<body>
+<main>
+ <h1>Sáu kỹ năng boss · Canvas thuần</h1>
+ <p class="sub">Chọn kỹ năng để xem; mọi hình đều vẽ bằng JavaScript, không nạp ảnh.</p>
+ <div class="layout">
+  <section>
+   <canvas id="cv" width="720" height="500" aria-label="Khung xem hiệu ứng boss"></canvas>
+   <div id="info" aria-live="polite"></div>
+  </section>
+  <aside class="panel">
+   <h2>CHỌN KỸ NĂNG</h2>
+   <div class="skills">
+    <button data-skill="bang-son-ap-dinh" aria-pressed="true">1 · Băng Sơn Áp Đỉnh</button>
+    <button data-skill="suong-nuot" aria-pressed="false">2 · Sương Nuốt</button>
+    <button data-skill="con-bang-trien-si" aria-pressed="false">3 · Côn Bằng Triển Sĩ</button>
+    <button data-skill="vu-xa-trien" aria-pressed="false">4 · Vũ Xà Triển</button>
+    <button data-skill="thien-loi-giang" aria-pressed="false">5 · Thiên Lôi Giáng</button>
+    <button data-skill="nguyet-thuc-nuot" aria-pressed="false">6 · Nguyệt Thực Nuốt</button>
+   </div>
+   <button id="replay">▶ Phát lại</button>
+   <p class="hint">Chạm vào một kỹ năng để chọn và chạy lại ngay.</p>
+  </aside>
+ </div>
+</main>
+<script src="31-combat-fx.js"></script>
+<script src="game-moi/57-fx-ky-nang-boss.js"></script>
+<script>
+'use strict';
+const CW=360,CH=250,GY=204,DURATION=1.68;
+const cv=document.getElementById('cv'),g=cv.getContext('2d'),info=document.getElementById('info');
+const buttons=[...document.querySelectorAll('[data-skill]')];
+const labels={
+ 'bang-son-ap-dinh':['Băng Sơn Áp Đỉnh','#9fe4ff'],
+ 'suong-nuot':['Sương Nuốt','#a3e1d4'],
+ 'con-bang-trien-si':['Côn Bằng Triển Sĩ','#c9a8ff'],
+ 'vu-xa-trien':['Vũ Xà Triển','#82f0bb'],
+ 'thien-loi-giang':['Thiên Lôi Giáng','#ffe53a'],
+ 'nguyet-thuc-nuot':['Nguyệt Thực Nuốt','#a8b8ff']
+};
+let skill='bang-son-ap-dinh',t0=performance.now(),playing=true,frame=0;
+function fit(){
+ const d=Math.min(window.devicePixelRatio||1,2),w=Math.max(260,cv.clientWidth||innerWidth-28);
+ cv.width=Math.round(w*d);cv.height=Math.round(w*d*CH/CW);
+}
+function restart(next){
+ if(next)skill=next;
+ buttons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.skill===skill)));
+ t0=performance.now();playing=true;
+ const api=window.TTGCombatFX;
+ if(api&&api.engine)api.engine.clear();
+ info.textContent=labels[skill][0]+' · '+skill+' · Trúng ở 0.665 giây · kết thúc ở 1.68 giây';
+}
+function pet(x,c1,c2,T,flip){
+ const b=Math.sin(T*3+x)*1.5;
+ g.save();g.translate(x,0);if(flip)g.scale(-1,1);
+ g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(0,GY,25,6,0,0,Math.PI*2);g.fill();
+ const gr=g.createLinearGradient(0,GY-102,0,GY);gr.addColorStop(0,c1);gr.addColorStop(1,c2);
+ g.fillStyle=gr;g.beginPath();g.ellipse(0,GY-51+b,25,51,0,0,Math.PI*2);g.fill();
+ g.fillStyle='#f7f8ff';g.beginPath();g.arc(8,GY-65+b,6,0,Math.PI*2);g.arc(-4,GY-65+b,6,0,Math.PI*2);g.fill();
+ g.fillStyle='#10121d';g.beginPath();g.arc(10,GY-65+b,2.5,0,Math.PI*2);g.arc(-2,GY-65+b,2.5,0,Math.PI*2);g.fill();
+ g.restore();
+}
+function drawStage(T){
+ const bg=g.createLinearGradient(0,0,0,CH);
+ bg.addColorStop(0,'#1d2440');bg.addColorStop(.68,'#37445a');bg.addColorStop(1,'#1c2b25');
+ g.fillStyle=bg;g.fillRect(0,0,CW,CH);
+ /* Sao và vệt trời đều là các nét Canvas, không có ảnh nền. */
+ g.fillStyle='rgba(221,231,255,.48)';
+ for(let i=0;i<22;i++){
+  const x=(i*83+23)%CW,y=14+(i*47)%82;
+  g.globalAlpha=.35+.3*Math.sin(T*2+i);g.fillRect(x,y,1.2,1.2);
+ }
+ g.globalAlpha=1;
+ g.fillStyle='#30422f';g.fillRect(0,GY-2,CW,CH-GY+2);
+ g.fillStyle='rgba(186,212,153,.15)';g.fillRect(0,GY-2,CW,1);
+ pet(85,'#7ccfff','#286ca5',T,false);pet(272,'#ff9a88','#a63c45',T,true);
+ g.fillStyle='rgba(232,240,255,.8)';g.font='10px system-ui';g.textAlign='center';
+ g.fillText('NGƯỜI ĐÁNH',85,232);g.fillText('MỤC TIÊU',272,232);
+}
+function loop(now){
+ requestAnimationFrame(loop);
+ const api=window.TTGCombatFX;
+ g.setTransform(cv.width/CW,0,0,cv.width/CW,0,0);
+ const elapsed=playing?(now-t0)/1000:DURATION;
+ const t=Math.min(DURATION,elapsed),u=Math.min(1,t/1.9),T=now/1000;
+ drawStage(T);
+ if(api&&api.drawAttack&&t<=DURATION){
+  window.BSPD=1;
+  api.drawAttack(g,T,{on:1,s:0,u,pa:true,cl:0,cr:false,miss:false,
+   h:'',i:frame,kyNang:skill,text:''});
+ }
+ if(playing&&elapsed>=DURATION)playing=false;
+}
+buttons.forEach(b=>b.addEventListener('click',()=>restart(b.dataset.skill)));
+document.getElementById('replay').addEventListener('click',()=>restart());
+window.addEventListener('resize',fit);
+fit();restart();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
