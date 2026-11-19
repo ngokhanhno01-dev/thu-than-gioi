@@ -195,6 +195,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
  <div id="tl"><div class="pn"><div class="hd"><span>Chọn thú</span><button class="x" id="tlx">Đóng</button></div><div id="tlb"></div></div></div>
 </div>
 <script src="51-thu-moi.js"></script>
+<script src="game-moi/52-nut-vuong.js"></script>
+<script src="game-moi/53-balo.js"></script>
 <script>
 /* GAME MỚI (khung ban đầu). CHỈ CÓ MÀN NGANG, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
@@ -267,7 +269,8 @@ function resize(){
  ctx.imageSmoothingEnabled=false;
  buildFrame();
  bgLayout();
- layoutUI();}
+ layoutUI();
+ if(window.TTGNV)TTGNV.layout({K:K,DPR:DPR,W:W,H:H,I:I,th:TH(),BP:BP,GAPB:GAPB});/* nút vuông (52-nut-vuong.js) */}
 /* VỊ TRÍ THÚ CỐ ĐỊNH, KHÔNG phụ thuộc nút nào (nút sau này đổi/bỏ thoải mái). PET_X = tâm thú trái tính theo tỉ lệ bề ngang khung (0 = mép trái khung, 0.5 = giữa). Thú phải đối xứng: 1 - PET_X. */
 function px(w){var fw=W-I.l-I.r;return Math.round(I.l+fw*(w==='me'?PET_X:1-PET_X));}
 function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
