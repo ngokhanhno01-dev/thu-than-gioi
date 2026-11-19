@@ -19,6 +19,11 @@ canvas{display:block;width:100%;height:auto;border:1px solid #38425f;border-radi
 button{font:inherit;color:#f7f8ff;background:#252d43;border:1px solid #485575;border-radius:9px;padding:9px 10px;min-height:42px;text-align:left;cursor:pointer}
 button:hover,button[aria-pressed="true"]{background:#3b315d;border-color:#aa94e8}
 #replay{width:100%;margin-top:10px;text-align:center;background:#674ec1;border-color:#967ce8;font-weight:700}
+#seek{display:block;width:100%;margin:8px 0 4px;accent-color:#b39aff}
+.timeReadout{display:flex;justify-content:space-between;color:#c3cce2;font-size:11px}
+.timeButtons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:7px}
+.timeButtons button{min-height:32px;padding:5px 3px;text-align:center;font-size:11px}
+#info{min-height:48px;margin:9px 2px;color:#c3cce2;font-size:12px;white-space:pre-wrap}
 #info{min-height:48px;margin:9px 2px;color:#c3cce2;font-size:12px;white-space:pre-wrap}
 .hint{font-size:11px;color:#8994b2;margin:8px 2px 0}
 @media(max-width:650px){.layout{grid-template-columns:1fr}.panel{order:2}.skills{grid-template-columns:repeat(2,minmax(0,1fr))}button{font-size:12px}}
@@ -38,13 +43,21 @@ button:hover,button[aria-pressed="true"]{background:#3b315d;border-color:#aa94e8
    <div class="skills">
     <button data-skill="bang-son-ap-dinh" aria-pressed="true">1 · Băng Sơn Áp Đỉnh</button>
     <button data-skill="suong-nuot" aria-pressed="false">2 · Sương Nuốt</button>
-    <button data-skill="con-bang-trien-si" aria-pressed="false">3 · Côn Bằng Triển Sĩ</button>
-    <button data-skill="vu-xa-trien" aria-pressed="false">4 · Vũ Xà Triển</button>
+    <button data-skill="con-bang-trien-si" aria-pressed="false">3 · Côn Bằng Triển Sí</button>
+    <button data-skill="vu-xa-trien" aria-pressed="false">4 · Vũ Xà Triền</button>
     <button data-skill="thien-loi-giang" aria-pressed="false">5 · Thiên Lôi Giáng</button>
     <button data-skill="nguyet-thuc-nuot" aria-pressed="false">6 · Nguyệt Thực Nuốt</button>
    </div>
    <button id="replay">▶ Phát lại</button>
-   <p class="hint">Chạm vào một kỹ năng để chọn và chạy lại ngay.</p>
+   <label class="timeReadout" for="seek"><span>Xem từng khung</span><output id="clock">0.00s</output></label>
+   <input id="seek" type="range" min="0" max="1680" step="5" value="0" aria-label="Chọn thời điểm hiệu ứng">
+   <div class="timeButtons" aria-label="Mốc thời gian chính xác">
+    <button data-time="0.20">0.20s</button><button data-time="0.50">0.50s</button>
+    <button data-time="0.665">0.665s</button><button data-time="0.80">0.80s</button>
+    <button data-time="1.00">1.00s</button><button data-time="1.30">1.30s</button>
+    <button data-time="1.60">1.60s</button>
+   </div>
+   <p class="hint">Kéo thanh hoặc chọn mốc để đóng băng khung hình. “Phát lại” chạy hoạt ảnh liên tục.</p>
   </aside>
  </div>
 </main>
@@ -58,12 +71,13 @@ const buttons=[...document.querySelectorAll('[data-skill]')];
 const labels={
  'bang-son-ap-dinh':['Băng Sơn Áp Đỉnh','#9fe4ff'],
  'suong-nuot':['Sương Nuốt','#a3e1d4'],
- 'con-bang-trien-si':['Côn Bằng Triển Sĩ','#c9a8ff'],
- 'vu-xa-trien':['Vũ Xà Triển','#82f0bb'],
+ 'con-bang-trien-si':['Côn Bằng Triển Sí','#c9a8ff'],
+ 'vu-xa-trien':['Vũ Xà Triền','#82f0bb'],
  'thien-loi-giang':['Thiên Lôi Giáng','#ffe53a'],
  'nguyet-thuc-nuot':['Nguyệt Thực Nuốt','#a8b8ff']
 };
-let skill='bang-son-ap-dinh',t0=performance.now(),playing=true,frame=0;
+let skill='bang-son-ap-dinh',t0=performance.now(),playing=true,frame=0,fixedTime=0;
+const seek=document.getElementById('seek'),clock=document.getElementById('clock');
 function fit(){
  const d=Math.min(window.devicePixelRatio||1,2),w=Math.max(260,cv.clientWidth||innerWidth-28);
  cv.width=Math.round(w*d);cv.height=Math.round(w*d*CH/CW);
@@ -71,10 +85,19 @@ function fit(){
 function restart(next){
  if(next)skill=next;
  buttons.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.skill===skill)));
- t0=performance.now();playing=true;
+ t0=performance.now();playing=true;fixedTime=0;frame++;
+ seek.value='0';clock.value='0.00s';clock.textContent='0.00s';
  const api=window.TTGCombatFX;
  if(api&&api.engine)api.engine.clear();
  info.textContent=labels[skill][0]+' · '+skill+' · Trúng ở 0.665 giây · kết thúc ở 1.68 giây';
+}
+function showTime(seconds){
+ playing=false;fixedTime=Math.max(0,Math.min(DURATION,Number(seconds)||0));frame++;
+ const api=window.TTGCombatFX;if(api&&api.engine)api.engine.clear();
+ seek.value=String(Math.round(fixedTime*1000));
+ const label=fixedTime.toFixed(3).replace(/0+$/,'').replace(/\.$/,'')+'s';
+ clock.value=label;clock.textContent=label;
+ info.textContent=labels[skill][0]+' · khung cố định t='+label+' · Trúng ở 0.665 giây';
 }
 function pet(x,c1,c2,T,flip){
  const b=Math.sin(T*3+x)*1.5;
@@ -107,8 +130,9 @@ function loop(now){
  requestAnimationFrame(loop);
  const api=window.TTGCombatFX;
  g.setTransform(cv.width/CW,0,0,cv.width/CW,0,0);
- const elapsed=playing?(now-t0)/1000:DURATION;
+ const elapsed=playing?(now-t0)/1000:fixedTime;
  const t=Math.min(DURATION,elapsed),u=Math.min(1,t/1.9),T=now/1000;
+ if(playing){seek.value=String(Math.round(t*1000));clock.value=t.toFixed(2)+'s';clock.textContent=clock.value}
  drawStage(T);
  if(api&&api.drawAttack&&t<=DURATION){
   window.BSPD=1;
@@ -118,6 +142,8 @@ function loop(now){
  if(playing&&elapsed>=DURATION)playing=false;
 }
 buttons.forEach(b=>b.addEventListener('click',()=>restart(b.dataset.skill)));
+document.querySelectorAll('[data-time]').forEach(b=>b.addEventListener('click',()=>showTime(b.dataset.time)));
+seek.addEventListener('input',()=>showTime(Number(seek.value)/1000));
 document.getElementById('replay').addEventListener('click',()=>restart());
 window.addEventListener('resize',fit);
 fit();restart();requestAnimationFrame(loop);
