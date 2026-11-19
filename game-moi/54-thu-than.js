@@ -235,7 +235,22 @@ function renderGo(){
 }
 function render(){if(!root)return;renderLeft();renderStats();renderGrid();renderGo();}
 
+/* ĐỒNG BỘ THÚ Ở SẢNH: game-moi/index.html lưu thú đang đứng ở sảnh vào khóa ttg_moi_v1 {thu:loài, bm:bậc 1-3}.
+   Chưa có cơ chế bắt thú thật, nên mỗi loài thú từng dùng ở sảnh được coi là ĐÃ CÓ và tự vào danh sách (mỗi loài 1 con, uid 'canh-<loài>').
+   Con 'canh-' luôn cập nhật tiến hóa (tien) theo bậc bm hiện tại. Sau này có bắt thú thì bỏ hàm này (hoặc chỉ giữ để nhập thú cũ). */
+function dongBo(){
+  if(demo||!window.THU_MOI||!THU_MOI.byId)return;
+  try{
+    var sv=JSON.parse(localStorage.getItem('ttg_moi_v1')||'{}'),id=sv&&sv.thu;
+    if(!id||!THU_MOI.byId[id])return;
+    var tien=Math.max(1,Math.min(3,(sv.bm|0)||1)),u='canh-'+id,t=byUid(u),i,co=false;
+    for(i=0;i<thus.length;i++)if(thus[i].id===id){co=true;break;}
+    if(t){if(t.tien!==tien){t.tien=tien;save();}}
+    else if(!co){thus.push({uid:u,id:id,tien:tien,chiso:{}});save();}
+  }catch(e){}
+}
 function open(){
+  dongBo();
   if(window.TTGBALO&&TTGBALO.close)TTGBALO.close();   /* mở panel này -> đóng Balo */
   if(!root)build();
   if(!byUid(sel))sel=(rt&&byUid(rt))?rt:(thus[0]?thus[0].uid:null);   /* mặc định chọn thú đang ra trận, không có thì thú đầu tiên */
@@ -281,7 +296,7 @@ function add(t){
   if(isOpen){if(!sel)sel=t.uid;render();}
   return t.uid;
 }
-function list(){return thus.map(function(t){return Object.assign({},t);});}
+function list(){dongBo();return thus.map(function(t){return Object.assign({},t);});}
 function getRaTran(){var t=rt&&byUid(rt);return t?Object.assign({},t):null;}   /* sau này nối vào trận đấu/sảnh bằng hàm này */
 
 window.TTGTHU={open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran};
