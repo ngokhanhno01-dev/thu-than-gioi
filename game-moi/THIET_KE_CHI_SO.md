@@ -15,7 +15,7 @@
 - 18 hệ (khung khắc chế lấy theo Pokémon, đổi tên cho hợp game): thuong, hoa, thuy, loi, moc, bang, vo, doc, tho, phong, tam (Tâm Linh), trung, nham, ma, long, am, kim, tien. Muốn đổi quan hệ nào thì sửa BANG_HE; thêm hệ mới thì thêm vào HE_TEN và BANG_HE.
 - Mỗi thú 1-2 hệ (hệ chủ đạo ghi trước). 3 thú khởi đầu vẫn là Hỏa / Mộc / Thủy.
 - Hệ số một đòn lên MỖI hệ của mục tiêu: khắc = CFG.he.khac (1,5), bị kháng = CFG.he.kem (0,7), miễn nhiễm = CFG.he.mien (0,3); còn lại 1. Mục tiêu 2 hệ thì NHÂN hai hệ số (CFG.he.cheDo='nhan'); đặt 'tb' để lấy trung bình. Song hệ cùng yếu = 2,25, cùng kháng = 0,49. Muốn kiểu Pokémon gốc: khac 2, kem 0,5, mien 0.
-- Đòn thường tự dùng hệ có lợi nhất của người đánh. Kỹ năng dùng hệ riêng của kỹ năng.
+- Đòn thường (đòn cơ bản) LUÔN dùng hệ đứng trước (hệ chủ đạo) của người đánh. Hệ phụ KHÔNG dùng để đánh: nó dùng để PHÒNG THỦ (tính khắc/kháng khi bị đánh) và để MANG SÁCH KỸ NĂNG cùng hệ. Thú chỉ mang được sách kỹ năng thuộc 1 trong 2 hệ của nó (vd băng + võ: mang sách băng hoặc võ; hệ khác không mang được). Kỹ năng dùng hệ riêng của kỹ năng. (Sách kỹ năng: chưa làm.)
 - Kiểm tra (mục tiêu Thủy+Thổ): Mộc đánh = 2,25; Lôi đánh = 0,45 (Thổ miễn Lôi); Hỏa đánh = 0,70; thú Thủy+Thổ đánh mục tiêu Hỏa = 1,5.
 
 ## 3. Bậc
@@ -54,5 +54,5 @@ Giao diện thú có 3 ô tròn: ô 1 BUFF (nội tại), ô 2 DEBUFF, ô 3 ĐÒ
 - (Bản cũ có "kỹ năng" kèm hồi chiêu và hệ số như Băng Tinh 130% tc cd 3, Băng Sơn Áp Đỉnh cd 5... ĐÃ BỎ khỏi đòn cơ bản. Kỹ năng độc quyền của boss: CHỜ CHỐT.)
 
 ## 8. Hệ chủ đạo 6 vùng và bảng loài mẫu Tuyết Nguyên (z0)
-- Hệ chủ đạo vùng (hệ của kỹ năng cơ bản vùng): z0 Tuyết Nguyên = bang, z1 Sương Cốc = thuy, z2 Vân Đảo = tien, z3 Phong Nguyên = phong, z4 Lôi Vực = loi, z5 Nguyệt Cung = tam.
+- Hệ chủ đạo vùng (hệ của đòn cơ bản vùng): z0 Tuyết Nguyên = bang, z1 Sương Cốc = thuy, z2 Vân Đảo = tien, z3 Phong Nguyên = phong, z4 Lôi Vực = loi, z5 Nguyệt Cung = tam.
 - Tuyết Nguyên: 1a Tuyết Cầu: Cân bằng, bang | 1b Tuyết Hùng: Tank, bang+tho | 1c Băng Lộc: Nhanh, bang+moc | 1d Tuyết Báo: Công, bang+vo | 1e Băng Hải: Tank, bang+thuy | 1f Tuyết Cú: Nhanh, bang+phong | 1g Băng Dương: Cân bằng, bang+tho | 1h Băng Linh: Công, bang+tam | 1i Băng Nham: Tank, bang+nham | 1j Băng Sơn Cự Thú (boss): Tank, bang+nham

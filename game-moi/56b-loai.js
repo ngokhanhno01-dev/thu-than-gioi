@@ -2,7 +2,7 @@
    Nạp SAU 56-chi-so.js. id theo 51-thu-moi.js (1a..1j Tuyết Nguyên, 2x Sương Cốc, 3x Vân Đảo, 4x Lôi Vực, 5x Nguyệt Cung, 6x Phong Nguyên).
    HỆ ĐÃ ĐỐI CHIẾU THEO MÔ TẢ (khung/cảm hứng) trong thu-moi/<vùng>/*.md, KHÔNG đặt theo tên (chốt 19/11/2026).
    Muốn đổi vai/hệ một con: sửa đúng một dòng trong bảng BANG bên dưới. Hệ ghi theo khóa của HE_TEN (56-chi-so.js).
-   API: TTGCS.loai(id) -> {id, ten, vung, vai, he, boss} | null ; TTGCS.dsLoai(z) ; TTGCS.heVung(z) ; TTGCS.LOAI */
+   API: TTGCS.loai(id) -> {id, ten, vung, vai, he, boss} | null ; TTGCS.dsLoai(z) ; TTGCS.heVung(z) ; TTGCS.mangDuocSach(id,heSach) ; TTGCS.LOAI */
 (function(root){
 'use strict';
 
@@ -100,9 +100,11 @@ Object.keys(BANG).forEach(function(zs){
 
 function loai(id){var o=LOAI[id];return o?{id:o.id,ten:o.ten,vung:o.vung,vai:o.vai,he:o.he.slice(),boss:o.boss}:null;}
 function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
+/* sách kỹ năng: thú chỉ mang được sách thuộc 1 trong 2 hệ của chính nó (hệ khác không mang được). heSach = khóa hệ như 'bang','vo'. */
+function mangDuocSach(id,heSach){var o=LOAI[id];return !!o&&o.he.indexOf(heSach)>=0;}
 function heVung(z){return HE_VUNG[z]||null;}
 
-root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,HE_VUNG:HE_VUNG});
+root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
 })(typeof window!=='undefined'?window:globalThis);
 

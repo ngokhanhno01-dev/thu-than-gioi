@@ -2,7 +2,7 @@
    Nguồn sự thật: game-moi/THIET_KE_CHI_SO.md (mục 1-5). MỌI SỐ chỉnh ở khối CFG ngay dưới.
    BƯỚC A: hệ (18 hệ), bậc (gacha), cấp/EXP, chỉ số, sát thương. Đã có 56b (bảng loài), 56c (buff vùng). CHƯA có: kỹ năng (56d), TTGLV (56e).
    Hàm có ngẫu nhiên đều nhận tham số rng (mặc định Math.random) để test bằng node.
-   API: HE, HE_TEN, BANG_HE, heHeSo, heTotNhat, BAC, tungBac, hsBac, expCan, tranCap, expThuong, goc, tinh, satThuong, CFG */
+   API: HE, HE_TEN, BANG_HE, heHeSo, heDanhThuong (đòn thường = hệ đứng trước), heTotNhat (chưa dùng nữa), BAC, tungBac, hsBac, expCan, tranCap, expThuong, goc, tinh, satThuong, CFG */
 (function(root){
 'use strict';
 
@@ -88,6 +88,11 @@ function heHeSo(heDon,heMucTieu){
   return v.reduce(function(a,b){return a*b;},1);
 }
 /* đòn thường tự chọn hệ có lợi nhất trong các hệ của người đánh. Trả {he, hs} */
+/* ĐÒN THƯỜNG: luôn dùng HỆ ĐỨNG TRƯỚC (hệ chủ đạo) của người đánh; hệ phụ chỉ để phòng thủ và để mang sách kỹ năng cùng hệ. Trả {he, hs}. */
+function heDanhThuong(heNguoiDanh,heMucTieu){
+  var h=(heNguoiDanh||[])[0];
+  return h?{he:h,hs:heHeSo(h,heMucTieu)}:{he:null,hs:1};
+}
 function heTotNhat(heNguoiDanh,heMucTieu){
   var best=null;
   (heNguoiDanh||[]).forEach(function(h){var hs=heHeSo(h,heMucTieu);if(!best||hs>best.hs)best={he:h,hs:hs};});
@@ -165,7 +170,7 @@ function satThuong(o){
   return Math.max(1,Math.floor(d));
 }
 
-var api={CFG:CFG,CHINH:CHINH,PHU:PHU,HE:HE,HE_TEN:HE_TEN,BANG_HE:BANG_HE,heHeSo:heHeSo,heTotNhat:heTotNhat,BAC:BAC,hsBac:hsBac,tungBac:tungBac,
+var api={CFG:CFG,CHINH:CHINH,PHU:PHU,HE:HE,HE_TEN:HE_TEN,BANG_HE:BANG_HE,heHeSo:heHeSo,heDanhThuong:heDanhThuong,heTotNhat:heTotNhat,BAC:BAC,hsBac:hsBac,tungBac:tungBac,
   expCan:expCan,tranCap:tranCap,expThuong:expThuong,goc:goc,tinh:tinh,satThuong:satThuong};
 /* giữ các phần mở rộng nếu file khác (56b/56c/56d) nạp trước */
 root.TTGCS=Object.assign(root.TTGCS||{},api);
