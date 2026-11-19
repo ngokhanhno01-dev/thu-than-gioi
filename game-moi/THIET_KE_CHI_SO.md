@@ -39,7 +39,7 @@
 - Kháng hiệu ứng (khu) CHỈ tác dụng lên DEBUFF: mỗi debuff vừa gắn có khu% bị hủy; debuff theo giá trị (vd -15% tốc độ) thì giảm hiệu lực theo (1 - khu/100). Buff không bị ảnh hưởng.
 - Đóng băng và choáng đều là debuff mất lượt. Đóng băng bị khu chặn. Choáng bị kc (kháng choáng) chặn, không dùng khu. Sau khi bị đóng băng, mục tiêu miễn nhiễm đóng băng 2 lượt.
 - Buff/debuff VÙNG áp cho MỌI thú thuộc loài của vùng đó: thú, quái, boss, thú người chơi. Debuff vùng gắn lên đối thủ khi vào trận, kéo dài cả trận (vẫn bị giảm theo khu).
-- Boss: 2 buff (buff vùng + buff riêng), 1 debuff (debuff vùng), đòn cơ bản của vùng (kỹ năng độc quyền: chờ chốt).
+- Boss: 2 buff (buff vùng + buff riêng), 1 debuff (debuff vùng), đòn cơ bản của vùng + 1 kỹ năng độc quyền (mục 7b).
 
 ## 7. Buff (nội tại), debuff, đòn cơ bản 6 vùng (z = 0..5)
 Giao diện thú có 3 ô tròn: ô 1 BUFF (nội tại), ô 2 DEBUFF, ô 3 ĐÒN CƠ BẢN.
@@ -51,7 +51,18 @@ Giao diện thú có 3 ô tròn: ô 1 BUFF (nội tại), ô 2 DEBUFF, ô 3 ĐÒ
 - z3 Phong Nguyên: debuff Cuồng Phong (đối thủ -10% ne) | buff Phong Tích (+15% td; mỗi đòn gắn 1 lớp gió, đủ 3 lớp thì thêm 1 đòn liên kích 60% tc) | đòn cơ bản Phong Nhận | Boss Phong Nguyên Vũ Xà: Xà Hành (+20% td lượt đầu)
 - z4 Lôi Vực: debuff Tĩnh Điện (đối thủ -15% khu) | buff Lôi Kích (+15% cm; mỗi lần chí mạng 20% làm choáng 1 lượt) | đòn cơ bản Sấm Rền | Boss Lôi Vực Chiến Thần: Lôi Giáp (pd +15% phản đòn)
 - z5 Nguyệt Cung: debuff Nguyệt Quang (đối thủ -20% cm) | buff Nguyệt Ảnh (+15% ne; né thành công thì lượt sau +30% tc) | đòn cơ bản Nguyệt Huy | Boss Nguyệt Thực Tế Quân: Nguyệt Thực (dưới 30% hp thì +30% tc và hút máu 15%)
-- (Bản cũ có "kỹ năng" kèm hồi chiêu và hệ số như Băng Tinh 130% tc cd 3, Băng Sơn Áp Đỉnh cd 5... ĐÃ BỎ khỏi đòn cơ bản. Kỹ năng độc quyền của boss: CHỜ CHỐT.)
+
+## 7b. Kỹ năng độc quyền của boss + sách kỹ năng (đã chốt 19/11/2026)
+- Mỗi boss có 1 kỹ năng độc quyền, có hồi chiêu (cd, tính lượt). Hết cd thì boss tự dùng, thay đòn cơ bản ở lượt đó. Hệ của kỹ năng là một hệ của chính boss.
+- Kỹ năng cũng là một SÁCH KỸ NĂNG: CHỈ rơi khi GIẾT CHẾT boss (bắt boss không rơi), tỉ lệ 1,5% mỗi lần (độc quyền nên hiếm). mm vẫn nhân tỉ lệ rớt như mục 1 (tối đa x3). Thú chỉ mang được nếu có hệ của sách (mục 2).
+- Sát thương kỹ năng = công thức mục 5 với hsKyNang bên dưới; hệ của kỹ năng đánh theo hệ kỹ năng. Debuff của kỹ năng bị giảm theo khu (mục 6), choáng bị chặn theo kc.
+- ks0 Băng Sơn Áp Đỉnh (boss Băng Sơn Cự Thú, hệ băng): 180% tc, gắn 2 lớp lạnh lên đối thủ (cộng vào buff Đông Cứng), cd 5. Mô tả: khối băng khổng lồ từ trên trời giáng xuống đè đối thủ, vỡ tan thành tinh thể băng.
+- ks1 Sương Nuốt (Vạn Trượng Vụ Thú, hệ thủy): 150% tc, hút 30% sát thương gây ra thành máu cho boss, cd 5. Mô tả: màn sương dày bao trùm đối thủ rồi bị hút về miệng boss, sương cuộn thành xoáy.
+- ks2 Côn Bằng Triển Sí (Vân Đảo Côn Bằng, hệ phong): 200% tc, boss tự +30% tốc độ 2 lượt, cd 5. Mô tả: Côn Bằng giương đôi cánh khổng lồ, cuốn gió và mây lao tới quét ngang.
+- ks3 Vũ Xà Triền (Phong Nguyên Vũ Xà, hệ phong): 140% tc, đối thủ -50% tốc độ 2 lượt, cd 5. Mô tả: thân rắn gió quấn chặt đối thủ rồi siết lại, vòng xoáy gió trói chân.
+- ks4 Thiên Lôi Giáng (Lôi Vực Chiến Thần, hệ lôi): 220% tc, 40% làm choáng 1 lượt, cd 6. Mô tả: chiến thần giơ vũ khí gọi cột sét từ trời đánh thẳng xuống đối thủ.
+- ks5 Nguyệt Thực Nuốt (Nguyệt Thực Tế Quân, hệ ám): 200% tc, đối thủ -20% tốc độ 2 lượt, cd 5. Mô tả: mặt trăng bị bóng đen che khuất, vòng tối nuốt lấy đối thủ.
+- Lưu ý: ks5 bản cũ không ghi thời gian giảm tốc, đang đặt 2 lượt cho giống ks3; hệ ks2 (phong) và ks5 (ám) là hệ chủ đạo của boss, khác hệ vùng (tiên, tâm linh). Muốn đổi thì sửa một dòng trong KY_NANG_BOSS (56c-buff.js).
 
 ## 8. Hệ chủ đạo 6 vùng và bảng loài mẫu Tuyết Nguyên (z0)
 - Hệ chủ đạo vùng (hệ của đòn cơ bản vùng): z0 Tuyết Nguyên = bang, z1 Sương Cốc = thuy, z2 Vân Đảo = tien, z3 Phong Nguyên = phong, z4 Lôi Vực = loi, z5 Nguyệt Cung = tam.

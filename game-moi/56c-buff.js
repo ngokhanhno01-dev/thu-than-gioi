@@ -3,7 +3,7 @@
    Quy tắc (mục 6): buff/debuff vùng áp cho MỌI thú thuộc loài của vùng (thú, quái, boss, thú người chơi).
    Debuff vùng gắn lên ĐỐI THỦ khi vào trận, kéo dài cả trận, và bị giảm theo (1 - khu/100) của người bị gắn. Buff không bị khu ảnh hưởng.
    3 ô tròn của giao diện thú: buff (nội tại) | debuff | đòn cơ bản. Đòn cơ bản = đánh thường theo chỉ số (hsKyNang 1), KHÔNG hồi chiêu, KHÔNG hiệu ứng kèm: chỉ có TÊN riêng mỗi vùng.
-   Mọi hiệu ứng đặc biệt (lớp, hồi máu, khiên, choáng...) nằm trong buff nội tại. Boss: 2 buff (buff vùng + buff riêng) + 1 debuff (debuff vùng) + đòn cơ bản. (Kỹ năng độc quyền boss: chờ chốt.)
+   Mọi hiệu ứng đặc biệt (lớp, hồi máu, khiên, choáng...) nằm trong buff nội tại. Boss: 2 buff (buff vùng + buff riêng) + 1 debuff (debuff vùng) + đòn cơ bản. Kỹ năng độc quyền boss (có cd, kiêm sách kỹ năng, rơi 1,5% khi giết boss): bảng KY_NANG_BOSS.
 
    Mỗi hiệu ứng gồm:
    - mod: [{stat,pct}] cộng THẲNG vào chỉ số (đưa vào ctx.mod của TTGCS.tinh). Chính hp/tc/pt/td/mm nhân (1+pct/100); chỉ số phụ cộng điểm %.
@@ -11,7 +11,7 @@
    - ev: [{...}] sự kiện trong trận do bước D (bộ máy trận) thực thi: tả bằng dữ liệu, ở đây KHÔNG chạy trận.
      loại ev: hoiLuot{pctHp} hồi %hp tối đa mỗi lượt | khienDau{pctHp} khiên đầu trận | lop{ten,du,moiDon,ra} mỗi đòn gắn 1 lớp, đủ `du` lớp thì kích `ra` (rồi xóa lớp)
               | chiMangRa{choang:{xs,luot}} khi chí mạng thì xs% làm choáng | neRa{stat,pct,luot} né thành công thì lượt sau cộng stat | tamKhiHp ... (xem tam)
-   API: TTGCS.vungBuff(z) | debuffVung(z) | buffBoss(z) | modTinh(thu, doiThu?, opt?) | modTam(thu, st) | suKien(thu) | hoiLuot(thu,hpMax) | khienDau(thu,hpMax) | donCoBan(z) | VUNG_BUFF */
+   API: TTGCS.vungBuff(z) | debuffVung(z) | buffBoss(z) | modTinh(thu, doiThu?, opt?) | modTam(thu, st) | suKien(thu) | hoiLuot(thu,hpMax) | khienDau(thu,hpMax) | donCoBan(z) | kyNangBoss(z) | VUNG_BUFF, KY_NANG_BOSS, TY_LE_ROI_SACH */
 (function(root){
 'use strict';
 
@@ -52,6 +52,19 @@ var VUNG={
 /* tên đòn cơ bản (đánh thường) theo vùng; không số liệu riêng */
 var DON_CO_BAN=['Băng Tinh','Sương Phủ','Vân Tỏa','Phong Nhận','Sấm Rền','Nguyệt Huy'];
 function donCoBan(z){return DON_CO_BAN[z]?{ten:DON_CO_BAN[z],hsKyNang:1,hoiChieu:0}:null;}
+
+/* ===== KỸ NĂNG ĐỘC QUYỀN BOSS (mục 7b THIET_KE). hsTc = hsKyNang của satThuong; cd = hồi chiêu (lượt); he = hệ của kỹ năng (một hệ của boss).
+   ev (bước D thực thi): lop{ten,them} thêm lớp | hutMau{pct} | tuBuff{stat,pct,luot} boss tự buff | debuff{stat,pct,luot} lên đối thủ (giảm theo khu) | choang{xs,luot} (kc chặn) */
+var KY_NANG_BOSS=[
+  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:5,ev:[{k:'lop',ten:'lanh',them:2}]},
+  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'thuy',hsTc:1.5,cd:5,ev:[{k:'hutMau',pct:30}]},
+  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'phong',hsTc:2.0,cd:5,ev:[{k:'tuBuff',stat:'td',pct:30,luot:2}]},
+  {id:'vu-xa-trien',ten:'Vũ Xà Triền',boss:'6j',he:'phong',hsTc:1.4,cd:5,ev:[{k:'debuff',stat:'td',pct:-50,luot:2}]},
+  {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:6,ev:[{k:'choang',xs:40,luot:1}]},
+  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:5,ev:[{k:'debuff',stat:'td',pct:-20,luot:2}]}
+];
+var TY_LE_ROI_SACH=1.5;   /* % rơi sách kỹ năng boss, CHỈ khi giết chết boss (bắt không rơi); mm nhân thêm như tỉ lệ rớt item */
+function kyNangBoss(z){return KY_NANG_BOSS[z]?copy(KY_NANG_BOSS[z]):null;}
 
 function copy(o){return o?JSON.parse(JSON.stringify(o)):null;}
 function zOf(thu){
@@ -124,7 +137,7 @@ function hoiLuot(thu,hpMax){return Math.floor(hpMax*tongEv(thu,'hoiLuot','pctHp'
 function khienDau(thu,hpMax){return Math.floor(hpMax*tongEv(thu,'khienDau','pctHp')/100);}
 
 root.TTGCS=Object.assign(root.TTGCS||{},{
-  VUNG_BUFF:VUNG,DON_CO_BAN:DON_CO_BAN,donCoBan:donCoBan,vungBuff:vungBuff,debuffVung:debuffVung,buffBoss:buffBoss,
+  VUNG_BUFF:VUNG,DON_CO_BAN:DON_CO_BAN,donCoBan:donCoBan,KY_NANG_BOSS:KY_NANG_BOSS,kyNangBoss:kyNangBoss,TY_LE_ROI_SACH:TY_LE_ROI_SACH,vungBuff:vungBuff,debuffVung:debuffVung,buffBoss:buffBoss,
   modTinh:modTinh,modTam:modTam,suKien:suKien,hoiLuot:hoiLuot,khienDau:khienDau
 });
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
