@@ -8,7 +8,7 @@
    API: TTGTB.open() / .close() / .isOpen() */
 (function(){
 'use strict';
-var BW=1798,BH=798,UB=1456,IMG='game-moi/khung-trang-bi.webp?v=2';   /* UB = thang đơn vị cũ cho cỡ chữ ({n}) */
+var BW=1798,BH=798,UB=1456,IMG='game-moi/khung-trang-bi.webp?v=2',OV_BO='game-moi/nut-bo-trang-bi.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ ({n}) */
 var isOpen=false,openAt=0,root=null,fr=null,E={};
 /* ===== THÚ TRÊN BỤC (chỗ chỉnh số, px ảnh khung 1798x798) =====
    cx = tâm ngang bục, by = đường chân thú (mặt bục), size = cạnh ảnh thú (ảnh gốc 192px, to quá sẽ mờ). */
@@ -24,6 +24,7 @@ var css=[
 '.tb-fr{position:relative;width:min(98vw,calc(96vh*1798/798));aspect-ratio:1798/798;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
 '.tb-fr>*{position:absolute;box-sizing:border-box}',
 '.tb button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
+'.tb-ov{display:none;pointer-events:none}','.tb-ov.on{display:block}',
 '.tb-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}',   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
 '.tb-pet{display:flex;align-items:flex-end;justify-content:center;pointer-events:none}',
 '.tb-pet img{width:100%;height:100%;object-fit:contain;-webkit-user-drag:none;user-select:none;filter:drop-shadow(0 {6} {10} rgba(0,0,0,.55));animation:tbBob 1.194s ease-in-out infinite alternate}',
@@ -45,6 +46,8 @@ function build(){
   /* thanh vàng trên-trái (x313-602,y172-217) để trống (chừa cho sau này, vd tên thú); tiêu đề TRANG BỊ đã vẽ sẵn trong khung */
   E.pet=mk('div','tb-pet',PET.cx-PET.size/2,PET.by-PET.size,PET.size,PET.size);
   E.emp=mk('div','tb-emp',TXT.x,TXT.y,TXT.w,TXT.h,'Chưa có Thú ra trận');
+  /* nút BỎ TRANG BỊ: ảnh phủ (x1376,y682 cỡ 182x74) đè lên nút TRANG BỊ vẽ sẵn khi đang chọn món ĐÃ mặc; bật/tắt bằng TTGTB.setBo(true/false) (chờ làm 8 ô trang bị để nối) */
+  E.ovB=mk('img','tb-ov',1376,682,182,74);E.ovB.src=OV_BO;E.ovB.alt='';E.ovB.draggable=false;
   /* nút X vẽ sẵn trong ảnh (tâm ~ x1691,y86): vùng bấm trong suốt 130x130 */
   var x=mk('button','tb-x',1626,22,130,130);x.type='button';x.setAttribute('aria-label','Đóng');x.addEventListener('click',close);
   document.body.appendChild(root);
@@ -63,5 +66,6 @@ function render(){
 function open(){if(!root)build();render();isOpen=true;openAt=performance.now();root.classList.add('on');unit();}
 function close(){if(!root)return;isOpen=false;root.classList.remove('on');}
 
-window.TTGTB={open:open,close:close,isOpen:function(){return isOpen;}};
+function setBo(on){if(E.ovB)E.ovB.classList.toggle('on',!!on);}   /* on=true: hiện nút BỎ TRANG BỊ đè lên TRANG BỊ */
+window.TTGTB={open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo};
 })();

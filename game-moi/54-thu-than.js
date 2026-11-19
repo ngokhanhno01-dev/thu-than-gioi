@@ -14,7 +14,7 @@
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var BW=1841,BH=811,UB=2200,IMG='game-moi/khung-thu.webp?v=6';   /* ảnh khung gốc 1841x811; UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
+var BW=1841,BH=811,UB=2200,IMG='game-moi/khung-thu.webp?v=6',OV_GOV='game-moi/nut-dang-ra-tran.webp?v=1';   /* ảnh khung gốc 1841x811; UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
 var KEY='ttg_moi_thu_v1',KRT='ttg_moi_thu_ratran_v1';
 var demo=/[?&]thu=demo/.test(location.search);
 var isOpen=false,openAt=0,root=null,fr=null,E={};
@@ -118,7 +118,7 @@ var css=[
 '.tt-go:active:not(:disabled){background:rgba(255,255,255,.18)}',
 '.tt-go:disabled{cursor:default}',
 '.tt-go.off{background:rgba(3,4,18,.5)}',   /* chưa chọn thú: làm tối tấm RA TRẬN */
-'.tt-gov{display:none;align-items:center;justify-content:center;border-radius:{18};background:linear-gradient(180deg,#ffe58a,#e0a93c 55%,#b97a1a);box-shadow:inset 0 0 {10} rgba(120,70,0,.55);font-family:var(--fh);font-weight:800;font-size:{40};letter-spacing:{1};color:#3b2406;text-shadow:0 {2} 0 rgba(255,246,200,.75);white-space:nowrap;pointer-events:none}',   /* thú đang ra trận: phủ lên chữ RA TRẬN vẽ sẵn bằng chữ ĐANG RA TRẬN (chỉnh màu/cỡ chữ ở đây) */
+'.tt-gov{display:none;pointer-events:none;-webkit-user-drag:none;user-select:none}',   /* ảnh nút ĐANG RA TRẬN phủ lên chữ RA TRẬN vẽ sẵn */
 /* ô kỹ năng đã gắn + bảng danh sách sách + bảng nổi */
 '.tt-sk .ic{display:flex;align-items:center;justify-content:center;font-size:{62};font-weight:400;line-height:1;text-shadow:none}',
 '.tt-sk .ic img{width:{74};height:{74};object-fit:contain}',
@@ -205,7 +205,7 @@ function build(){
   gridScroll();
 
   /* --- NÚT RA TRẬN: tấm vàng dưới-phải đã vẽ sẵn chữ "Ra trận" (x1372-1672,y662-752). E.gov = tấm phủ "Đang ra trận" khi thú đang ra trận --- */
-  E.gov=mk('div','tt-gov',1378,667,290,80,'Đang ra trận');
+  E.gov=mk('img','tt-gov',1346,634,354,142);E.gov.src=OV_GOV;E.gov.alt='';E.gov.draggable=false;   /* ảnh nút ĐANG RA TRẬN (cắt từ khung mới) đè lên nút RA TRẬN, giống ảnh MỞ KHÓA ở Balo */
   E.go=mk('button','tt-go',1372,662,300,90);E.go.setAttribute('aria-label','Ra trận');E.go.type='button';E.go.addEventListener('click',function(){if(sel&&sel!==rt){rt=sel;save();render();}});
 
   buildPop();
@@ -280,7 +280,7 @@ function renderLeft(){
 }
 function renderGo(){
   var on=!!sel&&sel===rt;
-  E.gov.style.display=on?'flex':'none';   /* chữ RA TRẬN vẽ sẵn không đổi được: đang ra trận thì phủ tấm "Đang ra trận" lên */
+  E.gov.style.display=on?'block':'none';   /* chữ RA TRẬN vẽ sẵn không đổi được: đang ra trận thì phủ tấm "Đang ra trận" lên */
   E.go.disabled=!sel||on;E.go.classList.toggle('off',!sel);
 }
 function render(){if(!root)return;renderLeft();renderStats();renderGrid();renderGo();renderSkills();}
