@@ -16,8 +16,8 @@
 </script>
 <link rel="preload" as="image" href="img-boot-ngang.webp">
 <link rel="preload" as="image" href="img-boot-frame.webp">
-<link rel="preload" as="image" href="game-moi/khung-sanh.webp">
-<link rel="preload" as="image" href="game-moi/khung-hang-nut.webp">
+<link rel="preload" as="image" href="game-moi/khung-sanh.webp?v=2">
+<link rel="preload" as="image" href="game-moi/khung-hang-nut.webp?v=2">
 <style id="boot-css">
 /* MÀN CHỜ (game chỉ có màn ngang): ảnh nền phủ toàn màn hình, thanh tiến trình ở đáy;
    tải xong thì chữ "Chạm vào màn hình để vào Thú Thần Giới" nổi giữa màn hình, chạm bất kỳ đâu để vào. Không có nút. */
@@ -225,7 +225,7 @@ if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,typing=false;
 var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,PET_X=.218,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
-var BP=88,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
+var BP=86,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 /* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */
 var BG_BLEED={l:10,r:10,t:6,b:8};
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
@@ -241,13 +241,13 @@ function gy(){return SCENE==='sanh'?edgeY()+1:TH()-FLOOR;}/* đường chân th�
 /* KHUNG MỚI: 2 ảnh riêng, cắt 9 mảnh. w,h = cỡ ảnh; sl,sr,st,sb = bề rộng/cao mảnh góc (px ảnh, gồm cả họa tiết góc); e = độ dày viền thật mỗi cạnh (px ảnh, dùng căn nền + chân thú).
    Tỉ lệ vẽ: khung trên s = th/(h - lấn trên), khung dưới s = BP/(h - lấn dưới) => cao đúng khít, chỉ mảnh giữa bị kéo giãn ngang. Chưa nạp được ảnh thì vẽ viền vàng mảnh tạm. */
 var FRM={
- top:{src:'game-moi/khung-sanh.webp',w:1843,h:830,sl:394,sr:390,st:330,sb:262,e:{l:36,r:38,t:27,b:44},img:null,ok:false},
- bot:{src:'game-moi/khung-hang-nut.webp',w:2126,h:740,sl:345,sr:342,st:279,sb:279,e:{l:38,r:38,t:34,b:41},img:null,ok:false}};
+ top:{src:'game-moi/khung-sanh.webp?v=2',w:1843,h:816,sl:394,sr:390,st:330,sb:248,e:{l:36,r:38,t:27,b:30},img:null,ok:false},/* đã cắt 14 hàng đáy (dải xanh phát sáng ngoài cùng) để khung trên sát khung nút */
+ bot:{src:'game-moi/khung-hang-nut.webp?v=2',w:2126,h:740,sl:345,sr:342,st:279,sb:279,e:{l:38,r:38,t:34,b:41},ct:18,img:null,ok:false}};/* ct = số hàng đỉnh ảnh lấn LÊN trên mép khung dưới: dải sao ngoài ở phần giữa đã xóa trong suốt, chỉ còn sừng rồng ở 2 góc chồng lên khung trên */
 ['top','bot'].forEach(function(k){var o=FRM[k];o.img=new Image();
  o.img.onload=function(){o.ok=true;frOK=FRM.top.ok&&FRM.bot.ok;buildFrame();};
  o.img.onerror=function(){o.ok=false;frOK=false;};o.img.src=o.src;});
 function sTop(th){return th/(FRM.top.h-BG_BLEED.t);}/* tỉ lệ vẽ khung trên */
-function sBot(){return BP/(FRM.bot.h-BG_BLEED.b);}/* tỉ lệ vẽ khung dưới */
+function sBot(){return BP/(FRM.bot.h-FRM.bot.ct-BG_BLEED.b);}/* tỉ lệ vẽ khung dưới */
 function s9(c,m,x,y,w,h,s,F){
  var IM=F.img,SW=IM.naturalWidth,SH=IM.naturalHeight,L=F.sl,R=F.sr,T=F.st,B=F.sb,l=L*s,r=R*s,t=T*s,b=B*s;
  var xs=[x,x+l,x+w-r,x+w],ys=[y,y+t,y+h-b,y+h],sx=[0,L,SW-R,SW],sy=[0,T,SH-B,SH];
@@ -265,7 +265,7 @@ function buildFrame(){
   /* khung trên: lấn ra trái, phải, trên (cạnh dưới giữ nguyên vì giáp khung dưới + thú đứng trên đó) */
   s9(c,m,fx-q.l*s1,-q.t*s1,fw+(q.l+q.r)*s1,th+q.t*s1,s1,FRM.top);
   /* khung dưới: lấn ra trái, phải, dưới (cạnh trên giữ nguyên) */
-  s9(c,m,fx-q.l*s2,pt,fw+(q.l+q.r)*s2,BP+q.b*s2,s2,FRM.bot);
+  s9(c,m,fx-q.l*s2,pt-FRM.bot.ct*s2,fw+(q.l+q.r)*s2,BP+(FRM.bot.ct+q.b)*s2,s2,FRM.bot);
  }else{/* chưa có ảnh khung: viền vàng mảnh tạm */
   c.strokeStyle='#c9a24a';c.lineWidth=Math.max(1,2*m);
   c.strokeRect(fx*m+m,m,fw*m-2*m,th*m-2*m);c.strokeRect(fx*m+m,pt*m+m,fw*m-2*m,BP*m-2*m);
@@ -440,7 +440,7 @@ var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn
  bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],bgFly=[],bgBolts=[],bgBoltNext=0,BG_IMGS={};
 /* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. Khi khung lấn mép (BG_BLEED) thì vùng nền tự mở rộng đúng bằng phần lấn: dày hiệu dụng = BG_EDGE - BG_BLEED. */
 var bgRaf=0,mainRaf=0;
-var BG_EDGE={l:36,r:38,t:27,b:44};/* = FRM.top.e (khung-sanh.webp) */
+var BG_EDGE={l:36,r:38,t:27,b:30};/* = FRM.top.e (khung-sanh.webp) */
 /* ===== CẤU HÌNH HIỆU ỨNG (chỉnh ở đây) ===== */
 var BG_FX_CFG={
  snowCount:80,      /* số hạt tuyết (máy yếu thì giảm, ví dụ 20) */

@@ -34,3 +34,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 ## Thanh nút to hơn (19/11/2026)
 - `BP` (cao khung dưới) 70 -> 88; nút vuông 29 -> 38, chừa góc trái 34 -> 42 (`CFG.left`). Khung trên còn cao 270 (trước 288), thú giữ nguyên cỡ.
 - Sức chứa: màn rộng 780 ≈ 17 ô/hàng x 2 hàng; màn 640 ≈ 13 ô/hàng. Hàng 0 (r:0) cho chức năng chính, hàng 1 (r:1) cho chức năng phụ. Quá nhiều nút thì làm vuốt ngang hoặc nút "Thêm".
+
+## Hai khung sát nhau, bỏ viền xanh phát sáng ở chỗ giáp (19/11/2026)
+- `khung-sanh.webp`: cắt 14 hàng đáy (dải xanh phát sáng ngoài vạch vàng) -> 1843x816. `FRM.top`: h 816, sb 248, e.b 30.
+- `khung-hang-nut.webp`: xóa trong suốt 18 hàng đỉnh (dải sao ngoài) ở PHẦN GIỮA, giữ nguyên 2 góc (sừng rồng chồng lên khung trên ~2 đơn vị). `FRM.bot.ct = 18`: khung dưới vẽ lấn lên trên đúng bằng số hàng này.
+- `BP` 88 -> 86 (viền trên khung dưới mỏng hơn nên vẫn đủ chỗ 2 hàng nút 38). `GAPB` = 0. Khung trên cao 274, chân thú ở y≈264 (trước ≈257): vùng cảnh rộng thêm ~7 đơn vị. `CFG.dy` (52-nut-vuong.js) dịch khối nút lên/xuống cho cân.

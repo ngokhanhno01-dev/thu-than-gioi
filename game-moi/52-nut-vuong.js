@@ -8,9 +8,10 @@
 (function(){
 'use strict';
 var CFG={
-  size:38,    /* cạnh nút. 2 hàng: 2*size + gap phải nhỏ hơn BP (88 trong index.html) trừ viền khung (~9) */
+  size:38,    /* cạnh nút. 2 hàng: 2*size + gap phải nhỏ hơn BP (86 trong index.html) trừ viền khung (~9) */
   gap:2,      /* khe giữa các nút */
   rows:2,     /* số hàng trong khung dưới */
+  dy:-1.5,   /* dịch cả khối nút lên (-) / xuống (+) cho cân với ô trong khung (viền trên mỏng hơn viền dưới) */
   left:42,    /* chừa bên trái cho họa tiết góc khung dưới */
   fill:'col', /* 'col' = xếp theo cột (nút 2 nằm dưới nút 1) | 'row' = xếp theo hàng */
   frame:'game-moi/khung-nut.webp?v=2'
@@ -43,7 +44,7 @@ function add(o){
 function layout(m){
   M=m||M;if(!M)return;
   var f=M.K/M.DPR,s=CFG.size*f,g=CFG.gap*f,x0=(M.I.l+CFG.left)*f,pt=(M.th+M.GAPB)*f,rows=Math.max(1,CFG.rows),
-      blk=rows*s+(rows-1)*g,y0=pt+Math.max(0,(M.BP*f-blk)/2);
+      blk=rows*s+(rows-1)*g,y0=pt+Math.max(0,(M.BP*f-blk)/2)+(CFG.dy||0)*f;
   var used={},pos=[];
   /* lượt 1: nút có chỉ định hàng (o.r: 0 = hàng trên, 1 = hàng dưới) -> đứng ở ô trống đầu tiên của hàng đó, nên Balo và Thú Thần nằm CÙNG HÀNG */
   list.forEach(function(it,i){if(it.o.r==null)return;var r=Math.min(Math.max(0,it.o.r|0),rows-1),c=0;while(used[c+','+r])c++;used[c+','+r]=1;pos[i]=[c,r];});
