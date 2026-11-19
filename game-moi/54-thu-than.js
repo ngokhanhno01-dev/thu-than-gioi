@@ -1,19 +1,19 @@
 /* 54-thu-than.js - Nút "Thú Thần" + panel Thú Thần (chứa và trang bị thú đã bắt).
    Cần 52-nut-vuong.js (TTGNV) nạp trước; nạp SAU 53-balo.js (để đóng Balo khi mở panel này).
-   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). BƯỚC 2 = khung ảnh game-moi/khung-thu.webp (1478x673, hiển thị đúng cỡ gốc 1 pixel ảnh = 1 pixel máy để không bị mờ) + đóng bằng nút X / bấm ngoài / Esc (xong). Bước 3 (bố cục: tên thú, chỉ số, ô kỹ năng, lưới thú, nút Ra trận) chưa làm: khung đang trống.
+   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). BƯỚC 2 = khung ảnh game-moi/khung-thu.webp (2200x996, hiển thị đúng cỡ gốc 1 pixel ảnh = 1 pixel máy để không bị mờ) + đóng bằng nút X / bấm ngoài / Esc (xong). Bước 3 (bố cục: tên thú, chỉ số, ô kỹ năng, lưới thú, nút Ra trận) chưa làm: khung đang trống.
    QUY TẮC: mở Thú Thần thì đóng Balo, mở Balo thì đóng Thú Thần (53-balo.js gọi TTGTHU.close()).
    API: TTGTHU.open() / .close() / .isOpen() */
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var BW=1478,BH=673,IMG='game-moi/khung-thu.webp?v=3';   /* ảnh khung gốc 1478x673 (không phóng to, nén không mất chất lượng); mọi tọa độ bên dưới tính theo pixel ảnh này */
+var BW=2200,BH=996,IMG='game-moi/khung-thu.webp?v=4';   /* ảnh khung gốc 2200x996 (không phóng to, nén không mất chất lượng); mọi tọa độ bên dưới tính theo pixel ảnh này */
 var isOpen=false,openAt=0,root=null,fr=null;
 
 /* ===== CSS: {n} = n px ảnh (tự co theo --u) ===== */
 var css=[
 '.tt{position:fixed;left:0;top:0;right:0;bottom:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.74);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
 '.tt.on{display:flex}',
-'.tt-fr{position:relative;width:min(98vw,calc(96vh*1478/673));aspect-ratio:1478/673;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
+'.tt-fr{position:relative;width:min(98vw,calc(96vh*2200/996));aspect-ratio:2200/996;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
 '.tt-fr>*{position:absolute;box-sizing:border-box}',
 '.tt button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
 '.tt-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}'   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
@@ -30,8 +30,8 @@ function unit(){if(!fr)return;var d=window.devicePixelRatio||1;fr.style.maxWidth
 function build(){
   root=document.createElement('div');root.className='tt';
   fr=document.createElement('div');fr.className='tt-fr';root.appendChild(fr);
-  /* nút X đã vẽ sẵn trong ảnh (tâm ~ x1407,y80 trên ảnh đã cắt): chỉ đặt vùng bấm trong suốt đè lên, đường kính 100 */
-  var x=mk('button','tt-x',1357,30,100,100);x.type='button';x.setAttribute('aria-label','Đóng');x.addEventListener('click',close);
+  /* nút X đã vẽ sẵn trong ảnh (tâm ~ x2101,y112 trên ảnh đã cắt): chỉ đặt vùng bấm trong suốt đè lên, đường kính 190 */
+  var x=mk('button','tt-x',2006,17,190,190);x.type='button';x.setAttribute('aria-label','Đóng');x.addEventListener('click',close);
   document.body.appendChild(root);
   /* bấm ra ngoài khung thì đóng (chặn 400ms đầu để cú chạm mở nút không đóng luôn) + phím Esc */
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
