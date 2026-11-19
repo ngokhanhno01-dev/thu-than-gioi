@@ -3,7 +3,7 @@
    BẢNG: nửa TRÁI = Bóng bắt thú (danh sách thanh, sau này dùng khung thanh dài + bấm mở bảng nổi có nút Dùng/Đóng);
          nửa PHẢI = lưới 16 ô (4x4) Nguyên liệu (chia trang, tổng CAP ô) + bảng thông tin item (icon phóng to, tên, mô tả, số lượng)
          + 4 khung ngang dưới lưới = 4 nút: KHÓA (khóa/mở khóa), CHỌN (bật chọn nhiều ô), VỨT BỎ (có hỏi lại, món khóa không vứt được), SẮP XẾP (đổi kiểu xếp).
-         Sức chứa + chuyển trang nằm ở dải trên, cạnh nút đóng.
+         Sức chứa (trái) + chuyển trang (phải) nằm ngay trên lưới ô.
    Mọi vị trí bên dưới tính theo pixel ẢNH ĐÃ CẮT 1469x673 (BW x BH), tự co theo cỡ màn hình bằng biến --u (= 1 px ảnh gốc).
    DỮ LIỆU: kho đồ {id: số lượng} lưu ở khóa ttg_moi_balo_v1. Danh mục item (CAT) khai ở khối "DANH MỤC ITEM" bên dưới hoặc gọi TTGBALO.reg({...}).
    API: TTGBALO.open()/close(), .add(id,n) (n âm = trừ), .count(id), .reg(items).
@@ -53,9 +53,9 @@ var css=[
 '.bl-t{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:900;font-size:{34};letter-spacing:{6};line-height:1;color:#ffe9a0;text-shadow:0 0 {8} rgba(255,200,80,.55),0 {2} 0 #1a1030}',
 '.bl-x{display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;border:{2.5} solid #d9a93c;background:radial-gradient(circle at 50% 30%,#3d3da0,#14143e);color:#ffe9a0;font-size:{24};line-height:1;cursor:pointer;box-shadow:0 0 {10} rgba(0,0,0,.6)}',
 '.bl-x:active{transform:scale(.92)}',
-'.bl-cap{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{24};color:#bfeee8;text-shadow:0 {2} 0 #000;white-space:nowrap}',
-'.bl-pg{display:flex;align-items:center;justify-content:space-between;color:#ffe9a0;font-weight:700;font-size:{22};text-shadow:0 {2} 0 #000}',
-'.bl-pg button{width:{34};height:{34};padding:0;border-radius:{8};border:{2} solid #c9992f;background:#1d1d5a;color:#ffe9a0;font-size:{22};line-height:1;cursor:pointer}',
+'.bl-cap{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{19};color:#bfeee8;text-shadow:0 {2} 0 #000;white-space:nowrap}',
+'.bl-pg{display:flex;align-items:center;justify-content:space-between;color:#ffe9a0;font-weight:700;font-size:{19};text-shadow:0 {2} 0 #000}',
+'.bl-pg button{width:{26};height:{26};padding:0;border-radius:{6};border:{2} solid #c9992f;background:#1d1d5a;color:#ffe9a0;font-size:{18};line-height:1;cursor:pointer}',
 '.bl-pg button:disabled{opacity:.3}',
 '.bl-pl{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{19};letter-spacing:{1};line-height:1;color:#3b2406;text-shadow:0 {1} 0 rgba(255,246,200,.7);white-space:nowrap}',
 '.bl-balls{overflow-y:auto;overflow-x:hidden;touch-action:pan-y;scrollbar-width:none;padding:{4}}',
@@ -105,8 +105,8 @@ function build(){
   fr=document.createElement('div');fr.className='bl-fr';root.appendChild(fr);
   mk('div','bl-t',160,52,200,50,'BALO'); /* tên bảng, nằm ở dải trên bên trái */
   E.x=mk('button','bl-x',1296,55,46,46,'✕'); /* nút đóng: khung mới không vẽ sẵn nút X nên đặt ở dải trên bên phải */E.x.type='button';E.x.setAttribute('aria-label','Đóng');
-  E.cap=mk('div','bl-cap',1060,56,100,44); /* sức chứa, dải trên */
-  var pg=mk('div','bl-pg',1166,56,122,44); /* chuyển trang, dải trên */
+  E.cap=mk('div','bl-cap',769,138,84,26); /* sức chứa: dải trống ngay trên lưới ô, sát góc trái */
+  var pg=mk('div','bl-pg',940,138,136,26); /* chuyển trang: ngay trên lưới ô, sát góc phải */
   E.pv=document.createElement('button');E.pv.type='button';E.pv.textContent='‹';E.pg=document.createElement('span');E.nx=document.createElement('button');E.nx.type='button';E.nx.textContent='›';
   pg.appendChild(E.pv);pg.appendChild(E.pg);pg.appendChild(E.nx);
   mk('div','bl-pl',275,149,202,29,'Bóng bắt thú'); /* chữ nằm giữa thanh vàng (thanh: x275-477, y149-178) */
