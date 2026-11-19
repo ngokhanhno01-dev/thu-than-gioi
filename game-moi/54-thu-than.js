@@ -1,35 +1,44 @@
 /* 54-thu-than.js - Nút "Thú Thần" + panel Thú Thần (chứa và trang bị thú đã bắt).
    Cần 52-nut-vuong.js (TTGNV) nạp trước; nạp SAU 53-balo.js (để đóng Balo khi mở panel này).
-   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). Panel hiện là KHUNG TẠM (hộp chữ), sẽ thay bằng khung ảnh khung-thu.webp ở bước 2.
+   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). BƯỚC 2 = khung ảnh game-moi/khung-thu.webp (1478x673) + đóng bằng nút X / bấm ngoài / Esc (xong). Bước 3 (bố cục: tên thú, chỉ số, ô kỹ năng, lưới thú, nút Ra trận) chưa làm: khung đang trống.
    QUY TẮC: mở Thú Thần thì đóng Balo, mở Balo thì đóng Thú Thần (53-balo.js gọi TTGTHU.close()).
    API: TTGTHU.open() / .close() / .isOpen() */
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var isOpen=false,openAt=0,root=null;
+var BW=1478,BH=673,IMG='game-moi/khung-thu.webp?v=1';   /* ảnh khung ĐÃ CẮT 1478x673; mọi tọa độ bên dưới tính theo pixel ảnh này */
+var isOpen=false,openAt=0,root=null,fr=null;
 
-/* ===== CSS (khung tạm) ===== */
-var st=document.createElement('style');
-st.textContent=[
+/* ===== CSS: {n} = n px ảnh (tự co theo --u) ===== */
+var css=[
 '.tt{position:fixed;left:0;top:0;right:0;bottom:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.74);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
 '.tt.on{display:flex}',
-'.tt .tt-tam{padding:18px 26px;border:3px solid #d9a93c;border-radius:14px;background:radial-gradient(ellipse at 50% 20%,#34348f,#12123a);color:#ffe9a0;font-weight:700;font-size:20px;text-align:center;line-height:1.4;box-shadow:0 0 30px rgba(0,0,0,.7)}',
-'.tt .tt-tam small{display:block;margin-top:6px;font-weight:400;font-size:14px;color:#9fe8de}'
-].join('\n');
-document.head.appendChild(st);
+'.tt-fr{position:relative;width:min(98vw,calc(96vh*1478/673));aspect-ratio:1478/673;background:url('+IMG+') 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
+'.tt-fr>*{position:absolute;box-sizing:border-box}',
+'.tt button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
+'.tt-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}'   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
+].join('\n').replace(/\{(\d+(?:\.\d+)?)\}/g,'calc(var(--u)*$1)');
+var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
+/* ===== DỰNG PANEL (một lần) ===== */
+function box(c,x,y,w,h){var s=c.style;s.left=(x/BW*100)+'%';s.top=(y/BH*100)+'%';s.width=(w/BW*100)+'%';s.height=(h/BH*100)+'%';return c;}
+function mk(tag,cls,x,y,w,h){var c=document.createElement(tag);if(cls)c.className=cls;if(w)box(c,x,y,w,h);fr.appendChild(c);return c;}
+function unit(){if(fr)fr.style.setProperty('--u',(fr.clientWidth/BW)+'px');}
 function build(){
   root=document.createElement('div');root.className='tt';
-  root.innerHTML='<div class="tt-tam">Thú Thần<small>(khung tạm - bước 2 sẽ thay bằng khung ảnh)</small></div>';
+  fr=document.createElement('div');fr.className='tt-fr';root.appendChild(fr);
+  /* nút X đã vẽ sẵn trong ảnh (tâm ~ x1407,y80 trên ảnh đã cắt): chỉ đặt vùng bấm trong suốt đè lên, đường kính 100 */
+  var x=mk('button','tt-x',1357,30,100,100);x.type='button';x.setAttribute('aria-label','Đóng');x.addEventListener('click',close);
   document.body.appendChild(root);
-  /* bấm ra ngoài hộp thì đóng (chặn 400ms đầu để cú chạm mở nút không đóng luôn) */
+  /* bấm ra ngoài khung thì đóng (chặn 400ms đầu để cú chạm mở nút không đóng luôn) + phím Esc */
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
   document.addEventListener('keydown',function(e){if(isOpen&&e.key==='Escape')close();});
+  window.addEventListener('resize',unit);
 }
 function open(){
   if(window.TTGBALO&&TTGBALO.close)TTGBALO.close();   /* mở panel này -> đóng Balo */
   if(!root)build();
-  isOpen=true;openAt=performance.now();root.classList.add('on');
+  isOpen=true;openAt=performance.now();root.classList.add('on');unit();
 }
 function close(){if(!root)return;isOpen=false;root.classList.remove('on');}
 
