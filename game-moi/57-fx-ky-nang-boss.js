@@ -449,7 +449,7 @@
   /* 4 · Vũ Xà Triền: thân rắn có vảy cuộn quanh mục tiêu, đầu rõ và ngẩng cao. */
   function snakeHead(g,x,y,dir,a,T){
    if(a<=.01)return;
-   g.save();g.translate(x,y);g.scale(dir,1);g.globalAlpha=clamp(a,0,1);g.lineJoin='round';
+   g.save();g.translate(x,y);g.scale(dir,1);g.scale(1.1,1.08);g.globalAlpha=clamp(a,0,1);g.lineJoin='round';
    const grad=g.createLinearGradient(-27,-17,31,13);
    grad.addColorStop(0,'#174d3c');grad.addColorStop(.4,'#3da775');grad.addColorStop(.78,'#9cf0c3');grad.addColorStop(1,'#eafff4');
    g.fillStyle=grad;g.beginPath();g.moveTo(-27,1);g.quadraticCurveTo(-22,-10,-13,-15);
@@ -480,17 +480,17 @@
    const q=aim(S),x=q.x,s=q.scale,C=COL.wind,r=E.rng(st.seed^0x570401),
     tighten=ph(t,.12,TH+.04),bodyFade=t<TH-.07?1:(1-ph(t,TH-.07,TH+.01)),
     radius=Math.min(63,Math.max(42,Math.min(x-30,330-x))),
-    coil=1-.24*eo(tighten),hx=clamp(x+q.dir*48*s,48,312),hy=GY-137;
+    coil=1-.24*eo(tighten),hx=clamp(x+q.dir*48*s,50,310),hy=GY-137;
    /* Ground seal and wind are visible from the first frame; the body closes tighter before impact. */
    const pre=1-ph(t,TH-.08,TH+.16);
-   ring(g,x,GY-4,34+8*eo(tighten),7,C.light,.34*pre,1.35);
-   groundCore(g,x,GY-3,C.light,.13*pre,24+8*eo(tighten));
+   ring(g,x,GY-4,34+8*eo(tighten),7,C.light,.18*pre,1.35);
+   groundCore(g,x,GY-3,C.light,.09*pre,24+8*eo(tighten));
    if(bodyFade>.01){
-    const points=[],depth=[],n=160,turns=2.4;
+    const points=[],depth=[],n=160,turns=1.55;
     for(let i=0;i<n;i++){
-     const v=i/(n-1),ang=v*TAU*turns+T*.48,
+     const v=i/(n-1),ang=v*TAU*turns+(q.dir>0?0:Math.PI)+Math.sin(T*1.1)*.12,
       rx=(radius-7*v)*coil*s,
-      yy=GY-56+v*38+Math.sin(ang)*15*s;
+      yy=GY-62+v*52+Math.sin(ang)*15*s;
      points.push(point(x+Math.cos(ang)*rx,yy));depth.push(Math.sin(ang));
     }
     /* Paint far loops dark first, then near loops with a green back and pale belly stripe. */
@@ -512,20 +512,20 @@
     paintSide(true,'#103d32',21*s*coil,bodyFade*.98,'source-over',0);
     paintSide(true,C.deep,16*s*coil,bodyFade*.96,'source-over',0);
     paintSide(true,C.main,12.5*s*coil,bodyFade*.98,'source-over',0);
-    paintSide(true,C.light,5.5*s*coil,bodyFade*.9,'lighter',0);
-    paintSide(true,'#d9ffea',2.2*s*coil,bodyFade*.92,'lighter',4*s);
+    paintSide(true,C.light,3.8*s*coil,bodyFade*.6,'lighter',0);
+    paintSide(true,'#d9ffea',1.4*s*coil,bodyFade*.75,'lighter',4*s);
     /* Overlapping raised scales and short ribs make the coils visibly segmented. */
-    for(let i=4;i<points.length-4;i+=3){
+    for(let i=4;i<points.length-4;i+=5){
      const p=points[i],before=points[i-1],after=points[i+1],ang=Math.atan2(after[1]-before[1],after[0]-before[0]),front=depth[i]>=0;
      g.save();g.translate(p[0],p[1]);g.rotate(ang);
-     g.fillStyle=E.rgba(front?(i%2?C.light:'#9bf0bf'):C.deep,bodyFade*(front?.88:.78));
+     g.fillStyle=E.rgba(front?(i%2?'#64bd8e':'#91dfb1'):C.deep,bodyFade*(front?.72:.66));
      g.beginPath();g.ellipse(0,0,4.9*s,3.35*s,0,0,TAU);g.fill();
-     g.strokeStyle=E.rgba(front?'#eafff4':'#4b9b72',bodyFade*(front?.82:.64));g.lineWidth=.8;
+     g.strokeStyle=E.rgba(front?'#d5f3df':'#4b9b72',bodyFade*(front?.62:.48));g.lineWidth=.8;
      g.beginPath();g.arc(0,0,4.25*s,.12,Math.PI-.12);g.stroke();
      g.beginPath();g.moveTo(-2.1*s,0);g.lineTo(2.1*s,0);g.stroke();g.restore();
     }
     /* A thick rising neck joins the coil to a large raised head. */
-    const neck=[point(x+q.dir*48*s,GY-54),point(x+q.dir*57*s,GY-77),
+    const neck=[points[0],point(x+q.dir*57*s,GY-77),point(x+q.dir*57*s,GY-77),
      point(x+q.dir*58*s,GY-103),point(hx-q.dir*13,hy+11)];
     stroke(g,neck,'#103d32',23*s,bodyFade*.98,false);
     stroke(g,neck,C.deep,17*s,bodyFade*.98,false);
@@ -538,14 +538,14 @@
     }
     snakeHead(g,hx,hy,q.dir,bodyFade,T);
     for(const side of [-1,1]){
-     fogPuff(g,x+side*(radius-4)*s,GY-32,19,9,bodyFade*.28,T,st.seed+110+side,
+     fogPuff(g,x+side*(radius-4)*s,GY-32,19,9,bodyFade*.18,T,st.seed+110+side,
       {deep:C.deep,main:C.main,light:C.light,core:C.core});
      const gust=[];
      for(let j=0;j<16;j++){
       const v=j/15,ang=T*1.35+v*TAU*.7+side*.8;
       gust.push(point(x+side*(radius+9-20*v)*s+Math.cos(ang)*4,GY-61+v*43+Math.sin(ang)*5));
      }
-     ribbon(g,gust,2.8,C.light,bodyFade*.3,C.core);
+     ribbon(g,gust,2.8,C.light,bodyFade*.17,C.core);
     }
    }
    if(t>=TH&&t<=END){
