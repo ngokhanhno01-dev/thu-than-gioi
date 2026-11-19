@@ -11,12 +11,12 @@
 - Boss: gốc x 1,6 (hp,tc,pt,td).
 - Ví dụ kiểm tra: Tuyết Hùng (Tank, z=0), cấp 15, tien 1, bậc C = hp 386, tc 63, pt 83, td 36, mm 10. Bậc SS cùng cấp = hp 521, tc 86, pt 112, td 48, mm 10 (làm tròn kiểu Math.round).
 
-## 2. Hệ (ngũ hành)
-- 5 hệ: kim, moc, thuy, hoa, tho. Vòng khắc: Mộc > Thổ > Thủy > Hỏa > Kim > Mộc.
-- Mỗi thú 1-2 hệ. 3 thú khởi đầu vẫn là Hỏa / Mộc / Thủy.
-- Hệ số một đòn (hệ đòn) lên mục tiêu có 1-2 hệ: với MỖI hệ của mục tiêu: x1,2 nếu hệ đòn khắc hệ đó; x0,8 nếu hệ đó khắc hệ đòn; x0,9 nếu cùng hệ; còn lại x1. Lấy TRUNG BÌNH các hệ của mục tiêu.
-- Đòn thường tự dùng hệ có lợi nhất của người đánh (so với mục tiêu). Kỹ năng dùng hệ riêng của kỹ năng.
-- Kiểm tra: mục tiêu Thủy+Thổ bị Thổ đánh = 1,05; Mộc đánh = 1,10; Hỏa đánh = 0,90; thú Thủy+Thổ đánh mục tiêu Hỏa = 1,2.
+## 2. Hệ (18 hệ, bảng khắc chế nằm trong 56-chi-so.js: BANG_HE)
+- 18 hệ (khung khắc chế lấy theo Pokémon, đổi tên cho hợp game): thuong, hoa, thuy, loi, moc, bang, vo, doc, tho, phong, tam (Tâm Linh), trung, nham, ma, long, am, kim, tien. Muốn đổi quan hệ nào thì sửa BANG_HE; thêm hệ mới thì thêm vào HE_TEN và BANG_HE.
+- Mỗi thú 1-2 hệ (hệ chủ đạo ghi trước). 3 thú khởi đầu vẫn là Hỏa / Mộc / Thủy.
+- Hệ số một đòn lên MỖI hệ của mục tiêu: khắc = CFG.he.khac (1,5), bị kháng = CFG.he.kem (0,7), miễn nhiễm = CFG.he.mien (0,3); còn lại 1. Mục tiêu 2 hệ thì NHÂN hai hệ số (CFG.he.cheDo='nhan'); đặt 'tb' để lấy trung bình. Song hệ cùng yếu = 2,25, cùng kháng = 0,49. Muốn kiểu Pokémon gốc: khac 2, kem 0,5, mien 0.
+- Đòn thường tự dùng hệ có lợi nhất của người đánh. Kỹ năng dùng hệ riêng của kỹ năng.
+- Kiểm tra (mục tiêu Thủy+Thổ): Mộc đánh = 2,25; Lôi đánh = 0,45 (Thổ miễn Lôi); Hỏa đánh = 0,70; thú Thủy+Thổ đánh mục tiêu Hỏa = 1,5.
 
 ## 3. Bậc
 - 7 bậc E,D,C,B,A,S,SS. Tỉ lệ tung: 28 / 24 / 20 / 14 / 8 / 4,5 / 1,5 (%). Hệ số hp,tc,pt,td: 0,85 / 0,92 / 1,00 / 1,08 / 1,16 / 1,25 / 1,35. mm không nhân bậc.
@@ -49,7 +49,8 @@ Mỗi vùng: debuff / buff / kỹ năng cơ bản / boss (buff riêng + kỹ nă
 - z3 Phong Nguyên: debuff Cuồng Phong (đối thủ -10% ne) | buff Phong Tích (+15% td; mỗi đòn gắn 1 lớp gió, đủ 3 lớp thì thêm 1 đòn liên kích 60% tc) | KN Phong Nhận (3 nhát, mỗi nhát 50% tc, cd 3) | Boss Phong Nguyên Vũ Xà: Xà Hành (+20% td lượt đầu), KN Vũ Xà Triền (140% tc, đối thủ -50% td 2 lượt, cd 5)
 - z4 Lôi Vực: debuff Tĩnh Điện (đối thủ -15% khu) | buff Lôi Kích (+15% cm; mỗi lần chí mạng 20% làm choáng 1 lượt) | KN Sấm Rền (160% tc, 20% choáng, cd 4) | Boss Lôi Vực Chiến Thần: Lôi Giáp (pd +15% phản đòn), KN Thiên Lôi Giáng (220% tc, 40% choáng, cd 6)
 - z5 Nguyệt Cung: debuff Nguyệt Quang (đối thủ -20% cm) | buff Nguyệt Ảnh (+15% ne; né thành công thì lượt sau +30% tc) | KN Nguyệt Huy (140% tc, hồi 10% hp, cd 4) | Boss Nguyệt Thực Tế Quân: Nguyệt Thực (dưới 30% hp thì +30% tc và hút máu 15%), KN Nguyệt Thực Nuốt (200% tc, đối thủ -20% td, cd 5)
-- Hệ của kỹ năng = hệ chủ đạo của vùng (khai ở bảng loài, bước B).
+- Hệ của kỹ năng = hệ chủ đạo của vùng (mục 8).
 
-## 8. Bảng loài mẫu: Tuyết Nguyên (z0)
-1a Tuyết Cầu: Cân bằng, thuy | 1b Tuyết Hùng: Tank, thuy+tho | 1c Băng Lộc: Nhanh, moc+thuy | 1d Tuyết Báo: Công, thuy+kim | 1e Băng Hải: Tank, thuy | 1f Tuyết Cú: Nhanh, thuy+moc | 1g Băng Dương: Cân bằng, thuy+tho | 1h Băng Linh: Công, thuy+hoa | 1i Băng Nham: Tank, thuy+tho | 1j Băng Sơn Cự Thú (boss): Tank, thuy+tho
+## 8. Hệ chủ đạo 6 vùng và bảng loài mẫu Tuyết Nguyên (z0)
+- Hệ chủ đạo vùng (hệ của kỹ năng cơ bản vùng): z0 Tuyết Nguyên = bang, z1 Sương Cốc = thuy, z2 Vân Đảo = tien, z3 Phong Nguyên = phong, z4 Lôi Vực = loi, z5 Nguyệt Cung = tam.
+- Tuyết Nguyên: 1a Tuyết Cầu: Cân bằng, bang | 1b Tuyết Hùng: Tank, bang+tho | 1c Băng Lộc: Nhanh, bang+moc | 1d Tuyết Báo: Công, bang+vo | 1e Băng Hải: Tank, bang+thuy | 1f Tuyết Cú: Nhanh, bang+phong | 1g Băng Dương: Cân bằng, bang+tho | 1h Băng Linh: Công, bang+tam | 1i Băng Nham: Tank, bang+nham | 1j Băng Sơn Cự Thú (boss): Tank, bang+nham

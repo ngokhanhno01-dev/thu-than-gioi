@@ -1,8 +1,8 @@
 /* 56-chi-so.js - LÕI TÍNH CHỈ SỐ (thuần tính toán, KHÔNG DOM, KHÔNG vẽ). Xuất window.TTGCS.
    Nguồn sự thật: game-moi/THIET_KE_CHI_SO.md (mục 1-5). MỌI SỐ chỉnh ở khối CFG ngay dưới.
-   BƯỚC A: hệ, bậc (gacha), cấp/EXP, chỉ số, sát thương. CHƯA có: bảng loài (56b), buff vùng (56c), kỹ năng (56d), TTGLV (56e).
+   BƯỚC A: hệ (18 hệ), bậc (gacha), cấp/EXP, chỉ số, sát thương. CHƯA có: bảng loài (56b), buff vùng (56c), kỹ năng (56d), TTGLV (56e).
    Hàm có ngẫu nhiên đều nhận tham số rng (mặc định Math.random) để test bằng node.
-   API: HE, heHeSo, heTotNhat, BAC, tungBac, hsBac, expCan, tranCap, expThuong, goc, tinh, satThuong, CFG */
+   API: HE, HE_TEN, BANG_HE, heHeSo, heTotNhat, BAC, tungBac, hsBac, expCan, tranCap, expThuong, goc, tinh, satThuong, CFG */
 (function(root){
 'use strict';
 
@@ -26,8 +26,9 @@ var CFG={
   /* bậc: tỉ lệ tung (%) và hs hp,tc,pt,td. mm KHÔNG nhân bậc */
   bac:[['E',28,0.85],['D',24,0.92],['C',20,1.00],['B',14,1.08],['A',8,1.16],['S',4.5,1.25],['SS',1.5,1.35]],
   bacQuai:'C',bacThuHoang:'C',bacBoss:'A',   /* bậc cố định KHI ĐANG ĐÁNH (bắt xong mới tung bậc thật) */
-  /* hệ: hệ số một đòn (trung bình các hệ mục tiêu) */
-  he:{khac:1.2,biKhac:0.8,cung:0.9},
+  /* hệ: hệ số một đòn lên MỖI hệ của mục tiêu. cheDo 'nhan' = nhân các hệ số của 2 hệ (song hệ cùng yếu 1,5x1,5=2,25), 'tb' = trung bình.
+     Muốn kiểu Pokémon gốc: khac 2, kem 0.5, mien 0, cheDo 'nhan'. Muốn chênh nhẹ hơn: giảm khac/tăng kem. */
+  he:{cheDo:'nhan',khac:1.5,kem:0.7,mien:0.3},
   /* cấp / EXP / sao */
   capMax:100,
   tranCapNen:10,tranCapMoiSao:0.55,     /* trần cấp = min(100, 10 + floor(sao x 0,55)) */
@@ -43,21 +44,48 @@ var PHU=['cm','hm','hutm','ne','choang','cx','pd','lk','stcm','stdb','xg','khu',
 function rngMac(){return Math.random();}
 function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 
-/* ===== HỆ (ngũ hành): Mộc > Thổ > Thủy > Hỏa > Kim > Mộc ===== */
-var HE=['kim','moc','thuy','hoa','tho'];
-var KHAC={moc:'tho',tho:'thuy',thuy:'hoa',hoa:'kim',kim:'moc'};   /* KHAC[a]=b : a khắc b */
-/* hs một đòn hệ heDon lên mục tiêu có 1-2 hệ: mỗi hệ mục tiêu -> khắc 1,2 / bị khắc 0,8 / cùng hệ 0,9 / còn lại 1; lấy TRUNG BÌNH */
+/* ===== HỆ: 18 hệ (khung khắc chế lấy theo Pokémon, đổi tên cho hợp game) =====
+   BANG_HE[hệ tấn công] = {khac:[hệ bị khắc], kem:[hệ kháng], mien:[hệ miễn nhiễm]}. Sửa quan hệ nào cứ sửa ở đây. Hệ không liệt kê = x1.
+   Thêm hệ mới: thêm vào HE_TEN + một dòng BANG_HE + (nếu cần) thêm tên vào dòng của các hệ khác. */
+var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên'};
+var HE=Object.keys(HE_TEN);
+function ds(x){return x?x.split(' '):[];}
+function H(khac,kem,mien){return {khac:ds(khac),kem:ds(kem),mien:ds(mien)};}
+var BANG_HE={
+  thuong:H('','nham kim','ma'),
+  hoa:   H('moc bang trung kim','hoa thuy nham long',''),
+  thuy:  H('hoa tho nham','thuy moc long',''),
+  loi:   H('thuy phong','loi moc long','tho'),
+  moc:   H('thuy tho nham','hoa moc doc phong trung long kim',''),
+  bang:  H('moc tho phong long','hoa thuy bang kim',''),
+  vo:    H('thuong bang nham am kim','doc phong tam trung tien','ma'),
+  doc:   H('moc tien','doc tho nham ma','kim'),
+  tho:   H('hoa loi doc nham kim','moc trung','phong'),
+  phong: H('moc vo trung','loi nham kim',''),
+  tam:   H('vo doc','tam kim','am'),
+  trung: H('moc tam am','hoa vo doc phong ma kim tien',''),
+  nham:  H('hoa bang phong trung','vo tho kim',''),
+  ma:    H('tam ma','am','thuong'),
+  long:  H('long','kim','tien'),
+  am:    H('tam ma','vo am tien',''),
+  kim:   H('bang nham tien','hoa thuy loi kim',''),
+  tien:  H('vo long am','hoa doc kim','')
+};
+/* hs một đòn hệ heDon lên 1 hệ mục tiêu h */
+function heMot(heDon,h){
+  var r=BANG_HE[heDon];if(!r)return 1;
+  if(r.mien.indexOf(h)>=0)return CFG.he.mien;
+  if(r.khac.indexOf(h)>=0)return CFG.he.khac;
+  if(r.kem.indexOf(h)>=0)return CFG.he.kem;
+  return 1;
+}
+/* hs một đòn hệ heDon lên mục tiêu có 1-2 hệ (cách gộp: CFG.he.cheDo) */
 function heHeSo(heDon,heMucTieu){
-  var ds=(heMucTieu&&heMucTieu.length)?heMucTieu:[],n=ds.length;
-  if(!n||!heDon)return 1;
-  var s=0;
-  ds.forEach(function(h){
-    if(KHAC[heDon]===h)s+=CFG.he.khac;
-    else if(KHAC[h]===heDon)s+=CFG.he.biKhac;
-    else if(h===heDon)s+=CFG.he.cung;
-    else s+=1;
-  });
-  return s/n;
+  var d=(heMucTieu&&heMucTieu.length)?heMucTieu:[];
+  if(!d.length||!heDon)return 1;
+  var v=d.map(function(h){return heMot(heDon,h);});
+  if(CFG.he.cheDo==='tb')return v.reduce(function(a,b){return a+b;},0)/v.length;
+  return v.reduce(function(a,b){return a*b;},1);
 }
 /* đòn thường tự chọn hệ có lợi nhất trong các hệ của người đánh. Trả {he, hs} */
 function heTotNhat(heNguoiDanh,heMucTieu){
@@ -137,7 +165,7 @@ function satThuong(o){
   return Math.max(1,Math.floor(d));
 }
 
-var api={CFG:CFG,CHINH:CHINH,PHU:PHU,HE:HE,KHAC:KHAC,heHeSo:heHeSo,heTotNhat:heTotNhat,BAC:BAC,hsBac:hsBac,tungBac:tungBac,
+var api={CFG:CFG,CHINH:CHINH,PHU:PHU,HE:HE,HE_TEN:HE_TEN,BANG_HE:BANG_HE,heHeSo:heHeSo,heTotNhat:heTotNhat,BAC:BAC,hsBac:hsBac,tungBac:tungBac,
   expCan:expCan,tranCap:tranCap,expThuong:expThuong,goc:goc,tinh:tinh,satThuong:satThuong};
 /* giữ các phần mở rộng nếu file khác (56b/56c/56d) nạp trước */
 root.TTGCS=Object.assign(root.TTGCS||{},api);
