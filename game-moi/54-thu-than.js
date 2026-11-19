@@ -1,12 +1,12 @@
 /* 54-thu-than.js - Nút "Thú Thần" + panel Thú Thần (chứa và trang bị thú đã bắt).
    Cần 52-nut-vuong.js (TTGNV) nạp trước; nạp SAU 53-balo.js (để đóng Balo khi mở panel này).
-   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). BƯỚC 2 = khung ảnh game-moi/khung-thu.webp (2956x1346, hệ tọa độ 1478x673) + đóng bằng nút X / bấm ngoài / Esc (xong). Bước 3 (bố cục: tên thú, chỉ số, ô kỹ năng, lưới thú, nút Ra trận) chưa làm: khung đang trống.
+   TIẾN ĐỘ: BƯỚC 1 = nút + icon + quy tắc đóng/mở (xong). BƯỚC 2 = khung ảnh game-moi/khung-thu.webp (1478x673, hiển thị đúng cỡ gốc 1 pixel ảnh = 1 pixel máy để không bị mờ) + đóng bằng nút X / bấm ngoài / Esc (xong). Bước 3 (bố cục: tên thú, chỉ số, ô kỹ năng, lưới thú, nút Ra trận) chưa làm: khung đang trống.
    QUY TẮC: mở Thú Thần thì đóng Balo, mở Balo thì đóng Thú Thần (53-balo.js gọi TTGTHU.close()).
    API: TTGTHU.open() / .close() / .isOpen() */
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var BW=1478,BH=673,IMG='game-moi/khung-thu.webp?v=2';   /* ảnh khung thật là 2956x1346 (gấp đôi cho nét), nhưng mọi tọa độ bên dưới vẫn tính theo hệ 1478x673 */
+var BW=1478,BH=673,IMG='game-moi/khung-thu.webp?v=3';   /* ảnh khung gốc 1478x673 (không phóng to, nén không mất chất lượng); mọi tọa độ bên dưới tính theo pixel ảnh này */
 var isOpen=false,openAt=0,root=null,fr=null;
 
 /* ===== CSS: {n} = n px ảnh (tự co theo --u) ===== */
@@ -23,7 +23,10 @@ var st=document.createElement('style');st.textContent=css;document.head.appendCh
 /* ===== DỰNG PANEL (một lần) ===== */
 function box(c,x,y,w,h){var s=c.style;s.left=(x/BW*100)+'%';s.top=(y/BH*100)+'%';s.width=(w/BW*100)+'%';s.height=(h/BH*100)+'%';return c;}
 function mk(tag,cls,x,y,w,h){var c=document.createElement(tag);if(cls)c.className=cls;if(w)box(c,x,y,w,h);fr.appendChild(c);return c;}
-function unit(){if(fr)fr.style.setProperty('--u',(fr.clientWidth/BW)+'px');}
+/* KHÔNG PHÓNG TO QUÁ CỠ GỐC: chiều rộng khung tối đa = BW / devicePixelRatio (CSS px) => đúng 1 pixel ảnh = 1 pixel màn hình, nét nhất.
+   Màn nhỏ hơn thì tự thu nhỏ lại. Muốn khung to hơn (đổi nét lấy kích thước): đổi MAXSCALE lên >1 (vd 1.3). */
+var MAXSCALE=1;
+function unit(){if(!fr)return;var d=window.devicePixelRatio||1;fr.style.maxWidth=(BW*MAXSCALE/d)+'px';fr.style.setProperty('--u',(fr.clientWidth/BW)+'px');}
 function build(){
   root=document.createElement('div');root.className='tt';
   fr=document.createElement('div');fr.className='tt-fr';root.appendChild(fr);
