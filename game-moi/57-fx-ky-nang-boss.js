@@ -15,6 +15,15 @@
   im.onerror=()=>{SPR.ok=false};
   im.src=base+'fx-boss/bang-son-ap-dinh.png';
  }catch(e){}
+ /* Sprite sheet kỹ năng 2 (Sương Nuốt): cùng bố cục 3x2, ô 768x768. */
+ const MS={ok:false,img:null,cell:768};
+ try{
+  const base=((document.currentScript&&document.currentScript.src)||'').replace(/[^\/]*$/,'');
+  const im=new Image();
+  im.onload=()=>{MS.img=im;MS.cell=Math.floor(im.naturalWidth/3);MS.ok=im.naturalWidth>=3&&im.naturalHeight>=2};
+  im.onerror=()=>{MS.ok=false};
+  im.src=base+'fx-boss/suong-nuot.png';
+ }catch(e){}
  function boot(){
   const API=window.TTGCombatFX;
   if(!API||!API.engine||!API.drawAttack){
@@ -499,6 +508,106 @@
       shape:n%4?'orb':'mist',c:C.light,c2:C.core,a:.9,add:true,tag:TAG});
     }
     groundCore(g,x,GY-3,C.light,after*.16,30*s);
+   }
+  }
+
+  /* 2b · Sương Nuốt bằng ảnh 6 khung. Chỉnh nhanh ở MIST_K / MIST_GY / MIST_SPR.
+     Mốc (giây): 1 báo hiệu · 2 vòm sương · 3 hàm mở và khép dần · 4 ngoạm (TH) · 5 bóp + hút · 6 tan.
+     Dòng sinh khí khung 5 vẽ bằng code (ảnh không có tia/quả cầu). */
+  const MIST_K=.31;          /* tỉ lệ phóng ảnh -> canvas 360x250 */
+  const MIST_GY=672;         /* y mặt đất trong ô ảnh (px ảnh gốc) */
+  const MIST_CUT=388;        /* hàng cắt giữa hàm trên và hàm dưới ở khung 3 */
+  const MIST_SPR=[
+   {f:0,a:0,   b:.2,  s0:1,   s1:1},
+   {f:1,a:.2,  b:.4,  s0:.8,  s1:1},
+   {f:2,a:.4,  b:TH,  s0:1,   s1:1, jaw:1},
+   {f:3,a:TH,  b:.9,  s0:1,   s1:1, hit:1},
+   {f:4,a:.9,  b:1.3, s0:1,   s1:.94, w0:1, w1:.86},
+   {f:5,a:1.3, b:END, s0:1,   s1:1}
+  ];
+  function mistSprite(g,t,S){
+   const q=aim(S),k=MIST_K*clamp(q.scale,.72,1.05),C=MS.cell,F=.07,
+    half=C*k*.5*.95,ax=clamp(q.x,half,360-half);
+   let sh=0,shy=0;
+   if(t>=TH){const dk=Math.max(0,1-(t-TH)/.34);sh=Math.sin((t-TH)*90)*2.6*dk;shy=Math.cos((t-TH)*75)*1.8*dk}
+   const gx=ax+sh,gy=GY-2+shy;
+   g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+   /* Bóng đất to dần phía sau ảnh, tan đi khi sương tan. */
+   const grow=ph(t,0,TH),sa=(1-ph(t,1.3,END))*(.3+.3*grow);
+   if(sa>.01){
+    g.save();g.globalAlpha=sa;g.fillStyle='#0f3a35';g.beginPath();
+    g.ellipse(gx,gy-1,Math.max(8,(40+70*grow)*k/.31),(7+8*grow),0,0,TAU);g.fill();g.restore();
+   }
+   for(const o of MIST_SPR){
+    if(t<o.a-F||t>o.b+F)continue;
+    let al=1;
+    if(o.f>0&&t<o.a+F)al=ph(t,o.a-F,o.a+F);
+    if(o.f<5&&t>o.b-F)al*=1-ph(t,o.b-F,o.b+F);
+    if(o.f===0)al=Math.min(al,ph(t,0,.08));
+    if(o.f===5)al*=1-ph(t,1.4,END);
+    if(al<=.01)continue;
+    const p=ph(t,o.a,o.b),sc=lerp(o.s0,o.s1,eo(p)),wx=lerp(o.w0||1,o.w1||1,p),
+     sq=o.hit?1-.05*Math.max(0,1-(t-TH)/.12):1,
+     sx0=(o.f%3)*C,sy0=((o.f/3)|0)*C;
+    g.save();g.globalAlpha=clamp(al,0,1);
+    g.translate(gx,gy);g.scale(sc*wx,sc*sq);g.translate(-(C/2)*k,-MIST_GY*k);
+    if(o.jaw){
+     /* Hàm trên hạ xuống, hàm dưới nâng lên: khép dần trước khi ngoạm. */
+     const e=p*p,up=70*e,lo=-24*e;
+     g.drawImage(MS.img,sx0,sy0,C,MIST_CUT,0,up*k,C*k,MIST_CUT*k);
+     g.drawImage(MS.img,sx0,sy0+MIST_CUT,C,C-MIST_CUT,0,(MIST_CUT+lo)*k,C*k,(C-MIST_CUT)*k);
+    }else g.drawImage(MS.img,sx0,sy0,C,C,0,0,C*k,C*k);
+    g.restore();
+   }
+   g.restore();
+  }
+  function mistSpriteFx(g,T,t,S,st){
+   const q=aim(S),x=q.x,s=q.scale,C=COL.mist,r=E.rng(st.seed^0x570201),
+    ax=clamp(x-q.dir*172,34,326);
+   if(t<TH){
+    for(let n=0;n<E.rate(st,'mist-charge',ph(t,0,TH),22);n++){
+     const side=r.sign(),yy=r.range(30,GY-14);
+     E.emit({x:x+side*r.range(48,90),y:yy,vx:-side*r.range(14,40),vy:r.range(-12,10),gy:0,drag:.4,
+      life:r.range(.34,.6),s0:r.range(1.6,3),s1:.5,shape:n%3?'mist':'orb',c:C.light,c2:C.core,a:.85,add:true,tag:TAG});
+    }
+   }
+   if(t>=TH&&t<=END){
+    if(E.once(st,'mist-hit')){
+     burst(st,'mist-implosion',x,GY-45,S.miss?16:36,{
+      speed:[18,70],ang:[0,TAU],size:[5,12],life:[.5,.9],gy:-8,drag:.66,shape:'mist',c:C.light,c2:C.core,a:.8,add:true});
+     burst(st,'mist-core-drops',x,GY-14,S.miss?14:30,{
+      speed:[26,82],ang:[-Math.PI*.92,-Math.PI*.08],size:[1.8,4.2],life:[.45,.84],
+      gy:80,drag:.46,shape:'orb',c:C.light,c2:C.core,a:.96,add:true,floor:GY+2,bounce:.1});
+    }
+    for(let i=0;i<3;i++){
+     const start=TH+i*.15,p=ph(t,start,start+.42),f=1-ph(t,start+.2,start+.6);
+     if(p>0&&f>0)wave(g,x,GY-3,8+110*eo(p)*s,i===1?C.core:C.light,f*.7,2.2,T,st.seed+80+i,.2);
+    }
+    /* Dòng sinh khí: ba sợi sương chảy từ mục tiêu về người đánh, đầu sáng dẫn đường. */
+    const flow=ph(t,TH+.08,TH+.82),keep=1-ph(t,TH+.76,END),mult=S.miss?.4:1;
+    if(flow>0&&keep>0)for(let k=0;k<3;k++){
+     const pts=[],head=eo(flow),tailV=Math.max(0,head-.6);
+     for(let j=0;j<22;j++){
+      const v=lerp(tailV,head,j/21),px=lerp(x-q.dir*16,ax+q.dir*20,v),
+       py=GY-58-Math.sin(v*Math.PI)*(26+k*13)+Math.sin(v*TAU*1.2+T*4+k*2.1)*(2.5+k*1.5);
+      pts.push(point(px,py));
+     }
+     stroke(g,pts,C.deep,12-k*2.6,keep*mult*.45,false);
+     stroke(g,pts,k===1?C.light:C.main,6.5-k*1.4,keep*mult*.7,true);
+     stroke(g,pts,'#f2fffb',1.8,keep*mult*.9,true);
+     const hd=pts[pts.length-1];glow(g,hd[0],hd[1],15-k*2,C.light,keep*mult*.75,C.core);
+    }
+    const arrive=ph(t,TH+.62,TH+.95)*(1-ph(t,TH+.9,END));
+    if(arrive>0&&!S.miss){
+     glow(g,ax+q.dir*24,GY-58,34,C.light,arrive*.4,C.core);
+     wave(g,ax+q.dir*24,GY-8,10+26*arrive,C.light,arrive*.5,1.6,T,st.seed+130,.18);
+    }
+    for(let n=0;n<E.rate(st,'mist-droplets',ph(t,TH,END),20);n++){
+     const an=r.range(0,TAU),rr=r.range(22,60);
+     E.emit({x:x+Math.cos(an)*rr,y:GY-r.range(8,70),vx:-q.dir*r.range(18,48),vy:r.range(-18,12),
+      gx:-q.dir*r.range(5,16),gy:14,drag:.5,life:r.range(.42,.8),s0:r.range(1.5,3.2),s1:.5,
+      shape:n%4?'orb':'mist',c:C.light,c2:C.core,a:.9,add:true,tag:TAG});
+    }
    }
   }
 
@@ -1059,6 +1168,9 @@
      /* Ảnh vẽ thẳng lên canvas (giữ nguyên màu); hạt và sóng vẫn đi qua lớp pixel. */
      iceSprite(g,t,S);
      pixelLayer(g,gg=>{iceSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
+    }else if(S.kyNang==='suong-nuot'&&MS.ok){
+     mistSprite(g,t,S);
+     pixelLayer(g,gg=>{mistSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
     }else pixelLayer(g,gg=>{run(gg,T,t,S,st);E.draw(gg,TAG)});
    }catch(e){
     window.__fxBossErr='57: '+(e&&e.message||e);
