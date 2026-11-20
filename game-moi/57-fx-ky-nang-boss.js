@@ -24,6 +24,15 @@
   im.onerror=()=>{MS.ok=false};
   im.src=base+'fx-boss/suong-nuot.png';
  }catch(e){}
+ /* Sprite sheet kỹ năng 3 (Côn Bằng Triển Sí): ô 768x768, bỏ khung 1 (không có vòng ấn dưới chân địch). */
+ const WS={ok:false,img:null,cell:768};
+ try{
+  const base=((document.currentScript&&document.currentScript.src)||'').replace(/[^\/]*$/,'');
+  const im=new Image();
+  im.onload=()=>{WS.img=im;WS.cell=Math.floor(im.naturalWidth/3);WS.ok=im.naturalWidth>=3&&im.naturalHeight>=2};
+  im.onerror=()=>{WS.ok=false};
+  im.src=base+'fx-boss/con-bang.png';
+ }catch(e){}
  function boot(){
   const API=window.TTGCombatFX;
   if(!API||!API.engine||!API.drawAttack){
@@ -855,6 +864,104 @@
    }
   }
 
+  /* 3b · Côn Bằng Triển Sí bằng ảnh. Cá voi bay từ phía người đánh vào địch, KHÔNG có vòng ấn dưới chân địch.
+     Ảnh dùng khung 2-6 (khung 1 bỏ). Cá voi trong ảnh quay đầu sang PHẢI; bên kia thì lật.
+     Mốc (giây): 2 bay lượn 0-.27 · 3 lao xuống .27-TH · 4 va chạm TH-.9 · 5 nổ nước .9-1.3 · 6 tan 1.3-END.
+     Chỉnh nhanh: WH_K (khung nước), WH_KW (khung cá voi), WH_GY, WH_A2/WH_A3 (mũi cá voi trong ảnh), WH_SHADOW. */
+  const WH_K=.31,WH_KW=.28,WH_GY=648,WH_SHADOW=true;
+  const WH_A2=[724,310],WH_A3=[636,640];
+  const WH_SPR=[
+   {f:1,a:0,   b:.27, fl:1},
+   {f:2,a:.27, b:TH,  fl:1},
+   {f:3,a:TH,  b:.9,  s0:.9, s1:1},
+   {f:4,a:.9,  b:1.3, s0:1,  s1:1.03},
+   {f:5,a:1.3, b:END, s0:1,  s1:1}
+  ];
+  /* Vị trí mũi cá voi: bay ngang rồi cắm chéo xuống, nhanh dần, chạm đất đúng lúc TH. */
+  function whaleHead(t,x,dir){
+   if(t<.27){const p=ph(t,0,.27);return {hx:x-dir*lerp(200,110,p),hy:lerp(70,92,p),rot:lerp(-.1,.12,p)}}
+   const p=ph(t,.27,TH),e=Math.pow(p,1.5);
+   return {hx:x-dir*lerp(105,6,e),hy:lerp(96,GY-8,e),rot:lerp(-.18,.02,p)};
+  }
+  function whaleSprite(g,t,S){
+   const q=aim(S),x=q.x,dir=q.dir,sm=clamp(q.scale,.72,1.05),C=WS.cell,F=.06,
+    k=WH_K*sm,kw=WH_KW*sm,half=C*k*.5*.8,ax=clamp(x,half,360-half);
+   let sh=0,shy=0;
+   if(t>=TH){const dk=Math.max(0,1-(t-TH)/.4);sh=Math.sin((t-TH)*85)*3.6*dk;shy=Math.cos((t-TH)*70)*2.6*dk}
+   g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+   /* Bóng chạy theo cá voi trên mặt đất (không phải vòng ấn dưới chân địch). */
+   if(WH_SHADOW&&t<TH+.15){
+    const u=ph(t,0,TH),h=whaleHead(Math.min(t,TH),x,dir),
+     sx=h.hx-dir*lerp(70,10,u),sa=(.18+.22*u)*(1-ph(t,TH,TH+.15));
+    g.save();g.globalAlpha=sa;g.fillStyle='#123c54';g.beginPath();
+    g.ellipse(clamp(sx,6,354),GY-1,(16+34*u)*sm,3.5+3.5*u,0,0,TAU);g.fill();g.restore();
+   }
+   for(const o of WH_SPR){
+    let al=1;
+    if(t<o.a-F||t>o.b+F)continue;
+    if(o.f>2&&t<o.a+F)al=ph(t,o.a-F,o.a+F);
+    if(o.f>1&&o.f<=2&&t<o.a+F)al=ph(t,o.a-F,o.a+F);
+    if(o.f<5&&t>o.b-F)al*=1-ph(t,o.b-F,o.b+F);
+    if(o.f===1)al=Math.min(al,ph(t,0,.05)+.35);
+    if(o.f===5)al*=1-ph(t,1.4,END);
+    al=clamp(al,0,1);if(al<=.01)continue;
+    const sx0=(o.f%3)*C,sy0=((o.f/3)|0)*C;
+    g.save();g.globalAlpha=al;
+    if(o.fl){
+     const h=whaleHead(clamp(t,o.a,o.b),x,dir),A=o.f===1?WH_A2:WH_A3;
+     g.translate(h.hx+sh,h.hy+shy);g.scale(dir,1);g.rotate(h.rot);g.translate(-A[0]*kw,-A[1]*kw);
+     g.drawImage(WS.img,sx0,sy0,C,C,0,0,C*kw,C*kw);
+    }else{
+     const p=ph(t,o.a,o.b),sc=lerp(o.s0,o.s1,eo(p));
+     g.translate(ax+sh,GY-2+shy);g.scale(sc,sc);g.translate(-(C/2)*k,-WH_GY*k);
+     g.drawImage(WS.img,sx0,sy0,C,C,0,0,C*k,C*k);
+    }
+    g.restore();
+   }
+   g.restore();
+  }
+  function whaleSpriteFx(g,T,t,S,st){
+   const q=aim(S),x=q.x,s=q.scale,dir=q.dir,C=COL.wing,r=E.rng(st.seed^0x570300);
+   if(t<TH){
+    const h=whaleHead(t,x,dir);
+    for(let n=E.rate(st,'whale-drip',ph(t,.04,TH),26);n>0;n--){
+     E.emit({x:clamp(h.hx-dir*r.range(30,110),6,354),y:clamp(h.hy-r.range(0,34),6,244),vx:-dir*r.range(6,28),vy:r.range(-12,22),
+      gy:110,drag:.5,life:r.range(.38,.7),s0:r.range(1.4,2.8),s1:.4,shape:n%3?'orb':'mist',c:SEA.main,c2:SEA.core,a:.85,add:true,tag:TAG});
+    }
+   }
+   if(t>=TH-.04&&t<=END){
+    if(E.once(st,'whale-impact')){
+     burst(st,'whale-water',x,GY-22,S.miss?18:40,{
+      speed:[46,128],ang:[-Math.PI*.92,-Math.PI*.08],size:[2,4.6],life:[.55,.98],
+      gy:300,drag:.28,shape:'orb',c:SEA.main,c2:SEA.core,a:.96,add:true,floor:GY+3,bounce:.18});
+     burst(st,'whale-feathers',x,GY-54,S.miss?10:24,{
+      speed:[22,74],ang:[-Math.PI*.94,-Math.PI*.06],size:[2.5,5.5],life:[.55,.98],
+      gy:86,drag:.42,shape:'leaf',c:C.main,c2:C.core,a:.95,vr:[-8,8],fl:8});
+     for(const side of [-1,1])
+      burst(st,'whale-sweep'+side,x+side*12,GY-9,S.miss?5:10,{
+       speed:[70,140],ang:side>0?[-.28,.04]:[Math.PI-.04,Math.PI+.28],size:[2,4.4],life:[.3,.58],
+       gy:20,drag:.5,shape:'streak',c:SEA.light,c2:SEA.core,a:.92,add:true});
+    }
+    for(let i=0;i<3;i++){
+     const start=TH+i*.15,p=ph(t,start,start+.44),f=1-ph(t,start+.22,start+.64);
+     if(p>0&&f>0)wave(g,x,GY-4,8+112*eo(p)*s*(1-i*.15),i===1?C.light:SEA.light,f*.74,2.3,T,st.seed+70+i,.18);
+    }
+    const flash=1-ph(t,TH-.02,TH+.16);
+    if(flash>.01)glow(g,x,GY-40,52*s,SEA.light,flash*.5,'#ffffff');
+    for(let n=E.rate(st,'whale-rain',ph(t,TH+.08,END-.1),22);n>0;n--)
+     E.emit({x:x+r.range(-50,50),y:GY-r.range(64,112),vx:r.range(-8,8),vy:r.range(10,40),gy:230,drag:.25,
+      life:r.range(.45,.78),s0:r.range(1.4,2.6),s1:.6,shape:'orb',c:SEA.main,c2:SEA.core,a:.9,add:true,
+      tag:TAG,floor:GY+2,bounce:.1});
+    for(let n=E.rate(st,'wing-drift',ph(t,TH,END),16);n>0;n--){
+     const xx=x+r.range(-30,30);
+     E.emit({x:xx,y:GY-r.range(22,76),vx:r.range(-31,31),vy:-r.range(10,46),
+      gy:66,drag:.48,life:r.range(.48,.86),s0:r.range(2,4),s1:.55,
+      shape:'leaf',c:n%2?C.main:C.light,c2:C.core,a:.92,tag:TAG,
+      rot:r.range(0,TAU),vr:r.range(-6,6),fl:9});
+    }
+   }
+  }
+
   /* 4 · Vũ Xà Triền: thân rắn có vảy cuộn quanh mục tiêu, đầu rõ và ngẩng cao. */
   function snakeHead(g,x,y,dir,a,T){
    if(a<=.01)return;
@@ -1171,6 +1278,9 @@
     }else if(S.kyNang==='suong-nuot'&&MS.ok){
      mistSprite(g,t,S);
      pixelLayer(g,gg=>{mistSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
+    }else if(S.kyNang==='con-bang-trien-si'&&WS.ok){
+     whaleSprite(g,t,S);
+     pixelLayer(g,gg=>{whaleSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
     }else pixelLayer(g,gg=>{run(gg,T,t,S,st);E.draw(gg,TAG)});
    }catch(e){
     window.__fxBossErr='57: '+(e&&e.message||e);
