@@ -58,7 +58,7 @@ Giao diện thú có 3 ô tròn: ô 1 BUFF (nội tại), ô 2 DEBUFF, ô 3 ĐÒ
 - Sát thương kỹ năng = công thức mục 5 với hsKyNang bên dưới; hệ của kỹ năng đánh theo hệ kỹ năng. Debuff của kỹ năng bị giảm theo khu (mục 6), choáng bị chặn theo kc.
 - ks0 Băng Sơn Áp Đỉnh (boss Băng Sơn Cự Thú, hệ băng): 180% tc, gắn 2 lớp lạnh lên đối thủ (cộng vào buff Đông Cứng), cd 5. Mô tả: khối băng khổng lồ từ trên trời giáng xuống đè đối thủ, vỡ tan thành tinh thể băng.
 - ks1 Sương Nuốt (Vạn Trượng Vụ Thú, hệ thủy): 150% tc, hút 30% sát thương gây ra thành máu cho boss, cd 5. Mô tả: màn sương dày bao trùm đối thủ rồi bị hút về miệng boss, sương cuộn thành xoáy.
-- ks2 Côn Bằng Triển Sí (Vân Đảo Côn Bằng, hệ phong): 200% tc, boss tự +30% tốc độ 2 lượt, cd 5. Mô tả: Côn Bằng giương đôi cánh khổng lồ, cuốn gió và mây lao tới quét ngang.
+- ks2 Côn Bằng Triển Sí (Vân Đảo Côn Bằng, hệ phong): 200% tc, boss tự +30% tốc độ 2 lượt, cd 5. Mô tả: Côn Bằng là cá voi khổng lồ mọc đôi cánh nhiều tầng, vỗ cánh cuốn gió và mây rồi lao xuống đâm vào đối thủ, vỡ thành cột nước và sóng quét ngang.
 - ks3 Vũ Xà Triền (Phong Nguyên Vũ Xà, hệ phong): 140% tc, đối thủ -50% tốc độ 2 lượt, cd 5. Mô tả: thân rắn gió quấn chặt đối thủ rồi siết lại, vòng xoáy gió trói chân.
 - ks4 Thiên Lôi Giáng (Lôi Vực Chiến Thần, hệ lôi): 220% tc, 40% làm choáng 1 lượt, cd 6. Mô tả: chiến thần giơ vũ khí gọi cột sét từ trời đánh thẳng xuống đối thủ.
 - ks5 Nguyệt Thực Nuốt (Nguyệt Thực Tế Quân, hệ ám): 200% tc, đối thủ -20% tốc độ 2 lượt, cd 5. Mô tả: mặt trăng bị bóng đen che khuất, vòng tối nuốt lấy đối thủ.
