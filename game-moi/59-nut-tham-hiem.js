@@ -1,5 +1,5 @@
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-TTGNV.add({id:'tham-hiem',ten:'Thám hiểm',image:'game-moi/nut-tham-hiem.webp',w:98,h:40,center:true,r:0,offsetY:-1});
+TTGNV.add({id:'tham-hiem',ten:'Thám hiểm',image:'game-moi/nut-tham-hiem.webp',w:98,h:40,center:true,onTap:function(){if(window.TTGTHAMHIEM&&TTGTHAMHIEM.start)TTGTHAMHIEM.start();},r:0,offsetY:-1});
 })();
