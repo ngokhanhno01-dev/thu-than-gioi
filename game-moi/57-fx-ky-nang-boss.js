@@ -33,6 +33,15 @@
   im.onerror=()=>{WS.ok=false};
   im.src=base+'fx-boss/con-bang.png';
  }catch(e){}
+ /* Sprite sheet kỹ năng 4 (Vũ Xà Triền): 3 cột x 2 hàng, ô 768x768, rắn quay đầu sang PHẢI. */
+ const VS={ok:false,img:null,cell:768};
+ try{
+  const base=((document.currentScript&&document.currentScript.src)||'').replace(/[^\/]*$/,'');
+  const im=new Image();
+  im.onload=()=>{VS.img=im;VS.cell=Math.floor(im.naturalWidth/3);VS.ok=im.naturalWidth>=3&&im.naturalHeight>=2};
+  im.onerror=()=>{VS.ok=false};
+  im.src=base+'fx-boss/vu-xa.png';
+ }catch(e){}
  function boot(){
   const API=window.TTGCombatFX;
   if(!API||!API.engine||!API.drawAttack){
@@ -1105,6 +1114,80 @@
     groundCore(g,x,GY-3,C.light,fade*.18,31*s);
    }
   }
+  /* 4b · Vũ Xà Triền bằng ảnh 6 khung. Rắn trong ảnh quay đầu sang PHẢI; bên kia lật bằng g.scale(dir,1).
+     Mốc (giây): 1 gió tụ 0-.2 · 2 rắn trồi .2-.4 · 3 siết chặt .4-TH · 4 nghiền (trúng) TH-.9 · 5 vỡ thành gió+lá .9-1.3 · 6 tan 1.3-END.
+     Chỉnh nhanh: SNK_K (tỉ lệ), SNK_CX (tâm ngang trong ảnh), gy của từng khung (mặt đất trong ô ảnh gốc). */
+  const SNK_K=.31,SNK_CX=380;
+  const SNK_SPR=[
+   {f:0,a:0,   b:.2,  s0:1,  s1:1,  gy:704},
+   {f:1,a:.2,  b:.4,  s0:.94,s1:1,  gy:704},
+   {f:2,a:.4,  b:TH,  s0:.97,s1:.9, gy:706},
+   {f:3,a:TH,  b:.9,  s0:.9, s1:.94,gy:686, hit:1},
+   {f:4,a:.9,  b:1.3, s0:.98,s1:1.04,gy:694},
+   {f:5,a:1.3, b:END, s0:1,  s1:1.03,gy:700}
+  ];
+  function snakeSprite(g,t,S){
+   const q=aim(S),dir=q.dir,k=SNK_K*clamp(q.scale,.72,1.05),C=VS.cell,F=.07,
+    half=C*k*.5*.95,ax=clamp(q.x,half,360-half);
+   let sh=0,shy=0;
+   if(t>=TH){const dk=Math.max(0,1-(t-TH)/.34);sh=Math.sin((t-TH)*92)*2.8*dk;shy=Math.cos((t-TH)*78)*1.9*dk}
+   g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+   for(const o of SNK_SPR){
+    if(t<o.a-F||t>o.b+F)continue;
+    let al=1;
+    if(o.f>0&&t<o.a+F)al=ph(t,o.a-F,o.a+F);
+    if(o.f<5&&t>o.b-F)al*=1-ph(t,o.b-F,o.b+F);
+    if(o.f===0)al=Math.min(al,ph(t,0,.08));
+    if(o.f===5)al*=1-ph(t,1.4,END);
+    al=clamp(al,0,1);if(al<=.01)continue;
+    const p=ph(t,o.a,o.b),sc=lerp(o.s0,o.s1,o.f===2?p*p:eo(p)),
+     /* Khung 4: thân bị nén lại rồi bật nhẹ ngay lúc trúng. */
+     sq=o.hit?1-.07*Math.max(0,1-(t-TH)/.14):1,
+     sx0=(o.f%3)*C,sy0=((o.f/3)|0)*C;
+    g.save();g.globalAlpha=al;
+    g.translate(ax+sh,GY-2+shy);g.scale(dir*sc,sc*sq);g.translate(-SNK_CX*k,-o.gy*k);
+    g.drawImage(VS.img,sx0,sy0,C,C,0,0,C*k,C*k);
+    g.restore();
+   }
+   g.restore();
+  }
+  function snakeSpriteFx(g,T,t,S,st){
+   const q=aim(S),x=q.x,s=q.scale,C=COL.wind,r=E.rng(st.seed^0x570401);
+   if(t<TH){
+    /* Lá và gió hút vào chân địch trong lúc rắn cuộn. */
+    for(let n=0;n<E.rate(st,'snake-gather',ph(t,0,TH),24);n++){
+     const side=r.sign();
+     E.emit({x:x+side*r.range(50,92),y:GY-r.range(6,70),vx:-side*r.range(22,56),vy:r.range(-14,10),gy:0,drag:.4,
+      life:r.range(.34,.6),s0:r.range(1.6,3),s1:.5,shape:n%3?'leaf':'streak',c:C.main,c2:C.core,a:.85,add:true,tag:TAG,
+      vr:r.range(-7,7),fl:8});
+    }
+   }
+   if(t>=TH&&t<=END){
+    if(E.once(st,'snake-burst')){
+     burst(st,'snake-wind-body',x,GY-44,S.miss?18:38,{
+      speed:[27,84],ang:[-Math.PI*.94,-Math.PI*.06],size:[2.5,5],life:[.5,.88],
+      gy:78,drag:.48,shape:'leaf',c:C.main,c2:C.core,a:.95,vr:[-9,9],fl:9});
+     burst(st,'snake-wind-glints',x,GY-31,S.miss?10:22,{
+      speed:[22,83],ang:[0,TAU],size:[1.2,2.8],life:[.42,.76],
+      gy:-8,drag:.5,shape:'streak',c:C.light,c2:'#ffffff',a:.94,add:true});
+    }
+    if(t>=TH+.18)burst(st,'snake-aftershock-one',x,GY-28,S.miss?8:14,{
+     speed:[28,78],ang:[-Math.PI*.78,-Math.PI*.22],size:[2,4.8],life:[.42,.78],
+     gy:92,drag:.5,shape:'leaf',c:C.main,c2:C.core,a:.92,vr:[-8,8],fl:8});
+    for(let i=0;i<3;i++){
+     const start=TH+i*.18,p=ph(t,start,start+.43),f=1-ph(t,start+.24,start+.66);
+     if(p>0&&f>0)wave(g,x,GY-4,10+104*eo(p)*s*(1-i*.17),i===1?C.light:C.main,f*.69,2.1,T,st.seed+150+i,.2);
+    }
+    for(let n=0;n<E.rate(st,'snake-scales',ph(t,TH,END),16);n++){
+     const an=r.range(0,TAU),rr=r.range(18,56);
+     E.emit({x:x+Math.cos(an)*rr,y:GY-r.range(14,72),vx:r.range(-34,34),
+      vy:-r.range(8,38),gy:70,drag:.42,life:r.range(.5,.84),s0:r.range(1.8,3.6),
+      s1:.5,shape:n%3?'leaf':'spark',c:C.main,c2:C.core,a:.94,add:true,tag:TAG,
+      vr:r.range(-8,8),fl:8});
+    }
+   }
+  }
+
   /* 5 · Thiên Lôi Giáng: cột sét chính/phụ, chấn sóng, điện bò và khói cháy. */
   function fxLightning(g,T,t,S,st){
    const q=aim(S),x=q.x,s=q.scale,C=COL.bolt,r=E.rng(st.seed^0x570500);
@@ -1281,6 +1364,9 @@
     }else if(S.kyNang==='con-bang-trien-si'&&WS.ok){
      whaleSprite(g,t,S);
      pixelLayer(g,gg=>{whaleSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
+    }else if(S.kyNang==='vu-xa-trien'&&VS.ok){
+     snakeSprite(g,t,S);
+     pixelLayer(g,gg=>{snakeSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
     }else pixelLayer(g,gg=>{run(gg,T,t,S,st);E.draw(gg,TAG)});
    }catch(e){
     window.__fxBossErr='57: '+(e&&e.message||e);
