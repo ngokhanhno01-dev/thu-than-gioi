@@ -5,6 +5,16 @@
 (()=>{
  'use strict';
  let tries=0;
+ /* Sprite sheet kỹ năng 1 (Băng Sơn Áp Đỉnh): 3 cột x 2 hàng, mỗi ô 768x768, nền trong suốt.
+    Đường dẫn lấy theo vị trí file script này. Tải lỗi thì tự dùng bản vẽ code cũ. */
+ const SPR={ok:false,img:null,cell:768};
+ try{
+  const base=((document.currentScript&&document.currentScript.src)||'').replace(/[^\/]*$/,'');
+  const im=new Image();
+  im.onload=()=>{SPR.img=im;SPR.cell=Math.floor(im.naturalWidth/3);SPR.ok=im.naturalWidth>=3&&im.naturalHeight>=2};
+  im.onerror=()=>{SPR.ok=false};
+  im.src=base+'fx-boss/bang-son-ap-dinh.png';
+ }catch(e){}
  function boot(){
   const API=window.TTGCombatFX;
   if(!API||!API.engine||!API.drawAttack){
@@ -280,6 +290,78 @@
       shape:'flake',c:COL.ice.light,c2:'#ffffff',a:.9,add:true,tag:TAG});
    }
   }
+  /* 1b · Băng Sơn Áp Đỉnh bằng ảnh 6 khung. Chỉnh nhanh ở bảng ICE_SPR bên dưới.
+     Mốc thời gian (giây): 1 báo hiệu · 2 núi nổi · 3 rơi · 4 đè (TH) · 5 vỡ · 6 tan.
+     dy = độ lệch dọc theo px ảnh gốc (ô 768), rơi nhanh dần ở khung 2-3. */
+  const ICE_K=.31;           /* tỉ lệ phóng ảnh -> canvas 360x250 */
+  const ICE_GY=655;          /* y mặt đất trong ô ảnh (px ảnh gốc) */
+  const ICE_SPR=[
+   {f:0,a:0,   b:.2,  dy0:0,   dy1:0,   ease:0},
+   {f:1,a:.2,  b:.4,  dy0:-70, dy1:55,  ease:1},
+   {f:2,a:.4,  b:TH,  dy0:-25, dy1:34,  ease:1},
+   {f:3,a:TH,  b:.9,  dy0:0,   dy1:0,   ease:0},
+   {f:4,a:.9,  b:1.3, dy0:0,   dy1:0,   ease:0},
+   {f:5,a:1.3, b:END, dy0:0,   dy1:0,   ease:0}
+  ];
+  function iceSprite(g,t,S){
+   const q=aim(S),k=ICE_K*clamp(q.scale,.72,1.05),C=SPR.cell,F=.07,
+    half=C*k*.5*.95,ax=clamp(q.x,half,360-half); /* giữ ảnh trong khung, không bị cắt ở mép */
+   let sh=0,shy=0;
+   if(t>=TH){const dk=Math.max(0,1-(t-TH)/.34);sh=Math.sin((t-TH)*95)*3.2*dk;shy=Math.cos((t-TH)*80)*2.2*dk}
+   g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+   for(const o of ICE_SPR){
+    let al=1;
+    if(t<o.a-F||t>o.b+F)continue;
+    if(o.f>0&&t<o.a+F)al=ph(t,o.a-F,o.a+F);
+    if(o.f<5&&t>o.b-F)al*=1-ph(t,o.b-F,o.b+F);
+    if(o.f===0)al=Math.min(al,ph(t,0,.08));
+    if(o.f===5)al*=1-ph(t,1.35,END);
+    if(al<=.01)continue;
+    const p=ph(t,o.a,o.b),u=o.ease?p*p:p,dy=lerp(o.dy0,o.dy1,u);
+    /* Khung 4: núi bị nén rồi bật lại ngay lúc trúng. */
+    const sq=o.f===3?1-.06*Math.max(0,1-(t-TH)/.12):1;
+    const col=o.f%3,row=(o.f/3)|0,sx=col*C,sy=row*C;
+    const dx=ax-(C/2)*k+sh,dyy=GY-2+(dy-ICE_GY)*k+shy;
+    g.globalAlpha=clamp(al,0,1);
+    g.save();g.translate(ax+sh,GY-2+shy);g.scale(1,sq);g.translate(-ax-sh,-(GY-2+shy));
+    g.drawImage(SPR.img,sx,sy,C,C,dx,dyy,C*k,C*k);
+    g.restore();
+   }
+   g.restore();
+  }
+  function iceSpriteFx(g,T,t,S,st){
+   const q=aim(S),x=q.x,s=q.scale,r=E.rng(st.seed^0x570101);
+   if(t<TH){
+    const fall=Math.pow(ph(t,0,TH),.72);
+    /* Bóng đất to dần: cho cảm giác khối núi nặng đang đè xuống. */
+    blob(g,x,GY-3,34+84*fall,7+9*fall,'#123c54',.55+.13*fall,T,st.seed+1,'#9fe4ff',.2);
+    for(let n=0;n<E.rate(st,'ice-charge',ph(t,0,TH),22);n++){
+     const side=r.sign();
+     E.emit({x:x+side*r.range(26,78),y:r.range(16,150),vx:-side*r.range(9,30),vy:r.range(18,48),
+      gy:20,drag:.42,life:r.range(.34,.58),s0:r.range(1.2,2.5),s1:.45,
+      shape:n%3?'flake':'spark',c:COL.ice.light,c2:COL.ice.core,a:.9,add:true,tag:TAG});
+    }
+   }
+   if(t>=TH&&t<=END){
+    if(E.once(st,'ice-impact')){
+     burst(st,'ice-fragments',x,GY-12,S.miss?20:44,{
+      speed:[52,110],ang:[-Math.PI*.8,-Math.PI*.2],size:[6,13],life:[.55,.82],
+      gy:350,drag:.32,shape:'shard',c:COL.ice.deep,c2:COL.ice.core,a:1,vr:[-11,11],floor:GY+3,bounce:.24});
+     burst(st,'ice-snow-burst',x,GY-5,S.miss?14:28,{
+      speed:[20,68],ang:[-Math.PI,-.02],size:[6,14],life:[.55,.98],
+      gy:-10,drag:.72,shape:'mist',c:COL.ice.core,c2:'#ffffff',a:.7,add:true});
+    }
+    for(let i=0;i<3;i++){
+     const p=ph(t,TH+i*.13,TH+.35+i*.15),f=1-ph(t,TH+i*.13+.25,TH+.42+i*.15);
+     if(p>0&&f>0)wave(g,x,GY-3,14+118*eo(p)*s*(1-i*.16),i===1?COL.ice.core:COL.ice.light,f*.72,2.5,T,st.seed+40+i,.18);
+    }
+    for(let n=0;n<E.rate(st,'ice-settled-snow',ph(t,TH+.28,END),18);n++)
+     E.emit({x:x+r.range(-60,60),y:GY-r.range(0,18),vx:r.range(-16,16),vy:-r.range(8,38),
+      gy:86,drag:.46,life:r.range(.42,.78),s0:r.range(1.1,2.3),s1:.35,
+      shape:'flake',c:COL.ice.light,c2:'#ffffff',a:.9,add:true,tag:TAG});
+   }
+  }
+
   /* 2 · Sương Nuốt: hai hàm sương ngoạm xuống, vòm sương cuộn quanh thân rồi bóp nghẹt, hút sinh khí về người đánh. */
   function mistJaw(g,x,base,W,L,up,a,T,seed){
    /* Hàm sương cong ôm lấy thân: dải mờ dày + hàng nanh cong vào trong; up=1 hàm trên (nanh chĩa xuống), up=-1 hàm dưới. */
@@ -973,7 +1055,11 @@
     if(t<0||t>END+.12)return result;
     E.setSpeed(window.BSPD||1);
     const st=E.seed('bossfx:'+S.kyNang+':'+(Number(S.i)||0),u);
-    pixelLayer(g,gg=>{run(gg,T,t,S,st);E.draw(gg,TAG)});
+    if(S.kyNang==='bang-son-ap-dinh'&&SPR.ok){
+     /* Ảnh vẽ thẳng lên canvas (giữ nguyên màu); hạt và sóng vẫn đi qua lớp pixel. */
+     iceSprite(g,t,S);
+     pixelLayer(g,gg=>{iceSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
+    }else pixelLayer(g,gg=>{run(gg,T,t,S,st);E.draw(gg,TAG)});
    }catch(e){
     window.__fxBossErr='57: '+(e&&e.message||e);
    }
