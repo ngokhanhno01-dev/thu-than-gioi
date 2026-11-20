@@ -266,7 +266,7 @@ function renderStats(){
   E.pv.disabled=page<=0;E.nx.disabled=page>=PAGES.length-1;
   for(i=0;i<5;i++){
     var d=pg.ds[i],b=E.bars[i];
-    if(d&&t){var v=t.chiso&&t.chiso[d[0]];b.innerHTML='<b>'+esc(d[1])+'</b><span>'+(v==null?'-':esc(v)+(d[2]||''))+'</span>';}
+    if(d&&t){var cs=t.chiso;if(!(cs&&Object.keys(cs).some(function(k){return cs[k]>0;}))&&window.TTGCS){try{cs=TTGCS.tinh(t);}catch(e){cs=t.chiso;}}var v=cs&&cs[d[0]];b.innerHTML='<b>'+esc(d[1])+'</b><span>'+(v==null?'-':esc(v)+(d[2]||''))+'</span>';}
     else if(d){b.innerHTML='<b>'+esc(d[1])+'</b><span>-</span>';}
     else b.innerHTML='';
   }

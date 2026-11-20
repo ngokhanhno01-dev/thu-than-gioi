@@ -415,7 +415,7 @@ els.tt.addEventListener('click',function(){if(!ed)openList();});
 document.getElementById('tlx').addEventListener('click',function(){if(performance.now()-tlAt>500)closeList();});
 document.getElementById('tl').addEventListener('click',function(e){if(e.target===this&&performance.now()-tlAt>500)closeList();});
 var MOB_IMGS={};
-function mobImg(q){var f=q&&q.imageFile;if(!f)return null;var o=MOB_IMGS[f];if(!o){o=MOB_IMGS[f]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;o.err=true;};o.img.src='quai/'+f;}return o.ok?o.img:null;}
+function mobImg(q){var f=q&&q.imageFile;if(!f)return null;var o=MOB_IMGS[f];if(!o){o=MOB_IMGS[f]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;o.err=true;};o.img.src='game-moi/quai/'+f;}return o.ok?o.img:null;}
 function drawMainMonster(q,x,by,bob){var s=q.boss?100:72,top=by+bob-s+8;var im=mobImg(q);if(im){var h=q.boss?150:110,w=h*(im.naturalWidth/im.naturalHeight||1);ctx.drawImage(im,x-w/2,by+bob+8-h,w,h);return;}ctx.fillStyle=q.mauChuDao||'#78bde5';ctx.beginPath();ctx.moveTo(x-s*.42,top+s*.42);ctx.lineTo(x-s*.28,top+s*.12);ctx.lineTo(x+s*.2,top+s*.08);ctx.lineTo(x+s*.43,top+s*.34);ctx.lineTo(x+s*.36,top+s*.78);ctx.lineTo(x-s*.34,top+s*.82);ctx.closePath();ctx.fill();ctx.fillStyle=q.mauNhan||'#69dfff';ctx.fillRect(x-s*.3,top+s*.33,s*.6,s*.16);ctx.fillStyle=q.mauSang||'#a7f3ff';ctx.fillRect(x-s*.18,top+s*.3,7,7);ctx.fillRect(x+s*.1,top+s*.3,7,7);ctx.fillStyle='#182238';ctx.fillRect(x-s*.14,top+s*.32,3,3);ctx.fillRect(x+s*.14,top+s*.32,3,3);if(q.boss){ctx.fillStyle=q.mauNhan||'#69dfff';ctx.fillRect(x-s*.27,top,9,24);ctx.fillRect(x+s*.18,top,9,24);}}
 function pet(w,ts){var model=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null,b=model?(model.tien||1):(w==='me'?bm:be),dead=st[w]<=0,x=px(w),o=0;
  if(A&&A.w===w){var p=(ts-A.t)/300;if(p<1)o=Math.round(Math.sin(p*Math.PI)*28);else A=null;}
@@ -511,7 +511,8 @@ function bgTick(g){if(!bgOn||g!==bgGen)return;if(document.hidden){bgRaf=0;return
  requestAnimationFrame(function(){bgTick(g);});}
 function bgSync(){
  var t=THU_MOI.byId[ID],zone=t&&t.zone;
- bgImageOn=!!(SCENE==='sanh'&&zone&&bgUseImg(zone));
+ if(SCENE==='tran'&&BATTLE&&BATTLE.enemy&&BATTLE.enemy.zoneSlug)zone=BATTLE.enemy.zoneSlug;/* trận thật: nền theo vùng của quái/thú hoang */
+ bgImageOn=!!((SCENE==='sanh'||(SCENE==='tran'&&BATTLE))&&zone&&bgUseImg(zone));
  if(bgImageOn){bgImg=BG_IMGS[zone];bgConf=BG_FX_ZONE[zone];}else{bgImg=null;bgConf=null;bgBase=null;}/* rời sảnh / vùng không có ảnh: thả bộ nhớ nền ảnh, hiệu ứng tự tắt */
  var w=bgWant(),f=w?BGV_ZONE[zone]:'';
  if(w===bgOn&&f===bgFile&&bgImageOn===bgLastImageOn)return;
