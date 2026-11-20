@@ -656,6 +656,11 @@ function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.sin(ts/380)*2;
 /* ===== EXP + CẤP ở góc phải khung trên. Tọa độ theo pixel ảnh khung-sanh.webp, đổi 1 chỗ ở EXPC / EXPB nếu thay ảnh khung.
    Ô TRÒN (EXPC): nền + nước EXP dâng từ đáy lên theo exp, số "exp/cần" ở giữa (tự co chữ cho vừa, số lớn vẫn đủ chỗ). Lên cấp: dâng đầy rồi về 0.
    DẢI XANH nhỏ bên dưới (EXPB): chỉ hiện "Lv.N". */
+var EXPSPK=[];for(var ei=0;ei<22;ei++)EXPSPK.push({x:Math.random(),y:Math.random(),v:.03+Math.random()*.08,r:.5+Math.random()*1.3,ph:Math.random()*6.28});
+function expWv(x0,w,t,top,hw,ah,amp,fr,sp,ph,yc,col,lw,al){/* 1 đường sóng sáng (giống wv() của thanh tiến trình màn chờ) */
+ var x,y,k;for(k=0;k<2;k++){ctx.beginPath();
+  for(x=0;x<=w;x+=2){y=top+hw*yc+Math.sin(x/w*fr*6.283+t*sp+ph)*ah*amp+Math.sin(x/w*fr*2.1*6.283-t*sp*.7)*ah*amp*.4;if(x)ctx.lineTo(x0+x,y);else ctx.moveTo(x0+x,y);}
+  ctx.strokeStyle='rgba('+col+','+(k?al:al*.3)+')';ctx.lineWidth=k?lw:lw*2.6;ctx.stroke();}}
 var EXPC={cx:1656.5,cy:159.5,rx:101,ry:94},EXPB={x0:1598,x1:1710,y0:274,y1:292},EXPV={uid:null,lv:0,p:0};
 function drawExp(ts){
  if(!FRM.top.img||!FRM.top.img.naturalWidth)return;
@@ -674,14 +679,28 @@ function drawExp(ts){
  /* ---- ô tròn: nền + nước EXP ---- */
  var cx=ox+EXPC.cx*s,cy=oy+EXPC.cy*s,rx=EXPC.rx*s,ry=EXPC.ry*s;
  ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.clip();
- ctx.fillStyle='rgba(2,8,34,.55)';ctx.fillRect(cx-rx,cy-ry,rx*2,ry*2);                       /* nền */
- if(p>0){
-  var top=cy+ry-(ry*2)*p,amp=p<.995?Math.min(2.5,ry*.05):0,t=(ts||0)/500,x;
-  ctx.beginPath();ctx.moveTo(cx-rx,cy+ry);
-  for(x=-rx;x<=rx;x+=2)ctx.lineTo(cx+x,top+Math.sin(x*.12+t)*amp);
-  ctx.lineTo(cx+rx,cy+ry);ctx.closePath();
-  var g=ctx.createLinearGradient(0,top,0,cy+ry);g.addColorStop(0,'rgba(120,240,255,.85)');g.addColorStop(.35,'rgba(40,170,255,.8)');g.addColorStop(1,'rgba(20,70,210,.85)');
-  ctx.fillStyle=g;ctx.fill();                                                                   /* nước fill */
+ ctx.fillStyle='rgba(6,26,38,.7)';ctx.fillRect(cx-rx,cy-ry,rx*2,ry*2);                       /* nền */
+ if(p>0){   /* nước fill: cùng kiểu thanh tiến trình màn chờ (gradient ngọc + dải tím trôi + 3 sóng sáng + đốm sáng + lớp bóng) */
+  var bx0=cx-rx,bw2=rx*2,bot=cy+ry,top=bot-ry*2*p,hw=bot-top,t=(ts||0)/1000,amp=p<.995?Math.min(2.5,ry*.05):0,x,i,yy,pt;
+  ctx.save();ctx.beginPath();ctx.moveTo(bx0,bot);
+  for(x=-rx;x<=rx;x+=2)ctx.lineTo(cx+x,top+Math.sin(x*.12+t*2)*amp);
+  ctx.lineTo(bx0+bw2,bot);ctx.closePath();ctx.clip();
+  var ry0=top-amp-1,rh=hw+amp+2,g=ctx.createLinearGradient(0,top,0,bot);g.addColorStop(0,'#7ff5e4');g.addColorStop(.45,'#22c9c4');g.addColorStop(1,'#0b7f9a');
+  ctx.fillStyle=g;ctx.fillRect(bx0,ry0,bw2,rh);
+  var h=ctx.createLinearGradient(0,0,bw2,0);h.addColorStop(0,'rgba(120,255,230,0)');h.addColorStop(.5,'rgba(200,170,255,.28)');h.addColorStop(1,'rgba(120,255,230,0)');
+  ctx.save();ctx.translate(bx0+((t*.12)%1)*bw2*2-bw2,0);ctx.fillStyle=h;ctx.fillRect(0,ry0,bw2,rh);ctx.restore();
+  ctx.globalCompositeOperation='lighter';
+  var ah=Math.min(hw,ry*.5),lw=Math.max(1,ry*.07);
+  expWv(bx0,bw2,t,top,hw,ah,.22,1.6,2.2,0,.5,'255,255,255',lw*1.2,.8);
+  expWv(bx0,bw2,t,top,hw,ah,.28,1.1,-1.7,1.7,.42,'205,175,255',lw,.65);
+  expWv(bx0,bw2,t,top,hw,ah,.2,2.3,2.9,3.1,.6,'140,255,240',lw*.9,.6);
+  for(i=0;i<EXPSPK.length;i++){pt=EXPSPK[i];pt.x+=pt.v*.016;if(pt.x>1){pt.x=0;pt.y=Math.random();}
+   ctx.fillStyle='rgba(255,255,255,'+(.35+.65*Math.abs(Math.sin(t*3+pt.ph)))+')';ctx.beginPath();ctx.arc(bx0+pt.x*bw2,top+pt.y*hw,pt.r*.8,0,6.283);ctx.fill();}
+  ctx.globalCompositeOperation='source-over';
+  var gl=ctx.createLinearGradient(0,top,0,bot);gl.addColorStop(0,'rgba(255,255,255,.35)');gl.addColorStop(.4,'rgba(255,255,255,0)');gl.addColorStop(1,'rgba(0,30,50,.35)');ctx.fillStyle=gl;ctx.fillRect(bx0,ry0,bw2,rh);
+  ctx.beginPath();for(x=-rx;x<=rx;x+=2){yy=top+Math.sin(x*.12+t*2)*amp;if(x===-rx)ctx.moveTo(cx+x,yy);else ctx.lineTo(cx+x,yy);}
+  ctx.strokeStyle='rgba(225,255,250,.9)';ctx.lineWidth=Math.max(1,lw);ctx.stroke();   /* mép nước sáng */
+  ctx.restore();
  }
  ctx.restore();ctx.save();ctx.lineJoin='round';ctx.textAlign='center';ctx.textBaseline='middle';
  /* số exp/cần ở giữa ô tròn, tự co cho vừa */
