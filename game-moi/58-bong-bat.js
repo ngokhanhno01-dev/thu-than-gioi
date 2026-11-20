@@ -16,13 +16,15 @@ var CFG={
   tiLeThuong:[0.65,0.50,0.38,0.28,0.18],
   tiLeBoss:  [0.25,0.18,0.12,0.08,0.05],   /* boss khó bắt hơn */
 
-  /* --- BÓNG CAO HƠN VÙNG: mỗi cấp chênh làm xác suất "trượt" nhân thêm (1 - buMoiCap).
-         tiLe = 1 - (1 - tiLeGoc) * (1 - buMoiCap)^chenh. Ví dụ buMoiCap 0,35: chênh 1 -> trượt còn 65% so với gốc. --- */
+  /* --- BÓNG THẤP/CAO SO VỚI VÙNG (tính theo từng vùng, delta = z - vùng đầu của bóng = z - (cap-1)*vungMoiCap) ---
+     delta 0..2 (vùng nằm trong 3 vùng của bóng): tiLe = tiLeGoc * (1 - giamMoiVung)^delta   (vùng đầu đủ tỉ lệ, vùng sau giảm xíu)
+     delta >= 3 (vùng quá cao so với bóng): KHÔNG ném được, cần bóng cấp cao hơn
+     delta < 0 (bóng cao hơn vùng): xác suất trượt nhân (1 - buMoiCap)^(|delta|/vungMoiCap) => dễ bắt hơn */
+  giamMoiVungThuong:0.10,
+  giamMoiVungBoss:0.10,
   buMoiCapThuong:0.35,
   buMoiCapBoss:0.30,
   tiLeToiDa:0.99,          /* không bao giờ chắc chắn 100% */
-
-  /* --- BÓNG THẤP HƠN VÙNG: capBong < capVung -> KHÔNG bắt được (tinhTiLe trả null) --- */
 
   /* --- BÓNG: tên + emoji tạm (sẽ thay bằng ảnh) --- */
   bong:[
@@ -46,7 +48,8 @@ var CFG={
     chenhQuai:[-5,0],                      /* quái cày (chưa có trong game-moi, để dùng sau) */
     capMin:1,capMax:100,
     soLanNem:3,                            /* số lần ném mỗi lần bắt (Bước 3) */
-    bongMoiLanNem:1                        /* mỗi lần ném trừ 1 bóng (CHỜ CHỐT) */
+    bongMoiLanNem:1,                       /* mỗi lần ném trừ 1 bóng (ĐÃ CHỐT) */
+    thoiGianNemGiay:60                     /* hết 60 giây mà chưa bắt được: thú hoang bỏ chạy, về sảnh (ĐÃ CHỐT) */
   }
 };
 
@@ -65,17 +68,18 @@ function tinhTiLe(capBong,phanTramHP,laBoss,vung){
   capBong=capBong|0;
   if(!(capBong>=1))return null;
   if(!(phanTramHP<CFG.mocHP[CFG.mocHP.length-1]))return null;   /* từ 60% trở lên (hoặc NaN) */
-  var chenh=capBong-capVung(vung||0);
-  if(chenh<0)return null;                                        /* bóng thấp, vùng quá cao */
+  var delta=(vung||0)-(capBong-1)*CFG.vungMoiCap;
+  if(delta>=CFG.vungMoiCap)return null;                          /* vùng quá cao so với bóng */
   var bang=laBoss?CFG.tiLeBoss:CFG.tiLeThuong,i=0;
   while(i<CFG.mocHP.length-1&&phanTramHP>=CFG.mocHP[i])i++;
-  var goc=bang[i],bu=laBoss?CFG.buMoiCapBoss:CFG.buMoiCapThuong;
-  var p=1-(1-goc)*Math.pow(1-bu,chenh);
+  var goc=bang[i],p;
+  if(delta>=0)p=goc*Math.pow(1-(laBoss?CFG.giamMoiVungBoss:CFG.giamMoiVungThuong),delta);
+  else p=1-(1-goc)*Math.pow(1-(laBoss?CFG.buMoiCapBoss:CFG.buMoiCapThuong),-delta/CFG.vungMoiCap);
   return Math.min(CFG.tiLeToiDa,p);
 }
 
 /* bóng có dùng được ở vùng này không (để Bước 3 lọc bóng trong Balo) */
-function dungDuoc(capBong,vung){return (capBong|0)>=capVung(vung||0);}
+function dungDuoc(capBong,vung){return ((vung||0)-((capBong|0)-1)*CFG.vungMoiCap)<CFG.vungMoiCap;}
 
 /* id item trong Balo cho từng cấp: bong-1 .. bong-6 */
 function idBong(cap){return 'bong-'+cap;}
@@ -90,7 +94,7 @@ function dangKy(){
     z0=(b.cap-1)*CFG.vungMoiCap+1;
     z1=b.cap>=CFG.capBongMax?17:b.cap*CFG.vungMoiCap;
     o[idBong(b.cap)]={loai:'bong',ten:b.ten,cap:b.cap,ic:b.ic,
-      mo:'Dành cho vùng '+z0+'-'+z1+'. Ném vùng thấp hơn thì tỉ lệ bắt cao hơn; vùng cao hơn thì không bắt được.'};
+      mo:'Dành cho vùng '+z0+'-'+z1+'. Vùng sau trong dải thì tỉ lệ giảm dần; vùng thấp hơn thì dễ bắt hơn; vùng cao hơn dải thì không ném được.'};
   }
   B.reg(o);
   return true;
