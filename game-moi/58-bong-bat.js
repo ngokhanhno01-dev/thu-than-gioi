@@ -38,9 +38,12 @@ var CFG={
 
   /* ================= THÁM HIỂM (dùng ở Bước 2) ================= */
   tx:{
-    tiLeBoss:0.05,                         /* 5% mỗi lượt, KHÔNG có chống đen */
-    trongSoLoai:[15,14,13,12,11,10,8,6,6], /* thú 1..9 của vùng, tổng 95 (khớp 95% còn lại) */
-    trongSoBac:{1:1,2:1,3:1},              /* bậc tiến hóa thú thường khi gặp: mặc định chia đều */
+    tiLeBoss:0.05,                         /* 5% mỗi lượt: chọn đều giữa boss demo và boss main */
+    tiLeQuaiMain:0.5,                      /* trong 95% lượt thường: chia đều pool main và demo */
+    trongSoQuaiMain:[1,1,1,1,1],           /* 5 quái thường main chọn đều */
+    trongSoBoss:{main:1,demo:1},            /* 2 boss chọn đều */
+    trongSoLoai:[15,14,13,12,11,10,8,6,6], /* trọng số tương đối cho 9 thú demo */
+    trongSoBac:{1:1,2:1,3:1},              /* bậc của thú demo thường: mặc định chia đều */
     bacBoss:3,                             /* boss luôn bậc 3 */
     bacKhiBat:1,                           /* bắt về luôn bậc 1 */
     chenhThuong:[-2,10],                   /* cấp thú hoang = L + số nguyên đều trong [min,max] */
