@@ -332,7 +332,7 @@
   ];
   function iceSprite(g,t,S){
    const q=aim(S),k=ICE_K*clamp(q.scale,.72,1.05),C=SPR.cell,F=.07,
-    half=C*k*.5*.95,ax=clamp(q.x,half,360-half); /* giữ ảnh trong khung, không bị cắt ở mép */
+    half=C*k*.5*.95,ax=q.x; /* đặt đúng giữa địch; mép ngoài cùng của gió có thể bị khung canvas cắt */
    let sh=0,shy=0;
    if(t>=TH){const dk=Math.max(0,1-(t-TH)/.34);sh=Math.sin((t-TH)*95)*3.2*dk;shy=Math.cos((t-TH)*80)*2.2*dk}
    g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
@@ -545,7 +545,7 @@
   ];
   function mistSprite(g,t,S){
    const q=aim(S),k=MIST_K*clamp(q.scale,.72,1.05),C=MS.cell,F=.07,
-    half=C*k*.5*.95,ax=clamp(q.x,half,360-half);
+    half=C*k*.5*.95,ax=q.x;
    let sh=0,shy=0;
    if(t>=TH){const dk=Math.max(0,1-(t-TH)/.34);sh=Math.sin((t-TH)*90)*2.6*dk;shy=Math.cos((t-TH)*75)*1.8*dk}
    const gx=ax+sh,gy=GY-2+shy;
@@ -894,7 +894,7 @@
   }
   function whaleSprite(g,t,S){
    const q=aim(S),x=q.x,dir=q.dir,sm=clamp(q.scale,.72,1.05),C=WS.cell,F=.06,
-    k=WH_K*sm,kw=WH_KW*sm,half=C*k*.5*.8,ax=clamp(x,half,360-half);
+    k=WH_K*sm,kw=WH_KW*sm,half=C*k*.5*.8,ax=x;
    let sh=0,shy=0;
    if(t>=TH){const dk=Math.max(0,1-(t-TH)/.4);sh=Math.sin((t-TH)*85)*3.6*dk;shy=Math.cos((t-TH)*70)*2.6*dk}
    g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
@@ -1128,7 +1128,7 @@
   ];
   function snakeSprite(g,t,S){
    const q=aim(S),dir=q.dir,k=SNK_K*clamp(q.scale,.72,1.05),C=VS.cell,F=.07,
-    half=C*k*.5*.95,ax=clamp(q.x,half,360-half);
+    half=C*k*.5*.95,ax=q.x;
    let sh=0,shy=0;
    if(t>=TH){const dk=Math.max(0,1-(t-TH)/.34);sh=Math.sin((t-TH)*92)*2.8*dk;shy=Math.cos((t-TH)*78)*1.9*dk}
    g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
