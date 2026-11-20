@@ -396,5 +396,11 @@ function add(t){
 function list(){dongBo();return thus.map(function(t){return Object.assign({},t);});}
 function getRaTran(){var t=rt&&byUid(rt);return t?Object.assign({},t):null;}   /* sau này nối vào trận đấu/sảnh bằng hàm này */
 
-window.TTGTHU={open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,anh:anhThu};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+/* ===== EXP / CẤP của thú đang ra trận (công thức: TTGCS.expCan, trần cấp: TTGCS.CFG.capMax hoặc 100) ===== */
+function capMax(){return (window.TTGCS&&TTGCS.CFG&&TTGCS.CFG.capMax)||100;}
+function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=Math.max(1,Math.floor(t.lv||1)),mx=lv>=capMax();return {uid:t.uid,lv:lv,exp:mx?0:Math.max(0,Math.floor(t.exp||0)),need:mx?0:TTGCS.expCan(lv),max:mx};}
+function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
+  while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
+  if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
+window.TTGTHU={open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,anh:anhThu,expInfo:expInfo,addExp:addExp};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();
