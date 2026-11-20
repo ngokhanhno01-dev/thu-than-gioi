@@ -280,79 +280,143 @@
       shape:'flake',c:COL.ice.light,c2:'#ffffff',a:.9,add:true,tag:TAG});
    }
   }
-  /* 2 · Sương Nuốt: màn sương dày khép quanh thân, đuôi xoáy hút về người đánh. */
+  /* 2 · Sương Nuốt: hai hàm sương ngoạm xuống, vòm sương cuộn quanh thân rồi bóp nghẹt, hút sinh khí về người đánh. */
+  function mistJaw(g,x,base,W,L,up,a,T,seed){
+   /* Hàm sương cong ôm lấy thân: dải mờ dày + hàng nanh cong vào trong; up=1 hàm trên (nanh chĩa xuống), up=-1 hàm dưới. */
+   if(a<=.01)return;
+   const C=COL.mist,N=8,dir=up>0?1:-1,cur=17,th=12;
+   const yb=v=>base-dir*cur*(1-Math.pow(2*v-1,2));
+   const edge=[],back=[];
+   for(let k=0;k<=24;k++){
+    const v=k/24,xx=x+(v-.5)*W;
+    edge.push(point(xx,yb(v)));back.push(point(xx,yb(v)-dir*(th-5*Math.abs(2*v-1))));
+   }
+   g.save();g.globalAlpha=clamp(a,0,1);
+   poly(g,edge.concat(back.slice().reverse()),'rgba(20,70,63,.9)','#78cbbd',a*.85,1.3);
+   for(let j=0;j<N;j++){
+    const v0=j/N,v1=(j+1)/N,vm=(j+.5)/N,u=2*vm-1,xm=x+(vm-.5)*W;
+    const len=L*(.5+.5*Math.pow(1-u*u,.6))*(1+.1*Math.sin(j*2.3+seed));
+    const t0=point(x+(v0-.5)*W,yb(v0)),t1=point(x+(v1-.5)*W,yb(v1)),
+     mid=point(xm,yb(vm)+dir*len*.55),tp=point(xm-u*9,yb(vm)+dir*len);
+    poly(g,[t0,mid,tp,t1],j%2?'#2a7a6f':'#3a9387','#bff3e8',a*.9,1.1);
+    poly(g,[point(xm-2,yb(vm)),tp,point(xm+(v1-v0)*W*.4,yb(vm))],'rgba(190,243,232,.35)',null,a*.8);
+    stroke(g,[t0,tp],'#e8fffa',1,a*.6,true);
+   }
+   stroke(g,edge,'#c6f6ec',1.1,a*.5,true);
+   g.restore();
+   for(let i=0;i<6;i++){
+    const v=(i+.5)/6;
+    fogPuff(g,x+(v-.5)*W,yb(v)-dir*5,15,8,a*.45,T,seed+i,C);
+   }
+  }
   function fxMist(g,T,t,S,st){
-   const q=aim(S),x=q.x,C=COL.mist,r=E.rng(st.seed^0x570201);
-   const gather=eo(ph(t,.1,TH+.42)),fade=t<TH+.48?1:1-ph(t,TH+.48,END);
-   const center=lerp(x,x-q.dir*104,gather),rad=lerp(65,13,gather);
+   const q=aim(S),x=q.x,s=q.scale,C=COL.mist,r=E.rng(st.seed^0x570201);
+   const grow=eo(ph(t,0,.5)),close=ei(ph(t,.1,TH)),
+    fade=t<TH+.12?1:1-ph(t,TH+.12,TH+.62),after=1-ph(t,TH+.5,END),
+    squeeze=eo(ph(t,TH-.05,TH+.3)),ax=clamp(x-q.dir*172,34,326);
+   /* Bóng đất tối, bộ ấn xoáy và vết nứt mờ báo hiệu từ khung đầu tiên. */
+   const shadow=40+48*grow;
+   blob(g,x,GY-3,shadow,9+7*grow,'#0f3a35',.7*(1-ph(t,TH+.5,END)),T,st.seed+1,'#78cbbd',.25);
+   const warn=1-ph(t,TH+.05,TH+.4);
+   ring(g,x,GY-3,22+66*grow,5+10*grow,C.light,.8*warn,1.7);
+   ring(g,x,GY-3,12+40*grow,3+6*grow,C.core,.55*warn,1.2);
+   for(let i=0;i<8;i++){
+    const an=i*TAU/8+T*.9,rr=(20+66*grow);
+    stroke(g,[point(x+Math.cos(an)*rr*.7,GY-3+Math.sin(an)*rr*.14),point(x+Math.cos(an)*rr,GY-3+Math.sin(an)*rr*.2)],i%2?C.main:C.light,1.2,.6*warn,true);
+   }
+   groundCore(g,x,GY-4,C.light,(.06+.07*grow)*fade,34+30*grow);
+   /* Vòm sương: các lớp mây xoáy lên từ chân, lớp sau tối, lớp trước mờ ở giữa để chừa mặt mục tiêu. */
+   const H=(30+88*grow)*(1-.55*squeeze)*s,Rm=(44+22*grow)*(1-.7*squeeze)*s,spin=T*(1.1+2.4*squeeze);
    if(fade>.01){
-    /* Three opaque-ish layers build a ring around the enemy, leaving its face visible. */
-    for(let i=0;i<9;i++){
-     const a=i*TAU/9+T*.45,rr=rad*(.72+.22*Math.sin(i*2+T*1.4));
-     const bx=center+Math.cos(a)*rr,by=GY-48+Math.sin(a)*26;
-     fogPuff(g,bx,by,22+(i%3)*5,13+(i%2)*4,fade*(.5+(i%3)*.08),T,st.seed+10+i,C);
+    blob(g,x,GY-16-H*.5,Rm*1.12,H*.62+10,'#174a43',fade*.5*(1-.6*squeeze),T,st.seed+7,'#4fa89b',.2);
+    blob(g,x,GY-12-H*.28,Rm*1.2,H*.36+8,'#1f5d55',fade*.4*(1-.6*squeeze),T,st.seed+8,'#78cbbd',.22);
+   }
+   const puffs=[];
+   for(let lv=0;lv<5;lv++){
+    const hf=lv/4,n=7-(lv>2?1:0);
+    for(let i=0;i<n;i++){
+     const a=spin*(1+hf*.35)+i*TAU/n+lv*.62,bulge=.7+.3*Math.sin(Math.PI*(.15+hf*.8)),
+      rr=Rm*bulge*(1-.28*hf),bx=x+Math.cos(a)*rr,by=GY-14-hf*H+Math.sin(a)*7;
+     puffs.push({bx,by,d:Math.sin(a),c:Math.cos(a),hf,id:lv*10+i});
     }
-    for(let side of [-1,1]){
-     fogPuff(g,x+side*48,GY-40,34,25,fade*.65,T,st.seed+30+side,C);
-     fogPuff(g,x+side*38,GY-12,29,15,fade*.48,T,st.seed+40+side,C);
-     fogPuff(g,x+side*65,GY-60,20,17,fade*.46,T,st.seed+50+side,C);
+   }
+   puffs.sort((p,u)=>p.d-u.d);
+   if(fade>.01)for(const p of puffs){
+    const front=p.d>=0,face=front?.3+.7*Math.min(1,Math.abs(p.c)*1.5):1,
+     al=fade*(front?.58:.5)*face*(.5+.5*grow)*(1-.6*squeeze);
+    const tone={deep:front?'#2c7a70':'#1b4d46',main:front?'#4fa89b':'#2a7167',light:front?'#8ed6c7':'#4fa89b',core:front?'#bff0e6':'#78cbbd'};
+    fogPuff(g,p.bx,p.by,(21+10*(1-p.hf))*(1-.3*squeeze)*s,(14+6*(1-p.hf))*s,al*.9,T,st.seed+10+p.id,tone);
+   }
+   /* Ba dải sương xoắn ốc leo quanh thân. */
+   if(fade>.01)for(let k=0;k<3;k++){
+    const pts=[];
+    for(let j=0;j<30;j++){
+     const v=j/29,a=spin*1.7+v*TAU*1.7+k*TAU/3,rr=Rm*(.82-.3*v)*(1-.3*squeeze);
+     pts.push(point(x+Math.cos(a)*rr,GY-12-v*H+Math.sin(a)*8));
     }
-    fogPuff(g,x,GY-77,42,13,fade*.38,T,st.seed+60,C);
-    /* Three curling stream-tails visibly run from the target toward the attacker. */
-    for(let k=0;k<3;k++){
-     const trail=[];
-     for(let j=0;j<25;j++){
-      const v=j/24,cx=lerp(x,center,v),rr=(1-v)*(35-18*gather)+8+gather*5,
-       a=T*(2.8+k*.18)+v*TAU*1.45+k*TAU/3;
-      trail.push(point(cx+Math.cos(a)*rr,GY-42+Math.sin(a)*rr*.48-v*8));
-     }
-     ribbon(g,trail,5-k*.8,k===1?C.light:C.main,fade*(.42-k*.06),C.core);
-     ribbon(g,trail,1.3,C.light,fade*.66,'#f6fffd');
+    ribbon(g,pts,5-k*.8,k===1?C.light:C.main,fade*(.5-k*.08),C.core);
+    ribbon(g,pts,1.2,C.light,fade*.72,'#f6fffd');
+   }
+   /* Hai hàm sương: hàm trên ập từ trên khung xuống, hàm dưới trồi lên từ đất, khép ở lúc trúng. */
+   if(t<TH+.4){
+    const jf=t<TH+.04?1:1-ph(t,TH+.04,TH+.38),W=Math.min(2*Math.min(x-20,340-x),118*s),
+     upBase=lerp(GY-196,GY-120,close),loBase=lerp(GY+6,GY-3,eo(ph(t,0,TH*.8)));
+    mistJaw(g,x,upBase,W,lerp(26,36,close),1,jf*.97,T,st.seed+300);
+    mistJaw(g,x,loBase,W*.92,lerp(8,34,eo(ph(t,0,TH*.9))),-1,jf*.97,T,st.seed+330);
+    for(const sd of [-1,1])fogPuff(g,x+sd*W*.5,(upBase+loBase)/2,14,24,jf*.34,T,st.seed+360+sd,C);
+   }
+   if(t<TH){
+    for(let n=0;n<E.rate(st,'mist-charge',ph(t,0,TH),30);n++){
+     const side=r.sign(),yy=r.range(30,GY-14);
+     E.emit({x:x+side*r.range(48,90),y:yy,vx:-side*r.range(14,40),vy:r.range(-12,10),gy:0,drag:.4,
+      life:r.range(.34,.6),s0:r.range(1.6,3),s1:.5,shape:n%3?'mist':'orb',c:C.light,c2:C.core,a:.85,add:true,tag:TAG});
     }
-    for(let i=0;i<4;i++){
-     const x0=lerp(x+q.dir*(38+i*5),center,i/4),a=T*3+i*TAU/4,tail=[];
-     for(let j=0;j<12;j++){
-      const v=j/11,rr=(1-v)*18+2;
-      tail.push(point(lerp(x0,center,v)+Math.cos(a+v*TAU)*rr,
-       GY-32-v*22+Math.sin(a+v*TAU)*7));
-     }
-     ribbon(g,tail,3.2,C.light,fade*.5,C.core);
-    }
-    wave(g,x,GY-3,16+19*eo(ph(t,0,TH)),C.light,fade*.46,1.6,T,st.seed+66,.17);
-    groundCore(g,center,GY-4,C.light,fade*.22,28);
    }
    if(t>=TH&&t<=END){
     if(E.once(st,'mist-hit')){
-     burst(st,'mist-implosion',x,GY-25,S.miss?24:54,{
-      speed:[16,62],ang:[0,TAU],size:[4,10],life:[.5,.84],
-      gy:-8,drag:.68,shape:'mist',c:C.deep,c2:C.light,a:.8,add:true});
-     burst(st,'mist-core-drops',x,GY-12,S.miss?18:38,{
-      speed:[18,66],ang:[-Math.PI*.92,-Math.PI*.08],size:[1.8,4.2],life:[.45,.82],
-      gy:68,drag:.48,shape:'orb',c:C.light,c2:C.core,a:.94,add:true,floor:GY+2,bounce:.08});
+     burst(st,'mist-implosion',x,GY-45,S.miss?24:56,{
+      speed:[18,70],ang:[0,TAU],size:[5,12],life:[.5,.9],gy:-8,drag:.66,shape:'mist',c:C.deep,c2:C.light,a:.85,add:true});
+     burst(st,'mist-core-drops',x,GY-14,S.miss?18:40,{
+      speed:[26,82],ang:[-Math.PI*.92,-Math.PI*.08],size:[1.8,4.2],life:[.45,.84],
+      gy:80,drag:.46,shape:'orb',c:C.light,c2:C.core,a:.96,add:true,floor:GY+2,bounce:.1});
     }
     for(let i=0;i<3;i++){
-     const start=TH+i*.16,p=ph(t,start,start+.4),f=1-ph(t,start+.2,start+.57);
+     const start=TH+i*.15,p=ph(t,start,start+.42),f=1-ph(t,start+.2,start+.6);
      if(p>0&&f>0){
-      const rr=8+91*eo(p);
-      wave(g,x,GY-3,rr,C.light,f*.66,2,T,st.seed+80+i,.2);
-      wave(g,x,GY-4,rr*.68,C.deep,f*.46,1.2,T,st.seed+90+i,.2);
+      const rr=8+96*eo(p)*s;
+      wave(g,x,GY-3,rr,i===1?C.core:C.light,f*.7,2.2,T,st.seed+80+i,.2);
+      wave(g,x,GY-4,rr*.66,C.deep,f*.5,1.3,T,st.seed+90+i,.2);
      }
     }
-    const squeeze=ph(t,TH+.03,TH+.55),vFade=1-ph(t,TH+.5,TH+1.02);
-    for(let i=0;i<15;i++){
-     const a=T*4+i*TAU/15,rr=(62-43*squeeze)*(0.8+.2*Math.sin(T*2+i)),
-      xx=x+Math.cos(a)*rr,yy=GY-7+Math.sin(a)*9;
-     blob(g,xx,yy,5,3,C.light,vFade*.58,T,st.seed+110+i,C.core,.34);
+    hitBloom(g,x,C,T,st.seed+95,(1-ph(t,TH+.16,TH+.4))*.95,s);
+    ring(g,x,GY-4,lerp(70,16,squeeze),7,C.deep,(1-ph(t,TH+.4,TH+.95))*.85,2.2);
+    ring(g,x,GY-4,lerp(54,10,squeeze),4,C.light,(1-ph(t,TH+.4,TH+.95))*.75,1.3);
+    /* Dòng sinh khí: ba sợi sương chảy từ mục tiêu về người đánh, đầu sáng dẫn đường. */
+    const flow=ph(t,TH+.08,TH+.82),keep=1-ph(t,TH+.76,END),mult=S.miss?.4:1;
+    if(flow>0&&keep>0)for(let k=0;k<3;k++){
+     const pts=[],head=eo(flow),tailV=Math.max(0,head-.6);
+     for(let j=0;j<22;j++){
+      const v=lerp(tailV,head,j/21),px=lerp(x-q.dir*16,ax+q.dir*20,v),
+       py=GY-58-Math.sin(v*Math.PI)*(26+k*13)+Math.sin(v*TAU*1.2+T*4+k*2.1)*(2.5+k*1.5);
+      pts.push(point(px,py));
+     }
+     stroke(g,pts,C.deep,12-k*2.6,keep*mult*.45,false);
+     stroke(g,pts,k===1?C.light:C.main,6.5-k*1.4,keep*mult*.7,true);
+     stroke(g,pts,'#f2fffb',1.8,keep*mult*.9,true);
+     const hd=pts[pts.length-1];glow(g,hd[0],hd[1],15-k*2,C.light,keep*mult*.75,C.core);
     }
-    ring(g,x,GY-4,lerp(68,14,squeeze),7,C.deep,vFade*.8,2.2);
-    ring(g,x,GY-4,lerp(52,9,squeeze),4,C.light,vFade*.72,1.3);
+    const arrive=ph(t,TH+.62,TH+.95)*(1-ph(t,TH+.9,END));
+    if(arrive>0&&!S.miss){
+     glow(g,ax+q.dir*24,GY-58,34,C.light,arrive*.4,C.core);
+     wave(g,ax+q.dir*24,GY-8,10+26*arrive,C.light,arrive*.5,1.6,T,st.seed+130,.18);
+    }
     for(let n=0;n<E.rate(st,'mist-droplets',ph(t,TH,END),26);n++){
-     const an=r.range(0,TAU),rr=r.range(25,62);
-     E.emit({x:x+Math.cos(an)*rr,y:GY-r.range(10,60),vx:-q.dir*r.range(16,43),
-      vy:r.range(-18,12),gx:-q.dir*r.range(5,16),gy:15,drag:.5,
-      life:r.range(.42,.78),s0:r.range(1.5,3.2),s1:.55,shape:n%4?'orb':'mist',
-      c:C.light,c2:C.core,a:.86,add:true,tag:TAG});
+     const an=r.range(0,TAU),rr=r.range(22,60);
+     E.emit({x:x+Math.cos(an)*rr,y:GY-r.range(8,70),vx:-q.dir*r.range(18,48),vy:r.range(-18,12),
+      gx:-q.dir*r.range(5,16),gy:14,drag:.5,life:r.range(.42,.8),s0:r.range(1.5,3.2),s1:.5,
+      shape:n%4?'orb':'mist',c:C.light,c2:C.core,a:.9,add:true,tag:TAG});
     }
+    groundCore(g,x,GY-3,C.light,after*.16,30*s);
    }
   }
 
