@@ -201,9 +201,10 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/58-bong-bat.js"></script>
 <script src="game-moi/54-thu-than.js"></script>
 <script src="game-moi/59-nut-tham-hiem.js"></script>
-<script src="game-moi/60-quai-vung.js"></script>
+<script src="game-moi/102-quai-vung.js"></script>
 <script src="game-moi/55-trang-bi.js"></script>
 <script src="game-moi/56-chi-so.js"></script>
+<script src="game-moi/61-tham-hiem-tran.js"></script>
 <script>
 /* GAME MỚI (khung ban đầu). CHỈ CÓ MÀN NGANG, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
@@ -227,7 +228,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 (function(){
 if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
-var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,A=null,typing=false;
+var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,BATTLE=null,A=null,typing=false;
 var AUTO=true,nextAt=0,GAP=350,END_WAIT=1200,PET_X=.218,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
 var BP=86,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 /* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */
@@ -238,6 +239,8 @@ var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]h
 function dp(id,b,cx,by,fine){THU_MOI.setFrame(192);THU_MOI.draw(ctx,id,b,cx,by,128,fine);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
+function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,busy:false,msg:'',fx:[]};SCENE='tran';A=null;nextAt=performance.now()+GAP;toast((enemy.source==='main'?'Gặp quái farm: ':'Gặp thú hoang: ')+enemy.ten);}
+if(window.TTGTHAMHIEM)TTGTHAMHIEM.start=startExplore;
 function TH(){return H-I.b-BP-GAPB;}/* chiều cao khung trên */
 function edgeY(){var t=TH();return t-Math.round(FRM.top.e.b*sTop(t));}/* mép trên của viền dưới khung trên (viền dày FRM.top.e.b px ảnh gốc, vẽ ở tỉ lệ sTop) */
 function gy(){return SCENE==='sanh'?edgeY()+1:TH()-FLOOR;}/* đường chân thú: sảnh = đứng ngay trên viền khung; trận mẫu = đứng trên đường nền như cũ */
@@ -289,15 +292,14 @@ function resize(){
  if(window.TTGNV)TTGNV.layout({K:K,DPR:DPR,W:W,H:H,I:I,th:TH(),BP:BP,GAPB:GAPB});/* nút vuông (52-nut-vuong.js) */}
 /* VỊ TRÍ THÚ CỐ ĐỊNH, KHÔNG phụ thuộc nút nào (nút sau này đổi/bỏ thoải mái). PET_X = tâm thú trái tính theo tỉ lệ bề ngang khung (0 = mép trái khung, 0.5 = giữa). Thú phải đối xứng: 1 - PET_X. */
 function px(w){var fw=W-I.l-I.r;return Math.round(I.l+fw*(w==='me'?PET_X:1-PET_X));}
-function hit(w){var t=w==='me'?'en':'me',d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2,n=performance.now();
- st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+d});A={w:w,t:n};}
+function hit(w){var t=w==='me'?'en':'me',d,n=performance.now();if(BATTLE&&window.TTGCS){var a=w==='me'?BATTLE.playerStats:BATTLE.enemyStats,z=w==='me'?BATTLE.enemyStats:BATTLE.playerStats;d=TTGCS.satThuong({tc:a.tc,pt:z.pt,hsHe:1});}else d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2;st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+d});A={w:w,t:n};}
 /* Một lượt: mình đánh -> (nếu địch còn sống) địch đánh lại -> kiểm tra thắng/thua.
    Hết trận: giữ busy=true, hiện kết quả END_WAIT ms rồi reset() (st mới, busy=false) để auto đánh tiếp. */
 function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;hit('me');
  setTimeout(function(){if(st===s0&&st.en>0)hit('en');},650);
  setTimeout(function(){if(st!==s0)return;
-  if(st.en<=0||st.me<=0){st.msg=st.en<=0?'Thắng!':'Thua';
-   setTimeout(function(){if(st===s0)reset();},END_WAIT);}
+  if(st.en<=0||st.me<=0){st.msg=st.en<=0?'Thắng!':'Thua';var encounter=!!BATTLE,won=st.en<=0;
+   setTimeout(function(){if(st!==s0)return;if(encounter){BATTLE=null;SCENE='sanh';reset();toast(won?'Thắng! Quái đã bị hạ':'Thua! Thú đã gục');}else reset();},END_WAIT);}
   else{st.busy=false;nextAt=performance.now()+GAP;}},1300);}
 function autoTick(){if(AUTO&&st&&!st.busy&&performance.now()>=nextAt)atk();}
 
@@ -332,7 +334,8 @@ UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.
   if(ed)return;
   if(u.id==='fs'){toast('Đang chơi toàn màn hình');}
   else if(u.id==='dt'){SCENE=SCENE==='sanh'?'tran':'sanh';if(SCENE==='tran')reset();toast(SCENE==='tran'?'Trận mẫu (bấm Đấu trường để về sảnh)':'Sảnh chính');}
-  else if(u.id==='tt'){openList();}
+  else if(u.id==='tx'){if(window.TTGTHAMHIEM&&TTGTHAMHIEM.start)TTGTHAMHIEM.start();else toast('Chưa nạp dữ liệu Thám Hiểm');}
+   else if(u.id==='tt'){openList();}
   else if(u.id==='tm'){bm=bm%MAXB+1;saveB();label('tm');toast('Bạn: bậc '+bm);}
   else if(u.id==='kh'){HD=!HD;try{localStorage.setItem('ttg_moi_hd',HD?'1':'0');}catch(x){}resize();label('kh');toast(HD?'Khung HD 192 (nét)':'Khung 128 (cũ)');}
   else if(u.id==='te'){be=be%MAXB+1;saveB();label('te');toast('Địch: bậc '+be);}
@@ -411,13 +414,15 @@ document.getElementById('tp').addEventListener('click',function(){if(!ed)openLis
 els.tt.addEventListener('click',function(){if(!ed)openList();});
 document.getElementById('tlx').addEventListener('click',function(){if(performance.now()-tlAt>500)closeList();});
 document.getElementById('tl').addEventListener('click',function(e){if(e.target===this&&performance.now()-tlAt>500)closeList();});
-function pet(w,ts){var b=w==='me'?bm:be,dead=st[w]<=0,x=px(w),o=0;
+function drawMainMonster(q,x,by,bob){var s=q.boss?100:72,top=by+bob-s+8;ctx.fillStyle=q.mauChuDao||'#78bde5';ctx.beginPath();ctx.moveTo(x-s*.42,top+s*.42);ctx.lineTo(x-s*.28,top+s*.12);ctx.lineTo(x+s*.2,top+s*.08);ctx.lineTo(x+s*.43,top+s*.34);ctx.lineTo(x+s*.36,top+s*.78);ctx.lineTo(x-s*.34,top+s*.82);ctx.closePath();ctx.fill();ctx.fillStyle=q.mauNhan||'#69dfff';ctx.fillRect(x-s*.3,top+s*.33,s*.6,s*.16);ctx.fillStyle=q.mauSang||'#a7f3ff';ctx.fillRect(x-s*.18,top+s*.3,7,7);ctx.fillRect(x+s*.1,top+s*.3,7,7);ctx.fillStyle='#182238';ctx.fillRect(x-s*.14,top+s*.32,3,3);ctx.fillRect(x+s*.14,top+s*.32,3,3);if(q.boss){ctx.fillStyle=q.mauNhan||'#69dfff';ctx.fillRect(x-s*.27,top,9,24);ctx.fillRect(x+s*.18,top,9,24);}}
+function pet(w,ts){var model=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null,b=model?(model.tien||1):(w==='me'?bm:be),dead=st[w]<=0,x=px(w),o=0;
  if(A&&A.w===w){var p=(ts-A.t)/300;if(p<1)o=Math.round(Math.sin(p*Math.PI)*28);else A=null;}
  var bob=dead?0:Math.round(Math.sin(ts/380+(w==='me'?0:2))*2);
  ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x-40,gy()-2,80,4);
  ctx.save();if(dead)ctx.globalAlpha=.35;
- if(w==='me'){ctx.translate(x+o,0);ctx.scale(-1,1);dp(ID,b,0,gy()+bob);}
- else dp(ID,b,x-o,gy()+bob);
+ if(w==='me'){ctx.translate(x+o,0);ctx.scale(-1,1);dp(model?model.id:ID,b,0,gy()+bob);}
+ else if(model&&model.source==='main')drawMainMonster(model.record,x-o,gy(),bob);
+ else dp(model?model.id:ID,b,x-o,gy()+bob);
  ctx.restore();}
 function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
@@ -658,9 +663,9 @@ function draw(ts){bgSync();
  if(FL){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
  if(SCENE==='sanh'){petSanh(ts);return;}
  pet('en',ts);pet('me',ts);
- var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),nm=THU_MOI.byId[ID].ten,by=I.t+32;
- bar(I.l+ox,by,bw,st.me/100,'#3c3',nm+' (bạn)');bar(W-I.r-ox-bw,by,bw,st.en/100,'#c33',nm+' (địch)');
- ctx.textAlign='center';ctx.textBaseline='top';ctx.font='10px sans-serif';ctx.fillStyle='#123';ctx.fillText((HD?'HD 192→128':'thú 128px')+' · x'+K+' · '+W+'×'+H+' · v5',W/2,I.t+50);
+ var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),by=I.t+32,mePet=BATTLE&&THU_MOI.byId[BATTLE.player.id],meName=BATTLE?(BATTLE.player.ten||(mePet&&mePet.ten)||'Thú của bạn'):THU_MOI.byId[ID].ten,enName=BATTLE?BATTLE.enemy.ten+(BATTLE.enemy.source==='main'?' [farm]':' [thú hoang]'):THU_MOI.byId[ID].ten,maxMe=BATTLE?BATTLE.playerStats.hp:100,maxEn=BATTLE?BATTLE.enemyStats.hp:100;
+  bar(I.l+ox,by,bw,Math.max(0,Math.min(1,st.me/maxMe)),'#3c3',meName+' (bạn)');bar(W-I.r-ox-bw,by,bw,Math.max(0,Math.min(1,st.en/maxEn)),'#c33',enName);
+  ctx.textAlign='center';ctx.textBaseline='top';ctx.font='10px sans-serif';ctx.fillStyle='#123';ctx.fillText((HD?'HD 192→128':'thú 128px')+' · x'+K+' · '+W+'×'+H+' · v5',W/2,I.t+50);
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
  st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
  if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+70,gy()-170));}}
