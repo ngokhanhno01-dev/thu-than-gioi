@@ -144,7 +144,7 @@ function tinh(thu,ctx){
   var tien=clamp(Math.floor(thu.tien||1),1,3);
   var bac=thu.bac||'C';
   var b,o={},base;
-  if(thu.chiso){base={};CHINH.forEach(function(k){base[k]=thu.chiso[k]||0;});}
+  if(thu.chiso&&CHINH.some(function(k){return thu.chiso[k]>0;})){base={};CHINH.forEach(function(k){base[k]=thu.chiso[k]||0;});}
   else{
     b=goc(thu.id,vung,vai,boss);base={};
     var hb=hsBac(bac);
