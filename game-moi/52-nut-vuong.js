@@ -57,7 +57,7 @@ function layout(m){
     used[c+','+r]=1;pos[i]=[c,r];});
   list.forEach(function(it,i){
     var c=pos[i][0],r=pos[i][1],e=it.e,s2=e.style,iw=(it.o.w>0?it.o.w:CFG.size)*f,ih=(it.o.h>0?it.o.h:CFG.size)*f;
-    s2.display='block';s2.width=iw+'px';s2.height=ih+'px';s2.left=Math.round(centered[i]?(M.I.l+(M.W-M.I.l-M.I.r)/2)*f-iw/2:x0+c*(s+g))+'px';s2.top=Math.round(y0+r*(s+g)+(s-ih)/2)+'px';
+    s2.display='block';s2.width=iw+'px';s2.height=ih+'px';s2.left=Math.round(centered[i]?(M.I.l+(M.W-M.I.l-M.I.r)/2)*f-iw/2:x0+c*(s+g))+'px';s2.top=Math.round(y0+r*(s+g)+(s-ih)/2+(it.o.offsetY||0)*f)+'px';
     s2.fontSize=(s*.17).toFixed(2)+'px';
   });}
 window.TTGNV={cfg:CFG,add:add,layout:layout};
