@@ -42,6 +42,15 @@
   im.onerror=()=>{VS.ok=false};
   im.src=base+'fx-boss/vu-xa.png';
  }catch(e){}
+ /* Sprite sheet kỹ năng 5 (Thiên Lôi Giáng): 3 cột x 2 hàng, ô 768x768, nền trong suốt, sét đánh thẳng giữa ô. */
+ const LS={ok:false,img:null,cell:768};
+ try{
+  const base=((document.currentScript&&document.currentScript.src)||'').replace(/[^\/]*$/,'');
+  const im=new Image();
+  im.onload=()=>{LS.img=im;LS.cell=Math.floor(im.naturalWidth/3);LS.ok=im.naturalWidth>=3&&im.naturalHeight>=2};
+  im.onerror=()=>{LS.ok=false};
+  im.src=base+'fx-boss/thien-loi.png';
+ }catch(e){}
  function boot(){
   const API=window.TTGCombatFX;
   if(!API||!API.engine||!API.drawAttack){
@@ -1188,6 +1197,71 @@
    }
   }
 
+  /* 5b · Thiên Lôi Giáng bằng ảnh 6 khung. Sét/mây đối xứng nên không lật; tâm ngang ảnh = tâm địch.
+     Mốc (giây): 1 tụ mây 0-.22 · 2 sét đầu .22-.45 · 3 sét lớn .45-TH · 4 đỉnh (trúng) TH-.95 · 5 sóng điện .95-1.3 · 6 tan 1.3-END.
+     Chỉnh nhanh: LTN_K (tỉ lệ), LTN_CX (tâm ngang trong ảnh), gy của từng khung (mặt đất trong ô ảnh gốc). */
+  const LTN_K=.29,LTN_CX=386;
+  const LTN_SPR=[
+   {f:0,a:0,   b:.22, s0:.97,s1:1,   gy:702},
+   {f:1,a:.22, b:.45, s0:1,  s1:1,   gy:704},
+   {f:2,a:.45, b:TH,  s0:1,  s1:1.01,gy:706},
+   {f:3,a:TH,  b:.95, s0:1.02,s1:1,  gy:652, hit:1},
+   {f:4,a:.95, b:1.3, s0:1,  s1:1,   gy:647},
+   {f:5,a:1.3, b:END, s0:1,  s1:1,   gy:642}
+  ];
+  function lightningSprite(g,t,S){
+   const q=aim(S),k=LTN_K*clamp(q.scale,.72,1.05),C=LS.cell,F=.06,ax=q.x;
+   let sh=0,shy=0;
+   if(t>=TH){const dk=Math.max(0,1-(t-TH)/.3);sh=Math.sin((t-TH)*100)*2.4*dk;shy=Math.cos((t-TH)*84)*1.6*dk}
+   g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+   for(const o of LTN_SPR){
+    if(t<o.a-F||t>o.b+F)continue;
+    let al=1;
+    if(o.f>0&&t<o.a+F)al=ph(t,o.a-F,o.a+F);
+    if(o.f<5&&t>o.b-F)al*=1-ph(t,o.b-F,o.b+F);
+    if(o.f===0)al=Math.min(al,ph(t,0,.08));
+    if(o.f===5)al*=1-ph(t,1.4,END);
+    al=clamp(al,0,1);if(al<=.01)continue;
+    const p=ph(t,o.a,o.b),sc=lerp(o.s0,o.s1,eo(p)),
+     sx0=(o.f%3)*C,sy0=((o.f/3)|0)*C;
+    g.save();g.globalAlpha=al;
+    g.translate(ax+sh,GY-2+shy);g.scale(sc,sc);g.translate(-LTN_CX*k,-o.gy*k);
+    g.drawImage(LS.img,sx0,sy0,C,C,0,0,C*k,C*k);
+    g.restore();
+   }
+   g.restore();
+  }
+  function lightningSpriteFx(g,T,t,S,st){
+   const q=aim(S),x=q.x,s=q.scale,C=COL.bolt,r=E.rng(st.seed^0x570501);
+   if(t<TH){
+    /* Tia điện nhỏ bò quanh chân địch trong lúc mây tụ. */
+    for(let n=0;n<E.rate(st,'ltn-gather',ph(t,0,TH),18);n++){
+     const side=r.sign();
+     E.emit({x:x+side*r.range(20,70),y:GY-r.range(2,16),vx:-side*r.range(10,36),vy:-r.range(4,22),gy:0,drag:.5,
+      life:r.range(.2,.4),s0:r.range(1.2,2.4),s1:.4,shape:'spark',c:C.main,c2:C.core,a:.9,add:true,tag:TAG});
+    }
+   }
+   if(t>=TH&&t<=END){
+    if(E.once(st,'ltn-burst')){
+     burst(st,'ltn-sparks',x,GY-6,S.miss?16:34,{
+      speed:[30,96],ang:[-Math.PI*.96,-Math.PI*.04],size:[1.6,3.6],life:[.42,.8],
+      gy:84,drag:.46,shape:'spark',c:C.light,c2:C.core,a:.95,add:true});
+     burst(st,'ltn-streaks',x,GY-18,S.miss?8:18,{
+      speed:[24,88],ang:[0,TAU],size:[1.2,2.6],life:[.36,.7],
+      gy:-6,drag:.5,shape:'streak',c:C.light,c2:'#ffffff',a:.94,add:true});
+    }
+    for(let i=0;i<3;i++){
+     const start=TH+.04+i*.18,p=ph(t,start,start+.45),f=1-ph(t,start+.25,start+.66);
+     if(p>0&&f>0)wave(g,x,GY-4,10+112*eo(p)*s*(1-i*.15),i===1?C.light:C.main,f*.7,2.1,T,st.seed+170+i,.2);
+    }
+    for(let n=0;n<E.rate(st,'ltn-embers',ph(t,TH,END),12);n++){
+     const an=r.range(0,TAU),rr=r.range(14,60);
+     E.emit({x:x+Math.cos(an)*rr,y:GY-r.range(4,40),vx:r.range(-30,30),vy:-r.range(8,34),gy:60,drag:.44,
+      life:r.range(.4,.76),s0:r.range(1.2,2.6),s1:.4,shape:n%3?'spark':'orb',c:C.light,c2:C.core,a:.9,add:true,tag:TAG});
+    }
+   }
+  }
+
   /* 5 · Thiên Lôi Giáng: cột sét chính/phụ, chấn sóng, điện bò và khói cháy. */
   function fxLightning(g,T,t,S,st){
    const q=aim(S),x=q.x,s=q.scale,C=COL.bolt,r=E.rng(st.seed^0x570500);
@@ -1367,6 +1441,9 @@
     }else if(S.kyNang==='vu-xa-trien'&&VS.ok){
      snakeSprite(g,t,S);
      pixelLayer(g,gg=>{snakeSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
+    }else if(S.kyNang==='thien-loi-giang'&&LS.ok){
+     lightningSprite(g,t,S);
+     pixelLayer(g,gg=>{lightningSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
     }else pixelLayer(g,gg=>{run(gg,T,t,S,st);E.draw(gg,TAG)});
    }catch(e){
     window.__fxBossErr='57: '+(e&&e.message||e);
