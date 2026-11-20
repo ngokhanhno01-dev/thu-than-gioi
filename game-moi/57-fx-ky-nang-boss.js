@@ -51,6 +51,15 @@
   im.onerror=()=>{LS.ok=false};
   im.src=base+'fx-boss/thien-loi.png';
  }catch(e){}
+ /* Sprite sheet kỹ năng 6 (Nguyệt Thực Nuốt): 3 cột x 2 hàng, ô 768x768, nền trong suốt, mặt trăng đen ở trên, xoáy tối nuốt địch ở giữa. */
+ const NS={ok:false,img:null,cell:768};
+ try{
+  const base=((document.currentScript&&document.currentScript.src)||'').replace(/[^\/]*$/,'');
+  const im=new Image();
+  im.onload=()=>{NS.img=im;NS.cell=Math.floor(im.naturalWidth/3);NS.ok=im.naturalWidth>=3&&im.naturalHeight>=2};
+  im.onerror=()=>{NS.ok=false};
+  im.src=base+'fx-boss/nguyet-thuc.png';
+ }catch(e){}
  function boot(){
   const API=window.TTGCombatFX;
   if(!API||!API.engine||!API.drawAttack){
@@ -1329,6 +1338,71 @@
    }
   }
 
+  /* 6b · Nguyệt Thực Nuốt bằng ảnh 6 khung. Ảnh đối xứng nên không lật; tâm ngang ảnh = tâm địch.
+     Mốc (giây): 1 trăng hiện .0-.2 · 2 bóng tối rơi .2-.42 · 3 xoáy trồi .42-TH · 4 nuốt (trúng) TH-.95 · 5 xoáy sụp .95-1.3 · 6 tan 1.3-END.
+     Chỉnh nhanh: ECL_K (tỉ lệ), ECL_CX (tâm ngang trong ảnh), gy của từng khung (tâm vòng đất trong ô ảnh gốc). */
+  const ECL_K=.29,ECL_CX=386;
+  const ECL_SPR=[
+   {f:0,a:0,   b:.2,  s0:.97,s1:1,   gy:704},
+   {f:1,a:.2,  b:.42, s0:1,  s1:1,   gy:696},
+   {f:2,a:.42, b:TH,  s0:1,  s1:1.01,gy:710},
+   {f:3,a:TH,  b:.95, s0:1.02,s1:1,  gy:674, hit:1},
+   {f:4,a:.95, b:1.3, s0:1,  s1:.99, gy:678},
+   {f:5,a:1.3, b:END, s0:1,  s1:1,   gy:664}
+  ];
+  function eclipseSprite(g,t,S){
+   const q=aim(S),k=ECL_K*clamp(q.scale,.72,1.05),C=NS.cell,F=.06,ax=q.x;
+   let sh=0,shy=0;
+   if(t>=TH){const dk=Math.max(0,1-(t-TH)/.3);sh=Math.sin((t-TH)*88)*2.2*dk;shy=Math.cos((t-TH)*74)*1.5*dk}
+   g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+   for(const o of ECL_SPR){
+    if(t<o.a-F||t>o.b+F)continue;
+    let al=1;
+    if(o.f>0&&t<o.a+F)al=ph(t,o.a-F,o.a+F);
+    if(o.f<5&&t>o.b-F)al*=1-ph(t,o.b-F,o.b+F);
+    if(o.f===0)al=Math.min(al,ph(t,0,.08));
+    if(o.f===5)al*=1-ph(t,1.4,END);
+    al=clamp(al,0,1);if(al<=.01)continue;
+    const p=ph(t,o.a,o.b),sc=lerp(o.s0,o.s1,eo(p)),
+     sx0=(o.f%3)*C,sy0=((o.f/3)|0)*C;
+    g.save();g.globalAlpha=al;
+    g.translate(ax+sh,GY-2+shy);g.scale(sc,sc);g.translate(-ECL_CX*k,-o.gy*k);
+    g.drawImage(NS.img,sx0,sy0,C,C,0,0,C*k,C*k);
+    g.restore();
+   }
+   g.restore();
+  }
+  function eclipseSpriteFx(g,T,t,S,st){
+   const q=aim(S),x=q.x,s=q.scale,C=COL.moon,r=E.rng(st.seed^0x570601);
+   if(t<TH){
+    /* Bụi bạc nhỏ hút vào chân địch trong lúc xoáy tụ. */
+    for(let n=0;n<E.rate(st,'ecl-gather',ph(t,0,TH),18);n++){
+     const side=r.sign();
+     E.emit({x:x+side*r.range(34,86),y:GY-r.range(4,44),vx:-side*r.range(18,48),vy:-r.range(2,18),gy:0,drag:.42,
+      life:r.range(.3,.55),s0:r.range(1.2,2.6),s1:.4,shape:'spark',c:C.light,c2:C.core,a:.85,add:true,tag:TAG});
+    }
+   }
+   if(t>=TH&&t<=END){
+    if(E.once(st,'ecl-burst')){
+     burst(st,'ecl-silver-dust',x,GY-8,S.miss?16:34,{
+      speed:[26,86],ang:[-Math.PI*.96,-Math.PI*.04],size:[1.6,3.4],life:[.46,.86],
+      gy:70,drag:.46,shape:'spark',c:C.light,c2:C.core,a:.95,add:true});
+     burst(st,'ecl-glints',x,GY-30,S.miss?8:18,{
+      speed:[20,78],ang:[0,TAU],size:[1.2,2.6],life:[.4,.74],
+      gy:-6,drag:.5,shape:'streak',c:C.light,c2:'#ffffff',a:.94,add:true});
+    }
+    for(let i=0;i<3;i++){
+     const start=TH+.04+i*.19,p=ph(t,start,start+.45),f=1-ph(t,start+.25,start+.66);
+     if(p>0&&f>0)wave(g,x,GY-4,10+104*eo(p)*s*(1-i*.16),i===1?C.deep:C.light,f*.66,2,T,st.seed+190+i,.18);
+    }
+    for(let n=0;n<E.rate(st,'ecl-motes',ph(t,TH,END),14);n++){
+     const an=r.range(0,TAU),rr=r.range(16,58);
+     E.emit({x:x+Math.cos(an)*rr,y:GY-r.range(8,70),vx:r.range(-26,26),vy:-r.range(6,30),gy:40,drag:.44,
+      life:r.range(.44,.8),s0:r.range(1.2,2.6),s1:.4,shape:n%3?'spark':'orb',c:C.light,c2:C.core,a:.9,add:true,tag:TAG});
+    }
+   }
+  }
+
   /* 6 · Nguyệt Thực Nuốt: trăng đen ngay trên địch, hút sáng và nổ tối nhiều đợt. */
   function fxEclipse(g,T,t,S,st){
    const q=aim(S),x=q.x,s=q.scale,C=COL.moon,r=E.rng(st.seed^0x570600),
@@ -1444,6 +1518,9 @@
     }else if(S.kyNang==='thien-loi-giang'&&LS.ok){
      lightningSprite(g,t,S);
      pixelLayer(g,gg=>{lightningSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
+    }else if(S.kyNang==='nguyet-thuc-nuot'&&NS.ok){
+     eclipseSprite(g,t,S);
+     pixelLayer(g,gg=>{eclipseSpriteFx(gg,T,t,S,st);E.draw(gg,TAG)});
     }else pixelLayer(g,gg=>{run(gg,T,t,S,st);E.draw(gg,TAG)});
    }catch(e){
     window.__fxBossErr='57: '+(e&&e.message||e);
