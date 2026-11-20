@@ -1,6 +1,6 @@
 /* 53-balo.js - BALO của game-moi: nút Balo (khung vuông + icon) + bảng Balo + dữ liệu túi đồ.
    Cần 52-nut-vuong.js (TTGNV) nạp trước. Ảnh khung bảng: game-moi/khung-balo.webp (1761x847, khung xanh-vàng mới: chữ BALO, nút X, chữ 4 nút KHÓA/CHỌN/VỨT BỎ/SẮP XẾP đã VẼ SẴN trong ảnh; 4x4 ô + bảng thông tin bên phải).
-   BẢNG: nửa TRÁI = Bóng bắt thú (danh sách thanh, sau này dùng khung thanh dài + bấm mở bảng nổi có nút Dùng/Đóng);
+   BẢNG: nửa TRÁI = Ngự Thú Châu (danh sách thanh, sau này dùng khung thanh dài + bấm mở bảng nổi có nút Dùng/Đóng);
          nửa PHẢI = lưới 16 ô (4x4) Nguyên liệu (chia trang, tổng CAP ô) + bảng thông tin item (icon phóng to, tên, mô tả, số lượng)
          + 4 khung ngang dưới lưới = 4 nút: KHÓA (khóa/mở khóa), CHỌN (bật chọn nhiều ô), VỨT BỎ (có hỏi lại, món khóa không vứt được), SẮP XẾP (đổi kiểu xếp).
          Sức chứa (trái) + chuyển trang (phải) nằm ngay trên lưới ô.
@@ -13,7 +13,7 @@
 if(!window.TTGNV)return;
 var KEY='ttg_moi_balo_v1',CAP=100,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=3',OV_KHOA='game-moi/nut-mo-khoa.webp?v=1',OV_CHON='game-moi/nut-bo-chon.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
 var demo=/[?&](balo|thu)=demo/.test(location.search);   /* ?thu=demo cũng bật demo Balo để có sách kỹ năng mẫu cho panel Thú Thần (không lưu) */
-var LOAI={nl:'Nguyên liệu',bong:'Bóng bắt thú',sach:'Sách kỹ năng'};   /* sách kỹ năng nằm chung lưới 4x4 với nguyên liệu; danh mục sách khai ở 54-thu-than.js */
+var LOAI={nl:'Nguyên liệu',bong:'Ngự Thú Châu',sach:'Sách kỹ năng'};   /* sách kỹ năng nằm chung lưới 4x4 với nguyên liệu; danh mục sách khai ở 54-thu-than.js */
 /* ===== DANH MỤC ITEM ===== mỗi item: id:{loai:'nl'|'bong', ten, mo (mô tả), ic (emoji tạm) hoặc img (đường dẫn ảnh icon), cap (cấp bóng)} */
 var CAT={};
 function reg(o){for(var k in o)CAT[k]=o[k];}
@@ -109,7 +109,7 @@ function build(){
   var pg=mk('div','bl-pg',1170,181,146,26); /* chuyển trang: ngay trên lưới ô, sát góc phải */
   E.pv=document.createElement('button');E.pv.type='button';E.pv.textContent='‹';E.pg=document.createElement('span');E.nx=document.createElement('button');E.nx.type='button';E.nx.textContent='›';
   pg.appendChild(E.pv);pg.appendChild(E.pg);pg.appendChild(E.nx);
-  mk('div','bl-pl',295,192,262,38,'Bóng bắt thú'); /* chữ nằm giữa thanh vàng (thanh: x295-557, y190-233) */
+  mk('div','bl-pl',295,192,262,38,'Ngự Thú Châu'); /* chữ nằm giữa thanh vàng (thanh: x295-557, y190-233) */
   E.balls=mk('div','bl-balls',105,252,705,470);
   E.slots=[];
   for(var r=0;r<6;r++)for(var c=0;c<4;c++){var b=mk('button','bl-sl',COLS[c],ROWS[r],SL,SL);b.type='button';(function(i){b.addEventListener('click',function(){clickSlot(i);});})(r*4+c);E.slots.push(b);}
@@ -167,7 +167,7 @@ function render(){
     else{b.innerHTML='';b.removeAttribute('aria-label');}
     b.classList.toggle('sel',id===sel&&!!id&&!multi);b.classList.toggle('pk',!!id&&!!picks[id]);}
   E.balls.innerHTML='';
-  if(!bg.length){var em=document.createElement('div');em.className='bl-emp';em.textContent='Chưa có bóng bắt thú';E.balls.appendChild(em);}
+  if(!bg.length){var em=document.createElement('div');em.className='bl-emp';em.textContent='Chưa có Ngự Thú Châu';E.balls.appendChild(em);}
   bg.forEach(function(id){var it=CAT[id],r=document.createElement('div');r.className='bl-row'+(id===sel&&!multi?' sel':'')+(picks[id]?' pk':'');
     r.innerHTML='<span class="i">'+ic(it)+'</span><span class="n">'+esc(it.ten)+'</span>'+(lock[id]?'<span class="lk">🔒</span>':'')+(it.cap?'<span class="l">Cấp '+it.cap+'</span>':'')+'<span class="q">x'+count(id)+'</span>';
     r.addEventListener('click',function(){pick(id);});E.balls.appendChild(r);});
