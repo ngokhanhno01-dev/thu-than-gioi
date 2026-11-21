@@ -31,7 +31,7 @@ function battle(){return host&&host.battle?host.battle():null;}
 function enemy(){var b=battle();return b&&b.enemy||null;}
 function hpPct(){var s=host.st();return s&&s.maxEn?(s.en/s.maxEn*100):100;}
 function hpMax(){var m=TTGBONG.CFG.mocHP;return m[m.length-1];}
-function toast(t){if(host&&host.toast)host.toast(t);}
+function toast(t){if(host&&host.toast)host.toast(t);else{try{console.log(t);}catch(e){}}}
 function itemOf(cap){var B=root.TTGBALO;return B&&B.CAT?B.CAT[TTGBONG.idBong(cap)]:null;}
 function countOf(cap){return root.TTGBALO?TTGBALO.count(TTGBONG.idBong(cap)):0;}
 function rateOf(cap){var e=enemy();if(!e)return null;return TTGBONG.tinhTiLe(cap,hpPct(),!!e.boss,e.vung||0);}
@@ -280,6 +280,15 @@ function showPanel(win){
   }
   els.res.className='btr on';
   els.res.querySelector('button').addEventListener('click',function(){abort();host.end();});
+}
+
+/* NÚT TEST TẠM: bấm để nhận mỗi bậc châu +5 (xóa khi đã có nguồn châu thật ở Bước 5). Tắt bằng CFG.nutTest=false */
+CFG.nutTest=true;
+if(CFG.nutTest&&root.TTGNV&&root.TTGBALO&&root.TTGBONG){
+  root.TTGNV.add({id:'nhan-chau',ten:'Nhận châu',onTap:function(){
+    for(var c=1;c<=TTGBONG.CFG.capBongMax;c++)TTGBALO.add(TTGBONG.idBong(c),5);
+    toast('TEST: +5 mỗi bậc Ngự Thú Châu');
+  },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="20" fill="#3ec9d6" stroke="#0b4a5c" stroke-width="3"/><path d="M32 18v28M18 32h28" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>'});
 }
 
 root.TTGBAT={
