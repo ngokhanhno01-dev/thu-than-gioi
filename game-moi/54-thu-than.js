@@ -61,7 +61,7 @@ function uid(){return 't'+Date.now().toString(36)+Math.random().toString(36).sli
 function demoChiso(k){var c={hp:300+k*37,tc:40+k*7,pt:30+k*5,td:20+(k*11)%60,mm:5+(k*3)%30},n=0;
   PAGES.slice(1).forEach(function(p){p.ds.forEach(function(d){c[d[0]]=((k*7+(n++)*13)%240)/10;});});return c;}   /* chỉ số phụ mẫu 0~24% */
 function demoData(){
-  var ids=['1a','1b','1d','2a','3a','4a','5a','6a','1c','2b','3b','4b','5b','6b','1e','2c','3c','4c','5c','6j'],bacs=['S','A','B','C','D','SS'];
+  var ids=['1a','1b','1d','2a','3a','4a','5a','6a','1c','2b','3b','4b','5b','6b','1e','2c','3c','4c','5c','6j'],bacs=['S','A','B','C','D','SS','E'];
   return ids.map(function(id,i){var k=i+1;
     return {uid:'demo'+i,id:id,tien:1+(i%3),bac:i%2?bacs[i%bacs.length]:undefined,
       chiso:demoChiso(k)};});
@@ -128,6 +128,12 @@ var css=[
 /* rãnh + thumb cuộn (phủ kín rãnh vẽ sẵn trong ảnh để không lộ thumb vẽ sẵn ở trên cùng) */
 '.tt-rail{border-radius:{9};background:#0d0e34;border:{2} solid #8a6a2a;touch-action:none;cursor:pointer}',
 '.tt-th{position:absolute;left:{2};right:{2};border-radius:{7};background:linear-gradient(90deg,#c9992f,#ffe58a,#c9992f);box-shadow:0 0 {6} rgba(255,224,102,.5)}',
+/* 3 Ô TRÒN dưới ảnh thú: Lv / Bậc tiến hóa / Rank (chữ bút lông, màu theo Rank) */
+'.tt-oc{display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;color:#ffe9a0;line-height:1;text-align:center}',
+'.tt-oc .l{font-family:var(--fh);font-weight:800;font-size:{22};letter-spacing:{1};color:#bfeee8;text-shadow:0 {2} 0 #000,0 0 {4} #000}',
+'.tt-oc .v{font-family:var(--fh);font-weight:800;font-size:{50};margin-top:{3};color:#ffe9a0;text-shadow:{2} 0 0 #000,-{2} 0 0 #000,0 {2} 0 #000,0 -{2} 0 #000,0 0 {10} rgba(255,200,80,.7)}',
+'.tt-oc.rk3 .r{font-family:\"Kaushan Script\",\"Yuji Boku\",\"Permanent Marker\",\"Brush Script MT\",cursive;font-weight:900;font-size:{86};line-height:1;color:var(--rc);padding:0 {6} {4} 0;-webkit-text-stroke:{3} rgba(0,0,0,.9);paint-order:stroke fill;text-shadow:{3} {3} 0 #000,-{2} -{2} 0 #000,{2} -{2} 0 #000,-{2} {2} 0 #000,0 0 {14} var(--rc),0 0 {28} var(--rc);transform:skewX(-6deg)}',
+'.tt-oc.rk3.two .r{font-size:{62};padding:0 {4} {3} 0}',
 /* NÚT RA TRẬN */
 '.tt-go{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ RA TRẬN đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
 '.tt-tha{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ THẢ vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
@@ -170,6 +176,8 @@ var css=[
 '.tt-pb button.p:active{filter:brightness(1.08)}'
 ].join('\n').replace(/\{(\d+(?:\.\d+)?)\}/g,'calc(var(--u)*$1)');
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+/* font chữ bút lông cho Rank (Google Fonts; mất mạng thì tự dùng font cursive của máy) */
+if(!document.getElementById('tt-font-rk')){var lk=document.createElement('link');lk.id='tt-font-rk';lk.rel='stylesheet';lk.href='https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap';document.head.appendChild(lk);}
 
 /* ===== DỰNG PANEL (một lần) ===== */
 function box(c,x,y,w,h){var s=c.style;s.left=(x/BW*100)+'%';s.top=(y/BH*100)+'%';s.width=(w/BW*100)+'%';s.height=(h/BH*100)+'%';return c;}
@@ -205,7 +213,8 @@ function build(){
   /* nút TRANG BỊ: vùng bấm trong suốt đè lên tấm vàng "Trang Bị" vẽ sẵn dưới ô ảnh thú (x209-522,y575-632). Bấm = mở khung trang bị (55-trang-bi.js) */
   var eq=mk('button','tt-eq',215,578,300,52);eq.type='button';eq.setAttribute('aria-label','Trang Bị');
   eq.addEventListener('click',function(){if(window.TTGTB)TTGTB.open();else toast('Sắp có');});
-  /* 3 ô tròn bên dưới (tâm (241,695),(367,695),(498,695), bán kính ~60): CHƯA LÀM (icon buff/debuff/kỹ năng có sẵn), để trống */
+  /* 3 ô tròn bên dưới (tâm (241,695),(367,695),(498,695), bán kính ~60): ô 1 = Lv, ô 2 = Bậc tiến hóa (1-3), ô 3 = Rank (E,D,C,B,A,S,SS) */
+  E.oc=[mk('div','tt-oc',191,645,100,100),mk('div','tt-oc',317,645,100,100),mk('div','tt-oc rk3',448,645,100,100)];
 
   /* --- GIỮA TRÊN: chữ trang + 5 thanh chỉ số + 2 nút ‹ › --- */
   E.cap=mk('div','tt-cap',960,170,290,26);E.cap.style.justifyContent='flex-end';   /* khung mới hết chỗ phía trên 5 thanh: chữ tên trang đặt ở dải trống trên bảng, canh phải để tránh mặt trang trí giữa */
@@ -314,9 +323,20 @@ function renderStats(){
 }
 function renderLeft(){
   var t=byUid(sel);
-  if(t){E.nm.innerHTML=esc(tenThu(t))+(t.bac?'<i>['+esc(t.bac)+']</i>':'');
+  if(t){E.nm.textContent=tenThu(t);   /* khung vàng chỉ hiện tên */
     var a=anhThu(t);E.ph.innerHTML=a?'<img src="'+esc(a)+'" alt="'+esc(tenThu(t))+'">':'';}
   else{E.nm.textContent='Chưa Có Thú';E.ph.innerHTML='<div class="tt-emp">Chưa có thú nào<br>Bắt thú để cất vào đây</div>';}
+  renderBadges(t);
+}
+/* 3 ô tròn: Lv / Bậc / Rank. Rank thiếu thì coi là C (giống TTGCS.tinh). Màu Rank trùng viền hiệu ứng ở 64-thong-bao.js */
+var RKC={E:'#ffffff',D:'#3dff6a',C:'#3fa9ff',B:'#b36bff',A:'#ffd21f',S:'#ff8a1f',SS:'#ff3030'};
+function renderBadges(t){
+  if(!E.oc)return;
+  if(!t){E.oc.forEach(function(c){c.innerHTML='';});return;}
+  var lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),bac=RKC[t.bac]?t.bac:'C';
+  E.oc[0].innerHTML='<span class="l">Lv</span><span class="v">'+lv+'</span>';
+  E.oc[1].innerHTML='<span class="l">Bậc</span><span class="v">'+tien+'</span>';
+  E.oc[2].classList.toggle('two',bac.length>1);E.oc[2].style.setProperty('--rc',RKC[bac]);E.oc[2].innerHTML='<span class="r">'+bac+'</span>';
 }
 function renderGo(){
   var on=!!sel&&sel===rt,t=!!byUid(sel);
