@@ -332,7 +332,11 @@ function drawSkillFx(ts){var f=st.skFx,api=window.TTGCombatFX;if(!f)return;var t
    Lỗi/thiếu TTGCombatFX: quay về kiểu cũ (thú lao 28px, trừ máu ngay). Kỹ năng boss vẫn dùng drawSkillFx (57), không chồng hiệu ứng vùng. */
 var AT_K=.68,AT_SC=1.2,AT_HIT=Math.round(665*AT_K);
 function atkFxOn(){var a=window.TTGCombatFX;return !!(a&&a.drawAttack&&a.drawImpact);}
-function zoneOfW(w){try{var m=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null;if(!m)return 0;var z=m.vung;if(z==null&&window.TTGCS&&TTGCS.loai){var l=TTGCS.loai(m.id);z=l&&l.vung;}z=Math.floor(+z)||0;return Math.max(0,Math.min(16,z));}catch(e){return 0;}}
+/* VÙNG HIỆU ỨNG ĐÒN = vùng QUÊ của LOÀI thú đang đánh (TTGCS.loai(id).goc), KHÔNG phải vùng đang thám hiểm và không phải vung dùng tính chỉ số.
+   Bảng BANG của demo đánh số vùng khác main ở các vùng mới, nên đổi sang số vùng hiệu ứng (0..16 của main) bằng FX_ZONE: 6 Thủy Nguyệt Cảnh -> 1 (Sương Cốc, cùng hệ thủy; main chưa có vùng này), 7 Xích Hỏa Địa -> 11, 8 Thanh Lâm -> 10.
+   Quái nguồn main (không có trong bảng loài) dùng vung của chính quái (vùng nó sinh ra). */
+var FX_ZONE={6:1,7:11,8:10};
+function zoneOfW(w){try{var m=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null;if(!m)return 0;var z=null,l=window.TTGCS&&TTGCS.loai?TTGCS.loai(m.id):null;if(l&&l.goc!=null)z=l.goc;else z=m.vung;z=Math.floor(+z)||0;if(FX_ZONE[z]!=null)z=FX_ZONE[z];return Math.max(0,Math.min(16,z));}catch(e){return 0;}}
 function atkU(f,ts){return (ts-f.t0)/(1900*AT_K);}
 function lungeP(x){if(x<=0)return 0;if(x<.14)return -14*Math.sin(x/.14*Math.PI/2);if(x<.35){var q=(x-.14)/.21;return -14+114*q*q*(1.4-.4*q);}if(x<.42)return 100;if(x<.72){var q2=(x-.42)/.3;return 100*(1-q2*q2*(3-2*q2));}return 0;}
 function smo(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);}

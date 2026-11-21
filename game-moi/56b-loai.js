@@ -2,7 +2,7 @@
    Nạp SAU 56-chi-so.js. id theo 51-thu-moi.js (1a..1j Tuyết Nguyên, 2x Sương Cốc, 3x Vân Đảo, 4x Lôi Vực, 5x Nguyệt Cung, 6x Phong Nguyên).
    HỆ ĐÃ ĐỐI CHIẾU THEO MÔ TẢ (khung/cảm hứng) trong thu-moi/<vùng>/*.md, KHÔNG đặt theo tên (chốt 19/11/2026).
    Muốn đổi vai/hệ một con: sửa đúng một dòng trong bảng BANG bên dưới. Hệ ghi theo khóa của HE_TEN (56-chi-so.js).
-   API: TTGCS.loai(id) -> {id, ten, vung, vai, he, boss} | null ; TTGCS.dsLoai(z) ; TTGCS.heVung(z) ; TTGCS.mangDuocSach(id,heSach) ; TTGCS.LOAI */
+   API: TTGCS.loai(id) -> {id, ten, goc (vùng QUÊ của loài = khóa trong bảng BANG), vung (vùng dùng TÍNH CHỈ SỐ, có thể khác goc), vai, he, boss} | null ; TTGCS.dsLoai(z) ; TTGCS.heVung(z) ; TTGCS.mangDuocSach(id,heSach) ; TTGCS.LOAI */
 (function(root){
 'use strict';
 
@@ -103,12 +103,12 @@ var LOAI={},THEO_VUNG={};
 Object.keys(BANG).forEach(function(zs){
   var z=+zs;THEO_VUNG[z]=[];
   BANG[zs].forEach(function(r,i){
-    var o={id:r[0],ten:r[1],vung:r[5]!=null?r[5]:z,vai:VAI[r[2]],he:r[3].slice(),boss:r[4]!==undefined?!!r[4]:i===BANG[zs].length-1};
+    var o={id:r[0],ten:r[1],goc:z,vung:r[5]!=null?r[5]:z,vai:VAI[r[2]],he:r[3].slice(),boss:r[4]!==undefined?!!r[4]:i===BANG[zs].length-1};
     LOAI[o.id]=o;THEO_VUNG[z].push(o.id);
   });
 });
 
-function loai(id){var o=LOAI[id];return o?{id:o.id,ten:o.ten,vung:o.vung,vai:o.vai,he:o.he.slice(),boss:o.boss}:null;}
+function loai(id){var o=LOAI[id];return o?{id:o.id,ten:o.ten,goc:o.goc,vung:o.vung,vai:o.vai,he:o.he.slice(),boss:o.boss}:null;}
 function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
 /* sách kỹ năng: thú chỉ mang được sách thuộc 1 trong 2 hệ của chính nó (hệ khác không mang được). heSach = khóa hệ như 'bang','vo'. */
 function mangDuocSach(id,heSach){var o=LOAI[id];return !!o&&o.he.indexOf(heSach)>=0;}
