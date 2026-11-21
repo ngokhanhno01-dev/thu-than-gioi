@@ -213,6 +213,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/67-rune-rank.js"></script>
 <script src="game-moi/68-hud-tran.js"></script>
 <script src="game-moi/69-dem-nguoc.js"></script>
+<script src="game-moi/31-combat-fx.js"></script>
+<script src="game-moi/57-fx-ky-nang-boss.js"></script>
 <script>
 /* GAME MỚI (khung ban đầu). CHỈ CÓ MÀN NGANG, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
@@ -247,9 +249,36 @@ var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]h
 function dp(id,b,cx,by,fine){THU_MOI.setFrame(192);return THU_MOI.draw(ctx,id,b,cx,by,128,fine);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
+/* ===== KỸ NĂNG ĐỘC QUYỀN BOSS THÚ HOANG (dữ liệu: TTGCS.KY_NANG_BOSS trong 56c-buff.js; hình: 57-fx-ky-nang-boss.js + 31-combat-fx.js) =====
+   Chỉ BOSS THÚ HOANG (enemy.boss && source==='demo') mới có; boss quái (main) và thú bị bắt về thì không. Khớp theo id boss (trường boss của bảng, vd '1j').
+   Hết hồi chiêu (cd, tính lượt của boss) thì boss dùng kỹ năng THAY đòn thường ở lượt đó. Lần đầu dùng sau KN_START lượt đánh thường, sau đó theo cd của kỹ năng.
+   FX chạy 1,68s, TRÚNG ở 0,665s (KN_T_HIT): sát thương/hiệu ứng áp đúng lúc trúng; lượt kéo dài tới KN_T_END rồi mới xét thắng/thua.
+   Hiệu ứng đã làm: sát thương theo hsTc + hệ kỹ năng, hutMau (Sương Nuốt), choang (Thiên Lôi Giáng, bị kc chặn). Chưa làm (trận demo chưa có hệ lớp/tốc độ): lop (lạnh), tuBuff/debuff tốc độ. */
+var KN_START=2,KN_T_HIT=665,KN_T_END=1750,knSeq=0;
+function bossSkill(e){if(!e||!e.boss||e.source!=='demo'||!window.TTGCS||!TTGCS.KY_NANG_BOSS)return null;
+ for(var i=0;i<TTGCS.KY_NANG_BOSS.length;i++){var k=TTGCS.KY_NANG_BOSS[i];if(k.boss===e.id)return {k:k,cd:KN_START};}return null;}
+function knDecide(){var n=st&&st.kn;if(!n||!BATTLE)return null;if(n.cd>0){n.cd--;return null;}n.cd=n.k.cd;return n.k;}
+function knHurt(t,d,n,col){var sk=t==='me'?'shMe':'shEn',dT=d;if(st[sk]>0&&d>0){var ab=Math.min(st[sk],d);st[sk]-=ab;d-=ab;}st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+dT,c:col});}
+function castSkill(s0,k){var n0=performance.now();s0.skFx={id:k.id,ten:k.ten,t0:n0,i:++knSeq};
+ setTimeout(function(){if(st!==s0||!BATTLE)return;var n=performance.now(),a=BATTLE.enemyStats,z=BATTLE.playerStats,
+   hs=TTGCS.heHeSo?TTGCS.heHeSo(k.he,heOf(BATTLE.player)):1,d=TTGCS.satThuong({tc:a.tc,pt:z.pt,hsKyNang:k.hsTc,hsHe:hs});
+  knHurt('me',d,n,'#ff8a2a');
+  (k.ev||[]).forEach(function(ev){
+   if(ev.k==='hutMau'&&st.en>0){var h=Math.floor(d*ev.pct/100);if(h>0){st.en=Math.min(st.maxEn,st.en+h);st.fx.push({x:px('en'),y:gy()-135,t:n,s:'+'+h,c:'#3c3'});}}
+   else if(ev.k==='choang'&&st.me>0){var kc=Math.max(0,Math.min(100,(z.kc||0)));if(Math.random()*100<ev.xs&&Math.random()*100>=kc){st.stun=ev.luot||1;st.fx.push({x:px('me'),y:gy()-110,t:n,s:'Choáng!',c:'#ffe45c'});}}});
+ },KN_T_HIT);}
+/* vẽ FX kỹ năng: canvas FX gốc 360x250 (mặt đất y=204, địch bên trái x=85 khi boss đánh bạn) co 1,25 lần cho khớp cỡ thú 128, căn đích vào đúng thú của bạn */
+function drawSkillFx(ts){var f=st.skFx,api=window.TTGCombatFX;if(!f)return;var t=(ts-f.t0)/1000;if(t<0)t=0;if(t>1.8||!api||!api.drawAttack){st.skFx=null;return;}
+ var sc=1.25,ox=px('me')-85*sc,oy=py()-204*sc;
+ ctx.save();ctx.beginPath();ctx.rect(I.l,0,W-I.l-I.r,TH());ctx.clip();
+ ctx.save();ctx.translate(ox,oy);ctx.scale(sc,sc);ctx.imageSmoothingEnabled=true;
+ try{window.BSPD=1;api.drawAttack(ctx,ts/1000,{on:1,s:0,u:Math.min(1,t/1.9),pa:false,cl:0,cr:false,miss:false,h:'',i:f.i,kyNang:f.id,text:''});}catch(e){window.__fxBossErr='index: '+(e&&e.message||e);}
+ ctx.restore();
+ if(t<1){var a=Math.min(1,t/.12)*(1-Math.max(0,(t-.7)/.3)),cx=px('en'),cy=gy()-150;ctx.save();ctx.globalAlpha=a;ctx.font='bold 14px "Noto Serif",Georgia,serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=4;ctx.strokeStyle='rgba(10,10,40,.9)';ctx.fillStyle='#ffe9a0';ctx.strokeText(f.ten,cx,cy);ctx.fillText(f.ten,cx,cy);ctx.restore();}
+ ctx.restore();ctx.imageSmoothingEnabled=false;}
 /* ĐẾM NGƯỢC 3-2-1-CHIẾN (69-dem-nguoc.js): chặn auto đánh (nextAt=Infinity) tới khi đếm xong mới cho đánh. Không có module thì đánh luôn như cũ. */
 function cdStart(){if(window.TTGDEM){nextAt=Infinity;TTGDEM.start(function(){nextAt=performance.now()+GAP;});}else nextAt=performance.now()+GAP;}
-function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};var sM=khienMax(player,ps.hp),sE=khienMax(enemy,enemy.stats.hp);st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,shMe:sM,shMaxMe:sM,shEn:sE,shMaxEn:sE,busy:false,msg:'',fx:[]};SCENE='tran';A=null;nextAt=Infinity;if(window.TTGDEM)TTGDEM.reset();var gm='Gặp '+enTag(enemy)+': '+enemy.ten+(enemy.hienBac?' (Rank '+enemy.bac+')':'');if(window.TTGTBAO){toast(gm,cdStart);}else{toast(gm);cdStart();}}
+function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};var sM=khienMax(player,ps.hp),sE=khienMax(enemy,enemy.stats.hp);st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,shMe:sM,shMaxMe:sM,shEn:sE,shMaxEn:sE,busy:false,msg:'',fx:[],kn:bossSkill(enemy)};SCENE='tran';A=null;nextAt=Infinity;if(window.TTGDEM)TTGDEM.reset();var gm='Gặp '+enTag(enemy)+': '+enemy.ten+(enemy.hienBac?' (Rank '+enemy.bac+')':'');if(window.TTGTBAO){toast(gm,cdStart);}else{toast(gm);cdStart();}}
 if(window.TTGTHAMHIEM)TTGTHAMHIEM.start=startExplore;
 /* BẮT THÚ (62-bat-thu.js): cầu nối. freeze = đóng băng trận (st mới => mọi setTimeout của lượt đang đánh tự bỏ vì st!==s0); resume = đánh tiếp; end = kết thúc lần Thám hiểm về sảnh */
 if(window.TTGBAT)TTGBAT.attach({scene:function(){return SCENE;},battle:function(){return BATTLE;},st:function(){return st;},
@@ -312,12 +341,14 @@ function px(w){var fw=W-I.l-I.r;return Math.round(I.l+fw*(w==='me'?PET_X:1-PET_X
 function hit(w){var t=w==='me'?'en':'me',d,n=performance.now();if(BATTLE&&window.TTGCS){var a=w==='me'?BATTLE.playerStats:BATTLE.enemyStats,z=w==='me'?BATTLE.enemyStats:BATTLE.playerStats;d=TTGCS.satThuong({tc:a.tc,pt:z.pt,hsHe:1});}else d=6+Math.floor(Math.random()*9)+(w==='me'?bm:be)*2;var dT=d,sk=t==='me'?'shMe':'shEn';if(st[sk]>0&&d>0){var ab=Math.min(st[sk],d);st[sk]-=ab;d-=ab;}st[t]=Math.max(0,st[t]-d);st.fx.push({x:px(t),y:gy()-135,t:n,s:'-'+dT});A={w:w,t:n};}
 /* Một lượt: mình đánh -> (nếu địch còn sống) địch đánh lại -> kiểm tra thắng/thua.
    Hết trận: giữ busy=true, hiện kết quả END_WAIT ms rồi reset() (st mới, busy=false) để auto đánh tiếp. */
-function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;hit('me');
- setTimeout(function(){if(st===s0&&st.en>0)hit('en');},650);
+function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;
+ if(st.stun>0){st.stun--;st.fx.push({x:px('me'),y:gy()-135,t:performance.now(),s:'Choáng',c:'#ffe45c'});}else hit('me');
+ var sk=st.en>0?knDecide():null;/* boss hết hồi chiêu: dùng kỹ năng thay đòn thường */
+ setTimeout(function(){if(st===s0&&st.en>0){if(sk)castSkill(s0,sk);else hit('en');}},650);
  setTimeout(function(){if(st!==s0)return;
   if(st.en<=0||st.me<=0){st.msg=st.en<=0?'Thắng!':'Thua';var encounter=!!BATTLE,won=st.en<=0,eb=BATTLE;
    setTimeout(function(){if(st!==s0)return;if(encounter){BATTLE=null;SCENE='sanh';reset();var xp=null,tt=0;if(won&&eb&&window.TTGTHU&&TTGTHU.addExp&&window.TTGCS){var lo=eb.enemy.boss?'boss':(eb.enemy.source==='main'?'quai':'thu');xp=TTGTHU.addExp(TTGCS.expThuong({capQuai:eb.enemy.lv,capThu:eb.player.lv,loai:lo,vung:eb.enemy.vung,bac:eb.enemy.bac}));if(window.TTGTIEN){tt=TTGTIEN.tinhThach({loai:lo,vung:eb.enemy.vung,bac:eb.enemy.bac});TTGTIEN.add('tt',tt);}}toast(won?'Thắng! +'+(xp?xp.gain:0)+' EXP'+(tt?' · +'+TTGTIEN.fmt(tt)+' Tinh Thạch':'')+(xp&&xp.lv1>xp.lv0?' · Lên cấp '+xp.lv1+'!':''):'Thua! Thú đã gục');}else reset();},END_WAIT);}
-  else{st.busy=false;nextAt=performance.now()+GAP;}},1300);}
+  else{st.busy=false;nextAt=performance.now()+GAP;}},sk?650+KN_T_END:1300);}
 function autoTick(){if(AUTO&&st&&!st.busy&&performance.now()>=nextAt)atk();}
 
 /* ===== NÚT ẢO + CHẾ ĐỘ SẮP XẾP ===== */
@@ -778,7 +809,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,py(),ts,'truoc');return;}
  pet('en',ts);pet('me',ts);
  if(window.TTGBAT&&TTGBAT.draw)TTGBAT.draw(ctx,ts);
- var DA={x:I.l,y:0,w:W-I.l-I.r,h:TH(),cx:I.l+(W-I.l-I.r)/2,cy:TH()*.46};if(window.TTGDEM)TTGDEM.under(ctx,ts,DA);/* đếm ngược: nền tối + tia sáng, nằm dưới khung HUD */
+ var DA={x:I.l,y:0,w:W-I.l-I.r,h:TH(),cx:I.l+(W-I.l-I.r)/2,cy:TH()*.46};if(st.skFx)drawSkillFx(ts);if(window.TTGDEM)TTGDEM.under(ctx,ts,DA);/* đếm ngược: nền tối + tia sáng, nằm dưới khung HUD */
  var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),by=I.t+32,mePet=BATTLE&&THU_MOI.byId[BATTLE.player.id],meName=BATTLE?(BATTLE.player.ten||(mePet&&mePet.ten)||'Thú của bạn'):THU_MOI.byId[ID].ten,enName=BATTLE?BATTLE.enemy.ten+' ['+enTag(BATTLE.enemy)+']':THU_MOI.byId[ID].ten,maxMe=BATTLE?BATTLE.playerStats.hp:100,maxEn=BATTLE?BATTLE.enemyStats.hp:100;
   /* KHUNG THÔNG TIN (68-hud-tran.js): khung thú bạn bên trái (vòng Rank bên trái), khung địch bên phải (lật gương). Ảnh chưa nạp xong thì dùng thanh máu cũ. */
   var HM=112,hw=Math.min(250,Math.floor((W-I.l-I.r-2*HM-16)/2)),hy=I.t+6,P=BATTLE?BATTLE.player:null,EN=BATTLE?BATTLE.enemy:null;
@@ -787,7 +818,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
   else{  bar(I.l+ox,by,bw,Math.max(0,Math.min(1,st.me/maxMe)),'#3c3',meName+' (bạn)',BATTLE?((window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[BATTLE.player.bac])?BATTLE.player.bac:'C'):null);/* thú của bạn: hiện Rank (thiếu/lạ coi là C như ô kho) */bar(W-I.r-ox-bw,by,bw,Math.max(0,Math.min(1,st.en/maxEn)),'#c33',enName,BATTLE&&BATTLE.enemy.hienBac?BATTLE.enemy.bac:null);}
   
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
- st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
+ st.fx.forEach(function(f){ctx.fillStyle=f.c||'#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
  if(window.TTGDEM)TTGDEM.draw(ctx,ts,DA);
  if(window.TTGDEM)TTGDEM.result(ctx,ts,DA,st.msg);else if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+70,gy()-170));}}
 function loop(ts){mainRaf=0;if(document.hidden)return;if(SCENE==='tran')autoTick();draw(ts);mainRaf=requestAnimationFrame(loop);}
