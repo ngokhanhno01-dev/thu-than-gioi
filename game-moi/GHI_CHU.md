@@ -67,8 +67,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
   5. Sửa xong cập nhật `THIET_KE_CHI_SO.md` mục 7b và ghi chú này, rồi mở trận thử xem mô tả sách có khớp những gì xảy ra.
 - **Thứ tự đánh theo tốc độ + nhịp trận (22/11/2026)**: `index.html` hàm `ordFirst()` (td cao hơn đánh trước, bằng nhau thì bạn trước, tính lại mỗi vòng theo `effS`), `act(s0,w)` thực hiện lượt của một bên và trả về thời gian lượt, `atk()` nối hai lượt theo thứ tự rồi mới xét thắng/thua (`fin`). Bên bị hạ gục trước lượt của mình thì mất lượt (vẫn giữ nhịp `T_DON`). Nhịp: `GAP` 350→450, `T_DON` (mới, trước là số 650 gõ cứng) =750; chỉnh nhanh ở dòng khai báo `GAP`/`T_DON`/`END_WAIT`. Trận mẫu không có `BATTLE` giữ như cũ (bạn đánh trước). Lưu ý: trước đây boss bị choáng vẫn mất hồi chiêu kỹ năng; giờ vẫn giữ y như vậy (chọn kỹ năng trước, rồi mới xét choáng).
 
-## Thanh tốc độ = thanh vàng hành động (index.html: planAct / gaugeOf)
-- Vào trận cả 2 thanh ĐẦY: td cao hơn đánh trước (bằng nhau: tung ngẫu nhiên, đặt `BATTLE.seed` giống nhau ở 2 máy/server thì giống nhau), bên kia đánh ngay sau. Đánh xong thanh về 0 rồi chạy lại; đầy trước thì đánh.
-- Thời gian đầy thanh = `FILL_MS*TD_REF/td` ms (mặc định FILL_MS=1500 ở TD_REF=50: td50=1,5s · td100=0,75s · td30=2,5s · td40=1,9s). Nhanh gấp đôi = 2 lượt liền khi bên kia 1 lượt; `MAX_LIEN=2` giới hạn tối đa 2 lượt liền. Boss giữ hệ số 1,6.
-- Thanh chỉ chạy lúc 2 bên không ra chiêu; `GAP_ACT` = nghỉ tối thiểu giữa 2 lượt; `T_DON` = 1 lượt đánh thường.
+## Thanh tốc độ = thanh vàng hành động, chạy thời gian thật (index.html: gaugeStep / gaugeOf)
+- Thanh dài `BAR_MS`=2000 (ms). Mỗi điểm tốc độ = `MS_PER_TD`=10 ms mỗi giây thật. td 50 => 500ms/s => đầy sau 4 giây (200/td giây): td 40 = 5s, td 100 = 2s, td 200 = 1s.
+- Vào trận cả 2 thanh ĐẦY: td cao đánh trước, bên kia ngay sau (bằng nhau: tung ngẫu nhiên; `BATTLE.seed` giống nhau ở 2 máy/server thì giống nhau). Đánh xong trừ BAR_MS (phần dư giữ lại), thanh nào đầy trước thì đánh.
+- Không sắp xếp trước, không giới hạn lượt liền: nhanh gấp 3 thì đánh 3 lần khi bên kia 1. Thanh đứng yên lúc đang đánh/ra kỹ năng/đếm ngược. `GAP_ACT` = nghỉ ngắn sau mỗi lượt; `T_DON` = 1 lượt đánh thường. Boss giữ hệ số td 1,6.
 - Hồi chiêu/choáng đếm theo lượt của chính bên đó. Buff đếm theo lượt bên đánh; debuff theo lượt bên bị đánh (`dbTick(side)`, cờ `fresh`).
