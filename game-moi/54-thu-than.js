@@ -73,6 +73,17 @@ function byUid(u){for(var i=0;i<thus.length;i++)if(thus[i].uid===u)return thus[i
 if(rt&&!byUid(rt))rt=null;
 function info(t){return (window.THU_MOI&&THU_MOI.byId&&THU_MOI.byId[t.id])||null;}
 function tenThu(t){var b=info(t);return t.ten||(b&&b.ten)||'?';}
+/* ẢNH THÚ TRONG Ô LƯỚI: đo khung chứa hình thú (bỏ phần trong suốt) rồi phóng vừa ô + căn giữa => thú nhỏ/vừa/lớn đều đầy đặn. Cache theo đường dẫn ảnh. */
+var PCV={};
+function pcPaint(cv){var u=cv.getAttribute('data-u'),e=PCV[u];
+  if(!e){e=PCV[u]={ok:false,w:[],im:new Image()};e.im.onload=function(){try{var tc=document.createElement('canvas');tc.width=tc.height=192;var g=tc.getContext('2d');g.drawImage(e.im,0,0,192,192);var d=g.getImageData(0,0,192,192).data,x0=192,y0=192,x1=-1,y1=-1,i,j;
+      for(j=0;j<192;j++)for(i=0;i<192;i++)if(d[(j*192+i)*4+3]>24){if(i<x0)x0=i;if(i>x1)x1=i;if(j<y0)y0=j;if(j>y1)y1=j;}
+      if(x1<0){x0=0;y0=0;x1=191;y1=191;}e.b=[x0,y0,x1-x0+1,y1-y0+1];}catch(x){e.b=[0,0,192,192];}
+      e.ok=true;e.w.splice(0).forEach(function(c){pcDraw(c,e);});};e.im.src=u;}
+  if(e.ok)pcDraw(cv,e);else e.w.push(cv);}
+function pcDraw(cv,e){if(!cv.isConnected)return;var g=cv.getContext('2d'),b=e.b,sc=Math.min(184/b[2],184/b[3],4),dw=b[2]*sc,dh=b[3]*sc;
+  cv.width=cv.height=192;g.clearRect(0,0,192,192);g.imageSmoothingEnabled=sc<1;if(sc<1)g.imageSmoothingQuality='high';
+  g.drawImage(e.im,b[0],b[1],b[2],b[3],(192-dw)/2,(192-dh)/2,dw,dh);}
 function anhThu(t){var b=info(t);return b?'thu-game/'+b.zone+'/'+b.slug+'-b'+(t.tien||1)+'-192.png':'';}   /* ảnh 192px, cùng đường dẫn 51-thu-moi.js */
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
@@ -110,6 +121,7 @@ var css=[
 '.tt-gr>*{position:absolute;box-sizing:border-box}',
 '.tt-c{padding:0;border:0;background:transparent;cursor:pointer}',
 '.tt-c img{position:absolute;left:12%;top:11%;width:76%;height:70%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}',
+'.tt-c canvas.pc{position:absolute!important;left:12%!important;top:9%!important;width:76%;height:auto;aspect-ratio:1;pointer-events:none;image-rendering:auto}',
 '.tt-c .b{position:absolute;left:{9};top:{7};font-family:var(--fh);font-weight:800;font-size:{22};line-height:1;color:#ffe9a0;text-shadow:0 0 {4} #000,{1} {1} 0 #000,-{1} {1} 0 #000}',
 '.tt-c .rt{position:absolute;left:8%;right:8%;bottom:{9};height:{25};display:flex;align-items:center;justify-content:center;border-radius:{6};background:linear-gradient(180deg,#ffe58a,#c58a1e);color:#3b2406;font-family:var(--fh);font-weight:800;font-size:{17};line-height:1;white-space:nowrap}',
 '.tt-c.sel::after{content:"";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{4} solid #ffe066;border-radius:{6};box-shadow:0 0 {16} rgba(255,224,102,.85),inset 0 0 {14} rgba(255,224,102,.4);pointer-events:none}',
@@ -278,7 +290,8 @@ function renderGrid(){
     var t=thus[row0*4+i],c=E.cells[i];
     if(t){
       var a=anhThu(t);
-      c.innerHTML=(window.TTGTBAO&&t.bac?TTGTBAO.fx(t.bac,4):'')+(a?'<img src="'+esc(a)+'" alt="">':'')+(t.bac?'<span class="b">'+esc(t.bac)+'</span>':'')+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
+      c.innerHTML=(window.TTGTBAO&&t.bac?TTGTBAO.fx(t.bac,4):'')+(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'')+(t.bac?'<span class="b">'+esc(t.bac)+'</span>':'')+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
+      var pc=c.querySelector('canvas.pc');if(pc)pcPaint(pc);
       c.setAttribute('aria-label',tenThu(t));c.style.pointerEvents='';
     }else{c.innerHTML='';c.removeAttribute('aria-label');c.style.pointerEvents='none';}
     c.classList.toggle('sel',!!t&&t.uid===sel);
