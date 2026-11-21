@@ -48,7 +48,7 @@ function under(ctx,ts,A){
 
 /* Số / chữ CHIẾN! + sóng xung kích + tia lửa + nháy sáng (vẽ SAU CÙNG) */
 function draw(ctx,ts,A){if(!S.on)return;var c=cur();fx(ctx,A,COL[c.i],c.i===CFG.dur.length-1,c.p,c.l,c.i,CFG.steps[c.i]);}
-/* hiệu ứng 1 nhịp chữ (dùng chung cho 3/2/1/CHIẾN! và THẮNG!/THUA!): col = bảng màu, last = kiểu CHIẾN (chữ ngang, vệt chém, 2 sóng), p = 0..1 tiến độ nhịp, l = ms từ đầu nhịp, ci = hạt giống tia lửa */
+/* hiệu ứng 1 nhịp chữ (dùng chung cho 3/2/1/CHIẾN! và THẮNG!/THUA!/HÒA!): col = bảng màu, last = kiểu CHIẾN (chữ ngang, vệt chém, 2 sóng), p = 0..1 tiến độ nhịp, l = ms từ đầu nhịp, ci = hạt giống tia lửa */
 function fx(ctx,A,col,last,p,l,ci,txt){
  var cx=A.cx,cy=A.cy,k,q,i;
  ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
@@ -109,16 +109,16 @@ function vs(ctx,ts,x0,x1,y){
  ctx.lineWidth=Math.max(.8,fs*.02);ctx.strokeStyle='rgba(255,255,255,.6)';ctx.strokeText('VS',0,0);
  ctx.restore();}
 
-/* KẾT QUẢ THẮNG/THUA: cùng kiểu CHIẾN!, đặt đúng chỗ chữ CHIẾN!. Thắng = vàng, Thua = đỏ. msg là st.msg của index.html ('Thắng!' / 'Thua'); rỗng thì không vẽ. */
-var RC={win:{a:'#fffbe0',b:'#ffd54a',c:'#c78a0a',g:'#ffc83a',r:'255,215,90'},lose:{a:'#ffe3de',b:'#ff4b3c',c:'#8c0c10',g:'#ff2a2a',r:'255,70,60'}},R={msg:null,t:0,last:0};
+/* KẾT QUẢ THẮNG/THUA/HÒA: cùng kiểu CHIẾN!, đặt đúng chỗ chữ CHIẾN!. Thắng = vàng, Thua = đỏ, Hòa = bạc xanh. msg là st.msg của index.html ('Thắng!' / 'Thua' / 'Hòa'); rỗng thì không vẽ. */
+var RC={win:{a:'#fffbe0',b:'#ffd54a',c:'#c78a0a',g:'#ffc83a',r:'255,215,90'},lose:{a:'#ffe3de',b:'#ff4b3c',c:'#8c0c10',g:'#ff2a2a',r:'255,70,60'},draw:{a:'#ffffff',b:'#d4e4ff',c:'#4f6f9f',g:'#a9c8ff',r:'190,215,255'}},R={msg:null,t:0,last:0};
 CFG.resultDur=1200;
 function result(ctx,ts,A,msg){
  if(!msg){R.msg=null;return;}
  if(R.msg!==msg){R.msg=msg;R.t=0;R.last=ts;}
  var dt=Math.min(50,Math.max(0,ts-R.last));R.last=ts;R.t+=dt;
- var win=/^Th(ắ|a)ng/i.test(msg)&&!/^Thua/i.test(msg),txt=String(msg).toUpperCase();if(txt.charAt(txt.length-1)!=='!')txt+='!';
+ var hoa=/^H/i.test(msg),win=!hoa&&/^Th(ắ|a)ng/i.test(msg)&&!/^Thua/i.test(msg),txt=String(msg).toUpperCase();if(txt.charAt(txt.length-1)!=='!')txt+='!';
  ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
  var q=Math.min(1,R.t/CFG.resultDur);ctx.fillStyle='rgba(2,6,24,'+(.3*Math.min(1,R.t/200)*(1-Math.max(0,(q-.8)/.2)))+')';ctx.fillRect(A.x,A.y,A.w,A.h);ctx.restore();
- fx(ctx,A,win?RC.win:RC.lose,true,q,R.t,win?7:9,txt);}
+ fx(ctx,A,hoa?RC.draw:(win?RC.win:RC.lose),true,q,R.t,hoa?8:(win?7:9),txt);}
 root.TTGDEM={result:result,start:start,reset:reset,active:function(){return S.on;},under:under,draw:draw,vs:vs,CFG:CFG};
 })(typeof window!=='undefined'?window:globalThis);
