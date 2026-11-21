@@ -23,9 +23,10 @@ var CFG={
     nhanh:   {hp:0.85,tc:1.0, pt:0.8, td:1.5},
     canbang: {hp:1,   tc:1,   pt:1,   td:1}
   },
-  /* bậc: tỉ lệ tung (%) và hs hp,tc,pt,td. mm KHÔNG nhân bậc */
-  bac:[['E',28,0.85],['D',24,0.92],['C',20,1.00],['B',14,1.08],['A',8,1.16],['S',4.5,1.25],['SS',1.5,1.35]],
-  bacQuai:'C',bacThuHoang:'C',bacBoss:'A',   /* bậc cố định KHI ĐANG ĐÁNH (bắt xong mới tung bậc thật) */
+  /* bậc (Rank): tỉ lệ tung (%) và hs hp,tc,pt,td. mm KHÔNG nhân bậc. TỔNG tỉ lệ = 100.
+     SR (màu cầu vồng) = bậc cực hiếm 0,1% (khoảng 1/1000), hs x2,00: muốn người may mắn có được thì phải tự hào. Chỉnh hs/tỉ lệ ở đây. */
+  bac:[['E',27.9,0.85],['D',24,0.92],['C',20,1.00],['B',14,1.08],['A',8,1.16],['S',4.5,1.25],['SS',1.5,1.35],['SR',0.1,2.00]],
+  bacQuai:'C',bacThuHoang:'C',bacBoss:'A',   /* DỰ PHÒNG, không còn dùng: mọi địch (quái, boss, thú hoang) tung Rank bằng tungBac lúc gặp (61-tham-hiem-tran.js) và giữ nguyên khi bắt */
   /* hệ: hệ số một đòn lên MỖI hệ của mục tiêu. cheDo 'nhan' = nhân các hệ số của 2 hệ (song hệ cùng yếu 1,5x1,5=2,25), 'tb' = trung bình.
      Muốn kiểu Pokémon gốc: khac 2, kem 0.5, mien 0, cheDo 'nhan'. Muốn chênh nhẹ hơn: giảm khac/tăng kem. */
   he:{cheDo:'nhan',khac:1.5,kem:0.7,mien:0.3},
@@ -102,7 +103,7 @@ function heTotNhat(heNguoiDanh,heMucTieu){
 /* ===== BẬC (gacha) ===== */
 var BAC=CFG.bac.map(function(b){return b[0];});
 function hsBac(bac){for(var i=0;i<CFG.bac.length;i++)if(CFG.bac[i][0]===bac)return CFG.bac[i][2];return 1;}
-/* tung bậc: KHÔNG nhận cấp/vùng, chỉ random theo bảng tỉ lệ. Dùng khi bắt xong thú và khi chọn thú đầu game */
+/* tung bậc: KHÔNG nhận cấp/vùng, chỉ random theo bảng tỉ lệ. Dùng khi gặp địch (61-tham-hiem-tran.js) và khi chọn thú đầu game; bắt thú giữ nguyên bậc đã tung lúc gặp */
 function tungBac(rng){
   var r=(rng||rngMac)()*100,acc=0;
   for(var i=0;i<CFG.bac.length;i++){acc+=CFG.bac[i][1];if(r<acc)return CFG.bac[i][0];}
