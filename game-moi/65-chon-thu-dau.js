@@ -3,7 +3,7 @@
    Khung = game-moi/khung-chon-thu.webp (2000x1127, nền trong suốt; chưa có thì thử khung-chon-thu.png; không có cả hai thì vẽ khung tạm).
    Mọi vị trí (tiêu đề, thanh thông tin, 3 bục, 3 bảng tên, nút Xác Nhận, nút X) tính theo TỌA ĐỘ ẢNH GỐC 2505x1412 (hàm B bên dưới), đổi ảnh khung thì chỉnh số ở đó.
 
-   THÚ: chưa có thú nên 3 bục để trống (hiện dấu "?"). Khi có thú: điền id (đúng id trong THU_MOI, ví dụ '1a') vào STARTERS, thú tự hiện đứng trên bục.
+   THÚ: 3 thú khởi đầu k2 Lưu Diêu (Thủy), k1 Viêm Sư (Hỏa), k3 Lâm Trư (Mộc), id khớp THU_MOI (51-thu-moi.js). Id nào chưa có trong THU_MOI thì bục hiện dấu "?".
    TEST: ALWAYS=true => mỗi lần mở game đều hiện. Khi làm thật đổi ALWAYS=false => chỉ hiện khi chưa chọn thú. Link có ?chon-thu=1 luôn ép hiện.
    LƯU: lựa chọn ghi ở khóa ttg_moi_starter_v1 = {slot, id, t}. Game chưa có tài khoản/kho nên chưa phát thú vào túi; khi cần thì nghe sự kiện 'ttg-starter' (detail = {slot,id}) hoặc gọi TTGSTARTER.get().
    Nút X: đóng không chọn (không lưu). Nút Xác Nhận chỉ bấm được sau khi chọn 1 bục. */
@@ -12,9 +12,9 @@
 if(window.TTG_BLOCK)return;
 var ALWAYS=true,KEY='ttg_moi_starter_v1',IW=2505,IH=1412,TIER=1;
 var STARTERS=[
- {id:null,ten:'Thú 1',mota:'Chưa có thông tin'},
- {id:null,ten:'Thú 2',mota:'Chưa có thông tin'},
- {id:null,ten:'Thú 3',mota:'Chưa có thông tin'}];
+ {id:'k2',ten:'Lưu Diêu',mota:'Thường + Thủy · Nhanh'},
+ {id:'k1',ten:'Viêm Sư',mota:'Thường + Hỏa · Công'},
+ {id:'k3',ten:'Lâm Trư',mota:'Thường + Mộc · Tank'}];
 var PX=[500,1255,2015];/* tâm 3 bục (px ảnh gốc) */
 var HINT='Chạm vào một bục để chọn thú đồng hành';
 var SRC=['game-moi/khung-chon-thu.webp?v=1','game-moi/khung-chon-thu.png?v=1'];
@@ -94,7 +94,7 @@ function loop(){raf=0;if(!root||root.className.indexOf('off')>=0)return;
   for(var i=0;i<3;i++){var id=STARTERS[i].id,c=cvs[i];if(!id||!c||!THU_MOI.byId||!THU_MOI.byId[id])continue;
    var g=c.getContext('2d'),sc=c.width/130,bob=Math.sin(performance.now()/380+i)*2;
    g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);g.setTransform(sc,0,0,sc,0,0);
-   try{THU_MOI.setFrame(192);THU_MOI.draw(g,id,TIER,65,128+bob,128,true);}catch(e){}}}
+   try{THU_MOI.setFrame(192);THU_MOI.draw(g,id,TIER,65,126+bob,176,true);}catch(e){}}}
  raf=requestAnimationFrame(loop);}
 function say(s,warn){infoEl.textContent=s;infoEl.className='a tx inf'+(warn?' warn':'');}
 function pick(i){if(locked)return;sel=i;

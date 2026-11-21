@@ -75,6 +75,15 @@
       { id: '6h', slug: '08-phong-lo', ten: 'Phong Lô', boss: false },
       { id: '6i', slug: '09-phong-tich', ten: 'Phong Tích', boss: false },
       { id: '6j', slug: '10-phong-nguyen-vu-xa', ten: 'Phong Nguyên Vũ Xà', boss: true }
+    ] },
+    { z: 6, slug: 'thuy-nguyet-canh', ten: 'Thủy Nguyệt Cảnh', thu: [
+      { id: 'k2', slug: '01-luu-dieu', ten: 'Lưu Diêu', boss: false }
+    ] },
+    { z: 7, slug: 'xich-hoa-dia', ten: 'Xích Hỏa Địa', thu: [
+      { id: 'k1', slug: '01-viem-su', ten: 'Viêm Sư', boss: false }
+    ] },
+    { z: 8, slug: 'thanh-lam', ten: 'Thanh Lâm', thu: [
+      { id: 'k3', slug: '01-lam-tru', ten: 'Lâm Trư', boss: false }
     ] }
   ];
   var byId = {}, cache = {};

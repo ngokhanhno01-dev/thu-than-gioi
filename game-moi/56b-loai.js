@@ -7,7 +7,7 @@
 'use strict';
 
 /* hệ chủ đạo của vùng z (hệ của kỹ năng cơ bản vùng, dùng ở bước D). Khớp mục 8 THIET_KE_CHI_SO.md */
-var HE_VUNG=['bang','thuy','tien','phong','loi','tam'];  /* z0..z5 */
+var HE_VUNG=['bang','thuy','tien','phong','loi','tam','thuy','hoa','moc'];  /* z0..z5, z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm */
 
 /* vai: t = tank, c = cong (công), n = nhanh, b = canbang (cân bằng) */
 var VAI={t:'tank',c:'cong',n:'nhanh',b:'canbang'};
@@ -86,6 +86,16 @@ var BANG={
     ['5h','Nguyệt Quy','t',['tam','nham']],
     ['5i','Nguyệt Tiên','c',['tam','tien']],
     ['5j','Nguyệt Thực Tế Quân','c',['am','tam']]
+  ],
+  /* 3 THÚ KHỞI ĐẦU (21/11/2026): hệ chủ Thường + hệ phụ. Mỗi vùng mới tạm chỉ có 1 con; phần tử thứ 5 = false nghĩa là KHÔNG phải boss (mặc định dòng cuối vùng là boss); phần tử thứ 6 = vung dùng để TÍNH CHỈ SỐ (0 = ngang thú vùng 1, để thú khởi đầu không mạnh hơn thú Tuyết Nguyên). Khi làm đủ 10 thú cho vùng thì sắp lại. */
+  6:[ /* Thủy Nguyệt Cảnh (thuy) */
+    ['k2','Lưu Diêu','n',['thuong','thuy'],false,0]
+  ],
+  7:[ /* Xích Hỏa Địa (hoa) */
+    ['k1','Viêm Sư','c',['thuong','hoa'],false,0]
+  ],
+  8:[ /* Thanh Lâm (moc) */
+    ['k3','Lâm Trư','t',['thuong','moc'],false,0]
   ]
 };
 
@@ -93,7 +103,7 @@ var LOAI={},THEO_VUNG={};
 Object.keys(BANG).forEach(function(zs){
   var z=+zs;THEO_VUNG[z]=[];
   BANG[zs].forEach(function(r,i){
-    var o={id:r[0],ten:r[1],vung:z,vai:VAI[r[2]],he:r[3].slice(),boss:i===BANG[zs].length-1};
+    var o={id:r[0],ten:r[1],vung:r[5]!=null?r[5]:z,vai:VAI[r[2]],he:r[3].slice(),boss:r[4]!==undefined?!!r[4]:i===BANG[zs].length-1};
     LOAI[o.id]=o;THEO_VUNG[z].push(o.id);
   });
 });
