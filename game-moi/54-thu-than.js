@@ -18,7 +18,7 @@
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var BW=1841,BH=811,UB=2200,IMG='game-moi/khung-thu.webp?v=7',OV_GOV='game-moi/nut-dang-ra-tran.webp?v=2';   /* ảnh khung gốc 1841x811; UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
+var BW=1841,BH=811,UB=2200,IMG='game-moi/khung-thu.webp?v=8',OV_GOV='game-moi/nut-dang-ra-tran.webp?v=2';   /* ảnh khung gốc 1841x811; UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
 var KEY='ttg_moi_thu_v1',KRT='ttg_moi_thu_ratran_v1',KTHA='ttg_moi_thu_tha_v1';
 var demo=/[?&]thu=demo/.test(location.search);
 var isOpen=false,openAt=0,root=null,fr=null,E={};
@@ -218,9 +218,9 @@ function build(){
   /* --- TRÁI: thanh vàng tên + bậc (x164-566,y176-229), ảnh thú trong ô lớn (x168-558,y241-570) --- */
   E.nm=mk('div','tt-nm',200,181,330,44);
   E.ph=mk('div','tt-ph',168,241,390,329);
-  /* nút TRANG BỊ: vùng bấm trong suốt đè lên tấm vàng "Trang Bị" vẽ sẵn dưới ô ảnh thú (x209-522,y575-632). Bấm = mở khung trang bị (55-trang-bi.js) */
-  var eq=mk('button','tt-eq',215,578,300,52);eq.type='button';eq.setAttribute('aria-label','Trang Bị');
-  eq.addEventListener('click',function(){if(window.TTGTB)TTGTB.open();else toast('Sắp có');});
+  /* nút TIẾN HÓA (trước là TRANG BỊ): vùng bấm trong suốt đè lên tấm vàng "Tiến Hóa" vẽ sẵn dưới ô ảnh thú (x209-522,y575-632). Bấm = mở khung Tiến Hóa Thú (72-khung-ren-cuong-hoa.js). Khung Trang bị vẫn mở được từ nút Trang bị ở hàng nút dưới. */
+  var eq=mk('button','tt-eq',215,578,300,52);eq.type='button';eq.setAttribute('aria-label','Tiến Hóa');
+  eq.addEventListener('click',function(){if(window.TTGKH)TTGKH.open('th');else toast('Sắp có');});
   /* 3 ô tròn bên dưới (tâm (241,695),(367,695),(498,695), bán kính ~60): ô 1 = Lv, ô 2 = Bậc tiến hóa (1-3), ô 3 = Rank (E,D,C,B,A,S,SS,SR) */
   E.oc=[0,1,2].map(function(k){var c=mk('canvas','tt-oc',OC_X[k]-52,OC_Y-52,104,104);c.width=c.height=208;return c;});   /* canvas 208x208 = 2x để nét; chữ căn giữa theo NÉT CHỮ THẬT (renderBadges) */
 
@@ -524,7 +524,7 @@ function open(){
   if(!byUid(sel))sel=(rt&&byUid(rt))?rt:(thus[0]?thus[0].uid:null);   /* mặc định chọn thú đang ra trận, không có thì thú đầu tiên */
   isOpen=true;openAt=performance.now();root.classList.add('on');unit();render();
 }
-function close(){if(window.TTGTB)TTGTB.close();if(!root)return;hidePop();isOpen=false;root.classList.remove('on');E.ts.style.display='none';}
+function close(){if(window.TTGTB)TTGTB.close();if(window.TTGKH)TTGKH.close();if(!root)return;hidePop();isOpen=false;root.classList.remove('on');E.ts.style.display='none';}
 
 /* ===== ICON NÚT THÚ THẦN (SVG vẽ tay, màu SÁNG: dấu chân thú xanh ngọc, viền tối, ngọc vàng ở giữa) =====
    id gradient dùng tiền tố tt để không trùng icon Balo. */
