@@ -71,8 +71,8 @@ function draw(ctx,ts,A){
   ctx.beginPath();ctx.moveTo(sx-A.w*.3,cy+A.h*.3);ctx.lineTo(sx+A.w*.04,cy-A.h*.3);ctx.stroke();}
  ctx.globalCompositeOperation='source-over';
  /* chữ */
- var txt=CFG.steps[c.i],fs=last?A.h*.5:A.h*.66;
- if(last){ctx.font=f(fs);var mw=ctx.measureText(txt).width,mx=A.w*.82;if(mw>mx)fs=fs*mx/mw;}
+ var txt=CFG.steps[c.i],fs=last?A.h*.34:A.h*.42;
+ if(last){ctx.font=f(fs);var mw=ctx.measureText(txt).width,mx=A.w*.6;if(mw>mx)fs=fs*mx/mw;}
  var sc,al=Math.min(1,p/.06),rot=0,os=last?.8:.74;
  if(p<.2)sc=3.2-2.28*eo(p/.2);else if(p<.32)sc=.92+.08*eo((p-.2)/.12);else sc=1+.1*Math.min(1,(p-.32)/(os-.32));
  if(p>os){q=(p-os)/(1-os);sc=1.1+(last?.25:.6)*q*q;al*=1-q;}
@@ -101,7 +101,7 @@ function vs(ctx,ts,x0,x1,y){
  var q=Math.max(0,(ts-V.t0)/C.slam),sc=1,al=1;
  if(q<1){sc=3-2*bo(q);al=Math.min(1,q*4);}
  sc*=1+.03*Math.sin(ts/230);
- ctx.translate((x0+x1)/2,y);ctx.scale(sc,sc);ctx.globalAlpha=al;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.font=f(fs);
+ ctx.translate((x0+x1)/2-fs*.09,y);ctx.scale(sc,sc);/* chữ nghiêng nên lệch phải: bù lại để VS nằm đúng tâm */ctx.globalAlpha=al;ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.font=f(fs);
  ctx.shadowColor='#ff5a1a';ctx.shadowBlur=fs*.4*(.8+.2*Math.sin(ts/160));ctx.lineWidth=fs*.2;ctx.strokeStyle='rgba(10,6,30,.95)';ctx.strokeText('VS',0,0);
  ctx.shadowBlur=0;ctx.lineWidth=fs*.09;ctx.strokeStyle='#a8200e';ctx.strokeText('VS',0,0);
  var g=ctx.createLinearGradient(0,-fs*.5,0,fs*.5);g.addColorStop(0,'#fff8d6');g.addColorStop(.5,'#ffb830');g.addColorStop(1,'#e0301a');ctx.fillStyle=g;ctx.fillText('VS',0,0);
