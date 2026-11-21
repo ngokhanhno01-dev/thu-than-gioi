@@ -254,7 +254,7 @@ function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.n
    Hết hồi chiêu (cd, tính lượt của boss) thì boss dùng kỹ năng THAY đòn thường ở lượt đó. Lần đầu dùng sau KN_START lượt đánh thường, sau đó theo cd của kỹ năng.
    FX chạy 1,68s, TRÚNG ở 0,665s (KN_T_HIT): sát thương/hiệu ứng áp đúng lúc trúng; lượt kéo dài tới KN_T_END rồi mới xét thắng/thua.
    Hiệu ứng đã làm: sát thương theo hsTc + hệ kỹ năng, hutMau (Sương Nuốt), choang (Thiên Lôi Giáng, bị kc chặn). Chưa làm (trận demo chưa có hệ lớp/tốc độ): lop (lạnh), tuBuff/debuff tốc độ. */
-var KN_SLOW=1.15,KN_START=2,KN_T_HIT=Math.round(665*KN_SLOW),KN_T_END=Math.round(1750*KN_SLOW),knSeq=0;   /* KN_SLOW: hệ số làm chậm FX kỹ năng (1 = tốc độ gốc); chỉnh 1.5-2.5 nếu vẫn nhanh/chậm */
+var KN_SLOW=1.15,KN_START=1,KN_T_HIT=Math.round(665*KN_SLOW),KN_T_END=Math.round(1750*KN_SLOW),knSeq=0;   /* KN_SLOW: hệ số làm chậm FX kỹ năng (1 = tốc độ gốc); chỉnh 1.5-2.5 nếu vẫn nhanh/chậm */
 /* GÁN SÁCH CHO BOSS thú hoang: boss được gán sách riêng (e.kn=[id sách]) -> kỹ năng, chỉ số, nội tại đều đọc từ sách, y như thú người chơi mang sách */
 function ganSachBoss(e){try{if(!e||!e.boss||e.source!=='demo'||!window.TTGCS||!TTGCS.sachBoss)return e;var id=TTGCS.sachBoss(e.id);if(!id)return e;e.kn=[id];e.stats=TTGCS.tinh({id:e.id,lv:e.lv,tien:e.tien,bac:e.bac,boss:e.boss,vung:e.vung},{mod:TTGCS.sachMod(e)});}catch(x){}return e;}
 function bossSkill(e){if(!e||!e.boss||e.source!=='demo'||!window.TTGCS||!TTGCS.sachKyNang||!e.kn||!e.kn[0])return null;var k=TTGCS.sachKyNang(e.kn[0]);return k?{k:k,cd:KN_START}:null;}
