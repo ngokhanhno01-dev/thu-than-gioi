@@ -203,6 +203,7 @@ function draw(ctx,ts){
 var CSS=[
 '.btx{position:fixed;z-index:7;display:none;box-sizing:border-box;border:2px solid #d9a93a;border-radius:9px;background:linear-gradient(#2a5fb0,#143a78);color:#fff3c4;font:800 14px/1 "Segoe UI",system-ui,sans-serif;text-shadow:0 1px 0 #000;box-shadow:0 0 10px rgba(255,214,102,.45);touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;padding:0;align-items:center;justify-content:center;gap:5px}',
 '.btx:active{transform:scale(.94)}',
+'.btx.bi{background:url(game-moi/nut-bat.webp) 50% 50%/contain no-repeat;border:0;border-radius:0;box-shadow:none;text-shadow:none;font-size:0;color:transparent}',
 '.btx.g{background:linear-gradient(#5b5f73,#33364a);border-color:#8a8da0;color:#ddd;box-shadow:none}',
 '.btx.chip{font-size:11px;line-height:1.15;padding:0 6px;text-align:left}',
 '.btx .ci{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:20px}',
@@ -243,7 +244,7 @@ function build(){
   if(els)return;
   var st=document.createElement('style');st.textContent=CSS;document.head.appendChild(st);
   els={};
-  els.bat=btn('','BẮT',start);
+  els.bat=btn('bi','',start);els.bat.setAttribute('aria-label','Bắt');   /* nút ảnh nut-bat.webp */
   els.nem=btn('','NÉM',doThrow);
   els.thoi=btn('g','Thôi',cancel);
   els.chip=btn('chip','',function(){openSel();});
@@ -298,12 +299,12 @@ function place(e,cxCss,cyCss,w,h){var s=e.style;s.width=w+'px';s.height=h+'px';s
 function syncDom(){
   if(!els){if(S.mode==='off'&&!(host&&canCatch()))return;build();}
   var inBattle=host&&canCatch(),ready=S.mode==='ready'&&!S.sel;
-  setShow(els.bat,S.mode==='off'&&inBattle);
+  setShow(els.bat,S.mode==='off'&&inBattle&&hpPct()<hpMax());   /* chỉ hiện khi thú hoang dưới ngưỡng máu bắt được (hpMax = 60%) */
   setShow(els.nem,ready);setShow(els.thoi,ready);setShow(els.chip,ready);
   if(!(S.mode==='off'&&inBattle)&&!ready)return;
   var m=host.m(),f=m.K/m.DPR,cc=Math.round(r2(m.cx*f)),key=[m.K,m.DPR,m.W,m.H,m.th,m.gy,m.cx,m.I.t,S.mode,S.cap,S.left,countOf(S.cap)].join('|');
   if(key===S.key)return;S.key=key;
-  place(els.bat,m.cx*f,(m.I.t+54)*f,80,32);
+  place(els.bat,m.cx*f,(m.I.t+54)*f,62,57);
   var cy=(m.gy-34)*f;
   place(els.nem,cc,cy,96,38);place(els.thoi,cc-48-8-28,cy,56,38);place(els.chip,cc+48+8+62,cy,124,38);
   if(ready){var it=itemOf(S.cap),r=rateOf(S.cap);els.chip.innerHTML='<span class="ci">'+icHtml(it)+'</span><span class="ct"><span>Cấp '+S.cap+' · x'+countOf(S.cap)+'</span><span>'+(r==null?'--':Math.round(r*100)+'%')+'</span></span>';}
