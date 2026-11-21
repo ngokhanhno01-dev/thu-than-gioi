@@ -357,7 +357,8 @@ function showPanel(win){
     if(win&&S.got){
       var g2=S.got,lo2=root.TTGCS&&TTGCS.loai?TTGCS.loai(g2.id):null,hT=root.TTGCS&&TTGCS.HE_TEN||{},he2=lo2&&lo2.he?lo2.he.map(function(x){return hT[x]||x;}).join(' / '):'?';
       var body=Pn.info({icon:'<canvas width="128" height="128"></canvas>',title:'Bắt thành công!',sub:esc(g2.ten)+(g2.boss?' <span style="color:#ff9f6f">[BOSS]</span>':''),text:'Hệ: '+esc(he2)+'<br>Bậc: <b style="color:'+(CFG.mauBac[g2.bac]||'#fff')+'">'+esc(g2.bac)+'</b> · Tiến hóa '+g2.tien+' · Cấp '+g2.lv,modal:true},[{t:'Về sảnh',cb:fin}]);
-      try{cvw=body.parentNode.querySelector('.tbo-ic canvas');var c3=cvw.getContext('2d');c3.imageSmoothingEnabled=false;THU_MOI.setFrame(192);THU_MOI.draw(c3,g2.id,g2.tien,64,124,128);}catch(x){}
+      try{cvw=body.parentNode.querySelector('.tbo-ic canvas');var c3=cvw.getContext('2d'),tryN=0;(function paint(){THU_MOI.setFrame(192);c3.clearRect(0,0,128,128);/* thú vẽ vừa đúng ô 128x128; ảnh chưa nạp xong thì thử lại tới ~3 giây */
+        if(!THU_MOI.draw(c3,g2.id,g2.tien,64,124,128)&&tryN++<30&&cvw.isConnected)setTimeout(paint,100);})();}catch(x){}
     }else Pn.info({title:'Bắt thất bại',tc:'y',text:'Thú hoang đã chạy thoát.',modal:true},[{t:'Về sảnh',cb:fin}]);
     return;
   }
