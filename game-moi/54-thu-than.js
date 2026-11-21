@@ -38,7 +38,7 @@ var RAIL={x:1754,y:199,w:21,h:422};
 var GO={x:1319,y:668,w:206,h:92},THA={x:1542,y:668,w:162,h:92};      /* 2 nút dưới-phải: RA TRẬN và THẢ (vùng tấm vàng vẽ sẵn). Lớp mờ/sáng nới thêm DIM_PAD px mỗi bên */
 var GO_OV={x:1286,y:664,w:250,h:100},DIM_PAD=5;                   /* ảnh 'Đang ra trận' phủ lên RA TRẬN */                                  /* rãnh cuộn bên phải lưới */
 /* ----- KỸ NĂNG / SÁCH (5a) ----- */
-var OC_X=[236,367,500],OC_Y=706;   /* tâm 3 ô tròn (px ảnh khung, đo trực tiếp từ khung-thu.webp). Muốn nhích chữ: sửa 2 số này */
+var OC_X=[236,367.5,500],OC_Y=698.5;   /* tâm 3 ô tròn (px ảnh khung, đo từ 4 viên ngọc quanh mỗi vòng trong khung-thu.webp). Muốn nhích chữ: sửa 2 số này */
 var NSK=6;                  /* số ô gắn kỹ năng */
 var NOI_IMG='';             /* ẢNH KHUNG BẢNG NỔI (nền xanh đã tách, ô giữa trong suốt): khi có file thì điền vd 'game-moi/khung-noi.webp'. Để trống = dùng khung vẽ bằng CSS tạm. */
 var POP_LS={x:735,y:180,w:470,h:535};    /* bảng danh sách sách (px ảnh khung) */
@@ -80,7 +80,7 @@ function pcPaint(cv){var u=cv.getAttribute('data-u'),e=PCV[u];
   if(!e){e=PCV[u]={ok:false,w:[],im:new Image()};e.im.onload=function(){try{var tc=document.createElement('canvas');tc.width=tc.height=192;var g=tc.getContext('2d');g.drawImage(e.im,0,0,192,192);var d=g.getImageData(0,0,192,192).data,x0=192,y0=192,x1=-1,y1=-1,i,j;
       for(j=0;j<192;j++)for(i=0;i<192;i++)if(d[(j*192+i)*4+3]>24){if(i<x0)x0=i;if(i>x1)x1=i;if(j<y0)y0=j;if(j>y1)y1=j;}
       if(x1<0){x0=0;y0=0;x1=191;y1=191;}e.b=[x0,y0,x1-x0+1,y1-y0+1];}catch(x){e.b=[0,0,192,192];}
-      e.ok=true;e.w.splice(0).forEach(function(c){pcDraw(c,e);});};e.im.src=u;}
+      e.ok=true;e.w.splice(0).forEach(function(c){if(typeof c==='function')c(e);else pcDraw(c,e);});};e.im.src=u;}
   if(e.ok)pcDraw(cv,e);else e.w.push(cv);}
 function pcDraw(cv,e){if(!cv.isConnected)return;var g=cv.getContext('2d'),b=e.b,sc=Math.min(184/b[2],184/b[3],4),dw=b[2]*sc,dh=b[3]*sc;
   cv.width=cv.height=192;g.clearRect(0,0,192,192);g.imageSmoothingEnabled=sc<1;if(sc<1)g.imageSmoothingQuality='high';
@@ -100,6 +100,7 @@ var css=[
 '.tt-nm{display:flex;align-items:center;justify-content:center;gap:{10};padding:0 {30};font-family:var(--fh);font-weight:800;font-size:{34};line-height:1;white-space:nowrap;overflow:hidden;color:#3b2406;text-shadow:0 {1} 0 rgba(255,246,200,.7)}',
 '.tt-nm i{font-style:normal;font-size:{30};color:#7a1f10}',
 '.tt-ph{display:flex;align-items:center;justify-content:center;overflow:hidden}',
+'.tt-ph canvas.big{position:relative!important;left:auto!important;top:auto!important;width:100%;height:100%;display:block;pointer-events:none;image-rendering:pixelated}'   /* ghi đè luật chung canvas{position:fixed} của index.html */,
 '.tt-ph img{width:{'+ANH_THU+'};height:{'+ANH_THU+'};object-fit:contain;filter:drop-shadow(0 {6} {10} rgba(0,0,0,.55));-webkit-user-drag:none;user-select:none}',
 '.tt-eq{padding:0;border:0;border-radius:{26};background:transparent;cursor:pointer}',   /* chữ TRANG BỊ đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
 '.tt-emp{text-align:center;font-size:{26};line-height:1.45;color:#7c83b8;padding:0 {20}}',
@@ -129,13 +130,8 @@ var css=[
 /* rãnh + thumb cuộn (phủ kín rãnh vẽ sẵn trong ảnh để không lộ thumb vẽ sẵn ở trên cùng) */
 '.tt-rail{border-radius:{9};background:#0d0e34;border:{2} solid #8a6a2a;touch-action:none;cursor:pointer}',
 '.tt-th{position:absolute;left:{2};right:{2};border-radius:{7};background:linear-gradient(90deg,#c9992f,#ffe58a,#c9992f);box-shadow:0 0 {6} rgba(255,224,102,.5)}',
-/* 3 Ô TRÒN dưới ảnh thú: Lv / Bậc tiến hóa / Rank. Chữ bút lông (font-rank.woff2 = Kaushan Script cắt nhỏ, nhúng sẵn), màu NEON theo Rank (biến --rc đậm, --rl nhạt) */
-'.tt-oc{display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;line-height:1;text-align:center}',
-'.tt-oc .l{font-family:var(--fh);font-weight:800;font-size:{21};letter-spacing:{1};color:#b9fbff;text-shadow:0 0 {3} #00e5ff,0 0 {8} #00b8ff,0 {2} 0 rgba(0,0,40,.9)}',
-'.tt-oc .v,.tt-oc .r{font-family:\"TTGRank\",\"Kaushan Script\",\"Brush Script MT\",cursive;font-weight:400;display:block}',
-'.tt-oc .v{font-size:{58};margin-top:{2};color:#fffbd0;-webkit-text-stroke:{3} #fffbd0;filter:drop-shadow(0 {3} 0 rgba(0,6,40,.85));text-shadow:0 0 {6} #ffe14d,0 0 {14} #ffb800,0 0 {26} rgba(255,170,0,.8)}',
-'.tt-oc.rk3 .r{font-size:{88};color:var(--rl);-webkit-text-stroke:{4} var(--rl);text-shadow:0 0 {4} var(--rc),0 0 {10} var(--rc),0 0 {20} var(--rc),0 0 {34} var(--rc);filter:drop-shadow(0 {3} 0 rgba(0,6,40,.85))}',
-'.tt-oc.rk3.two .r{font-size:{66}}',
+/* 3 Ô TRÒN dưới ảnh thú: canvas, chữ bút lông neon (font-rank.woff2 = Kaushan Script cắt nhỏ) */
+'.tt-oc{pointer-events:none;image-rendering:auto!important}',
 /* NÚT RA TRẬN */
 '.tt-go{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ RA TRẬN đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
 '.tt-tha{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ THẢ vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
@@ -216,7 +212,7 @@ function build(){
   var eq=mk('button','tt-eq',215,578,300,52);eq.type='button';eq.setAttribute('aria-label','Trang Bị');
   eq.addEventListener('click',function(){if(window.TTGTB)TTGTB.open();else toast('Sắp có');});
   /* 3 ô tròn bên dưới (tâm (241,695),(367,695),(498,695), bán kính ~60): ô 1 = Lv, ô 2 = Bậc tiến hóa (1-3), ô 3 = Rank (E,D,C,B,A,S,SS) */
-  E.oc=[mk('div','tt-oc',OC_X[0]-52,OC_Y-52,104,104),mk('div','tt-oc',OC_X[1]-52,OC_Y-52,104,104),mk('div','tt-oc rk3',OC_X[2]-52,OC_Y-52,104,104)];
+  E.oc=[0,1,2].map(function(k){var c=mk('canvas','tt-oc',OC_X[k]-52,OC_Y-52,104,104);c.width=c.height=208;return c;});   /* canvas 208x208 = 2x để nét; chữ căn giữa theo NÉT CHỮ THẬT (renderBadges) */
 
   /* --- GIỮA TRÊN: chữ trang + 5 thanh chỉ số + 2 nút ‹ › --- */
   E.cap=mk('div','tt-cap',960,170,290,26);E.cap.style.justifyContent='flex-end';   /* khung mới hết chỗ phía trên 5 thanh: chữ tên trang đặt ở dải trống trên bảng, canh phải để tránh mặt trang trí giữa */
@@ -323,23 +319,55 @@ function renderStats(){
   }
   E.mid.textContent=pg.ds.length?'':'Chưa có '+pg.ten.toLowerCase();
 }
+/* ẢNH THÚ LỚN: đo khung chứa thân thú (bỏ phần trong suốt) rồi phóng vừa khung + căn giữa => thú nhỏ/vừa/lớn đều đầy đặn như ô trong kho. BIG_FILL = tỉ lệ khung được dùng; BIG_MAX = hệ số phóng tối đa (ảnh gốc 192px nên quá cao sẽ vỡ hạt) */
+var BIG_FILL=.92,BIG_MAX=7;
+function bigPaint(cv,u){
+  var d=document.createElement('canvas');d.setAttribute('data-u',u);pcPaint(d);var e=PCV[u];
+  function go(e){if(!cv.isConnected||cv.getAttribute('data-u')!==u)return;var g=cv.getContext('2d'),b=e.b,W=cv.width,H=cv.height,sc=Math.min(W*BIG_FILL/b[2],H*BIG_FILL/b[3],BIG_MAX*2),dw=b[2]*sc,dh=b[3]*sc;
+    g.clearRect(0,0,W,H);g.imageSmoothingEnabled=false;
+    g.shadowColor='rgba(0,0,0,.55)';g.shadowBlur=14;g.shadowOffsetY=6;
+    g.drawImage(e.im,b[0],b[1],b[2],b[3],Math.round((W-dw)/2),Math.round((H-dh)/2),Math.round(dw),Math.round(dh));}
+  if(e.ok)go(e);else e.w.push(go);
+}
 function renderLeft(){
   var t=byUid(sel);
   if(t){E.nm.textContent=tenThu(t);   /* khung vàng chỉ hiện tên */
-    var a=anhThu(t);E.ph.innerHTML=a?'<img src="'+esc(a)+'" alt="'+esc(tenThu(t))+'">':'';}
+    var a=anhThu(t);E.ph.innerHTML=a?'<canvas class="big" width="780" height="658" data-u="'+esc(a)+'" aria-label="'+esc(tenThu(t))+'"></canvas>':'';var bc=E.ph.querySelector('canvas.big');if(bc)bigPaint(bc,a);}
   else{E.nm.textContent='Chưa Có Thú';E.ph.innerHTML='<div class="tt-emp">Chưa có thú nào<br>Bắt thú để cất vào đây</div>';}
   renderBadges(t);
 }
-/* 3 ô tròn: Lv / Bậc / Rank. Rank thiếu thì coi là C (giống TTGCS.tinh). Màu Rank trùng viền hiệu ứng ở 64-thong-bao.js */
-var RKC={E:['#ffffff','#ffffff'],D:['#39ff14','#7dff5e'],C:['#00d0ff','#3de0ff'],B:['#cc33ff','#dd77ff'],A:['#ffe600','#fff24d'],S:['#ff8000','#ffa63d'],SS:['#ff1744','#ff5472']};   /* [màu phát sáng, màu lõi chữ] neon: E trắng, D xanh lá, C lam, B tím, A vàng, S cam, SS đỏ */
+/* 3 ô tròn: Lv / Bậc / Rank. VẼ BẰNG CANVAS và căn giữa theo khung NÉT CHỮ thật (actualBoundingBox) nên chữ nghiêng/bút lông vẫn nằm giữa vòng.
+   Rank thiếu thì coi là C. Màu neon: [màu phát sáng, màu lõi]. */
+var RKC={E:['#ffffff','#ffffff'],D:['#39ff14','#7dff5e'],C:['#00d0ff','#3de0ff'],B:['#cc33ff','#dd77ff'],A:['#ffe600','#fff24d'],S:['#ff8000','#ffa63d'],SS:['#ff1744','#ff5472']};
+var F_BR='"TTGRank","Kaushan Script","Brush Script MT",cursive',F_LB='700 {S}px "Noto Serif","Palatino Linotype",Georgia,serif';
+function ocBox(g,txt,font){g.font=font;var m=g.measureText(txt);return {l:-m.actualBoundingBoxLeft,r:m.actualBoundingBoxRight,a:m.actualBoundingBoxAscent,d:m.actualBoundingBoxDescent};}
+/* items: [{t,font,core,glow,sz?,maxW?}] xếp dọc, cả khối căn giữa canvas. maxW: thu nhỏ chữ nếu rộng quá. */
+function ocDraw(cv,items,gap){
+  var g=cv.getContext('2d'),W=cv.width,H=cv.height,cx=W/2,cy=H/2,i,b=[],tot=0;
+  g.clearRect(0,0,W,H);g.textBaseline='alphabetic';g.lineJoin='round';
+  for(i=0;i<items.length;i++){var it=items[i],sz=it.sz,bx=ocBox(g,it.t,it.font.replace('{S}',sz));
+    if(it.maxW&&bx.r-bx.l>it.maxW){sz=Math.floor(sz*it.maxW/(bx.r-bx.l));bx=ocBox(g,it.t,it.font.replace('{S}',sz));}
+    it.fs=it.font.replace('{S}',sz);b.push(bx);tot+=bx.a+bx.d+(i?gap:0);}
+  var y=cy-tot/2;
+  for(i=0;i<items.length;i++){var it=items[i],bx=b[i],x=cx-(bx.l+bx.r)/2,base=y+bx.a;
+    g.font=it.fs;g.shadowColor='transparent';g.shadowBlur=0;
+    g.lineWidth=it.lw||5;g.strokeStyle='rgba(0,6,40,.9)';g.strokeText(it.t,x,base+3);   /* bóng tối phía dưới cho nổi trên nền xanh */
+    if(it.glow){g.fillStyle=it.core;[34,20,10,4].forEach(function(s){g.shadowColor=it.glow;g.shadowBlur=s;g.fillText(it.t,x,base);});}
+    g.shadowColor='transparent';g.shadowBlur=0;
+    g.strokeStyle=it.core;g.lineWidth=it.lw2||3;g.strokeText(it.t,x,base);g.fillStyle=it.core;g.fillText(it.t,x,base);   /* lõi: stroke cùng màu làm nét bút đậm hơn */
+    y+=bx.a+bx.d+gap;}
+}
 function renderBadges(t){
   if(!E.oc)return;
-  if(!t){E.oc.forEach(function(c){c.innerHTML='';});return;}
-  var lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),bac=RKC[t.bac]?t.bac:'C';
-  E.oc[0].innerHTML='<span class="l">Lv</span><span class="v">'+lv+'</span>';
-  E.oc[1].innerHTML='<span class="l">Bậc</span><span class="v">'+tien+'</span>';
-  E.oc[2].classList.toggle('two',bac.length>1);E.oc[2].style.setProperty('--rc',RKC[bac][0]);E.oc[2].style.setProperty('--rl',RKC[bac][1]);E.oc[2].innerHTML='<span class="r">'+bac+'</span>';
+  if(!t){E.oc.forEach(function(c){c.getContext('2d').clearRect(0,0,c.width,c.height);});return;}
+  var lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),bac=RKC[t.bac]?t.bac:'C',rc=RKC[bac];
+  var lab=function(s){return {t:s,font:F_LB,sz:40,core:'#c9fbff',glow:'#00c8ff',lw:6,lw2:1};};
+  var num=function(s){return {t:String(s),font:'400 {S}px '+F_BR,sz:110,maxW:112,core:'#fff7b0',glow:'#ffb800'};};
+  ocDraw(E.oc[0],[lab('Lv'),num(lv)],4);
+  ocDraw(E.oc[1],[lab('Bậc'),num(tien)],4);
+  ocDraw(E.oc[2],[{t:bac,font:'400 {S}px '+F_BR,sz:168,maxW:136,core:rc[1],glow:rc[0],lw:8,lw2:5}],0);
 }
+if(document.fonts&&document.fonts.load){document.fonts.load('40px TTGRank','EDCBASSS0123456789').then(function(){if(root)render();}).catch(function(){});}   /* font nạp xong thì vẽ lại */
 function renderGo(){
   var on=!!sel&&sel===rt,t=!!byUid(sel);
   E.gov.style.display=on?'block':'none';   /* chữ RA TRẬN vẽ sẵn không đổi được: đang ra trận thì phủ tấm "Đang ra trận" lên */
