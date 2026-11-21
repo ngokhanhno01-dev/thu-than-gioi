@@ -30,7 +30,7 @@ function tick(ts){if(!S.on)return;if(!S.last)S.last=ts;
  var dt=Math.min(50,Math.max(0,ts-S.last));S.last=ts;S.t+=dt;   /* tab ẩn/giật hình thì không nhảy vọt */
  if(S.t>=total()){S.on=false;var cb=S.cb;S.cb=null;if(cb)cb();}}
 function start(cb){S.on=true;S.t=0;S.last=0;S.cb=cb||null;V.on=true;V.t0=performance.now();}
-function reset(){S.on=false;S.cb=null;V.on=false;}
+function reset(){S.on=false;S.cb=null;V.on=false;R.msg=null;}
 
 /* Nền tối + vignette + tia sáng xoay (vẽ TRƯỚC khung HUD để HUD vẫn sáng) */
 function under(ctx,ts,A){
@@ -47,9 +47,10 @@ function under(ctx,ts,A){
  ctx.restore();}
 
 /* Số / chữ CHIẾN! + sóng xung kích + tia lửa + nháy sáng (vẽ SAU CÙNG) */
-function draw(ctx,ts,A){
- if(!S.on)return;
- var c=cur(),col=COL[c.i],last=c.i===CFG.dur.length-1,p=c.p,l=c.l,cx=A.cx,cy=A.cy,k,q,i;
+function draw(ctx,ts,A){if(!S.on)return;var c=cur();fx(ctx,A,COL[c.i],c.i===CFG.dur.length-1,c.p,c.l,c.i,CFG.steps[c.i]);}
+/* hiệu ứng 1 nhịp chữ (dùng chung cho 3/2/1/CHIẾN! và THẮNG!/THUA!): col = bảng màu, last = kiểu CHIẾN (chữ ngang, vệt chém, 2 sóng), p = 0..1 tiến độ nhịp, l = ms từ đầu nhịp, ci = hạt giống tia lửa */
+function fx(ctx,A,col,last,p,l,ci,txt){
+ var cx=A.cx,cy=A.cy,k,q,i;
  ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
  /* nháy sáng lúc đập số */
  var fl=Math.max(0,1-l/140);if(fl>0){ctx.fillStyle='rgba(255,255,255,'+(.4*fl*(last?1.4:1))+')';ctx.fillRect(A.x,A.y,A.w,A.h);}
@@ -61,7 +62,7 @@ function draw(ctx,ts,A){
  /* tia lửa tóe ra */
  var NP=last?46:26,LIFE=650;ctx.lineCap='round';
  for(i=0;i<NP;i++){q=l/LIFE;if(q>=1)break;
-  var ang=rnd(i+c.i*50)*6.2832,sp=A.h*(.5+rnd(i*3.1+c.i)*.9),g1=A.h*.25*q*q,g0=A.h*.25*Math.pow(Math.max(0,q-.08),2),
+  var ang=rnd(i+ci*50)*6.2832,sp=A.h*(.5+rnd(i*3.1+ci)*.9),g1=A.h*.25*q*q,g0=A.h*.25*Math.pow(Math.max(0,q-.08),2),
    d1=sp*eo(q),d0=sp*eo(Math.max(0,q-.08)),ca=Math.cos(ang),sa=Math.sin(ang)*.8;
   ctx.strokeStyle='rgba('+col.r+','+(1-q)+')';ctx.lineWidth=i%4?1.3:2.2;
   ctx.beginPath();ctx.moveTo(cx+ca*d0,cy+sa*d0+g0);ctx.lineTo(cx+ca*d1,cy+sa*d1+g1);ctx.stroke();}
@@ -71,13 +72,13 @@ function draw(ctx,ts,A){
   ctx.beginPath();ctx.moveTo(sx-A.w*.3,cy+A.h*.3);ctx.lineTo(sx+A.w*.04,cy-A.h*.3);ctx.stroke();}
  ctx.globalCompositeOperation='source-over';
  /* chữ */
- var txt=CFG.steps[c.i],fs=last?A.h*.34:A.h*.42;
+ var fs=last?A.h*.34:A.h*.42;
  if(last){ctx.font=f(fs);var mw=ctx.measureText(txt).width,mx=A.w*.6;if(mw>mx)fs=fs*mx/mw;}
  var sc,al=Math.min(1,p/.06),rot=0,os=last?.8:.74;
  if(p<.2)sc=3.2-2.28*eo(p/.2);else if(p<.32)sc=.92+.08*eo((p-.2)/.12);else sc=1+.1*Math.min(1,(p-.32)/(os-.32));
  if(p>os){q=(p-os)/(1-os);sc=1.1+(last?.25:.6)*q*q;al*=1-q;}
  if(last)rot=-.14*(1-eo(p/.25));
- var am=A.h*.022*Math.max(0,1-p/.3),dx=(rnd(Math.floor(S.t/28)+7)-.5)*2*am,dy=(rnd(Math.floor(S.t/28)+19)-.5)*2*am;
+ var am=A.h*.022*Math.max(0,1-p/.3),dx=(rnd(Math.floor(l/28)+7)-.5)*2*am,dy=(rnd(Math.floor(l/28)+19)-.5)*2*am;
  ctx.translate(cx+dx,cy+dy);ctx.rotate(rot);ctx.scale(sc,sc);ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';ctx.font=f(fs);
  ctx.globalAlpha=Math.max(0,al);
  /* bóng mờ phía sau (cảm giác lao tới) */
@@ -108,5 +109,16 @@ function vs(ctx,ts,x0,x1,y){
  ctx.lineWidth=Math.max(.8,fs*.02);ctx.strokeStyle='rgba(255,255,255,.6)';ctx.strokeText('VS',0,0);
  ctx.restore();}
 
-root.TTGDEM={start:start,reset:reset,active:function(){return S.on;},under:under,draw:draw,vs:vs,CFG:CFG};
+/* KẾT QUẢ THẮNG/THUA: cùng kiểu CHIẾN!, đặt đúng chỗ chữ CHIẾN!. Thắng = vàng, Thua = đỏ. msg là st.msg của index.html ('Thắng!' / 'Thua'); rỗng thì không vẽ. */
+var RC={win:{a:'#fffbe0',b:'#ffd54a',c:'#c78a0a',g:'#ffc83a',r:'255,215,90'},lose:{a:'#ffe3de',b:'#ff4b3c',c:'#8c0c10',g:'#ff2a2a',r:'255,70,60'}},R={msg:null,t:0,last:0};
+CFG.resultDur=1200;
+function result(ctx,ts,A,msg){
+ if(!msg){R.msg=null;return;}
+ if(R.msg!==msg){R.msg=msg;R.t=0;R.last=ts;}
+ var dt=Math.min(50,Math.max(0,ts-R.last));R.last=ts;R.t+=dt;
+ var win=/^Th(ắ|a)ng/i.test(msg)&&!/^Thua/i.test(msg),txt=String(msg).toUpperCase();if(txt.charAt(txt.length-1)!=='!')txt+='!';
+ ctx.save();ctx.beginPath();ctx.rect(A.x,A.y,A.w,A.h);ctx.clip();
+ var q=Math.min(1,R.t/CFG.resultDur);ctx.fillStyle='rgba(2,6,24,'+(.3*Math.min(1,R.t/200)*(1-Math.max(0,(q-.8)/.2)))+')';ctx.fillRect(A.x,A.y,A.w,A.h);ctx.restore();
+ fx(ctx,A,win?RC.win:RC.lose,true,q,R.t,win?7:9,txt);}
+root.TTGDEM={result:result,start:start,reset:reset,active:function(){return S.on;},under:under,draw:draw,vs:vs,CFG:CFG};
 })(typeof window!=='undefined'?window:globalThis);
