@@ -351,6 +351,17 @@ function r2(x){return x;}
 function showPanel(win){
   build();S.mode='panel';S.win=win;closeSel();
   var h;
+  /* KHUNG THÔNG BÁO MỚI (64-thong-bao.js): bảng kết quả nằm trong khung chung; chưa nạp module thì rơi xuống bảng cũ bên dưới */
+  if(root.TTGBAO){
+    var Pn=root.TTGBAO,fin=function(){abort();host.end();},cvw=null;
+    if(win&&S.got){
+      var g2=S.got,lo2=root.TTGCS&&TTGCS.loai?TTGCS.loai(g2.id):null,hT=root.TTGCS&&TTGCS.HE_TEN||{},he2=lo2&&lo2.he?lo2.he.map(function(x){return hT[x]||x;}).join(' / '):'?';
+      var body=Pn.panel('<canvas width="128" height="128" style="height:100%;aspect-ratio:1;flex:none"></canvas><div><b style="color:#9ff5a8">Bắt thành công!</b><br><b>'+esc(g2.ten)+'</b>'+(g2.boss?' <span style="color:#ff9f6f">[BOSS]</span>':'')+'<br><small>Hệ: '+esc(he2)+' · Bậc: <b style="color:'+(CFG.mauBac[g2.bac]||'#fff')+'">'+esc(g2.bac)+'</b> · Tiến hóa '+g2.tien+' · Cấp '+g2.lv+'</small></div>',[{t:'Về sảnh',cb:fin}],{row:true});
+      try{cvw=body.querySelector('canvas');var c3=cvw.getContext('2d');c3.imageSmoothingEnabled=false;THU_MOI.setFrame(192);THU_MOI.draw(c3,g2.id,g2.tien,64,124,128);}catch(x){}
+    }else Pn.panel('<div><b style="color:#ff9f9f">Bắt thất bại</b><br><small>Thú hoang đã chạy thoát.</small></div>',[{t:'Về sảnh',cb:fin}]);
+    return;
+  }
+  var h;
   if(win&&S.got){
     var g=S.got,lo=root.TTGCS&&TTGCS.loai?TTGCS.loai(g.id):null,heTen=root.TTGCS&&TTGCS.HE_TEN||{},he=lo&&lo.he?lo.he.map(function(x){return heTen[x]||x;}).join(' / '):'?';
     h='<div class="btr-c"><h3>Bắt thành công!</h3><canvas width="128" height="128"></canvas><div class="ln"><b>'+esc(g.ten)+'</b>'+(g.boss?' <span style="color:#ff9f6f">[BOSS]</span>':'')+'<br>Hệ: '+esc(he)+'<br>Bậc: <b style="color:'+(CFG.mauBac[g.bac]||'#fff')+'">'+esc(g.bac)+'</b> · Tiến hóa '+g.tien+' · Cấp '+g.lv+'</div><button type="button">Về sảnh</button></div>';

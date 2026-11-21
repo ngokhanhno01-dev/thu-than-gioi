@@ -169,7 +169,7 @@ function boxIn(c,x,y,w,h,ox,oy,W,H){var s=c.style;s.left=((x-ox)/W*100)+'%';s.to
 var MAXSCALE=1;
 function unit(){if(!fr)return;var d=window.devicePixelRatio||1;fr.style.maxWidth=(BW*MAXSCALE/d)+'px';fr.style.setProperty('--u',(fr.clientWidth/UB)+'px');}
 var tt=0,lastDrag=0;
-function toast(t){E.ts.textContent=t;E.ts.style.display='flex';clearTimeout(tt);tt=setTimeout(function(){E.ts.style.display='none';},1500);}
+function toast(t){if(window.TTGTBAO){TTGTBAO.toast(t,1500);return;}E.ts.textContent=t;E.ts.style.display='flex';clearTimeout(tt);tt=setTimeout(function(){E.ts.style.display='none';},1500);}
 
 /* cắt mảnh ảnh khung theo box {x,y,w,h} (px ảnh), nới DIM_PAD mỗi bên, làm lớp phủ cùng chỗ (dùng cho mờ/sáng nút vẽ sẵn) */
 function bake(cls,b){

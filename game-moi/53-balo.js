@@ -138,7 +138,7 @@ function pages(){return Math.max(1,Math.ceil(CAP/PAGE));}
 function pick(id){sel=id;if(multi){if(picks[id])delete picks[id];else picks[id]=1;}render();}
 function clickSlot(i){var id=ids('luoi')[page*PAGE+i];if(!id)return;pick(id);}
 function targets(){var a=multi?Object.keys(picks).filter(function(id){return CAT[id]&&count(id)>0;}):[];if(!a.length&&sel&&!multi)a=[sel];return a;}
-function toast(t){E.ts.textContent=t;E.ts.style.display='flex';clearTimeout(tt);tt=setTimeout(function(){E.ts.style.display='none';},1800);}
+function toast(t){if(window.TTGTBAO){TTGTBAO.toast(t,1800);return;}E.ts.textContent=t;E.ts.style.display='flex';clearTimeout(tt);tt=setTimeout(function(){E.ts.style.display='none';},1800);}
 /* KHÓA: món đã khóa không vứt được. Tất cả đang khóa -> mở khóa, ngược lại -> khóa hết */
 function khoa(){var t=targets();if(!t.length){toast('Chưa chọn vật phẩm');return;}
   var allL=t.every(function(id){return lock[id];});
@@ -152,10 +152,12 @@ function vut(){var t=targets();if(!t.length){toast('Chưa chọn vật phẩm');
   var tong=ok.reduce(function(n,id){return n+count(id);},0);
   var tx=ok.length===1?'Vứt bỏ '+esc(CAT[ok[0]].ten)+' x'+tong+'?':'Vứt bỏ '+ok.length+' loại ('+tong+' món)?';
   if(ok.length<t.length)tx+='<br><small>(bỏ qua '+(t.length-ok.length)+' món đã khóa)</small>';
-  E.cf.innerHTML='<div>'+tx+'</div><div class="r"><button type="button" class="d">Vứt bỏ</button><button type="button">Hủy</button></div>';
+  var xoa=function(){ok.forEach(function(id){delete inv[id];delete picks[id];if(sel===id)sel=null;});save();toast('Đã vứt bỏ');render();};
+  if(window.TTGTBAO){TTGTBAO.confirm(tx,[{t:'Vứt bỏ',cls:'d',cb:xoa},{t:'Hủy'}]);return;}
+  E.cf.innerHTML='<div>'+tx+'</div><div class=\"r\"><button type=\"button\" class=\"d\">Vứt bỏ</button><button type=\"button\">Hủy</button></div>';
   E.cf.style.display='flex';
   var bs=E.cf.querySelectorAll('button');
-  bs[0].addEventListener('click',function(){ok.forEach(function(id){delete inv[id];delete picks[id];if(sel===id)sel=null;});save();E.cf.style.display='none';toast('Đã vứt bỏ');render();});
+  bs[0].addEventListener('click',function(){E.cf.style.display='none';xoa();});
   bs[1].addEventListener('click',function(){E.cf.style.display='none';});}
 /* SẮP XẾP: bấm đổi kiểu xếp (nhặt -> tên -> số lượng) */
 function xep(){sortMode=(sortMode+1)%3;saveMeta();page=0;toast(SORTN[sortMode]);render();}

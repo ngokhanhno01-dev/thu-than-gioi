@@ -18,6 +18,7 @@
 <link rel="preload" as="image" href="img-boot-frame.webp">
 <link rel="preload" as="image" href="game-moi/khung-sanh.webp?v=2">
 <link rel="preload" as="image" href="game-moi/khung-hang-nut.webp?v=2">
+<link rel="preload" as="image" href="game-moi/khung-thong-bao.webp?v=1">
 <style id="boot-css">
 /* MÀN CHỜ (game chỉ có màn ngang): ảnh nền phủ toàn màn hình, thanh tiến trình ở đáy;
    tải xong thì chữ "Chạm vào màn hình để vào Thú Thần Giới" nổi giữa màn hình, chạm bất kỳ đâu để vào. Không có nút. */
@@ -197,6 +198,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 </div>
 <script src="51-thu-moi.js"></script>
 <script src="game-moi/52-nut-vuong.js"></script>
+<script src="game-moi/64-thong-bao.js"></script>
 <script src="game-moi/63-nhan-nut.js"></script>
 <script src="game-moi/53-balo.js"></script>
 <script src="game-moi/58-bong-bat.js"></script>
@@ -326,7 +328,7 @@ var ui=document.getElementById('ui'),edb=document.getElementById('edb'),edt=docu
 var els={},lay={},ed=false,sel=null,drag=null,tt=0;
 try{lay=JSON.parse(localStorage.getItem(LKEY)||'{}')||{};}catch(e){lay={};}
 function saveLay(){try{localStorage.setItem(LKEY,JSON.stringify(lay));}catch(e){}}
-function toast(s){tst.textContent=s;tst.style.opacity=1;clearTimeout(tt);tt=setTimeout(function(){tst.style.opacity=0;},900);}
+function toast(s){if(window.TTGTBAO){TTGTBAO.toast(s,900);return;}tst.textContent=s;tst.style.opacity=1;clearTimeout(tt);tt=setTimeout(function(){tst.style.opacity=0;},900);}
 function byId(id){for(var i=0;i<UI.length;i++)if(UI[i].id===id)return UI[i];return null;}
 function label(id){var p=lay[id];els[id].textContent=(p&&p.t)?p.t:dt(byId(id));}
 UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.c;e.textContent=dt(u);e.setAttribute('data-id',u.id);ui.appendChild(e);els[u.id]=e;
