@@ -54,27 +54,34 @@ var DON_CO_BAN=['Băng Tinh','Sương Phủ','Vân Tỏa','Phong Nhận','Sấm 
 function donCoBan(z){return DON_CO_BAN[z]?{ten:DON_CO_BAN[z],hsKyNang:1,hoiChieu:0}:null;}
 
 /* ===== KỸ NĂNG ĐỘC QUYỀN BOSS (mục 7b THIET_KE). hsTc = hsKyNang của satThuong; cd = hồi chiêu (lượt); he = hệ của kỹ năng (một hệ của boss).
-   ev (bước D thực thi): lop{ten,them} thêm lớp | hutMau{pct} | tuBuff{stat,pct,luot} boss tự buff | debuff{stat,pct,luot} lên đối thủ (giảm theo khu) | choang{xs,luot} (kc chặn) */
+   QUY TẮC KHI THÊM / SỬA KỸ NĂNG (đọc trước, tránh khai hiệu ứng "ma"):
+   1. Mô tả sách (Balo, bảng thú) TỰ SINH từ bảng này (sachMoTa) => cái gì khai ở đây là cái người chơi SẼ ĐỌC THẤY. Khai mà trận không chạy = người chơi thấy hiệu ứng không có thật.
+   2. Chỉ khai ev mà index.html ĐÃ CÓ CODE chạy (liệt kê bên dưới). Muốn hiệu ứng mới: viết code ở index.html + ghi vào danh sách này TRƯỚC, rồi mới khai cho kỹ năng.
+   3. cd và số liệu chỉ sửa Ở ĐÂY. 54-thu-than.js đọc cd từ bảng này (hàm cdSach), KHÔNG khai cd riêng cho sách boss.
+   4. Sửa xong thì cập nhật THIET_KE_CHI_SO.md mục 7b và GHI_CHU.md cho khớp.
+   ev của KỸ NĂNG (k.ev, chạy khi kỹ năng trúng): hutMau{pct} hút % sát thương thành máu | choang{xs,luot} choáng (kc chặn).
+   ev của NỘI TẠI (noiTai.ev, chạy sau khi dùng kỹ năng): debuff{stat:'pt' hoặc 'tc',pct,luot} lên đối thủ (giảm theo khu) | buHutMau{pct,luot} | buXuyenGiap{pct,luot} | khienSau{pctHp} | gayMu{pct,luot} (giảm theo khu) | choangNT{xs,luot} (kc chặn).
+   CHƯA CÓ CODE CHẠY, ĐỪNG KHAI cho kỹ năng: tuBuff (tự buff), debuff với stat khác pt/tc (vd tốc độ td), lop (lớp lạnh). Trận demo chưa có hệ tốc độ/lớp lạnh. */
 var KY_NANG_BOSS=[
-  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:8,ev:[],
+  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:5,ev:[],
    mt:'Triệu hồi 1 ngọn núi băng trấn áp đối thủ',
    noiTai:{ten:'Lạnh Thấu Xương',mod:[],ev:[{k:'debuff',stat:'pt',pct:-20,luot:2}]}},
-  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'thuy',hsTc:1.5,cd:8,ev:[{k:'hutMau',pct:30}],
+  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'thuy',hsTc:1.5,cd:5,ev:[{k:'hutMau',pct:30}],
    noiTai:{ten:'Huyết Sương',mod:[],ev:[{k:'buHutMau',pct:10,luot:3}]}},
-  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'phong',hsTc:2.0,cd:9,ev:[{k:'tuBuff',stat:'td',pct:30,luot:2}],
+  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'phong',hsTc:2.0,cd:5,ev:[],
    noiTai:{ten:'Vân Cánh',mod:[],ev:[{k:'khienSau',pctHp:20}]}},
-  {id:'vu-xa-trien',ten:'Vũ Xà Triền',boss:'6j',he:'phong',hsTc:1.4,cd:8,ev:[{k:'debuff',stat:'td',pct:-50,luot:2}],
+  {id:'vu-xa-trien',ten:'Vũ Xà Triền',boss:'6j',he:'phong',hsTc:1.4,cd:4,ev:[],
    noiTai:{ten:'Xà Hành',mod:[],ev:[{k:'buXuyenGiap',pct:15,luot:3}]}},
-  {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:9,ev:[],
+  {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:6,ev:[],
    noiTai:{ten:'Lôi Kích',mod:[],ev:[{k:'choangNT',xs:30,luot:1}]}},
-  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:8,ev:[{k:'debuff',stat:'td',pct:-20,luot:2}],
+  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:5,ev:[],
    noiTai:{ten:'Nguyệt Mê',mod:[],ev:[{k:'gayMu',pct:40,luot:2}]}}
 ];
 /* SÁCH KỸ NĂNG = NGUỒN DUY NHẤT: mỗi sách (id 'sach-'+id kỹ năng) gồm 3 phần theo đúng thiết kế:
    (1) CHỈ SỐ = % sát thương theo hệ (hsTc, he; vd 180% sát thương Băng) + hồi chiêu cd (+ ev kèm theo của kỹ năng nếu có: hút máu, choáng...);
    (2) NỘI TẠI = noiTai {ten, ev}: hiệu ứng kèm theo, vd 'Lạnh Thấu Xương': giảm 20% giáp đối thủ trong 2 lượt (debuff, bị giảm theo Kháng của người bị gắn);
    (3) HIỆU ỨNG = hình ảnh kỹ năng (57-fx-ky-nang-boss.js), không phải số liệu.
-   Sách KHÔNG cộng chỉ số cho thú mang sách. Boss thú hoang được GÁN sách của mình (boss:'..'); người chơi gắn sách vào thú (thu.kn = [id sách]) thì dùng được y hệt boss. Số trong bảng trên là số mẫu, chỉnh tại đó. */
+   Sách KHÔNG cộng chỉ số cho thú mang sách. Boss thú hoang được GÁN sách của mình (boss:'..'); người chơi gắn sách vào thú (thu.kn = [id sách]) thì dùng được y hệt boss. Số trong bảng trên là số chính thức hiện tại (cd chốt 22/11/2026), chỉnh tại đó. */
 function sachKyNang(bid){if(typeof bid!=='string'||bid.indexOf('sach-')!==0)return null;var id=bid.slice(5);for(var i=0;i<KY_NANG_BOSS.length;i++)if(KY_NANG_BOSS[i].id===id)return KY_NANG_BOSS[i];return null;}
 function sachBoss(bossId){for(var i=0;i<KY_NANG_BOSS.length;i++)if(KY_NANG_BOSS[i].boss===bossId)return 'sach-'+KY_NANG_BOSS[i].id;return null;}
 function sachBuffs(thu){var r=[];((thu&&thu.kn)||[]).forEach(function(b){var k=sachKyNang(b);if(!k)return;var n=k.noiTai||{};r.push({mod:n.mod||[],ev:n.ev||[]});});return r;}   /* sách không cộng chỉ số: chỉ nội tại */

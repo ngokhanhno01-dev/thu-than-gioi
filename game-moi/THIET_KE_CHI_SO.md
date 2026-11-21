@@ -52,17 +52,18 @@ Giao diện thú có 3 ô tròn: ô 1 BUFF (nội tại), ô 2 DEBUFF, ô 3 ĐÒ
 - z4 Lôi Vực: debuff Tĩnh Điện (đối thủ -15% khu) | buff Lôi Kích (+15% cm; mỗi lần chí mạng 20% làm choáng 1 lượt) | đòn cơ bản Sấm Rền | Boss Lôi Vực Chiến Thần: Lôi Giáp (pd +15% phản đòn)
 - z5 Nguyệt Cung: debuff Nguyệt Quang (đối thủ -20% cm) | buff Nguyệt Ảnh (+15% ne; né thành công thì lượt sau +30% tc) | đòn cơ bản Nguyệt Huy | Boss Nguyệt Thực Tế Quân: Nguyệt Thực (dưới 30% hp thì +30% tc và hút máu 15%)
 
-## 7b. Kỹ năng độc quyền của boss + sách kỹ năng (đã chốt 19/11/2026)
+## 7b. Kỹ năng độc quyền của boss + sách kỹ năng (chốt 19/11/2026, cập nhật số liệu 22/11/2026)
 - Mỗi boss có 1 kỹ năng độc quyền, có hồi chiêu (cd, tính lượt). Hết cd thì boss tự dùng, thay đòn cơ bản ở lượt đó. Hệ của kỹ năng là một hệ của chính boss.
 - Kỹ năng cũng là một SÁCH KỸ NĂNG: CHỈ rơi khi GIẾT CHẾT boss (bắt boss không rơi), tỉ lệ 1,5% mỗi lần (độc quyền nên hiếm). mm vẫn nhân tỉ lệ rớt như mục 1 (tối đa x3). Thú chỉ mang được nếu có hệ của sách (mục 2).
-- Sát thương kỹ năng = công thức mục 5 với hsKyNang bên dưới; hệ của kỹ năng đánh theo hệ kỹ năng. Debuff của kỹ năng bị giảm theo khu (mục 6), choáng bị chặn theo kc.
-- ks0 Băng Sơn Áp Đỉnh (boss Băng Sơn Cự Thú, hệ băng): 180% tc, gắn 2 lớp lạnh lên đối thủ (cộng vào buff Đông Cứng), cd 5. Mô tả: khối băng khổng lồ từ trên trời giáng xuống đè đối thủ, vỡ tan thành tinh thể băng.
-- ks1 Sương Nuốt (Vạn Trượng Vụ Thú, hệ thủy): 150% tc, hút 30% sát thương gây ra thành máu cho boss, cd 5. Mô tả: màn sương dày bao trùm đối thủ rồi bị hút về miệng boss, sương cuộn thành xoáy.
-- ks2 Côn Bằng Triển Sí (Vân Đảo Côn Bằng, hệ phong): 200% tc, boss tự +30% tốc độ 2 lượt, cd 5. Mô tả: Côn Bằng là cá voi khổng lồ mọc đôi cánh nhiều tầng, vỗ cánh cuốn gió và mây rồi lao xuống đâm vào đối thủ, vỡ thành cột nước và sóng quét ngang.
-- ks3 Vũ Xà Triền (Phong Nguyên Vũ Xà, hệ phong): 140% tc, đối thủ -50% tốc độ 2 lượt, cd 5. Mô tả: thân rắn gió quấn chặt đối thủ rồi siết lại, vòng xoáy gió trói chân.
-- ks4 Thiên Lôi Giáng (Lôi Vực Chiến Thần, hệ lôi): 220% tc, 40% làm choáng 1 lượt, cd 6. Mô tả: chiến thần giơ vũ khí gọi cột sét từ trời đánh thẳng xuống đối thủ.
-- ks5 Nguyệt Thực Nuốt (Nguyệt Thực Tế Quân, hệ ám): 200% tc, đối thủ -20% tốc độ 2 lượt, cd 5. Mô tả: mặt trăng bị bóng đen che khuất, vòng tối nuốt lấy đối thủ.
-- Lưu ý: ks5 bản cũ không ghi thời gian giảm tốc, đang đặt 2 lượt cho giống ks3; hệ ks2 (phong) và ks5 (ám) là hệ chủ đạo của boss, khác hệ vùng (tiên, tâm linh). Muốn đổi thì sửa một dòng trong KY_NANG_BOSS (56c-buff.js).
+- Sát thương kỹ năng = công thức mục 5 với hsKyNang bên dưới; hệ của kỹ năng đánh theo hệ kỹ năng. Debuff và mù của nội tại bị giảm theo khu (mục 6), choáng bị chặn theo kc. Mô tả sách trong game TỰ SINH từ bảng KY_NANG_BOSS (56c-buff.js), nên mục này phải khớp bảng đó.
+- ks0 Băng Sơn Áp Đỉnh (boss Băng Sơn Cự Thú, hệ băng): 180% tc, cd 5. Nội tại Lạnh Thấu Xương: giảm 20% giáp đối thủ trong 2 lượt. Mô tả: khối băng khổng lồ từ trên trời giáng xuống đè đối thủ, vỡ tan thành tinh thể băng.
+- ks1 Sương Nuốt (Vạn Trượng Vụ Thú, hệ thủy): 150% tc, hút 30% sát thương gây ra thành máu cho người dùng, cd 5. Nội tại Huyết Sương: sau khi dùng kỹ năng, hút thêm 10% sát thương gây ra thành máu trong 3 lượt. Mô tả: màn sương dày bao trùm đối thủ rồi bị hút về miệng boss, sương cuộn thành xoáy.
+- ks2 Côn Bằng Triển Sí (Vân Đảo Côn Bằng, hệ phong): 200% tc, cd 5. Nội tại Vân Cánh: sau khi dùng kỹ năng, nhận khiên bằng 20% máu tối đa. Mô tả: Côn Bằng là cá voi khổng lồ mọc đôi cánh nhiều tầng, vỗ cánh cuốn gió và mây rồi lao xuống đâm vào đối thủ, vỡ thành cột nước và sóng quét ngang.
+- ks3 Vũ Xà Triền (Phong Nguyên Vũ Xà, hệ phong): 140% tc, cd 4. Nội tại Xà Hành: sau khi dùng kỹ năng, Xuyên Giáp +15% trong 3 lượt. Mô tả: thân rắn gió quấn chặt đối thủ rồi siết lại, vòng xoáy gió trói chân.
+- ks4 Thiên Lôi Giáng (Lôi Vực Chiến Thần, hệ lôi): 220% tc, cd 6. Nội tại Lôi Kích: 30% làm choáng đối thủ 1 lượt (bị kc chặn). Mô tả: chiến thần giơ vũ khí gọi cột sét từ trời đánh thẳng xuống đối thủ.
+- ks5 Nguyệt Thực Nuốt (Nguyệt Thực Tế Quân, hệ ám): 200% tc, cd 5. Nội tại Nguyệt Mê: sau khi dùng kỹ năng, gây mù, đối thủ đánh hụt 40% trong 2 lượt. Mô tả: mặt trăng bị bóng đen che khuất, vòng tối nuốt lấy đối thủ.
+- Lưu ý: hệ ks2 (phong) và ks5 (ám) là hệ chủ đạo của boss, khác hệ vùng (tiên, tâm linh). Muốn đổi số thì sửa một dòng trong KY_NANG_BOSS (56c-buff.js), rồi cập nhật mục này.
+- ĐÃ BỎ (22/11/2026): lớp lạnh (ks0), tự +30% tốc độ (ks2), giảm tốc độ đối thủ (ks3, ks5). Lý do: trận chưa có hệ tốc độ/lớp lạnh nên không chạy, trong khi mô tả sách lại nói có. QUY TẮC: chỉ khai hiệu ứng mà trận ĐÃ chạy được (danh sách ở chú thích trên bảng KY_NANG_BOSS). Muốn thêm hiệu ứng mới thì viết code trận trước, rồi mới khai vào kỹ năng.
 
 ## 8. Hệ chủ đạo 6 vùng và bảng loài mẫu Tuyết Nguyên (z0)
 - Hệ chủ đạo vùng (hệ của đòn cơ bản vùng): z0 Tuyết Nguyên = bang, z1 Sương Cốc = thuy, z2 Vân Đảo = tien, z3 Phong Nguyên = phong, z4 Lôi Vực = loi, z5 Nguyệt Cung = tam.
