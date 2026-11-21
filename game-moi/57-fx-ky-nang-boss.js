@@ -62,7 +62,7 @@
  }catch(e){}
  function boot(){
   const API=window.TTGCombatFX;
-  if(!API||!API.engine||!API.drawAttack||(window.TTGGearScene&&!API.__procfix)){   /* chờ chuỗi hiệu ứng 17 vùng (33–43) bọc xong để file này nằm NGOÀI CÙNG */
+  if(!API||!API.engine||!API.drawAttack||!API.__procfix){   /* chờ chuỗi hiệu ứng 17 vùng (33–43) bọc xong để file này nằm NGOÀI CÙNG */
    if(tries++<240)setTimeout(boot,50);
    return;
   }
