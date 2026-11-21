@@ -2,7 +2,7 @@
    Ảnh: game-moi/khung-chien-dau.webp (đã tách nền, đã xóa chữ Tên/Bậc/Lv./Khiên/Tốc Độ vẽ sẵn để lật gương không bị ngược chữ; mọi chữ vẽ bằng canvas). Tọa độ G tính theo chính ảnh file 1622x483 (vẽ tự co theo bề rộng).
    - Vòng tròn = RANK (chữ neon theo màu rank, giống kho/thông báo). Ô xanh bên dưới vòng = HỆ (1 hệ: "Băng"; 2 hệ: "Băng · Võ", mỗi hệ một màu).
    - Thanh vàng kem: TÊN (tự co chữ nếu dài) + BẬC 1/2/3.   - Thanh KHIÊN (trên, tô xanh lam): "hiện/tối đa"; tối đa 0 thì "0/0" và KHÔNG có phần tô.   - Thanh to giữa: MÁU "hiện/tối đa".   - Ô nhỏ: "Lv.N" (tới Lv.100).
-   - Thanh TỐC ĐỘ (dưới, tô vàng): chỉ số td; độ dài thanh = td / td cao nhất của 2 bên (bên nhanh hơn đầy thanh) nên nhìn là so được; bên nhanh hơn có thêm nhãn "Đánh trước", bên chậm "Đánh sau".
+   - Thanh TỐC ĐỘ (dưới, tô vàng): chỉ số td; độ dài thanh = td / td cao nhất của 2 bên (bên nhanh hơn đầy thanh) nên nhìn là so được; bên nhanh hơn có thêm nhãn "Đánh trước", bên chậm "Đánh sau", bằng nhau "Ngang tốc" (tie:true).
    API: TTGHUD.draw(ctx,{x,y,w,mirror,rank,name,bac,lv,he:[..],hp,hpMax,sh,shMax,td,tdMax,first,enemy}) ; TTGHUD.ratio (cao/rộng) ; TTGHUD.G */
 (function(root){
 'use strict';
@@ -75,6 +75,7 @@ function draw(ctx,o){
   barFill(ctx,G.sp,hasTd?td/tdM:0,m,'#ffe27a','#d9921a',5);
   var spC=(G.sp.x0+G.sp.x1)/2;
   fit(ctx,hasTd?String(Math.round(td)):'-',X(spC),(G.sp.y0+G.sp.y1)/2+2,300,36,24,'bold {S}px sans-serif','#fff','rgba(60,30,0,.9)',7);
+  if(hasTd&&o.tie){fit(ctx,'Ngang tốc',X(G.sp.x1-105),(G.sp.y0+G.sp.y1)/2+2,170,28,20,'bold {S}px sans-serif','#e8f0ff','rgba(60,30,0,.9)',6);}
   if(hasTd&&o.first!=null){var fx=o.first?'#fff3a0':'#d8e4ff';
     fit(ctx,o.first?'Đánh trước':'Đánh sau',X(G.sp.x1-105),(G.sp.y0+G.sp.y1)/2+2,170,28,20,'bold {S}px sans-serif',fx,'rgba(60,30,0,.9)',6);}
   /* LV */

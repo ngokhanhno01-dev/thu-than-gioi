@@ -434,12 +434,13 @@ function hit(w){if(missChk(w,performance.now())){A={w:w,t:performance.now()};ret
    td lấy từ effS (đã tính buff/debuff), tính lại mỗi vòng. Ngoài trận thật (trận mẫu không có BATTLE) giữ như cũ: bạn trước.
    NHỊP TRẬN chỉnh ở dòng khai báo đầu: GAP = nghỉ giữa các vòng, T_DON = mỗi lượt đánh thường (và khoảng nghỉ giữa 2 bên trong vòng), END_WAIT = dừng khi hết trận.
    Kỹ năng dài KN_INTRO + KN_T_END (xem khối KỸ NĂNG ĐỘC QUYỀN BOSS). */
-/* THANH TỐC ĐỘ: mỗi bên có thanh g (0..100) đầy theo td; thanh nào đầy trước thì đánh MỘT lượt rồi trừ 100. Nhanh gấp đôi => 2 lượt liên tiếp trong lúc bên kia 1 lượt; 1,5 lần => nhịp 3 đổi 2. Bằng nhau thì thú của bạn trước, rồi luân phiên.
-   Tối đa MAX_LIEN (2) lượt liên tiếp: nhanh hơn 2 lần cũng chỉ đánh 2 lần liền rồi tới bên kia (phần dư bị chặn, không tích lũy). td lấy từ effS mỗi lượt. Ngoài trận thật (trận mẫu không có BATTLE): bạn rồi địch luân phiên. */
-function nextActor(){
+/* THANH TỐC ĐỘ: mỗi bên có thanh g (0..100) đầy theo td; thanh nào đầy trước thì đánh MỘT lượt rồi trừ 100. Nhanh gấp đôi => 2 lượt liên tiếp trong lúc bên kia 1 lượt; 1,5 lần => nhịp 3 đổi 2. Bằng tốc độ: TUNG NGẪU NHIÊN 50/50 (st.rnd), rồi luân phiên. Sau này đấu người: đặt BATTLE.seed giống nhau ở cả 2 máy/server thì kết quả tung giống nhau.
+   Tối đa MAX_LIEN (2) lượt liên tiếp: nhanh hơn 2 lần cũng chỉ đánh 2 lần liền rồi tới bên kia (phần dư bị chặn, không tích lũy). td lấy từ effS mỗi lượt. Ngoài trận thật (trận mẫu không có BATTLE): luân phiên. */
+function mkRnd(seed){var a=(seed==null?Math.floor(Math.random()*4294967296):seed)>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+function nextActor(){if(!st.rnd)st.rnd=mkRnd(BATTLE&&BATTLE.seed);
  if(!BATTLE||!window.TTGCS){st.alt=st.alt?0:1;return st.alt?'me':'en';}
  var tm=Math.max(1,effS('me').td||1),te=Math.max(1,effS('en').td||1),g=st.g,
-  Tm=(100-g.me)/tm,Te=(100-g.en)/te,w=(Math.abs(Tm-Te)<1e-9)?(te>tm?'en':'me'):(Te<Tm?'en':'me');
+  Tm=(100-g.me)/tm,Te=(100-g.en)/te,w=(Math.abs(Tm-Te)<1e-9)?(st.rnd()<.5?'me':'en'):(Te<Tm?'en':'me');/* bằng tốc độ: tung ngẫu nhiên 50/50 (không ưu tiên bên nào) */
  if(st.run.w===w&&st.run.n>=MAX_LIEN)w=w==='me'?'en':'me';
  var t=Math.max(0,w==='me'?Tm:Te);g.me=Math.min(100,g.me+t*tm);g.en=Math.min(100,g.en+t*te);g[w]=Math.max(0,g[w]-100);
  st.run=st.run.w===w?{w:w,n:st.run.n+1}:{w:w,n:1};return w;}
@@ -924,9 +925,9 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),by=I.t+32,mePet=BATTLE&&THU_MOI.byId[BATTLE.player.id],meName=BATTLE?(BATTLE.player.ten||(mePet&&mePet.ten)||'Thú của bạn'):THU_MOI.byId[ID].ten,enName=BATTLE?BATTLE.enemy.ten+' ['+enTag(BATTLE.enemy)+']':THU_MOI.byId[ID].ten,maxMe=BATTLE?BATTLE.playerStats.hp:100,maxEn=BATTLE?BATTLE.enemyStats.hp:100;
   /* KHUNG THÔNG TIN (68-hud-tran.js): khung thú bạn bên trái (vòng Rank bên trái), khung địch bên phải (lật gương). Ảnh chưa nạp xong thì dùng thanh máu cũ. */
   var HM=112,hw=Math.min(250,Math.floor((W-I.l-I.r-2*HM-16)/2)),hy=I.t+6,P=BATTLE?BATTLE.player:null,EN=BATTLE?BATTLE.enemy:null;
-  var TD=(function(){if(!BATTLE||!window.TTGCS)return{me:null,en:null,max:0,first:null};var m=effS('me').td||0,e=effS('en').td||0;return{me:m,en:e,max:Math.max(m,e),first:m>=e};})();/* tốc độ 2 bên (đã tính buff/debuff), khớp ordFirst */
-  var okHud=window.TTGHUD&&TTGHUD.ready()&&TTGHUD.draw(ctx,{x:I.l+HM,y:hy,w:hw,rank:P?((window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[P.bac])?P.bac:'C'):null,name:meName,bac:P?P.tien:bm,lv:P?P.lv:1,he:heOf(P||{id:ID}),hp:st.me,hpMax:maxMe,sh:st.shMe||0,shMax:st.shMaxMe||0,td:TD.me,tdMax:TD.max,first:TD.first});
-  if(okHud){TTGHUD.draw(ctx,{x:W-I.r-HM-hw,y:hy,w:hw,mirror:true,enemy:true,rank:EN&&EN.hienBac?EN.bac:null,name:enName,bac:EN?EN.tien:be,lv:EN?EN.lv:1,he:heOf(EN||{id:ID}),hp:st.en,hpMax:maxEn,sh:st.shEn||0,shMax:st.shMaxEn||0,td:TD.en,tdMax:TD.max,first:TD.first==null?null:!TD.first});if(window.TTGDEM)TTGDEM.vs(ctx,ts,I.l+HM+hw,W-I.r-HM-hw,hy+hw*TTGHUD.ratio*TTGDEM.CFG.vs.dy);knIcons(ts,I.l+HM,W-I.r-HM,hy+hw*TTGHUD.ratio+KN_ICON.dy,hw);}/* VS nằm giữa 2 khung, tự co theo khe + lề */
+  var TD=(function(){if(!BATTLE||!window.TTGCS)return{me:null,en:null,max:0,first:null};var m=effS('me').td||0,e=effS('en').td||0;return{me:m,en:e,max:Math.max(m,e),first:m>e?true:(m<e?false:null)};})();/* tốc độ 2 bên (đã tính buff/debuff), khớp ordFirst */
+  var okHud=window.TTGHUD&&TTGHUD.ready()&&TTGHUD.draw(ctx,{x:I.l+HM,y:hy,w:hw,rank:P?((window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[P.bac])?P.bac:'C'):null,name:meName,bac:P?P.tien:bm,lv:P?P.lv:1,he:heOf(P||{id:ID}),hp:st.me,hpMax:maxMe,sh:st.shMe||0,shMax:st.shMaxMe||0,td:TD.me,tdMax:TD.max,first:TD.first,tie:TD.first==null&&TD.max>0});
+  if(okHud){TTGHUD.draw(ctx,{x:W-I.r-HM-hw,y:hy,w:hw,mirror:true,enemy:true,rank:EN&&EN.hienBac?EN.bac:null,name:enName,bac:EN?EN.tien:be,lv:EN?EN.lv:1,he:heOf(EN||{id:ID}),hp:st.en,hpMax:maxEn,sh:st.shEn||0,shMax:st.shMaxEn||0,td:TD.en,tdMax:TD.max,first:TD.first==null?null:!TD.first,tie:TD.first==null&&TD.max>0});if(window.TTGDEM)TTGDEM.vs(ctx,ts,I.l+HM+hw,W-I.r-HM-hw,hy+hw*TTGHUD.ratio*TTGDEM.CFG.vs.dy);knIcons(ts,I.l+HM,W-I.r-HM,hy+hw*TTGHUD.ratio+KN_ICON.dy,hw);}/* VS nằm giữa 2 khung, tự co theo khe + lề */
   else{  bar(I.l+ox,by,bw,Math.max(0,Math.min(1,st.me/maxMe)),'#3c3',meName+' (bạn)',BATTLE?((window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[BATTLE.player.bac])?BATTLE.player.bac:'C'):null);/* thú của bạn: hiện Rank (thiếu/lạ coi là C như ô kho) */bar(W-I.r-ox-bw,by,bw,Math.max(0,Math.min(1,st.en/maxEn)),'#c33',enName,BATTLE&&BATTLE.enemy.hienBac?BATTLE.enemy.bac:null);}
   
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
