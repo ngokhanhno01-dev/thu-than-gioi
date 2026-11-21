@@ -6,7 +6,8 @@
          Sức chứa (trái) + chuyển trang (phải) nằm ngay trên lưới ô.
    Mọi vị trí bên dưới tính theo pixel ẢNH ĐÃ CẮT 1761x847 (BW x BH). Cỡ chữ/độ dày trong CSS ({n}) vẫn tính theo thang cũ 1469 (UB) nên không phải chỉnh lại; --u = clientWidth/UB.
    DỮ LIỆU: kho đồ {id: số lượng} lưu ở khóa ttg_moi_balo_v1. Danh mục item (CAT) khai ở khối "DANH MỤC ITEM" bên dưới hoặc gọi TTGBALO.reg({...}).
-   API: TTGBALO.open()/close(), .add(id,n) (n âm = trừ), .count(id), .reg(items).
+   API: TTGBALO.open()/close(), .add(id,n) (n âm = trừ), .count(id), .reg(items), .xoaTrang().
+   XÓA TRẮNG (21/11/2026): TTGBALO.xoaTrang() = xóa sạch túi đồ + khóa + kiểu sắp xếp (bộ nhớ và localStorage). Gọi từ màn chọn thú đầu game (65-chon-thu-dau.js) để mô phỏng người chơi lần đầu. Bỏ qua ở chế độ demo.
    THỬ BẢNG: thêm ?balo=demo vào link -> có sẵn vài item mẫu (không lưu lại). */
 (function(){
 'use strict';
@@ -36,6 +37,8 @@ if(demo){
 function save(){if(demo)return;try{localStorage.setItem(KEY,JSON.stringify(inv));}catch(e){}}
 function count(id){return inv[id]|0;}
 function add(id,n){var c=count(id)+(n==null?1:n);if(c<=0)delete inv[id];else inv[id]=c;save();if(isOpen)render();return Math.max(0,c);}
+/* xoaTrang(): TÀI KHOẢN MỚI. Xóa sạch túi đồ, khóa, kiểu sắp xếp (bộ nhớ + localStorage). Bỏ qua ở chế độ demo. */
+function xoaTrang(){if(demo)return;inv={};lock={};picks={};sel=null;sortMode=0;page=0;multi=false;try{localStorage.removeItem(KEY);localStorage.removeItem(KLOCK);localStorage.removeItem(KSORT);}catch(e){}if(isOpen)render();}
 function ids(loai){var a=Object.keys(inv).filter(function(id){var c=CAT[id];return c&&(loai==='luoi'?(c.loai==='nl'||c.loai==='sach'):c.loai===loai)&&inv[id]>0;});   /* 'luoi' = mọi món hiện trong lưới ô (nguyên liệu + sách kỹ năng) */
   if(loai==='bong')a.sort(function(x,y){function b(i){return (CAT[i]&&+CAT[i].cap)||(parseInt(String(i).replace(/\D/g,''),10))||0;}return b(x)-b(y);});   /* Ngự Thú Châu: luôn bậc 1→6, bỏ qua nút Sắp xếp */
   else if(sortMode===1)a.sort(function(x,y){return String(CAT[x].ten).localeCompare(String(CAT[y].ten),'vi');});
@@ -191,5 +194,5 @@ function close(){if(!root)return;E.cf.style.display='none';multi=false;picks={};
 /* ===== ICON NÚT BALO (SVG vẽ tay, màu SÁNG để nổi trên nền tối: balo vàng cam, túi xanh lam, khóa ngọc; nút tự có quầng sáng + phát sáng ở 52-nut-vuong.js) ===== */
 var ICON='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="bkG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#ff9a1f"/></linearGradient><linearGradient id="bkC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a6f6ff"/><stop offset="1" stop-color="#2d9cff"/></linearGradient></defs><path d="M24 14C24 3 40 3 40 14" fill="none" stroke="#5a2a00" stroke-width="5.6" stroke-linecap="round"/><path d="M24 14C24 3 40 3 40 14" fill="none" stroke="#fff0a8" stroke-width="3" stroke-linecap="round"/><rect x="5.5" y="33" width="9.5" height="19" rx="4.5" fill="url(#bkC)" stroke="#5a2a00" stroke-width="2.2"/><rect x="49" y="33" width="9.5" height="19" rx="4.5" fill="url(#bkC)" stroke="#5a2a00" stroke-width="2.2"/><path d="M14 28C14 18 21 12 32 12S50 18 50 28V52C50 58 47 61 42 61H22C17 61 14 58 14 52Z" fill="url(#bkG)" stroke="#5a2a00" stroke-width="2.6" stroke-linejoin="round"/><path d="M14 28C14 18 21 12 32 12S50 18 50 28C44 34 20 34 14 28Z" fill="#fff0a0" stroke="#5a2a00" stroke-width="2.2" stroke-linejoin="round"/><rect x="19.5" y="41" width="25" height="15" rx="4.5" fill="url(#bkC)" stroke="#5a2a00" stroke-width="2.2"/><path d="M20 47H44" stroke="#fff" stroke-opacity=".75" stroke-width="1.5"/><path d="M32 26.5L36.6 32 32 38.5 27.4 32Z" fill="#8ff6ff" stroke="#05556b" stroke-width="1.8" stroke-linejoin="round"/><path d="M32 28.5L34.2 32H32Z" fill="#fff"/><path d="M18.5 24C19.5 19 23.5 15.5 28 14.5" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="2.2" stroke-linecap="round"/><path d="M56 6L57.2 9.6 60.8 10.8 57.2 12 56 15.6 54.8 12 51.2 10.8 54.8 9.6Z" fill="#fff"/></svg>';
 TTGNV.add({id:'balo',ten:'Balo',icon:ICON,onTap:open,r:0}); /* r:0 = hàng trên, cùng hàng với Thú Thần */
-window.TTGBALO={open:open,close:close,add:add,count:count,reg:reg,CAT:CAT};
+window.TTGBALO={open:open,close:close,add:add,count:count,reg:reg,CAT:CAT,xoaTrang:xoaTrang};
 })();
