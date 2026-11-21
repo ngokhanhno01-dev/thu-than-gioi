@@ -430,19 +430,21 @@ document.getElementById('tl').addEventListener('click',function(e){if(e.target==
 var MOB_IMGS={};
 function mobImg(q){var f=q&&q.imageFile;if(!f)return null;var o=MOB_IMGS[f];if(!o){o=MOB_IMGS[f]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;o.err=true;};o.img.src='game-moi/quai/'+f;}return o.ok?o.img:null;}
 function drawMainMonster(q,x,by,bob){var s=q.boss?100:72,top=by+bob-s+8;var im=mobImg(q);if(im){var h=q.boss?150:110,w=h*(im.naturalWidth/im.naturalHeight||1);ctx.drawImage(im,x-w/2,by+bob+8-h,w,h);return;}ctx.fillStyle=q.mauChuDao||'#78bde5';ctx.beginPath();ctx.moveTo(x-s*.42,top+s*.42);ctx.lineTo(x-s*.28,top+s*.12);ctx.lineTo(x+s*.2,top+s*.08);ctx.lineTo(x+s*.43,top+s*.34);ctx.lineTo(x+s*.36,top+s*.78);ctx.lineTo(x-s*.34,top+s*.82);ctx.closePath();ctx.fill();ctx.fillStyle=q.mauNhan||'#69dfff';ctx.fillRect(x-s*.3,top+s*.33,s*.6,s*.16);ctx.fillStyle=q.mauSang||'#a7f3ff';ctx.fillRect(x-s*.18,top+s*.3,7,7);ctx.fillRect(x+s*.1,top+s*.3,7,7);ctx.fillStyle='#182238';ctx.fillRect(x-s*.14,top+s*.32,3,3);ctx.fillRect(x+s*.14,top+s*.32,3,3);if(q.boss){ctx.fillStyle=q.mauNhan||'#69dfff';ctx.fillRect(x-s*.27,top,9,24);ctx.fillRect(x+s*.18,top,9,24);}}
+var PET_LIFT=16;/* nâng thú (và bóng, vòng rune Rank) lên khỏi mặt đất bấy nhiêu điểm để vòng không bị cắt ở viền; 0 = như cũ */
+function py(){return gy()-PET_LIFT;}
 function pet(w,ts){var model=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null,b=model?(model.tien||1):(w==='me'?bm:be),dead=st[w]<=0,x=px(w),o=0,fxb=(w==='en'&&window.TTGBAT&&TTGBAT.enemyFx)?TTGBAT.enemyFx(ts):null;if(fxb&&fxb.hide)return;
  if(A&&A.w===w){var p=(ts-A.t)/300;if(p<1)o=Math.round(Math.sin(p*Math.PI)*28);else A=null;}
  var bob=dead?0:Math.round(Math.sin(ts/380+(w==='me'?0:2))*2);
- if(!fxb){ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x-40,gy()-2,80,4);}
+ if(!fxb){ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x-40,py()-2,80,4);}
  var rk=model?(w==='me'?model.bac:(model.hienBac?model.bac:null)):null,rkA=(dead?.35:1)*(fxb?fxb.a:1);if(w==='me'&&rk&&!(window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[rk]))rk='C';
- if(window.TTGRUNE&&rk)TTGRUNE.ring(ctx,rk,x,gy(),ts,'sau',rkA);   /* vòng rune Rank: lượt sau, dưới chân */
+ if(window.TTGRUNE&&rk)TTGRUNE.ring(ctx,rk,x,py(),ts,'sau',rkA);   /* vòng rune Rank: lượt sau, dưới chân */
  ctx.save();if(dead)ctx.globalAlpha=.35;
- if(fxb){ctx.globalAlpha*=fxb.a;var pyv=gy()-60;ctx.translate(x+fxb.dx,pyv+fxb.dy);if(fxb.r)ctx.rotate(fxb.r);ctx.scale(fxb.s,fxb.s);ctx.translate(-x,-pyv);}
- if(w==='me'){ctx.translate(x+o,0);ctx.scale(-1,1);dp(model?model.id:ID,b,0,gy()+bob);}
- else if(model&&model.source==='main')drawMainMonster(model.record,x-o,gy(),bob);
- else dp(model?model.id:ID,b,x-o,gy()+bob);
+ if(fxb){ctx.globalAlpha*=fxb.a;var pyv=py()-60;ctx.translate(x+fxb.dx,pyv+fxb.dy);if(fxb.r)ctx.rotate(fxb.r);ctx.scale(fxb.s,fxb.s);ctx.translate(-x,-pyv);}
+ if(w==='me'){ctx.translate(x+o,0);ctx.scale(-1,1);dp(model?model.id:ID,b,0,py()+bob);}
+ else if(model&&model.source==='main')drawMainMonster(model.record,x-o,py(),bob);
+ else dp(model?model.id:ID,b,x-o,py()+bob);
  ctx.restore();
- if(window.TTGRUNE&&rk)TTGRUNE.ring(ctx,rk,x,gy(),ts,'truoc',rkA);}
+ if(window.TTGRUNE&&rk)TTGRUNE.ring(ctx,rk,x,py(),ts,'truoc',rkA);}
 function bar(x,y,w,p,c,name,rk){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
  ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);
  if(rk){/* RANK (thú của bạn + quái + boss quái; thú hoang/boss thú hoang không truyền): chữ neon bên trái thanh máu (màu theo rank, cùng bảng màu với kho/thông báo) */
@@ -683,12 +685,12 @@ document.addEventListener('visibilitychange',function(){bgLast=0;if(document.hid
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
 function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.sin(ts/380)*2;
  var rt0=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null,rk=rt0?(rt0.bac||'C'):null;if(rk&&!(window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[rk]))rk='C';
- if(window.TTGRUNE&&rk)TTGRUNE.ring(ctx,rk,x,gy(),ts,'sau');   /* vòng rune Rank dưới chân (lượt sau) */
+ if(window.TTGRUNE&&rk)TTGRUNE.ring(ctx,rk,x,py(),ts,'sau');   /* vòng rune Rank dưới chân (lượt sau) */
  petSanh.rk=rk;petSanh.x=x;/* NHỊP THỞ mượt: không làm tròn (biên độ 2 điểm game, chu kỳ ~2,4s); đổi 2 để thở mạnh/yếu */
  var rt=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null,rid=rt&&rt.id,rb=rt?Math.max(1,Math.min(3,(rt.tien|0)||1)):bm;
  /* Vẽ thú ĐANG RA TRẬN (getRaTran mỗi khung hình). Ảnh chưa tải xong thì giữ thú vừa vẽ được (không chớp trống); không có thú ra trận thì dùng ID, bm như cũ. */
- if(rid&&window.THU_MOI&&THU_MOI.byId[rid]){if(dp(rid,rb,x,gy()+bob,true)){petSanh.lid=rid;petSanh.lb=rb;return;}if(petSanh.lid&&dp(petSanh.lid,petSanh.lb,x,gy()+bob,true))return;}
- dp(ID,bm,x,gy()+bob,true);}
+ if(rid&&window.THU_MOI&&THU_MOI.byId[rid]){if(dp(rid,rb,x,py()+bob,true)){petSanh.lid=rid;petSanh.lb=rb;return;}if(petSanh.lid&&dp(petSanh.lid,petSanh.lb,x,py()+bob,true))return;}
+ dp(ID,bm,x,py()+bob,true);}
 /* ===== EXP + CẤP ở góc phải khung trên. Tọa độ theo pixel ảnh khung-sanh.webp, đổi 1 chỗ ở EXPC / EXPB nếu thay ảnh khung.
    Ô TRÒN (EXPC): nền + nước EXP dâng từ đáy lên theo exp, số "exp/cần" ở giữa (tự co chữ cho vừa, số lớn vẫn đủ chỗ). Lên cấp: dâng đầy rồi về 0.
    DẢI XANH nhỏ bên dưới (EXPB): chỉ hiện "Lv.N". */
@@ -765,7 +767,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  if(FL){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
  drawExp(ts);
  if(SCENE==='sanh'&&window.TTGTIEN)TTGTIEN.draw(ctx,fx+fw/2,I.t,fw-460);   /* khung tiền tệ: chỉ ở sảnh, giữa Danh Vọng và EXP */
- if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,gy(),ts,'truoc');return;}
+ if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,py(),ts,'truoc');return;}
  pet('en',ts);pet('me',ts);
  if(window.TTGBAT&&TTGBAT.draw)TTGBAT.draw(ctx,ts);
  var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),by=I.t+32,mePet=BATTLE&&THU_MOI.byId[BATTLE.player.id],meName=BATTLE?(BATTLE.player.ten||(mePet&&mePet.ten)||'Thú của bạn'):THU_MOI.byId[ID].ten,enName=BATTLE?BATTLE.enemy.ten+' ['+enTag(BATTLE.enemy)+']':THU_MOI.byId[ID].ten,maxMe=BATTLE?BATTLE.playerStats.hp:100,maxEn=BATTLE?BATTLE.enemyStats.hp:100;

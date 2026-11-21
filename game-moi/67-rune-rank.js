@@ -7,15 +7,16 @@
 (function(root){
 'use strict';
 var CFG={
-  rong:190,dy:.22,xuong:14,
+  rong:190,dy:.25,xuong:32,
   alSau:1,alTruoc:.55,
-  toi:.4,                   /* phần vòng không có ánh chạy sáng còn bấy nhiêu (1 = không tối, ánh chạy không thấy) */
+  toi:.62,                   /* phần vòng không có ánh chạy sáng còn bấy nhiêu (1 = không tối, ánh chạy không thấy) */
   toc:{D:.25,C:.28,B:.31,A:.34,S:.4,SS:.45,SR:.5},
   f:{D:3.76,C:3.44,B:3.3,A:3.74,S:2.52,SS:2.68,SR:2.04},   /* nén dọc đường chạy của ánh sáng, đo từ elip vòng chính */
+  sang:.35,                 /* độ sáng cộng thêm (0 = tắt). Tăng nếu vẫn nhạt, giảm nếu nền sáng bị bệt */
   ow:320                    /* bề rộng canvas phụ để dựng khung hình (nhỏ cho nhẹ máy) */
 };
 var IM={},CV={};
-function ld(r){if(IM[r])return IM[r];var o={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.src='game-moi/rune/rank-'+r+'.webp?v=1';IM[r]=o;return o;}
+function ld(r){if(IM[r])return IM[r];var o={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.src='game-moi/rune/rank-'+r+'.webp?v=2';IM[r]=o;return o;}
 var HASCONIC=typeof document!=='undefined'&&typeof CanvasRenderingContext2D!=='undefined'&&!!CanvasRenderingContext2D.prototype.createConicGradient;
 /* dựng 1 khung hình của vòng (cache theo ts: nhiều thú cùng Rank trong 1 khung hình dùng chung) */
 function build(rank,ts){
@@ -47,6 +48,7 @@ function ring(ctx,rank,x,gy,ts,pass,a){
   var top=pass==='truoc'?cy:gy-dh*3;                 /* lượt trước: chỉ nửa dưới (từ tâm vòng xuống) */
   ctx.save();ctx.beginPath();ctx.rect(x-dw*1.3,top,dw*2.6,gy+CFG.xuong-top);ctx.clip();
   ctx.globalAlpha=Math.min(1,al);ctx.drawImage(c.cv,x-dw/2,cy-dh/2,dw,dh);
+  if(CFG.sang>0){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=Math.min(1,al*CFG.sang);ctx.drawImage(c.cv,x-dw/2,cy-dh/2,dw,dh);}   /* lớp phát sáng thêm cho đậm */
   ctx.restore();
 }
 root.TTGRUNE={CFG:CFG,ring:ring};
