@@ -2,7 +2,7 @@
    Cần nạp sau 58-bong-bat.js, 61-tham-hiem-tran.js (dùng TTGBONG, TTGBALO, TTGCS, TTGTHU, THU_MOI).
    index.html nối vào bằng: TTGBAT.attach(host), TTGBAT.frame(ts) (đầu draw), TTGBAT.draw(ctx,ts) (sau khi vẽ thú), TTGBAT.enemyFx(ts) (trong pet('en')).
    LUỒNG: bấm BẮT (đang đánh, thú hoang <60% máu) -> trận đóng băng -> giao diện Ném (3 lần, 60 giây) -> NÉM: bóng bay vòng cung -> TRÚNG (chớp) -> BẬT NGƯỢC -> MỞ -> HÚT thú -> ĐÓNG+RƠI -> RUNG 3 đợt (~5s) -> thành công / vỡ.
-   Mỗi lần ném tốn 1 châu. Thành công: thú vào kho bậc tiến hóa 1, tung bậc chất lượng bằng TTGCS.tungBac (E..SS). Hết lượt: thú chạy thoát, về sảnh.
+   Mỗi lần ném tốn 1 châu. Thành công: thú vào kho bậc tiến hóa 1, giữ ĐÚNG Rank (E..SS) đã tung lúc gặp (hiện ở thanh máu), KHÔNG tung lại. Hết lượt: thú chạy thoát, về sảnh.
    ẢNH châu: game-moi/img/chau/<slug>-<dạng>.png với dạng = dong, mo, rung, thanhcong, thatbai. Bậc chưa có ảnh thì dùng ảnh Thương Hải Châu đổi màu tạm (hue). */
 (function(root){
 'use strict';
@@ -96,12 +96,14 @@ function doThrow(){
   TTGBALO.add(TTGBONG.idBong(cap),-nBong());
   S.left--;S.capUsed=cap;S.win=Math.random()<r;S.mode='fly';S.t0=performance.now();
 }
-function tungBacChau(cap){   /* CHỖ GẮN CHÂU GACHA RIÊNG (ra bậc từ B đến SS) sau này: kiểm tra cap hoặc id châu ở đây. Hiện mọi châu: E..SS theo TTGCS.tungBac */
+function bacBat(e){   /* Rank thú nhận khi bắt = ĐÚNG Rank đã tung lúc gặp (e.bac, hiện ở thanh máu). Chỉ khi thiếu/lạ mới tung dự phòng. */
+  var ok=e&&e.bac&&root.TTGCS&&TTGCS.BAC&&TTGCS.BAC.indexOf(e.bac)>=0;
+  if(ok)return e.bac;
   return (root.TTGCS&&TTGCS.tungBac)?TTGCS.tungBac():'E';
 }
 function giveBeast(){
   var e=enemy();if(!e)return;
-  var bac=tungBacChau(S.capUsed),tien=Number(txc().bacKhiBat)||1,uid=null;
+  var bac=bacBat(e),tien=Number(txc().bacKhiBat)||1,uid=null;
   try{uid=TTGTHU.add({id:e.id,ten:e.ten,bac:bac,tien:tien,lv:e.lv,chiso:{},kn:[null,null,null,null,null,null]});}catch(x){}
   S.got={uid:uid,id:e.id,ten:e.ten,bac:bac,tien:tien,lv:e.lv,boss:!!e.boss};
 }
