@@ -243,7 +243,7 @@ var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]h
 function dp(id,b,cx,by,fine){THU_MOI.setFrame(192);return THU_MOI.draw(ctx,id,b,cx,by,128,fine);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
-function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,busy:false,msg:'',fx:[]};SCENE='tran';A=null;nextAt=performance.now()+GAP;var gm=(enemy.source==='main'?'Gặp quái farm: ':'Gặp thú hoang: ')+enemy.ten;if(window.TTGTBAO){nextAt=Infinity;toast(gm,function(){nextAt=performance.now()+GAP;});}else toast(gm);}
+function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,busy:false,msg:'',fx:[]};SCENE='tran';A=null;nextAt=performance.now()+GAP;var gm='Gặp '+enTag(enemy)+': '+enemy.ten+(enemy.hienBac?' (Rank '+enemy.bac+')':'');if(window.TTGTBAO){nextAt=Infinity;toast(gm,function(){nextAt=performance.now()+GAP;});}else toast(gm);}
 if(window.TTGTHAMHIEM)TTGTHAMHIEM.start=startExplore;
 /* BẮT THÚ (62-bat-thu.js): cầu nối. freeze = đóng băng trận (st mới => mọi setTimeout của lượt đang đánh tự bỏ vì st!==s0); resume = đánh tiếp; end = kết thúc lần Thám hiểm về sảnh */
 if(window.TTGBAT)TTGBAT.attach({scene:function(){return SCENE;},battle:function(){return BATTLE;},st:function(){return st;},
@@ -438,8 +438,13 @@ function pet(w,ts){var model=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null,b
  else if(model&&model.source==='main')drawMainMonster(model.record,x-o,gy(),bob);
  else dp(model?model.id:ID,b,x-o,gy()+bob);
  ctx.restore();}
-function bar(x,y,w,p,c,name){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
- ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);}
+function bar(x,y,w,p,c,name,rk){ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font='bold 11px sans-serif';ctx.textBaseline='bottom';ctx.fillText(name,x,y-2);
+ ctx.fillStyle='#000';ctx.fillRect(x,y,w,10);ctx.fillStyle=c;ctx.fillRect(x+1,y+1,Math.round((w-2)*p),8);
+ if(rk){/* RANK của QUÁI: chữ neon bên trái thanh máu (màu theo rank, cùng bảng màu với kho/thông báo) */
+  var K2=window.TTGBAO&&TTGBAO.RKC||{},cl=K2[rk]||['#00d0ff','#3de0ff'];ctx.save();ctx.textAlign='right';ctx.textBaseline='middle';ctx.font='16px TTGRank,bold 16px sans-serif';
+  ctx.shadowColor=cl[0];ctx.shadowBlur=6;ctx.fillStyle=cl[1];ctx.fillText(rk,x-5,y+3);ctx.restore();}}
+/* Nhãn loại địch ở thanh máu: Quái | Thú Hoang | Boss Quái | Boss Thú Hoang (quái = nguồn main, thú hoang = nguồn demo) */
+function enTag(e){return e.source==='main'?(e.boss?'Boss Quái':'Quái'):(e.boss?'Boss Thú Hoang':'Thú Hoang');}
 /* NỀN khung trên (ở sảnh). Mỗi vùng có thể có NỀN VIDEO (BGV_ZONE) hoặc NỀN ẢNH + HIỆU ỨNG (BG_FX_ZONE). Vùng nào chưa có thì vẫn nền trời như cũ.
    ƯU TIÊN: vùng có cả ảnh lẫn video -> dùng ảnh (khi ảnh đã nạp xong). Muốn giữ video thì thêm pri:'video' vào cấu hình vùng đó trong BG_FX_ZONE.
    NỀN VIDEO: video 1920x872 (tỉ lệ 2.2:1), kéo vừa KHÍT phần trống BÊN TRONG viền khung (object-fit:fill); viền khung vẽ đè lên.
@@ -753,8 +758,8 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  if(SCENE==='sanh'){petSanh(ts);return;}
  pet('en',ts);pet('me',ts);
  if(window.TTGBAT&&TTGBAT.draw)TTGBAT.draw(ctx,ts);
- var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),by=I.t+32,mePet=BATTLE&&THU_MOI.byId[BATTLE.player.id],meName=BATTLE?(BATTLE.player.ten||(mePet&&mePet.ten)||'Thú của bạn'):THU_MOI.byId[ID].ten,enName=BATTLE?BATTLE.enemy.ten+(BATTLE.enemy.source==='main'?' [farm]':' [thú hoang]'):THU_MOI.byId[ID].ten,maxMe=BATTLE?BATTLE.playerStats.hp:100,maxEn=BATTLE?BATTLE.enemyStats.hp:100;
-  bar(I.l+ox,by,bw,Math.max(0,Math.min(1,st.me/maxMe)),'#3c3',meName+' (bạn)');bar(W-I.r-ox-bw,by,bw,Math.max(0,Math.min(1,st.en/maxEn)),'#c33',enName);
+ var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),by=I.t+32,mePet=BATTLE&&THU_MOI.byId[BATTLE.player.id],meName=BATTLE?(BATTLE.player.ten||(mePet&&mePet.ten)||'Thú của bạn'):THU_MOI.byId[ID].ten,enName=BATTLE?BATTLE.enemy.ten+' ['+enTag(BATTLE.enemy)+']':THU_MOI.byId[ID].ten,maxMe=BATTLE?BATTLE.playerStats.hp:100,maxEn=BATTLE?BATTLE.enemyStats.hp:100;
+  bar(I.l+ox,by,bw,Math.max(0,Math.min(1,st.me/maxMe)),'#3c3',meName+' (bạn)');bar(W-I.r-ox-bw,by,bw,Math.max(0,Math.min(1,st.en/maxEn)),'#c33',enName,BATTLE&&BATTLE.enemy.hienBac?BATTLE.enemy.bac:null);
   
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});
  st.fx.forEach(function(f){ctx.fillStyle='#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});

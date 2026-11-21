@@ -21,8 +21,10 @@ function createEncounter(player,rng){
   var playerLv=clamp(Math.floor(Number(player.lv)||1),1,Number(cfg.capMax)||100),delta=boss?[Number(cfg.chenhBoss)||10,Number(cfg.chenhBoss)||10]:(source==='main'?(cfg.chenhQuai||[-5,0]):(cfg.chenhThuong||[-2,10]));
   var lv=clamp(playerLv+randint(Number(delta[0]),Number(delta[1]),rng),Number(cfg.capMin)||1,Number(cfg.capMax)||100);
   var tien=boss?Number(cfg.bacBoss||3):(source==='demo'?weighted([1,2,3],[Number((cfg.trongSoBac||{})[1])||0,Number((cfg.trongSoBac||{})[2])||0,Number((cfg.trongSoBac||{})[3])||0],rng):1);
-  var stats=root.TTGCS.tinh({id:q.id,lv:lv,tien:tien,bac:boss?(root.TTGCS.CFG.bacBoss||'A'):(source==='demo'?(root.TTGCS.CFG.bacThuHoang||'C'):(root.TTGCS.CFG.bacQuai||'C')),boss:boss,vung:z,vai:source==='main'?'canbang':undefined});
-  return {id:q.id,ten:q.ten,source:source,boss:boss,lv:lv,tien:tien,vung:z,zoneSlug:demoZone.slug,stats:stats,record:q};
+  /* RANK (bậc) khi đánh: QUÁI thường tung ngẫu nhiên E..SS theo bảng tỉ lệ TTGCS.CFG.bac (có quái yếu, quái mạnh; hs hp/tc/pt/td 0,85..1,35). Boss quái cố định bacBoss. Thú hoang (và boss thú hoang) giữ bậc cố định, KHÔNG hiện rank (bắt xong mới tung bậc thật). */
+  var bacCS=root.TTGCS.CFG,bac=boss?(bacCS.bacBoss||'A'):(source==='demo'?(bacCS.bacThuHoang||'C'):(typeof root.TTGCS.tungBac==='function'?root.TTGCS.tungBac(rng):(bacCS.bacQuai||'C')));
+  var stats=root.TTGCS.tinh({id:q.id,lv:lv,tien:tien,bac:bac,boss:boss,vung:z,vai:source==='main'?'canbang':undefined});
+  return {id:q.id,ten:q.ten,source:source,boss:boss,lv:lv,tien:tien,bac:bac,hienBac:source==='main',vung:z,zoneSlug:demoZone.slug,stats:stats,record:q};
 }
 root.TTGTHAMHIEM={createEncounter:createEncounter};
 })(typeof window!=='undefined'?window:globalThis);
