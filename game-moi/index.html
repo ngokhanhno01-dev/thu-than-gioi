@@ -461,7 +461,9 @@ var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn
  'van-dao':{image:'game-moi/bg-van-dao.webp',fit:true,fy:.55,fx:['mist','glint','firefly'],mistY:[.55,.7],mistOpacity:.2,mistRgb:'228,208,255',glintRgb:'228,200,255',flyRgb:'215,175,255'},
  'thuy-nguyet-canh':{image:'game-moi/bg-thuy-nguyet-canh.webp',fit:true,fy:.55,fx:['mist','firefly'],mistY:[.5,.62],mistOpacity:.2,mistRgb:'150,205,255',flyRgb:'175,225,255'},
  'xich-hoa-dia':{image:'game-moi/bg-xich-hoa-dia.webp',fit:true,fy:.55,fx:['firefly','mist'],mistY:[.55,.7],mistOpacity:.16,mistRgb:'130,75,75',flyRgb:'255,150,60'},
- 'thanh-lam':{image:'game-moi/bg-thanh-lam.webp',fit:true,fy:.55,fx:['leaf','firefly'],leafRgb:'150,215,110',flyRgb:'255,240,150'}},
+ 'thanh-lam':{image:'game-moi/bg-thanh-lam.webp',fit:true,fy:.55,fx:['leaf','firefly'],leafRgb:'150,215,110',flyRgb:'255,240,150'},
+ /* NGOẠI LỆ: 3 thú khởi đầu (k1 Viêm Sư, k2 Lưu Diêu, k3 Lâm Trư) dùng chung nền này thay vì nền vùng của mình. Gắn bằng cờ nen:'khoi-dau' trên thú ở 51-thu-moi.js (t.zone vẫn giữ để tìm ảnh thú). */
+ 'khoi-dau':{image:'game-moi/bg-khoi-dau.webp',fit:true,fy:.55,fx:['leaf','firefly'],leafRgb:'255,196,220',flyRgb:'190,235,255'}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
  bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],bgFly=[],bgBolts=[],bgBoltNext=0,BG_IMGS={};
 /* Độ dày viền thật (px ảnh khung gốc); giữ nguyên công thức căn nền. Khi khung lấn mép (BG_BLEED) thì vùng nền tự mở rộng đúng bằng phần lấn: dày hiệu dụng = BG_EDGE - BG_BLEED. */
@@ -515,7 +517,7 @@ function bgImgFor(z){var c=BG_FX_ZONE[z];if(!c)return null;var o=BG_IMGS[z];
  if(!o){o=BG_IMGS[z]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;};o.img.src=c.image;}
  return o;}
 function bgUseImg(z){var c=BG_FX_ZONE[z],o=c&&bgImgFor(z);return !!(o&&o.ok&&o.img.naturalWidth>0&&!(BGV_ZONE[z]&&c.pri==='video'));}
-function bgWant(){var t=THU_MOI.byId[ID];return SCENE==='sanh'&&!!t&&!!BGV_ZONE[t.zone]&&!bgUseImg(t.zone);}
+function bgWant(){var t=THU_MOI.byId[ID],z=t&&(t.nen||t.zone);return SCENE==='sanh'&&!!t&&!!BGV_ZONE[z]&&!bgUseImg(z);}
 function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,e=bgInset(th),l=e.l,r=e.r,t=e.t,b=e.b;
  [BGV,BGV2].forEach(function(v){v.style.left=Math.round((I.l+l)*f)+'px';v.style.top=Math.round(t*f)+'px';v.style.width=Math.round((fw-l-r)*f)+'px';v.style.height=Math.round((th-t-b)*f)+'px';});}
 function bgShow(c,n){c.style.opacity=1;n.style.opacity=0;}
@@ -525,7 +527,7 @@ function bgTick(g){if(!bgOn||g!==bgGen)return;if(document.hidden){bgRaf=0;return
  if(bgSw&&n.currentTime>0.01&&!n.paused){bgShow(n,c);c.pause();try{c.currentTime=0;}catch(e){}bgCur=n;bgNxt=c;bgSw=false;}
  requestAnimationFrame(function(){bgTick(g);});}
 function bgSync(){
- var t=THU_MOI.byId[ID],zone=t&&t.zone;
+ var t=THU_MOI.byId[ID],zone=t&&(t.nen||t.zone);/* t.nen = nền ngoại lệ của thú (3 thú khởi đầu), không có thì theo vùng */
  if(SCENE==='tran'&&BATTLE&&BATTLE.enemy&&BATTLE.enemy.zoneSlug)zone=BATTLE.enemy.zoneSlug;/* trận thật: nền theo vùng của quái/thú hoang */
  bgImageOn=!!((SCENE==='sanh'||(SCENE==='tran'&&BATTLE))&&zone&&bgUseImg(zone));
  if(bgImageOn){bgImg=BG_IMGS[zone];bgConf=BG_FX_ZONE[zone];}else{bgImg=null;bgConf=null;bgBase=null;}/* rời sảnh / vùng không có ảnh: thả bộ nhớ nền ảnh, hiệu ứng tự tắt */

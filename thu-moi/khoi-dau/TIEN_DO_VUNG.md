@@ -11,3 +11,4 @@
 - Màn chọn thú (`game-moi/65-chon-thu-dau.js`): bục trái Lưu Diêu, giữa Viêm Sư, phải Lâm Trư.
 - Hiệu ứng nền (index.html, BG_FX_ZONE): Thủy = sương + hạt sáng xanh, Hỏa = tàn lửa cam + khói, Mộc = lá bay + đom đóm.
 - Chưa làm: ghi chú .md từng con, đổi tên chính thức, phát thú vào túi khi chọn, tên chưa kiểm trùng quái cũ.
+- 21/11/2026: NGOẠI LỆ NỀN. Cả 3 thú khởi đầu dùng chung nền `game-moi/bg-khoi-dau.webp` (sân vườn anh đào, 1520x702, cắt từ ảnh gốc 1672x941 cho gần tỉ lệ các nền vùng khác), KHÔNG dùng nền vùng của mình nữa. Cách làm: cờ `nen:'khoi-dau'` trên k1/k2/k3 trong `51-thu-moi.js` (t.zone giữ nguyên để tìm ảnh thú); `bgSync`/`bgWant` trong `game-moi/index.html` lấy `t.nen||t.zone`; cấu hình `'khoi-dau'` trong `BG_FX_ZONE` (hiệu ứng: cánh hoa hồng rơi + hạt sáng xanh nhạt). 3 nền cũ (thuy-nguyet-canh, xich-hoa-dia, thanh-lam) vẫn còn trong BG_FX_ZONE cho quái/thú hoang của vùng đó.
