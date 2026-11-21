@@ -362,6 +362,8 @@ function moList(k){
 /* bảng nổi thông tin kỹ năng. mode 'dung' (từ danh sách): Dùng/Đóng. mode 'go' (ô đã gắn): Gỡ/Đóng. */
 function moInfo(id,k,mode){
   var it=sachOf(id),t=byUid(sel);if(!it||!t)return;
+  if(window.TTGTBAO){TTGTBAO.info({icon:icSach(it),title:esc(it.kn||it.ten),tc:'y',sub:esc(it.ten)+(it.cd?' · Hồi chiêu '+it.cd+' lượt':''),text:esc(it.mo||'')},
+   [{t:mode==='go'?'Gỡ':'Dùng',cls:mode==='go'?'d':'',cb:function(){mode==='go'?go(k):dung(id,k);}},{t:'Đóng',cb:function(){if(mode==='go')hidePop();}}]);return;}
   E.in.innerHTML='<div class="tt-ii"><span class="i">'+icSach(it)+'</span><div class="n">'+esc(it.kn||it.ten)+'</div><div class="m">'+esc(it.ten)+(it.cd?' · Hồi chiêu '+it.cd+' lượt':'')+'</div><div class="d">'+esc(it.mo||'')+'</div></div>'
    +'<div class="tt-pb"><button type="button" class="'+(mode==='go'?'d':'p')+'">'+(mode==='go'?'Gỡ':'Dùng')+'</button><button type="button">Đóng</button></div>';
   var bs=E.in.querySelectorAll('button');
@@ -386,6 +388,8 @@ function go(k){
 /* ===== THẢ THÚ: bỏ hẳn khỏi kho. Hỏi xác nhận (dùng bảng nổi E.in). Thú đang ra trận KHÔNG thả được. ===== */
 function moTha(t){
   var a=anhThu(t);
+  if(window.TTGTBAO){TTGTBAO.info({icon:a?'<img src="'+esc(a)+'" alt="">':'?',title:'Thả '+esc(tenThu(t))+'?',tc:'y',text:'Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.'},
+   [{t:'Thả',cls:'d',cb:function(){tha(t.uid);}},{t:'Hủy',cb:function(){hidePop();}}]);return;}
   E.in.innerHTML='<div class="tt-ii"><span class="i">'+(a?'<img src="'+esc(a)+'" alt="">':'?')+'</span><div class="n">Thả '+esc(tenThu(t))+'?</div><div class="d">Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.</div></div>'
    +'<div class="tt-pb"><button type="button" class="d">Thả</button><button type="button">Hủy</button></div>';
   var bs=E.in.querySelectorAll('button');
