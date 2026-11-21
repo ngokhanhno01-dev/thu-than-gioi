@@ -56,8 +56,8 @@ var CFG={
   }
 };
 
-/* ICON ẢNH của từng bậc châu (PNG nền trong suốt, đặt ở game-moi/img/chau/). Thêm bậc khác: thêm khóa 2..6. Chưa có file thì item vẫn dùng emoji ic ở trên, có file thì tự đổi sang ảnh. */
-var ANH_ICON={1:'game-moi/img/chau/thuong-hai-dong.png'};
+/* ICON ẢNH của từng bậc châu (PNG nền trong suốt, đặt ở game-moi/img/chau/). Bậc 2..6: đặt file đúng tên này là tự có (dùng chung tên với ảnh -mo/-rung/-thanhcong/-thatbai của 62-bat-thu.js). Chưa có file thì item vẫn dùng emoji ic ở trên, có file thì tự đổi sang ảnh. */
+var ANH_ICON={1:'game-moi/img/chau/thuong-hai-dong.png',2:'game-moi/img/chau/thanh-moc-dong.png',3:'game-moi/img/chau/xich-viem-dong.png',4:'game-moi/img/chau/tu-tieu-dong.png',5:'game-moi/img/chau/tinh-than-dong.png',6:'game-moi/img/chau/hon-don-dong.png'};
 
 /* ================= HÀM ================= */
 function clamp(x,a,b){return x<a?a:(x>b?b:x);}
