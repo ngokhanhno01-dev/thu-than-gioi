@@ -243,7 +243,7 @@ var HD=true;try{HD=localStorage.getItem('ttg_moi_hd')!=='0';}catch(e){}if(/[?&]h
 function dp(id,b,cx,by,fine){THU_MOI.setFrame(192);return THU_MOI.draw(ctx,id,b,cx,by,128,fine);} /* ảnh 128/256 cũ đã xóa: chỉ còn ảnh 192 */
 function saveB(){try{localStorage.setItem(KEY,JSON.stringify({bm:bm,be:be,thu:ID}));}catch(e){}}
 function reset(){st={me:100,en:100,busy:false,msg:'',fx:[]};nextAt=performance.now()+GAP;}
-function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,busy:false,msg:'',fx:[]};SCENE='tran';A=null;nextAt=performance.now()+GAP;toast((enemy.source==='main'?'Gặp quái farm: ':'Gặp thú hoang: ')+enemy.ten);}
+function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,busy:false,msg:'',fx:[]};SCENE='tran';A=null;nextAt=performance.now()+GAP;var gm=(enemy.source==='main'?'Gặp quái farm: ':'Gặp thú hoang: ')+enemy.ten;if(window.TTGTBAO){nextAt=Infinity;toast(gm,function(){nextAt=performance.now()+GAP;});}else toast(gm);}
 if(window.TTGTHAMHIEM)TTGTHAMHIEM.start=startExplore;
 /* BẮT THÚ (62-bat-thu.js): cầu nối. freeze = đóng băng trận (st mới => mọi setTimeout của lượt đang đánh tự bỏ vì st!==s0); resume = đánh tiếp; end = kết thúc lần Thám hiểm về sảnh */
 if(window.TTGBAT)TTGBAT.attach({scene:function(){return SCENE;},battle:function(){return BATTLE;},st:function(){return st;},
@@ -328,7 +328,7 @@ var ui=document.getElementById('ui'),edb=document.getElementById('edb'),edt=docu
 var els={},lay={},ed=false,sel=null,drag=null,tt=0;
 try{lay=JSON.parse(localStorage.getItem(LKEY)||'{}')||{};}catch(e){lay={};}
 function saveLay(){try{localStorage.setItem(LKEY,JSON.stringify(lay));}catch(e){}}
-function toast(s){if(window.TTGTBAO){TTGTBAO.toast(s,900);return;}tst.textContent=s;tst.style.opacity=1;clearTimeout(tt);tt=setTimeout(function(){tst.style.opacity=0;},900);}
+function toast(s,cb){if(window.TTGTBAO){TTGTBAO.toast(s,0,cb);return;}tst.textContent=s;tst.style.opacity=1;clearTimeout(tt);tt=setTimeout(function(){tst.style.opacity=0;},900);}
 function byId(id){for(var i=0;i<UI.length;i++)if(UI[i].id===id)return UI[i];return null;}
 function label(id){var p=lay[id];els[id].textContent=(p&&p.t)?p.t:dt(byId(id));}
 UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.c;e.textContent=dt(u);e.setAttribute('data-id',u.id);ui.appendChild(e);els[u.id]=e;

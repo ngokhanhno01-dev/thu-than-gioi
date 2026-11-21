@@ -1,7 +1,7 @@
 /* KHUNG THÔNG BÁO DÙNG CHUNG (20/11/2026) = ảnh game-moi/khung-thong-bao.webp (2121x724, nền trong suốt, chữ "Thông báo" in sẵn trên tiêu đề).
    Ảnh có 2 ô nút trống ở đáy; module phủ nút bấm lên đúng 2 ô đó. KHÔNG kéo giãn ảnh (tiêu đề có chữ nên giữ nguyên tỉ lệ), chỉ phóng to/thu nhỏ đều.
    Dùng:
-     TTGTBAO.toast('Đã khóa')                              // thông báo nổi tự tắt sau 3 giây (không chặn chạm)
+     TTGTBAO.toast('Đã khóa'[,0,cb])                      // thông báo nổi tự tắt sau 3 giây hoặc chạm vào khung; cb chạy SAU khi khung tắt
      TTGTBAO.confirm('Vứt bỏ?', [{t:'Vứt bỏ',cls:'d',cb:fn},{t:'Hủy'}])   // hỏi 2 nút (nút nào cũng tự đóng khung sau khi bấm)
      TTGTBAO.panel(html, [{t:'Về sảnh',cb:fn}]) -> phần tử chứa nội dung (để vẽ canvas...)   // bảng kết quả, KHÔNG tự đóng khi bấm ngoài
      TTGTBAO.close()
@@ -15,7 +15,7 @@ var css=[
 '.tbo.dim{background:rgba(3,4,18,.62)}',
 '.tbo.tst{align-items:flex-start;pointer-events:none;padding-top:3vh}',
 '.tbo-fr{position:relative;flex:none;background:0 0/100% 100% no-repeat;filter:drop-shadow(0 0 calc(var(--u)*24) rgba(60,140,255,.55));animation:tbo-in .18s ease-out}',
-'.tbo.tst .tbo-fr{animation:tbo-in .18s ease-out}',
+'.tbo.tst .tbo-fr{animation:tbo-in .18s ease-out;pointer-events:auto;cursor:pointer}',/* thông báo không nút: chạm vào khung để tắt ngay (vùng ngoài khung vẫn chạm xuyên xuống game) */
 '@keyframes tbo-in{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}',
 '.tbo-fr>*{position:absolute;box-sizing:border-box}',
 '.tbo-m{display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;color:#fff3c4;font-weight:700;line-height:1.3;font-size:calc(var(--u)*64);text-shadow:0 0 calc(var(--u)*8) #02061c,calc(var(--u)*3) calc(var(--u)*3) 0 #02061c,calc(var(--u)*-3) calc(var(--u)*3) 0 #02061c}',
@@ -36,7 +36,7 @@ var css=[
 '.tbo-b.d{color:#ffb8c0}'
 ].join('\n');
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
-var wrap,fr,msg,btn=[],tm=0,mode='';
+var wrap,fr,msg,btn=[],tm=0,mode='',onc=null;
 function put(el,b){var s=el.style;s.left=(b.x/IW*100)+'%';s.top=(b.y/IH*100)+'%';s.width=(b.w/IW*100)+'%';s.height=(b.h/IH*100)+'%';}
 function build(){
  if(wrap)return;
@@ -52,13 +52,14 @@ var MAXW=760;
 function size(){if(!fr)return;var w=Math.min(innerWidth*.94,MAXW,innerHeight*.9*IW/IH);w=Math.max(160,Math.round(w));
  fr.style.width=w+'px';fr.style.height=Math.round(w*IH/IW)+'px';fr.style.setProperty('--u',(w/IW)+'px');}
 function reset(){clearTimeout(tm);msg.className='tbo-m';btn.forEach(function(b){b.style.display='none';b.onclick=null;b.className='tbo-b';});}
-function open(m,w,dim){build();reset();mode=m;MAXW=w;wrap.className='tbo on'+(dim?' dim':'')+(m==='toast'?' tst':'');size();}
-function close(){if(!wrap)return;clearTimeout(tm);wrap.className='tbo';mode='';}
+function flush(){var f=onc;onc=null;if(f)try{f();}catch(e){}}
+function open(m,w,dim){build();flush();reset();mode=m;MAXW=w;wrap.className='tbo on'+(dim?' dim':'')+(m==='toast'?' tst':'');size();}
+function close(){if(!wrap)return;clearTimeout(tm);wrap.className='tbo';mode='';flush();}
 function setBtns(list){list=(list||[]).slice(0,2);var n=list.length;fr.style.backgroundImage='url('+IMGS[n]+')';put(msg,BOX['m'+n]);
  if(n===1)put(btn[0],BOX.b1);else if(n===2){put(btn[0],BOX.b2a);put(btn[1],BOX.b2b);}
  list.forEach(function(d,i){var b=btn[i];b.style.display='flex';b.textContent=d.t;b.className='tbo-b'+(d.cls?' '+d.cls:'');
  b.onclick=function(ev){ev.stopPropagation();close();if(d.cb)d.cb();};});}
-function toast(t,ms){if(mode==='confirm'||mode==='panel')return;open('toast',520,false);setBtns([]);msg.textContent=t;tm=setTimeout(close,3000);/* thông báo không có nút: luôn tự tắt sau 3 giây */}
+function toast(t,ms,cb){if(mode==='confirm'||mode==='panel'){if(cb)cb();return;}open('toast',520,false);setBtns([]);msg.textContent=t;onc=cb||null;fr.onclick=close;tm=setTimeout(close,3000);/* thông báo không có nút: luôn tự tắt sau 3 giây */}
 function confirm(html,list){open('confirm',760,true);setBtns(list);msg.innerHTML=html;wrap.onclick=function(e){if(e.target===wrap)close();};}
 function panel(html,list,o){open('panel',960,true);o=o||{};setBtns(list);if(o.row)msg.className='tbo-m row';msg.innerHTML=html;wrap.onclick=null;return msg;}
 /* BẢNG THÔNG TIN: chữ nhỏ bên TRÁI (tiêu đề, dòng phụ, mô tả có thanh CUỘN), ô hình nhỏ có khung bên PHẢI.
