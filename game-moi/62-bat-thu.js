@@ -19,7 +19,7 @@ var CFG={
   rung:{dot:3,lac:1000,nghi:500},   /* RUNG: 3 đợt, mỗi đợt lắc 1000ms rồi nghỉ 500ms (đợt sau mạnh hơn); phần dư của t.rung là nghỉ cuối */
   bat:{dx:-144,dy:-40},              /* điểm bóng lơ lửng sau khi bật ngược, lệch so với thú (đơn vị game; dx âm = về phía người chơi) */
   mau:['#7fe8ff','#8cf08c','#ff9a5a','#c9a0ff','#8fb0ff','#ffe066'],   /* màu hạt hút / ánh sáng theo bậc châu 1..6 */
-  mauBac:{E:'#9aa3b5',D:'#6fcf6f',C:'#4fb3ff',B:'#b57bff',A:'#ffb347',S:'#ff6f6f',SS:'#ffe066'}
+  mauBac:{E:'#ffffff',D:'#3dff6a',C:'#3fa9ff',B:'#b36bff',A:'#ffd21f',S:'#ff8a1f',SS:'#ff3030'}
 };
 var host=null,els=null,IMGS={};
 var S={mode:'off',t0:0,cap:1,capUsed:1,left:0,time:0,sel:false,win:false,last:0,got:null,selCap:1,key:''};
@@ -356,7 +356,7 @@ function showPanel(win){
     var Pn=root.TTGBAO,fin=function(){abort();host.end();},cvw=null;
     if(win&&S.got){
       var g2=S.got,lo2=root.TTGCS&&TTGCS.loai?TTGCS.loai(g2.id):null,hT=root.TTGCS&&TTGCS.HE_TEN||{},he2=lo2&&lo2.he?lo2.he.map(function(x){return hT[x]||x;}).join(' / '):'?';
-      var body=Pn.info({icon:'<canvas width="128" height="128"></canvas>',title:'Bắt thành công!',sub:esc(g2.ten)+(g2.boss?' <span style="color:#ff9f6f">[BOSS]</span>':''),text:'Hệ: '+esc(he2)+'<br>Bậc: <b style="color:'+(CFG.mauBac[g2.bac]||'#fff')+'">'+esc(g2.bac)+'</b> · Tiến hóa '+g2.tien+' · Cấp '+g2.lv,modal:true},[{t:'Về sảnh',cb:fin}]);
+      var body=Pn.info({icon:'<canvas width="128" height="128"></canvas>',bac:g2.bac,title:'Bắt thành công!',sub:esc(g2.ten)+(g2.boss?' <span style="color:#ff9f6f">[BOSS]</span>':''),text:'Hệ: '+esc(he2)+'<br>Bậc: <b style="color:'+(CFG.mauBac[g2.bac]||'#fff')+'">'+esc(g2.bac)+'</b> · Tiến hóa '+g2.tien+' · Cấp '+g2.lv,modal:true},[{t:'Về sảnh',cb:fin}]);
       try{cvw=body.parentNode.querySelector('.tbo-ic canvas');var c3=cvw.getContext('2d'),tryN=0;cvw.width=cvw.height=192;(function paint(){THU_MOI.setFrame(192);
           /* vẽ 1:1 ra canvas phụ, đo khung chứa hình thú (bỏ phần trong suốt), rồi phóng vừa ô và căn GIỮA => thú bậc nhỏ/lớn đều đầy đặn; ảnh chưa nạp thì thử lại ~3 giây */
           var tmp=document.createElement('canvas');tmp.width=tmp.height=192;var tc=tmp.getContext('2d');

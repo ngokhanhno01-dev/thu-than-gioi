@@ -31,11 +31,27 @@ var css=[
 '.tbo-d::-webkit-scrollbar-thumb{background:#d9a93c;border-radius:calc(var(--u)*6)}',
 '.tbo-ic{flex:none;aspect-ratio:1;height:100%;max-height:calc(var(--u)*250);align-self:center;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border:calc(var(--u)*6) solid #d9a93c;border-radius:calc(var(--u)*22);background:linear-gradient(160deg,rgba(40,60,160,.75),rgba(8,12,60,.9));box-shadow:inset 0 0 calc(var(--u)*30) rgba(110,170,255,.45),0 0 calc(var(--u)*18) rgba(0,0,0,.6);overflow:hidden;font-size:calc(var(--u)*120);line-height:1}',
 '.tbo-ic img,.tbo-ic canvas{position:static!important;left:auto!important;top:auto!important;width:86%;height:86%;object-fit:contain;display:block;image-rendering:auto}',/* canvas toàn game bị đặt position:fixed trong index.html => phải ép static kẻo thú bay ra giữa màn hình */
+'.rk{position:absolute;left:var(--ins,0);top:var(--ins,0);right:var(--ins,0);bottom:var(--ins,0);box-sizing:border-box;border:var(--bw,2px) solid rgb(var(--rgb));border-radius:var(--rd,6px);pointer-events:none;z-index:3;animation:rkp var(--p,2.5s) ease-in-out infinite alternate}',
+'@keyframes rkp{0%{opacity:.55;box-shadow:0 0 calc(var(--g)*.4) rgba(var(--rgb),.45),inset 0 0 calc(var(--g)*.4) rgba(var(--rgb),.3)}100%{opacity:1;box-shadow:0 0 var(--g) rgba(var(--rgb),.95),inset 0 0 calc(var(--g)*1.1) rgba(var(--rgb),.6)}}',
+'.rk b{position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;border-radius:inherit}',
+'.rk i{position:absolute;bottom:-6%;border-radius:50%;background:rgb(var(--rgb));box-shadow:0 0 5px 1px rgba(var(--rgb),.9);opacity:0;animation:rkq 3s linear infinite}',
+'@keyframes rkq{0%{bottom:-6%;transform:scale(.6);opacity:0}15%{opacity:1}80%{opacity:.85}100%{bottom:104%;transform:scale(1);opacity:0}}',
+'.tbo-ic.rkc{overflow:visible;border-color:transparent;box-shadow:none}',
+'.tbo-ic .rk{--bw:calc(var(--u)*6);--ins:calc(var(--u)*-6);--rd:calc(var(--u)*22)}',
+'.tbo-ic .rk i{width:calc(var(--u)*9);height:calc(var(--u)*9)}',
+'.tt-c .rk{--ins:5%;--bw:2px;--rd:5px}',
+'.tt-c .rk i{width:3px;height:3px}',
 '.tbo-b{display:flex;align-items:center;justify-content:center;padding:0;border:0;background:transparent;cursor:pointer;color:#ffe9a0;font:800 calc(var(--u)*60)/1 "Noto Serif","Palatino Linotype",Georgia,serif;text-shadow:0 0 calc(var(--u)*8) #02061c,calc(var(--u)*3) calc(var(--u)*3) 0 #02061c;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border-radius:calc(var(--u)*30)}',
 '.tbo-b:active{background:rgba(255,224,102,.28)}',
 '.tbo-b.d{color:#ffb8c0}'
 ].join('\n');
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+/* HIỆU ỨNG VIỀN THEO BẬC thú: E trắng, D xanh lá, C lam, B tím, A vàng, S cam, SS đỏ. Viền phát sáng nhấp nháy + hạt bay lên (bậc càng cao càng nhiều hạt, sáng mạnh, nhịp nhanh).
+   TTGBAO.fx('D',max) trả về chuỗi HTML của lớp hiệu ứng (đặt làm con ĐẦU của khung thú; khung cha phải position:relative/absolute). max = giới hạn số hạt (dùng cho ô nhỏ). */
+var RK={E:['255,255,255',3,3.4,6],D:['61,255,106',4,3,8],C:['63,169,255',5,2.7,10],B:['179,107,255',6,2.4,12],A:['255,210,31',7,2.1,14],S:['255,138,31',9,1.8,16],SS:['255,48,48',12,1.4,20]};
+function fx(bac,max){var r=RK[bac];if(!r)return '';var n=Math.min(r[1],max||99),h='<span class="rk" style="--rgb:'+r[0]+';--p:'+r[2]+'s;--g:'+r[3]+'px"><b>',i,d;
+ for(i=0;i<n;i++){d=(1.8+Math.random()*1.6)*(r[2]<2?.8:1);h+='<i style="left:'+(6+Math.random()*88).toFixed(1)+'%;animation-duration:'+d.toFixed(2)+'s;animation-delay:-'+(Math.random()*d).toFixed(2)+'s"></i>';}
+ return h+'</b></span>';}
 var wrap,fr,msg,btn=[],tm=0,mode='',onc=null;
 function put(el,b){var s=el.style;s.left=(b.x/IW*100)+'%';s.top=(b.y/IH*100)+'%';s.width=(b.w/IW*100)+'%';s.height=(b.h/IH*100)+'%';}
 function build(){
@@ -66,9 +82,9 @@ function panel(html,list,o){open('panel',960,true);o=o||{};setBtns(list);if(o.ro
    o = {icon:'<img>|<canvas>|chữ', title, sub, text, tc:'y' (tiêu đề vàng; mặc định xanh), modal:true (không đóng khi chạm nền)}
    Chạm nền tối = bấm nút cuối (Hủy/Đóng) nếu không modal. Trả về phần tử chữ (để vẽ canvas vào icon...). */
 function info(o,list){open('panel',900,true);setBtns(list);msg.className='tbo-m info';
- msg.innerHTML='<div class="tbo-tx"><div class="tbo-t'+(o.tc?' '+o.tc:'')+'">'+(o.title||'')+'</div>'+(o.sub?'<div class="tbo-s">'+o.sub+'</div>':'')+(o.text?'<div class="tbo-d">'+o.text+'</div>':'')+'</div>'+(o.icon!=null?'<div class="tbo-ic">'+o.icon+'</div>':'');
+ msg.innerHTML='<div class="tbo-tx"><div class="tbo-t'+(o.tc?' '+o.tc:'')+'">'+(o.title||'')+'</div>'+(o.sub?'<div class="tbo-s">'+o.sub+'</div>':'')+(o.text?'<div class="tbo-d">'+o.text+'</div>':'')+'</div>'+(o.icon!=null?'<div class="tbo-ic'+(RK[o.bac]?' rkc':'')+'">'+fx(o.bac)+o.icon+'</div>':'');
  var last=list&&list[list.length-1];
  wrap.onclick=o.modal?null:function(e){if(e.target===wrap){close();if(last&&last.cb)last.cb();}};
  return msg;}
-root.TTGBAO=root.TTGTBAO={toast:toast,confirm:confirm,panel:panel,info:info,close:close,BOX:BOX};
+root.TTGBAO=root.TTGTBAO={fx:fx,toast:toast,confirm:confirm,panel:panel,info:info,close:close,BOX:BOX};
 })(window);

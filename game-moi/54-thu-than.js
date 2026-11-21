@@ -278,7 +278,7 @@ function renderGrid(){
     var t=thus[row0*4+i],c=E.cells[i];
     if(t){
       var a=anhThu(t);
-      c.innerHTML=(a?'<img src="'+esc(a)+'" alt="">':'')+(t.bac?'<span class="b">'+esc(t.bac)+'</span>':'')+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
+      c.innerHTML=(window.TTGTBAO&&t.bac?TTGTBAO.fx(t.bac,4):'')+(a?'<img src="'+esc(a)+'" alt="">':'')+(t.bac?'<span class="b">'+esc(t.bac)+'</span>':'')+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
       c.setAttribute('aria-label',tenThu(t));c.style.pointerEvents='';
     }else{c.innerHTML='';c.removeAttribute('aria-label');c.style.pointerEvents='none';}
     c.classList.toggle('sel',!!t&&t.uid===sel);
@@ -388,7 +388,7 @@ function go(k){
 /* ===== THẢ THÚ: bỏ hẳn khỏi kho. Hỏi xác nhận (dùng bảng nổi E.in). Thú đang ra trận KHÔNG thả được. ===== */
 function moTha(t){
   var a=anhThu(t);
-  if(window.TTGTBAO){TTGTBAO.info({icon:a?'<img src="'+esc(a)+'" alt="">':'?',title:'Thả '+esc(tenThu(t))+'?',tc:'y',text:'Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.'},
+  if(window.TTGTBAO){TTGTBAO.info({bac:t.bac,icon:a?'<img src="'+esc(a)+'" alt="">':'?',title:'Thả '+esc(tenThu(t))+'?',tc:'y',text:'Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.'},
    [{t:'Thả',cls:'d',cb:function(){tha(t.uid);}},{t:'Hủy',cb:function(){hidePop();}}]);return;}
   E.in.innerHTML='<div class="tt-ii"><span class="i">'+(a?'<img src="'+esc(a)+'" alt="">':'?')+'</span><div class="n">Thả '+esc(tenThu(t))+'?</div><div class="d">Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.</div></div>'
    +'<div class="tt-pb"><button type="button" class="d">Thả</button><button type="button">Hủy</button></div>';
