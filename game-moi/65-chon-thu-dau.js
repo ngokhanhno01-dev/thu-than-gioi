@@ -6,13 +6,14 @@
    THÚ: 3 thú khởi đầu k2 Lưu Diêu (Thủy), k1 Viêm Sư (Hỏa), k3 Lâm Trư (Mộc), id khớp THU_MOI (51-thu-moi.js). Id nào chưa có trong THU_MOI thì bục hiện dấu "?".
    TEST: ALWAYS=true => mỗi lần mở game đều hiện. Khi làm thật đổi ALWAYS=false => chỉ hiện khi chưa chọn thú. Link có ?chon-thu=1 luôn ép hiện.
    LƯU: lựa chọn ghi ở khóa ttg_moi_starter_v1 = {slot, id, bac, t}.
-   BẤM XÁC NHẬN (21/11/2026) = BẮT ĐẦU TÀI KHOẢN MỚI: xóa sạch dữ liệu thú cũ (kho thú, thú ra trận, danh sách thả, thú đứng ở sảnh ttg_moi_v1), phát đúng 1 con thú vừa chọn vào kho với Lv.1, Bậc 1 và RANK RANDOM bằng TTGCS.tungBac() (cùng bảng tỉ lệ E..SS như lúc bắt thú ở Thám hiểm), rồi cho RA TRẬN luôn => sảnh hiện đúng thú đã chọn. Việc xóa + phát thú do TTGTHU.khoiTao() (54-thu-than.js) làm. Balo/Châu KHÔNG bị xóa.
+   BẤM XÁC NHẬN (21/11/2026) = BẮT ĐẦU TÀI KHOẢN MỚI, XÓA TRẮNG như người chơi lần đầu: xóa MỌI khóa localStorage ttg_moi_* (kho thú, thú ra trận, danh sách thả, thú ở sảnh, Balo/Châu/sách, khóa đồ, kiểu xếp...) TRỪ lựa chọn thú đầu, bố cục nút (ttg_moi_layout_v1) và cài đặt khung HD (ttg_moi_hd) (xem GIU bên dưới); đồng thời reset Balo trong bộ nhớ bằng TTGBALO.xoaTrang() (53-balo.js). Rồi phát đúng 1 con thú vừa chọn vào kho với Lv.1, Bậc 1 và RANK RANDOM bằng TTGCS.tungBac() (cùng bảng tỉ lệ E..SS như lúc bắt thú ở Thám hiểm), cho RA TRẬN luôn => sảnh hiện đúng thú đã chọn. Việc xóa kho thú + phát thú do TTGTHU.khoiTao() (54-thu-than.js) làm.
    Sự kiện 'ttg-starter' (detail = {slot,id,bac,uid}) vẫn bắn như cũ; TTGSTARTER.get() trả lựa chọn đã lưu.
    Nút X: đóng không chọn (không lưu, không xóa gì). Nút Xác Nhận chỉ bấm được sau khi chọn 1 bục. */
 (function(){
 'use strict';
 if(window.TTG_BLOCK)return;
 var ALWAYS=true,KEY='ttg_moi_starter_v1',IW=2505,IH=1412,TIER=1;
+var GIU=['ttg_moi_starter_v1','ttg_moi_layout_v1','ttg_moi_hd'];   /* khóa KHÔNG xóa khi xóa trắng: lựa chọn thú đầu + cài đặt giao diện (không phải dữ liệu chơi) */
 var STARTERS=[
  {id:'k2',ten:'Lưu Diêu',mota:'Thường + Thủy · Nhanh'},
  {id:'k1',ten:'Viêm Sư',mota:'Thường + Hỏa · Công'},
@@ -102,14 +103,20 @@ function say(s,warn){infoEl.textContent=s;infoEl.className='a tx inf'+(warn?' wa
 function pick(i){if(locked)return;sel=i;
  var sl=root.querySelectorAll('.slot');for(var k=0;k<3;k++)sl[k].classList.toggle('on',k===i);
  say(STARTERS[i].ten+' — '+STARTERS[i].mota);root.classList.add('ready');}
-/* XÁC NHẬN: bắt đầu tài khoản mới. Rank tung bằng TTGCS.tungBac() = cùng bảng tỉ lệ với lúc bắt thú (62-bat-thu.js, tungBacChau). Chưa nạp TTGCS thì rơi về 'E'. */
+/* XÓA TRẮNG: xóa mọi khóa localStorage ttg_moi_* (trừ GIU) + reset Balo trong bộ nhớ. Kho thú do TTGTHU.khoiTao() lo (gọi SAU hàm này vì nó ghi lại kho). */
+function xoaTrang(){
+ try{var ks=[],i;for(i=0;i<localStorage.length;i++)ks.push(localStorage.key(i));
+  ks.forEach(function(k){if(k&&k.indexOf('ttg_moi_')===0&&GIU.indexOf(k)<0)localStorage.removeItem(k);});}catch(e){}
+ try{if(window.TTGBALO&&TTGBALO.xoaTrang)TTGBALO.xoaTrang();}catch(e){}
+}
+/* XÁC NHẬN: bắt đầu tài khoản mới (xóa trắng). Rank tung bằng TTGCS.tungBac() = cùng bảng tỉ lệ với lúc bắt thú (62-bat-thu.js, tungBacChau). Chưa nạp TTGCS thì rơi về 'E'. */
 function confirm(){if(locked)return;
  if(sel<0){say('Hãy chọn một thú trước!',true);setTimeout(function(){if(sel<0&&!locked)say(HINT);},1400);return;}
  locked=true;
  var s=STARTERS[sel],bac=(window.TTGCS&&TTGCS.tungBac)?TTGCS.tungBac():'E',uid=null;
  var r={slot:sel,id:s.id||null,bac:bac,t:Date.now()};
+ xoaTrang();
  try{localStorage.setItem(KEY,JSON.stringify(r));}catch(e){}
- try{localStorage.removeItem('ttg_moi_v1');}catch(e){}   /* thú đang đứng ở sảnh kiểu cũ (index.html) */
  if(s.id&&window.TTGTHU&&TTGTHU.khoiTao){
   try{uid=TTGTHU.khoiTao({id:s.id,ten:s.ten,bac:bac,tien:1,lv:1,chiso:{},kn:[null,null,null,null,null,null]});}catch(e){}}
  r.uid=uid;
