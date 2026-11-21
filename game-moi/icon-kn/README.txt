@@ -1,3 +1,2 @@
-Bỏ icon kỹ năng (ảnh vuông, nên 128x128) vào đây, đặt tên theo id kỹ năng + .webp:
-bang-son-ap-dinh.webp, suong-nuot.webp, con-bang-trien-si.webp, vu-xa-trien.webp, thien-loi-giang.webp, nguyet-thuc-nuot.webp
+Icon kỹ năng (PNG vuông 128x128), tên = id kỹ năng + .png: bang-son-ap-dinh, suong-nuot, con-bang-trien-si, vu-xa-trien, thien-loi-giang, nguyet-thuc-nuot.
 Chưa có ảnh thì game vẽ icon tạm (màu theo hệ + chữ cái đầu).

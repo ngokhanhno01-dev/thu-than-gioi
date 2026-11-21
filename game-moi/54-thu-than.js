@@ -52,6 +52,12 @@ var SACH={
   'sach-hoi-xuan':{loai:'sach',ten:'Sách Hồi Xuân',kn:'Hồi Xuân',ic:'🌿',cd:5,mo:'Hồi 25% máu tối đa cho bản thân.'},
   'sach-loi-de':{loai:'sach',ten:'Sách Lôi Đế',kn:'Lôi Đế',ic:'⚡',cd:5,mo:'Triệu sấm sét gây 200% tấn công, có 20% làm choáng 1 lượt.'},
   'sach-doc-vu':{loai:'sach',ten:'Sách Độc Vụ',kn:'Độc Vụ',ic:'☠️',cd:4,mo:'Phun sương độc, gây sát thương theo thời gian trong 3 lượt (debuff).'},
+  'sach-bang-son-ap-dinh':{loai:'sach',ten:'Sách Băng Sơn Áp Đỉnh',kn:'Băng Sơn Áp Đỉnh',ky:'bang-son-ap-dinh',he:'bang',img:'game-moi/icon-kn/bang-son-ap-dinh.png',cd:5,mo:'Kỹ năng boss Tuyết Nguyên. Chỉ thú có hệ chính hoặc hệ phụ Băng mới gắn được.'},
+  'sach-suong-nuot':{loai:'sach',ten:'Sách Sương Nuốt',kn:'Sương Nuốt',ky:'suong-nuot',he:'thuy',img:'game-moi/icon-kn/suong-nuot.png',cd:5,mo:'Kỹ năng boss Sương Cốc, hút 30% sát thương thành máu. Chỉ thú hệ Thủy gắn được.'},
+  'sach-con-bang-trien-si':{loai:'sach',ten:'Sách Côn Bằng Triển Sí',kn:'Côn Bằng Triển Sí',ky:'con-bang-trien-si',he:'phong',img:'game-moi/icon-kn/con-bang.png',cd:5,mo:'Kỹ năng boss Vân Đảo, tăng tốc độ bản thân. Chỉ thú hệ Phong gắn được.'},
+  'sach-vu-xa-trien':{loai:'sach',ten:'Sách Vũ Xà Triền',kn:'Vũ Xà Triền',ky:'vu-xa-trien',he:'phong',img:'game-moi/icon-kn/vu-xa-trien.png',cd:5,mo:'Kỹ năng boss Phong Nguyên, giảm tốc độ đối thủ. Chỉ thú hệ Phong gắn được.'},
+  'sach-thien-loi-giang':{loai:'sach',ten:'Sách Thiên Lôi Giáng',kn:'Thiên Lôi Giáng',ky:'thien-loi-giang',he:'loi',img:'game-moi/icon-kn/thien-loi-giang.png',cd:6,mo:'Kỹ năng boss Lôi Vực, có 40% làm choáng. Chỉ thú hệ Lôi gắn được.'},
+  'sach-nguyet-thuc-nuot':{loai:'sach',ten:'Sách Nguyệt Thực Nuốt',kn:'Nguyệt Thực Nuốt',ky:'nguyet-thuc-nuot',he:'am',img:'game-moi/icon-kn/nguyet-thuc.png',cd:5,mo:'Kỹ năng boss Nguyệt Cung, giảm tốc độ đối thủ. Chỉ thú hệ Âm gắn được.'},
   'sach-tang-toc':{loai:'sach',ten:'Sách Tăng Tốc',kn:'Tăng Tốc',ic:'💨',cd:3,mo:'Tăng 40% tốc độ trong 2 lượt (buff).'}
 };
 if(window.TTGBALO&&TTGBALO.reg)TTGBALO.reg(SACH);   /* đăng ký vào Balo (sách đã sở hữu từ trước vẫn nhận ra) */
@@ -444,6 +450,7 @@ function dung(id,k){
   if(kn[k]){toast('Ô này đã có kỹ năng');return;}
   if(kn.indexOf(id)>=0){toast('Thú đã có kỹ năng này');return;}
   if(!window.TTGBALO||TTGBALO.count(id)<=0){toast('Balo hết sách này');return;}
+  var bk=sachOf(id);if(bk&&bk.he&&window.TTGCS&&TTGCS.mangDuocSach&&!TTGCS.mangDuocSach(t.id,bk.he)){toast('Thú không cùng hệ với sách này');return;}   /* sách có hệ: chỉ thú có hệ chính/phụ trùng mới gắn */
   TTGBALO.add(id,-1);kn[k]=id;save();hidePop();renderSkills();toast('Đã gắn kỹ năng');
 }
 /* GỠ: trả sách về Balo, trống ô k */
@@ -536,6 +543,8 @@ function add(t){
   if(isOpen){if(!sel)sel=t.uid;render();}
   return t.uid;
 }
+var RK_ORD=['E','D','C','B','A','S','SS','SR'];
+function doiRank(){var t=rt&&byUid(rt);if(!t)return null;var i=RK_ORD.indexOf(RKC[t.bac]?t.bac:'C');t.bac=RK_ORD[(i+1)%RK_ORD.length];save();if(isOpen)render();return t.bac;}   /* NÚT TEST: đổi Rank thú ra trận theo vòng E>D>C>B>A>S>SS>SR */
 function list(){dongBo();return thus.map(function(t){return Object.assign({},t);});}
 function getRaTran(){var t=rt&&byUid(rt);return t?Object.assign({},t):null;}   /* sau này nối vào trận đấu/sảnh bằng hàm này */
 /* khoiTao(thu): TÀI KHOẢN MỚI. Xóa sạch kho + thú ra trận + danh sách thả (bộ nhớ và localStorage), thêm đúng con `thu`, cho ra trận luôn. Trả uid (null nếu đang ở chế độ ?thu=demo hoặc thiếu id). Không đụng Balo. */
@@ -555,5 +564,5 @@ function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=M
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
   if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
-window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();

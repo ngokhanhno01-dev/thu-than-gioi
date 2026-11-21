@@ -280,7 +280,12 @@ function drawSkillFx(ts){var f=st.skFx,api=window.TTGCombatFX;if(!f)return;var t
    Đang hồi chiêu: icon MỜ + số lượt còn lại (4·3·2·1). Hết hồi chiêu: icon SÁNG (viền vàng nhấp nháy), lượt sau dùng.
    Ảnh icon: game-moi/icon-kn/<id kỹ năng>.webp (vd bang-son-ap-dinh.webp, ảnh vuông). Chưa có ảnh thì vẽ icon tạm (màu theo hệ + chữ cái đầu tên). Cỡ/khoảng cách chỉnh ở KN_ICON. */
 var KN_ICON={s:26,gap:4,dy:3,max:3},KNI={},HE_MAU_KN={bang:'#8fe3ff',thuy:'#58a8ff',phong:'#7fe8b0',loi:'#ffe45c',am:'#a98cf0',hoa:'#ff8a5c',moc:'#6ce57a',tho:'#d6a866',doc:'#c27cff',kim:'#fff0b8'};
-function knImg(id){var o=KNI[id];if(!o){o=KNI[id]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;};o.img.src='game-moi/icon-kn/'+id+'.webp';}return o.ok?o.img:null;}
+function knImg(id){var o=KNI[id];if(!o){o=KNI[id]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;};o.img.src='game-moi/icon-kn/'+id+'.png';}return o.ok?o.img:null;}
+function knMeList(p){var r=[],C=(window.TTGBALO&&TTGBALO.CAT)||{};(p&&p.kn||[]).forEach(function(id){var it=id&&C[id];if(!it||!it.ky||!window.TTGCS||!TTGCS.KY_NANG_BOSS)return;for(var i=0;i<TTGCS.KY_NANG_BOSS.length;i++){var k=TTGCS.KY_NANG_BOSS[i];if(k.id===it.ky){r.push({k:k,cd:KN_START});break;}}});return r;}/* kỹ năng thú bạn: đọc t.kn (id sách) -> kỹ năng trong KY_NANG_BOSS qua trường ky của sách */
+function knMeDecide(){var a=st&&st.knMe,r=null;if(!a||!BATTLE)return null;a.forEach(function(n){if(n.cd>0)n.cd--;else if(!r){n.cd=Math.max(0,n.k.cd-1);r=n.k;}});return r;}
+/* thú bạn dùng kỹ năng sách: thay đòn thường, sát thương theo hsTc + hệ kỹ năng lên địch (chưa có hình FX riêng cho phía bạn, chỉ hiện tên + số) */
+function castMe(k){var n=performance.now(),a=BATTLE.playerStats,z=BATTLE.enemyStats,hs=TTGCS.heHeSo?TTGCS.heHeSo(k.he,heOf(BATTLE.enemy)):1,d=TTGCS.satThuong({tc:a.tc,pt:z.pt,hsKyNang:k.hsTc,hsHe:hs});A={w:'me',t:n};knHurt('en',d,n,'#ffd24a');st.fx.push({x:px('me'),y:gy()-160,t:n,s:k.ten,c:'#ffe9a0'});
+ (k.ev||[]).forEach(function(ev){if(ev.k==='hutMau'){var h=Math.floor(d*ev.pct/100);if(h>0){st.me=Math.min(st.maxMe,st.me+h);st.fx.push({x:px('me'),y:gy()-135,t:n,s:'+'+h,c:'#3c3'});}}});}
 function knList(side){var r=[];if(side==='en'&&st.kn)r.push(st.kn);if(side==='me'&&st.knMe)r=r.concat(st.knMe);return r.slice(0,KN_ICON.max);}
 function knIcon(ts,x,y,n){var S=KN_ICON.s,k=n.k,lit=n.cd<=0,im=knImg(k.id),c=HE_MAU_KN[k.he]||'#cfe3ff',p=.5+.5*Math.sin(ts/260);
  ctx.save();ctx.translate(x,y);
@@ -301,7 +306,7 @@ function knIcons(ts,xl,xr,y){var S=KN_ICON.s,G=KN_ICON.gap,a=knList('me'),b=knLi
  for(i=0;i<b.length;i++)knIcon(ts,xr-S-i*(S+G),y,b[i]);}
 /* ĐẾM NGƯỢC 3-2-1-CHIẾN (69-dem-nguoc.js): chặn auto đánh (nextAt=Infinity) tới khi đếm xong mới cho đánh. Không có module thì đánh luôn như cũ. */
 function cdStart(){if(window.TTGDEM){nextAt=Infinity;TTGDEM.start(function(){nextAt=performance.now()+GAP;});}else nextAt=performance.now()+GAP;}
-function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};var sM=khienMax(player,ps.hp),sE=khienMax(enemy,enemy.stats.hp);st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,shMe:sM,shMaxMe:sM,shEn:sE,shMaxEn:sE,busy:false,msg:'',fx:[],kn:bossSkill(enemy)};SCENE='tran';A=null;nextAt=Infinity;if(window.TTGDEM)TTGDEM.reset();var gm='Gặp '+enTag(enemy)+': '+enemy.ten+(enemy.hienBac?' (Rank '+enemy.bac+')':'');if(window.TTGTBAO){toast(gm,cdStart);}else{toast(gm);cdStart();}}
+function startExplore(){if(SCENE!=='sanh'){toast('Đang có trận');return;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return;}var ps=TTGCS.tinh(player),enemy=TTGTHAMHIEM.createEncounter(player);if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return;}BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};var sM=khienMax(player,ps.hp),sE=khienMax(enemy,enemy.stats.hp);st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,shMe:sM,shMaxMe:sM,shEn:sE,shMaxEn:sE,busy:false,msg:'',fx:[],kn:bossSkill(enemy),knMe:knMeList(player)};SCENE='tran';A=null;nextAt=Infinity;if(window.TTGDEM)TTGDEM.reset();var gm='Gặp '+enTag(enemy)+': '+enemy.ten+(enemy.hienBac?' (Rank '+enemy.bac+')':'');if(window.TTGTBAO){toast(gm,cdStart);}else{toast(gm);cdStart();}}
 if(window.TTGTHAMHIEM)TTGTHAMHIEM.start=startExplore;
 /* BẮT THÚ (62-bat-thu.js): cầu nối. freeze = đóng băng trận (st mới => mọi setTimeout của lượt đang đánh tự bỏ vì st!==s0); resume = đánh tiếp; end = kết thúc lần Thám hiểm về sảnh */
 if(window.TTGBAT)TTGBAT.attach({scene:function(){return SCENE;},battle:function(){return BATTLE;},st:function(){return st;},
@@ -365,7 +370,7 @@ function hit(w){var t=w==='me'?'en':'me',d,n=performance.now();if(BATTLE&&window
 /* Một lượt: mình đánh -> (nếu địch còn sống) địch đánh lại -> kiểm tra thắng/thua.
    Hết trận: giữ busy=true, hiện kết quả END_WAIT ms rồi reset() (st mới, busy=false) để auto đánh tiếp. */
 function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;
- if(st.stun>0){st.stun--;st.fx.push({x:px('me'),y:gy()-135,t:performance.now(),s:'Choáng',c:'#ffe45c'});}else hit('me');
+ if(st.stun>0){st.stun--;st.fx.push({x:px('me'),y:gy()-135,t:performance.now(),s:'Choáng',c:'#ffe45c'});}else{var sm=knMeDecide();if(sm)castMe(sm);else hit('me');}
  var sk=st.en>0?knDecide():null;/* boss hết hồi chiêu: dùng kỹ năng thay đòn thường */
  setTimeout(function(){if(st===s0&&st.en>0){if(sk)castSkill(s0,sk);else hit('en');}},650);
  setTimeout(function(){if(st!==s0)return;

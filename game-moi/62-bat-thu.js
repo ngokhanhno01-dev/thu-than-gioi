@@ -397,6 +397,19 @@ if(CFG.nutTest&&root.TTGNV&&root.TTGBALO&&root.TTGBONG){
   },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="20" fill="#3ec9d6" stroke="#0b4a5c" stroke-width="3"/><path d="M32 18v28M18 32h28" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>'});
 }
 
+/* NÚT TEST TẠM (cạnh Nhận châu): 1) Đổi rank thú đang ra trận (vòng E>D>C>B>A>S>SS>SR, có hiệu lực từ trận sau) 2) Lấy sách kỹ năng (6 sách boss, mỗi loại +2) */
+if(CFG.nutTest&&root.TTGNV&&root.TTGBALO){
+  root.TTGNV.add({id:'doi-rank',ten:'Đổi rank',onTap:function(){
+    var b=root.TTGTHU&&TTGTHU.doiRank?TTGTHU.doiRank():null;
+    toast(b?'TEST: Rank thú ra trận = '+b+' (áp dụng từ trận sau)':'TEST: chưa có thú ra trận');
+  },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 8l7 15 16 2-12 11 3 16-14-8-14 8 3-16L9 25l16-2z" fill="#ffd24a" stroke="#7a4a00" stroke-width="3" stroke-linejoin="round"/></svg>'});
+  root.TTGNV.add({id:'lay-sach',ten:'Lấy sách',onTap:function(){
+    var ids=['sach-bang-son-ap-dinh','sach-suong-nuot','sach-con-bang-trien-si','sach-vu-xa-trien','sach-thien-loi-giang','sach-nguyet-thuc-nuot'];
+    ids.forEach(function(i){TTGBALO.add(i,2);});
+    toast('TEST: +2 mỗi loại sách kỹ năng boss');
+  },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="14" y="10" width="36" height="44" rx="4" fill="#5b3cc4" stroke="#1d0f5c" stroke-width="3"/><rect x="14" y="10" width="8" height="44" rx="3" fill="#3a2494"/><path d="M36 20l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z" fill="#ffd24a"/></svg>'});
+}
+
 root.TTGBAT={
   CFG:CFG,attach:function(h){host=h;},frame:frame,draw:draw,enemyFx:enemyFx,start:start,
   active:function(){return S.mode!=='off';},mode:function(){return S.mode;}
