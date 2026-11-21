@@ -56,13 +56,31 @@ function donCoBan(z){return DON_CO_BAN[z]?{ten:DON_CO_BAN[z],hsKyNang:1,hoiChieu
 /* ===== KỸ NĂNG ĐỘC QUYỀN BOSS (mục 7b THIET_KE). hsTc = hsKyNang của satThuong; cd = hồi chiêu (lượt); he = hệ của kỹ năng (một hệ của boss).
    ev (bước D thực thi): lop{ten,them} thêm lớp | hutMau{pct} | tuBuff{stat,pct,luot} boss tự buff | debuff{stat,pct,luot} lên đối thủ (giảm theo khu) | choang{xs,luot} (kc chặn) */
 var KY_NANG_BOSS=[
-  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:5,ev:[{k:'lop',ten:'lanh',them:2}]},
-  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'thuy',hsTc:1.5,cd:5,ev:[{k:'hutMau',pct:30}]},
-  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'phong',hsTc:2.0,cd:5,ev:[{k:'tuBuff',stat:'td',pct:30,luot:2}]},
-  {id:'vu-xa-trien',ten:'Vũ Xà Triền',boss:'6j',he:'phong',hsTc:1.4,cd:5,ev:[{k:'debuff',stat:'td',pct:-50,luot:2}]},
-  {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:6,ev:[{k:'choang',xs:40,luot:1}]},
-  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:5,ev:[{k:'debuff',stat:'td',pct:-20,luot:2}]}
+  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:5,ev:[{k:'lop',ten:'lanh',them:2}],
+   mod:[{stat:'pt',pct:8}],noiTai:{ten:'Hàn Giáp',mod:[],ev:[{k:'khienDau',pctHp:8}]}},
+  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'thuy',hsTc:1.5,cd:5,ev:[{k:'hutMau',pct:30}],
+   mod:[{stat:'hp',pct:8}],noiTai:{ten:'Sương Che',mod:[{stat:'ne',pct:5}],ev:[]}},
+  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'phong',hsTc:2.0,cd:5,ev:[{k:'tuBuff',stat:'td',pct:30,luot:2}],
+   mod:[{stat:'td',pct:8}],noiTai:{ten:'Vân Cánh',mod:[],ev:[{k:'khienDau',pctHp:5}]}},
+  {id:'vu-xa-trien',ten:'Vũ Xà Triền',boss:'6j',he:'phong',hsTc:1.4,cd:5,ev:[{k:'debuff',stat:'td',pct:-50,luot:2}],
+   mod:[{stat:'td',pct:8}],noiTai:{ten:'Xà Hành',mod:[{stat:'cx',pct:5}],ev:[]}},
+  {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:6,ev:[{k:'choang',xs:40,luot:1}],
+   mod:[{stat:'tc',pct:8}],noiTai:{ten:'Lôi Kích',mod:[{stat:'cm',pct:5}],ev:[]}},
+  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:5,ev:[{k:'debuff',stat:'td',pct:-20,luot:2}],
+   mod:[{stat:'tc',pct:8}],noiTai:{ten:'Nguyệt Ảnh',mod:[{stat:'ne',pct:5}],ev:[]}}
 ];
+/* SÁCH KỸ NĂNG = NGUỒN DUY NHẤT: mỗi sách (id 'sach-'+id kỹ năng) gồm 3 phần: (1) kỹ năng: hsTc, cd, he, ev; (2) mod = chỉ số cộng THẲNG cho thú mang sách (% vào hp/tc/pt/td/mm, phụ cộng điểm %); (3) noiTai = {ten, mod, ev} nội tại luôn có.
+   Boss thú hoang được GÁN sách của mình (boss:'..') -> dùng đúng kỹ năng/chỉ số/nội tại này; người chơi gắn sách vào thú (thu.kn = [id sách]) thì được y hệt. Chỉnh số ở bảng trên (mod/noiTai chỉ là số mẫu). */
+function sachKyNang(bid){if(typeof bid!=='string'||bid.indexOf('sach-')!==0)return null;var id=bid.slice(5);for(var i=0;i<KY_NANG_BOSS.length;i++)if(KY_NANG_BOSS[i].id===id)return KY_NANG_BOSS[i];return null;}
+function sachBoss(bossId){for(var i=0;i<KY_NANG_BOSS.length;i++)if(KY_NANG_BOSS[i].boss===bossId)return 'sach-'+KY_NANG_BOSS[i].id;return null;}
+function sachBuffs(thu){var r=[];((thu&&thu.kn)||[]).forEach(function(b){var k=sachKyNang(b);if(!k)return;var n=k.noiTai||{};r.push({mod:(k.mod||[]).concat(n.mod||[]),ev:n.ev||[]});});return r;}
+function sachMod(thu){var o=[];sachBuffs(thu).forEach(function(h){(h.mod||[]).forEach(function(m){o.push({stat:m.stat,pct:m.pct});});});return o;}   /* chỉ số từ sách -> TTGCS.tinh(thu,{mod:sachMod(thu)}) */
+var STAT_VI={hp:'Máu',tc:'Tấn công',pt:'Phòng thủ',td:'Tốc độ',mm:'May mắn',ne:'Né',cx:'Chính xác',cm:'Chí mạng',khu:'Kháng',hutm:'Hút máu',pd:'Phản đòn'};
+function evVi(e){if(e.k==='lop')return 'gắn '+e.them+' lớp lạnh';if(e.k==='hutMau')return 'hút '+e.pct+'% sát thương thành máu';if(e.k==='tuBuff')return 'bản thân +'+e.pct+'% '+(STAT_VI[e.stat]||e.stat)+' '+e.luot+' lượt';if(e.k==='debuff')return 'đối thủ '+e.pct+'% '+(STAT_VI[e.stat]||e.stat)+' '+e.luot+' lượt';if(e.k==='choang')return e.xs+'% làm choáng '+e.luot+' lượt';if(e.k==='khienDau')return 'khiên đầu trận '+e.pctHp+'% máu';return '';}
+function modVi(a){return (a||[]).map(function(m){return (m.pct>0?'+':'')+m.pct+'% '+(STAT_VI[m.stat]||m.stat);}).join(', ');}
+/* mô tả sách (cho Balo/bảng thú): kỹ năng + chỉ số + nội tại, sinh từ đúng dữ liệu trên nên không lệch số */
+function sachMoTa(bid){var k=sachKyNang(bid);if(!k)return '';var n=k.noiTai||{},nt=[modVi(n.mod)].concat((n.ev||[]).map(evVi)).filter(Boolean).join(', ');
+  return 'Kỹ năng: '+Math.round(k.hsTc*100)+'% tấn công'+((k.ev||[]).length?', '+k.ev.map(evVi).join(', '):'')+', hồi chiêu '+k.cd+' lượt. Chỉ số sách: '+modVi(k.mod)+'. Nội tại '+(n.ten||'')+': '+(nt||'-')+'. Chỉ thú có hệ chính hoặc phụ trùng hệ sách mới gắn được.';}
 var TY_LE_ROI_SACH=1.5;   /* % rơi sách kỹ năng boss, CHỈ khi giết chết boss (bắt không rơi); mm nhân thêm như tỉ lệ rớt item */
 function kyNangBoss(z){return KY_NANG_BOSS[z]?copy(KY_NANG_BOSS[z]):null;}
 
@@ -85,10 +103,8 @@ function buffBoss(z){return VUNG[z]?copy(VUNG[z].boss):null;}
 /* các hiệu ứng buff đang có của một thú: buff vùng, thêm buff riêng nếu là boss */
 function dsBuff(thu){
   var z=zOf(thu),r=[];
-  if(z==null||!VUNG[z])return r;
-  r.push(VUNG[z].buff);
-  if(laBoss(thu))r.push(VUNG[z].boss);
-  return r;
+  if(z!=null&&VUNG[z]){r.push(VUNG[z].buff);if(laBoss(thu))r.push(VUNG[z].boss);}
+  return r.concat(sachBuffs(thu));   /* + chỉ số/nội tại từ sách đang mang (thu.kn) */
 }
 
 /* modTinh(thu, doiThu, opt): mảng [{stat,pct}] để đưa vào TTGCS.tinh(thu,{mod:...}).
@@ -137,7 +153,7 @@ function hoiLuot(thu,hpMax){return Math.floor(hpMax*tongEv(thu,'hoiLuot','pctHp'
 function khienDau(thu,hpMax){return Math.floor(hpMax*tongEv(thu,'khienDau','pctHp')/100);}
 
 root.TTGCS=Object.assign(root.TTGCS||{},{
-  VUNG_BUFF:VUNG,DON_CO_BAN:DON_CO_BAN,donCoBan:donCoBan,KY_NANG_BOSS:KY_NANG_BOSS,kyNangBoss:kyNangBoss,TY_LE_ROI_SACH:TY_LE_ROI_SACH,vungBuff:vungBuff,debuffVung:debuffVung,buffBoss:buffBoss,
+  VUNG_BUFF:VUNG,DON_CO_BAN:DON_CO_BAN,donCoBan:donCoBan,KY_NANG_BOSS:KY_NANG_BOSS,kyNangBoss:kyNangBoss,sachKyNang:sachKyNang,sachBoss:sachBoss,sachMod:sachMod,sachMoTa:sachMoTa,TY_LE_ROI_SACH:TY_LE_ROI_SACH,vungBuff:vungBuff,debuffVung:debuffVung,buffBoss:buffBoss,
   modTinh:modTinh,modTam:modTam,suKien:suKien,hoiLuot:hoiLuot,khienDau:khienDau
 });
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
