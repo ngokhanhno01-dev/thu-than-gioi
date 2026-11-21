@@ -35,6 +35,12 @@
 - sát thương = tc x hsKyNang x tc/(tc+pt) x hsHe x (chí mạng ? 1,5 : 1). Làm tròn xuống, tối thiểu 1.
 - Đòn thường hsKyNang = 1.
 
+## 5b. Thứ tự đánh và nhịp trận (22/11/2026)
+- Mỗi vòng cả hai bên đều đánh một lần. Bên có tốc độ (td) CAO HƠN đánh trước; td bằng nhau thì thú của người chơi đánh trước. td lấy theo chỉ số đang có trong trận (đã tính buff/debuff) và tính lại mỗi vòng.
+- Bên đánh trước hạ gục đối thủ thì đối thủ mất lượt trong vòng đó (không đánh trả). Choáng làm mất đúng lượt đánh của bên bị choáng, kể cả khi bên kia đánh trước trong cùng vòng.
+- Boss có td nhân thêm 1,6 (mục 1) nên thường nhanh hơn thú cùng loài; thú vai Nhanh (td x1,5), cấp cao hoặc tiến hóa cao mới vượt được.
+- Nhịp (index.html, dòng khai báo đầu): nghỉ giữa các vòng `GAP`=450ms, mỗi lượt đánh thường và khoảng nghỉ giữa hai bên `T_DON`=750ms, dừng khi hết trận `END_WAIT`=1200ms. Lượt dùng kỹ năng dài `KN_INTRO`+`KN_T_END`.
+
 ## 6. Hiệu ứng và kháng
 - Kháng hiệu ứng (khu) CHỈ tác dụng lên DEBUFF: mỗi debuff vừa gắn có khu% bị hủy; debuff theo giá trị (vd -15% tốc độ) thì giảm hiệu lực theo (1 - khu/100). Buff không bị ảnh hưởng.
 - Đóng băng và choáng đều là debuff mất lượt. Đóng băng bị khu chặn. Choáng bị kc (kháng choáng) chặn, không dùng khu. Sau khi bị đóng băng, mục tiêu miễn nhiễm đóng băng 2 lượt.
