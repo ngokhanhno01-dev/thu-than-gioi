@@ -360,15 +360,16 @@ function ocDraw(cv,items,gap){
     g.strokeStyle=cf;g.lineWidth=it.lw2||3;g.strokeText(it.t,x,base);g.fillStyle=cf;g.fillText(it.t,x,base);   /* lõi: stroke cùng màu làm nét bút đậm hơn */
     y+=bx.a+bx.d+gap;}
 }
-function renderBadges(t){
-  if(!E.oc)return;
-  if(!t){E.oc.forEach(function(c){c.getContext('2d').clearRect(0,0,c.width,c.height);});return;}
+function renderBadges(t){if(E.oc)drawBadges(E.oc,t);}
+/* vẽ 3 ô Lv/Bậc/Rank vào 3 canvas 208x208 (cvs). Dùng chung cho khung Trang Bị (55-trang-bi.js) qua TTGTHU.badges */
+function drawBadges(cvs,t){
+  if(!t){cvs.forEach(function(c){c.getContext('2d').clearRect(0,0,c.width,c.height);});return;}
   var lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),bac=RKC[t.bac]?t.bac:'C',rc=RKC[bac];
   var lab=function(s){return {t:s,font:F_LB,sz:40,core:'#c9fbff',glow:'#00c8ff',lw:6,lw2:1};};
   var num=function(s){return {t:String(s),font:'400 {S}px '+F_BR,sz:82,maxW:88,core:'#fff7b0',glow:'#ffb800'};};
-  ocDraw(E.oc[0],[lab('Lv'),num(lv)],4);
-  ocDraw(E.oc[1],[lab('Bậc'),num(tien)],4);
-  ocDraw(E.oc[2],[{t:bac,font:'400 {S}px '+F_BR,sz:124,maxW:96,core:rc[1],glow:rc[0],lw:7,lw2:4,rb:bac==='SR'}],0);
+  ocDraw(cvs[0],[lab('Lv'),num(lv)],4);
+  ocDraw(cvs[1],[lab('Bậc'),num(tien)],4);
+  ocDraw(cvs[2],[{t:bac,font:'400 {S}px '+F_BR,sz:124,maxW:96,core:rc[1],glow:rc[0],lw:7,lw2:4,rb:bac==='SR'}],0);
 }
 if(document.fonts&&document.fonts.load){document.fonts.load('40px TTGRank','EDCBASSR0123456789').then(function(){if(root)render();}).catch(function(){});}   /* font nạp xong thì vẽ lại */
 function renderGo(){
@@ -554,5 +555,5 @@ function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=M
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
   if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
-window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();
