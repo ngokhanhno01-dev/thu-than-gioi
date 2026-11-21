@@ -39,3 +39,9 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - `khung-sanh.webp`: cắt 14 hàng đáy (dải xanh phát sáng ngoài vạch vàng) -> 1843x816. `FRM.top`: h 816, sb 248, e.b 30.
 - `khung-hang-nut.webp`: xóa trong suốt 18 hàng đỉnh (dải sao ngoài) ở PHẦN GIỮA, giữ nguyên 2 góc (sừng rồng chồng lên khung trên ~2 đơn vị). `FRM.bot.ct = 18`: khung dưới vẽ lấn lên trên đúng bằng số hàng này.
 - `BP` 88 -> 86 (viền trên khung dưới mỏng hơn nên vẫn đủ chỗ 2 hàng nút 38). `GAPB` = 0. Khung trên cao 274, chân thú ở y≈264 (trước ≈257): vùng cảnh rộng thêm ~7 đơn vị. `CFG.dy` (52-nut-vuong.js) dịch khối nút lên/xuống cho cân.
+
+## Khung thông tin chiến đấu (21/11/2026)
+- `68-hud-tran.js` + `khung-chien-dau.webp` thay thanh máu cũ ở trận: khung thú bạn (vòng Rank bên trái), khung địch lật gương (vòng Rank bên phải). Chữ Tên/Bậc/Lv đã xóa khỏi ảnh, tất cả vẽ bằng canvas (tên dài tự co chữ).
+- Vòng tròn = Rank; ô xanh dưới vòng = Hệ (1 hoặc 2 hệ, mỗi hệ một màu; quái nguồn main lấy hệ chủ đạo của vùng); thanh kem = Tên + Bậc 1-3; thanh to = Máu "hiện/tối đa"; thanh nhỏ = Giáp (tối đa 0 thì "0/0", không tô); ô góc = Lv.N (tối đa Lv.100).
+- Giáp = khiên đầu trận `TTGCS.khienDau` (hiện chỉ vùng Vân Đảo có buff Vân Hộ). Trong `index.html`: `st.shMe/shEn` (+ `shMaxMe/shMaxEn`) khởi tạo ở startExplore, hàm `hit()` cho giáp đỡ sát thương trước rồi mới trừ máu.
+- Chỉnh bố cục: `G` trong 68-hud-tran.js (tọa độ ảnh gốc 2161x728); cỡ/vị trí khung: `HM`, `hw`, `hy` trong `index.html` (đoạn "KHUNG THÔNG TIN").
