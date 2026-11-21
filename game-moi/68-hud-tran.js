@@ -70,7 +70,7 @@ function draw(ctx,o){
   var hpM=Math.max(1,o.hpMax||1),hp=Math.max(0,Math.min(hpM,o.hp||0));
   barFill(ctx,G.hp,hp/hpM,m,o.enemy?'#f06060':'#58e05a',o.enemy?'#a21c1c':'#1f9b2a',7);
   fit(ctx,Math.ceil(hp)+'/'+Math.ceil(hpM),X((G.hp.x0+G.hp.x1)/2),(G.hp.y0+G.hp.y1)/2+2,G.hp.x1-G.hp.x0-100,50,32,'bold {S}px sans-serif','#fff','rgba(0,0,0,.85)',9);
-  /* TỐC ĐỘ (dưới, tô vàng) = THANH HÀNH ĐỘNG: đầy thì tới lượt đánh; chạy nhanh/chậm theo td. gauge 0..1 do trận truyền vào (không có thì tô theo td/tdMax) */
+  /* TỐC ĐỘ (dưới, tô vàng) = THANH ĐÁNH THƯỜNG: đầy thì tới lượt đánh; chạy nhanh/chậm theo td. gauge 0..1 do trận truyền vào (không có thì tô theo td/tdMax) */
   var hasTd=o.td!=null,td=Math.max(0,o.td||0),tdM=Math.max(td,o.tdMax||0,1),gp=o.gauge!=null?o.gauge:(hasTd?td/tdM:0);
   barFill(ctx,G.sp,Math.max(0,Math.min(1,gp)),m,gp>=.999?'#fff0a0':'#ffe27a',gp>=.999?'#f0b020':'#d9921a',5);
   fit(ctx,hasTd?String(Math.round(td)):'-',X((G.sp.x0+G.sp.x1)/2),(G.sp.y0+G.sp.y1)/2+2,300,36,24,'bold {S}px sans-serif','#fff','rgba(60,30,0,.9)',7);
