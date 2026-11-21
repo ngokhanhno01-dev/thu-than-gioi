@@ -8,11 +8,11 @@
 (function(root){
 'use strict';
 var CFG={
-  vongRong:175,nen:.36,dyVong:2,       /* tâm vòng thấp hơn chân thú dyVong điểm */
-  auraRong:125,auraAl:.9,
-  alSau:1,alTruoc:.6,
-  sang:.25,                            /* lớp phát sáng cộng thêm cho vòng (0 = tắt) */
-  xuong:36,                            /* vòng được vẽ tới chân thú + số này (khỏi tràn xuống khung nút) */
+  vongRong:145,nen:.36,dyVong:2,       /* tâm vòng thấp hơn chân thú dyVong điểm */
+  auraRong:100,auraAl:.7,
+  alSau:.75,alTruoc:.45,
+  sang:.12,                            /* lớp phát sáng cộng thêm cho vòng (0 = tắt) */
+  xuong:30,                            /* vòng được vẽ tới chân thú + số này (khỏi tràn xuống khung nút) */
   toc:{D:.10,C:.12,B:.14,A:.16,S:.20,SS:.24,SR:.30}
 };
 var IM={};
