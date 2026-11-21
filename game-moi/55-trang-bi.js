@@ -165,5 +165,5 @@ function open(){if(!root)build();render();renderItems();isOpen=true;openAt=perfo
 function close(){if(!root)return;isOpen=false;root.classList.remove('on');}
 
 function setBo(on){if(E.ovB)E.ovB.classList.toggle('on',!!on);}   /* on=true: hiện nút BỎ TRANG BỊ đè lên TRANG BỊ */
-window.TTGTB={open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);}};
+window.TTGTB={open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);},dangMac:function(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}};   /* dangMac: danh sách món ĐANG MẶC (đọc trường bo = số vùng 0..16 của bộ, dùng cho aura bộ trang bị) */
 })();

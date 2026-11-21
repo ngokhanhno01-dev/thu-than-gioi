@@ -62,7 +62,7 @@
  }catch(e){}
  function boot(){
   const API=window.TTGCombatFX;
-  if(!API||!API.engine||!API.drawAttack){
+  if(!API||!API.engine||!API.drawAttack||(window.TTGGearScene&&!API.__procfix)){   /* chờ chuỗi hiệu ứng 17 vùng (33–43) bọc xong để file này nằm NGOÀI CÙNG */
    if(tries++<240)setTimeout(boot,50);
    return;
   }
@@ -1494,7 +1494,8 @@
    'vu-xa-trien':fxSnake,'thien-loi-giang':fxLightning,'nguyet-thuc-nuot':fxEclipse
   };
   API.drawAttack=function(g,T,S){
-   const result=prevA(g,T,S);
+   const own=!!(S&&FX[S.kyNang]);   /* kỹ năng boss tự vẽ: KHÔNG chạy hiệu ứng vùng bên dưới (tránh chồng đòn vùng 0 lên kỹ năng) */
+   const result=own?true:prevA(g,T,S);
    try{
     if(!S)return result;
     const run=FX[S.kyNang];if(!run)return result;
