@@ -437,9 +437,9 @@ function moList(k){
 /* bảng nổi thông tin kỹ năng. mode 'dung' (từ danh sách): Dùng/Đóng. mode 'go' (ô đã gắn): Gỡ/Đóng. */
 function moInfo(id,k,mode){
   var it=sachOf(id),t=byUid(sel);if(!it||!t)return;
-  if(window.TTGTBAO){TTGTBAO.info({icon:icSach(it),title:esc(it.kn||it.ten),tc:'y',sub:esc(it.ten)+(it.he&&window.TTGCS&&TTGCS.heVi?' · Hệ '+TTGCS.heVi(it.he):'')+(it.cd?' · Hồi chiêu '+(it.cd*(window.TTGCD_S||2))+' giây':''),text:esc(it.moNgan||it.mo||'')},
+  if(window.TTGTBAO){TTGTBAO.info({icon:icSach(it),title:esc(it.kn||it.ten),tc:'y',sub:esc(it.ten)+(it.he&&window.TTGCS&&TTGCS.heVi?' · Hệ '+TTGCS.heVi(it.he):'')+(it.cd?' · Hồi chiêu '+it.cd+' lượt':''),text:esc(it.moNgan||it.mo||'')},
    [{t:mode==='go'?'Gỡ':'Dùng',cls:mode==='go'?'d':'',cb:function(){mode==='go'?go(k):dung(id,k);}},{t:'Đóng',cb:function(){if(mode==='go')hidePop();}}]);return;}
-  E.in.innerHTML='<div class="tt-ii"><span class="i">'+icSach(it)+'</span><div class="n">'+esc(it.kn||it.ten)+'</div><div class="m">'+esc(it.ten)+(it.he&&window.TTGCS&&TTGCS.heVi?' · Hệ '+TTGCS.heVi(it.he):'')+(it.cd?' · Hồi chiêu '+(it.cd*(window.TTGCD_S||2))+' giây':'')+'</div><div class="d">'+esc(it.moNgan||it.mo||'')+'</div></div>'
+  E.in.innerHTML='<div class="tt-ii"><span class="i">'+icSach(it)+'</span><div class="n">'+esc(it.kn||it.ten)+'</div><div class="m">'+esc(it.ten)+(it.he&&window.TTGCS&&TTGCS.heVi?' · Hệ '+TTGCS.heVi(it.he):'')+(it.cd?' · Hồi chiêu '+it.cd+' lượt':'')+'</div><div class="d">'+esc(it.moNgan||it.mo||'')+'</div></div>'
    +'<div class="tt-pb"><button type="button" class="'+(mode==='go'?'d':'p')+'">'+(mode==='go'?'Gỡ':'Dùng')+'</button><button type="button">Đóng</button></div>';
   var bs=E.in.querySelectorAll('button');
   bs[0].addEventListener('click',function(){mode==='go'?go(k):dung(id,k);});
