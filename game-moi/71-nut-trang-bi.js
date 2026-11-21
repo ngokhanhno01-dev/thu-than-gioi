@@ -1,6 +1,6 @@
 /* 71-nut-trang-bi.js - 3 nút vuông chức năng ở khung dưới (cùng khung khung-nut.webp như Balo / Thú Thần):
    Trang bị (hàng trên, sau Thú Thần) -> mở khung Trang bị (55-trang-bi.js: TTGTB.open) · Rèn (hàng trên, sau Trang bị) · Cường hóa (hàng dưới, cột đầu).
-   Rèn và Cường hóa CHƯA có chức năng: bấm chỉ báo "Sắp có". Khi làm xong chỉ cần thay hàm onTap.
+   Rèn và Cường hóa mở khung ở 72-khung-ren-cuong-hoa.js (TTGKH.open('ren'|'ch')); logic Đập / Rèn CHƯA làm.
    Nạp SAU 54-thu-than.js và 55-trang-bi.js để thứ tự cột là Balo, Thú Thần, Trang bị, Rèn. */
 (function(){
 'use strict';
@@ -25,6 +25,6 @@ var ICON_CH=HEAD+G('chA','#fff6b0','#ff9a1f')+G('chB','#b8fff0','#14b8c8')+'</de
  '<path d="M32 10L46 27H36V54H32Z" fill="#fff" opacity=".28"/>'+
  '<path d="M50 40l2.5 6 6 2.5-6 2.5L50 57l-2.5-6-6-2.5 6-2.5z" fill="url(#chB)" stroke="#04464f" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 TTGNV.add({id:'trang-bi',ten:'Trang bị',icon:ICON_TB,r:0,onTap:function(){if(window.TTGTB)TTGTB.open();else toast('Sắp có');}});
-TTGNV.add({id:'ren',ten:'Rèn',icon:ICON_REN,r:0,onTap:function(){toast('Rèn: sắp có');}});
-TTGNV.add({id:'cuong-hoa',ten:'Cường hóa',icon:ICON_CH,r:1,onTap:function(){toast('Cường hóa: sắp có');}});
+TTGNV.add({id:'ren',ten:'Rèn',icon:ICON_REN,r:0,onTap:function(){if(window.TTGKH)TTGKH.open('ren');else toast('Rèn: sắp có');}});
+TTGNV.add({id:'cuong-hoa',ten:'Cường hóa',icon:ICON_CH,r:1,onTap:function(){if(window.TTGKH)TTGKH.open('ch');else toast('Cường hóa: sắp có');}});
 })();
