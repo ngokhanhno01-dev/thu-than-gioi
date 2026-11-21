@@ -430,7 +430,7 @@ function pet(w,ts){var model=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null,b
  var bob=dead?0:Math.round(Math.sin(ts/380+(w==='me'?0:2))*2);
  if(!fxb){ctx.fillStyle='rgba(0,0,0,.18)';ctx.fillRect(x-40,gy()-2,80,4);}
  ctx.save();if(dead)ctx.globalAlpha=.35;
- if(fxb){ctx.globalAlpha*=fxb.a;var pyv=gy()-60;ctx.translate(x+fxb.dx,pyv+fxb.dy);ctx.scale(fxb.s,fxb.s);ctx.translate(-x,-pyv);}
+ if(fxb){ctx.globalAlpha*=fxb.a;var pyv=gy()-60;ctx.translate(x+fxb.dx,pyv+fxb.dy);if(fxb.r)ctx.rotate(fxb.r);ctx.scale(fxb.s,fxb.s);ctx.translate(-x,-pyv);}
  if(w==='me'){ctx.translate(x+o,0);ctx.scale(-1,1);dp(model?model.id:ID,b,0,gy()+bob);}
  else if(model&&model.source==='main')drawMainMonster(model.record,x-o,gy(),bob);
  else dp(model?model.id:ID,b,x-o,gy()+bob);

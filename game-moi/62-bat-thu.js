@@ -1,7 +1,7 @@
 /* 62-bat-thu.js — BẮT THÚ (Bước 3): nút Bắt, giao diện Ném, khung chọn châu, hoạt ảnh bóng, kết quả.
    Cần nạp sau 58-bong-bat.js, 61-tham-hiem-tran.js (dùng TTGBONG, TTGBALO, TTGCS, TTGTHU, THU_MOI).
    index.html nối vào bằng: TTGBAT.attach(host), TTGBAT.frame(ts) (đầu draw), TTGBAT.draw(ctx,ts) (sau khi vẽ thú), TTGBAT.enemyFx(ts) (trong pet('en')).
-   LUỒNG: bấm BẮT (đang đánh, thú hoang <60% máu) -> trận đóng băng -> giao diện Ném (3 lần, 60 giây) -> NÉM: bóng bay vòng cung -> mở hút thú -> đóng lại rung -> thành công / vỡ.
+   LUỒNG: bấm BẮT (đang đánh, thú hoang <60% máu) -> trận đóng băng -> giao diện Ném (3 lần, 60 giây) -> NÉM: bóng bay vòng cung -> TRÚNG (chớp) -> BẬT NGƯỢC -> MỞ -> HÚT thú -> ĐÓNG+RƠI -> RUNG 3 đợt (~5s) -> thành công / vỡ.
    Mỗi lần ném tốn 1 châu. Thành công: thú vào kho bậc tiến hóa 1, tung bậc chất lượng bằng TTGCS.tungBac (E..SS). Hết lượt: thú chạy thoát, về sảnh.
    ẢNH châu: game-moi/img/chau/<slug>-<dạng>.png với dạng = dong, mo, rung, thanhcong, thatbai. Bậc chưa có ảnh thì dùng ảnh Thương Hải Châu đổi màu tạm (hue). */
 (function(root){
@@ -15,7 +15,10 @@ var CFG={
   sc:{dong:.156,mo:.145,rung:.145,thanhcong:.145,thatbai:.145},   /* đơn vị game / pixel ảnh: quả châu ~40 đơn vị */
   neo:{mo:[.42,.53]},              /* điểm neo (tỉ lệ) của ảnh: mo = viên ngọc nằm lệch trái */
   macDinh:'cao',                   /* châu chọn sẵn khi vào giao diện Ném: 'cao' = bậc cao nhất đang có (dùng được), 'thap' = thấp nhất */
-  t:{bay:750,hut:850,rung:1900,ok:1500,fail:1200},   /* thời gian từng giai đoạn (ms) */
+  t:{bay:750,trung:150,bat:450,mo:400,hut:1000,roi:350,rung:5000,ok:1500,fail:1200},   /* thời gian từng giai đoạn (ms): bay > trúng > bật ngược > mở > hút > đóng+rơi > rung lắc > ok/fail */
+  rung:{dot:3,lac:1000,nghi:500},   /* RUNG: 3 đợt, mỗi đợt lắc 1000ms rồi nghỉ 500ms (đợt sau mạnh hơn); phần dư của t.rung là nghỉ cuối */
+  bat:{dx:-36,dy:-14},              /* điểm bóng lơ lửng sau khi bật ngược, lệch so với thú (đơn vị game; dx âm = về phía người chơi) */
+  mau:['#7fe8ff','#8cf08c','#ff9a5a','#c9a0ff','#8fb0ff','#ffe066'],   /* màu hạt hút / ánh sáng theo bậc châu 1..6 */
   mauBac:{E:'#9aa3b5',D:'#6fcf6f',C:'#4fb3ff',B:'#b57bff',A:'#ffb347',S:'#ff6f6f',SS:'#ffe066'}
 };
 var host=null,els=null,IMGS={};
@@ -116,8 +119,12 @@ function frame(ts){
   if(S.mode!=='off'&&(host.scene()!=='tran'||!battle())){abort();}
   var t=Math.max(0,ts-S.t0),T=CFG.t;
   if(S.mode==='ready'&&!S.sel){S.time-=dt;if(S.time<=0)flee('Hết giờ, thú hoang đã bỏ chạy!');}
-  else if(S.mode==='fly'&&t>=T.bay){S.mode='hut';S.t0=ts;}
-  else if(S.mode==='hut'&&t>=T.hut){S.mode='rung';S.t0=ts;}
+  else if(S.mode==='fly'&&t>=T.bay){S.mode='trung';S.t0=ts;}
+  else if(S.mode==='trung'&&t>=T.trung){S.mode='bat';S.t0=ts;}
+  else if(S.mode==='bat'&&t>=T.bat){S.mode='mo';S.t0=ts;}
+  else if(S.mode==='mo'&&t>=T.mo){S.mode='hut';S.t0=ts;}
+  else if(S.mode==='hut'&&t>=T.hut){S.mode='roi';S.t0=ts;}
+  else if(S.mode==='roi'&&t>=T.roi){S.mode='rung';S.t0=ts;}
   else if(S.mode==='rung'&&t>=T.rung){S.mode=S.win?'ok':'fail';S.t0=ts;if(S.win)giveBeast();}
   else if(S.mode==='ok'&&t>=T.ok)showPanel(true);
   else if(S.mode==='fail'&&t>=T.fail)afterFail();
@@ -125,15 +132,36 @@ function frame(ts){
 }
 function enemyFx(ts){
   var m=S.mode,t=Math.max(0,ts-S.t0),p;
-  if(m==='hut'){p=Math.max(0,Math.min(1,(t-150)/(CFG.t.hut-150)));return {a:1-p*.85,s:1-p*.9,dx:0,dy:0,hide:p>=1};}
-  if(m==='rung'||m==='ok'||(m==='panel'&&S.win))return {hide:true};
+  if(m==='trung'){p=Math.min(1,t/CFG.t.trung);return {a:(Math.floor(t/50)%2?.55:1),s:1,dx:7*(1-p),dy:0,r:0};}   /* trúng: giật lùi + nháy */
+  if(m==='bat'){p=Math.max(0,1-t/250);return p>0?{a:1,s:1,dx:6*p,dy:0,r:0}:null;}
+  if(m==='hut'&&host){   /* hút: thú thu nhỏ, xoay nhẹ, mờ dần, bay về phía bóng (dx,dy = độ lệch từ chỗ thú đến bóng) */
+    var mm=host.m(),ey=mm.gy-60;p=Math.max(0,Math.min(1,(t-100)/(CFG.t.hut-100)));var q=p*p;
+    return {a:1-p*.85,s:1-p*.92,dx:CFG.bat.dx*q,dy:CFG.bat.dy*q,r:p*3.5,hide:p>=1};}
+  if(m==='roi'||m==='rung'||m==='ok'||(m==='panel'&&S.win))return {hide:true};
   if(m==='fail'){p=Math.min(1,t/450);return {a:p,s:.25+.75*p,dx:0,dy:0};}
   return null;
 }
+/* ----- hiệu ứng canvas: ánh sáng, va chạm, hạt hút ----- */
+function glow(ctx,x,y,r,col,a){ctx.save();ctx.globalCompositeOperation='lighter';var g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,col);g.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=Math.max(0,Math.min(1,a));ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,6.2832);ctx.fill();ctx.restore();}
+function hitFx(ctx,x,y,u){   /* chớp sáng trắng + tia tóe ra tại điểm chạm, u: 0..1 */
+  if(u>=1)return;glow(ctx,x,y,12+30*u,'#ffffff',1-u);
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle='#fff6c0';ctx.lineWidth=2;ctx.lineCap='round';ctx.globalAlpha=1-u;
+  for(var i=0;i<8;i++){var a=i*.7854+.3,c=Math.cos(a),s=Math.sin(a),r0=8+10*u,r1=14+34*u;ctx.beginPath();ctx.moveTo(x+c*r0,y+s*r0);ctx.lineTo(x+c*r1,y+s*r1);ctx.stroke();}
+  ctx.restore();}
+function hutFx(ctx,ts,t,cap,ex,ey,Hx,Hy){   /* hạt/tia sáng xoáy từ thú vào tâm bóng, mật độ tăng dần */
+  var p=Math.min(1,t/CFG.t.hut),n=8+Math.round(28*p),col=CFG.mau[cap-1]||'#fff',i;
+  function pos(i,u){var ang=i*2.399+u*3.5,r0=26+((i*7)%5)*7,e=u*u*(3-2*u);return [ex+(Hx-ex)*e+Math.cos(ang)*r0*(1-e),ey+(Hy-ey)*e+Math.sin(ang)*r0*.8*(1-e)];}
+  glow(ctx,Hx,Hy,16+14*p,col,.3+.4*p);
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineCap='round';
+  for(i=0;i<n;i++){
+    var u=(t/520+(i*.6180339)%1)%1,a=pos(i,u),b=pos(i,Math.max(0,u-.07)),sz=1.4+2*u;
+    ctx.globalAlpha=(u<.15?u/.15:1)*.9;ctx.lineWidth=sz;ctx.beginPath();ctx.moveTo(b[0],b[1]);ctx.lineTo(a[0],a[1]);ctx.stroke();
+    ctx.beginPath();ctx.arc(a[0],a[1],sz,0,6.2832);ctx.fill();}
+  ctx.restore();}
 function draw(ctx,ts){
   if(S.mode==='off'||!host)return;
   var m=host.m(),t=Math.max(0,ts-S.t0),T=CFG.t,cap=S.mode==='ready'?S.cap:S.capUsed;
-  var hx=m.cx,hy=m.gy-78+Math.sin(ts/420)*3,ex=m.ex,ey=m.gy-60,gb=m.gy-20,p,q,amp;
+  var hx=m.cx,hy=m.gy-78+Math.sin(ts/420)*3,ex=m.ex,ey=m.gy-60,gb=m.gy-20,Hx=ex+CFG.bat.dx,Hy=ey+CFG.bat.dy,p,q,amp;
   if(S.mode==='ready'){
     spr(ctx,'dong',cap,hx,hy,1,Math.sin(ts/700)*.08);
     ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 13px sans-serif';ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.fillStyle='#fff';
@@ -141,12 +169,29 @@ function draw(ctx,ts){
     ctx.strokeText(tx,hx,ty);ctx.fillText(tx,hx,ty);ctx.restore();
   }else if(S.mode==='fly'){
     p=Math.min(1,t/T.bay);spr(ctx,'dong',cap,hx+(ex-hx)*p,hy+(ey-hy)*p-Math.sin(Math.PI*p)*70,1,p*12.5);
+  }else if(S.mode==='trung'){
+    spr(ctx,'dong',cap,ex,ey,1,12.5);hitFx(ctx,ex,ey,t/(T.trung*2));
+  }else if(S.mode==='bat'){
+    p=Math.min(1,t/T.bat);q=1-(1-p)*(1-p);
+    spr(ctx,'dong',cap,ex+(Hx-ex)*q,ey+(Hy-ey)*q-18*Math.sin(Math.PI*p),1,12.5+4*q);hitFx(ctx,ex,ey,(T.trung+t)/(T.trung*2));
+  }else if(S.mode==='mo'){
+    p=Math.min(1,t/T.mo);spr(ctx,'mo',cap,Hx,Hy+Math.sin(ts/240)*1.5,.55+.45*(1-(1-p)*(1-p)),0);
   }else if(S.mode==='hut'){
-    p=Math.min(1,t/T.hut);spr(ctx,'mo',cap,ex,ey,.75+.25*Math.min(1,p*3),0);
-  }else if(S.mode==='rung'){
-    q=Math.min(1,t/300);var y=ey+(gb-ey)*q*q;
-    if(t<300)spr(ctx,'dong',cap,ex,y,1,q*3);
-    else{amp=7*(1-.5*(t-300)/(T.rung-300));spr(ctx,'rung',cap,ex+Math.sin(ts/17)*amp,gb,1,Math.sin(ts/21)*.12);}
+    p=Math.min(1,t/T.hut);hutFx(ctx,ts,t,cap,ex,ey,Hx,Hy);
+    spr(ctx,'mo',cap,Hx,Hy+Math.sin(ts/240)*1.5,1+.03*Math.sin(ts/90),0);
+  }else if(S.mode==='roi'){   /* đóng lại, rơi xuống đất, nảy nhẹ một cái */
+    p=Math.min(1,t/T.roi);q=Math.min(1,p/.65);
+    var bx=Hx+(ex-Hx)*q,by=Hy+(gb-Hy)*q*q;
+    if(p>.65){bx=ex;by=gb-9*Math.sin(Math.PI*(p-.65)/.35);}
+    spr(ctx,'dong',cap,bx,by,1,-(1-p)*6.2832);
+  }else if(S.mode==='rung'){   /* 3 đợt lắc (ảnh rung) xen nghỉ đứng yên (ảnh dong + ánh sáng nhấp nháy) */
+    var R=CFG.rung,per=R.lac+R.nghi,idx=Math.floor(t/per),wi=t-idx*per,mau=CFG.mau[cap-1]||'#fff';
+    if(idx<R.dot&&wi<R.lac){
+      var env=Math.min(1,wi/80,(R.lac-wi)/120);amp=(4+idx*3)*env;
+      spr(ctx,'rung',cap,ex+Math.sin(ts/(17-idx*2))*amp,gb,1,Math.sin(ts/(21-idx*3))*(.08+.07*idx)*env);
+    }else{
+      spr(ctx,'dong',cap,ex,gb,1,0);glow(ctx,ex,gb,24,mau,.25+.25*Math.sin(ts/80));
+    }
   }else if(S.mode==='ok'){
     spr(ctx,'thanhcong',cap,ex,gb-4,1+.05*Math.sin(ts/120),0);
   }else if(S.mode==='fail'){
