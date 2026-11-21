@@ -38,6 +38,7 @@ var RAIL={x:1754,y:199,w:21,h:422};
 var GO={x:1319,y:668,w:206,h:92},THA={x:1542,y:668,w:162,h:92};      /* 2 nút dưới-phải: RA TRẬN và THẢ (vùng tấm vàng vẽ sẵn). Lớp mờ/sáng nới thêm DIM_PAD px mỗi bên */
 var GO_OV={x:1286,y:664,w:250,h:100},DIM_PAD=5;                   /* ảnh 'Đang ra trận' phủ lên RA TRẬN */                                  /* rãnh cuộn bên phải lưới */
 /* ----- KỸ NĂNG / SÁCH (5a) ----- */
+var OC_X=[236,367,500],OC_Y=706;   /* tâm 3 ô tròn (px ảnh khung, đo trực tiếp từ khung-thu.webp). Muốn nhích chữ: sửa 2 số này */
 var NSK=6;                  /* số ô gắn kỹ năng */
 var NOI_IMG='';             /* ẢNH KHUNG BẢNG NỔI (nền xanh đã tách, ô giữa trong suốt): khi có file thì điền vd 'game-moi/khung-noi.webp'. Để trống = dùng khung vẽ bằng CSS tạm. */
 var POP_LS={x:735,y:180,w:470,h:535};    /* bảng danh sách sách (px ảnh khung) */
@@ -128,12 +129,13 @@ var css=[
 /* rãnh + thumb cuộn (phủ kín rãnh vẽ sẵn trong ảnh để không lộ thumb vẽ sẵn ở trên cùng) */
 '.tt-rail{border-radius:{9};background:#0d0e34;border:{2} solid #8a6a2a;touch-action:none;cursor:pointer}',
 '.tt-th{position:absolute;left:{2};right:{2};border-radius:{7};background:linear-gradient(90deg,#c9992f,#ffe58a,#c9992f);box-shadow:0 0 {6} rgba(255,224,102,.5)}',
-/* 3 Ô TRÒN dưới ảnh thú: Lv / Bậc tiến hóa / Rank (chữ bút lông, màu theo Rank) */
-'.tt-oc{display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;color:#ffe9a0;line-height:1;text-align:center}',
-'.tt-oc .l{font-family:var(--fh);font-weight:800;font-size:{22};letter-spacing:{1};color:#bfeee8;text-shadow:0 {2} 0 #000,0 0 {4} #000}',
-'.tt-oc .v{font-family:var(--fh);font-weight:800;font-size:{50};margin-top:{3};color:#ffe9a0;text-shadow:{2} 0 0 #000,-{2} 0 0 #000,0 {2} 0 #000,0 -{2} 0 #000,0 0 {10} rgba(255,200,80,.7)}',
-'.tt-oc.rk3 .r{font-family:\"Kaushan Script\",\"Yuji Boku\",\"Permanent Marker\",\"Brush Script MT\",cursive;font-weight:900;font-size:{86};line-height:1;color:var(--rc);padding:0 {6} {4} 0;-webkit-text-stroke:{3} rgba(0,0,0,.9);paint-order:stroke fill;text-shadow:{3} {3} 0 #000,-{2} -{2} 0 #000,{2} -{2} 0 #000,-{2} {2} 0 #000,0 0 {14} var(--rc),0 0 {28} var(--rc);transform:skewX(-6deg)}',
-'.tt-oc.rk3.two .r{font-size:{62};padding:0 {4} {3} 0}',
+/* 3 Ô TRÒN dưới ảnh thú: Lv / Bậc tiến hóa / Rank. Chữ bút lông (font-rank.woff2 = Kaushan Script cắt nhỏ, nhúng sẵn), màu NEON theo Rank (biến --rc đậm, --rl nhạt) */
+'.tt-oc{display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;line-height:1;text-align:center}',
+'.tt-oc .l{font-family:var(--fh);font-weight:800;font-size:{21};letter-spacing:{1};color:#b9fbff;text-shadow:0 0 {3} #00e5ff,0 0 {8} #00b8ff,0 {2} 0 rgba(0,0,40,.9)}',
+'.tt-oc .v,.tt-oc .r{font-family:\"TTGRank\",\"Kaushan Script\",\"Brush Script MT\",cursive;font-weight:400;display:block}',
+'.tt-oc .v{font-size:{58};margin-top:{2};color:#fffbd0;-webkit-text-stroke:{3} #fffbd0;filter:drop-shadow(0 {3} 0 rgba(0,6,40,.85));text-shadow:0 0 {6} #ffe14d,0 0 {14} #ffb800,0 0 {26} rgba(255,170,0,.8)}',
+'.tt-oc.rk3 .r{font-size:{88};color:var(--rl);-webkit-text-stroke:{4} var(--rl);text-shadow:0 0 {4} var(--rc),0 0 {10} var(--rc),0 0 {20} var(--rc),0 0 {34} var(--rc);filter:drop-shadow(0 {3} 0 rgba(0,6,40,.85))}',
+'.tt-oc.rk3.two .r{font-size:{66}}',
 /* NÚT RA TRẬN */
 '.tt-go{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ RA TRẬN đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
 '.tt-tha{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ THẢ vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
@@ -176,8 +178,8 @@ var css=[
 '.tt-pb button.p:active{filter:brightness(1.08)}'
 ].join('\n').replace(/\{(\d+(?:\.\d+)?)\}/g,'calc(var(--u)*$1)');
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
-/* font chữ bút lông cho Rank (Google Fonts; mất mạng thì tự dùng font cursive của máy) */
-if(!document.getElementById('tt-font-rk')){var lk=document.createElement('link');lk.id='tt-font-rk';lk.rel='stylesheet';lk.href='https://fonts.googleapis.com/css2?family=Kaushan+Script&display=swap';document.head.appendChild(lk);}
+/* font bút lông cho chữ Rank / số: file nhúng sẵn trong repo (không cần mạng) */
+var ff=document.createElement('style');ff.textContent='@font-face{font-family:"TTGRank";src:url("game-moi/font-rank.woff2?v=1") format("woff2");font-display:block}';document.head.appendChild(ff);
 
 /* ===== DỰNG PANEL (một lần) ===== */
 function box(c,x,y,w,h){var s=c.style;s.left=(x/BW*100)+'%';s.top=(y/BH*100)+'%';s.width=(w/BW*100)+'%';s.height=(h/BH*100)+'%';return c;}
@@ -214,7 +216,7 @@ function build(){
   var eq=mk('button','tt-eq',215,578,300,52);eq.type='button';eq.setAttribute('aria-label','Trang Bị');
   eq.addEventListener('click',function(){if(window.TTGTB)TTGTB.open();else toast('Sắp có');});
   /* 3 ô tròn bên dưới (tâm (241,695),(367,695),(498,695), bán kính ~60): ô 1 = Lv, ô 2 = Bậc tiến hóa (1-3), ô 3 = Rank (E,D,C,B,A,S,SS) */
-  E.oc=[mk('div','tt-oc',191,645,100,100),mk('div','tt-oc',317,645,100,100),mk('div','tt-oc rk3',448,645,100,100)];
+  E.oc=[mk('div','tt-oc',OC_X[0]-52,OC_Y-52,104,104),mk('div','tt-oc',OC_X[1]-52,OC_Y-52,104,104),mk('div','tt-oc rk3',OC_X[2]-52,OC_Y-52,104,104)];
 
   /* --- GIỮA TRÊN: chữ trang + 5 thanh chỉ số + 2 nút ‹ › --- */
   E.cap=mk('div','tt-cap',960,170,290,26);E.cap.style.justifyContent='flex-end';   /* khung mới hết chỗ phía trên 5 thanh: chữ tên trang đặt ở dải trống trên bảng, canh phải để tránh mặt trang trí giữa */
@@ -329,14 +331,14 @@ function renderLeft(){
   renderBadges(t);
 }
 /* 3 ô tròn: Lv / Bậc / Rank. Rank thiếu thì coi là C (giống TTGCS.tinh). Màu Rank trùng viền hiệu ứng ở 64-thong-bao.js */
-var RKC={E:'#ffffff',D:'#3dff6a',C:'#3fa9ff',B:'#b36bff',A:'#ffd21f',S:'#ff8a1f',SS:'#ff3030'};
+var RKC={E:['#ffffff','#ffffff'],D:['#39ff14','#7dff5e'],C:['#00d0ff','#3de0ff'],B:['#cc33ff','#dd77ff'],A:['#ffe600','#fff24d'],S:['#ff8000','#ffa63d'],SS:['#ff1744','#ff5472']};   /* [màu phát sáng, màu lõi chữ] neon: E trắng, D xanh lá, C lam, B tím, A vàng, S cam, SS đỏ */
 function renderBadges(t){
   if(!E.oc)return;
   if(!t){E.oc.forEach(function(c){c.innerHTML='';});return;}
   var lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),bac=RKC[t.bac]?t.bac:'C';
   E.oc[0].innerHTML='<span class="l">Lv</span><span class="v">'+lv+'</span>';
   E.oc[1].innerHTML='<span class="l">Bậc</span><span class="v">'+tien+'</span>';
-  E.oc[2].classList.toggle('two',bac.length>1);E.oc[2].style.setProperty('--rc',RKC[bac]);E.oc[2].innerHTML='<span class="r">'+bac+'</span>';
+  E.oc[2].classList.toggle('two',bac.length>1);E.oc[2].style.setProperty('--rc',RKC[bac][0]);E.oc[2].style.setProperty('--rl',RKC[bac][1]);E.oc[2].innerHTML='<span class="r">'+bac+'</span>';
 }
 function renderGo(){
   var on=!!sel&&sel===rt,t=!!byUid(sel);
