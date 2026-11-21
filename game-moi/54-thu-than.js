@@ -1,8 +1,10 @@
 /* 54-thu-than.js - Nút "Thú Thần" + panel Thú Thần (chứa và trang bị thú đã bắt).
    Cần 52-nut-vuong.js (TTGNV) nạp trước; nạp SAU 53-balo.js (để đóng Balo khi mở panel này) và sau 51-thu-moi.js (lấy ảnh thú).
-   Ảnh khung: game-moi/khung-thu.webp (1841x811, khung xanh-vàng mới: chữ THÚ THẦN, nút X, chữ TRANG BỊ và RA TRẬN đã VẼ SẴN trong ảnh). Hiển thị tối đa đúng cỡ gốc (1 pixel ảnh = 1 pixel máy) để không bị mờ; đóng bằng nút X / bấm ngoài / Esc.
+   Ảnh khung: game-moi/khung-thu.webp (1841x811, khung xanh-vàng: chữ THÚ THẦN, nút X, chữ TRANG BỊ, RA TRẬN và THẢ đã VẼ SẴN trong ảnh; khung mới 21/11/2026 thêm nút THẢ). Hiển thị tối đa đúng cỡ gốc (1 pixel ảnh = 1 pixel máy) để không bị mờ; đóng bằng nút X / bấm ngoài / Esc.
    MỌI TỌA ĐỘ bên dưới tính theo PIXEL ẢNH ĐÃ CẮT 1841x811 (BW x BH). Cỡ chữ/độ dày trong CSS ({n}) vẫn tính theo thang cũ 2200 (UB) nên không phải chỉnh lại; --u = clientWidth/UB.
    TIẾN ĐỘ: BƯỚC 1 (nút + icon) xong. BƯỚC 2 (khung + đóng) xong. BƯỚC 3 (bố cục + chọn thú + ra trận) xong.
+   NÚT THẢ: bỏ hẳn thú đang chọn khỏi kho (hỏi xác nhận, sách kỹ năng đang gắn trả về Balo). Nút MỜ khi chưa chọn thú hoặc thú đang chọn đã RA TRẬN; chỉ SÁNG khi chọn thú CHƯA ra trận. Thú 'canh-' (đồng bộ từ sảnh) bị thả thì ghi nhớ ở khóa ttg_moi_thu_tha_v1 để dongBo() không tự thêm lại.
+   HIỆU ỨNG NHẤN: do 63-nhan-nut.js lo cho mọi nút (nút vẽ sẵn trong ảnh khung tự được cắt mảnh ảnh để co/nảy). Đừng thêm :active{transform} vào nút nữa kẻo co đôi.
    CHƯA LÀM: bậc thú SS..D (chỉ chừa trường bac), buff/debuff/kỹ năng có sẵn (3 ô tròn), gắn/gỡ sách kỹ năng (6 ô "+"), bảng nổi.
    QUY TẮC: mở Thú Thần thì đóng Balo, mở Balo thì đóng Thú Thần (53-balo.js gọi TTGTHU.close()).
    DỮ LIỆU: danh sách thú {uid, id (loài, khớp THU_MOI.byId), ten, bac (tùy chọn: SS/S/A/B/C/D), tien (tiến hóa 1-3 = ảnh -b1/-b2/-b3, mặc định 1), chiso:{hp,tc,pt,td,mm}}
@@ -14,8 +16,8 @@
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var BW=1841,BH=811,UB=2200,IMG='game-moi/khung-thu.webp?v=6',OV_GOV='game-moi/nut-dang-ra-tran.webp?v=1';   /* ảnh khung gốc 1841x811; UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
-var KEY='ttg_moi_thu_v1',KRT='ttg_moi_thu_ratran_v1';
+var BW=1841,BH=811,UB=2200,IMG='game-moi/khung-thu.webp?v=7',OV_GOV='game-moi/nut-dang-ra-tran.webp?v=2';   /* ảnh khung gốc 1841x811; UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
+var KEY='ttg_moi_thu_v1',KRT='ttg_moi_thu_ratran_v1',KTHA='ttg_moi_thu_tha_v1';
 var demo=/[?&]thu=demo/.test(location.search);
 var isOpen=false,openAt=0,root=null,fr=null,E={};
 
@@ -32,7 +34,9 @@ var ANH_THU=360;    /* cỡ ảnh thú lớn bên trái (px ảnh khung). Ảnh 
 var BAR_Y=216,BAR_DY=40.8,BAR_X=772,BAR_W=374,BAR_H=27;             /* 5 thanh chỉ số */
 var GR_X=[1288,1405,1520,1634],GR_Y=[201,310,420,523],GR_W=105,GR_H=96;  /* lưới thú 4 cột x 4 hàng */
 var SK_X=[782,902,1021],SK_Y=[477,592],SK_S=100;                    /* 6 ô kỹ năng (3 cột x 2 hàng) */
-var RAIL={x:1754,y:199,w:21,h:422};                                  /* rãnh cuộn bên phải lưới */
+var RAIL={x:1754,y:199,w:21,h:422};
+var GO={x:1319,y:668,w:206,h:92},THA={x:1542,y:668,w:162,h:92};      /* 2 nút dưới-phải: RA TRẬN và THẢ (vùng tấm vàng vẽ sẵn). Lớp mờ/sáng nới thêm DIM_PAD px mỗi bên */
+var GO_OV={x:1286,y:664,w:250,h:100},DIM_PAD=5;                   /* ảnh 'Đang ra trận' phủ lên RA TRẬN */                                  /* rãnh cuộn bên phải lưới */
 /* ----- KỸ NĂNG / SÁCH (5a) ----- */
 var NSK=6;                  /* số ô gắn kỹ năng */
 var NOI_IMG='';             /* ẢNH KHUNG BẢNG NỔI (nền xanh đã tách, ô giữa trong suốt): khi có file thì điền vd 'game-moi/khung-noi.webp'. Để trống = dùng khung vẽ bằng CSS tạm. */
@@ -51,7 +55,8 @@ if(window.TTGBALO&&TTGBALO.reg)TTGBALO.reg(SACH);   /* đăng ký vào Balo (sá
 if(demo&&window.TTGBALO)Object.keys(SACH).forEach(function(k,i){TTGBALO.add(k,i%3+1);});   /* ?thu=demo: tặng sách mẫu (Balo demo, không lưu) */
 
 /* ===== DỮ LIỆU ===== */
-var thus=[],rt=null,sel=null,page=0,row0=0;
+var thus=[],rt=null,sel=null,page=0,row0=0,thaList=[];
+try{var tl=JSON.parse(localStorage.getItem(KTHA)||'[]');if(Array.isArray(tl))thaList=tl;}catch(e){}
 function uid(){return 't'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function demoChiso(k){var c={hp:300+k*37,tc:40+k*7,pt:30+k*5,td:20+(k*11)%60,mm:5+(k*3)%30},n=0;
   PAGES.slice(1).forEach(function(p){p.ds.forEach(function(d){c[d[0]]=((k*7+(n++)*13)%240)/10;});});return c;}   /* chỉ số phụ mẫu 0~24% */
@@ -85,7 +90,6 @@ var css=[
 '.tt-ph{display:flex;align-items:center;justify-content:center;overflow:hidden}',
 '.tt-ph img{width:{'+ANH_THU+'};height:{'+ANH_THU+'};object-fit:contain;filter:drop-shadow(0 {6} {10} rgba(0,0,0,.55));-webkit-user-drag:none;user-select:none}',
 '.tt-eq{padding:0;border:0;border-radius:{26};background:transparent;cursor:pointer}',   /* chữ TRANG BỊ đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
-'.tt-eq:active{background:rgba(255,224,102,.18)}',
 '.tt-emp{text-align:center;font-size:{26};line-height:1.45;color:#7c83b8;padding:0 {20}}',
 /* GIỮA TRÊN: chỉ số */
 '.tt-cap{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{21};letter-spacing:{1};color:#bfeee8;text-shadow:0 {2} 0 #000}',
@@ -95,7 +99,6 @@ var css=[
 '.tt-mid{display:flex;align-items:center;justify-content:center;text-align:center;font-size:{24};color:#7c83b8}',
 '.tt-pg{display:flex;align-items:center;justify-content:center;padding:0;border-radius:{10};border:{3} solid #c9992f;background:#1d1d5a;color:#ffe9a0;font-size:{36};line-height:1;cursor:pointer}',
 '.tt-pg:disabled{opacity:.3;cursor:default}',
-'.tt-pg:active:not(:disabled){transform:scale(.92)}',
 /* GIỮA DƯỚI: 6 ô kỹ năng */
 '.tt-sk{display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:{10};background:transparent;color:#ffd86b;font-size:{78};font-weight:300;line-height:1;text-shadow:0 0 {12} rgba(255,200,80,.6);cursor:pointer}',
 '.tt-sk{position:absolute}',
@@ -115,9 +118,15 @@ var css=[
 '.tt-th{position:absolute;left:{2};right:{2};border-radius:{7};background:linear-gradient(90deg,#c9992f,#ffe58a,#c9992f);box-shadow:0 0 {6} rgba(255,224,102,.5)}',
 /* NÚT RA TRẬN */
 '.tt-go{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ RA TRẬN đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
-'.tt-go:active:not(:disabled){background:rgba(255,255,255,.18)}',
-'.tt-go:disabled{cursor:default}',
-'.tt-go.off{background:rgba(3,4,18,.5)}',   /* chưa chọn thú: làm tối tấm RA TRẬN */
+'.tt-tha{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ THẢ vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
+'.tt-go.off,.tt-tha.off{cursor:default}',
+/* lớp MỜ / SÁNG: cắt đúng mảnh ảnh khung dưới nút rồi chỉnh độ sáng, viền mờ dần để không lộ hình chữ nhật */
+'.tt-dim,.tt-lit{pointer-events:none;background-repeat:no-repeat;opacity:0;transition:opacity .22s ease;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 9%,#000 91%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent),linear-gradient(180deg,transparent,#000 9%,#000 91%,transparent);mask-composite:intersect}',
+'.tt-dim{filter:brightness(.4) saturate(.35)}',
+'.tt-dim.on{opacity:.93}',
+'.tt-lit{filter:brightness(1.7) saturate(1.25)}',
+'.tt-lit.on{opacity:.4;animation:ttLit 1.7s ease-in-out infinite}',
+'@keyframes ttLit{0%,100%{opacity:.08}50%{opacity:.42}}',
 '.tt-gov{display:none;pointer-events:none;-webkit-user-drag:none;user-select:none}',   /* ảnh nút ĐANG RA TRẬN phủ lên chữ RA TRẬN vẽ sẵn */
 /* ô kỹ năng đã gắn + bảng danh sách sách + bảng nổi */
 '.tt-sk .ic{display:flex;align-items:center;justify-content:center;font-size:{62};font-weight:400;line-height:1;text-shadow:none}',
@@ -146,7 +155,7 @@ var css=[
 '.tt-pb button{min-width:{150};height:{58};padding:0 {18};border-radius:{10};border:{2} solid #c9992f;background:#1d1d5a;color:#ffe9a0;font-family:var(--fh);font-weight:800;font-size:{28};cursor:pointer}',
 '.tt-pb button.p{background:linear-gradient(180deg,#ffe58a,#c58a1e);color:#3b2406}',
 '.tt-pb button.d{background:#6b1f2e;border-color:#e0707e;color:#ffd9dd}',
-'.tt-pb button:active{transform:scale(.95)}'
+'.tt-pb button.p:active{filter:brightness(1.08)}'
 ].join('\n').replace(/\{(\d+(?:\.\d+)?)\}/g,'calc(var(--u)*$1)');
 var st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 
@@ -162,6 +171,15 @@ function unit(){if(!fr)return;var d=window.devicePixelRatio||1;fr.style.maxWidth
 var tt=0,lastDrag=0;
 function toast(t){E.ts.textContent=t;E.ts.style.display='flex';clearTimeout(tt);tt=setTimeout(function(){E.ts.style.display='none';},1500);}
 
+/* cắt mảnh ảnh khung theo box {x,y,w,h} (px ảnh), nới DIM_PAD mỗi bên, làm lớp phủ cùng chỗ (dùng cho mờ/sáng nút vẽ sẵn) */
+function bake(cls,b){
+  var x=Math.max(0,b.x-DIM_PAD),y=Math.max(0,b.y-DIM_PAD),w=Math.min(BW-x,b.w+DIM_PAD*2),h=Math.min(BH-y,b.h+DIM_PAD*2);
+  var c=mk('div',cls,x,y,w,h),s=c.style;
+  s.backgroundImage='url('+IMG+')';
+  s.backgroundSize=(BW/w*100)+'% '+(BH/h*100)+'%';
+  s.backgroundPosition=(BW>w?x/(BW-w)*100:0)+'% '+(BH>h?y/(BH-h)*100:0)+'%';
+  return c;
+}
 function build(){
   var i,j;
   root=document.createElement('div');root.className='tt';
@@ -204,9 +222,18 @@ function build(){
   E.th=document.createElement('div');E.th.className='tt-th';E.rail.appendChild(E.th);
   gridScroll();
 
-  /* --- NÚT RA TRẬN: tấm vàng dưới-phải đã vẽ sẵn chữ "Ra trận" (x1372-1672,y662-752). E.gov = tấm phủ "Đang ra trận" khi thú đang ra trận --- */
-  E.gov=mk('img','tt-gov',1346,634,354,142);E.gov.src=OV_GOV;E.gov.alt='';E.gov.draggable=false;   /* ảnh nút ĐANG RA TRẬN (cắt từ khung mới) đè lên nút RA TRẬN, giống ảnh MỞ KHÓA ở Balo */
-  E.go=mk('button','tt-go',1372,662,300,90);E.go.setAttribute('aria-label','Ra trận');E.go.type='button';E.go.addEventListener('click',function(){if(sel&&sel!==rt){rt=sel;save();render();}});
+  /* --- 2 NÚT DƯỚI-PHẢI: RA TRẬN và THẢ (tấm vàng đã vẽ sẵn chữ trong khung). Mỗi nút gồm: lớp MỜ (.tt-dim) + lớp SÁNG (.tt-lit, chỉ THẢ) + ảnh 'Đang ra trận' (chỉ RA TRẬN) + nút bấm trong suốt.
+     Lớp dim/lit dựng TRƯỚC nút bấm để nút luôn nằm trên cùng. --- */
+  E.goDim=bake('tt-dim',GO);E.thaDim=bake('tt-dim',THA);E.thaLit=bake('tt-lit',THA);
+  E.gov=mk('img','tt-gov',GO_OV.x,GO_OV.y,GO_OV.w,GO_OV.h);E.gov.src=OV_GOV;E.gov.alt='';E.gov.draggable=false;   /* ảnh nút ĐANG RA TRẬN đè lên nút RA TRẬN, giống ảnh MỞ KHÓA ở Balo */
+  E.go=mk('button','tt-go',GO.x,GO.y,GO.w,GO.h);E.go.setAttribute('aria-label','Ra trận');E.go.type='button';
+  E.go.addEventListener('click',function(){if(sel&&sel!==rt){rt=sel;save();render();}});
+  E.tha=mk('button','tt-tha',THA.x,THA.y,THA.w,THA.h);E.tha.setAttribute('aria-label','Thả');E.tha.type='button';
+  E.tha.addEventListener('click',function(){
+    var t=byUid(sel);if(!t)return;
+    if(t.uid===rt){toast('Thú đang ra trận, không thể thả');return;}
+    moTha(t);
+  });
 
   buildPop();
   document.body.appendChild(root);
@@ -279,9 +306,14 @@ function renderLeft(){
   else{E.nm.textContent='Chưa Có Thú';E.ph.innerHTML='<div class="tt-emp">Chưa có thú nào<br>Bắt thú để cất vào đây</div>';}
 }
 function renderGo(){
-  var on=!!sel&&sel===rt;
+  var on=!!sel&&sel===rt,t=!!byUid(sel);
   E.gov.style.display=on?'block':'none';   /* chữ RA TRẬN vẽ sẵn không đổi được: đang ra trận thì phủ tấm "Đang ra trận" lên */
-  E.go.disabled=!sel||on;E.go.classList.toggle('off',!sel);
+  E.go.disabled=!sel||on;
+  E.goDim.classList.toggle('on',!sel);   /* chưa chọn thú: làm mờ tấm RA TRẬN */
+  /* THẢ: chỉ SÁNG khi chọn thú CHƯA ra trận. Mờ khi không chọn gì HOẶC thú chọn đã ra trận. (aria-disabled thay vì disabled để bấm vào còn báo lý do) */
+  var can=t&&sel!==rt;
+  E.tha.setAttribute('aria-disabled',can?'false':'true');E.tha.classList.toggle('off',!can);
+  E.thaDim.classList.toggle('on',!can);E.thaLit.classList.toggle('on',!!can);
 }
 function render(){if(!root)return;renderLeft();renderStats();renderGrid();renderGo();renderSkills();}
 
@@ -351,6 +383,27 @@ function go(k){
   if(window.TTGBALO)TTGBALO.add(id,1);kn[k]=null;save();hidePop();renderSkills();toast('Đã gỡ, sách về Balo');
 }
 
+/* ===== THẢ THÚ: bỏ hẳn khỏi kho. Hỏi xác nhận (dùng bảng nổi E.in). Thú đang ra trận KHÔNG thả được. ===== */
+function moTha(t){
+  var a=anhThu(t);
+  E.in.innerHTML='<div class="tt-ii"><span class="i">'+(a?'<img src="'+esc(a)+'" alt="">':'?')+'</span><div class="n">Thả '+esc(tenThu(t))+'?</div><div class="d">Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.</div></div>'
+   +'<div class="tt-pb"><button type="button" class="d">Thả</button><button type="button">Hủy</button></div>';
+  var bs=E.in.querySelectorAll('button');
+  bs[0].addEventListener('click',function(){tha(t.uid);});
+  bs[1].addEventListener('click',function(){hidePop();});
+  E.ls.style.display='none';E.ov.style.display='block';E.in.style.display='flex';
+}
+function tha(u){
+  var t=byUid(u);if(!t||t.uid===rt)return;
+  var idx=thus.indexOf(t),kn=Array.isArray(t.kn)?t.kn:[],ten=tenThu(t);
+  if(window.TTGBALO)kn.forEach(function(id){if(id)TTGBALO.add(id,1);});   /* trả sách kỹ năng về Balo */
+  thus.splice(idx,1);
+  if(u.indexOf('canh-')===0&&thaList.indexOf(u)<0){thaList.push(u);if(!demo){try{localStorage.setItem(KTHA,JSON.stringify(thaList));}catch(e){}}}   /* thú đồng bộ từ sảnh: nhớ đã thả để không tự thêm lại */
+  save();
+  sel=thus[idx]?thus[idx].uid:(thus[idx-1]?thus[idx-1].uid:null);
+  hidePop();render();toast('Đã thả '+ten);
+}
+
 /* ĐỒNG BỘ THÚ Ở SẢNH: game-moi/index.html lưu thú đang đứng ở sảnh vào khóa ttg_moi_v1 {thu:loài, bm:bậc 1-3}.
    Chưa có cơ chế bắt thú thật, nên mỗi loài thú từng dùng ở sảnh được coi là ĐÃ CÓ và tự vào danh sách (mỗi loài 1 con, uid 'canh-<loài>').
    Con 'canh-' luôn cập nhật tiến hóa (tien) theo bậc bm hiện tại. Sau này có bắt thú thì bỏ hàm này (hoặc chỉ giữ để nhập thú cũ). */
@@ -360,6 +413,7 @@ function dongBo(){
     var sv=JSON.parse(localStorage.getItem('ttg_moi_v1')||'{}'),id=sv&&sv.thu;
     if(!id||!THU_MOI.byId[id])return;
     var tien=Math.max(1,Math.min(3,(sv.bm|0)||1)),u='canh-'+id,t=byUid(u),i,co=false;
+    if(thaList.indexOf(u)>=0)return;   /* đã thả con này rồi */
     for(i=0;i<thus.length;i++)if(thus[i].id===id){co=true;break;}
     if(t){if(t.tien!==tien){t.tien=tien;save();}}
     else if(!co){thus.push({uid:u,id:id,tien:tien,chiso:{}});save();}
@@ -402,5 +456,5 @@ function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=M
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
   if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
-window.TTGTHU={open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,anh:anhThu,expInfo:expInfo,addExp:addExp};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,anh:anhThu,expInfo:expInfo,addExp:addExp};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();

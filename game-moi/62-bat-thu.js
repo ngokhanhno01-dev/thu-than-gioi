@@ -237,7 +237,6 @@ function draw(ctx,ts){
 /* ================= DOM ================= */
 var CSS=[
 '.btx{position:fixed;z-index:7;display:none;box-sizing:border-box;border:2px solid #d9a93a;border-radius:9px;background:linear-gradient(#2a5fb0,#143a78);color:#fff3c4;font:800 14px/1 "Segoe UI",system-ui,sans-serif;text-shadow:0 1px 0 #000;box-shadow:0 0 10px rgba(255,214,102,.45);touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;padding:0;align-items:center;justify-content:center;gap:5px}',
-'.btx:active{transform:scale(.94)}',
 '.btx.bi{background:url(game-moi/nut-bat.webp) 50% 50%/contain no-repeat;border:0;border-radius:0;box-shadow:none;text-shadow:none;font-size:0;color:transparent}',
 '.btx.g{background:linear-gradient(#5b5f73,#33364a);border-color:#8a8da0;color:#ddd;box-shadow:none}',
 '.btx.chip{font-size:11px;line-height:1.15;padding:0 6px;text-align:left}',

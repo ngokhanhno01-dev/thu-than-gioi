@@ -21,7 +21,6 @@ var st=document.createElement('style');
 st.textContent=[
 '.nv{position:fixed;left:0;top:0;z-index:6;display:none;margin:0;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;transition:transform .08s ease}',
 '.nv:focus{outline:none}',
-'.nv:active{transform:scale(.92)}',
 '.nv .nv-bg{position:absolute;left:21%;right:21%;top:21%;bottom:21%;border-radius:10%;background:radial-gradient(ellipse at 50% 42%,rgba(86,92,230,.55) 0%,rgba(40,44,140,.35) 55%,rgba(14,16,60,0) 100%)}',
 '.nv .nv-gl{position:absolute;left:14%;right:14%;top:12%;height:56%;border-radius:50%;background:radial-gradient(ellipse at center,rgba(255,226,130,.5) 0%,rgba(255,190,80,.2) 45%,rgba(255,190,80,0) 72%);animation:nvg 2.4s ease-in-out infinite;pointer-events:none}',
 '@keyframes nvg{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.06)}}',
