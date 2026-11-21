@@ -391,7 +391,7 @@ function showPanel(win){
 /* NÚT TEST TẠM: bấm để nhận mỗi bậc châu +5 (xóa khi đã có nguồn châu thật ở Bước 5). Tắt bằng CFG.nutTest=false */
 CFG.nutTest=true;
 if(CFG.nutTest&&root.TTGNV&&root.TTGBALO&&root.TTGBONG){
-  root.TTGNV.add({id:'nhan-chau',ten:'Nhận châu',onTap:function(){
+  root.TTGNV.add({id:'nhan-chau',ten:'Nhận châu',r:0,rc:2,onTap:function(){   /* 3 nút test nằm bên PHẢI khung dưới (rc = cột từ mép phải) */
     for(var c=1;c<=TTGBONG.CFG.capBongMax;c++)TTGBALO.add(TTGBONG.idBong(c),5);
     toast('TEST: +5 mỗi bậc Ngự Thú Châu');
   },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="20" fill="#3ec9d6" stroke="#0b4a5c" stroke-width="3"/><path d="M32 18v28M18 32h28" stroke="#fff" stroke-width="5" stroke-linecap="round"/></svg>'});
@@ -399,11 +399,11 @@ if(CFG.nutTest&&root.TTGNV&&root.TTGBALO&&root.TTGBONG){
 
 /* NÚT TEST TẠM (cạnh Nhận châu): 1) Đổi rank thú đang ra trận (vòng E>D>C>B>A>S>SS>SR, có hiệu lực từ trận sau) 2) Lấy sách kỹ năng (6 sách boss, mỗi loại +2) */
 if(CFG.nutTest&&root.TTGNV&&root.TTGBALO){
-  root.TTGNV.add({id:'doi-rank',ten:'Đổi rank',onTap:function(){
+  root.TTGNV.add({id:'doi-rank',ten:'Đổi rank',r:0,rc:1,onTap:function(){
     var b=root.TTGTHU&&TTGTHU.doiRank?TTGTHU.doiRank():null;
     toast(b?'TEST: Rank thú ra trận = '+b+' (áp dụng từ trận sau)':'TEST: chưa có thú ra trận');
   },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 8l7 15 16 2-12 11 3 16-14-8-14 8 3-16L9 25l16-2z" fill="#ffd24a" stroke="#7a4a00" stroke-width="3" stroke-linejoin="round"/></svg>'});
-  root.TTGNV.add({id:'lay-sach',ten:'Lấy sách',onTap:function(){
+  root.TTGNV.add({id:'lay-sach',ten:'Lấy sách',r:0,rc:0,onTap:function(){
     var ids=['sach-bang-son-ap-dinh','sach-suong-nuot','sach-con-bang-trien-si','sach-vu-xa-trien','sach-thien-loi-giang','sach-nguyet-thuc-nuot'];
     ids.forEach(function(i){TTGBALO.add(i,2);});
     toast('TEST: +2 mỗi loại sách kỹ năng boss');

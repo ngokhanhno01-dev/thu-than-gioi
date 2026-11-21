@@ -2,6 +2,7 @@
    Mỗi nút: khung vàng-xanh đêm (khung-nut.webp, ô giữa trong suốt) + quầng sáng + icon SVG sáng có phát sáng + chữ sáng bên dưới icon. Nút là DOM nằm trên canvas (z-index 6, trên #ui).
    DÙNG:  TTGNV.add({id:'balo', ten:'Balo', icon:'<svg ...>', onTap:function(){...}, r:0});
    r (tùy chọn) = hàng muốn đứng (0 = hàng trên, 1 = hàng dưới); các nút cùng r xếp ngang cạnh nhau. Không có r thì xếp theo CFG.fill.
+   rc (tùy chọn) = đặt nút theo cột tính từ MÉP PHẢI của khung dưới (0 = ngoài cùng bên phải, 1 = sát bên trong nó...), dùng cùng r để chọn hàng; nút có rc không chiếm ô lưới bên trái.
    Nút xếp theo CỘT (trên -> dưới rồi sang cột kế): nút 1 ở hàng trên cùng bên trái, nút 2 ngay dưới nó, nút 3 sang cột bên cạnh...
    Chỉnh to/nhỏ, khe, số hàng, chỗ chừa họa tiết góc: sửa CFG bên dưới (đơn vị game, giống BP = 88 của khung dưới trong index.html).
    index.html gọi TTGNV.layout(...) mỗi lần đổi cỡ màn hình (hàm resize) để đặt lại vị trí. */
@@ -45,10 +46,11 @@ function layout(m){
   M=m||M;if(!M)return;
   var f=M.K/M.DPR,s=CFG.size*f,g=CFG.gap*f,x0=(M.I.l+CFG.left)*f,pt=(M.th+M.GAPB)*f,rows=Math.max(1,CFG.rows),
       blk=rows*s+(rows-1)*g,y0=pt+Math.max(0,(M.BP*f-blk)/2)+(CFG.dy||0)*f;
-  var used={},pos=[],centered={};
+  var used={},pos=[],centered={},rcol={};
   /* lượt 1: nút có chỉ định hàng (o.r: 0 = hàng trên, 1 = hàng dưới); nút center chiếm các ô lưới giao với ảnh để nút thêm sau không đè lên. */
   list.forEach(function(it,i){
     if(it.o.center){var r=Math.min(Math.max(0,it.o.r==null?0:it.o.r|0),rows-1),w=(it.o.w>0?it.o.w:CFG.size),step=CFG.size+CFG.gap,base=M.I.l+CFG.left,left=M.I.l+(M.W-M.I.l-M.I.r)/2-w/2,first=Math.max(0,Math.floor((left-base)/step)),last=Math.max(first,Math.ceil((left+w-base)/step)-1);for(var cc=first;cc<=last;cc++)used[cc+','+r]=1;pos[i]=[first,r];centered[i]=1;return;}
+    if(it.o.rc!=null){rcol[i]=Math.max(0,it.o.rc|0);pos[i]=[0,Math.min(Math.max(0,it.o.r==null?0:it.o.r|0),rows-1)];return;}   /* đặt theo mép phải: không chiếm ô lưới trái */
     if(it.o.r==null)return;var r=Math.min(Math.max(0,it.o.r|0),rows-1),c=0;while(used[c+','+r])c++;used[c+','+r]=1;pos[i]=[c,r];});
   /* lượt 2: nút không chỉ định hàng -> xếp vào ô trống đầu tiên theo kiểu CFG.fill */
   list.forEach(function(it,i){if(pos[i])return;var n=0,c,r;
@@ -56,7 +58,7 @@ function layout(m){
     used[c+','+r]=1;pos[i]=[c,r];});
   list.forEach(function(it,i){
     var c=pos[i][0],r=pos[i][1],e=it.e,s2=e.style,iw=(it.o.w>0?it.o.w:CFG.size)*f,ih=(it.o.h>0?it.o.h:CFG.size)*f;
-    s2.display='block';s2.width=iw+'px';s2.height=ih+'px';s2.left=Math.round(centered[i]?(M.I.l+(M.W-M.I.l-M.I.r)/2)*f-iw/2:x0+c*(s+g))+'px';s2.top=Math.round(y0+r*(s+g)+(s-ih)/2+(it.o.offsetY||0)*f)+'px';
+    s2.display='block';s2.width=iw+'px';s2.height=ih+'px';s2.left=Math.round(rcol[i]!=null?(M.W-M.I.r-CFG.left)*f-(rcol[i]+1)*s-rcol[i]*g:centered[i]?(M.I.l+(M.W-M.I.l-M.I.r)/2)*f-iw/2:x0+c*(s+g))+'px';s2.top=Math.round(y0+r*(s+g)+(s-ih)/2+(it.o.offsetY||0)*f)+'px';
     s2.fontSize=(s*.17).toFixed(2)+'px';
   });}
 window.TTGNV={cfg:CFG,add:add,layout:layout};
