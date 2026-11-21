@@ -209,6 +209,8 @@ var CSS=[
 '.btx .ci{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:20px}',
 '.btx .ci img{width:100%;height:100%;object-fit:contain}',
 '.btx .ct{display:flex;flex-direction:column}',
+'.btx.kh{background:url(game-moi/nut-khung.webp) 50% 50%/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:0 18px;white-space:nowrap;overflow:visible}',   /* khung ảnh cho Thôi / Ném / chip châu */
+'.btx.kh.g{filter:grayscale(.9) brightness(.9)}',
 '.bts,.btr{position:fixed;left:0;top:0;right:0;bottom:0;z-index:9;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.72);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
 '.bts.on,.btr.on{display:flex}',
 '.bts-fr{position:relative;height:min(96vh,calc(96vw*1142/1268));aspect-ratio:1268/1142;background:url(game-moi/khung-chon-chau.webp) 0 0/100% 100% no-repeat;color:#e8ecff;--u:1px}',
@@ -245,9 +247,9 @@ function build(){
   var st=document.createElement('style');st.textContent=CSS;document.head.appendChild(st);
   els={};
   els.bat=btn('bi','',start);els.bat.setAttribute('aria-label','Bắt');   /* nút ảnh nut-bat.webp */
-  els.nem=btn('','NÉM',doThrow);
-  els.thoi=btn('g','Thôi',cancel);
-  els.chip=btn('chip','',function(){openSel();});
+  els.nem=btn('kh','NÉM',doThrow);
+  els.thoi=btn('kh g','Thôi',cancel);
+  els.chip=btn('kh chip','',function(){openSel();});
   /* khung chọn châu */
   els.sel=document.createElement('div');els.sel.className='bts';
   els.fr=document.createElement('div');els.fr.className='bts-fr';els.sel.appendChild(els.fr);
@@ -306,7 +308,7 @@ function syncDom(){
   if(key===S.key)return;S.key=key;
   place(els.bat,m.cx*f,(m.I.t+54)*f,62,57);
   var cy=(m.gy-34)*f;
-  place(els.nem,cc,cy,96,38);place(els.thoi,cc-48-8-28,cy,56,38);place(els.chip,cc+48+8+62,cy,124,38);
+  place(els.nem,cc,cy,120,36);place(els.thoi,cc-60-8-50,cy,100,32);place(els.chip,cc+60+8+75,cy,150,44);   /* kích thước theo tỉ lệ ảnh khung (~3.4:1) */
   if(ready){var it=itemOf(S.cap),r=rateOf(S.cap);els.chip.innerHTML='<span class="ci">'+icHtml(it)+'</span><span class="ct"><span>Cấp '+S.cap+' · x'+countOf(S.cap)+'</span><span>'+(r==null?'--':Math.round(r*100)+'%')+'</span></span>';}
 }
 function r2(x){return x;}
