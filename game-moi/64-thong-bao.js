@@ -5,6 +5,7 @@
      TTGTBAO.confirm('Vứt bỏ?', [{t:'Vứt bỏ',cls:'d',cb:fn},{t:'Hủy'}])   // hỏi 2 nút (nút nào cũng tự đóng khung sau khi bấm)
      TTGTBAO.panel(html, [{t:'Về sảnh',cb:fn}]) -> phần tử chứa nội dung (để vẽ canvas...)   // bảng kết quả, KHÔNG tự đóng khi bấm ngoài
      TTGTBAO.close()
+   TTGTBAO.info({icon,bac,title,ts:true,sub,text},[...])  // bảng thông tin (chữ trái, ô hình phải). ts:true = tiêu đề cỡ nhỏ. Muốn có chữ Rank ở góc ô hình: icon = '<canvas>...'+TTGTBAO.corner(bac).
    Ghi chú: 0 nút => khung trống; 1 nút => 1 ô nằm GIỮA; 2 nút => 2 ô trái/phải (mỗi kiểu một ảnh cắt ghép riêng). Muốn đổi vị trí ô nút hay vùng chữ thì sửa BOX (m0/m1/m2 = vùng chữ, b1 = nút đơn, b2a/b2b = 2 nút) bên dưới (đơn vị: pixel ảnh). */
 (function(root){
 var IMGS=['game-moi/khung-tb-0.webp?v=1','game-moi/khung-tb-1.webp?v=1','game-moi/khung-thong-bao.webp?v=1'],IW=2121,IH=724;/* ảnh theo SỐ NÚT: 0 nút (không ô), 1 nút (1 ô giữa), 2 nút (2 ô) */
@@ -40,6 +41,10 @@ var css=[
 '.rk i{position:absolute;bottom:-6%;border-radius:50%;background:rgb(var(--rgb));box-shadow:0 0 5px 1px rgba(var(--rgb),.9);opacity:0;animation:rkq 3s linear infinite}',
 '@keyframes rkq{0%{bottom:-6%;transform:scale(.6);opacity:0}15%{opacity:1}80%{opacity:.85}100%{bottom:104%;transform:scale(1);opacity:0}}',
 '.tbo-ic{position:relative}',
+'.tbo-rk{position:absolute;left:calc(var(--u)*16);top:calc(var(--u)*2);z-index:4;font-family:"TTGRank","Kaushan Script",cursive;font-weight:400;font-size:calc(var(--u)*80);line-height:1;color:var(--rl);-webkit-text-stroke:calc(var(--u)*3) var(--rl);text-shadow:0 0 calc(var(--u)*6) var(--rc),0 0 calc(var(--u)*14) var(--rc),0 0 calc(var(--u)*28) var(--rc);filter:drop-shadow(0 calc(var(--u)*3) 0 rgba(0,6,40,.85));pointer-events:none}',/* chữ Rank neon ở góc trên-trái ô hình, giống ô kho (.tt-c .b) */
+'.tbo-rk.w2{font-size:calc(var(--u)*62);top:calc(var(--u)*6)}',/* SS: 2 chữ cái nên nhỏ lại để không đè lên thú */
+'.tbo-t.sm{font-size:calc(var(--u)*44)}',/* tiêu đề dài (vd câu hỏi xác nhận) */
+'.tbo-w{color:#ffb86b;font-weight:800}.tbo-w.r{color:#ff7a86}',/* dòng cảnh báo trong mô tả */
 '.tbo-ic.rkc{overflow:visible;border-color:transparent;box-shadow:none;background:linear-gradient(160deg,rgba(40,60,160,.75),rgba(8,12,60,.9))}',
 '.tbo-ic .rk{--bw:calc(var(--u)*9);--ins:calc(var(--u)*-6);--rd:calc(var(--u)*24)}',
 '.tbo-ic .rk i{width:calc(var(--u)*13);height:calc(var(--u)*13)}',
@@ -57,6 +62,13 @@ var RK={E:['255,255,255',4,3.2,10],D:['61,255,106',5,2.8,13],C:['63,169,255',6,2
 function fx(bac,max){var r=RK[bac];if(!r)return '';var n=Math.min(r[1],max||99),h='<span class="rk" style="--rgb:'+r[0]+';--p:'+r[2]+'s;--g:'+r[3]+'px"><b>',i,d;
  for(i=0;i<n;i++){d=(1.8+Math.random()*1.6)*(r[2]<2?.8:1);h+='<i style="left:'+(6+Math.random()*88).toFixed(1)+'%;animation-duration:'+d.toFixed(2)+'s;animation-delay:-'+(Math.random()*d).toFixed(2)+'s"></i>';}
  return h+'</b></span>';}
+/* CHỮ RANK Ở GÓC Ô HÌNH (như ô kho): TTGBAO.corner('A') trả về HTML, đặt TRONG ô hình (icon). Rank thiếu/lạ thì coi là C (giống kho).
+   TTGBAO.RKC = màu neon [phát sáng, lõi] theo Rank; TTGBAO.rankHtml('A') = chữ Rank tô màu (dùng trong câu). */
+var RKC={E:['#ffffff','#ffffff'],D:['#39ff14','#7dff5e'],C:['#00d0ff','#3de0ff'],B:['#cc33ff','#dd77ff'],A:['#ffe600','#fff24d'],S:['#ff8000','#ffa63d'],SS:['#ff1744','#ff5472']};
+function rkOf(b){return RKC[b]?b:'C';}
+function corner(b){b=rkOf(b);return '<span class="tbo-rk'+(b.length>1?' w2':'')+'" style="--rc:'+RKC[b][0]+';--rl:'+RKC[b][1]+'">'+b+'</span>';}
+function rankHtml(b){b=rkOf(b);return '<b style="color:'+RKC[b][1]+';text-shadow:0 0 6px '+RKC[b][0]+'">'+b+'</b>';}
+try{if(!document.getElementById('tbo-ff')){var ff=document.createElement('style');ff.id='tbo-ff';ff.textContent='@font-face{font-family:\"TTGRank\";src:url(\"game-moi/font-rank.woff2?v=1\") format(\"woff2\");font-display:block}';document.head.appendChild(ff);}}catch(e){}
 var wrap,fr,msg,btn=[],tm=0,mode='',onc=null;
 function put(el,b){var s=el.style;s.left=(b.x/IW*100)+'%';s.top=(b.y/IH*100)+'%';s.width=(b.w/IW*100)+'%';s.height=(b.h/IH*100)+'%';}
 function build(){
@@ -87,9 +99,9 @@ function panel(html,list,o){open('panel',960,true);o=o||{};setBtns(list);if(o.ro
    o = {icon:'<img>|<canvas>|chữ', title, sub, text, tc:'y' (tiêu đề vàng; mặc định xanh), modal:true (không đóng khi chạm nền)}
    Chạm nền tối = bấm nút cuối (Hủy/Đóng) nếu không modal. Trả về phần tử chữ (để vẽ canvas vào icon...). */
 function info(o,list){open('panel',900,true);setBtns(list);msg.className='tbo-m info';
- msg.innerHTML='<div class="tbo-tx"><div class="tbo-t'+(o.tc?' '+o.tc:'')+'">'+(o.title||'')+'</div>'+(o.sub?'<div class="tbo-s">'+o.sub+'</div>':'')+(o.text?'<div class="tbo-d">'+o.text+'</div>':'')+'</div>'+(o.icon!=null?'<div class="tbo-ic'+(RK[o.bac]?' rkc':'')+'">'+fx(o.bac)+o.icon+'</div>':'');
+ msg.innerHTML='<div class="tbo-tx"><div class="tbo-t'+(o.tc?' '+o.tc:'')+(o.ts?' sm':'')+'">'+(o.title||'')+'</div>'+(o.sub?'<div class="tbo-s">'+o.sub+'</div>':'')+(o.text?'<div class="tbo-d">'+o.text+'</div>':'')+'</div>'+(o.icon!=null?'<div class="tbo-ic'+(RK[o.bac]?' rkc':'')+'">'+fx(o.bac)+o.icon+'</div>':'');
  var last=list&&list[list.length-1];
  wrap.onclick=o.modal?null:function(e){if(e.target===wrap){close();if(last&&last.cb)last.cb();}};
  return msg;}
-root.TTGBAO=root.TTGTBAO={fx:fx,toast:toast,confirm:confirm,panel:panel,info:info,close:close,BOX:BOX};
+root.TTGBAO=root.TTGTBAO={fx:fx,corner:corner,rankHtml:rankHtml,RKC:RKC,toast:toast,confirm:confirm,panel:panel,info:info,close:close,BOX:BOX};
 })(window);
