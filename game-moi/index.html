@@ -209,6 +209,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/56-chi-so.js"></script>
 <script src="game-moi/61-tham-hiem-tran.js"></script>
 <script src="game-moi/62-bat-thu.js"></script>
+<script src="game-moi/66-tien-te.js"></script>
 <script>
 /* GAME MỚI (khung ban đầu). CHỈ CÓ MÀN NGANG, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
@@ -310,7 +311,7 @@ function atk(){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;st.busy=true;hit(
  setTimeout(function(){if(st===s0&&st.en>0)hit('en');},650);
  setTimeout(function(){if(st!==s0)return;
   if(st.en<=0||st.me<=0){st.msg=st.en<=0?'Thắng!':'Thua';var encounter=!!BATTLE,won=st.en<=0,eb=BATTLE;
-   setTimeout(function(){if(st!==s0)return;if(encounter){BATTLE=null;SCENE='sanh';reset();var xp=null;if(won&&eb&&window.TTGTHU&&TTGTHU.addExp&&window.TTGCS)xp=TTGTHU.addExp(TTGCS.expThuong({capQuai:eb.enemy.lv,capThu:eb.player.lv,loai:eb.enemy.boss?'boss':(eb.enemy.source==='main'?'quai':'thu')}));toast(won?'Thắng! +'+(xp?xp.gain:0)+' EXP'+(xp&&xp.lv1>xp.lv0?' · Lên cấp '+xp.lv1+'!':''):'Thua! Thú đã gục');}else reset();},END_WAIT);}
+   setTimeout(function(){if(st!==s0)return;if(encounter){BATTLE=null;SCENE='sanh';reset();var xp=null,tt=0;if(won&&eb&&window.TTGTHU&&TTGTHU.addExp&&window.TTGCS){var lo=eb.enemy.boss?'boss':(eb.enemy.source==='main'?'quai':'thu');xp=TTGTHU.addExp(TTGCS.expThuong({capQuai:eb.enemy.lv,capThu:eb.player.lv,loai:lo,vung:eb.enemy.vung,bac:eb.enemy.bac}));if(window.TTGTIEN){tt=TTGTIEN.tinhThach({loai:lo,vung:eb.enemy.vung,bac:eb.enemy.bac});TTGTIEN.add('tt',tt);}}toast(won?'Thắng! +'+(xp?xp.gain:0)+' EXP'+(tt?' · +'+TTGTIEN.fmt(tt)+' Tinh Thạch':'')+(xp&&xp.lv1>xp.lv0?' · Lên cấp '+xp.lv1+'!':''):'Thua! Thú đã gục');}else reset();},END_WAIT);}
   else{st.busy=false;nextAt=performance.now()+GAP;}},1300);}
 function autoTick(){if(AUTO&&st&&!st.busy&&performance.now()>=nextAt)atk();}
 
@@ -756,6 +757,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  /* khung (đã dựng sẵn ở độ phân giải máy) */
  if(FL){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
  drawExp(ts);
+ if(SCENE==='sanh'&&window.TTGTIEN)TTGTIEN.draw(ctx,fx+fw/2,I.t,fw-460);   /* khung tiền tệ: chỉ ở sảnh, giữa Danh Vọng và EXP */
  if(SCENE==='sanh'){petSanh(ts);return;}
  pet('en',ts);pet('me',ts);
  if(window.TTGBAT&&TTGBAT.draw)TTGBAT.draw(ctx,ts);

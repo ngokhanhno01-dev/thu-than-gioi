@@ -37,6 +37,8 @@ var CFG={
   expThuongNen:10,expThuongMoiCap:8,    /* EXP thưởng = (10 + 8 x cấpQuái) x hsChenh */
   chenhMoiCap:0.1,chenhMin:0.3,chenhMax:1.5,
   hsExpBoss:5,hsExpThuHoang:1.3,
+  hsExpVungMoiZ:0.12,                   /* EXP nhân (1 + 0,12 x vùng z): 18 vùng (z 0..17) chia đều, vùng cuối ~ x3,04 */
+  hsExpBac:{E:0.8,D:0.9,C:1,B:1.15,A:1.3,S:1.6,SS:2,SR:4},   /* EXP nhân theo Rank địch */
   chiMang:1.5                           /* nhân sát thương khi chí mạng */
 };
 
@@ -119,7 +121,9 @@ function expThuong(o){
   var chenh=clamp(1+CFG.chenhMoiCap*(cq-ct),CFG.chenhMin,CFG.chenhMax);
   var v=(CFG.expThuongNen+CFG.expThuongMoiCap*cq)*chenh;
   if(o.loai==='boss')v*=CFG.hsExpBoss;else if(o.loai==='thu')v*=CFG.hsExpThuHoang;
-  return Math.round(v);
+  v*=1+CFG.hsExpVungMoiZ*Math.max(0,o.vung||0);   /* theo vùng */
+  v*=(o.bac&&CFG.hsExpBac[o.bac])||1;               /* theo Rank địch */
+  return Math.max(1,Math.round(v));
 }
 
 /* ===== CHỈ SỐ ===== */
