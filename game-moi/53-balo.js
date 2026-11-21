@@ -184,7 +184,7 @@ function render(){
   E.bt.chon.setAttribute('aria-label',multi?'Bỏ chọn':'Chọn');E.ovC.classList.toggle('on',multi);   /* đang chọn nhiều -> hiện nút BỎ CHỌN */
   var d=E.dt,oldDs=d.querySelector('.dt-ds'),keepSc=(oldDs&&d.getAttribute('data-sel')===String(sel))?oldDs.scrollTop:0;
   d.setAttribute('data-sel',sel?String(sel):'');
-  if(sel){var s=CAT[sel];d.innerHTML='<div class="dt-ic">'+ic(s)+'</div><div class="dt-nm">'+esc(s.ten)+'</div><div class="dt-mt">'+esc(LOAI[s.loai]||'')+(s.cap?' · Cấp '+s.cap:'')+' · Số lượng: '+count(sel)+(lock[sel]?' · 🔒':'')+'</div><div class="dt-ds">'+esc(s.mo||'')+'</div>';var nds=d.querySelector('.dt-ds');if(nds)nds.scrollTop=keepSc;}
+  if(sel){var s=CAT[sel];d.innerHTML='<div class="dt-ic">'+ic(s)+'</div><div class="dt-nm">'+esc(s.ten)+'</div><div class="dt-mt">'+esc(LOAI[s.loai]||'')+(s.loai==='sach'&&s.he&&window.TTGCS&&TTGCS.heVi?' · Hệ '+TTGCS.heVi(s.he):'')+(s.cap?' · Cấp '+s.cap:'')+' · Số lượng: '+count(sel)+(lock[sel]?' · 🔒':'')+'</div><div class="dt-ds">'+esc(s.mo||'')+'</div>';var nds=d.querySelector('.dt-ds');if(nds)nds.scrollTop=keepSc;}
   else d.innerHTML='<div class="dt-hint">Chạm một ô để xem thông tin</div>';
 }
 function open(){if(window.TTGTHU&&TTGTHU.close)TTGTHU.close();/* mở Balo -> đóng panel Thú Thần */

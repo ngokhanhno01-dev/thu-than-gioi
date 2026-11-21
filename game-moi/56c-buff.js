@@ -84,9 +84,11 @@ var HE_VI={bang:'Băng',thuy:'Thủy',phong:'Phong',loi:'Lôi',am:'Âm',hoa:'H�
 function evVi(e){if(e.k==='lop')return 'gắn '+e.them+' lớp lạnh';if(e.k==='hutMau')return 'hút '+e.pct+'% sát thương thành máu';if(e.k==='tuBuff')return 'bản thân +'+e.pct+'% '+(STAT_VI[e.stat]||e.stat)+' '+e.luot+' lượt';if(e.k==='debuff')return 'giảm '+Math.abs(e.pct)+'% '+(STAT_VI[e.stat]||e.stat)+' đối thủ trong '+e.luot+' lượt';if(e.k==='choang')return e.xs+'% làm choáng '+e.luot+' lượt';if(e.k==='khienDau')return 'khiên đầu trận '+e.pctHp+'% máu';if(e.k==='buHutMau')return 'sau khi dùng kỹ năng: hút '+e.pct+'% sát thương gây ra thành máu trong '+e.luot+' lượt';if(e.k==='khienSau')return 'sau khi dùng kỹ năng: nhận khiên bằng '+e.pctHp+'% máu tối đa';if(e.k==='buXuyenGiap')return 'sau khi dùng kỹ năng: Xuyên Giáp +'+e.pct+'% trong '+e.luot+' lượt';if(e.k==='choangNT')return 'khi dùng kỹ năng: '+e.xs+'% làm choáng đối thủ '+e.luot+' lượt';if(e.k==='gayMu')return 'sau khi dùng kỹ năng: gây mù, đối thủ đánh hụt '+e.pct+'% trong '+e.luot+' lượt';return '';}
 function modVi(a){return (a||[]).map(function(m){return (m.pct>0?'+':'')+m.pct+'% '+(STAT_VI[m.stat]||m.stat);}).join(', ');}
 /* mô tả sách (Balo/bảng thú): sinh từ đúng dữ liệu bảng nên không lệch số. Chỉ số = % sát thương + hệ; Nội tại = hiệu ứng kèm; Hiệu ứng = hình ảnh. */
-function sachMoTa(bid){var k=sachKyNang(bid);if(!k)return '';var n=k.noiTai||{},nt=[modVi(n.mod)].concat((n.ev||[]).map(evVi)).filter(Boolean).join(', '),
-  cs=[Math.round(k.hsTc*100)+'% sát thương '+(HE_VI[k.he]||k.he)].concat((k.ev||[]).map(evVi)).filter(Boolean).join(', ');
-  return (k.mt?k.mt+'. ':'')+'Chỉ số: '+cs+', hồi chiêu '+k.cd+' lượt. Nội tại '+(n.ten||'')+': '+(nt||'-')+((n.ev||[]).some(function(e){return e.k==='debuff'||e.k==='gayMu'||e.k==='choangNT';})?' (giảm theo Kháng của đối thủ)':'')+'. Hiệu ứng: hình ảnh kỹ năng khi tung chiêu. Chỉ thú có hệ chính hoặc phụ trùng hệ sách mới gắn được.';}
+function sachMoTa(bid,ngan){var k=sachKyNang(bid);if(!k)return '';var n=k.noiTai||{},nt=[modVi(n.mod)].concat((n.ev||[]).map(evVi)).filter(Boolean).join(', '),
+  cs=[Math.round(k.hsTc*100)+'% sát thương '+(HE_VI[k.he]||k.he)].concat((k.ev||[]).map(evVi)).filter(Boolean).join(', '),
+  heT='Hệ '+(HE_VI[k.he]||k.he);
+  if(ngan)return cs+', hồi chiêu '+k.cd+' lượt. Nội tại '+(n.ten||'')+': '+(nt||'-')+'.';   /* bản ngắn cho bảng chọn kỹ năng trong Thú Thần */
+  return heT+'. '+(k.mt?k.mt+'. ':'')+'Chỉ số: '+cs+', hồi chiêu '+k.cd+' lượt. Nội tại '+(n.ten||'')+': '+(nt||'-')+((n.ev||[]).some(function(e){return e.k==='debuff'||e.k==='gayMu'||e.k==='choangNT';})?' (giảm theo Kháng của đối thủ)':'')+'. Hiệu ứng: hình ảnh kỹ năng khi tung chiêu. Chỉ thú có hệ chính hoặc phụ trùng hệ sách mới gắn được.';}
 var TY_LE_ROI_SACH=1.5;   /* % rơi sách kỹ năng boss, CHỈ khi giết chết boss (bắt không rơi); mm nhân thêm như tỉ lệ rớt item */
 function kyNangBoss(z){return KY_NANG_BOSS[z]?copy(KY_NANG_BOSS[z]):null;}
 

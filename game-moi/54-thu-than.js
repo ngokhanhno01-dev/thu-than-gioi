@@ -52,12 +52,12 @@ var SACH={
   'sach-hoi-xuan':{loai:'sach',ten:'Sách Hồi Xuân',kn:'Hồi Xuân',ic:'🌿',cd:5,mo:'Hồi 25% máu tối đa cho bản thân.'},
   'sach-loi-de':{loai:'sach',ten:'Sách Lôi Đế',kn:'Lôi Đế',ic:'⚡',cd:5,mo:'Triệu sấm sét gây 200% tấn công, có 20% làm choáng 1 lượt.'},
   'sach-doc-vu':{loai:'sach',ten:'Sách Độc Vụ',kn:'Độc Vụ',ic:'☠️',cd:4,mo:'Phun sương độc, gây sát thương theo thời gian trong 3 lượt (debuff).'},
-  'sach-bang-son-ap-dinh':{loai:'sach',ten:'Sách Băng Sơn Áp Đỉnh',kn:'Băng Sơn Áp Đỉnh',ky:'bang-son-ap-dinh',he:'bang',img:'game-moi/icon-kn/bang-son-ap-dinh.png',cd:8,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';}},
-  'sach-suong-nuot':{loai:'sach',ten:'Sách Sương Nuốt',kn:'Sương Nuốt',ky:'suong-nuot',he:'thuy',img:'game-moi/icon-kn/suong-nuot.png',cd:8,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';}},
-  'sach-con-bang-trien-si':{loai:'sach',ten:'Sách Côn Bằng Triển Sí',kn:'Côn Bằng Triển Sí',ky:'con-bang-trien-si',he:'phong',img:'game-moi/icon-kn/con-bang-trien-si.png',cd:9,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';}},
-  'sach-vu-xa-trien':{loai:'sach',ten:'Sách Vũ Xà Triền',kn:'Vũ Xà Triền',ky:'vu-xa-trien',he:'phong',img:'game-moi/icon-kn/vu-xa-trien.png',cd:8,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';}},
-  'sach-thien-loi-giang':{loai:'sach',ten:'Sách Thiên Lôi Giáng',kn:'Thiên Lôi Giáng',ky:'thien-loi-giang',he:'loi',img:'game-moi/icon-kn/thien-loi-giang.png',cd:9,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';}},
-  'sach-nguyet-thuc-nuot':{loai:'sach',ten:'Sách Nguyệt Thực Nuốt',kn:'Nguyệt Thực Nuốt',ky:'nguyet-thuc-nuot',he:'am',img:'game-moi/icon-kn/nguyet-thuc-nuot.png',cd:8,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';}},
+  'sach-bang-son-ap-dinh':{loai:'sach',ten:'Sách Băng Sơn Áp Đỉnh',kn:'Băng Sơn Áp Đỉnh',ky:'bang-son-ap-dinh',he:'bang',img:'game-moi/icon-kn/bang-son-ap-dinh.png',cd:8,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';},get moNgan(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky,1))||'';}},
+  'sach-suong-nuot':{loai:'sach',ten:'Sách Sương Nuốt',kn:'Sương Nuốt',ky:'suong-nuot',he:'thuy',img:'game-moi/icon-kn/suong-nuot.png',cd:8,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';},get moNgan(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky,1))||'';}},
+  'sach-con-bang-trien-si':{loai:'sach',ten:'Sách Côn Bằng Triển Sí',kn:'Côn Bằng Triển Sí',ky:'con-bang-trien-si',he:'phong',img:'game-moi/icon-kn/con-bang-trien-si.png',cd:9,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';},get moNgan(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky,1))||'';}},
+  'sach-vu-xa-trien':{loai:'sach',ten:'Sách Vũ Xà Triền',kn:'Vũ Xà Triền',ky:'vu-xa-trien',he:'phong',img:'game-moi/icon-kn/vu-xa-trien.png',cd:8,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';},get moNgan(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky,1))||'';}},
+  'sach-thien-loi-giang':{loai:'sach',ten:'Sách Thiên Lôi Giáng',kn:'Thiên Lôi Giáng',ky:'thien-loi-giang',he:'loi',img:'game-moi/icon-kn/thien-loi-giang.png',cd:9,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';},get moNgan(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky,1))||'';}},
+  'sach-nguyet-thuc-nuot':{loai:'sach',ten:'Sách Nguyệt Thực Nuốt',kn:'Nguyệt Thực Nuốt',ky:'nguyet-thuc-nuot',he:'am',img:'game-moi/icon-kn/nguyet-thuc-nuot.png',cd:8,get mo(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky))||'';},get moNgan(){return (window.TTGCS&&TTGCS.sachMoTa&&TTGCS.sachMoTa('sach-'+this.ky,1))||'';}},
   'sach-tang-toc':{loai:'sach',ten:'Sách Tăng Tốc',kn:'Tăng Tốc',ic:'💨',cd:3,mo:'Tăng 40% tốc độ trong 2 lượt (buff).'}
 };
 if(window.TTGBALO&&TTGBALO.reg)TTGBALO.reg(SACH);   /* đăng ký vào Balo (sách đã sở hữu từ trước vẫn nhận ra) */
@@ -435,9 +435,9 @@ function moList(k){
 /* bảng nổi thông tin kỹ năng. mode 'dung' (từ danh sách): Dùng/Đóng. mode 'go' (ô đã gắn): Gỡ/Đóng. */
 function moInfo(id,k,mode){
   var it=sachOf(id),t=byUid(sel);if(!it||!t)return;
-  if(window.TTGTBAO){TTGTBAO.info({icon:icSach(it),title:esc(it.kn||it.ten),tc:'y',sub:esc(it.ten)+(it.cd?' · Hồi chiêu '+it.cd+' lượt':''),text:esc(it.mo||'')},
+  if(window.TTGTBAO){TTGTBAO.info({icon:icSach(it),title:esc(it.kn||it.ten),tc:'y',sub:esc(it.ten)+(it.he&&window.TTGCS&&TTGCS.heVi?' · Hệ '+TTGCS.heVi(it.he):'')+(it.cd?' · Hồi chiêu '+it.cd+' lượt':''),text:esc(it.moNgan||it.mo||'')},
    [{t:mode==='go'?'Gỡ':'Dùng',cls:mode==='go'?'d':'',cb:function(){mode==='go'?go(k):dung(id,k);}},{t:'Đóng',cb:function(){if(mode==='go')hidePop();}}]);return;}
-  E.in.innerHTML='<div class="tt-ii"><span class="i">'+icSach(it)+'</span><div class="n">'+esc(it.kn||it.ten)+'</div><div class="m">'+esc(it.ten)+(it.cd?' · Hồi chiêu '+it.cd+' lượt':'')+'</div><div class="d">'+esc(it.mo||'')+'</div></div>'
+  E.in.innerHTML='<div class="tt-ii"><span class="i">'+icSach(it)+'</span><div class="n">'+esc(it.kn||it.ten)+'</div><div class="m">'+esc(it.ten)+(it.he&&window.TTGCS&&TTGCS.heVi?' · Hệ '+TTGCS.heVi(it.he):'')+(it.cd?' · Hồi chiêu '+it.cd+' lượt':'')+'</div><div class="d">'+esc(it.moNgan||it.mo||'')+'</div></div>'
    +'<div class="tt-pb"><button type="button" class="'+(mode==='go'?'d':'p')+'">'+(mode==='go'?'Gỡ':'Dùng')+'</button><button type="button">Đóng</button></div>';
   var bs=E.in.querySelectorAll('button');
   bs[0].addEventListener('click',function(){mode==='go'?go(k):dung(id,k);});
