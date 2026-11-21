@@ -517,7 +517,9 @@ function bgImgFor(z){var c=BG_FX_ZONE[z];if(!c)return null;var o=BG_IMGS[z];
  if(!o){o=BG_IMGS[z]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;};o.img.src=c.image;}
  return o;}
 function bgUseImg(z){var c=BG_FX_ZONE[z],o=c&&bgImgFor(z);return !!(o&&o.ok&&o.img.naturalWidth>0&&!(BGV_ZONE[z]&&c.pri==='video'));}
-function bgWant(){var t=THU_MOI.byId[ID],z=t&&(t.nen||t.zone);return SCENE==='sanh'&&!!t&&!!BGV_ZONE[z]&&!bgUseImg(z);}
+/* Thú đang đứng ở sảnh = thú RA TRẬN (giống petSanh); không có thì dùng ID. Nền theo vùng của đúng con này (hoặc t.nen nếu có). */
+function bgThu(){var rt=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null,rid=rt&&rt.id;return THU_MOI.byId[(rid&&THU_MOI.byId[rid])?rid:ID];}
+function bgWant(){var t=bgThu(),z=t&&(t.nen||t.zone);return SCENE==='sanh'&&!!t&&!!BGV_ZONE[z]&&!bgUseImg(z);}
 function bgLayout(){var f=K/DPR,th=TH(),fw=W-I.l-I.r,e=bgInset(th),l=e.l,r=e.r,t=e.t,b=e.b;
  [BGV,BGV2].forEach(function(v){v.style.left=Math.round((I.l+l)*f)+'px';v.style.top=Math.round(t*f)+'px';v.style.width=Math.round((fw-l-r)*f)+'px';v.style.height=Math.round((th-t-b)*f)+'px';});}
 function bgShow(c,n){c.style.opacity=1;n.style.opacity=0;}
@@ -527,7 +529,7 @@ function bgTick(g){if(!bgOn||g!==bgGen)return;if(document.hidden){bgRaf=0;return
  if(bgSw&&n.currentTime>0.01&&!n.paused){bgShow(n,c);c.pause();try{c.currentTime=0;}catch(e){}bgCur=n;bgNxt=c;bgSw=false;}
  requestAnimationFrame(function(){bgTick(g);});}
 function bgSync(){
- var t=THU_MOI.byId[ID],zone=t&&(t.nen||t.zone);/* t.nen = nền ngoại lệ của thú (3 thú khởi đầu), không có thì theo vùng */
+ var t=bgThu(),zone=t&&(t.nen||t.zone);/* t.nen = nền ngoại lệ của thú (3 thú khởi đầu), không có thì theo vùng */
  if(SCENE==='tran'&&BATTLE&&BATTLE.enemy&&BATTLE.enemy.zoneSlug)zone=BATTLE.enemy.zoneSlug;/* trận thật: nền theo vùng của quái/thú hoang */
  bgImageOn=!!((SCENE==='sanh'||(SCENE==='tran'&&BATTLE))&&zone&&bgUseImg(zone));
  if(bgImageOn){bgImg=BG_IMGS[zone];bgConf=BG_FX_ZONE[zone];}else{bgImg=null;bgConf=null;bgBase=null;}/* rời sảnh / vùng không có ảnh: thả bộ nhớ nền ảnh, hiệu ứng tự tắt */
