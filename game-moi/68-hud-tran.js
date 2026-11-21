@@ -29,6 +29,13 @@ function barFill(c,b,p,mir,c1,c2){
     c.fillStyle=g;c.fillRect(fx,b.y0+8,fw,h-16);
     c.fillStyle='rgba(255,255,255,.28)';c.fillRect(fx,b.y0+10,fw,(h-16)*.28);}   /* vệt sáng trên */
   c.restore();}
+var RBC={};
+/* ảnh chữ Rank neon giống trang Thú Thần: vẽ bằng TTGTHU.badges vào canvas 208x208, nhớ theo rank (SR đổi màu nên vẽ lại ~8 lần/giây). Chưa nạp font thì không nhớ. */
+function rankBadge(rk){if(!rk||!root.TTGTHU||!root.TTGTHU.badges)return null;var fo=!document.fonts||!document.fonts.check||document.fonts.check('40px TTGRank'),now=Date.now(),e=RBC[rk];
+  if(e&&(rk!=='SR'||now-e.t<120))return e.c;
+  var cv=[0,1,2].map(function(){var c=document.createElement('canvas');c.width=c.height=208;return c;});
+  try{root.TTGTHU.badges(cv,{lv:1,tien:1,bac:rk});}catch(x){return e?e.c:null;}
+  if(fo||rk==='SR')RBC[rk]={c:cv[2],t:now};return cv[2];}
 function draw(ctx,o){
   if(!ok||!o)return false;
   var m=!!o.mirror,s=o.w/IW,X=function(x){return m?IW-x:x;};
@@ -40,9 +47,11 @@ function draw(ctx,o){
   ctx.save();if(m){ctx.translate(IW,0);ctx.scale(-1,1);}ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(img,0,0,IW,IH);ctx.restore();
   /* RANK */
   var RK=(root.TTGBAO&&root.TTGBAO.RKC)||{},rk=o.rank,cl=(rk&&RK[rk]?RK[rk]:(rk?['#00d0ff','#3de0ff']:['#8899bb','#c8d2ea'])).map(function(v){return typeof v==='function'?v():v;}),rt=rk||'?';   /* SR: màu là hàm theo thời gian */
-  ctx.save();ctx.shadowColor=cl[0];ctx.shadowBlur=40;
+  var bd=rankBadge(rk);
+  if(bd){var D=G.r*2.05;ctx.save();ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';ctx.drawImage(bd,cx-D/2,G.cy-D/2,D,D);ctx.restore();}   /* chữ Rank vẽ bằng ĐÚNG hàm của trang Thú Thần (TTGTHU.badges) */
+  else{ctx.save();ctx.shadowColor=cl[0];ctx.shadowBlur=40;
   fit(ctx,rt,cx,G.cy+6,300,250,120,'{S}px TTGRank,"Kaushan Script",cursive',rt==='SR'?'#ffd1f6':cl[1],'rgba(0,6,30,.9)',16);
-  ctx.shadowBlur=0;ctx.restore();
+  ctx.shadowBlur=0;ctx.restore();}
   /* TÊN + BẬC */
   fit(ctx,o.name||'',X((G.name.x0+G.name.x1)/2),G.name.y,G.name.x1-G.name.x0,76,46,'bold {S}px '+FS,'#0c1f45',null);
   fit(ctx,'Bậc '+(o.bac||1),X(G.bac.x),G.bac.y,G.bac.w,76,50,'bold {S}px '+FS,'#7a2a10',null);
