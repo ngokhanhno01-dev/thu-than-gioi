@@ -39,9 +39,9 @@ var CFG={
   /* ================= THÁM HIỂM (dùng ở Bước 2) ================= */
   tx:{
     tiLeBoss:0.05,                         /* 5% mỗi lượt: chọn đều giữa boss demo và boss main */
-    tiLeQuaiMain:0.5,                      /* trong 95% lượt thường: chia đều pool main và demo */
+    tiLeQuaiMain:0.7,                      /* trong 95% lượt thường: 70% gặp QUÁI (pool main, 102 quái), 30% gặp THÚ HOANG (pool demo, 60 thú). Chỉnh số này để đổi tỉ lệ (0.5 = ngang nhau) */
     trongSoQuaiMain:[1,1,1,1,1],           /* 5 quái thường main chọn đều */
-    trongSoBoss:{main:1,demo:1},            /* 2 boss chọn đều */
+    trongSoBoss:{main:7,demo:3},            /* boss: cũng nghiêng về quái, 7 boss quái : 3 boss thú hoang (cùng tỉ lệ 70/30 với lượt thường) */
     trongSoLoai:[15,14,13,12,11,10,8,6,6], /* trọng số tương đối cho 9 thú demo */
     trongSoBac:{1:1,2:1,3:1},              /* bậc của thú demo thường: mặc định chia đều */
     bacBoss:3,                             /* boss luôn bậc 3 */
