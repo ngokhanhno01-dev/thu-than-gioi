@@ -1,0 +1,1 @@
+Icon trạng thái trong trận (PNG 128x128): giam-giap, hut-mau, xuyen-giap, khien, choang, gay-mu. Hiện ở cuối khung chỉ số, phía ngược với icon CD kỹ năng; số góc icon = số lượt còn lại (1 lượt thì không hiện số).

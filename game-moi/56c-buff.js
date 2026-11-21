@@ -56,19 +56,19 @@ function donCoBan(z){return DON_CO_BAN[z]?{ten:DON_CO_BAN[z],hsKyNang:1,hoiChieu
 /* ===== KỸ NĂNG ĐỘC QUYỀN BOSS (mục 7b THIET_KE). hsTc = hsKyNang của satThuong; cd = hồi chiêu (lượt); he = hệ của kỹ năng (một hệ của boss).
    ev (bước D thực thi): lop{ten,them} thêm lớp | hutMau{pct} | tuBuff{stat,pct,luot} boss tự buff | debuff{stat,pct,luot} lên đối thủ (giảm theo khu) | choang{xs,luot} (kc chặn) */
 var KY_NANG_BOSS=[
-  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:5,ev:[],
+  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:8,ev:[],
    mt:'Triệu hồi 1 ngọn núi băng trấn áp đối thủ',
    noiTai:{ten:'Lạnh Thấu Xương',mod:[],ev:[{k:'debuff',stat:'pt',pct:-20,luot:2}]}},
-  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'thuy',hsTc:1.5,cd:5,ev:[{k:'hutMau',pct:30}],
-   noiTai:{ten:'Sương Che',mod:[],ev:[{k:'debuff',stat:'tc',pct:-15,luot:2}]}},
-  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'phong',hsTc:2.0,cd:5,ev:[{k:'tuBuff',stat:'td',pct:30,luot:2}],
-   noiTai:{ten:'Vân Cánh',mod:[],ev:[{k:'khienDau',pctHp:5}]}},
-  {id:'vu-xa-trien',ten:'Vũ Xà Triền',boss:'6j',he:'phong',hsTc:1.4,cd:5,ev:[{k:'debuff',stat:'td',pct:-50,luot:2}],
-   noiTai:{ten:'Xà Hành',mod:[],ev:[{k:'debuff',stat:'pt',pct:-10,luot:2}]}},
-  {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:6,ev:[{k:'choang',xs:40,luot:1}],
-   noiTai:{ten:'Lôi Kích',mod:[],ev:[{k:'debuff',stat:'pt',pct:-10,luot:2}]}},
-  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:5,ev:[{k:'debuff',stat:'td',pct:-20,luot:2}],
-   noiTai:{ten:'Nguyệt Ảnh',mod:[],ev:[{k:'debuff',stat:'tc',pct:-10,luot:2}]}}
+  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'thuy',hsTc:1.5,cd:8,ev:[{k:'hutMau',pct:30}],
+   noiTai:{ten:'Huyết Sương',mod:[],ev:[{k:'buHutMau',pct:10,luot:3}]}},
+  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'phong',hsTc:2.0,cd:9,ev:[{k:'tuBuff',stat:'td',pct:30,luot:2}],
+   noiTai:{ten:'Vân Cánh',mod:[],ev:[{k:'khienSau',pctHp:20}]}},
+  {id:'vu-xa-trien',ten:'Vũ Xà Triền',boss:'6j',he:'phong',hsTc:1.4,cd:8,ev:[{k:'debuff',stat:'td',pct:-50,luot:2}],
+   noiTai:{ten:'Xà Hành',mod:[],ev:[{k:'buXuyenGiap',pct:15,luot:3}]}},
+  {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:9,ev:[],
+   noiTai:{ten:'Lôi Kích',mod:[],ev:[{k:'choangNT',xs:30,luot:1}]}},
+  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:8,ev:[{k:'debuff',stat:'td',pct:-20,luot:2}],
+   noiTai:{ten:'Nguyệt Mê',mod:[],ev:[{k:'gayMu',pct:40,luot:2}]}}
 ];
 /* SÁCH KỸ NĂNG = NGUỒN DUY NHẤT: mỗi sách (id 'sach-'+id kỹ năng) gồm 3 phần theo đúng thiết kế:
    (1) CHỈ SỐ = % sát thương theo hệ (hsTc, he; vd 180% sát thương Băng) + hồi chiêu cd (+ ev kèm theo của kỹ năng nếu có: hút máu, choáng...);
@@ -81,12 +81,12 @@ function sachBuffs(thu){var r=[];((thu&&thu.kn)||[]).forEach(function(b){var k=s
 function sachMod(thu){var o=[];sachBuffs(thu).forEach(function(h){(h.mod||[]).forEach(function(m){o.push({stat:m.stat,pct:m.pct});});});return o;}   /* chỉ số từ sách -> TTGCS.tinh(thu,{mod:sachMod(thu)}) */
 var STAT_VI={hp:'Máu',tc:'Tấn công',pt:'Giáp',td:'Tốc độ',mm:'May mắn',ne:'Né',cx:'Chính xác',cm:'Chí mạng',khu:'Kháng',hutm:'Hút máu',pd:'Phản đòn'};
 var HE_VI={bang:'Băng',thuy:'Thủy',phong:'Phong',loi:'Lôi',am:'Âm',hoa:'Hỏa',moc:'Mộc',tho:'Thổ',doc:'Độc',kim:'Kim'};
-function evVi(e){if(e.k==='lop')return 'gắn '+e.them+' lớp lạnh';if(e.k==='hutMau')return 'hút '+e.pct+'% sát thương thành máu';if(e.k==='tuBuff')return 'bản thân +'+e.pct+'% '+(STAT_VI[e.stat]||e.stat)+' '+e.luot+' lượt';if(e.k==='debuff')return 'giảm '+Math.abs(e.pct)+'% '+(STAT_VI[e.stat]||e.stat)+' đối thủ trong '+e.luot+' lượt';if(e.k==='choang')return e.xs+'% làm choáng '+e.luot+' lượt';if(e.k==='khienDau')return 'khiên đầu trận '+e.pctHp+'% máu';return '';}
+function evVi(e){if(e.k==='lop')return 'gắn '+e.them+' lớp lạnh';if(e.k==='hutMau')return 'hút '+e.pct+'% sát thương thành máu';if(e.k==='tuBuff')return 'bản thân +'+e.pct+'% '+(STAT_VI[e.stat]||e.stat)+' '+e.luot+' lượt';if(e.k==='debuff')return 'giảm '+Math.abs(e.pct)+'% '+(STAT_VI[e.stat]||e.stat)+' đối thủ trong '+e.luot+' lượt';if(e.k==='choang')return e.xs+'% làm choáng '+e.luot+' lượt';if(e.k==='khienDau')return 'khiên đầu trận '+e.pctHp+'% máu';if(e.k==='buHutMau')return 'sau khi dùng kỹ năng: hút '+e.pct+'% sát thương gây ra thành máu trong '+e.luot+' lượt';if(e.k==='khienSau')return 'sau khi dùng kỹ năng: nhận khiên bằng '+e.pctHp+'% máu tối đa';if(e.k==='buXuyenGiap')return 'sau khi dùng kỹ năng: Xuyên Giáp +'+e.pct+'% trong '+e.luot+' lượt';if(e.k==='choangNT')return 'khi dùng kỹ năng: '+e.xs+'% làm choáng đối thủ '+e.luot+' lượt';if(e.k==='gayMu')return 'sau khi dùng kỹ năng: gây mù, đối thủ đánh hụt '+e.pct+'% trong '+e.luot+' lượt';return '';}
 function modVi(a){return (a||[]).map(function(m){return (m.pct>0?'+':'')+m.pct+'% '+(STAT_VI[m.stat]||m.stat);}).join(', ');}
 /* mô tả sách (Balo/bảng thú): sinh từ đúng dữ liệu bảng nên không lệch số. Chỉ số = % sát thương + hệ; Nội tại = hiệu ứng kèm; Hiệu ứng = hình ảnh. */
 function sachMoTa(bid){var k=sachKyNang(bid);if(!k)return '';var n=k.noiTai||{},nt=[modVi(n.mod)].concat((n.ev||[]).map(evVi)).filter(Boolean).join(', '),
   cs=[Math.round(k.hsTc*100)+'% sát thương '+(HE_VI[k.he]||k.he)].concat((k.ev||[]).map(evVi)).filter(Boolean).join(', ');
-  return (k.mt?k.mt+'. ':'')+'Chỉ số: '+cs+', hồi chiêu '+k.cd+' lượt. Nội tại '+(n.ten||'')+': '+(nt||'-')+((n.ev||[]).some(function(e){return e.k==='debuff';})?' (giảm theo Kháng của đối thủ)':'')+'. Hiệu ứng: hình ảnh kỹ năng khi tung chiêu. Chỉ thú có hệ chính hoặc phụ trùng hệ sách mới gắn được.';}
+  return (k.mt?k.mt+'. ':'')+'Chỉ số: '+cs+', hồi chiêu '+k.cd+' lượt. Nội tại '+(n.ten||'')+': '+(nt||'-')+((n.ev||[]).some(function(e){return e.k==='debuff'||e.k==='gayMu'||e.k==='choangNT';})?' (giảm theo Kháng của đối thủ)':'')+'. Hiệu ứng: hình ảnh kỹ năng khi tung chiêu. Chỉ thú có hệ chính hoặc phụ trùng hệ sách mới gắn được.';}
 var TY_LE_ROI_SACH=1.5;   /* % rơi sách kỹ năng boss, CHỈ khi giết chết boss (bắt không rơi); mm nhân thêm như tỉ lệ rớt item */
 function kyNangBoss(z){return KY_NANG_BOSS[z]?copy(KY_NANG_BOSS[z]):null;}
 
