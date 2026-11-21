@@ -12,6 +12,8 @@
    KỸ NĂNG (5a): mỗi thú có thu.kn = mảng 6 ô (id sách hoặc null). Bấm ô "+" -> danh sách sách kỹ năng trong Balo -> bấm 1 sách -> bảng nổi (Dùng/Đóng);
                  bấm ô đã gắn -> bảng nổi (Gỡ/Đóng). Dùng = trừ 1 sách ở Balo, Gỡ = trả sách về Balo. Danh mục sách mẫu: khối SACH bên dưới (chỗ thêm/sửa kỹ năng).
    API: TTGTHU.open() / .close() / .isOpen() / .add(thu) (trả về uid) / .list() / .getRaTran() (trả thú đang ra trận hoặc null).
+   KHỞI TẠO TÀI KHOẢN MỚI (21/11/2026): TTGTHU.khoiTao(thu) = xóa sạch kho thú + thú ra trận + danh sách thả (cả trong bộ nhớ lẫn localStorage), rồi thêm đúng 1 con `thu` và cho RA TRẬN luôn; trả về uid. Gọi từ màn chọn thú đầu game (65-chon-thu-dau.js). Không đụng Balo. Bị bỏ qua ở chế độ ?thu=demo.
+   ĐỒNG BỘ SẢNH (dongBo) ĐÃ TẮT (hằng DONGBO = false): đã có chọn thú đầu game + bắt thú thật, không tự thêm thú đang đứng ở sảnh vào kho nữa (nếu không thú cũ sẽ lẫn vào tài khoản mới).
    THỬ: thêm ?thu=demo vào link -> có sẵn vài thú mẫu (không lưu lại). */
 (function(){
 'use strict';
@@ -488,9 +490,11 @@ function tha(u){
 
 /* ĐỒNG BỘ THÚ Ở SẢNH: game-moi/index.html lưu thú đang đứng ở sảnh vào khóa ttg_moi_v1 {thu:loài, bm:bậc 1-3}.
    Chưa có cơ chế bắt thú thật, nên mỗi loài thú từng dùng ở sảnh được coi là ĐÃ CÓ và tự vào danh sách (mỗi loài 1 con, uid 'canh-<loài>').
-   Con 'canh-' luôn cập nhật tiến hóa (tien) theo bậc bm hiện tại. Sau này có bắt thú thì bỏ hàm này (hoặc chỉ giữ để nhập thú cũ). */
+   Con 'canh-' luôn cập nhật tiến hóa (tien) theo bậc bm hiện tại. Sau này có bắt thú thì bỏ hàm này (hoặc chỉ giữ để nhập thú cũ).
+   21/11/2026: TẮT bằng DONGBO=false vì đã có chọn thú đầu game (TTGTHU.khoiTao) + bắt thú thật. Cần lại thì đặt true. */
+var DONGBO=false;
 function dongBo(){
-  if(demo||!window.THU_MOI||!THU_MOI.byId)return;
+  if(!DONGBO||demo||!window.THU_MOI||!THU_MOI.byId)return;
   try{
     var sv=JSON.parse(localStorage.getItem('ttg_moi_v1')||'{}'),id=sv&&sv.thu;
     if(!id||!THU_MOI.byId[id])return;
@@ -531,6 +535,16 @@ function add(t){
 }
 function list(){dongBo();return thus.map(function(t){return Object.assign({},t);});}
 function getRaTran(){var t=rt&&byUid(rt);return t?Object.assign({},t):null;}   /* sau này nối vào trận đấu/sảnh bằng hàm này */
+/* khoiTao(thu): TÀI KHOẢN MỚI. Xóa sạch kho + thú ra trận + danh sách thả (bộ nhớ và localStorage), thêm đúng con `thu`, cho ra trận luôn. Trả uid (null nếu đang ở chế độ ?thu=demo hoặc thiếu id). Không đụng Balo. */
+function khoiTao(t){
+  if(demo||!t||!t.id)return null;
+  thus=[];rt=null;sel=null;row0=0;page=0;thaList=[];
+  try{localStorage.removeItem(KTHA);}catch(e){}
+  var u=add(t);   /* add() đã lưu kho; ra trận đặt ngay sau đó */
+  rt=u;sel=u;save();
+  if(isOpen)render();
+  return u;
+}
 
 /* ===== EXP / CẤP của thú đang ra trận (công thức: TTGCS.expCan, trần cấp: TTGCS.CFG.capMax hoặc 100) ===== */
 function capMax(){return (window.TTGCS&&TTGCS.CFG&&TTGCS.CFG.capMax)||100;}
@@ -538,5 +552,5 @@ function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=M
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
   if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
-window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,anh:anhThu,expInfo:expInfo,addExp:addExp};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();
