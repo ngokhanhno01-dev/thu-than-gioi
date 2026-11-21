@@ -66,3 +66,9 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
   4. Thêm kỹ năng mới cần đủ: dòng trong `KY_NANG_BOSS`, dòng sách trong `54-thu-than.js`, icon `icon-kn/<id>.png`, sprite `fx-boss/<tên>.png` + hàm vẽ trong `57-fx-ky-nang-boss.js`, mục trong `tools/fx-boss-demo.html`.
   5. Sửa xong cập nhật `THIET_KE_CHI_SO.md` mục 7b và ghi chú này, rồi mở trận thử xem mô tả sách có khớp những gì xảy ra.
 - **Thứ tự đánh theo tốc độ + nhịp trận (22/11/2026)**: `index.html` hàm `ordFirst()` (td cao hơn đánh trước, bằng nhau thì bạn trước, tính lại mỗi vòng theo `effS`), `act(s0,w)` thực hiện lượt của một bên và trả về thời gian lượt, `atk()` nối hai lượt theo thứ tự rồi mới xét thắng/thua (`fin`). Bên bị hạ gục trước lượt của mình thì mất lượt (vẫn giữ nhịp `T_DON`). Nhịp: `GAP` 350→450, `T_DON` (mới, trước là số 650 gõ cứng) =750; chỉnh nhanh ở dòng khai báo `GAP`/`T_DON`/`END_WAIT`. Trận mẫu không có `BATTLE` giữ như cũ (bạn đánh trước). Lưu ý: trước đây boss bị choáng vẫn mất hồi chiêu kỹ năng; giờ vẫn giữ y như vậy (chọn kỹ năng trước, rồi mới xét choáng).
+
+## Thanh tốc độ (thay kiểu "mỗi vòng 2 bên đánh 1 lần")
+- `nextActor()` trong index.html: mỗi bên có thanh 0..100 đầy theo td; đầy trước thì đánh MỘT lượt. Nhanh gấp đôi = 2 lượt liền khi bên kia 1 lượt; 1,5 lần = nhịp 3 đổi 2. Bằng nhau: bạn trước rồi luân phiên.
+- `MAX_LIEN=2`: tối đa 2 lượt liền (nhanh hơn 2 lần cũng chỉ 2). Boss giữ nguyên hệ số 1,6.
+- Nhịp: `GAP_ACT` = nghỉ giữa 2 lượt bất kỳ (thay cho GAP giữa các vòng); `T_DON` vẫn là thời gian 1 lượt đánh thường.
+- Hồi chiêu kỹ năng, choáng: đếm theo lượt của chính bên đó. Buff/nội tại đếm theo lượt bên đánh (bên cầm buff); debuff đếm theo lượt bên bị đánh (bên mang debuff) — `dbTick(side)`, cờ `fresh` chỉ bật khi gắn vào bên đang đánh.
