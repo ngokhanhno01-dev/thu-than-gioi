@@ -449,10 +449,25 @@ function go(k){
 }
 
 /* ===== THẢ THÚ: bỏ hẳn khỏi kho. Hỏi xác nhận (dùng bảng nổi E.in). Thú đang ra trận KHÔNG thả được. ===== */
+/* Cảnh báo theo Rank (chữ đỏ = nặng). Rank thiếu coi là C như trong kho. */
+var THA_CB={
+  E:['','Thú Rank E rất phổ biến, nhưng thả đi vẫn không lấy lại được.'],
+  D:['','Thú Rank D khá phổ biến, nhưng thả đi vẫn không lấy lại được.'],
+  C:['','Thú Rank C: thả đi sẽ không lấy lại được.'],
+  B:['o','⚠ Thú Rank B khá mạnh, hãy cân nhắc kỹ trước khi thả.'],
+  A:['o','⚠ Thú Rank A rất mạnh và khó kiếm, hãy cân nhắc kỹ!'],
+  S:['r','⚠ Thú Rank S cực hiếm! Thả đi là mất vĩnh viễn.'],
+  SS:['r','⚠ Thú Rank SS huyền thoại! Thả đi là mất vĩnh viễn.']
+};
 function moTha(t){
-  var a=anhThu(t);
-  if(window.TTGTBAO){TTGTBAO.info({bac:t.bac,icon:a?'<img src="'+esc(a)+'" alt="">':'?',title:'Thả '+esc(tenThu(t))+'?',tc:'y',text:'Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.'},
-   [{t:'Thả',cls:'d',cb:function(){tha(t.uid);}},{t:'Hủy',cb:function(){hidePop();}}]);return;}
+  var a=anhThu(t),rk=RKC[t.bac]?t.bac:'C',lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),cb=THA_CB[rk];
+  if(window.TTGTBAO){
+    var tit='Bạn chắc chắn muốn thả <b>'+esc(tenThu(t))+'</b> <span style="color:#fff3c4">Lv.'+lv+' · Bậc '+tien+' · Rank</span> '+TTGTBAO.rankHtml(rk)+'?';
+    var txt='Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.<br><span class="'+(cb[0]?'tbo-w'+(cb[0]==='r'?' r':''):'')+'">'+cb[1]+'</span>';
+    var body=TTGTBAO.info({bac:t.bac,ts:true,icon:(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'?')+TTGTBAO.corner(rk),title:tit,tc:'y',text:txt},
+     [{t:'Thả',cls:'d',cb:function(){tha(t.uid);}},{t:'Hủy',cb:function(){hidePop();}}]);
+    try{var pc=body.querySelector('.tbo-ic canvas.pc');if(pc)pcPaint(pc);}catch(x){}   /* tự phóng vừa khung: thú nhỏ/vừa/to đều đầy đặn như ô kho */
+    return;}
   E.in.innerHTML='<div class="tt-ii"><span class="i">'+(a?'<img src="'+esc(a)+'" alt="">':'?')+'</span><div class="n">Thả '+esc(tenThu(t))+'?</div><div class="d">Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.</div></div>'
    +'<div class="tt-pb"><button type="button" class="d">Thả</button><button type="button">Hủy</button></div>';
   var bs=E.in.querySelectorAll('button');

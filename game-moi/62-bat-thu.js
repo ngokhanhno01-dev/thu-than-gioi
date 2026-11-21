@@ -356,7 +356,8 @@ function showPanel(win){
     var Pn=root.TTGBAO,fin=function(){abort();host.end();},cvw=null;
     if(win&&S.got){
       var g2=S.got,lo2=root.TTGCS&&TTGCS.loai?TTGCS.loai(g2.id):null,hT=root.TTGCS&&TTGCS.HE_TEN||{},he2=lo2&&lo2.he?lo2.he.map(function(x){return hT[x]||x;}).join(' / '):'?';
-      var body=Pn.info({icon:'<canvas width="128" height="128"></canvas>',bac:g2.bac,title:'Bắt thành công!',sub:esc(g2.ten)+(g2.boss?' <span style="color:#ff9f6f">[BOSS]</span>':''),text:'Hệ: '+esc(he2)+'<br>Bậc: <b style="color:'+(CFG.mauBac[g2.bac]||'#fff')+'">'+esc(g2.bac)+'</b> · Tiến hóa '+g2.tien+' · Cấp '+g2.lv,modal:true},[{t:'Về sảnh',cb:fin}]);
+      var rk2=g2.bac&&Pn.RKC&&Pn.RKC[g2.bac]?g2.bac:'C',cb2={B:'Thú Rank B khá mạnh!',A:'Thú Rank A rất mạnh và khó kiếm!',S:'⚠ Thú Rank S cực hiếm!',SS:'⚠ Thú Rank SS huyền thoại!'}[rk2];   /* chữ Rank ở góc ô hình như kho; Rank cao có thêm dòng chúc mừng */
+       var body=Pn.info({icon:'<canvas width="128" height="128"></canvas>'+Pn.corner(rk2),bac:g2.bac,title:'Bắt thành công!',sub:esc(g2.ten)+(g2.boss?' <span style="color:#ff9f6f">[BOSS]</span>':''),text:'Hệ: '+esc(he2)+' · Lv.<b>'+g2.lv+'</b> · Bậc <b>'+g2.tien+'</b> · Rank '+Pn.rankHtml(rk2)+(cb2?'<br><span class="tbo-w'+(rk2==='S'||rk2==='SS'?' r':'')+'">'+cb2+'</span>':''),modal:true},[{t:'Về sảnh',cb:fin}]);
       try{cvw=body.parentNode.querySelector('.tbo-ic canvas');var c3=cvw.getContext('2d'),tryN=0;cvw.width=cvw.height=192;(function paint(){THU_MOI.setFrame(192);
           /* vẽ 1:1 ra canvas phụ, đo khung chứa hình thú (bỏ phần trong suốt), rồi phóng vừa ô và căn GIỮA => thú bậc nhỏ/lớn đều đầy đặn; ảnh chưa nạp thì thử lại ~3 giây */
           var tmp=document.createElement('canvas');tmp.width=tmp.height=192;var tc=tmp.getContext('2d');
