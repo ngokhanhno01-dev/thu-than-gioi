@@ -41,8 +41,8 @@ var css=[
 '.rk i{position:absolute;bottom:-6%;border-radius:50%;background:rgb(var(--rgb));box-shadow:0 0 5px 1px rgba(var(--rgb),.9);opacity:0;animation:rkq 3s linear infinite}',
 '@keyframes rkq{0%{bottom:-6%;transform:scale(.6);opacity:0}15%{opacity:1}80%{opacity:.85}100%{bottom:104%;transform:scale(1);opacity:0}}',
 '.tbo-ic{position:relative}',
-'.tbo-rk{position:absolute;left:calc(var(--u)*16);top:calc(var(--u)*2);z-index:4;font-family:"TTGRank","Kaushan Script",cursive;font-weight:400;font-size:calc(var(--u)*80);line-height:1;color:var(--rl);-webkit-text-stroke:calc(var(--u)*3) var(--rl);text-shadow:0 0 calc(var(--u)*6) var(--rc),0 0 calc(var(--u)*14) var(--rc),0 0 calc(var(--u)*28) var(--rc);filter:drop-shadow(0 calc(var(--u)*3) 0 rgba(0,6,40,.85));pointer-events:none}',/* chữ Rank neon ở góc trên-trái ô hình, giống ô kho (.tt-c .b) */
-'.tbo-rk.w2{font-size:calc(var(--u)*62);top:calc(var(--u)*6)}',/* SS: 2 chữ cái nên nhỏ lại để không đè lên thú */
+'.tbo-rk{position:absolute;left:calc(var(--u)*8);top:calc(var(--u)*-2);z-index:4;font-family:"TTGRank","Kaushan Script",cursive;font-weight:400;font-size:calc(var(--u)*54);line-height:1;color:var(--rl);-webkit-text-stroke:calc(var(--u)*2) var(--rl);text-shadow:0 0 calc(var(--u)*4) var(--rc),0 0 calc(var(--u)*10) var(--rc),0 0 calc(var(--u)*20) var(--rc);filter:drop-shadow(0 calc(var(--u)*3) 0 rgba(0,6,40,.85));pointer-events:none}',/* chữ Rank neon NHỎ, sát góc trên-trái ô hình, giống ô kho (.tt-c .b) */
+'.tbo-rk.w2{font-size:calc(var(--u)*42);top:calc(var(--u)*2)}',/* SS: 2 chữ cái nên nhỏ hơn nữa để không đè lên thú */
 '.tbo-t.sm{font-size:calc(var(--u)*44)}',/* tiêu đề dài (vd câu hỏi xác nhận) */
 '.tbo-w{color:#ffb86b;font-weight:800}.tbo-w.r{color:#ff7a86}',/* dòng cảnh báo trong mô tả */
 '.tbo-ic.rkc{overflow:visible;border-color:transparent;box-shadow:none;background:linear-gradient(160deg,rgba(40,60,160,.75),rgba(8,12,60,.9))}',
