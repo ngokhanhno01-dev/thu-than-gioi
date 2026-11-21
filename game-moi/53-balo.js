@@ -37,7 +37,8 @@ function save(){if(demo)return;try{localStorage.setItem(KEY,JSON.stringify(inv))
 function count(id){return inv[id]|0;}
 function add(id,n){var c=count(id)+(n==null?1:n);if(c<=0)delete inv[id];else inv[id]=c;save();if(isOpen)render();return Math.max(0,c);}
 function ids(loai){var a=Object.keys(inv).filter(function(id){var c=CAT[id];return c&&(loai==='luoi'?(c.loai==='nl'||c.loai==='sach'):c.loai===loai)&&inv[id]>0;});   /* 'luoi' = mọi món hiện trong lưới ô (nguyên liệu + sách kỹ năng) */
-  if(sortMode===1)a.sort(function(x,y){return String(CAT[x].ten).localeCompare(String(CAT[y].ten),'vi');});
+  if(loai==='bong')a.sort(function(x,y){function b(i){return (CAT[i]&&+CAT[i].cap)||(parseInt(String(i).replace(/\D/g,''),10))||0;}return b(x)-b(y);});   /* Ngự Thú Châu: luôn bậc 1→6, bỏ qua nút Sắp xếp */
+  else if(sortMode===1)a.sort(function(x,y){return String(CAT[x].ten).localeCompare(String(CAT[y].ten),'vi');});
   else if(sortMode===2)a.sort(function(x,y){return inv[y]-inv[x];});
   return a;}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
@@ -89,9 +90,10 @@ var css=[
 '.bl-dt{display:flex;flex-direction:column;align-items:center;padding:{10} {8};overflow:hidden}',
 '.dt-ic{display:flex;align-items:center;justify-content:center;width:{172};height:{172};flex:none;font-size:{104};border-radius:{14};border:{3} solid #c9992f;background:radial-gradient(circle at 50% 35%,#34348f,#12123a);box-shadow:inset 0 0 {18} rgba(0,0,0,.6)}',
 '.dt-ic b{font-weight:400}',
-'.dt-nm{margin-top:{12};font-family:var(--fh);font-weight:800;font-size:{27};color:#ffe9a0;text-align:center;line-height:1.15}',
-'.dt-mt{margin-top:{5};font-size:{19};color:#9fe8de;text-align:center}',
-'.dt-ds{margin-top:{10};font-size:{19};line-height:1.35;color:#cfd6ff;text-align:center;overflow:hidden}',
+'.dt-nm{flex:none;margin-top:{12};font-family:var(--fh);font-weight:800;font-size:{27};color:#ffe9a0;text-align:center;line-height:1.15}',
+'.dt-mt{flex:none;margin-top:{5};font-size:{19};color:#9fe8de;text-align:center}',
+'.dt-ds{margin-top:{10};font-size:{19};line-height:1.35;color:#cfd6ff;text-align:center;width:100%;flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;scrollbar-width:none;-webkit-overflow-scrolling:touch}',
+'.dt-ds::-webkit-scrollbar{display:none}',
 '.dt-hint{margin:auto;font-size:{20};line-height:1.4;color:#8a90c0;text-align:center}'
 ].join('\n').replace(/\{(\d+(?:\.\d+)?)\}/g,'calc(var(--u)*$1)');
 try{var lkf=document.createElement('link');lkf.rel='stylesheet';lkf.href='https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700;800;900&family=Kaushan+Script&display=swap';document.head.appendChild(lkf);}catch(e){}
@@ -175,8 +177,9 @@ function render(){
   var tg=targets(),allLk=!!(tg.length&&tg.every(function(x){return lock[x];}));
   E.bt.khoa.setAttribute('aria-label',allLk?'Mở khóa':'Khóa');E.ovK.classList.toggle('on',allLk);   /* đang chọn món đã khóa -> hiện nút MỞ KHÓA */
   E.bt.chon.setAttribute('aria-label',multi?'Bỏ chọn':'Chọn');E.ovC.classList.toggle('on',multi);   /* đang chọn nhiều -> hiện nút BỎ CHỌN */
-  var d=E.dt;
-  if(sel){var s=CAT[sel];d.innerHTML='<div class="dt-ic">'+ic(s)+'</div><div class="dt-nm">'+esc(s.ten)+'</div><div class="dt-mt">'+esc(LOAI[s.loai]||'')+(s.cap?' · Cấp '+s.cap:'')+' · Số lượng: '+count(sel)+(lock[sel]?' · 🔒':'')+'</div><div class="dt-ds">'+esc(s.mo||'')+'</div>';}
+  var d=E.dt,oldDs=d.querySelector('.dt-ds'),keepSc=(oldDs&&d.getAttribute('data-sel')===String(sel))?oldDs.scrollTop:0;
+  d.setAttribute('data-sel',sel?String(sel):'');
+  if(sel){var s=CAT[sel];d.innerHTML='<div class="dt-ic">'+ic(s)+'</div><div class="dt-nm">'+esc(s.ten)+'</div><div class="dt-mt">'+esc(LOAI[s.loai]||'')+(s.cap?' · Cấp '+s.cap:'')+' · Số lượng: '+count(sel)+(lock[sel]?' · 🔒':'')+'</div><div class="dt-ds">'+esc(s.mo||'')+'</div>';var nds=d.querySelector('.dt-ds');if(nds)nds.scrollTop=keepSc;}
   else d.innerHTML='<div class="dt-hint">Chạm một ô để xem thông tin</div>';
 }
 function open(){if(window.TTGTHU&&TTGTHU.close)TTGTHU.close();/* mở Balo -> đóng panel Thú Thần */
