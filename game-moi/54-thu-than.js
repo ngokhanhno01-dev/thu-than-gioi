@@ -124,7 +124,7 @@ var css=[
 '.tt-c{padding:0;border:0;background:transparent;cursor:pointer}',
 '.tt-c img{position:absolute;left:12%;top:11%;width:76%;height:70%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}',
 '.tt-c canvas.pc{position:absolute!important;left:12%!important;top:9%!important;width:76%;height:auto;aspect-ratio:1;pointer-events:none;image-rendering:auto}',
-'.tt-c .b{position:absolute;left:{9};top:{7};font-family:var(--fh);font-weight:800;font-size:{22};line-height:1;color:#ffe9a0;text-shadow:0 0 {4} #000,{1} {1} 0 #000,-{1} {1} 0 #000}',
+'.tt-c .b{position:absolute;left:{8};top:{2};font-family:"TTGRank","Kaushan Script",cursive;font-weight:400;font-size:{36};line-height:1;color:var(--rl);-webkit-text-stroke:{2} var(--rl);text-shadow:0 0 {3} var(--rc),0 0 {8} var(--rc),0 0 {16} var(--rc);filter:drop-shadow(0 {2} 0 rgba(0,6,40,.85));pointer-events:none}',
 '.tt-c .rt{position:absolute;left:8%;right:8%;bottom:{9};height:{25};display:flex;align-items:center;justify-content:center;border-radius:{6};background:linear-gradient(180deg,#ffe58a,#c58a1e);color:#3b2406;font-family:var(--fh);font-weight:800;font-size:{17};line-height:1;white-space:nowrap}',
 '.tt-c.sel::after{content:"";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{4} solid #ffe066;border-radius:{6};box-shadow:0 0 {16} rgba(255,224,102,.85),inset 0 0 {14} rgba(255,224,102,.4);pointer-events:none}',
 /* rãnh + thumb cuộn (phủ kín rãnh vẽ sẵn trong ảnh để không lộ thumb vẽ sẵn ở trên cùng) */
@@ -297,7 +297,7 @@ function renderGrid(){
     var t=thus[row0*4+i],c=E.cells[i];
     if(t){
       var a=anhThu(t);
-      c.innerHTML=(window.TTGTBAO&&t.bac?TTGTBAO.fx(t.bac,4):'')+(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'')+(t.bac?'<span class="b">'+esc(t.bac)+'</span>':'')+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
+      c.innerHTML=(window.TTGTBAO&&t.bac?TTGTBAO.fx(t.bac,4):'')+(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'')+'<span class="b" style="--rc:'+RKC[RKC[t.bac]?t.bac:'C'][0]+';--rl:'+RKC[RKC[t.bac]?t.bac:'C'][1]+'">'+(RKC[t.bac]?t.bac:'C')+'</span>'+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
       var pc=c.querySelector('canvas.pc');if(pc)pcPaint(pc);
       c.setAttribute('aria-label',tenThu(t));c.style.pointerEvents='';
     }else{c.innerHTML='';c.removeAttribute('aria-label');c.style.pointerEvents='none';}
@@ -362,10 +362,10 @@ function renderBadges(t){
   if(!t){E.oc.forEach(function(c){c.getContext('2d').clearRect(0,0,c.width,c.height);});return;}
   var lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),bac=RKC[t.bac]?t.bac:'C',rc=RKC[bac];
   var lab=function(s){return {t:s,font:F_LB,sz:40,core:'#c9fbff',glow:'#00c8ff',lw:6,lw2:1};};
-  var num=function(s){return {t:String(s),font:'400 {S}px '+F_BR,sz:110,maxW:112,core:'#fff7b0',glow:'#ffb800'};};
+  var num=function(s){return {t:String(s),font:'400 {S}px '+F_BR,sz:82,maxW:88,core:'#fff7b0',glow:'#ffb800'};};
   ocDraw(E.oc[0],[lab('Lv'),num(lv)],4);
   ocDraw(E.oc[1],[lab('Bậc'),num(tien)],4);
-  ocDraw(E.oc[2],[{t:bac,font:'400 {S}px '+F_BR,sz:168,maxW:136,core:rc[1],glow:rc[0],lw:8,lw2:5}],0);
+  ocDraw(E.oc[2],[{t:bac,font:'400 {S}px '+F_BR,sz:124,maxW:96,core:rc[1],glow:rc[0],lw:7,lw2:4}],0);
 }
 if(document.fonts&&document.fonts.load){document.fonts.load('40px TTGRank','EDCBASSS0123456789').then(function(){if(root)render();}).catch(function(){});}   /* font nạp xong thì vẽ lại */
 function renderGo(){
