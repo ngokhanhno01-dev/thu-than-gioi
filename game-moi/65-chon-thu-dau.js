@@ -1,0 +1,122 @@
+/* CHỌN THÚ ĐỒNG HÀNH (màn chọn thú lúc mới vào game).
+   Hiện ngay sau màn chờ (nằm DƯỚI màn chờ nên khi màn chờ mờ đi là thấy luôn). Phủ toàn màn hình ngang (780x360 logic, co giãn theo máy).
+   Khung = game-moi/khung-chon-thu.webp (2000x1127, nền trong suốt; chưa có thì thử khung-chon-thu.png; không có cả hai thì vẽ khung tạm).
+   Mọi vị trí (tiêu đề, thanh thông tin, 3 bục, 3 bảng tên, nút Xác Nhận, nút X) tính theo TỌA ĐỘ ẢNH GỐC 2505x1412 (hàm B bên dưới), đổi ảnh khung thì chỉnh số ở đó.
+
+   THÚ: chưa có thú nên 3 bục để trống (hiện dấu "?"). Khi có thú: điền id (đúng id trong THU_MOI, ví dụ '1a') vào STARTERS, thú tự hiện đứng trên bục.
+   TEST: ALWAYS=true => mỗi lần mở game đều hiện. Khi làm thật đổi ALWAYS=false => chỉ hiện khi chưa chọn thú. Link có ?chon-thu=1 luôn ép hiện.
+   LƯU: lựa chọn ghi ở khóa ttg_moi_starter_v1 = {slot, id, t}. Game chưa có tài khoản/kho nên chưa phát thú vào túi; khi cần thì nghe sự kiện 'ttg-starter' (detail = {slot,id}) hoặc gọi TTGSTARTER.get().
+   Nút X: đóng không chọn (không lưu). Nút Xác Nhận chỉ bấm được sau khi chọn 1 bục. */
+(function(){
+'use strict';
+if(window.TTG_BLOCK)return;
+var ALWAYS=true,KEY='ttg_moi_starter_v1',IW=2505,IH=1412,TIER=1;
+var STARTERS=[
+ {id:null,ten:'Thú 1',mota:'Chưa có thông tin'},
+ {id:null,ten:'Thú 2',mota:'Chưa có thông tin'},
+ {id:null,ten:'Thú 3',mota:'Chưa có thông tin'}];
+var PX=[500,1255,2015];/* tâm 3 bục (px ảnh gốc) */
+var HINT='Chạm vào một bục để chọn thú đồng hành';
+var SRC=['game-moi/khung-chon-thu.webp?v=1','game-moi/khung-chon-thu.png?v=1'];
+var root=null,sel=-1,raf=0,locked=false,cvs=[],infoEl,okDim,frameOk=false;
+function read(){try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){return null;}}
+function B(x0,y0,x1,y1){return 'left:'+(x0/IW*100).toFixed(3)+'%;top:'+(y0/IH*100).toFixed(3)+'%;width:'+((x1-x0)/IW*100).toFixed(3)+'%;height:'+((y1-y0)/IH*100).toFixed(3)+'%;';}
+function css(){
+ var s=document.createElement('style');
+ s.textContent=
+ '#cht{position:fixed;left:0;right:0;top:0;bottom:0;z-index:100;opacity:0;transition:opacity .4s ease;touch-action:none;-webkit-tap-highlight-color:transparent;font-family:sans-serif;color:#fff;-webkit-user-select:none;user-select:none}'+
+ '#cht.on{opacity:1}#cht.off{opacity:0;pointer-events:none}'+
+ '#cht .bx{position:absolute;left:env(safe-area-inset-left,0px);right:env(safe-area-inset-right,0px);top:0;bottom:env(safe-area-inset-bottom,0px);background-size:100% 100%;background-repeat:no-repeat}'+
+ '#cht.nofr .bx{background:linear-gradient(180deg,#0b1030,#1d1650);box-shadow:inset 0 0 0 .6vh #d9b24c}'+
+ '#cht .a{position:absolute;box-sizing:border-box}'+
+ '#cht .tx{display:flex;align-items:center;justify-content:center;text-align:center;font-weight:bold;font-size:clamp(9px,3.2vh,18px);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 1%;text-shadow:0 0 .7vh #02122a,0 .25vh 0 #02122a,0 -.25vh 0 #02122a,.25vh 0 0 #02122a,-.25vh 0 0 #02122a}'+
+ '#cht .inf{color:#bfefff}#cht .inf.warn{color:#ffd45a;animation:chtsk .35s}'+
+ '#cht .nm{color:#fff2c0}'+
+ '#cht.nofr .inf,#cht.nofr .nm{border:1px solid #d9b24c;background:rgba(0,0,40,.5)}'+
+ '#cht .slot{cursor:pointer}'+
+ '#cht .gl{opacity:0;transition:opacity .25s;background:radial-gradient(ellipse at 50% 50%,rgba(255,236,150,.95) 0%,rgba(120,255,240,.55) 38%,rgba(120,255,240,0) 70%);pointer-events:none}'+
+ '#cht .slot.on .gl{opacity:1;animation:chtgl 1.2s ease-in-out infinite}'+
+ '#cht .pl{position:absolute;pointer-events:none;border-radius:1vh;transition:box-shadow .25s}'+
+ '#cht .slot.on .pl{box-shadow:0 0 0 .35vh #ffe9a0,0 0 2.4vh rgba(120,255,240,.9)}'+
+ '#cht canvas.pt{position:absolute;image-rendering:auto;pointer-events:none;transition:transform .25s,filter .25s;transform-origin:50% 100%}'+
+ '#cht .slot.on canvas.pt{transform:scale(1.1);filter:drop-shadow(0 0 1.4vh #ffe27a)}'+
+ '#cht .q{position:absolute;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:15vh;line-height:1;color:rgba(170,235,255,.9);text-shadow:0 0 2.5vh #4fd8ff,0 0 .8vh #fff;pointer-events:none;animation:chtfl 2.6s ease-in-out infinite}'+
+ '#cht .slot.on .q{color:#fff2c0;text-shadow:0 0 3vh #ffd45a,0 0 .8vh #fff}'+
+ '#cht .ok{cursor:pointer}'+
+ '#cht .okd{background:rgba(4,8,36,.58);border-radius:2.2vh;pointer-events:none;transition:opacity .25s}'+
+ '#cht.ready .okd{opacity:0}#cht.ready .okg{animation:chtgl 1.2s ease-in-out infinite;opacity:1}'+
+ '#cht .okg{opacity:0;border-radius:2.2vh;box-shadow:0 0 2.2vh rgba(255,236,150,.9);pointer-events:none}'+
+ '#cht.nofr .ok{border:1px solid #d9b24c;background:rgba(0,0,40,.6)}'+
+ '#cht .x{cursor:pointer}'+
+ '@keyframes chtgl{0%,100%{filter:brightness(.8)}50%{filter:brightness(1.25)}}'+
+ '@keyframes chtfl{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2vh)}}'+
+ '@keyframes chtsk{0%,100%{transform:translateX(0)}25%{transform:translateX(-1vh)}75%{transform:translateX(1vh)}}';
+ document.head.appendChild(s);}
+function build(src){
+ css();frameOk=!!src;
+ root=document.createElement('div');root.id='cht';if(!frameOk)root.className='nofr';
+ var h='<div class="bx" id="cht-bx"'+(frameOk?' style="background-image:url('+src+')"':'')+'>';
+ h+='<div class="a tx inf" id="cht-inf" style="'+B(535,228,1975,312)+'">'+HINT+'</div>';
+ for(var i=0;i<3;i++){var cx=PX[i];
+  h+='<div class="a slot" data-i="'+i+'" style="'+B(cx-300,330,cx+300,1050)+'">'+
+   '<div class="a gl" style="'+B(cx-300,740-330,cx+300,890-330)+'"></div>'+
+   '<div class="pl" style="'+B(cx-210,893-330,cx+210,1003-330)+'"></div>'+
+   '<div class="q" data-q="'+i+'" style="'+B(cx-150,420-330,cx+150,820-330)+'">?</div>'+
+   '<canvas class="pt" data-c="'+i+'"></canvas>'+
+   '<div class="a tx nm" style="'+B(cx-175,903-330,cx+175,993-330)+'">'+STARTERS[i].ten+'</div></div>';}
+ h+='<div class="a ok tx" id="cht-ok" style="'+B(900,1150,1610,1320)+'">'+(frameOk?'':'Xác Nhận')+'</div>';
+ h+='<div class="a okd" id="cht-okd" style="'+B(975,1183,1535,1292)+'"></div><div class="a okg" style="'+B(975,1183,1535,1292)+'"></div>';
+ h+='<div class="a x" id="cht-x" style="'+B(2300,25,2480,205)+'">'+(frameOk?'':'✕')+'</div>';
+ h+='</div>';
+ root.innerHTML=h;document.body.appendChild(root);
+ infoEl=document.getElementById('cht-inf');okDim=document.getElementById('cht-okd');
+ /* slot: tọa độ con tính theo ô slot (bắt đầu ở y=330 của ảnh gốc, ngang tâm khác nhau => đổi lại left theo ô slot) */
+ var slots=root.querySelectorAll('.slot');
+ for(i=0;i<3;i++){var sl=slots[i],cx2=PX[i],sw=600,ch=sl.querySelectorAll('.a,.pl,.q');
+  /* left của phần tử con tính lại tương đối ô slot (ô slot rộng 600 px ảnh gốc, tâm = cx) */
+  for(var j=0;j<ch.length;j++){var e=ch[j],l=parseFloat(e.style.left)/100*IW,w=parseFloat(e.style.width)/100*IW;e.style.left=((l-(cx2-300))/sw*100).toFixed(3)+'%';e.style.width=(w/sw*100).toFixed(3)+'%';
+   var t=parseFloat(e.style.top)/100*IH,hh=parseFloat(e.style.height)/100*IH;e.style.top=(t/720*100).toFixed(3)+'%';e.style.height=(hh/720*100).toFixed(3)+'%';}
+  cvs[i]=sl.querySelector('canvas.pt');
+  sl.addEventListener('click',(function(k){return function(){pick(k);};})(i));}
+ document.getElementById('cht-ok').addEventListener('click',confirm);
+ document.getElementById('cht-x').addEventListener('click',function(){close(false);});
+ sizeCv();window.addEventListener('resize',sizeCv);
+ for(i=0;i<3;i++)if(STARTERS[i].id)root.querySelector('[data-q="'+i+'"]').style.display='none';
+ requestAnimationFrame(function(){root.className+=' on';});
+ loop();}
+/* khung thú trên mỗi bục: vuông, cao ~ 30,8% chiều cao màn hình, đáy nằm trên mặt bục (y=835 ảnh gốc) */
+function sizeCv(){if(!root)return;var d=window.devicePixelRatio||1,ph=innerHeight*.308,sl=root.querySelectorAll('.slot');
+ for(var i=0;i<3;i++){var c=cvs[i],r=sl[i].getBoundingClientRect();if(!c)continue;
+  c.style.width=ph+'px';c.style.height=ph+'px';c.style.left=((r.width-ph)/2)+'px';c.style.top=((835-330)/720*r.height-ph)+'px';
+  c.width=Math.max(2,Math.round(ph*d));c.height=c.width;}}
+function loop(){raf=0;if(!root||root.className.indexOf('off')>=0)return;
+ if(!document.hidden&&window.THU_MOI){
+  for(var i=0;i<3;i++){var id=STARTERS[i].id,c=cvs[i];if(!id||!c||!THU_MOI.byId||!THU_MOI.byId[id])continue;
+   var g=c.getContext('2d'),sc=c.width/130,bob=Math.sin(performance.now()/380+i)*2;
+   g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,c.width,c.height);g.setTransform(sc,0,0,sc,0,0);
+   try{THU_MOI.setFrame(192);THU_MOI.draw(g,id,TIER,65,128+bob,128,true);}catch(e){}}}
+ raf=requestAnimationFrame(loop);}
+function say(s,warn){infoEl.textContent=s;infoEl.className='a tx inf'+(warn?' warn':'');}
+function pick(i){if(locked)return;sel=i;
+ var sl=root.querySelectorAll('.slot');for(var k=0;k<3;k++)sl[k].classList.toggle('on',k===i);
+ say(STARTERS[i].ten+' — '+STARTERS[i].mota);root.classList.add('ready');}
+function confirm(){if(locked)return;
+ if(sel<0){say('Hãy chọn một thú trước!',true);setTimeout(function(){if(sel<0&&!locked)say(HINT);},1400);return;}
+ locked=true;var r={slot:sel,id:STARTERS[sel].id||null,t:Date.now()};
+ try{localStorage.setItem(KEY,JSON.stringify(r));}catch(e){}
+ say('Đã chọn '+STARTERS[sel].ten+'!');
+ try{window.dispatchEvent(new CustomEvent('ttg-starter',{detail:r}));}catch(e){}
+ setTimeout(function(){close(true);},700);}
+function close(){if(!root)return;root.className=root.className.replace(' on','').replace(' ready','')+' off';
+ var r=root;root=null;if(raf){cancelAnimationFrame(raf);raf=0;}window.removeEventListener('resize',sizeCv);
+ setTimeout(function(){if(r.parentNode)r.parentNode.removeChild(r);},500);}
+function show(force){if(root)return;
+ if(!force&&!ALWAYS&&read())return;
+ sel=-1;locked=false;cvs=[];
+ var im=new Image(),n=0;
+ im.onload=function(){build(SRC[n]);};
+ im.onerror=function(){n++;if(n<SRC.length)im.src=SRC[n];else build(null);};
+ im.src=SRC[0];}
+window.TTGSTARTER={get:read,show:function(){show(true);},reset:function(){try{localStorage.removeItem(KEY);}catch(e){}},list:STARTERS};
+show(/[?&]chon-thu=1/.test(location.search));
+})();
