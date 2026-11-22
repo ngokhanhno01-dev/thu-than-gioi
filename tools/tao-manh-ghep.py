@@ -88,6 +88,17 @@ CROP = {
     '4h': (0.48, 0.55, 0.55),   # Lôi Linh (linh thể cầu): mặt ở giữa
     '4i': (0.40, 0.42, 0.42),   # Lôi Đồng (đồng tử): mặt + băng trán
     '4j': (0.45, 0.42, 0.50),   # Lôi Vực Chiến Thần (boss): mũ sừng + mắt
+    # --- vùng 5 Nguyệt Cung (ảnh b1; mắt màu xanh) ---
+    '5a': (0.34, 0.38, 0.45),   # Nguyệt Thố (thỏ): đầu + tai
+    '5b': (0.32, 0.25, 0.40),   # Nguyệt Hạc (chim): đầu phía trên
+    '5c': (0.36, 0.35, 0.55),   # Nguyệt Thiềm (cóc): đầu + mắt lớn bên trái
+    '5d': (0.27, 0.42, 0.45),   # Nguyệt Đằng (dây leo): mặt bên trái
+    '5e': (0.26, 0.48, 0.42),   # Nguyệt Nga (bướm đêm): mặt bên trái
+    '5f': (0.21, 0.38, 0.45),   # Nguyệt Kình (cá voi): đầu bên trái
+    '5g': (0.37, 0.38, 0.50),   # Nguyệt Tượng (voi): đầu + ngà bên trái
+    '5h': (0.25, 0.36, 0.40),   # Nguyệt Quy (rùa): đầu bên trái
+    '5i': (0.33, 0.35, 0.50),   # Nguyệt Tiên (tiên): mặt bên trái
+    '5j': (0.24, 0.25, 0.45),   # Nguyệt Thực Tế Quân (boss, sói): đầu bên trái-trên
 }
 
 # Màu QUẦNG SÁNG theo vùng (z -> hex). Khóa theo số vùng của 51-thu-moi.js
