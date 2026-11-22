@@ -2,24 +2,28 @@
    Khung ảnh nằm ở 72-khung-ren-cuong-hoa.js (khung 'th', mở từ nút "Tiến Hóa" trong panel Thú Thần). File này nạp SAU 72 và 54, dùng móc TTGKH.on('open'|'btn'|'pick') + TTGKH.frame('th') (giống 74-ren-cuong-hoa.js).
    Đổi bậc thú dùng TTGTHU.setTien(uid,n) (54-thu-than.js). Chỉ số sau tiến hóa do TTGCS.tinh tính theo tien.
 
-   ITEM: 6 vùng (z0..z5) x 4 loại = 24 item, loai:'th' (chỉ hiện trong túi của khung Tiến Hóa, không hiện ở Balo chính). Id: th-z<vùng>-<manh|loi|chau|an>. Ảnh: game-moi/icon-th/<id>.png (128x128).
+   ITEM: 9 vùng (z0..z8) x 4 loại = 36 item (z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm = vùng của 3 thú khởi đầu, chưa mở: icon làm sẵn), loai:'th' (chỉ hiện trong túi của khung Tiến Hóa, không hiện ở Balo chính). Id: th-z<vùng>-<manh|loi|chau|an>. Ảnh: game-moi/icon-th/<id>.png (128x128).
    CÔNG THỨC (CFG.cong, khóa = bậc ĐÍCH): dùng item của VÙNG GỐC của thú (TTGCS.loai(id).goc); 3 ô vòng = 3 món.
       Bậc 1 -> 2: Mảnh x6 + Lõi x2 + Châu x1        Bậc 2 -> 3: Lõi x5 + Châu x3 + Thần Ấn x1
    RƠI (CFG.roi): CHỈ thú hoang (địch source 'demo') và boss thú hoang CHẾT mới rơi (gọi từ index.html lúc thắng trận); quái vùng (source 'main') đã có bộ item riêng ở 73-luat-trang-bi.js nên KHÔNG rơi ở đây.
       Tỉ lệ nhân hệ số may mắn giống 73 (tối đa x3). Thần Ấn chỉ rơi từ boss thú hoang.
-   Thú khởi đầu (vùng gốc 6,7,8 chưa mở) tạm dùng item vùng 0 (Tuyết Nguyên).
+   Thú khởi đầu dùng item của vùng gốc của mình: Lưu Diêu (k2) -> z6, Viêm Sư (k1) -> z7, Lâm Trư (k3) -> z8. Số vùng theo 56b-loai.js (goc) = 51-thu-moi.js (z). LƯU Ý: 73-luat-trang-bi.js đánh số vùng khác (z6 = Dương Sơn...) vì đó là danh sách 17 vùng trang bị; id item ở đây KHÔNG dùng số của 73.
+   Chưa mở vùng 6-8 thì chưa có nguồn rơi: item chỉ lấy được bằng nút test "Lấy đồ TH".
    API: TTGTH.roiDo(enemy,mm) | .moTa(list) | .yeuCau(thu) | .tienHoa(uid) | .cap(n) (test: +item) | .id(z,loai) | .CFG */
 (function(root){
 'use strict';
-var D='game-moi/icon-th/',NZ=6,KIND=['manh','loi','chau','an'];
-var ZONE=['Tuyết Nguyên','Sương Cốc','Vân Đảo','Phong Nguyên','Lôi Vực','Nguyệt Cung'];
+var D='game-moi/icon-th/',NZ=9,KIND=['manh','loi','chau','an'];
+var ZONE=['Tuyết Nguyên','Sương Cốc','Vân Đảo','Phong Nguyên','Lôi Vực','Nguyệt Cung','Thủy Nguyệt Cảnh','Xích Hỏa Địa','Thanh Lâm'];
 var TEN=[
  ['Mảnh Băng Tinh','Lõi Hàn Sương','Châu Tuyết Phách','Thần Ấn Băng Sơn'],
  ['Mảnh Sương Ngọc','Lõi Vụ Linh','Châu Mộc Sương','Thần Ấn Vụ Thú'],
  ['Mảnh Vân Tinh','Lõi Phù Vân','Châu Mộng Vân','Thần Ấn Côn Bằng'],
  ['Mảnh Phong Tinh','Lõi Cuồng Phong','Châu Lục Phong','Thần Ấn Vũ Xà'],
  ['Mảnh Lôi Tinh','Lõi Thiên Lôi','Châu Tử Điện','Thần Ấn Chiến Thần'],
- ['Mảnh Nguyệt Tinh','Lõi Ngân Quang','Châu Nguyệt Quế','Thần Ấn Tế Quân']];
+ ['Mảnh Nguyệt Tinh','Lõi Ngân Quang','Châu Nguyệt Quế','Thần Ấn Tế Quân'],
+ ['Mảnh Thủy Tinh','Lõi Triều Nguyệt','Châu Lam Ba','Thần Ấn Thủy Nguyệt'],
+ ['Mảnh Hỏa Tinh','Lõi Xích Diễm','Châu Liệt Diễm','Thần Ấn Viêm Vương'],
+ ['Mảnh Mộc Tinh','Lõi Thanh Diệp','Châu Cổ Thụ','Thần Ấn Lâm Chủ']];
 var CFG={
  nutTest:true,   /* nút test "Lấy đồ TH" (hàng dưới, cạnh Lấy sách). Đặt false khi đã có nguồn rơi ổn định */
  /* công thức: khóa = bậc đích (tien mới). Mỗi phần tử = [loại item, số lượng], theo thứ tự ô vòng: trái, phải, dưới */
