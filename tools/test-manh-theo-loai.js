@@ -33,15 +33,15 @@ function nap(inv0, thuRaTran) {
 
 console.log('Test Mảnh theo loài');
 
-t('không còn item th-z*-manh trong danh mục; có th-m-<id> cho 10 loài vùng 0 và 10 loài vùng 1, 10 loài vùng 2, 10 loài vùng 3, chưa có vùng khác', function () {
+t('không còn item th-z*-manh trong danh mục; có th-m-<id> cho 10 loài vùng 0 và 10 loài vùng 1, 10 loài vùng 2, 10 loài vùng 3, 10 loài vùng 4, chưa có vùng khác', function () {
   var e = nap();
   Object.keys(e.CAT).forEach(function (k) { assert(!/^th-z\d+-manh$/.test(k), 'còn ' + k); });
-  ['1a', '1b', '1c', '1d', '1e', '1f', '1g', '1h', '1i', '1j', '2a', '2b', '2c', '2d', '2e', '2f', '2g', '2h', '2i', '2j', '3a', '3b', '3c', '3d', '3e', '3f', '3g', '3h', '3i', '3j', '6a', '6b', '6c', '6d', '6e', '6f', '6g', '6h', '6i', '6j'].forEach(function (id) {
+  ['1a', '1b', '1c', '1d', '1e', '1f', '1g', '1h', '1i', '1j', '2a', '2b', '2c', '2d', '2e', '2f', '2g', '2h', '2i', '2j', '3a', '3b', '3c', '3d', '3e', '3f', '3g', '3h', '3i', '3j', '6a', '6b', '6c', '6d', '6e', '6f', '6g', '6h', '6i', '6j', '4a', '4b', '4c', '4d', '4e', '4f', '4g', '4h', '4i', '4j'].forEach(function (id) {
     assert(e.CAT['th-m-' + id], 'thiếu th-m-' + id);
     assert.strictEqual(e.CAT['th-m-' + id].img, 'game-moi/icon-th/th-m-' + id + '.png');
     assert(/^Mảnh /.test(e.CAT['th-m-' + id].ten));
   });
-  assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-m-/.test(k); }).length, 40);
+  assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-m-/.test(k); }).length, 50);
   assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-z\d+-(loi|chau|an)$/.test(k); }).length, 27);
 });
 
@@ -90,8 +90,13 @@ t('thú hoang vùng 3 rơi Mảnh đúng loài (6a)', function () {
   assert(r.some(function (d) { return d.id === 'th-m-6a'; }));
 });
 
-t('thú hoang vùng chưa mở Mảnh (vd 4a) không rơi Mảnh (chưa có item)', function () {
+t('thú hoang vùng 4 rơi Mảnh đúng loài (4a)', function () {
   var e = nap(); var r = e.TH.roiDo({ source: 'demo', boss: false, id: '4a', vung: 4 }, 0);
+  assert(r.some(function (d) { return d.id === 'th-m-4a'; }));
+});
+
+t('thú hoang vùng chưa mở Mảnh (vd 5a) không rơi Mảnh (chưa có item)', function () {
+  var e = nap(); var r = e.TH.roiDo({ source: 'demo', boss: false, id: '5a', vung: 5 }, 0);
   assert(!r.some(function (d) { return /^th-m-/.test(d.id); }));
 });
 
