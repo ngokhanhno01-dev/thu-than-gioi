@@ -100,7 +100,7 @@ function init(){
   ov.querySelector('.dv-x').addEventListener('click',dong);
   document.body.appendChild(ov);
   /* nút dài ngay dưới nút Thám hiểm (hàng 1, kéo lên sát nút trên): ảnh 1200x190 -> 200 x 31,7 */
-  btn=root.TTGNV.add({id:'chon-vung',ten:'Chọn vùng',image:'game-moi/nut-chon-vung.webp?v=1',w:200,h:31.7,center:true,onTap:mo,r:1,offsetY:-12.5});
+  btn=root.TTGNV.add({id:'chon-vung',ten:'Chọn vùng',image:'game-moi/nut-chon-vung.webp?v=1',w:200,h:31.7,center:true,onTap:mo,r:1,offsetY:-14.5});
   span=document.createElement('span');span.className='dv-vt';btn.appendChild(span);
   var lay0=root.TTGNV.layout;root.TTGNV.layout=function(m){lay0(m);requestAnimationFrame(fit);};
   capNhat();window.addEventListener('resize',function(){requestAnimationFrame(fit);});

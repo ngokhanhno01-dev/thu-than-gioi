@@ -107,7 +107,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 
 ## Danh Vọng + Chọn vùng (23/11/2026) — `80-danh-vong.js` (TTGDV)
 - **Danh Vọng** = số LOÀI thú hoang / boss thú hoang đã giết (mỗi loài tính 1 lần đầu; 1 vùng = 9 thú + 1 boss = 10). Lưu `ttg_moi_dv`. Hiện ngôi sao + số trong ô nhỏ dưới chữ "Danh Vọng" (tọa độ `PLATE` trong file, theo pixel khung-sanh.webp; vẽ từ index.html ngay sau `drawExp`).
-- **Trần cấp thú nuôi** = `TTGCS.tranCap(Danh Vọng)` = min(100, 10 + floor(DV x 0,55)): DV 0 -> Lv.10, DV 10 -> Lv.15 (hệ số ở 56-chi-so.js `tranCapNen`, `tranCapMoiSao`). `capMax()` trong 54-thu-than.js đọc `TTGDV.tran()`; đạt trần thì ngừng nhận EXP, vòng EXP hiện "Đạt trần". Thú đã vượt trần thì giữ nguyên cấp.
+- **Trần cấp thú nuôi** = `TTGCS.tranCap(Danh Vọng)` = min(100, 10 + floor(DV x 0,55)): DV 0 -> Lv.10, DV 10 -> Lv.15 (hệ số ở 56-chi-so.js `tranCapNen`, `tranCapMoiSao`). `capMax()` trong 54-thu-than.js đọc `TTGDV.tran()`; đạt trần thì ngừng nhận EXP, vòng EXP hiện "Lv.Max" (khi có thêm Danh Vọng thì EXP chạy tiếp). Thú đã vượt trần thì giữ nguyên cấp.
 - **Chọn vùng**: nút dài `nut-chon-vung.webp` (chữ là DOM nên đổi theo vùng) nằm dưới nút Thám hiểm; bấm mở bảng danh sách. Vùng thứ n cần 10 x (n-1) Danh Vọng (`CFG.moiVung`), không bị tiêu hao. Thám hiểm gặp thú/quái của vùng đã chọn (61-tham-hiem-tran.js đọc `TTGDV.vung()`), lưu `ttg_moi_vung`.
 - Thử nhanh: thêm `?dv=30` vào link để tạm cộng 30 Danh Vọng (không lưu).
 - Lưu ý: vùng 7, 8, 9 (Thủy Nguyệt Cảnh, Xích Hỏa Địa, Thanh Lâm) hiện mới có 1 loài mỗi vùng trong `51-thu-moi.js`, nên chưa đủ loài để kiếm đủ Danh Vọng mở các vùng sau.

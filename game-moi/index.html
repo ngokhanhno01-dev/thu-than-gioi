@@ -203,7 +203,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/53-balo.js"></script>
 <script src="game-moi/58-bong-bat.js"></script>
 <script src="game-moi/54-thu-than.js?v=2"></script>
-<script src="game-moi/59-nut-tham-hiem.js?v=4"></script>
+<script src="game-moi/59-nut-tham-hiem.js?v=5"></script>
 <script src="game-moi/102-quai-vung.js"></script>
 <script src="game-moi/55-trang-bi.js"></script>
 <script src="game-moi/72-khung-ren-cuong-hoa.js"></script>
@@ -1001,7 +1001,7 @@ function drawExp(ts){
  }
  ctx.restore();ctx.save();ctx.lineJoin='round';ctx.textAlign='center';ctx.textBaseline='middle';
  /* số exp/cần ở giữa ô tròn, tự co cho vừa */
- var txt=inf?(inf.max?(inf.tran?'Đạt trần':'MAX'):inf.exp+'/'+inf.need):'--',fs=Math.max(7,Math.round(ry*.32));
+ var txt=inf?(inf.max?(inf.tran?'Lv.Max':'MAX'):inf.exp+'/'+inf.need):'--',fs=Math.max(7,Math.round(ry*.32));
  ctx.font='bold '+fs+'px sans-serif';
  while(fs>6&&ctx.measureText(txt).width>rx*1.55){fs--;ctx.font='bold '+fs+'px sans-serif';}
  ctx.lineWidth=Math.max(2,fs*.28);ctx.strokeStyle='#020618';ctx.fillStyle='#fff';ctx.strokeText(txt,cx,cy);ctx.fillText(txt,cx,cy);
