@@ -33,15 +33,15 @@ function nap(inv0, thuRaTran) {
 
 console.log('Test Mảnh theo loài');
 
-t('không còn item th-z*-manh trong danh mục; có th-m-<id> cho 10 loài vùng 0 và 10 loài vùng 1, chưa có vùng khác', function () {
+t('không còn item th-z*-manh trong danh mục; có th-m-<id> cho 10 loài vùng 0 và 10 loài vùng 1, 10 loài vùng 2, chưa có vùng khác', function () {
   var e = nap();
   Object.keys(e.CAT).forEach(function (k) { assert(!/^th-z\d+-manh$/.test(k), 'còn ' + k); });
-  ['1a', '1b', '1c', '1d', '1e', '1f', '1g', '1h', '1i', '1j', '2a', '2b', '2c', '2d', '2e', '2f', '2g', '2h', '2i', '2j'].forEach(function (id) {
+  ['1a', '1b', '1c', '1d', '1e', '1f', '1g', '1h', '1i', '1j', '2a', '2b', '2c', '2d', '2e', '2f', '2g', '2h', '2i', '2j', '3a', '3b', '3c', '3d', '3e', '3f', '3g', '3h', '3i', '3j'].forEach(function (id) {
     assert(e.CAT['th-m-' + id], 'thiếu th-m-' + id);
     assert.strictEqual(e.CAT['th-m-' + id].img, 'game-moi/icon-th/th-m-' + id + '.png');
     assert(/^Mảnh /.test(e.CAT['th-m-' + id].ten));
   });
-  assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-m-/.test(k); }).length, 20);
+  assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-m-/.test(k); }).length, 30);
   assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-z\d+-(loi|chau|an)$/.test(k); }).length, 27);
 });
 
@@ -85,8 +85,8 @@ t('thú hoang vùng 1 rơi Mảnh đúng loài (2a)', function () {
   assert(r.some(function (d) { return d.id === 'th-m-2a'; }));
 });
 
-t('thú hoang vùng chưa mở Mảnh (vd 3a) không rơi Mảnh (chưa có item)', function () {
-  var e = nap(); var r = e.TH.roiDo({ source: 'demo', boss: false, id: '3a', vung: 2 }, 0);
+t('thú hoang vùng chưa mở Mảnh (vd 4a) không rơi Mảnh (chưa có item)', function () {
+  var e = nap(); var r = e.TH.roiDo({ source: 'demo', boss: false, id: '4a', vung: 4 }, 0);
   assert(!r.some(function (d) { return /^th-m-/.test(d.id); }));
 });
 

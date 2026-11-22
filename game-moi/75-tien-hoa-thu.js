@@ -29,7 +29,7 @@ var TEN=[
 var CFG={
  nutTest:true,   /* nút test "Lấy đồ TH" (hàng dưới, cạnh Lấy sách). Đặt false khi đã có nguồn rơi ổn định */
  /* vùng ĐÃ có ảnh Mảnh theo loài (chạy tools/tao-manh-ghep.py --vung <z> rồi thêm số vùng vào đây). Vùng chưa có thì chưa khai Mảnh, chưa rơi Mảnh */
- vungManh:[0,1],
+ vungManh:[0,1,2],
  /* công thức: khóa = bậc đích (tien mới). Mỗi phần tử = [loại item, số lượng], theo thứ tự ô vòng: trái, phải, dưới.
     'manh' = Mảnh CỦA CHÍNH LOÀI thú đang tiến hóa (th-m-<id thú>); loi/chau/an = item của vùng gốc */
  cong:{2:[['manh',6],['loi',2],['chau',1]],3:[['loi',5],['chau',3],['an',1]]},
