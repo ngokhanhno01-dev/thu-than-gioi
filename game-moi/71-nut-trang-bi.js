@@ -24,7 +24,7 @@ var ICON_CH=HEAD+G('chA','#fff6b0','#ff9a1f')+G('chB','#b8fff0','#14b8c8')+'</de
  '<path d="M32 4L54 30H40V58H24V30H10Z" fill="url(#chA)" stroke="#6b3a00" stroke-width="3" stroke-linejoin="round"/>'+
  '<path d="M32 10L46 27H36V54H32Z" fill="#fff" opacity=".28"/>'+
  '<path d="M50 40l2.5 6 6 2.5-6 2.5L50 57l-2.5-6-6-2.5 6-2.5z" fill="url(#chB)" stroke="#04464f" stroke-width="1.8" stroke-linejoin="round"/></svg>';
-/* NL test (tạm): rương quà */
+/* NL test (tạm, nút TEST nằm cụm bên phải cùng Nhận châu/Đổi rank/Lấy sách/Lấy đồ TH: xóa ICON_NL + dòng TTGNV.add 'nl-test' khi ra bản thật): rương quà */
 var ICON_NL=HEAD+G('nlA','#ffe29a','#e0861c')+G('nlB','#b8fff0','#14b8c8')+'</defs>'+
  '<path d="M8 28H56V54C56 56 54 58 52 58H12C10 58 8 56 8 54Z" fill="url(#nlA)" stroke="#5a2e00" stroke-width="3" stroke-linejoin="round"/>'+
  '<path d="M6 16H58V28H6Z" fill="url(#nlB)" stroke="#04464f" stroke-width="3" stroke-linejoin="round"/>'+
@@ -32,5 +32,5 @@ var ICON_NL=HEAD+G('nlA','#ffe29a','#e0861c')+G('nlB','#b8fff0','#14b8c8')+'</de
 TTGNV.add({id:'trang-bi',ten:'Trang bị',icon:ICON_TB,r:0,onTap:function(){if(window.TTGTB)TTGTB.open();else toast('Sắp có');}});
 TTGNV.add({id:'ren',ten:'Rèn',icon:ICON_REN,r:0,onTap:function(){if(window.TTGKH)TTGKH.open('ren');else toast('Rèn: sắp có');}});
 TTGNV.add({id:'cuong-hoa',ten:'Cường hóa',icon:ICON_CH,r:1,onTap:function(){if(window.TTGKH)TTGKH.open('ch');else toast('Cường hóa: sắp có');}});
-TTGNV.add({id:'nl-test',ten:'NL test',icon:ICON_NL,r:1,onTap:function(){var r=window.TTGLT&&TTGLT.nhanTest?TTGLT.nhanTest():null;if(!r){toast('Chưa nạp dữ liệu Rèn');return;}toast('Đã nhận NL test: nguyên liệu rèn x'+r.lan+' mỗi món, đá CH x'+r.da+', vé x'+r.ve+', Ngũ Sắc x'+r.ngusac+', '+r.tt+' Tinh Thạch');}});
+TTGNV.add({id:'nl-test',ten:'NL test',icon:ICON_NL,r:1,rc:1,onTap:function(){var r=window.TTGLT&&TTGLT.nhanTest?TTGLT.nhanTest():null;if(!r){toast('Chưa nạp dữ liệu Rèn');return;}toast('Đã nhận NL test: nguyên liệu rèn x'+r.lan+' mỗi món, đá CH x'+r.da+', vé x'+r.ve+', Ngũ Sắc x'+r.ngusac+', '+r.tt+' Tinh Thạch');}});
 })();
