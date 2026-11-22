@@ -4,7 +4,8 @@
    MÓC: TTGKH.on('open'|'close'|'btn'|'pick',fn) + TTGKH.frame(k) -> {root,fr,d,slots}; logic Rèn / Cường hóa nằm ở 74-ren-cuong-hoa.js (luật ở 73-luat-trang-bi.js).
    TIẾN ĐỘ: KHUNG + đóng (nút X / bấm ra ngoài / Esc) + ô đã có vị trí + LƯỚI TÚI đã nối dữ liệu thật (xem khối NGUỒN TÚI): chọn ô (viền sáng), cuộn lưới bằng lăn chuột / vuốt dọc. CHƯA có logic Đập / Rèn (bấm nút: báo "Sắp có").
    Toạ độ tính theo PIXEL ẢNH. API: TTGKH.open('ch'|'ren'|'th') / .close() / .isOpen() / .slots(loai) -> [{el,k}] để gắn đồ vào ô.
-   SỬA LỖI 22/11/2026: canvas thú ở ô to khung Tiến Hóa (.kh-pc) bị luật chung canvas{position:fixed} của index.html phóng to che cả màn hình. Đã ghi đè vị trí/kích thước bằng !important (giống .tt-c canvas.pc bên 54-thu-than.js). Canvas luôn nằm TRONG ô, rộng tối đa 92% ô, giữ tỉ lệ vuông. */
+   SỬA LỖI 22/11/2026: canvas thú ở ô to khung Tiến Hóa (.kh-pc) bị luật chung canvas{position:fixed} của index.html phóng to che cả màn hình. Đã ghi đè vị trí/kích thước bằng !important (giống .tt-c canvas.pc bên 54-thu-than.js). Canvas luôn nằm TRONG ô, rộng tối đa 92% ô, giữ tỉ lệ vuông.
+   BỐ CỤC NÚT KHUNG TIẾN HÓA (22/11/2026): nút "Tự Động" vẽ sẵn trong ảnh khung đã được che bằng 1 mảnh nền sao cắt từ chính ảnh khung (div .kh-pa, không thêm ảnh mới) và thay bằng 4 nút nhỏ làm từ nut-trong.webp, xếp 2x2 đúng chỗ cũ: hàng trên Tự Động - Chọn, hàng dưới Khóa - Vứt Bỏ. Thanh nút dưới khung chỉ còn "Bỏ chọn" / "Chọn tất cả" (chỉ hiện khi bật Chọn nhiều). Muốn chỉnh vị trí/kích thước: sửa TH_PL + TH_PATCH bên dưới. */
 (function(){
 'use strict';
 var D={
@@ -15,7 +16,7 @@ var D={
    ring:[[129,446,92,92],[475,446,93,92],[297,561,109,104]],
    bag:(function(){var a=[],X=[1099,1219,1338,1456],Y=[239,345,449,552,656];Y.forEach(function(y){X.forEach(function(x){a.push([x,y,96,84]);});});return a;})()}},
  th:{img:'game-moi/khung-tien-hoa.webp?v=2',w:1536,h:868,ex:76,tb:true,x:{x:1405,y:26,s:104},sb:{x:1452,y:232,w:30,h:393},
-  btn:[{x:85,y:640,w:420,h:125,t:'Tiến Hóa'},{x:1090,y:680,w:365,h:100,t:'Tự Động'}],
+  btn:[{x:85,y:640,w:420,h:125,t:'Tiến Hóa'}],
   sl:{
    main:[[236,212,132,127]],
    ring:[[104,444,84,84],[409,445,83,83],[253,480,91,87]],
@@ -30,6 +31,14 @@ var D={
    bag:(function(){var a=[],X=[1101,1220,1337,1456],Y=[283,400,517,636];Y.forEach(function(y){X.forEach(function(x){a.push([x,y,93,93]);});});return a;})()}}
 };
 /* ex = chiều cao THÊM dưới ảnh khung (px ảnh) để đặt thanh nút; tb = có thanh nút CHỌN / KHÓA / VỨT BỎ / BỎ CHỌN / CHỌN TẤT CẢ (làm từ nut-trong.webp) */
+/* KHUNG TIẾN HÓA: mảnh nền che nút Tự Động cũ (đích x,y,w,h = chỗ nút cũ; nguồn sx,sy = vùng nền sao sạch ở giữa ảnh khung) + 4 nút nhỏ 2x2 (tọa độ pixel ảnh).
+   key: 'auto' = bắn móc btn 'Tự Động'; chon/khoa/vut = 3 nút của túi (doChon/doKhoa/doVut) */
+var TH_PATCH={x:1074,y:667,w:376,h:122,sx:560,sy:478};
+var TH_PL=[
+ {key:'auto',t:'Tự Động',x:1086,y:670,w:172,h:56},
+ {key:'chon',t:'Chọn',x:1264,y:670,w:172,h:56},
+ {key:'khoa',t:'Khóa',x:1086,y:730,w:172,h:56},
+ {key:'vut',t:'Vứt Bỏ',x:1264,y:730,w:172,h:56}];
 var P={},cur=null,openAt=0,MULTI={},PK={};
 /* MÓC cho logic bên ngoài (74-ren-cuong-hoa.js): TTGKH.on('open'|'close'|'btn'|'pick',fn). fn trả true ở 'btn' = đã xử lý, khỏi hiện "Sắp có". */
 var HK={};
@@ -122,7 +131,17 @@ function build(k){
  document.body.appendChild(root);
  P[k]={root:root,fr:fr,d:d,slots:slots,tr:tr,th:th};
  if(d.tb){var tb={},y0=d.h+4,bw=160,bh=68,gap=8,x0=d.w-bw*5-gap*4-62;
-  [['chon','Chọn',doChon],['khoa','Khóa',doKhoa],['vut','Vứt Bỏ',doVut],['bc','Bỏ chọn',doBoChon],['tc','Chọn tất cả',doChonAll]].forEach(function(o,i){var b=document.createElement('button');b.type='button';b.className='kh-pl';b.textContent=o[1];box(b,x0+i*(bw+gap),y0,bw,bh);b.addEventListener('click',function(){o[2](k);});tb[o[0]]=b;});
+  /* mảnh nền che nút Tự Động cũ vẽ sẵn trong ảnh: cắt từ vùng nền sao sạch của chính ảnh khung, viền mờ dần; phải thêm TRƯỚC 4 nút mới */
+  var pt=TH_PATCH,pa=document.createElement('div');pa.className='kh-pa';
+  pa.style.backgroundImage='url('+d.img+')';pa.style.backgroundRepeat='no-repeat';
+  pa.style.backgroundSize=(d.w/pt.w*100)+'% '+(d.h/pt.h*100)+'%';
+  pa.style.backgroundPosition=(pt.sx/(d.w-pt.w)*100)+'% '+(pt.sy/(d.h-pt.h)*100)+'%';
+  box(pa,pt.x,pt.y,pt.w,pt.h);
+  /* 4 nút nhỏ 2x2 trong khung: Tự Động - Chọn / Khóa - Vứt Bỏ */
+  TH_PL.forEach(function(o){var b=document.createElement('button');b.type='button';b.className='kh-pl kh-pl2';b.textContent=o.t;box(b,o.x,o.y,o.w,o.h);
+   b.addEventListener('click',function(){if(o.key==='auto'){if(!fire('btn',k,'Tự Động'))toast('Tự Động: sắp có');}else if(o.key==='chon')doChon(k);else if(o.key==='khoa')doKhoa(k);else doVut(k);});tb[o.key]=b;});
+  /* thanh nút dưới khung: chỉ còn Bỏ chọn / Chọn tất cả (hiện khi bật Chọn nhiều), nằm ở 2 vị trí cuối của thanh cũ */
+  [['bc','Bỏ chọn',doBoChon,3],['tc','Chọn tất cả',doChonAll,4]].forEach(function(o){var b=document.createElement('button');b.type='button';b.className='kh-pl';b.textContent=o[1];box(b,x0+o[3]*(bw+gap),y0,bw,bh);b.addEventListener('click',function(){o[2](k);});tb[o[0]]=b;});
   P[k].tb=tb;}
  wireBag(k);
 }
@@ -139,7 +158,10 @@ function css(){
  /* canvas thú trong ô: PHẢI ghi đè luật chung canvas{position:fixed...} của index.html, nếu không thú bị phóng to che cả màn hình */
  '.kh-c canvas.kh-pc{position:relative!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;display:block;width:92%!important;height:auto!important;max-width:92%;aspect-ratio:1/1;flex:none;pointer-events:none;image-rendering:auto!important}'+
  '.kh .kh-pl{display:flex;align-items:center;justify-content:center;background:url(game-moi/nut-trong.webp?v=1) 0 0/100% 100% no-repeat;font-family:"Noto Serif","Palatino Linotype",Georgia,serif;font-weight:800;font-size:calc(var(--u)*24);line-height:1;white-space:nowrap;color:#ffe9a0;-webkit-text-stroke:calc(var(--u)*1.4) #3b2200;paint-order:stroke fill;text-shadow:0 calc(var(--u)*2) 0 #5a3000,0 0 calc(var(--u)*6) rgba(0,0,0,.7)}'+
+ '.kh .kh-pl2{font-size:calc(var(--u)*23)}'+
  '.kh .kh-pl:active{filter:brightness(1.25)}.kh .kh-pl.act{box-shadow:0 0 calc(var(--u)*14) calc(var(--u)*3) rgba(95,240,224,.85);border-radius:calc(var(--u)*14)}.kh .kh-pl.hid{display:none}'+
+ /* mảnh nền che nút Tự Động cũ: viền mờ dần, không nhận chạm */
+ '.kh-pa{pointer-events:none;filter:brightness(1.1);-webkit-mask-image:linear-gradient(to right,transparent,#000 calc(var(--u)*6),#000 calc(100% - var(--u)*6),transparent),linear-gradient(to bottom,transparent,#000 calc(var(--u)*6),#000 calc(100% - var(--u)*6),transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 calc(var(--u)*6),#000 calc(100% - var(--u)*6),transparent),linear-gradient(to bottom,transparent,#000 calc(var(--u)*6),#000 calc(100% - var(--u)*6),transparent);mask-composite:intersect}'+
  '.kh-lk{position:absolute;left:9%;top:7%;font-size:calc(var(--u)*22);line-height:1;text-shadow:0 0 3px #000;pointer-events:none}'+
  '.kh-c.pk::before{content:"";position:absolute;inset:3%;border:calc(var(--u)*3) solid #5ff0e0;border-radius:calc(var(--u)*8);box-shadow:0 0 calc(var(--u)*12) rgba(95,240,224,.7);pointer-events:none}'+
  '.kh-c.sel{box-shadow:0 0 0 calc(var(--u)*3) #fff3a0,0 0 calc(var(--u)*14) calc(var(--u)*4) rgba(255,211,77,.85);background:rgba(255,211,77,.12)}';
