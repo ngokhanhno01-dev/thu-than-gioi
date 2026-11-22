@@ -172,10 +172,17 @@ var demoOn=/[?&]luat=demo/.test(location.search),demoDone=false;
 function demo(){if(!demoOn||demoDone||!root.TTGBALO)return;try{if(sessionStorage.getItem('ttg_luat_demo'))return;sessionStorage.setItem('ttg_luat_demo','1');}catch(e){}
   demoDone=true;var z,s,n,t;for(z=0;z<NZ;z++){n=need(z);TTGBALO.add(bossId(z),n.boss*PIECE.length);for(s=0;s<4;s++)TTGBALO.add(matId(z,s),n.main);TTGBALO.add(matId(z,SHARED),n.shared*PIECE.length);}
   for(t=1;t<=ENH_TIER_MAX;t++)TTGBALO.add('da_ch'+t,30);TTGBALO.add('ve_bao_ho',10);TTGBALO.add('da_ngu_sac',30);if(root.TTGTIEN)TTGTIEN.add('tt',20000);}
+/* NÚT "NL TEST" ở sảnh (71-nut-trang-bi.js): MỖI LẦN BẤM tặng nguyên liệu để thử Rèn/Cường hóa, cộng dồn, không giới hạn lần. Chỉ để thử: xóa nút khi ra bản thật.
+   Mỗi lần: đủ rèn MỖI món (17 bộ x 4 món) 3 lần, đá cường hóa bậc 1..6 mỗi loại 100, Vé Bảo Hộ 20, Đá Ngũ Sắc 100, 50.000 Tinh Thạch. */
+var TEST_LAN=3,TEST_DA=100,TEST_VE=20,TEST_NS=100,TEST_TT=50000;
+function nhanTest(){if(!root.TTGBALO)return null;var z,s,n,t;
+  for(z=0;z<NZ;z++){n=need(z);TTGBALO.add(bossId(z),n.boss*PIECE.length*TEST_LAN);for(s=0;s<PIECE.length;s++)TTGBALO.add(matId(z,PIECE[s].cat),n.main*TEST_LAN);TTGBALO.add(matId(z,SHARED),n.shared*PIECE.length*TEST_LAN);}
+  for(t=1;t<=ENH_TIER_MAX;t++)TTGBALO.add('da_ch'+t,TEST_DA);TTGBALO.add('ve_bao_ho',TEST_VE);TTGBALO.add('da_ngu_sac',TEST_NS);if(root.TTGTIEN)TTGTIEN.add('tt',TEST_TT);
+  return {lan:TEST_LAN,da:TEST_DA,ve:TEST_VE,ngusac:TEST_NS,tt:TEST_TT};}
 regItems();
 try{migrate();}catch(e){}
 root.TTGLT={ZN:ZN,PIECE:PIECE,CATN:CATN,QN:QN,QC:QC,QB:QB,EQ:EQ,STATS:STATS,ENH:{MAX:EQ.MAX,RATE:ENH_RATE,DROP_FROM:ENH_DROP_FROM,RB_PCT:ENH_RB_PCT,TIER_MAX:ENH_TIER_MAX},
   need:need,ids:ids,check:check,ren:ren,cuongHoa:cuongHoa,tierOf:tierOf,enhNeed:enhNeed,rateAt:rateAt,rbMax:rbMax,resolve:resolve,tierZones:tierZones,
   lines:lines,lineTxt:lineTxt,mainRange:mainRange,decor:decor,tong:tong,apDung:apDung,rates:rates,roiDo:roiDo,moTa:moTa,
-  zoneName:zoneName,zoneCol:zoneCol,setName:setName,zbStart:zbStart,eqImg:eqImg,itemImg:itemImg,regItems:regItems,migrate:migrate,demo:demo};
+  zoneName:zoneName,zoneCol:zoneCol,setName:setName,zbStart:zbStart,eqImg:eqImg,itemImg:itemImg,regItems:regItems,migrate:migrate,nhanTest:nhanTest,demo:demo};
 })(typeof window!=='undefined'?window:globalThis);
