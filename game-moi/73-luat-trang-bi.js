@@ -5,7 +5,7 @@
    nhân vùng (1+z*0,03), cường hóa +0..+10 (mỗi cấp +4% mọi dòng), tỉ lệ 95..15%, đá bậc 1..6 theo vùng, Vé Bảo Hộ, Đá Ngũ Sắc +5%, giá rèn eqNeed(z), tỉ lệ rơi nguyên liệu/đá.
    KHÁC MAIN (vì nhánh này có hệ thống khác, sửa ở khối CẤU HÌNH):
    - "xu" của main = TINH THẠCH (TTGTIEN 'tt').
-   - 4 món của main nằm vào 4 ô của 8 ô Trang bị: Vũ Khí -> ô 4 (Vũ khí), Giáp -> ô 1 (Áo giáp), Vòng -> ô 5 (Dây chuyền), Ngọc -> ô 7 (Ngọc bội). Ô Mũ/Găng tay/Giày/Nhẫn chưa có đồ.
+   - 4 món của main nằm vào 4 ô TRÊN của 8 ô Trang bị (cột trái = ô 0-3, cột phải = ô 4-7, hàng trên = 2 ô đầu mỗi cột): Vũ Khí -> ô 0, Giáp -> ô 1, Vòng (Nhẫn) -> ô 4, Ngọc -> ô 5. 4 ô DƯỚI (2, 3, 6, 7) dành cho 5 loại mới (Pháp Khí, Pháp Bảo, Linh Bảo, Tiên Khí, Thần Khí), chưa có đồ.
    - Chỉ số: dùng ĐÚNG khóa chỉ số Thú Thần (hp, tc, pt, td, mm, cm, hm, hutm, ne, choang, cx, pd, lk, stcm, stdb, xg, khu, kdb, kc, kne, klk, khutm, khm, kpd). Không còn Pháp Công: món Ngọc có chỉ số mặc định là ST đặc biệt (stdb). KHÔNG có trần chỉ số (để người chơi tự phối build, PvP).
      Chỉ số cố định = 7% (mặc định ô: 9..20%) chỉ số thú ĐIỂN HÌNH của vùng đó (thú cấp giữa vùng), tính từ TTGCS.CFG, thay cho eqRef của main.
    - Địch nhánh này chỉ có Rank E..SR (không có Yếu/Thường/Tinh Anh/Thống Lĩnh): xem TIER_NORMAL / TIER_BOSS để đổi Rank sang bậc của main.
@@ -21,7 +21,7 @@ var NZ=ZN.length;
 var CATN=[{n:'Móng Vuốt',t:'claw'},{n:'Vảy Giáp',t:'scale'},{n:'Nanh Thú',t:'fang'},{n:'Nhãn Châu',t:'eye'},{n:'Linh Cốt',t:'bone'}];   /* loại nguyên liệu = quái thứ 1..5 của vùng */
 var SHARED=4;   /* Linh Cốt dùng chung cho mọi ô */
 /* 4 món của main -> ô trong 8 ô Trang bị (55-trang-bi.js). cat = loại nguyên liệu chính; main/b = chỉ số mặc định cố định của ô */
-var PIECE=[{k:'vukhi',n:'Vũ Khí',slot:4,cat:0,main:'tc',b:10},{k:'giap',n:'Giáp',slot:1,cat:1,main:'pt',b:10},{k:'vong',n:'Vòng',slot:5,cat:2,main:'td',b:9},{k:'ngoc',n:'Ngọc',slot:7,cat:3,main:'stdb',b:7}];
+var PIECE=[{k:'vukhi',n:'Vũ Khí',slot:0,cat:0,main:'tc',b:10},{k:'giap',n:'Giáp',slot:1,cat:1,main:'pt',b:10},{k:'vong',n:'Vòng',slot:4,cat:2,main:'td',b:9},{k:'ngoc',n:'Ngọc',slot:5,cat:3,main:'stdb',b:7}];
 var QN=['Phàm','Linh','Địa','Thiên','Thần'],QW=[55,28,12,4,1],QB=[0,.10,.22,.38,.60],QC=['190,190,190','110,220,200','110,170,255','200,130,255','255,190,70'];
 var EQ={BAG:100,LINES:2,ZSTEP:.03,ROLL:[.6,1],GAIN:.04,MAX:10};
 /* BẢNG CHỈ SỐ TRANG BỊ = đúng khóa + tên của chỉ số Thú Thần (PAGES ở 54-thu-than.js, PHU ở 56-chi-so.js). Trang bị cộng THẲNG vào chỉ số thú.
@@ -94,7 +94,7 @@ function mainRange(z,s){var m=PIECE[s],a=val(z,m.main,0,1,m.b),b=val(z,m.main,4,
 function pickKeys(excl,n){var pool=Object.keys(STATS).filter(function(k){return k!==excl;}).map(function(k){return [k,W[k]||1];}),out=[],i,j,x,t;
   for(i=0;i<n&&pool.length;i++){t=0;pool.forEach(function(p){t+=p[1];});x=Math.random()*t;for(j=0;j<pool.length-1;j++){x-=pool[j][1];if(x<0)break;}out.push(pool.splice(j,1)[0][0]);}
   return out;}
-function roll(z,s,q){var L=pickKeys(PIECE[s].main,EQ.LINES).map(function(k){return [k,Math.round((EQ.ROLL[0]+Math.random()*(EQ.ROLL[1]-EQ.ROLL[0]))*1000)/1000];});return {z:z,s:s,q:q,e:0,L:L,v:2};}   /* v:2 = dòng đã theo khóa chỉ số demo (xem migrate) */
+function roll(z,s,q){var L=pickKeys(PIECE[s].main,EQ.LINES).map(function(k){return [k,Math.round((EQ.ROLL[0]+Math.random()*(EQ.ROLL[1]-EQ.ROLL[0]))*1000)/1000];});return {z:z,s:s,q:q,e:0,L:L,v:3};}   /* v:3 = dòng theo khóa chỉ số demo + ô theo bố cục mới (xem migrate) */
 /* các trường hiển thị của 1 món (tên, ảnh, mô tả, ô, bộ, cấp mặc) - dựng lại mỗi lần đổi cấp cường hóa */
 function decor(it){var P=PIECE[it.s];
   return {id:'eq-'+it.z+'-'+P.k,ten:'['+QN[it.q]+'] '+P.n+' '+zoneName(it.z)+(it.e?' +'+it.e:''),img:eqImg(it.z,it.s),slot:P.slot,bo:it.z,lv:zbStart(it.z),
@@ -110,13 +110,14 @@ function apDung(ps){if(!ps)return ps;var T=tong(),o=Object.assign({},ps),k;
     else o[k]=r1((o[k]||0)+T[k]);}   /* KHÔNG có trần: cộng thẳng. Giới hạn (nếu cần) do luật chiến đấu xử lý sau */
   return o;}
 /* ĐỒ CŨ trong túi (khóa của main: atk, def, spd, eva, stun, regen, crit, mag) -> khóa demo. Pháp Công (mag) đổi thành ST đặc biệt (stdb) như món Ngọc. Giữ nguyên mức roll, giá trị tính lại theo bảng mới.
-   Dòng trùng chỉ số mặc định của món (nếu có) bị bỏ. Chạy 1 lần khi nạp (món đã có v:2 thì bỏ qua). Trả số món đã chuyển. */
+   Dòng trùng chỉ số mặc định của món (nếu có) bị bỏ. Chạy 1 lần khi nạp (món đã có v:3 thì bỏ qua; v:2 chỉ sửa ô). Cũng chuyển món sang ô mới (Vũ khí 0, Giáp 1, Nhẫn 4, Ngọc 5) và sửa lại món đang mặc. Trả số món đã chuyển. */
 var OLD2NEW={atk:'tc',def:'pt',spd:'td',eva:'ne',stun:'choang',regen:'hm',crit:'cm',mag:'stdb'};
 function migrate(){if(!root.TTGTB||!TTGTB.list||!TTGTB.update)return 0;var n=0;
-  TTGTB.list().forEach(function(it){if(it.z==null||!PIECE[it.s]||it.v===2)return;
-    var seen={},main=PIECE[it.s].main,L=[];
-    (it.L||[]).forEach(function(l){var k=OLD2NEW.hasOwnProperty(l[0])?OLD2NEW[l[0]]:l[0];if(!STATS[k]||k===main||seen[k])return;seen[k]=1;L.push([k,l[1]]);});
-    var t=Object.assign({},it,{L:L,v:2}),p=decor(t);p.L=L;p.v=2;TTGTB.update(it.uid,p);n++;});
+  TTGTB.list().forEach(function(it){if(it.z==null||!PIECE[it.s]||it.v===3)return;
+    var seen={},main=PIECE[it.s].main,L=it.L||[];
+    if(it.v!==2){L=[];(it.L||[]).forEach(function(l){var k=OLD2NEW.hasOwnProperty(l[0])?OLD2NEW[l[0]]:l[0];if(!STATS[k]||k===main||seen[k])return;seen[k]=1;L.push([k,l[1]]);});}
+    var t=Object.assign({},it,{L:L,v:3}),p=decor(t);p.L=L;p.v=3;TTGTB.update(it.uid,p);n++;});
+  if(n&&TTGTB.fixEq)TTGTB.fixEq();
   return n;}
 /* ===================== RÈN (fgDo) ===================== */
 function check(z,s){var n=need(z),I=ids(z,s),miss=[],ok=true;

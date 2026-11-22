@@ -325,7 +325,8 @@ function renderStats(){
   E.pv.disabled=page<=0;E.nx.disabled=page>=PAGES.length-1;
   for(i=0;i<5;i++){
     var d=pg.ds[i],b=E.bars[i];
-    if(d&&t){var cs=t.chiso;if(!(cs&&Object.keys(cs).some(function(k){return cs[k]>0;}))&&window.TTGCS){try{cs=TTGCS.tinh(t);}catch(e){cs=t.chiso;}}var v=cs&&cs[d[0]];b.innerHTML='<b>'+esc(d[1])+'</b><span>'+(v==null?'-':esc(v)+(d[2]||''))+'</span>';}
+    if(d&&t){var cs=t.chiso;if(!(cs&&Object.keys(cs).some(function(k){return cs[k]>0;}))&&window.TTGCS){try{cs=TTGCS.tinh(t);}catch(e){cs=t.chiso;}}var base=cs,ra=t.uid===rt&&window.TTGLT&&TTGLT.apDung;if(ra){try{cs=TTGLT.apDung(Object.assign({},cs));}catch(e){cs=base;}}   /* thú ĐANG RA TRẬN: cộng chỉ số trang bị đang mặc (giống lúc vào trận) */
+    var v=cs&&cs[d[0]],b0=base&&base[d[0]],dl=(ra&&v!=null&&b0!=null)?Math.round((v-b0)*10)/10:0;b.innerHTML='<b>'+esc(d[1])+'</b><span>'+(v==null?'-':esc(v)+(d[2]||''))+(dl>0?'<i style="font-style:normal;font-size:.82em;color:#8dffb0;margin-left:.35em">+'+esc(dl)+(d[2]||'')+'</i>':'')+'</span>';}
     else if(d){b.innerHTML='<b>'+esc(d[1])+'</b><span>-</span>';}
     else b.innerHTML='';
   }
@@ -572,5 +573,6 @@ function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=M
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
   if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
-window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,setTien:setTien,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges,pc:pcPaint};   /* pc(canvas có data-u=đường dẫn ảnh): vẽ thú tự phóng vừa ô (khung Tiến Hóa 72-khung-ren-cuong-hoa.js dùng) */   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+function lamMoi(){try{if(isOpen&&E&&E.cap)renderStats();}catch(e){}}   /* gọi khi đổi trang bị (55-trang-bi.js) để trang chỉ số cập nhật */
+window.TTGTHU={lamMoi:lamMoi,tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,setTien:setTien,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges,pc:pcPaint};   /* pc(canvas có data-u=đường dẫn ảnh): vẽ thú tự phóng vừa ô (khung Tiến Hóa 72-khung-ren-cuong-hoa.js dùng) */   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();

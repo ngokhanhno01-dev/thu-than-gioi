@@ -27,7 +27,8 @@ var GRID_X=[885,982,1077,1172],GRID_Y=[191,296,403,512,622,734],GRID_W=72,GRID_H
 var INFO={x:1303,y:221,w:283,h:496};                                          /* bảng THÔNG TIN */
 var BTN_EQ={x:1284,y:746,w:153,h:66},BTN_VUT={x:1449,y:746,w:150,h:66};       /* nút TRANG BỊ / VỨT BỎ (đã vẽ sẵn trong ảnh) */
 var OV_BOX={x:1276,y:738,w:170,h:82};                                         /* ảnh phủ \"Đã Trang Bị\" đè lên nút TRANG BỊ */
-var SLOTN=['Mũ','Áo giáp','Găng tay','Giày','Vũ khí','Dây chuyền','Nhẫn','Ngọc bội'];
+/* BỐ CỤC 8 Ô: cột trái = ô 0-3, cột phải = ô 4-7 (từ trên xuống). 4 ô TRÊN = hàng 1-2 mỗi cột: ô 0 Vũ khí, ô 1 Áo giáp, ô 4 Nhẫn, ô 5 Ngọc bội. 4 ô DƯỚI (2, 3, 6, 7) = Bảo vật: dành cho 5 loại mới (Pháp Khí, Pháp Bảo, Linh Bảo, Tiên Khí, Thần Khí), mỗi ô nhận loại nào cũng được */
+var SLOTN=['Vũ khí','Áo giáp','Bảo vật 1','Bảo vật 2','Nhẫn','Ngọc bội','Bảo vật 3','Bảo vật 4'];
 /* ===== KHO TRANG BỊ =====
    items: [{uid,id,ten,ic|img,slot(0-7),mo}] (mọi món sở hữu), eq: {slot:uid} (món đang mặc). Túi = món không nằm trong eq.
    Lưu localStorage 'ttg_moi_trangbi_v1'. ?trangbi=demo: có sẵn vài món mẫu, không lưu. */
@@ -35,7 +36,10 @@ var KEY='ttg_moi_trangbi_v1',demo=/[?&]trangbi=demo/.test(location.search),items
 (function(){if(demo){items=[{uid:'d1',id:'mu-da',ten:'Mũ da thú',ic:'🪖',slot:0,mo:'Mũ da cơ bản, nhẹ và bền.'},{uid:'d2',id:'ao-vai',ten:'Áo giáp vải',ic:'🥋',slot:1,mo:'Áo giáp vải dày.'},{uid:'d3',id:'giay-co',ten:'Giày cỏ linh',ic:'👢',slot:3,mo:'Giày bện từ cỏ linh, đi êm.'},{uid:'d4',id:'kiem-go',ten:'Kiếm gỗ',ic:'🗡️',slot:4,mo:'Kiếm tập luyện.'},{uid:'d5',id:'nhan-bac',ten:'Nhẫn bạc',ic:'💍',slot:6,mo:'Nhẫn bạc trơn.'},{uid:'d6',id:'mu-sat',ten:'Mũ sắt',ic:'⛑️',slot:0,mo:'Mũ sắt chắc chắn.'}];eq={0:'d1'};return;}
   try{var v=JSON.parse(localStorage.getItem(KEY)||'{}');if(v&&Array.isArray(v.items))items=v.items.filter(function(t){return t&&t.uid&&t.slot>=0&&t.slot<8;});if(v&&v.eq&&typeof v.eq==='object')eq=v.eq;}catch(e){}
   Object.keys(eq).forEach(function(k){if(!byUid(eq[k]))delete eq[k];});})();
-function save(){if(demo)return;try{localStorage.setItem(KEY,JSON.stringify({items:items,eq:eq}));}catch(e){}}
+function save(){try{if(window.TTGTHU&&TTGTHU.lamMoi)TTGTHU.lamMoi();}catch(e){}   /* đổi đồ -> trang chỉ số của Thú Thần cập nhật theo */
+  if(demo)return;try{localStorage.setItem(KEY,JSON.stringify({items:items,eq:eq}));}catch(e){}}
+/* fixEq(): đồng bộ eq theo ô thật của từng món (73 đổi ô cho món cũ) - món trùng ô thì trả về túi */
+function fixEq(){var ne={},ch=false;Object.keys(eq).forEach(function(k){var t=byUid(eq[k]);if(!t)return;if(String(t.slot)!==k)ch=true;if(ne[t.slot]===undefined)ne[t.slot]=t.uid;else ch=true;});if(ch){eq=ne;save();if(isOpen)renderItems();}}
 function byUid(u){for(var i=0;i<items.length;i++)if(items[i].uid===u)return items[i];return null;}
 function isEq(u){for(var k in eq)if(eq[k]===u)return true;return false;}
 function bag(){return items.filter(function(t){return !isEq(t.uid);});}
@@ -172,5 +176,5 @@ function open(){if(!root)build();render();renderItems();isOpen=true;openAt=perfo
 function close(){if(!root)return;isOpen=false;root.classList.remove('on');}
 
 function setBo(on){if(E.ovB)E.ovB.classList.toggle('on',!!on);}   /* on=true: hiện nút BỎ TRANG BỊ đè lên TRANG BỊ */
-window.TTGTB={open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,get:getItem,update:updItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);},dangMac:function(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}};   /* dangMac: danh sách món ĐANG MẶC (đọc trường bo = số vùng 0..16 của bộ, dùng cho luật bộ trang bị trong trận: 70-bo-trang-bi.js) */
+window.TTGTB={fixEq:fixEq,open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,get:getItem,update:updItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);},dangMac:function(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}};   /* dangMac: danh sách món ĐANG MẶC (đọc trường bo = số vùng 0..16 của bộ, dùng cho luật bộ trang bị trong trận: 70-bo-trang-bi.js) */
 })();
