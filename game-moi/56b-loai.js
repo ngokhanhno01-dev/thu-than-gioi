@@ -111,7 +111,19 @@ var DO_HIEM={
   huyenthoai:{ten:'Huyền Thoại',mau:'#ffb020',ts:8},
   truyenthuyet:{ten:'Truyền Thuyết',mau:'#ff3d5a',ts:1}
 };
-var DO_HIEM_RIENG={};
+/* ĐỘ HIẾM TỪNG CON do người dùng chốt (danh-sach-do-hiem, 22/11/2026). Con nào không có ở đây thì theo quy tắc mặc định bên dưới. */
+var DO_HIEM_RIENG={
+  '1a':'thuong', '1b':'suthi', '1c':'thuong', '1d':'hiem', '1e':'thuong', '1f':'hiem', '1g':'hiem', '1h':'suthi', '1i':'huyenthoai', '1j':'truyenthuyet',
+  '2a':'thuong', '2b':'thuong', '2c':'thuong', '2d':'suthi', '2e':'hiem', '2f':'huyenthoai', '2g':'suthi', '2h':'hiem', '2i':'hiem', '2j':'truyenthuyet',
+  '3a':'thuong', '3b':'thuong', '3c':'thuong', '3d':'hiem', '3e':'huyenthoai', '3f':'hiem', '3g':'suthi', '3h':'suthi', '3i':'hiem', '3j':'truyenthuyet',
+  '6a':'suthi', '6b':'thuong', '6c':'hiem', '6d':'hiem', '6e':'hiem', '6f':'thuong', '6g':'suthi', '6h':'thuong', '6i':'huyenthoai', '6j':'truyenthuyet',
+  '4a':'thuong', '4b':'thuong', '4c':'hiem', '4d':'suthi', '4e':'hiem', '4f':'hiem', '4g':'thuong', '4h':'suthi', '4i':'huyenthoai', '4j':'truyenthuyet',
+  '5a':'thuong', '5b':'thuong', '5c':'hiem', '5d':'thuong', '5e':'hiem', '5f':'hiem', '5g':'suthi', '5h':'suthi', '5i':'huyenthoai', '5j':'truyenthuyet'
+};
+/* ĐỘ HIẾM CỦA HỆ (khác độ hiếm loài): hệ có vùng riêng = thuong; Độc/Trùng = hiem; Võ/Nham = suthi; Ma = huyenthoai; Long = truyenthuyet.
+   CHỈ LÀ DỮ LIỆU: sau này mỗi hệ hiếm sẽ có nội tại riêng theo độ hiếm; hiện chưa dùng ở đâu. Hệ không ghi ở đây = thuong. */
+var HE_DO_HIEM={doc:'hiem',trung:'hiem',vo:'suthi',nham:'suthi',ma:'huyenthoai',long:'truyenthuyet'};
+function doHiemHe(he){return HE_DO_HIEM[he]||'thuong';}
 var DO_HIEM_MD=['thuong','thuong','thuong','hiem','hiem','hiem','suthi','suthi','huyenthoai'];
 
 var LOAI={},THEO_VUNG={},DO_HIEM_LOAI={};
@@ -134,7 +146,7 @@ function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
 function mangDuocSach(id,heSach){var o=LOAI[id];return !!o&&o.he.indexOf(heSach)>=0;}
 function heVung(z){return HE_VUNG[z]||null;}
 
-root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo});
+root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo,HE_DO_HIEM:HE_DO_HIEM,doHiemHe:doHiemHe});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
 })(typeof window!=='undefined'?window:globalThis);
 

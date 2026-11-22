@@ -120,6 +120,18 @@ DO_HIEM_TEN = ['Thường', 'Hiếm', 'Sử Thi', 'Huyền Thoại', 'Truyền T
 DO_HIEM_MAU = ['#b9c0c9', '#3ec9a7', '#b06cff', '#ffb020', '#ff3d5a']
 
 
+def doc_do_hiem_rieng(goc):
+    """Đọc DO_HIEM_RIENG trong game-moi/56b-loai.js (độ hiếm người dùng chốt): {id: chỉ số 0..4}."""
+    import re
+    p = os.path.join(goc, 'game-moi', '56b-loai.js')
+    if not os.path.exists(p):
+        return {}
+    txt = open(p, encoding='utf-8').read()
+    m = re.search(r'var DO_HIEM_RIENG=\{(.*?)\};', txt, re.S)
+    ds = ['thuong', 'hiem', 'suthi', 'huyenthoai', 'truyenthuyet']
+    return {k: ds.index(v) for k, v in re.findall(r"'(\w+)':'(\w+)'", m.group(1)) if v in ds} if m else {}
+
+
 def do_hiem_mac_dinh(chi_so, boss):
     """Quy tắc mặc định: trong 9 thú thường: 3 Thường, 3 Hiếm, 2 Sử Thi, 1 Huyền Thoại; thú thứ 10 (boss) Truyền Thuyết."""
     if boss:
@@ -304,6 +316,7 @@ def main():
     ra = a.ra or os.path.join(a.goc, 'game-moi', 'icon-th')
     os.makedirs(ra, exist_ok=True)
     n_ok = 0
+    DH_RIENG = doc_do_hiem_rieng(a.goc)
     for z in zs:
         v = thu_moi.get(z)
         if not v:
@@ -315,7 +328,7 @@ def main():
             if not f:
                 print('  thiếu ảnh', v['slug'], t['slug'], 'b%d' % a.form); continue
             chi_so = thu_thuong.index(t) if not t['boss'] else 9
-            dh = do_hiem_mac_dinh(chi_so, t['boss'])
+            dh = DH_RIENG.get(t['id'], do_hiem_mac_dinh(chi_so, t['boss']))   # ưu tiên độ hiếm đã chốt trong 56b-loai.js
             im = Image.open(f)
             out = tao_manh(t['id'], im, mau_vung, DO_HIEM_MAU[dh])
             out.save(os.path.join(ra, 'th-m-%s.png' % t['id']))
