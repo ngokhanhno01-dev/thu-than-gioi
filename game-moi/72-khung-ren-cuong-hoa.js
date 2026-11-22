@@ -12,8 +12,8 @@ var D={
    main:[[278,233,149,136]],
    ring:[[129,446,92,92],[475,446,93,92],[297,561,109,104]],
    bag:(function(){var a=[],X=[1099,1219,1338,1456],Y=[239,345,449,552,656];Y.forEach(function(y){X.forEach(function(x){a.push([x,y,96,84]);});});return a;})()}},
- th:{img:'game-moi/khung-tien-hoa.webp?v=1',w:1536,h:868,x:{x:1405,y:26,s:104},
-  btn:[{x:85,y:640,w:420,h:125,t:'Tiến Hóa'},{x:1090,y:680,w:365,h:100,t:'Túi Thú'}],
+ th:{img:'game-moi/khung-tien-hoa.webp?v=2',w:1536,h:868,x:{x:1405,y:26,s:104},
+  btn:[{x:85,y:640,w:420,h:125,t:'Tiến Hóa'},{x:1090,y:680,w:365,h:100,t:'Tự Động'}],
   sl:{
    main:[[236,212,132,127]],
    ring:[[104,444,84,84],[409,445,83,83],[253,480,91,87]],
