@@ -6,7 +6,7 @@
    KHÁC MAIN (vì nhánh này có hệ thống khác, sửa ở khối CẤU HÌNH):
    - "xu" của main = TINH THẠCH (TTGTIEN 'tt').
    - 4 món của main nằm vào 4 ô của 8 ô Trang bị: Vũ Khí -> ô 4 (Vũ khí), Giáp -> ô 1 (Áo giáp), Vòng -> ô 5 (Dây chuyền), Ngọc -> ô 7 (Ngọc bội). Ô Mũ/Găng tay/Giày/Nhẫn chưa có đồ.
-   - Chỉ số: atk->tc, def->pt, spd->td, hp->hp, Pháp Công -> cộng 30% vào tc (như main: Linh góp 30% vào sát thương), eva->ne, stun->choang, regen->hm, crit->cm (có trần như main).
+   - Chỉ số: dùng ĐÚNG khóa chỉ số Thú Thần (hp, tc, pt, td, mm, cm, hm, hutm, ne, choang, cx, pd, lk, stcm, stdb, xg, khu, kdb, kc, kne, klk, khutm, khm, kpd). Không còn Pháp Công: món Ngọc có chỉ số mặc định là ST đặc biệt (stdb). Có trần tổng (CAPS).
      Chỉ số cố định = 7% (mặc định ô: 9..20%) chỉ số thú ĐIỂN HÌNH của vùng đó (thú cấp giữa vùng), tính từ TTGCS.CFG, thay cho eqRef của main.
    - Địch nhánh này chỉ có Rank E..SR (không có Yếu/Thường/Tinh Anh/Thống Lĩnh): xem TIER_NORMAL / TIER_BOSS để đổi Rank sang bậc của main.
    - Chỉ quái nguồn "main" (102 quái vùng) rơi nguyên liệu + đá; thú hoang (demo) không rơi.
@@ -21,15 +21,25 @@ var NZ=ZN.length;
 var CATN=[{n:'Móng Vuốt',t:'claw'},{n:'Vảy Giáp',t:'scale'},{n:'Nanh Thú',t:'fang'},{n:'Nhãn Châu',t:'eye'},{n:'Linh Cốt',t:'bone'}];   /* loại nguyên liệu = quái thứ 1..5 của vùng */
 var SHARED=4;   /* Linh Cốt dùng chung cho mọi ô */
 /* 4 món của main -> ô trong 8 ô Trang bị (55-trang-bi.js). cat = loại nguyên liệu chính; main/b = chỉ số mặc định cố định của ô */
-var PIECE=[{k:'vukhi',n:'Vũ Khí',slot:4,cat:0,main:'atk',b:10},{k:'giap',n:'Giáp',slot:1,cat:1,main:'def',b:10},{k:'vong',n:'Vòng',slot:5,cat:2,main:'spd',b:9},{k:'ngoc',n:'Ngọc',slot:7,cat:3,main:'mag',b:20}];
+var PIECE=[{k:'vukhi',n:'Vũ Khí',slot:4,cat:0,main:'tc',b:10},{k:'giap',n:'Giáp',slot:1,cat:1,main:'pt',b:10},{k:'vong',n:'Vòng',slot:5,cat:2,main:'td',b:9},{k:'ngoc',n:'Ngọc',slot:7,cat:3,main:'stdb',b:7}];
 var QN=['Phàm','Linh','Địa','Thiên','Thần'],QW=[55,28,12,4,1],QB=[0,.10,.22,.38,.60],QC=['190,190,190','110,220,200','110,170,255','200,130,255','255,190,70'];
 var EQ={BAG:100,LINES:2,ZSTEP:.03,ROLL:[.6,1],GAIN:.04,MAX:10};
-var STATS={hp:{n:'Sinh Lực',b:7,t:'f'},atk:{n:'Công',b:7,t:'f'},def:{n:'Thủ',b:7,t:'f'},spd:{n:'Tốc',b:7,t:'f'},mag:{n:'Pháp Công',b:7,t:'f'},eva:{n:'Né tránh',b:4,t:'p'},stun:{n:'Choáng',b:3.5,t:'p'},regen:{n:'Hồi/lượt',b:1.4,t:'p'},crit:{n:'Chí mạng',b:4,t:'p'}};
-var W={hp:14,atk:14,def:14,spd:12,mag:8,eva:10,stun:8,regen:8,crit:12};   /* trọng số bốc dòng ngẫu nhiên */
-var CAPS={eva:45,stun:35,regen:8,crit:60};                                  /* trần tổng (khớp main) */
-var REFK={hp:'hp',atk:'tc',def:'pt',spd:'td',mag:'tc'};                    /* chỉ số 'f' tính theo chỉ số thú nào */
-var TOB={eva:'ne',stun:'choang',regen:'hm',crit:'cm'};                      /* chỉ số % của main -> chỉ số phụ của nhánh */
-var MAG_TO_TC=.3;
+/* BẢNG CHỈ SỐ TRANG BỊ = đúng khóa + tên của chỉ số Thú Thần (PAGES ở 54-thu-than.js, PHU ở 56-chi-so.js). Trang bị cộng THẲNG vào chỉ số thú.
+   t:'f' = số cố định, tính theo % chỉ số thú điển hình của vùng (REFK) | t:'p' = tỉ lệ %, hiện kèm dấu % | t:'n' = số thẳng, không dấu % (May mắn).
+   b = giá trị gốc (% ở vùng 1, phẩm Phàm, chưa cường hóa). Giá thật = b x (1+vùng*0,03) x (1+cộng phẩm) x (0,6~1 ngẫu nhiên) x (1+0,04*cấp cường hóa).
+   Chỉ số chưa có luật chiến đấu vẫn bốc + cộng bình thường (có hiệu lực khi làm luật). */
+var STATS={
+  hp:{n:'HP',b:7,t:'f'},tc:{n:'Tấn công',b:7,t:'f'},pt:{n:'Phòng thủ',b:7,t:'f'},td:{n:'Tốc độ',b:7,t:'f'},mm:{n:'May mắn',b:2,t:'n'},
+  cm:{n:'Chí mạng',b:4,t:'p'},hm:{n:'Hồi máu',b:1.4,t:'p'},hutm:{n:'Hút máu',b:2,t:'p'},ne:{n:'Né tránh',b:4,t:'p'},choang:{n:'Choáng',b:3.5,t:'p'},
+  cx:{n:'Chính xác',b:4,t:'p'},pd:{n:'Phản đòn',b:3,t:'p'},lk:{n:'Liên kích',b:3,t:'p'},stcm:{n:'ST chí mạng',b:6,t:'p'},stdb:{n:'ST đặc biệt',b:5,t:'p'},
+  xg:{n:'Xuyên giáp',b:3,t:'p'},khu:{n:'Kháng hiệu ứng',b:4,t:'p'},kdb:{n:'Kháng đặc biệt',b:4,t:'p'},kc:{n:'Kháng choáng',b:4,t:'p'},kne:{n:'Kháng né',b:3,t:'p'},
+  klk:{n:'Kháng liên kích',b:3,t:'p'},khutm:{n:'Kháng hút máu',b:3,t:'p'},khm:{n:'Kháng hồi máu',b:3,t:'p'},kpd:{n:'Kháng phản đòn',b:3,t:'p'}};
+var W={hp:14,tc:14,pt:14,td:12,mm:4,                                       /* trọng số bốc dòng ngẫu nhiên */
+  cm:12,hm:8,hutm:6,ne:10,choang:8,cx:8,pd:5,lk:6,stcm:8,stdb:8,
+  xg:6,khu:7,kdb:6,kc:6,kne:5,klk:4,khutm:4,khm:4,kpd:4};
+var CAPS={mm:100,cm:60,hm:8,hutm:30,ne:45,choang:35,cx:60,pd:35,lk:35,stcm:100,stdb:100,  /* trần TỔNG chỉ số thú sau khi cộng trang bị (hp/tc/pt/td không có trần) */
+  xg:50,khu:60,kdb:60,kc:60,kne:45,klk:45,khutm:45,khm:45,kpd:45};
+var REFK={hp:'hp',tc:'tc',pt:'pt',td:'td'};   /* chỉ số 'f' tính theo chỉ số thú nào */
 /* Giá rèn theo vùng z (0..16): boss = Tinh Hoa, main = nguyên liệu chính của ô, shared = Linh Cốt, xu = Tinh Thạch */
 function need(z){return {boss:1+Math.floor(z/6),main:5+Math.floor(z/4),shared:3+Math.floor(z/5),xu:40*(z+1)};}
 /* Cường hóa (48-enh-ui.js, 46-enh-items.js) */
@@ -92,13 +102,15 @@ function decor(it){var P=PIECE[it.s];
   return {id:'eq-'+it.z+'-'+P.k,ten:'['+QN[it.q]+'] '+P.n+' '+zoneName(it.z)+(it.e?' +'+it.e:''),img:eqImg(it.z,it.s),slot:P.slot,bo:it.z,lv:zbStart(it.z),
     mo:'Bộ '+setName(it.z)+' · mặc từ cấp '+zbStart(it.z)+' · '+lines(it).map(lineTxt).join(' · ')};}
 /* tổng chỉ số của món ĐANG MẶC (khóa của main) */
-function tong(){var T={hp:0,atk:0,def:0,spd:0,mag:0,eva:0,stun:0,regen:0,crit:0};
-  try{(root.TTGTB&&TTGTB.dangMac?TTGTB.dangMac():[]).forEach(function(it){if(it&&it.z!=null&&it.L&&PIECE[it.s])lines(it).forEach(function(l){T[l[0]]+=l[1];});});}catch(e){}
+function tong(){var T={},k;for(k in STATS)T[k]=0;
+  try{(root.TTGTB&&TTGTB.dangMac?TTGTB.dangMac():[]).forEach(function(it){if(it&&it.z!=null&&it.L&&PIECE[it.s])lines(it).forEach(function(l){T[l[0]]=r1((T[l[0]]||0)+l[1]);});});}catch(e){}
   return T;}
 /* cộng trang bị vào chỉ số thú trong trận (gọi ở startExplore, index.html): số cố định cộng thẳng, chỉ số % có trần tổng như main */
 function apDung(ps){if(!ps)return ps;var T=tong(),o=Object.assign({},ps),k;
-  o.hp=Math.round((o.hp||0)+T.hp);o.tc=Math.round((o.tc||0)+T.atk+MAG_TO_TC*T.mag);o.pt=Math.round((o.pt||0)+T.def);o.td=Math.round((o.td||0)+T.spd);
-  for(k in CAPS)o[TOB[k]]=Math.min(CAPS[k],(o[TOB[k]]||0)+T[k]);return o;}
+  for(k in STATS){if(!T[k])continue;
+    if(STATS[k].t==='f')o[k]=Math.round((o[k]||0)+T[k]);
+    else{o[k]=r1((o[k]||0)+T[k]);if(CAPS[k]!=null)o[k]=Math.min(CAPS[k],o[k]);}}
+  return o;}
 /* ===================== RÈN (fgDo) ===================== */
 function check(z,s){var n=need(z),I=ids(z,s),miss=[],ok=true;
   ['boss','main','shared'].forEach(function(k){var have=root.TTGBALO?TTGBALO.count(I[k]):0;if(have<n[k]){ok=false;miss.push((root.TTGBALO&&TTGBALO.CAT[I[k]]?TTGBALO.CAT[I[k]].ten:I[k])+' ('+have+'/'+n[k]+')');}});
