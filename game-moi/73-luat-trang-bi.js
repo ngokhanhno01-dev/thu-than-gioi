@@ -6,7 +6,7 @@
    KHÁC MAIN (vì nhánh này có hệ thống khác, sửa ở khối CẤU HÌNH):
    - "xu" của main = TINH THẠCH (TTGTIEN 'tt').
    - 4 món của main nằm vào 4 ô của 8 ô Trang bị: Vũ Khí -> ô 4 (Vũ khí), Giáp -> ô 1 (Áo giáp), Vòng -> ô 5 (Dây chuyền), Ngọc -> ô 7 (Ngọc bội). Ô Mũ/Găng tay/Giày/Nhẫn chưa có đồ.
-   - Chỉ số: dùng ĐÚNG khóa chỉ số Thú Thần (hp, tc, pt, td, mm, cm, hm, hutm, ne, choang, cx, pd, lk, stcm, stdb, xg, khu, kdb, kc, kne, klk, khutm, khm, kpd). Không còn Pháp Công: món Ngọc có chỉ số mặc định là ST đặc biệt (stdb). Có trần tổng (CAPS).
+   - Chỉ số: dùng ĐÚNG khóa chỉ số Thú Thần (hp, tc, pt, td, mm, cm, hm, hutm, ne, choang, cx, pd, lk, stcm, stdb, xg, khu, kdb, kc, kne, klk, khutm, khm, kpd). Không còn Pháp Công: món Ngọc có chỉ số mặc định là ST đặc biệt (stdb). KHÔNG có trần chỉ số (để người chơi tự phối build, PvP).
      Chỉ số cố định = 7% (mặc định ô: 9..20%) chỉ số thú ĐIỂN HÌNH của vùng đó (thú cấp giữa vùng), tính từ TTGCS.CFG, thay cho eqRef của main.
    - Địch nhánh này chỉ có Rank E..SR (không có Yếu/Thường/Tinh Anh/Thống Lĩnh): xem TIER_NORMAL / TIER_BOSS để đổi Rank sang bậc của main.
    - Chỉ quái nguồn "main" (102 quái vùng) rơi nguyên liệu + đá; thú hoang (demo) không rơi.
@@ -37,8 +37,6 @@ var STATS={
 var W={hp:14,tc:14,pt:14,td:12,mm:4,                                       /* trọng số bốc dòng ngẫu nhiên */
   cm:12,hm:8,hutm:6,ne:10,choang:8,cx:8,pd:5,lk:6,stcm:8,stdb:8,
   xg:6,khu:7,kdb:6,kc:6,kne:5,klk:4,khutm:4,khm:4,kpd:4};
-var CAPS={mm:100,cm:60,hm:8,hutm:30,ne:45,choang:35,cx:60,pd:35,lk:35,stcm:100,stdb:100,  /* trần TỔNG chỉ số thú sau khi cộng trang bị (hp/tc/pt/td không có trần) */
-  xg:50,khu:60,kdb:60,kc:60,kne:45,klk:45,khutm:45,khm:45,kpd:45};
 var REFK={hp:'hp',tc:'tc',pt:'pt',td:'td'};   /* chỉ số 'f' tính theo chỉ số thú nào */
 /* Giá rèn theo vùng z (0..16): boss = Tinh Hoa, main = nguyên liệu chính của ô, shared = Linh Cốt, xu = Tinh Thạch */
 function need(z){return {boss:1+Math.floor(z/6),main:5+Math.floor(z/4),shared:3+Math.floor(z/5),xu:40*(z+1)};}
@@ -109,7 +107,7 @@ function tong(){var T={},k;for(k in STATS)T[k]=0;
 function apDung(ps){if(!ps)return ps;var T=tong(),o=Object.assign({},ps),k;
   for(k in STATS){if(!T[k])continue;
     if(STATS[k].t==='f')o[k]=Math.round((o[k]||0)+T[k]);
-    else{o[k]=r1((o[k]||0)+T[k]);if(CAPS[k]!=null)o[k]=Math.min(CAPS[k],o[k]);}}
+    else o[k]=r1((o[k]||0)+T[k]);}   /* KHÔNG có trần: cộng thẳng. Giới hạn (nếu cần) do luật chiến đấu xử lý sau */
   return o;}
 /* ===================== RÈN (fgDo) ===================== */
 function check(z,s){var n=need(z),I=ids(z,s),miss=[],ok=true;
