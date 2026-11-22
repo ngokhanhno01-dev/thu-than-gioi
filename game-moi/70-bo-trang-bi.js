@@ -1,5 +1,5 @@
 /* 70-bo-trang-bi.js — LUẬT BỘ TRANG BỊ TRONG TRẬN (chép luật từ main: 12-equip.js EQ_SETS + EQFX), KHÔNG vẽ aura.
-   17 bộ ứng với 17 vùng z (0..16). Mặc >=2 món cùng bộ: buff v2; đủ 4 món: buff v4. Giá trị nhân (1 + z*0,03) như main; CHƯA có phẩm nên coi phẩm = 0.
+   17 bộ ứng với 17 vùng z (0..16). Mặc >=2 món cùng bộ: buff v2; đủ 4 món: buff v4. Giá trị nhân (1 + z*0,03) và (1 + phẩm trung bình các món cùng bộ) như main (phẩm đọc từ trường q của món, thiếu = Phàm).
    Món trang bị khai trường  bo = số vùng (0..16)  (vd {slot:0,bo:11,...} = món bộ Dung Nham). Đọc món đang mặc qua TTGTB.dangMac().
    XEM THỬ không cần đồ: thêm ?bo=11 (hoặc ?bo=lava) vào link game = người chơi mang đủ 4 món bộ đó.
    Sự kiện kích hoạt: hiện CHỮ tên sự kiện trên đầu thú chủ bộ; Dung Nham / Lôi Phạt / Phong Nhận / Nguyệt Ảnh còn chạy hiệu ứng đòn (31 + 33..40) với đúng nhãn của main.
@@ -33,16 +33,17 @@ var SETS=[
 var EV={thunder:['Lôi Phạt Giáng Xuống','#ffe53a'],wind:['Phong Nhận Chém Thêm','#a0ffd0'],lava:['Dung Nham Phun Trào','#ff8a3a'],counter:['Nguyệt Ảnh Phản Kích','#b8a8ff'],
  grove:['Sinh Cơ Cổ Thụ','#8be04a'],revive:['Ngọc Hộ Mệnh','#ffe27a'],cloud:['Vân Ẩn','#c9d8ff'],mist:['Sương Tán','#9fd9c8'],sun:['Dương Diệm','#ffb84a'],
  judge:['Thần Phán','#ffd24a'],star:['Tinh Quang','#c08aff'],first:['Thiên Uy','#fff0a0'],frost:['Băng Phong','#9fe4ff'],thorn:['Phản Chấn','#9fd0ff']};
+var QB=[0,.10,.22,.38,.60];   /* phẩm Phàm/Linh/Địa/Thiên/Thần cộng thêm cho buff bộ (EQ_QBONUS của main); lấy trung bình phẩm các món cùng bộ */
 var EV_MS=1500,env=null;
 function r1(x){return Math.round(x*10)/10;}
-function scale(v,z){var o={},zm=1+(z||0)*ZSTEP;for(var k in v){o[k]=r1(v[k]*zm);if(k==='ch')o[k]=Math.min(100,o[k]);}return o;}
+function scale(v,z,qb){var o={},zm=1+(z||0)*ZSTEP;qb=qb||0;for(var k in v){o[k]=r1(v[k]*(1+qb)*zm);if(k==='ch')o[k]=Math.min(100,o[k]);}return o;}
 function forced(){try{var m=/[?&]bo=([\w-]+)/.exec(root.location.search);if(!m)return null;var v=m[1],z=/^\d+$/.test(v)?+v:K.indexOf(v);return z>=0&&z<K.length?z:null;}catch(e){return null;}}
 /* các bộ đang kích hoạt của người chơi: [{z,k,ten,n,full,v}] */
 function sets(){
- var f=forced(),out=[],cnt={},l,z;
+ var f=forced(),out=[],cnt={},qs={},l,z;
  if(f!=null)return [{z:f,k:SETS[f].k,ten:SETS[f].ten,n:4,full:true,v:scale(SETS[f].v4,f)}];
- try{l=root.TTGTB&&root.TTGTB.dangMac?root.TTGTB.dangMac():[];l.forEach(function(t){z=Math.floor(Number(t&&t.bo));if(z>=0&&z<K.length)cnt[z]=(cnt[z]||0)+1;});}catch(e){}
- for(z in cnt){var n=cnt[z];if(n>=2){var S=SETS[+z];out.push({z:+z,k:S.k,ten:S.ten,n:n,full:n>=4,v:scale(n>=4?S.v4:S.v2,+z)});}}
+ try{l=root.TTGTB&&root.TTGTB.dangMac?root.TTGTB.dangMac():[];l.forEach(function(t){z=Math.floor(Number(t&&t.bo));if(z>=0&&z<K.length){cnt[z]=(cnt[z]||0)+1;(qs[z]=qs[z]||[]).push(QB[Math.max(0,Math.min(4,Math.floor(Number(t.q)||0)))]);}});}catch(e){}
+ for(z in cnt){var n=cnt[z];if(n>=2){var S=SETS[+z],qb=qs[z].reduce(function(a,b){return a+b;},0)/qs[z].length;out.push({z:+z,k:S.k,ten:S.ten,n:n,full:n>=4,v:scale(n>=4?S.v4:S.v2,+z,qb)});}}
  return out;}
 function attach(e){env=e;}
 function S0(){return env&&env.st?env.st():null;}

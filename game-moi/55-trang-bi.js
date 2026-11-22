@@ -38,6 +38,8 @@ function save(){if(demo)return;try{localStorage.setItem(KEY,JSON.stringify({item
 function byUid(u){for(var i=0;i<items.length;i++)if(items[i].uid===u)return items[i];return null;}
 function isEq(u){for(var k in eq)if(eq[k]===u)return true;return false;}
 function bag(){return items.filter(function(t){return !isEq(t.uid);});}
+function getItem(u){var t=byUid(u);return t?Object.assign({},t):null;}   /* bản sao 1 món theo uid (73-luat-trang-bi.js dùng khi cường hóa) */
+function updItem(u,p){var t=byUid(u);if(!t||!p)return false;for(var k in p)t[k]=p[k];save();if(isOpen)renderItems();return true;}   /* sửa trường của 1 món (tên/cấp cường hóa...) rồi lưu */
 function addItem(t){if(!t||!t.ten||!(t.slot>=0&&t.slot<8))return null;var o=Object.assign({},t);o.uid=o.uid||('tb'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));items.push(o);save();if(isOpen)renderItems();return o.uid;}
 function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function icon(t){return t.img?'<img src=\"'+esc(t.img)+'\" alt=\"\" draggable=\"false\">':'<span>'+esc(t.ic||'❔')+'</span>';}   /* khối chữ "Chưa có Thú ra trận" (giữa 2 cột ô trang bị, phía trên bục) */
@@ -88,6 +90,7 @@ function pickSlot(k){var u=eq[k];if(!u){sel=null;renderItems();toast('Ô '+SLOTN
 function doEquip(){
   var t=sel&&byUid(sel);if(!t){toast('Chưa chọn trang bị');return;}
   if(isEq(t.uid)){toast('Món này đang được trang bị');return;}
+  if(t.lv){var rt=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null,lp=rt?Math.max(1,Math.floor(rt.lv||1)):1;if(lp<t.lv){toast('Cần thú đạt cấp '+t.lv+' để mặc món này');return;}}   /* như main: đủ cấp mới được mang */
   var old=eq[t.slot]?byUid(eq[t.slot]):null;eq[t.slot]=t.uid;save();renderItems();
   toast('Đã trang bị '+t.ten+(old?' (đã cất '+old.ten+' vào túi)':''));}
 /* VỨT BỎ: hỏi lại, xóa hẳn món khỏi kho. Món đang mặc không vứt được. */
@@ -165,5 +168,5 @@ function open(){if(!root)build();render();renderItems();isOpen=true;openAt=perfo
 function close(){if(!root)return;isOpen=false;root.classList.remove('on');}
 
 function setBo(on){if(E.ovB)E.ovB.classList.toggle('on',!!on);}   /* on=true: hiện nút BỎ TRANG BỊ đè lên TRANG BỊ */
-window.TTGTB={open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);},dangMac:function(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}};   /* dangMac: danh sách món ĐANG MẶC (đọc trường bo = số vùng 0..16 của bộ, dùng cho luật bộ trang bị trong trận: 70-bo-trang-bi.js) */
+window.TTGTB={open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,get:getItem,update:updItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);},dangMac:function(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}};   /* dangMac: danh sách món ĐANG MẶC (đọc trường bo = số vùng 0..16 của bộ, dùng cho luật bộ trang bị trong trận: 70-bo-trang-bi.js) */
 })();
