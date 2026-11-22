@@ -15,7 +15,7 @@ var PCT4={hp:1,tc:1,pt:1,td:1};              /* 4 chỉ số chính: cs là % c�
 var KN={hp:'HP',tc:'Tấn công',pt:'Phòng thủ',td:'Tốc độ',mm:'May mắn',cm:'Chí mạng',stcm:'ST chí mạng',stdb:'ST đặc biệt',xg:'Xuyên giáp'};
 /* cs = chỉ số cộng khi MẶC (SỐ MẪU). hp/tc/pt/td = % chỉ số thú; còn lại = điểm (cm, stcm, stdb, xg là %; mm là số) */
 var LIST=[
- {id:'admin',ten:'Quản Trị Viên',ic:'🛠️',img:'game-moi/danh-hieu/img-title-admin.webp?v=2',col:'#ff5a6a',nhom:'Admin',cs:{}},
+ {id:'admin',ten:'Quản Trị Viên',ic:'🛠️',img:'game-moi/danh-hieu/img-title-admin.webp?v=3',col:'#ff5a6a',nhom:'Admin',cs:{}},
  {id:'vip1',ten:'Tinh Anh Kỵ Sĩ',ic:'🛡️',img:'game-moi/danh-hieu/img-title-vip1.webp',col:'#8fc4ee',nhom:'VIP',cs:{hp:2,pt:2}},
  {id:'vip2',ten:'Ngự Thú Nam Tước',ic:'🐺',img:'game-moi/danh-hieu/img-title-vip2.webp',col:'#6fd08a',nhom:'VIP',cs:{hp:3,tc:2,pt:3}},
  {id:'vip3',ten:'Linh Thú Bá Tước',ic:'🦌',img:'game-moi/danh-hieu/img-title-vip3.webp',col:'#7fb4ff',nhom:'VIP',cs:{hp:4,tc:3,pt:4,td:2}},
