@@ -15,17 +15,17 @@ var PCT4={hp:1,tc:1,pt:1,td:1};              /* 4 chỉ số chính: cs là % c�
 var KN={hp:'HP',tc:'Tấn công',pt:'Phòng thủ',td:'Tốc độ',mm:'May mắn',cm:'Chí mạng',stcm:'ST chí mạng',stdb:'ST đặc biệt',xg:'Xuyên giáp'};
 /* cs = chỉ số cộng khi MẶC (SỐ MẪU). hp/tc/pt/td = % chỉ số thú; còn lại = điểm (cm, stcm, stdb, xg là %; mm là số) */
 var LIST=[
- {id:'admin',ten:'Quản Trị Viên',ic:'🛠️',col:'#ff5a6a',nhom:'Admin',cs:{}},
- {id:'vip1',ten:'Tinh Anh Kỵ Sĩ',ic:'🛡️',col:'#8fc4ee',nhom:'VIP',cs:{hp:2,pt:2}},
- {id:'vip2',ten:'Ngự Thú Nam Tước',ic:'🐺',col:'#6fd08a',nhom:'VIP',cs:{hp:3,tc:2,pt:3}},
- {id:'vip3',ten:'Linh Thú Bá Tước',ic:'🦌',col:'#7fb4ff',nhom:'VIP',cs:{hp:4,tc:3,pt:4,td:2}},
- {id:'vip4',ten:'Thánh Thú Hầu Tước',ic:'🦄',col:'#c08aff',nhom:'VIP',cs:{hp:5,tc:4,pt:5,td:3,cm:2}},
- {id:'vip5',ten:'Long Thần Công Tước',ic:'🐲',col:'#ff8a4a',nhom:'VIP',cs:{hp:6,tc:5,pt:6,td:4,cm:3,stcm:4}},
- {id:'vip6',ten:'Vạn Thú Quân Vương',ic:'👑',col:'#ffd24a',nhom:'VIP',cs:{hp:8,tc:7,pt:8,td:5,cm:4,stcm:6,mm:3}},
- {id:'vip7',ten:'Thần Thú Đế Tôn',ic:'🌟',col:'#ff7be0',glow:true,nhom:'VIP',cs:{hp:10,tc:9,pt:10,td:7,cm:6,stcm:10,mm:5,stdb:5}},
- {id:'top1',ten:'Chí Tôn Đấu Trường · Mùa 1',ic:'👑',col:'#ffd24a',glow:true,nhom:'Top mùa',cs:{tc:8,td:6,cm:5,stcm:8,xg:4}},
- {id:'top2',ten:'Cao Thủ Đấu Trường · Mùa 1',ic:'🥈',col:'#e0a060',nhom:'Top mùa',cs:{tc:6,td:4,cm:3,stcm:5,xg:3}},
- {id:'top3',ten:'Vô Địch Đấu Trường · Mùa 1',ic:'🥉',col:'#9fc7ff',nhom:'Top mùa',cs:{tc:4,td:3,cm:2,stcm:3,xg:2}}];
+ {id:'admin',ten:'Quản Trị Viên',ic:'🛠️',img:'game-moi/danh-hieu/img-title-admin.webp',col:'#ff5a6a',nhom:'Admin',cs:{}},
+ {id:'vip1',ten:'Tinh Anh Kỵ Sĩ',ic:'🛡️',img:'game-moi/danh-hieu/img-title-vip1.webp',col:'#8fc4ee',nhom:'VIP',cs:{hp:2,pt:2}},
+ {id:'vip2',ten:'Ngự Thú Nam Tước',ic:'🐺',img:'game-moi/danh-hieu/img-title-vip2.webp',col:'#6fd08a',nhom:'VIP',cs:{hp:3,tc:2,pt:3}},
+ {id:'vip3',ten:'Linh Thú Bá Tước',ic:'🦌',img:'game-moi/danh-hieu/img-title-vip3.webp',col:'#7fb4ff',nhom:'VIP',cs:{hp:4,tc:3,pt:4,td:2}},
+ {id:'vip4',ten:'Thánh Thú Hầu Tước',ic:'🦄',img:'game-moi/danh-hieu/img-title-vip4.webp',col:'#c08aff',nhom:'VIP',cs:{hp:5,tc:4,pt:5,td:3,cm:2}},
+ {id:'vip5',ten:'Long Thần Công Tước',ic:'🐲',img:'game-moi/danh-hieu/img-title-vip5.webp',col:'#ff8a4a',nhom:'VIP',cs:{hp:6,tc:5,pt:6,td:4,cm:3,stcm:4}},
+ {id:'vip6',ten:'Vạn Thú Quân Vương',ic:'👑',img:'game-moi/danh-hieu/img-title-vip6.webp',col:'#ffd24a',nhom:'VIP',cs:{hp:8,tc:7,pt:8,td:5,cm:4,stcm:6,mm:3}},
+ {id:'vip7',ten:'Thần Thú Đế Tôn',ic:'🌟',img:'game-moi/danh-hieu/img-title-vip7.webp',col:'#ff7be0',glow:true,nhom:'VIP',cs:{hp:10,tc:9,pt:10,td:7,cm:6,stcm:10,mm:5,stdb:5}},
+ {id:'top1',ten:'Chí Tôn Đấu Trường · Mùa 1',ic:'👑',img:'game-moi/danh-hieu/img-title-top1-s1.webp',col:'#ffd24a',glow:true,nhom:'Top mùa',cs:{tc:8,td:6,cm:5,stcm:8,xg:4}},
+ {id:'top2',ten:'Cao Thủ Đấu Trường · Mùa 1',ic:'🥈',img:'game-moi/danh-hieu/img-title-top2-s1.webp',col:'#e0a060',nhom:'Top mùa',cs:{tc:6,td:4,cm:3,stcm:5,xg:3}},
+ {id:'top3',ten:'Vô Địch Đấu Trường · Mùa 1',ic:'🥉',img:'game-moi/danh-hieu/img-title-top3-s1.webp',col:'#9fc7ff',nhom:'Top mùa',cs:{tc:4,td:3,cm:2,stcm:3,xg:2}}];
 function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function r1(x){return Math.round(x*10)/10;}
 function toast(m){if(root.TTGTBAO&&TTGTBAO.toast)TTGTBAO.toast(m,1800);}
@@ -38,10 +38,10 @@ function TB(){return(root.TTGTB&&TTGTB.list&&TTGTB.addItem)?root.TTGTB:null;}
 function has(id){var tb=TB();return !!(tb&&tb.list().some(function(t){return t.dh===id;}));}
 function owned(){return LIST.filter(function(d){return has(d.id);});}
 function give(id){var d=by(id),tb=TB();if(!d||!tb)return 'err';if(has(id))return 'had';
- return tb.addItem({id:'dh-'+id,dh:id,ten:d.ten,ic:d.ic,slot:SLOT,mo:mo(d)})?'ok':'err';}
+ return tb.addItem({id:'dh-'+id,dh:id,ten:d.ten,ic:d.ic,img:d.img,slot:SLOT,mo:mo(d)})?'ok':'err';}
 /* món đã nhận mà số liệu / tên trong LIST đổi -> cập nhật lại */
 function sync(){var tb=TB();if(!tb||!tb.update)return;
- tb.list().forEach(function(t){var d=t.dh?by(t.dh):null;if(d&&(t.mo!==mo(d)||t.ten!==d.ten||t.ic!==d.ic||t.slot!==SLOT))tb.update(t.uid,{mo:mo(d),ten:d.ten,ic:d.ic,slot:SLOT});});}
+ tb.list().forEach(function(t){var d=t.dh?by(t.dh):null;if(d&&(t.mo!==mo(d)||t.ten!==d.ten||t.ic!==d.ic||t.img!==d.img||t.slot!==SLOT))tb.update(t.uid,{mo:mo(d),ten:d.ten,ic:d.ic,img:d.img,slot:SLOT});});}
 
 /* ===================== CỘNG CHỈ SỐ ===================== */
 function worn(){var tb=TB(),o=[];try{(tb&&tb.dangMac?tb.dangMac():[]).forEach(function(t){var d=t&&t.dh?by(t.dh):null;if(d)o.push(d);});}catch(e){}return o;}
@@ -104,7 +104,7 @@ function render(){
  LIST.forEach(function(d){
   if(d.nhom!==g){g=d.nhom;h+='<div class="adh-g">'+esc(g.toUpperCase())+'</div>';}
   var on=has(d.id),l=lines(d).join(' · ');
-  h+='<div class="adh-r'+(on?' on':'')+'"><span class="adh-ic">'+d.ic+'</span><span class="adh-n'+(d.glow?' gl':'')+'" style="color:'+d.col+'"><b>'+esc(d.ten)+'</b><small>'+esc(l||'Không cộng chỉ số')+'</small></span>'+
+  h+='<div class="adh-r'+(on?' on':'')+'"><span class="adh-ic">'+(d.img?'<img src="'+esc(d.img)+'" alt="" draggable="false" style="width:46px;height:30px;object-fit:contain;display:block">':d.ic)+'</span><span class="adh-n'+(d.glow?' gl':'')+'" style="color:'+d.col+'"><b>'+esc(d.ten)+'</b><small>'+esc(l||'Không cộng chỉ số')+'</small></span>'+
    (on?'<span class="adh-k">✔ Đã có</span>':'<button type="button" class="adh-b" data-id="'+d.id+'">Trao</button>')+'</div>';});
  bd.innerHTML=h;}
 function open(){build();render();ov.classList.add('on');}
