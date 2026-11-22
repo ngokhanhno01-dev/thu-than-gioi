@@ -547,6 +547,8 @@ function add(t){
 }
 var RK_ORD=['E','D','C','B','A','S','SS','SR'];
 function doiRank(){var t=rt&&byUid(rt);if(!t)return null;var i=RK_ORD.indexOf(RKC[t.bac]?t.bac:'C');t.bac=RK_ORD[(i+1)%RK_ORD.length];save();if(isOpen)render();return t.bac;}   /* NÚT TEST: đổi Rank thú ra trận theo vòng E>D>C>B>A>S>SS>SR */
+/* setTien(uid,n): đổi bậc tiến hóa (1-3) của 1 thú, lưu + vẽ lại panel. Dùng cho khung Tiến Hóa (75-tien-hoa-thu.js). Trả bậc mới hoặc null nếu không có thú. */
+function setTien(u,n){var t=byUid(u);if(!t)return null;n=Math.max(1,Math.min(3,Math.floor(n)||1));t.tien=n;save();if(isOpen)render();return n;}
 function list(){dongBo();return thus.map(function(t){return Object.assign({},t);});}
 function getRaTran(){var t=rt&&byUid(rt);return t?Object.assign({},t):null;}   /* sau này nối vào trận đấu/sảnh bằng hàm này */
 /* khoiTao(thu): TÀI KHOẢN MỚI. Xóa sạch kho + thú ra trận + danh sách thả (bộ nhớ và localStorage), thêm đúng con `thu`, cho ra trận luôn. Trả uid (null nếu đang ở chế độ ?thu=demo hoặc thiếu id). Không đụng Balo. */
@@ -566,5 +568,5 @@ function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=M
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
   if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
-window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges,pc:pcPaint};   /* pc(canvas có data-u=đường dẫn ảnh): vẽ thú tự phóng vừa ô (khung Tiến Hóa 72-khung-ren-cuong-hoa.js dùng) */   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,setTien:setTien,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges,pc:pcPaint};   /* pc(canvas có data-u=đường dẫn ảnh): vẽ thú tự phóng vừa ô (khung Tiến Hóa 72-khung-ren-cuong-hoa.js dùng) */   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();
