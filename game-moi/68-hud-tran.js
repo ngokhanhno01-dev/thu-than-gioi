@@ -83,15 +83,15 @@ function draw(ctx,o){
   barFill(ctx,G.sp,Math.max(0,Math.min(1,gp)),m,gp>=.999?'#fff0a0':'#ffe27a',gp>=.999?'#f0b020':'#d9921a',5);
   fit(ctx,hasTd?String(Math.round(td)):'-',X((G.sp.x0+G.sp.x1)/2),(G.sp.y0+G.sp.y1)/2+2,300,36,24,'bold {S}px sans-serif','#fff','rgba(60,30,0,.9)',7);
   /* LV */
-  fit(ctx,'Lv.'+Math.max(1,Math.min(100,Math.floor(o.lv||1))),X(G.lv.x),G.lv.y+2,G.lv.w,46,26,'bold {S}px sans-serif','#fff3c4','rgba(40,20,0,.9)',7);
-  /* HỆ (1 hoặc 2 hệ, mỗi hệ một màu) */
+  fit(ctx,'Lv.'+Math.max(1,Math.min(100,Math.floor(o.lv||1))),X(G.he.x),G.he.y+2,G.he.w,46,26,'bold {S}px sans-serif','#fff3c4','rgba(40,20,0,.9)',7);
+  /* HỆ (1 hoặc 2 hệ, mỗi hệ một màu): nằm ở ô Lv cũ (cuối thanh Máu); còn Lv nằm ở ô dưới vòng Rank (đã đổi chỗ 23/11/2026) */
   var he=(o.he||[]).filter(Boolean).slice(0,2),HT=(root.TTGCS&&root.TTGCS.HE_TEN)||HE_TEN;
   if(he.length){
     var fs=44,fnt='bold {S}px sans-serif',names=he.map(function(k){return HT[k]||HE_TEN[k]||k;}),sep=' · ';
     var meas=function(f){ctx.font=fnt.replace('{S}',f);return names.reduce(function(a,n){return a+ctx.measureText(n).width;},0)+(names.length>1?ctx.measureText(sep).width:0);};
-    var tw=meas(fs);while(tw>G.he.w&&fs>28){fs-=2;tw=meas(fs);}
-    var sx=tw>G.he.w?G.he.w/tw:1;
-    ctx.save();ctx.translate(X(G.he.x),G.he.y);ctx.scale(sx,1);ctx.font=fnt.replace('{S}',fs);ctx.textAlign='left';ctx.textBaseline='middle';ctx.lineJoin='round';
+    var tw=meas(fs);while(tw>G.lv.w&&fs>28){fs-=2;tw=meas(fs);}
+    var sx=tw>G.lv.w?G.lv.w/tw:1;
+    ctx.save();ctx.translate(X(G.lv.x),G.lv.y+2);ctx.scale(sx,1);ctx.font=fnt.replace('{S}',fs);ctx.textAlign='left';ctx.textBaseline='middle';ctx.lineJoin='round';
     var px=-tw/2;
     names.forEach(function(n,i){
       if(i){ctx.lineWidth=6;ctx.strokeStyle='rgba(0,0,30,.9)';ctx.strokeText(sep,px,0);ctx.fillStyle='#cfe3ff';ctx.fillText(sep,px,0);px+=ctx.measureText(sep).width;}
