@@ -100,7 +100,7 @@ function build(){
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ov&&ov.classList.contains('on')){e.stopImmediatePropagation();close();}},true);}
 function render(){
  if(!ov)return;var sub=ov.querySelector('#adh-sub'),n=owned().length,g='',h='';
- sub.textContent='Đang có '+n+'/'+LIST.length+' danh hiệu. Trao xong vào Trang Bị > ô Bảo vật 1 để mặc. Muốn bỏ: Trang Bị > chọn món > Vứt bỏ.';
+ sub.textContent='Đang có '+n+'/'+LIST.length+' danh hiệu. Trao xong vào Trang Bị > ô Danh hiệu để mặc. Muốn bỏ: Trang Bị > chọn món > Vứt bỏ.';
  LIST.forEach(function(d){
   if(d.nhom!==g){g=d.nhom;h+='<div class="adh-g">'+esc(g.toUpperCase())+'</div>';}
   var on=has(d.id),l=lines(d).join(' · ');

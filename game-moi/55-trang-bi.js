@@ -37,7 +37,7 @@ var BTN_BC={x:1318,y:586,w:124,h:58},BTN_TC={x:1447,y:586,w:124,h:58};
 /* bảng CHỈ SỐ (mở từ nút CHỈ SỐ): nằm giữa 2 cột ô trang bị, phía dưới 3 ô tròn */
 var CSP={x:212,y:296,w:450,h:480};
 /* BỐ CỤC 8 Ô: cột trái = ô 0-3, cột phải = ô 4-7 (từ trên xuống). 4 ô TRÊN = hàng 1-2 mỗi cột: ô 0 Vũ khí, ô 1 Áo giáp, ô 4 Nhẫn, ô 5 Ngọc bội. 4 ô DƯỚI (2, 3, 6, 7) = Bảo vật: dành cho 5 loại mới (Pháp Khí, Pháp Bảo, Linh Bảo, Tiên Khí, Thần Khí), mỗi ô nhận loại nào cũng được */
-var SLOTN=['Vũ khí','Áo giáp','Bảo vật 1','Bảo vật 2','Nhẫn','Ngọc bội','Bảo vật 3','Bảo vật 4'];
+var SLOTN=['Vũ khí','Áo giáp','Danh hiệu','Bảo vật 2','Nhẫn','Ngọc bội','Bảo vật 3','Bảo vật 4'];
 /* ===== KHO TRANG BỊ =====
    items: [{uid,id,ten,ic|img,slot(0-7),mo}] (mọi món sở hữu), eq: {slot:uid} (món đang mặc). Túi = món không nằm trong eq.
    Lưu localStorage 'ttg_moi_trangbi_v1'. ?trangbi=demo: có sẵn vài món mẫu, không lưu. */
