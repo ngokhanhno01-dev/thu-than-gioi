@@ -7,6 +7,7 @@ function createEncounter(player,rng){
   rng=typeof rng==='function'?rng:Math.random;
   if(!player||!root.TTGCS||!root.TTGBONG||!root.THU_MOI||!root.TTG_QUAI_MAIN)return null;
   var cfg=root.TTGBONG.CFG.tx||{},species=root.TTGCS.loai(player.id),z=species&&species.vung!=null?species.vung:0;
+  if(root.TTGDV&&root.TTGDV.vung)z=root.TTGDV.vung();   /* vùng do người chơi chọn (80-danh-vong.js), không còn theo vùng của thú */
   var demoZone=null,i;for(i=0;i<root.THU_MOI.zones.length;i++)if(root.THU_MOI.zones[i].z===z){demoZone=root.THU_MOI.zones[i];break;}
   if(!demoZone)return null;
   var mainZone=null;for(i=0;i<root.TTG_QUAI_MAIN.zones.length;i++)if(root.TTG_QUAI_MAIN.zones[i].slug===demoZone.slug){mainZone=root.TTG_QUAI_MAIN.zones[i];break;}

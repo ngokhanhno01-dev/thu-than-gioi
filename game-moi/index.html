@@ -202,14 +202,14 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/63-nhan-nut.js"></script>
 <script src="game-moi/53-balo.js"></script>
 <script src="game-moi/58-bong-bat.js"></script>
-<script src="game-moi/54-thu-than.js"></script>
-<script src="game-moi/59-nut-tham-hiem.js?v=3"></script>
+<script src="game-moi/54-thu-than.js?v=2"></script>
+<script src="game-moi/59-nut-tham-hiem.js?v=4"></script>
 <script src="game-moi/102-quai-vung.js"></script>
 <script src="game-moi/55-trang-bi.js"></script>
 <script src="game-moi/72-khung-ren-cuong-hoa.js"></script>
 <script src="game-moi/71-nut-trang-bi.js"></script>
 <script src="game-moi/56-chi-so.js"></script>
-<script src="game-moi/61-tham-hiem-tran.js"></script>
+<script src="game-moi/61-tham-hiem-tran.js?v=2"></script>
 <script src="game-moi/62-bat-thu.js"></script>
 <script src="game-moi/66-tien-te.js"></script>
 <script src="game-moi/67-rune-rank.js"></script>
@@ -563,7 +563,7 @@ function atk(w){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;
  var fin=function(){if(st!==s0)return;if(window.TTGBO&&w){if(w==='both'){TTGBO.round('me');TTGBO.round('en');}else TTGBO.round(w);lcsRound(w);TTGBO.dead();}   /* cuối lượt: Sinh Cơ/Dung Nham/Vân Ẩn; rồi Ngọc Hộ Mệnh trước khi xét thắng/thua */
   if(w==='both'){dbTick('me');dbTick('en');}else dbTick(w);
   if(st.en<=0||st.me<=0){var hoa=st.en<=0&&st.me<=0;st.msg=hoa?'Hòa':(st.en<=0?'Thắng!':'Thua');var encounter=!!BATTLE,won=st.en<=0&&!hoa,eb=BATTLE;
-   setTimeout(function(){if(st!==s0)return;if(encounter){BATTLE=null;SCENE='sanh';reset();var xp=null,tt=0;if(won&&eb&&window.TTGTHU&&TTGTHU.addExp&&window.TTGCS){var lo=eb.enemy.boss?'boss':(eb.enemy.source==='main'?'quai':'thu');xp=TTGTHU.addExp(TTGCS.expThuong({capQuai:eb.enemy.lv,capThu:eb.player.lv,loai:lo,vung:eb.enemy.vung,bac:eb.enemy.bac}));if(window.TTGTIEN){tt=TTGTIEN.tinhThach({loai:lo,vung:eb.enemy.vung,bac:eb.enemy.bac});TTGTIEN.add('tt',tt);}}var bkDrop=null;if(won&&eb&&eb.enemy.boss&&eb.enemy.source==='demo'&&eb.enemy.kn&&eb.enemy.kn[0]&&window.TTGBALO&&window.TTGCS){var mmL=(eb.playerStats&&eb.playerStats.mm)||0,pcR=(TTGCS.TY_LE_ROI_SACH||1.5)*Math.min(3,1+mmL/100);if(Math.random()*100<pcR){bkDrop=eb.enemy.kn[0];TTGBALO.add(bkDrop,1);}}/* CHỈ giết boss thú hoang mới rơi sách của boss đó: 1,5% x (1+mm/100), tối đa x3 (bắt thú không đi qua đây) */var rd=[];if(won&&eb&&window.TTGLT){try{rd=TTGLT.roiDo(eb.enemy,(eb.playerStats&&eb.playerStats.mm)||0);}catch(e){}}/* quái vùng nguồn main rơi nguyên liệu rèn + đá cường hóa (73-luat-trang-bi.js) */var rt2=[];if(won&&eb&&eb.enemy.source==='demo'&&window.TTGTH){try{rt2=TTGTH.roiDo(eb.enemy,(eb.playerStats&&eb.playerStats.mm)||0);}catch(e){}}/* CHỈ thú hoang và boss thú hoang chết mới rơi item tiến hóa (75-tien-hoa-thu.js); quái vùng đã có bộ item riêng nên không rơi ở đây */var pen=0;if(!won&&!hoa&&eb&&window.TTGTIEN){var lo3=eb.enemy.boss?'boss':(eb.enemy.source==='main'?'quai':'thu');pen=Math.min(TTGTIEN.get('tt'),Math.max(1,Math.round(TTGTIEN.tinhThach({loai:lo3,vung:eb.enemy.vung,bac:eb.enemy.bac})/2)));if(pen>0)TTGTIEN.add('tt',-pen);}/* HÒA: không mất gì; THUA: trừ 1 nửa Tinh Thạch của lần thắng (không âm quá số đang có) */toast(hoa?'Hòa! Không mất gì':won?'Thắng! +'+(xp?xp.gain:0)+' EXP'+(tt?' · +'+TTGTIEN.fmt(tt)+' Tinh Thạch':'')+(xp&&xp.lv1>xp.lv0?' · Lên cấp '+xp.lv1+'!':'')+(bkDrop&&TTGBALO.CAT[bkDrop]?' · Rơi '+TTGBALO.CAT[bkDrop].ten+'!':'')+(rd.length?' · Rơi '+TTGLT.moTa(rd):'')+(rt2.length?' · Rơi '+TTGTH.moTa(rt2):''):'Thua! Thú đã gục'+(pen?' · -'+TTGTIEN.fmt(pen)+' Tinh Thạch':''));}else reset();},END_WAIT);}
+   setTimeout(function(){if(st!==s0)return;if(encounter){BATTLE=null;SCENE='sanh';reset();var xp=null,tt=0,dvN=0,dvMo=[];if(won&&eb&&eb.enemy&&window.TTGDV){try{dvN=TTGDV.kill(eb.enemy);dvMo=TTGDV.moMoi();}catch(e){}}/* thú hoang/boss thú hoang chết lần đầu theo loài: +1 Danh Vọng (tính TRƯỚC khi cộng EXP để trần cấp mới có hiệu lực ngay) */if(won&&eb&&window.TTGTHU&&TTGTHU.addExp&&window.TTGCS){var lo=eb.enemy.boss?'boss':(eb.enemy.source==='main'?'quai':'thu');xp=TTGTHU.addExp(TTGCS.expThuong({capQuai:eb.enemy.lv,capThu:eb.player.lv,loai:lo,vung:eb.enemy.vung,bac:eb.enemy.bac}));if(window.TTGTIEN){tt=TTGTIEN.tinhThach({loai:lo,vung:eb.enemy.vung,bac:eb.enemy.bac});TTGTIEN.add('tt',tt);}}var bkDrop=null;if(won&&eb&&eb.enemy.boss&&eb.enemy.source==='demo'&&eb.enemy.kn&&eb.enemy.kn[0]&&window.TTGBALO&&window.TTGCS){var mmL=(eb.playerStats&&eb.playerStats.mm)||0,pcR=(TTGCS.TY_LE_ROI_SACH||1.5)*Math.min(3,1+mmL/100);if(Math.random()*100<pcR){bkDrop=eb.enemy.kn[0];TTGBALO.add(bkDrop,1);}}/* CHỈ giết boss thú hoang mới rơi sách của boss đó: 1,5% x (1+mm/100), tối đa x3 (bắt thú không đi qua đây) */var rd=[];if(won&&eb&&window.TTGLT){try{rd=TTGLT.roiDo(eb.enemy,(eb.playerStats&&eb.playerStats.mm)||0);}catch(e){}}/* quái vùng nguồn main rơi nguyên liệu rèn + đá cường hóa (73-luat-trang-bi.js) */var rt2=[];if(won&&eb&&eb.enemy.source==='demo'&&window.TTGTH){try{rt2=TTGTH.roiDo(eb.enemy,(eb.playerStats&&eb.playerStats.mm)||0);}catch(e){}}/* CHỈ thú hoang và boss thú hoang chết mới rơi item tiến hóa (75-tien-hoa-thu.js); quái vùng đã có bộ item riêng nên không rơi ở đây */var pen=0;if(!won&&!hoa&&eb&&window.TTGTIEN){var lo3=eb.enemy.boss?'boss':(eb.enemy.source==='main'?'quai':'thu');pen=Math.min(TTGTIEN.get('tt'),Math.max(1,Math.round(TTGTIEN.tinhThach({loai:lo3,vung:eb.enemy.vung,bac:eb.enemy.bac})/2)));if(pen>0)TTGTIEN.add('tt',-pen);}/* HÒA: không mất gì; THUA: trừ 1 nửa Tinh Thạch của lần thắng (không âm quá số đang có) */toast(hoa?'Hòa! Không mất gì':won?'Thắng! +'+(xp?xp.gain:0)+' EXP'+(xp&&xp.tran?' (đã đạt trần cấp, cần thêm Danh Vọng)':'')+(dvN?' · +'+dvN+' Danh Vọng':'')+(dvMo.length?' · Mở khóa '+dvMo.join(', '):'')+(tt?' · +'+TTGTIEN.fmt(tt)+' Tinh Thạch':'')+(xp&&xp.lv1>xp.lv0?' · Lên cấp '+xp.lv1+'!':'')+(bkDrop&&TTGBALO.CAT[bkDrop]?' · Rơi '+TTGBALO.CAT[bkDrop].ten+'!':'')+(rd.length?' · Rơi '+TTGLT.moTa(rd):'')+(rt2.length?' · Rơi '+TTGTH.moTa(rt2):''):'Thua! Thú đã gục'+(pen?' · -'+TTGTIEN.fmt(pen)+' Tinh Thạch':''));}else reset();},END_WAIT);}
   else{st.busy=false;nextAt=performance.now()+GAP_ACT;if(st.tg!=null)st.tg=nextAt;}};
  setTimeout(fin,w==='both'?actClash(s0):act(s0,w));}
 function autoTick(){if(!AUTO||!st)return;var now=performance.now();
@@ -1001,7 +1001,7 @@ function drawExp(ts){
  }
  ctx.restore();ctx.save();ctx.lineJoin='round';ctx.textAlign='center';ctx.textBaseline='middle';
  /* số exp/cần ở giữa ô tròn, tự co cho vừa */
- var txt=inf?(inf.max?'MAX':inf.exp+'/'+inf.need):'--',fs=Math.max(7,Math.round(ry*.32));
+ var txt=inf?(inf.max?(inf.tran?'Đạt trần':'MAX'):inf.exp+'/'+inf.need):'--',fs=Math.max(7,Math.round(ry*.32));
  ctx.font='bold '+fs+'px sans-serif';
  while(fs>6&&ctx.measureText(txt).width>rx*1.55){fs--;ctx.font='bold '+fs+'px sans-serif';}
  ctx.lineWidth=Math.max(2,fs*.28);ctx.strokeStyle='#020618';ctx.fillStyle='#fff';ctx.strokeText(txt,cx,cy);ctx.fillText(txt,cx,cy);
@@ -1025,6 +1025,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  /* khung (đã dựng sẵn ở độ phân giải máy) */
  if(FL){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
  drawExp(ts);
+ if(window.TTGDV&&FRM.top.img&&FRM.top.img.naturalWidth){var dvS=sTop(TH());TTGDV.draw(ctx,I.l-BG_BLEED.l*dvS,-BG_BLEED.t*dvS,dvS);}   /* ngôi sao + số Danh Vọng trong ô dưới chữ Danh Vọng (80-danh-vong.js) */
  if(SCENE==='sanh'&&window.TTGTIEN)TTGTIEN.draw(ctx,fx+fw/2,I.t,fw-460);   /* khung tiền tệ: chỉ ở sảnh, giữa Danh Vọng và EXP */
  if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,py(),ts,'truoc');return;}
  pet('en',ts);pet('me',ts);

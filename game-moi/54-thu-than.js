@@ -568,11 +568,12 @@ function khoiTao(t){
 }
 
 /* ===== EXP / CẤP của thú đang ra trận (công thức: TTGCS.expCan, trần cấp: TTGCS.CFG.capMax hoặc 100) ===== */
-function capMax(){return (window.TTGCS&&TTGCS.CFG&&TTGCS.CFG.capMax)||100;}
-function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=Math.max(1,Math.floor(t.lv||1)),mx=lv>=capMax();return {uid:t.uid,lv:lv,exp:mx?0:Math.max(0,Math.floor(t.exp||0)),need:mx?0:TTGCS.expCan(lv),max:mx};}
+function capGoc(){return (window.TTGCS&&TTGCS.CFG&&TTGCS.CFG.capMax)||100;}
+function capMax(){var m=capGoc();if(window.TTGDV&&TTGDV.tran){var c=TTGDV.tran();if(c>0)m=Math.min(m,c);}return m;}   /* trần cấp = min(100, trần theo Danh Vọng) (80-danh-vong.js); thú đã vượt trần thì giữ nguyên, chỉ ngừng nhận EXP */
+function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=Math.max(1,Math.floor(t.lv||1)),mx=lv>=capMax();return {uid:t.uid,lv:lv,exp:mx?0:Math.max(0,Math.floor(t.exp||0)),need:mx?0:TTGCS.expCan(lv),max:mx,tran:mx&&lv<capGoc()};}
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
-  if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
+  var tr=lv>=capMax()&&lv<capGoc();if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:(lv0>=capMax()?0:n),lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv),tran:tr};}
 function lamMoi(){try{if(isOpen&&E&&E.cap)renderStats();}catch(e){}}   /* gọi khi đổi trang bị (55-trang-bi.js) để trang chỉ số cập nhật */
 window.TTGTHU={lamMoi:lamMoi,tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,setTien:setTien,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges,pc:pcPaint};   /* pc(canvas có data-u=đường dẫn ảnh): vẽ thú tự phóng vừa ô (khung Tiến Hóa 72-khung-ren-cuong-hoa.js dùng) */   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();
