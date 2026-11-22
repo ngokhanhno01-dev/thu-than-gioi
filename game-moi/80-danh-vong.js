@@ -12,7 +12,8 @@
 (function(root){
 'use strict';
 var KEY='ttg_moi_dv',KEYV='ttg_moi_vung';
-var CFG={moiVung:10};
+var CFG={moiVung:10,devTaps:1};   /* devTaps = số lần chạm liên tiếp (trong 1,2s) vào chữ "Danh Vọng" để mở menu ẩn các nút test; 1 = chạm 1 lần, đặt 3-5 khi ra bản thật. */
+var HOT={x0:118,x1:298,y0:88,y1:238},TOPH=816,BLEED={l:10,t:6};   /* vùng chữ "Danh Vọng" (px ảnh khung-sanh.webp) + số đo khung trên giống index.html (FRM.top.h, BG_BLEED) */
 var PLATE={cx:198.5,cy:283.5,w:112,h:26};   /* ô xanh dưới chữ Danh Vọng, theo pixel ảnh khung-sanh.webp (1843x816) */
 var S={kills:{}},IDX=0,extra=0,mo0=[];
 try{var o=JSON.parse(localStorage.getItem(KEY)||'{}');if(o&&o.kills&&typeof o.kills==='object')S.kills=o.kills;}catch(e){}
@@ -70,7 +71,11 @@ function css(){var s=document.createElement('style');s.textContent=[
 '#dv-ov .dv-r .n{flex:1;font-weight:700;font-size:15px}',
 '#dv-ov .dv-r .n small{display:block;font-weight:400;font-size:11px;color:#9fb4e8}',
 '#dv-ov .dv-r .t{font-size:12px;color:#bcd2ff;text-align:right;white-space:nowrap}',
-'#dv-ov .dv-r.on .t{color:#ffe27a;font-weight:700}'
+'#dv-ov .dv-r.on .t{color:#ffe27a;font-weight:700}',
+'#dv-hot{position:fixed;z-index:7;background:transparent;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:default}',
+'#dv-dev .dv-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;padding:6px 12px 14px;overflow:auto}',
+'#dv-dev .dv-b{padding:12px 8px;border-radius:9px;border:1px solid #3a4a8a;background:linear-gradient(180deg,#1a2352,#10173a);color:#fff;font:700 14px "Segoe UI",system-ui,sans-serif;cursor:pointer}',
+'#dv-dev .dv-b:active{border-color:#ffd45a;background:#222c66}'
 ].join('\n');document.head.appendChild(s);}
 function fit(){if(!span||!btn)return;span.style.fontSize='';var cw=span.clientWidth,sw=span.scrollWidth;
   if(cw>0&&sw>cw){var fs=parseFloat(getComputedStyle(span).fontSize)||0;if(fs)span.style.fontSize=(fs*cw/sw*.97).toFixed(2)+'px';}}
@@ -90,6 +95,17 @@ function lap(){
 function toast(t){try{if(root.TTGTBAO&&root.TTGTBAO.toast){root.TTGTBAO.toast(t);return;}}catch(e){}
   var d=document.createElement('div');d.textContent=t;d.style.cssText='position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:70;background:rgba(10,14,40,.92);color:#ffe27a;border:1px solid #d9b45a;border-radius:8px;padding:8px 14px;font:700 14px "Segoe UI",sans-serif;max-width:90vw;text-align:center';document.body.appendChild(d);setTimeout(function(){d.remove();},2200);}
 function mo(){if(!ov)return;lap();ov.style.display='flex';}
+/* ---- menu ẩn: gom nút TEST/ADMIN (TTGNV.cfg.dev) ---- */
+var hot=null,dev=null,taps=0,tapT=0;
+function moDev(){if(!dev)return;var g=dev.querySelector('.dv-g'),l=(root.TTGNV&&root.TTGNV.dev)||[];g.innerHTML='';
+  if(!l.length){g.innerHTML='<div style="grid-column:1/-1;color:#9fb4e8;padding:8px">Chưa có nút test nào.</div>';}
+  l.forEach(function(it){var b=document.createElement('button');b.type='button';b.className='dv-b';b.textContent=it.o.ten||it.o.id;
+    b.addEventListener('click',function(){try{if(it.o.id==='admin')dongDev();if(it.o.onTap)it.o.onTap(it.e);}catch(e){}});g.appendChild(b);});
+  dev.style.display='flex';}
+function dongDev(){if(dev)dev.style.display='none';}
+function datHot(m){if(!hot)return;m=m||(root.TTGNV&&root.TTGNV.m&&root.TTGNV.m());if(!m)return;
+  var f=m.K/m.DPR,s=m.th/(TOPH-BLEED.t),x=(m.I.l-BLEED.l*s+HOT.x0*s)*f,y=(-BLEED.t*s+HOT.y0*s)*f;
+  hot.style.left=Math.round(x)+'px';hot.style.top=Math.round(y)+'px';hot.style.width=Math.round((HOT.x1-HOT.x0)*s*f)+'px';hot.style.height=Math.round((HOT.y1-HOT.y0)*s*f)+'px';hot.style.display='block';}
 function dong(){if(ov)ov.style.display='none';}
 function init(){
   if(!root.TTGNV||!root.THU_MOI||!root.TTGNV.add){return false;}
@@ -99,11 +115,17 @@ function init(){
   ov.addEventListener('click',function(e){if(e.target===ov)dong();});
   ov.querySelector('.dv-x').addEventListener('click',dong);
   document.body.appendChild(ov);
+  dev=document.createElement('div');dev.id='dv-dev';dev.className='dv-o2';dev.style.cssText='position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(2,4,18,.55);font-family:"Segoe UI",system-ui,sans-serif';
+  dev.innerHTML='<div class="dv-pn" style="width:min(440px,92vw);max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#171d44,#0b0f26);border:2px solid #d9b45a;border-radius:12px;color:#fff"><div class="dv-hd" style="display:flex;align-items:center;padding:10px 12px 4px;font-weight:800;font-size:16px;color:#ffe27a"><b style="flex:1">Menu thử (ẩn)</b><button type="button" class="dv-x" style="width:30px;height:30px;border-radius:8px;border:1px solid #d9b45a;background:#1b2250;color:#ffe27a;font-size:16px;cursor:pointer">✕</button></div><div class="dv-g"></div></div>';
+  dev.addEventListener('click',function(e){if(e.target===dev)dongDev();});dev.querySelector('.dv-x').addEventListener('click',dongDev);document.body.appendChild(dev);
+  hot=document.createElement('div');hot.id='dv-hot';hot.setAttribute('aria-hidden','true');hot.style.display='none';
+  hot.addEventListener('click',function(){var t=Date.now();taps=(t-tapT<1200)?taps+1:1;tapT=t;if(taps>=CFG.devTaps){taps=0;moDev();}});
+  document.body.appendChild(hot);
   /* nút dài ngay dưới nút Thám hiểm (hàng 1, kéo lên sát nút trên): ảnh 1200x190 -> 200 x 31,7 */
   btn=root.TTGNV.add({id:'chon-vung',ten:'Chọn vùng',image:'game-moi/nut-chon-vung.webp?v=1',w:200,h:31.7,center:true,onTap:mo,r:1,offsetY:-14.5});
   span=document.createElement('span');span.className='dv-vt';btn.appendChild(span);
-  var lay0=root.TTGNV.layout;root.TTGNV.layout=function(m){lay0(m);requestAnimationFrame(fit);};
-  capNhat();window.addEventListener('resize',function(){requestAnimationFrame(fit);});
+  var lay0=root.TTGNV.layout;root.TTGNV.layout=function(m){lay0(m);datHot(m);requestAnimationFrame(fit);};
+  capNhat();datHot();window.addEventListener('resize',function(){requestAnimationFrame(fit);});
   return true;}
 root.TTGDV={CFG:CFG,PLATE:PLATE,get:get,tran:tran,can:can,kill:kill,moMoi:moMoi,vung:vung,ten:ten,set:set,draw:draw,mo:mo,dong:dong,zones:zones};
 if(!init()){var tries=0,iv=setInterval(function(){if(init()||++tries>40)clearInterval(iv);},250);}

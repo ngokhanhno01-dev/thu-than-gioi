@@ -15,9 +15,11 @@ var CFG={
   dy:-1.5,   /* dịch cả khối nút lên (-) / xuống (+) cho cân với ô trong khung (viền trên mỏng hơn viền dưới) */
   left:42,    /* chừa bên trái cho họa tiết góc khung dưới */
   fill:'col', /* 'col' = xếp theo cột (nút 2 nằm dưới nút 1) | 'row' = xếp theo hàng */
-  frame:'game-moi/khung-nut.webp?v=2'
+  frame:'game-moi/khung-nut.webp?v=2',
+  khung:false,   /* false = nút vuông KHÔNG có khung/nền (chỉ icon + chữ; sau này thay bằng ảnh icon riêng qua o.image). true = khung vàng-xanh đêm như cũ. Chỉ nút dài (Thám hiểm, Chọn vùng) luôn dùng ảnh riêng có khung. */
+  dev:['nhan-chau','doi-rank','lay-sach','lay-do-th','admin','nl-test']   /* nút TEST/ADMIN: không đặt ra thanh nút, gom vào menu ẩn (chạm chữ "Danh Vọng", xem 80-danh-vong.js). Thêm id vào đây hoặc đặt o.dev:true cho nút test mới. */
 };
-var list=[],M=null;
+var list=[],M=null,devList=[];
 var st=document.createElement('style');
 st.textContent=[
 '.nv{position:fixed;left:0;top:0;z-index:6;display:none;margin:0;padding:0;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;transition:transform .08s ease}',
@@ -29,14 +31,17 @@ st.textContent=[
 '.nv .nv-ic svg,.nv .nv-ic img{width:100%;height:100%;display:block;object-fit:contain}',
 '.nv .nv-tx{position:absolute;left:3%;right:3%;top:60%;height:19%;display:flex;align-items:center;justify-content:center;font-weight:800;letter-spacing:.02em;line-height:1;white-space:nowrap;color:#fffbe0;text-shadow:0 0 .1em #fff2a8,0 0 .28em #ffb830,0 0 .5em rgba(255,170,40,.85),.06em 0 0 #3a1a00,-.06em 0 0 #3a1a00,0 .06em 0 #3a1a00,0 -.06em 0 #3a1a00}',
 '.nv .nv-fr{position:absolute;left:0;top:0;width:100%;height:100%;background:url('+CFG.frame+') 0 0/100% 100% no-repeat;pointer-events:none}',
+'.nv.nv-nf .nv-ic{left:6%;right:6%;top:2%;height:64%}',
+'.nv.nv-nf .nv-tx{left:0;right:0;top:68%;height:24%}',
   '.nv.nv-img .nv-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none;-webkit-user-drag:none;user-select:none}'
 ].join('\n');
 document.head.appendChild(st);
 
 function add(o){
+  if(o.dev||CFG.dev.indexOf(o.id)>=0){var d=document.createElement('button');d.type='button';d.setAttribute('data-id',o.id);devList.push({o:o,e:d});return d;}   /* nút test: không lên thanh nút, vào menu ẩn */
   var e=document.createElement('button');e.type='button';e.className='nv';e.setAttribute('data-id',o.id);e.setAttribute('aria-label',o.ten||o.id);
   if(o.image){e.className+=' nv-img';var im=document.createElement('img');im.className='nv-art';im.src=o.image;im.alt='';im.draggable=false;e.appendChild(im);}
-  else{e.innerHTML='<i class="nv-bg"></i><i class="nv-gl"></i><i class="nv-ic">'+(o.icon||'')+'</i><i class="nv-fr"></i><span class="nv-tx"></span>';e.querySelector('.nv-tx').textContent=o.ten||'';}
+  else{if(!CFG.khung)e.className+=' nv-nf';e.innerHTML=(CFG.khung?'<i class="nv-bg"></i>':'')+'<i class="nv-gl"></i><i class="nv-ic">'+(o.icon||'')+'</i>'+(CFG.khung?'<i class="nv-fr"></i>':'')+'<span class="nv-tx"></span>';e.querySelector('.nv-tx').textContent=o.ten||'';}
   e.addEventListener('click',function(){if(o.onTap)o.onTap(e);});
   document.body.appendChild(e);list.push({o:o,e:e});
   if(M)layout(M);
@@ -61,5 +66,5 @@ function layout(m){
     s2.display='block';s2.width=iw+'px';s2.height=ih+'px';s2.left=Math.round(rcol[i]!=null?(M.W-M.I.r-CFG.left)*f-(rcol[i]+1)*s-rcol[i]*g:centered[i]?(M.I.l+(M.W-M.I.l-M.I.r)/2)*f-iw/2:x0+c*(s+g))+'px';s2.top=Math.round(y0+r*(s+g)+(s-ih)/2+(it.o.offsetY||0)*f)+'px';
     s2.fontSize=(s*.17).toFixed(2)+'px';
   });}
-window.TTGNV={cfg:CFG,add:add,layout:layout};
+window.TTGNV={cfg:CFG,add:add,layout:layout,dev:devList,m:function(){return M;}};
 })();

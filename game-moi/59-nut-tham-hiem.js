@@ -12,4 +12,4 @@ TTGNV.add({id:'tham-hiem',ten:'Thám hiểm',image:'game-moi/nut-tham-hiem.webp?
 /* Nạp item Khung UI (79-khung-ui.js). */
 (function(){var s=document.createElement('script');s.src='game-moi/79-khung-ui.js?v=1';document.head.appendChild(s);})();
 /* Nạp Danh Vọng + nút chọn vùng (80-danh-vong.js). */
-(function(){var s=document.createElement('script');s.src='game-moi/80-danh-vong.js?v=2';document.head.appendChild(s);})();
+(function(){var s=document.createElement('script');s.src='game-moi/80-danh-vong.js?v=3';document.head.appendChild(s);})();

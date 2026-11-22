@@ -111,3 +111,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - **Chọn vùng**: nút dài `nut-chon-vung.webp` (chữ là DOM nên đổi theo vùng) nằm dưới nút Thám hiểm; bấm mở bảng danh sách. Vùng thứ n cần 10 x (n-1) Danh Vọng (`CFG.moiVung`), không bị tiêu hao. Thám hiểm gặp thú/quái của vùng đã chọn (61-tham-hiem-tran.js đọc `TTGDV.vung()`), lưu `ttg_moi_vung`.
 - Thử nhanh: thêm `?dv=30` vào link để tạm cộng 30 Danh Vọng (không lưu).
 - Lưu ý: vùng 7, 8, 9 (Thủy Nguyệt Cảnh, Xích Hỏa Địa, Thanh Lâm) hiện mới có 1 loài mỗi vùng trong `51-thu-moi.js`, nên chưa đủ loài để kiếm đủ Danh Vọng mở các vùng sau.
+
+## Gom nút test + bỏ khung nút vuông (23/11/2026)
+- **Menu ẩn**: 6 nút test/admin (Nhận châu, Đổi rank, Lấy sách, Lấy đồ TH, Admin, NL test) không còn nằm ở thanh nút. `TTGNV.add` thấy id trong `CFG.dev` (52-nut-vuong.js) hoặc `o.dev:true` thì cất vào `TTGNV.dev`. Chạm chữ "Danh Vọng" ở khung trên mở menu liệt kê chúng (80-danh-vong.js: vùng chạm `HOT`, số lần chạm `CFG.devTaps`, nên đặt 3-5 khi ra bản thật). Muốn bỏ hẳn: xóa nút ở file gốc hoặc đặt `CFG.nutTest=false`.
+- **Nút vuông không khung**: `TTGNV.cfg.khung=false` (mặc định): bỏ khung vàng + nền, chỉ icon + chữ, icon to hơn. Đặt `true` để về kiểu cũ. Khi có icon riêng thì dùng `image:` trong `TTGNV.add` (ảnh vẽ nguyên nút, không chữ). Chỉ nút dài Thám hiểm và Chọn vùng giữ khung.
