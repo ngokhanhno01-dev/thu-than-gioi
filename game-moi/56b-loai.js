@@ -108,7 +108,7 @@ var DO_HIEM={
   thuong:{ten:'Thường',mau:'#b9c0c9',ts:40},
   hiem:{ten:'Hiếm',mau:'#3ec9a7',ts:25},
   suthi:{ten:'Sử Thi',mau:'#b06cff',ts:12},
-  huyenthoai:{ten:'Huyền Thoại',mau:'#ffb020',ts:6},
+  huyenthoai:{ten:'Huyền Thoại',mau:'#ffb020',ts:8},
   truyenthuyet:{ten:'Truyền Thuyết',mau:'#ff3d5a',ts:1}
 };
 var DO_HIEM_RIENG={};

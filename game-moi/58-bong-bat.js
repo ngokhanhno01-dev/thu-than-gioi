@@ -38,7 +38,7 @@ var CFG={
 
   /* ================= THÁM HIỂM (dùng ở Bước 2) ================= */
   tx:{
-    tiLeBoss:0.04,                          /* 4% mỗi lượt gặp boss; boss thú hoang (Truyền Thuyết) ~0,5% mỗi lượt, vẫn hiếm hơn Huyền Thoại (~0,77%) */
+    tiLeBoss:0.04,                          /* 4% mỗi lượt gặp boss; boss thú hoang (Truyền Thuyết) ~0,5% mỗi lượt, vẫn hiếm hơn Huyền Thoại (~1%) */
     tiLeQuaiMain:0.7,                      /* trong 95% lượt thường: 70% gặp QUÁI (pool main, 102 quái), 30% gặp THÚ HOANG (pool demo, 60 thú). Chỉnh số này để đổi tỉ lệ (0.5 = ngang nhau) */
     trongSoQuaiMain:[1,1,1,1,1],           /* 5 quái thường main chọn đều */
     trongSoBoss:{main:7,demo:1},            /* boss quái 7 : boss thú hoang 1 (boss quái ~3,5%/lượt, boss thú hoang ~0,5%/lượt) */
