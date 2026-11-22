@@ -64,7 +64,7 @@ function draw(ctx,o){
   fit(ctx,o.name||'',X((G.name.x0+G.name.x1)/2),G.name.y,G.name.x1-G.name.x0,56,34,'bold {S}px '+FS,NC[0],NC[1],8);
   fit(ctx,'V'+(o.bac||1),X(G.bac.x),G.bac.y,G.bac.w,56,38,'bold {S}px '+FS,NC[2],NC[3],8);
   /* ĐỘ HIẾM loài (Thường/Hiếm/Sử Thi/Huyền Thoại/Truyền Thuyết): đặt ở ô tối cuối thanh Khiên; luôn phủ nền ô này để xóa dấu + cũ */
-  var hm=o.hiem&&root.TTGCS&&root.TTGCS.DO_HIEM?root.TTGCS.DO_HIEM[o.hiem]:null,hx=X(G.hiem.cx);
+  var hm=o.hiem&&root.TTGCS&&root.TTGCS.DO_HIEM?root.TTGCS.DO_HIEM[o.hiem]:null,hx=X(G.hiem.cx+(F?28:0));   /* khung Khung UI: nhích chữ độ hiếm sang phải 28 điểm */
   if(!F){ctx.save();rr(ctx,hx-G.hiem.pw/2,G.hiem.cy-G.hiem.ph/2,G.hiem.pw,G.hiem.ph,G.hiem.ph/2);ctx.fillStyle='#031938';ctx.fill();ctx.restore();}
   if(hm)fit(ctx,hm.ten,hx,G.hiem.cy+2,G.hiem.w,46,26,'bold {S}px '+FS,hm.mau,'rgba(0,0,0,.9)',8);
   /* nhãn Khiên / Tốc Độ (chữ vẽ bằng canvas để lật gương không bị ngược) */
@@ -87,16 +87,10 @@ function draw(ctx,o){
   /* HỆ (1 hoặc 2 hệ, mỗi hệ một màu): nằm ở ô Lv cũ (cuối thanh Máu); còn Lv nằm ở ô dưới vòng Rank (đã đổi chỗ 23/11/2026) */
   var he=(o.he||[]).filter(Boolean).slice(0,2),HT=(root.TTGCS&&root.TTGCS.HE_TEN)||HE_TEN;
   if(he.length){
-    var fs=44,fnt='bold {S}px sans-serif',names=he.map(function(k){return HT[k]||HE_TEN[k]||k;}),sep=' · ';
-    var meas=function(f){ctx.font=fnt.replace('{S}',f);return names.reduce(function(a,n){return a+ctx.measureText(n).width;},0)+(names.length>1?ctx.measureText(sep).width:0);};
-    var tw=meas(fs);while(tw>G.lv.w&&fs>28){fs-=2;tw=meas(fs);}
-    var sx=tw>G.lv.w?G.lv.w/tw:1;
-    ctx.save();ctx.translate(X(G.lv.x),G.lv.y+2);ctx.scale(sx,1);ctx.font=fnt.replace('{S}',fs);ctx.textAlign='left';ctx.textBaseline='middle';ctx.lineJoin='round';
-    var px=-tw/2;
-    names.forEach(function(n,i){
-      if(i){ctx.lineWidth=6;ctx.strokeStyle='rgba(0,0,30,.9)';ctx.strokeText(sep,px,0);ctx.fillStyle='#cfe3ff';ctx.fillText(sep,px,0);px+=ctx.measureText(sep).width;}
-      ctx.lineWidth=6;ctx.strokeStyle='rgba(0,0,30,.9)';ctx.strokeText(n,px,0);ctx.fillStyle=HE_MAU[he[i]]||'#fff';ctx.fillText(n,px,0);px+=ctx.measureText(n).width;});
-    ctx.restore();}
+    /* ô Hệ nhỏ: 1 hệ = 1 dòng chữ to; 2 hệ = 2 dòng xếp dọc (mỗi dòng 1 màu) cho dễ đọc, không ép chữ ngang */
+    var hcx=X(G.lv.x),hcy=G.lv.y+2,hw2=G.lv.w-6;
+    if(he.length===1)fit(ctx,HT[he[0]]||HE_TEN[he[0]]||he[0],hcx,hcy,hw2,40,24,'bold {S}px sans-serif',HE_MAU[he[0]]||'#fff','rgba(0,0,30,.9)',6);
+    else he.forEach(function(k,i){fit(ctx,HT[k]||HE_TEN[k]||k,hcx,hcy+(i?15:-15),hw2,28,18,'bold {S}px sans-serif',HE_MAU[k]||'#fff','rgba(0,0,30,.9)',5);});}
   ctx.restore();return true;}
 root.TTGHUD={draw:draw,ratio:IH/IW,G:G,ready:function(){return ok;}};
 })(typeof window!=='undefined'?window:globalThis);
