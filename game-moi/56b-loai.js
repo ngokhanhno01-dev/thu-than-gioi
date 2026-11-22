@@ -2,7 +2,7 @@
    Nạp SAU 56-chi-so.js. id theo 51-thu-moi.js (1a..1j Tuyết Nguyên, 2x Sương Cốc, 3x Vân Đảo, 4x Lôi Vực, 5x Nguyệt Cung, 6x Phong Nguyên).
    HỆ ĐÃ ĐỐI CHIẾU THEO MÔ TẢ (khung/cảm hứng) trong thu-moi/<vùng>/*.md, KHÔNG đặt theo tên (chốt 19/11/2026).
    Muốn đổi vai/hệ một con: sửa đúng một dòng trong bảng BANG bên dưới. Hệ ghi theo khóa của HE_TEN (56-chi-so.js).
-   API: TTGCS.loai(id) -> {id, ten, goc (vùng QUÊ của loài = khóa trong bảng BANG), vung (vùng dùng TÍNH CHỈ SỐ, có thể khác goc), vai, he, boss} | null ; TTGCS.dsLoai(z) ; TTGCS.heVung(z) ; TTGCS.mangDuocSach(id,heSach) ; TTGCS.LOAI */
+   API: TTGCS.doHiem(id) -> 'thuong'..'truyenthuyet' | null ; TTGCS.hiemInfo(id) -> {key,ten,mau,ts} | null ; TTGCS.DO_HIEM (bảng 5 bậc độ hiếm). TTGCS.loai(id) -> {id, ten, goc (vùng QUÊ của loài = khóa trong bảng BANG), vung (vùng dùng TÍNH CHỈ SỐ, có thể khác goc), vai, he, boss} | null ; TTGCS.dsLoai(z) ; TTGCS.heVung(z) ; TTGCS.mangDuocSach(id,heSach) ; TTGCS.LOAI */
 (function(root){
 'use strict';
 
@@ -99,22 +99,42 @@ var BANG={
   ]
 };
 
-var LOAI={},THEO_VUNG={};
+/* ĐỘ HIẾM LOÀI (5 bậc, khác Rank E..SR của từng cá thể): thuong < hiem < suthi < huyenthoai < truyenthuyet.
+   ts = trọng số GẶP thú hoang (61-tham-hiem-tran.js): con càng hiếm càng ít gặp. mau = màu chữ nhãn (khớp DO_HIEM_MAU của tools/tao-manh-ghep.py).
+   QUY TẮC MẶC ĐỊNH mỗi vùng 10 con theo thứ tự trong BANG: 3 Thường, 3 Hiếm, 2 Sử Thi, 1 Huyền Thoại, con cuối (boss) Truyền Thuyết. Thú khởi đầu (k1-k3) = Thường.
+   Muốn đổi 1 con: thêm vào DO_HIEM_RIENG, vd {'1c':'suthi'}. */
+var DO_HIEM_THU=['thuong','hiem','suthi','huyenthoai','truyenthuyet'];
+var DO_HIEM={
+  thuong:{ten:'Thường',mau:'#b9c0c9',ts:40},
+  hiem:{ten:'Hiếm',mau:'#3ec9a7',ts:25},
+  suthi:{ten:'Sử Thi',mau:'#b06cff',ts:12},
+  huyenthoai:{ten:'Huyền Thoại',mau:'#ffb020',ts:4},
+  truyenthuyet:{ten:'Truyền Thuyết',mau:'#ff3d5a',ts:1}
+};
+var DO_HIEM_RIENG={};
+var DO_HIEM_MD=['thuong','thuong','thuong','hiem','hiem','hiem','suthi','suthi','huyenthoai'];
+
+var LOAI={},THEO_VUNG={},DO_HIEM_LOAI={};
 Object.keys(BANG).forEach(function(zs){
   var z=+zs;THEO_VUNG[z]=[];
   BANG[zs].forEach(function(r,i){
     var o={id:r[0],ten:r[1],goc:z,vung:r[5]!=null?r[5]:z,vai:VAI[r[2]],he:r[3].slice(),boss:r[4]!==undefined?!!r[4]:i===BANG[zs].length-1};
     LOAI[o.id]=o;THEO_VUNG[z].push(o.id);
+    DO_HIEM_LOAI[o.id]=DO_HIEM_RIENG[o.id]||(z>=6?'thuong':(o.boss?'truyenthuyet':DO_HIEM_MD[Math.min(i,8)]));
   });
 });
 
 function loai(id){var o=LOAI[id];return o?{id:o.id,ten:o.ten,goc:o.goc,vung:o.vung,vai:o.vai,he:o.he.slice(),boss:o.boss}:null;}
+/* độ hiếm của loài: khóa 'thuong'|'hiem'|'suthi'|'huyenthoai'|'truyenthuyet' hoặc null nếu không phải loài thú (vd quái main) */
+function doHiem(id){return DO_HIEM_LOAI[id]||null;}
+/* {key,ten,mau,ts} để vẽ nhãn, hoặc null */
+function hiemInfo(id){var k=DO_HIEM_LOAI[id],d=k&&DO_HIEM[k];return d?{key:k,ten:d.ten,mau:d.mau,ts:d.ts}:null;}
 function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
 /* sách kỹ năng: thú chỉ mang được sách thuộc 1 trong 2 hệ của chính nó (hệ khác không mang được). heSach = khóa hệ như 'bang','vo'. */
 function mangDuocSach(id,heSach){var o=LOAI[id];return !!o&&o.he.indexOf(heSach)>=0;}
 function heVung(z){return HE_VUNG[z]||null;}
 
-root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG});
+root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
 })(typeof window!=='undefined'?window:globalThis);
 

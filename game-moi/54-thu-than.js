@@ -142,6 +142,7 @@ var css=[
 '.tt-th{position:absolute;left:{2};right:{2};border-radius:{7};background:linear-gradient(90deg,#c9992f,#ffe58a,#c9992f);box-shadow:0 0 {6} rgba(255,224,102,.5)}',
 /* 3 Ô TRÒN dưới ảnh thú: canvas, chữ bút lông neon (font-rank.woff2 = Kaushan Script cắt nhỏ) */
 '.tt-oc{pointer-events:none;image-rendering:auto!important}',
+'.tt-hiem{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{28};line-height:1;white-space:nowrap;border-radius:{18};background:rgba(4,12,40,.78);border:{2} solid currentColor;text-shadow:0 {1} {3} #000;pointer-events:none}',
 /* NÚT RA TRẬN */
 '.tt-go{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ RA TRẬN đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
 '.tt-tha{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ THẢ vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
@@ -217,6 +218,7 @@ function build(){
 
   /* --- TRÁI: thanh vàng tên + bậc (x164-566,y176-229), ảnh thú trong ô lớn (x168-558,y241-570) --- */
   E.nm=mk('div','tt-nm',200,181,330,44);
+   E.hiem=mk('div','tt-hiem',283,249,160,32);   /* nhãn ĐỘ HIẾM loài: giữa mép trên ô ảnh thú */
   E.ph=mk('div','tt-ph',168,241,390,329);
   /* nút TIẾN HÓA (trước là TRANG BỊ): vùng bấm trong suốt đè lên tấm vàng "Tiến Hóa" vẽ sẵn dưới ô ảnh thú (x209-522,y575-632). Bấm = mở khung Tiến Hóa Thú (72-khung-ren-cuong-hoa.js). Khung Trang bị vẫn mở được từ nút Trang bị ở hàng nút dưới. */
   var eq=mk('button','tt-eq',215,578,300,52);eq.type='button';eq.setAttribute('aria-label','Tiến Hóa');
@@ -345,6 +347,7 @@ function renderLeft(){
     var a=anhThu(t);E.ph.innerHTML=a?'<canvas class="big" width="780" height="658" data-u="'+esc(a)+'" aria-label="'+esc(tenThu(t))+'"></canvas>':'';var bc=E.ph.querySelector('canvas.big');if(bc)bigPaint(bc,a);}
   else{E.nm.textContent='Chưa Có Thú';E.ph.innerHTML='<div class="tt-emp">Chưa có thú nào<br>Bắt thú để cất vào đây</div>';}
   renderBadges(t);
+  renderHiem(t);
 }
 /* 3 ô tròn: Lv / Bậc / Rank. VẼ BẰNG CANVAS và căn giữa theo khung NÉT CHỮ thật (actualBoundingBox) nên chữ nghiêng/bút lông vẫn nằm giữa vòng.
    Rank thiếu thì coi là C. Màu neon: [màu phát sáng, màu lõi]. SR (cực hiếm): chữ tô gradient cầu vồng (rb:true). */
@@ -368,6 +371,7 @@ function ocDraw(cv,items,gap){
     g.strokeStyle=cf;g.lineWidth=it.lw2||3;g.strokeText(it.t,x,base);g.fillStyle=cf;g.fillText(it.t,x,base);   /* lõi: stroke cùng màu làm nét bút đậm hơn */
     y+=bx.a+bx.d+gap;}
 }
+function renderHiem(t){if(!E.hiem)return;var h=t&&window.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(t.id):null;E.hiem.style.display=h?'flex':'none';if(h){E.hiem.textContent=h.ten;E.hiem.style.color=h.mau;}}
 function renderBadges(t){if(E.oc)drawBadges(E.oc,t);}
 /* vẽ 3 ô Lv/Bậc/Rank vào 3 canvas 208x208 (cvs). Dùng chung cho khung Trang Bị (55-trang-bi.js) qua TTGTHU.badges */
 function drawBadges(cvs,t){
@@ -376,7 +380,7 @@ function drawBadges(cvs,t){
   var lab=function(s){return {t:s,font:F_LB,sz:40,core:'#c9fbff',glow:'#00c8ff',lw:6,lw2:1};};
   var num=function(s){return {t:String(s),font:'400 {S}px '+F_BR,sz:82,maxW:88,core:'#fff7b0',glow:'#ffb800'};};
   ocDraw(cvs[0],[lab('Lv'),num(lv)],4);
-  ocDraw(cvs[1],[lab('Bậc'),num(tien)],4);
+  ocDraw(cvs[1],[{t:'V'+tien,font:'400 {S}px '+F_BR,sz:104,maxW:92,core:'#fff7b0',glow:'#ffb800'}],0);   /* ô giữa: V1/V2/V3 (dạng tiến hóa) */
   ocDraw(cvs[2],[{t:bac,font:'400 {S}px '+F_BR,sz:124,maxW:96,core:rc[1],glow:rc[0],lw:7,lw2:4,rb:bac==='SR'}],0);
 }
 if(document.fonts&&document.fonts.load){document.fonts.load('40px TTGRank','EDCBASSR0123456789').then(function(){if(root)render();}).catch(function(){});}   /* font nạp xong thì vẽ lại */
@@ -476,7 +480,7 @@ var THA_CB={
 function moTha(t){
   var a=anhThu(t),rk=RKC[t.bac]?t.bac:'C',lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),cb=THA_CB[rk];
   if(window.TTGTBAO){
-    var tit='Bạn chắc chắn muốn thả <b>'+esc(tenThu(t))+'</b> <span style="color:#fff3c4">Lv.'+lv+' · Bậc '+tien+' · Rank</span> '+TTGTBAO.rankHtml(rk)+'?';
+    var tit='Bạn chắc chắn muốn thả <b>'+esc(tenThu(t))+'</b> <span style="color:#fff3c4">Lv.'+lv+' · V'+tien+' · Rank</span> '+TTGTBAO.rankHtml(rk)+'?';
     var txt='Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.<br><span class="'+(cb[0]?'tbo-w'+(cb[0]==='r'?' r':''):'')+'">'+cb[1]+'</span>';
     var body=TTGTBAO.info({bac:t.bac,ts:true,icon:(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'?')+TTGTBAO.corner(rk),title:tit,tc:'y',text:txt},
      [{t:'Thả',cls:'d',cb:function(){tha(t.uid);}},{t:'Hủy',cb:function(){hidePop();}}]);

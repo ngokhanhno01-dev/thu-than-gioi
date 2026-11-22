@@ -51,7 +51,7 @@ function reg(){
  if(!root.TTGBALO||!TTGBALO.reg)return;var o={},z,i,k;
  for(z=0;z<NZ;z++)for(i=0;i<3;i++){k=KIND[i];
   o[id(z,k)]={loai:'th',ten:TEN[z][i],img:D+id(z,k)+'.png',
-   mo:MO[k]+' của vùng '+ZONE[z]+'. Dùng tiến hóa thú gốc vùng này'+(k==='an'?' (Bậc 2 → 3). Chỉ rơi từ boss thú hoang.':'. Rơi từ thú hoang vùng này.')};}
+   mo:MO[k]+' của vùng '+ZONE[z]+'. Dùng tiến hóa thú gốc vùng này'+(k==='an'?' (V2 → V3). Chỉ rơi từ boss thú hoang.':'. Rơi từ thú hoang vùng này.')};}
  /* Mảnh theo từng loài (chỉ vùng đã có ảnh) */
  CFG.vungManh.forEach(function(zv){dsThu(zv).forEach(function(s){
   o[idManh(s.id)]={loai:'th',ten:'Mảnh '+s.ten,img:D+idManh(s.id)+'.png',
@@ -82,7 +82,7 @@ function tienHoa(uid){
  for(i=0;i<L.length;i++)if(L[i].uid===uid){t=L[i];break;}
  if(!t)return {err:'Không tìm thấy thú.'};
  var r=yeuCau(t);
- if(r.max)return {err:'Thú đã đạt Bậc 3 (tối đa).'};
+ if(r.max)return {err:'Thú đã đạt V3 (tối đa).'};
  if(!r.ok)return {err:'Chưa đủ nguyên liệu: '+thieu(r)};
  if(!root.TTGTHU||!TTGTHU.setTien)return {err:'Thiếu hàm TTGTHU.setTien (54-thu-than.js).'};
  r.items.forEach(function(x){TTGBALO.add(x.id,-x.n);});
@@ -156,12 +156,12 @@ function render(){
  if(!t){w.st.innerHTML='';w.cd.innerHTML='<div class="th-em">Chưa có thú ra trận.<br>Hãy đưa 1 thú ra trận ở panel Thú Thần.</div>';w.rt.textContent='';return;}
  var cur=stat(t,t.tien|0||1),nx=r.max?null:stat(t,r.next);
  w.st.innerHTML=ks.map(function(k){var a=Math.round(cur[k]||0);return '<div class="th-r">'+a+(nx?' <i>→</i> <b>'+Math.round(nx[k]||0)+'</b>':'')+'</div>';}).join('');
- if(r.max){w.cd.innerHTML='<div class="th-em">Thú đã đạt <b>Bậc 3</b> (tối đa).</div>';w.rt.textContent='';return;}
- w.cd.innerHTML='<h6>Bậc '+r.tien+' → '+r.next+' · vùng '+esc(ZONE[r.z])+'</h6>'+r.items.map(function(x,j){var ok=x.have>=x.n;return '<div class="th-l"><span class="'+(ok?'th-ok':'th-no')+'">'+(S.put[j]?'✔ ':ok?'○ ':'✖ ')+esc(x.ten)+'</span><span class="'+(ok?'th-ok':'th-no')+'">'+x.have+'/'+x.n+'</span></div>';}).join('');
+ if(r.max){w.cd.innerHTML='<div class="th-em">Thú đã đạt <b>V3</b> (tối đa).</div>';w.rt.textContent='';return;}
+ w.cd.innerHTML='<h6>V'+r.tien+' → V'+r.next+' · vùng '+esc(ZONE[r.z])+'</h6>'+r.items.map(function(x,j){var ok=x.have>=x.n;return '<div class="th-l"><span class="'+(ok?'th-ok':'th-no')+'">'+(S.put[j]?'✔ ':ok?'○ ':'✖ ')+esc(x.ten)+'</span><span class="'+(ok?'th-ok':'th-no')+'">'+x.have+'/'+x.n+'</span></div>';}).join('');
  w.rt.textContent='100%';}
 function togglePut(i){
  var r=yeuCau(ra());if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}
- if(r.max){toast('Thú đã đạt Bậc 3, không tiến hóa thêm được.');return;}
+ if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}
  var it=r.items[i];
  if(S.put[i])S.put[i]=false;
  else if(it.have<it.n){toast('Chưa đủ '+it.ten+' ('+it.have+'/'+it.n+')');return;}
@@ -169,14 +169,14 @@ function togglePut(i){
  render();}
 function doEvo(){
  var t=ra();if(!t){toast('Chưa có thú ra trận để tiến hóa.');return;}
- var r=yeuCau(t);if(r.max){toast('Thú đã đạt Bậc 3, không tiến hóa thêm được.');return;}
+ var r=yeuCau(t);if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}
  if(!S.put.every(Boolean)){toast(r.ok?'Hãy đặt đủ 3 nguyên liệu vào 3 ô (chạm ô hoặc chạm món trong túi).':'Chưa đủ nguyên liệu: '+thieu(r));return;}
  var res=tienHoa(t.uid);if(res.err){toast(res.err);render();return;}
  S.put=[false,false,false];KH.refresh('th');render();
- toast('Tiến hóa thành công! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' Bậc '+res.from+' → '+res.to);}
+ toast('Tiến hóa thành công! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' V'+res.from+' → V'+res.to);}
 function auto(){
  var t=ra(),r=yeuCau(t);if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}
- if(r.max){toast('Thú đã đạt Bậc 3, không tiến hóa thêm được.');return;}
+ if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}
  S.put=r.items.map(function(x){return x.have>=x.n;});render();
  toast(r.ok?'Đã đặt đủ nguyên liệu. Bấm Tiến Hóa.':'Chưa đủ nguyên liệu: '+thieu(r));}
 KH.on('open',function(k){if(k!=='th')return;S.put=[false,false,false];render();});
@@ -188,8 +188,8 @@ KH.on('btn',function(k,label){
 KH.on('pick',function(k,item){
  if(k!=='th'||!item)return;
  var r=yeuCau(ra());if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}
- if(r.max){toast('Thú đã đạt Bậc 3, không tiến hóa thêm được.');return;}
+ if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}
  var key=String(item.key),j,idx=-1;for(j=0;j<r.items.length;j++)if(r.items[j].id===key)idx=j;
- if(idx<0){toast(nm(key)+': không dùng được cho thú này (Bậc '+r.tien+' → '+r.next+' cần item vùng '+ZONE[r.z]+').');return;}
+ if(idx<0){toast(nm(key)+': không dùng được cho thú này (V'+r.tien+' → V'+r.next+' cần item vùng '+ZONE[r.z]+').');return;}
  togglePut(idx);});
 })(typeof window!=='undefined'?window:globalThis);

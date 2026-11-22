@@ -566,7 +566,7 @@ var UI=[
  {id:'cm',t:'💬',n:'Chat',c:1},{id:'sn',t:'🔊',n:'Âm thanh',c:1},
  {id:'tt',t:'',n:'Đổi thú',c:5},{id:'tm',t:'',n:'Đổi bậc bạn',c:5},{id:'te',t:'',n:'Đổi bậc địch',c:5},{id:'kh',t:'',n:'Đổi khung 128/HD',c:5}];
 /* Chữ mặc định của nút (2 nút đổi bậc có chữ thay đổi theo bậc hiện tại) */
-function dt(u){return u.id==='tt'?'Thú: '+THU_MOI.byId[ID].ten:u.id==='tm'?'Bạn: bậc '+bm:u.id==='te'?'Địch: bậc '+be:u.id==='kh'?'Khung: '+(HD?'HD 192':'128'):u.t;}
+function dt(u){return u.id==='tt'?'Thú: '+THU_MOI.byId[ID].ten:u.id==='tm'?'Bạn: V'+bm:u.id==='te'?'Địch: V'+be:u.id==='kh'?'Khung: '+(HD?'HD 192':'128'):u.t;}
 var ui=document.getElementById('ui'),edb=document.getElementById('edb'),edt=document.getElementById('edt'),edn=document.getElementById('edn'),edz=document.getElementById('edz'),tst=document.getElementById('tst'),edq=document.getElementById('edq'),edi=document.getElementById('edi');
 var els={},lay={},ed=false,sel=null,drag=null,tt=0;
 try{lay=JSON.parse(localStorage.getItem(LKEY)||'{}')||{};}catch(e){lay={};}
@@ -590,9 +590,9 @@ UI.forEach(function(u){var e=document.createElement('div');e.className='ub c'+u.
   else if(u.id==='dt'){SCENE=SCENE==='sanh'?'tran':'sanh';if(SCENE==='tran'){reset();cdStart();}toast(SCENE==='tran'?'Trận mẫu (bấm Đấu trường để về sảnh)':'Sảnh chính');}
   else if(u.id==='tx'){if(window.TTGTHAMHIEM&&TTGTHAMHIEM.start)TTGTHAMHIEM.start();else toast('Chưa nạp dữ liệu Thám Hiểm');}
    else if(u.id==='tt'){openList();}
-  else if(u.id==='tm'){bm=bm%MAXB+1;saveB();label('tm');toast('Bạn: bậc '+bm);}
+  else if(u.id==='tm'){bm=bm%MAXB+1;saveB();label('tm');toast('Bạn: V'+bm);}
   else if(u.id==='kh'){HD=!HD;try{localStorage.setItem('ttg_moi_hd',HD?'1':'0');}catch(x){}resize();label('kh');toast(HD?'Khung HD 192 (nét)':'Khung 128 (cũ)');}
-  else if(u.id==='te'){be=be%MAXB+1;saveB();label('te');toast('Địch: bậc '+be);}
+  else if(u.id==='te'){be=be%MAXB+1;saveB();label('te');toast('Địch: V'+be);}
   else toast(els[u.id].textContent+' (chưa gắn chức năng)');});
  e.addEventListener('pointercancel',function(){if(drag){drag=null;saveLay();}});
 });
@@ -1020,8 +1020,8 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
   /* KHUNG THÔNG TIN (68-hud-tran.js): khung thú bạn bên trái (vòng Rank bên trái), khung địch bên phải (lật gương). Ảnh chưa nạp xong thì dùng thanh máu cũ. */
   var HM=112,hw=Math.min(250,Math.floor((W-I.l-I.r-2*HM-16)/2)),hy=I.t+6,P=BATTLE?BATTLE.player:null,EN=BATTLE?BATTLE.enemy:null;
   var TD=(function(){if(!BATTLE||!window.TTGCS)return{me:null,en:null,max:0,gm:null,ge:null};var m=effS('me').td||0,e=effS('en').td||0;return{me:m,en:e,max:Math.max(m,e),gm:gaugeOf('me'),ge:gaugeOf('en')};})();/* tốc độ 2 bên (đã tính buff/debuff), khớp ordFirst */
-  var okHud=window.TTGHUD&&TTGHUD.ready()&&TTGHUD.draw(ctx,{x:I.l+HM,y:hy,w:hw,rank:P?((window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[P.bac])?P.bac:'C'):null,name:meName,bac:P?P.tien:bm,lv:P?P.lv:1,he:heOf(P||{id:ID}),hp:st.me,hpMax:maxMe,sh:st.shMe||0,shMax:st.shMaxMe||0,td:TD.me,tdMax:TD.max,gauge:TD.gm});
-  if(okHud){TTGHUD.draw(ctx,{x:W-I.r-HM-hw,y:hy,w:hw,mirror:true,enemy:true,rank:EN&&EN.hienBac?EN.bac:null,name:enName,bac:EN?EN.tien:be,lv:EN?EN.lv:1,he:heOf(EN||{id:ID}),hp:st.en,hpMax:maxEn,sh:st.shEn||0,shMax:st.shMaxEn||0,td:TD.en,tdMax:TD.max,gauge:TD.ge});if(window.TTGDEM)TTGDEM.vs(ctx,ts,I.l+HM+hw,W-I.r-HM-hw,hy+hw*TTGHUD.ratio*TTGDEM.CFG.vs.dy);knIcons(ts,I.l+HM,W-I.r-HM,hy+hw*TTGHUD.ratio+KN_ICON.dy,hw);}/* VS nằm giữa 2 khung, tự co theo khe + lề */
+  var okHud=window.TTGHUD&&TTGHUD.ready()&&TTGHUD.draw(ctx,{x:I.l+HM,y:hy,w:hw,rank:P?((window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[P.bac])?P.bac:'C'):null,name:meName,hiem:(P&&window.TTGCS&&TTGCS.doHiem?TTGCS.doHiem(P.id):null),bac:P?P.tien:bm,lv:P?P.lv:1,he:heOf(P||{id:ID}),hp:st.me,hpMax:maxMe,sh:st.shMe||0,shMax:st.shMaxMe||0,td:TD.me,tdMax:TD.max,gauge:TD.gm});
+  if(okHud){TTGHUD.draw(ctx,{x:W-I.r-HM-hw,y:hy,w:hw,mirror:true,enemy:true,rank:EN&&EN.hienBac?EN.bac:null,name:enName,hiem:(EN&&window.TTGCS&&TTGCS.doHiem?TTGCS.doHiem(EN.id):null),bac:EN?EN.tien:be,lv:EN?EN.lv:1,he:heOf(EN||{id:ID}),hp:st.en,hpMax:maxEn,sh:st.shEn||0,shMax:st.shMaxEn||0,td:TD.en,tdMax:TD.max,gauge:TD.ge});if(window.TTGDEM)TTGDEM.vs(ctx,ts,I.l+HM+hw,W-I.r-HM-hw,hy+hw*TTGHUD.ratio*TTGDEM.CFG.vs.dy);knIcons(ts,I.l+HM,W-I.r-HM,hy+hw*TTGHUD.ratio+KN_ICON.dy,hw);}/* VS nằm giữa 2 khung, tự co theo khe + lề */
   else{  bar(I.l+ox,by,bw,Math.max(0,Math.min(1,st.me/maxMe)),'#3c3',meName+' (bạn)',BATTLE?((window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[BATTLE.player.bac])?BATTLE.player.bac:'C'):null);/* thú của bạn: hiện Rank (thiếu/lạ coi là C như ô kho) */bar(W-I.r-ox-bw,by,bw,Math.max(0,Math.min(1,st.en/maxEn)),'#c33',enName,BATTLE&&BATTLE.enemy.hienBac?BATTLE.enemy.bac:null);}
   
  st.fx=st.fx.filter(function(f){return ts-f.t<900;});

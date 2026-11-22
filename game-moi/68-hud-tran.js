@@ -3,7 +3,7 @@
    - Vòng tròn = RANK (chữ neon theo màu rank, giống kho/thông báo). Ô xanh bên dưới vòng = HỆ (1 hệ: "Băng"; 2 hệ: "Băng · Võ", mỗi hệ một màu).
    - Thanh vàng kem: TÊN (tự co chữ nếu dài) + BẬC 1/2/3.   - Thanh KHIÊN (trên, tô xanh lam): "hiện/tối đa"; tối đa 0 thì "0/0" và KHÔNG có phần tô.   - Thanh to giữa: MÁU "hiện/tối đa".   - Ô nhỏ: "Lv.N" (tới Lv.100).
    - Thanh TỐC ĐỘ (dưới, tô vàng) = THANH HÀNH ĐỘNG: số ở giữa là td, thanh chạy đầy theo td (o.gauge 0..1 do trận truyền); đầy là tới lượt đánh.
-   API: TTGHUD.draw(ctx,{x,y,w,mirror,rank,name,bac,lv,he:[..],hp,hpMax,sh,shMax,td,tdMax,gauge,enemy}) ; TTGHUD.ratio (cao/rộng) ; TTGHUD.G */
+   API: TTGHUD.draw(ctx,{x,y,w,mirror,rank,name,bac,hiem,lv,he:[..],hp,hpMax,sh,shMax,td,tdMax,gauge,enemy}) ; TTGHUD.ratio (cao/rộng) ; TTGHUD.G */
 (function(root){
 'use strict';
 var IW=1622,IH=483;
@@ -12,7 +12,8 @@ var G={cx:257,cy:237,r:150,                       /* vòng tròn Rank */
   sh:{x0:639,x1:1297,y0:154,y1:202,lx:565,ly:177,lw:112},      /* thanh KHIÊN (trên) + nhãn */
   hp:{x0:500,x1:1375,y0:224,y1:292},                           /* thanh MÁU (giữa, to) */
   sp:{x0:639,x1:1532,y0:309,y1:357,lx:563,ly:333,lw:118},      /* thanh TỐC ĐỘ (dưới) + nhãn */
-  lv:{x:1478,y:262,w:140},he:{x:257,y:407,w:165}};
+  lv:{x:1478,y:262,w:140},he:{x:257,y:407,w:165},
+  hiem:{cx:1432,cy:176,pw:200,ph:62,w:190}};   /* ô tối cuối thanh Khiên (chỗ dấu + đỏ cũ): phủ nền rồi vẽ nhãn ĐỘ HIẾM loài */
 var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên'};
 var HE_MAU={thuong:'#f0f0f0',hoa:'#ff8a5c',thuy:'#58c4ff',loi:'#ffe45c',moc:'#6ce57a',bang:'#a8ecff',vo:'#ffb872',doc:'#c27cff',tho:'#d6a866',phong:'#a6f5d8',tam:'#ff98e6',trung:'#c4e45a',nham:'#c8c0b0',ma:'#b088e0',long:'#ffd24a',am:'#9a8aea',kim:'#fff0b8',tien:'#fff6d0'};
 var FS='"Noto Serif","Palatino Linotype",Georgia,serif',FB='bold 10px sans-serif';
@@ -58,7 +59,11 @@ function draw(ctx,o){
   ctx.shadowBlur=0;ctx.restore();}
   /* TÊN + BẬC */
   fit(ctx,o.name||'',X((G.name.x0+G.name.x1)/2),G.name.y,G.name.x1-G.name.x0,56,34,'bold {S}px '+FS,'#0c1f45',null);
-  fit(ctx,'Bậc '+(o.bac||1),X(G.bac.x),G.bac.y,G.bac.w,56,38,'bold {S}px '+FS,'#7a2a10',null);
+  fit(ctx,'V'+(o.bac||1),X(G.bac.x),G.bac.y,G.bac.w,56,38,'bold {S}px '+FS,'#7a2a10',null);
+  /* ĐỘ HIẾM loài (Thường/Hiếm/Sử Thi/Huyền Thoại/Truyền Thuyết): đặt ở ô tối cuối thanh Khiên; luôn phủ nền ô này để xóa dấu + cũ */
+  var hm=o.hiem&&root.TTGCS&&root.TTGCS.DO_HIEM?root.TTGCS.DO_HIEM[o.hiem]:null,hx=X(G.hiem.cx);
+  ctx.save();rr(ctx,hx-G.hiem.pw/2,G.hiem.cy-G.hiem.ph/2,G.hiem.pw,G.hiem.ph,G.hiem.ph/2);ctx.fillStyle='#031938';ctx.fill();ctx.restore();
+  if(hm)fit(ctx,hm.ten,hx,G.hiem.cy+2,G.hiem.w,46,26,'bold {S}px '+FS,hm.mau,'rgba(0,0,0,.9)',8);
   /* nhãn Khiên / Tốc Độ (chữ vẽ bằng canvas để lật gương không bị ngược) */
   fit(ctx,'Khiên',X(G.sh.lx),G.sh.ly+1,G.sh.lw,38,24,'bold {S}px sans-serif','#fff','rgba(0,0,0,.85)',7);
   fit(ctx,'Tốc Độ',X(G.sp.lx),G.sp.ly+1,G.sp.lw,38,24,'bold {S}px sans-serif','#fff','rgba(0,0,0,.85)',7);

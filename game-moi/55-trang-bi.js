@@ -17,6 +17,7 @@ var isOpen=false,openAt=0,root=null,fr=null,E={},raf=0,cur=null,petImg=null,petS
 var PET={cx:437,by:656,size:320};
 var TXT={x:235,y:300,w:400,h:100};
 /* THANH VÀNG TÊN + 3 Ô TRÒN (px ảnh khung 1673x867): tâm 3 ô tròn (353,240),(442,240),(531,240), ruột ~56px */
+var HIEM={x:352,y:284,w:180,h:30};
 var NM={x:292,y:160,w:300,h:36},OC_X=[353,442,531],OC_Y=240,OC_S=62;
 /* vẽ thú + vòng rune/aura theo Rank trên canvas: CW x (CHU+DOWN) px ảnh, chân thú ở y=CHU. Thú vẽ 128 điểm logic (như ở sảnh) rồi phóng s=PET.size/128 lần */
 var CV={w:460,up:420,down:70};
@@ -55,6 +56,7 @@ var css=[
 '.tb-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}',   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
 '.tb-cv{pointer-events:none}',
 '.tb-oc{pointer-events:none;image-rendering:auto}',
+'.tb-hiem{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{18};line-height:1;white-space:nowrap;border-radius:{14};background:rgba(4,12,40,.78);border:{1.5} solid currentColor;text-shadow:0 {1} {2} #000;pointer-events:none}',
 '.tb-nm{display:flex;align-items:center;justify-content:center;padding:0 {10};font-family:var(--fh);font-weight:800;font-size:{20};line-height:1;white-space:nowrap;overflow:hidden;color:#3b2406;text-shadow:0 {1} 0 rgba(255,246,200,.7);pointer-events:none}',
 '.tb-emp{display:flex;align-items:center;justify-content:center;text-align:center;font-size:{28};line-height:1.4;color:#7c83b8;padding:0 {20}}',
 '.tb-c{padding:0;border:0;background:transparent;cursor:pointer;border-radius:{10};display:flex;align-items:center;justify-content:center;color:#fff}',
@@ -117,7 +119,8 @@ function build(){
   fr=document.createElement('div');fr.className='tb-fr';root.appendChild(fr);
   /* thanh vàng = TÊN thú; 3 ô tròn = Lv / Bậc / Rank (cùng cách vẽ với panel Thú Thần); tiêu đề TRANG BỊ đã vẽ sẵn trong khung */
   E.nm=mk('div','tb-nm',NM.x,NM.y,NM.w,NM.h);
-  E.oc=OC_X.map(function(cx){var c=mk('canvas','tb-oc',cx-OC_S/2,OC_Y-OC_S/2,OC_S,OC_S);c.width=c.height=208;return c;});
+  E.hiem=mk('div','tb-hiem',HIEM.x,HIEM.y,HIEM.w,HIEM.h);   /* nhãn ĐỘ HIẾM loài: ngay dưới hàng 3 ô tròn */
+   E.oc=OC_X.map(function(cx){var c=mk('canvas','tb-oc',cx-OC_S/2,OC_Y-OC_S/2,OC_S,OC_S);c.width=c.height=208;return c;});
   E.cv=mk('canvas','tb-cv',PET.cx-CV.w/2,PET.by-CV.up,CV.w,CV.up+CV.down);
   E.emp=mk('div','tb-emp',TXT.x,TXT.y,TXT.w,TXT.h,'Chưa có Thú ra trận');
   /* nút BỎ TRANG BỊ: ảnh phủ (x1376,y682 cỡ 182x74) đè lên nút TRANG BỊ vẽ sẵn khi đang chọn món ĐÃ mặc; bật/tắt bằng TTGTB.setBo(true/false) (chờ làm 8 ô trang bị để nối) */
@@ -147,6 +150,7 @@ function render(){
   else{petSrc='';petImg=null;E.cv.style.display='none';E.emp.style.display='flex';}
   E.nm.textContent=t&&TTGTHU.ten?TTGTHU.ten(t):'';if(t)fitName();
   if(TTGTHU&&TTGTHU.badges)TTGTHU.badges(E.oc,t||null);
+  var hm=t&&window.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(t.id):null;E.hiem.style.display=hm?'flex':'none';if(hm){E.hiem.textContent=hm.ten;E.hiem.style.color=hm.mau;}
 }
 /* canvas thú + vòng rune + aura (giống sảnh/Thám Hiểm: lượt 'sau' = vòng+aura, vẽ thú, lượt 'truoc' = nửa vòng đè chân thú) */
 function sizeCv(){if(!E.cv)return;var r=E.cv.getBoundingClientRect(),d=window.devicePixelRatio||1,w=Math.max(1,Math.round(r.width*d)),h=Math.max(1,Math.round(r.height*d));if(E.cv.width!==w||E.cv.height!==h){E.cv.width=w;E.cv.height=h;}}

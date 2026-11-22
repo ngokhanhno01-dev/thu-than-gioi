@@ -16,7 +16,7 @@ function createEncounter(player,rng){
   else{var mainShare=Number(cfg.tiLeQuaiMain);if(!isFinite(mainShare))mainShare=0.5;source=rng()<mainShare?'main':'demo';}
   var candidates,weights,q;
   if(source==='main'){candidates=mainZone.quai.filter(function(x){return !!x.boss===boss;});weights=boss?candidates.map(function(){return 1;}):(cfg.trongSoQuaiMain||[]);}
-  else{candidates=demoZone.thu.filter(function(x){return !!x.boss===boss;});weights=boss?candidates.map(function(){return 1;}):(cfg.trongSoLoai||[]);}
+  else{candidates=demoZone.thu.filter(function(x){return !!x.boss===boss;});weights=boss?candidates.map(function(){return 1;}):candidates.map(function(c,k){var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(c.id);return h?h.ts:((cfg.trongSoLoai||[])[k]||1);});}   /* thú hoang thường: trọng số theo ĐỘ HIẾM loài (TTGCS.DO_HIEM[..].ts), thiếu thì dùng trongSoLoai cũ */
   q=weighted(candidates,weights,rng);if(!q)return null;
   var playerLv=clamp(Math.floor(Number(player.lv)||1),1,Number(cfg.capMax)||100),delta=boss?[Number(cfg.chenhBoss)||10,Number(cfg.chenhBoss)||10]:(source==='main'?(cfg.chenhQuai||[-5,0]):(cfg.chenhThuong||[-2,10]));
   var lv=clamp(playerLv+randint(Number(delta[0]),Number(delta[1]),rng),Number(cfg.capMin)||1,Number(cfg.capMax)||100);
