@@ -7,3 +7,5 @@
 if(!window.TTGNV)return;
 TTGNV.add({id:'tham-hiem',ten:'Thám hiểm',image:'game-moi/nut-tham-hiem.webp',w:98,h:40,center:true,onTap:function(){if(window.TTGTHAMHIEM&&TTGTHAMHIEM.start)TTGTHAMHIEM.start();},r:0,offsetY:-1});
 })();
+/* Nạp danh hiệu nổi trên đầu thú ở sảnh (78-danh-hieu-tren-dau.js). */
+(function(){var s=document.createElement('script');s.src='game-moi/78-danh-hieu-tren-dau.js?v=1';document.head.appendChild(s);})();

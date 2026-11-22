@@ -94,7 +94,7 @@ var css=[
 '.tb-c{position:absolute}',
 '.tb-info{display:flex;flex-direction:column;align-items:center;gap:{6};padding:{16} {14};text-align:center;overflow:hidden;pointer-events:none}',
 '.tb-info.mu{padding-bottom:{78}}',
-'.tb-info .ic{width:{96};height:{96};flex:none;display:flex;align-items:center;justify-content:center}','.tb-info .ic span{font-size:{74}}','.tb-info .ic img{width:100%;height:100%;object-fit:contain}',
+'.tb-info .ic{width:100%;height:{132};flex:none;display:flex;align-items:center;justify-content:center}','.tb-info .ic span{font-size:{74}}','.tb-info .ic img{width:100%;height:100%;object-fit:contain}',
 '.tb-info .nm{flex:none;font-family:var(--fh);font-weight:800;font-size:{25};color:#ffe58a;line-height:1.2}',
 '.tb-info .sl{flex:none;font-size:{18};color:#9fe4ff}','.tb-info .st{flex:none;font-size:{18};color:#46e07a;font-weight:700}',
 /* mô tả dài: THANH CUỘN (vuốt dọc / lăn chuột / kéo thanh vàng bên phải) */
