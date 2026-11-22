@@ -66,6 +66,17 @@ CROP = {
     '3h': (0.40, 0.41, 0.48),   # Vân Châu (sứa): hai mắt giữa thân
     '3i': (0.40, 0.48, 0.44),   # Vân Đăng (đèn lồng): hai mắt giữa thân
     '3j': (0.15, 0.27, 0.28),   # Vân Đảo Côn Bằng (boss): đầu bên trái
+    # --- vùng 3 Phong Nguyên (ảnh b1) ---
+    '6a': (0.28, 0.28, 0.45),   # Phong Túc (chim ưng): đầu trên-trái
+    '6b': (0.28, 0.40, 0.45),   # Phong Phi (mèo cánh): đầu bên trái
+    '6c': (0.28, 0.42, 0.50),   # Phong Giác (tê giác): đầu + sừng bên trái
+    '6d': (0.15, 0.38, 0.45),   # Phong Liêm (rồng nhỏ cánh): đầu + sừng bên trái
+    '6e': (0.24, 0.35, 0.42),   # Phong Ngư (cá cánh): đầu bên trái
+    '6f': (0.30, 0.20, 0.50),   # Phong Tiêu (gấu mèo đứng): đầu phía trên
+    '6g': (0.40, 0.42, 0.60),   # Phong Bi (linh thể đá): mắt + xoáy giữa thân
+    '6h': (0.25, 0.62, 0.45),   # Phong Lô (chồn đuôi lớn): đầu thấp bên trái
+    '6i': (0.25, 0.38, 0.45),   # Phong Tích (thằn lằn): đầu bên trái
+    '6j': (0.25, 0.25, 0.40),   # Phong Nguyên Vũ Xà (boss): đầu bên trái-trên
 }
 
 # Màu QUẦNG SÁNG theo vùng (z -> hex). Khóa theo số vùng của 51-thu-moi.js
