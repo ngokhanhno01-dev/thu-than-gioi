@@ -99,3 +99,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - **Khóa**: trường `kh` trên từng món trang bị (lưu cùng kho `ttg_moi_trangbi_v1`). Món khóa / đang mặc không vứt được.
 - **Chọn**: bật chọn nhiều (nút Chọn phát sáng) -> hiện 2 nút Bỏ chọn (tắt chế độ + xóa lựa chọn) / Chọn tất cả. Khóa, Vứt Bỏ, Tháo Trang Bị áp dụng cho mọi món đã chọn. Balo (`53-balo.js`) có cùng 2 nút; nút Chọn của Balo không còn đổi sang ảnh "Bỏ chọn" (chỉ phát sáng).
 - Chưa dùng nữa (có thể xóa nếu muốn): `nut-da-trang-bi.webp`, `nut-bo-trang-bi.webp`, `nut-bo-chon.webp`.
+
+## 22/11/2026 (2) - Thanh cuộn mô tả, mô tả buff bộ chi tiết, nút cho khung Tiến Hóa
+- Bảng Thông Tin của Trang Bị: phần mô tả cuộn được (vuốt dọc / thanh vàng). Bảng Chỉ Số cũng có thanh cuộn.
+- Buff bộ: mỗi bộ có mô tả hiệu ứng thật (bảng BD trong 55-trang-bi.js, theo luật 70-bo-trang-bi.js), hiện giá trị đang áp dụng + mốc 2 món / 4 món (gốc) + danh sách món đang mặc.
+- Khung Tiến Hóa (72 + 75): thêm thanh nút dưới khung (ảnh khung giữ nguyên, thêm `ex:76` px phía dưới): Chọn / Khóa(Mở Khóa) / Vứt Bỏ, và Bỏ chọn / Chọn tất cả khi bật Chọn. Khóa + Vứt dùng chung với Balo qua TTGBALO.isLocked / setLock / xoa (53-balo.js). Hook mới TTGKH.on('change').

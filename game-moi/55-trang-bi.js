@@ -75,11 +75,11 @@ var css=[
 '.tb-cs.on{display:flex}',
 '.tb-cs .h{display:flex;align-items:center;justify-content:space-between;font-family:var(--fh);font-weight:800;font-size:{25};color:#ffe58a;flex:none}',
 '.tb-cs .h button{padding:0 {14};height:{34};border-radius:{8};border:{2} solid #c9992f;background:#1d1d5a;color:#ffe9a0;font-family:var(--fh);font-weight:800;font-size:{17};cursor:pointer}',
-'.tb-cs .bd{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;scrollbar-width:none}','.tb-cs .bd::-webkit-scrollbar{display:none}',
+'.tb-cs .bd{padding-right:{6}}',
 '.tb-cs .sec{margin:{8} 0 {4};font-family:var(--fh);font-weight:800;font-size:{19};color:#9fe4ff;border-bottom:{1} solid rgba(159,228,255,.35);padding-bottom:{3}}',
 '.tb-cs .ln{display:flex;justify-content:space-between;font-size:{19};line-height:1.5;color:#dfe6ff}','.tb-cs .ln b{color:#46e07a;font-weight:800}',
 '.tb-cs .bo{margin:{4} 0 {6};padding:{6} {10};border-radius:{8};background:rgba(40,60,140,.45);border:{1} solid rgba(255,211,77,.5)}',
-'.tb-cs .bo .t{font-weight:800;font-size:{19};color:#ffe58a}','.tb-cs .bo .d{font-size:{17};color:#cfd6ff;line-height:1.4}','.tb-cs .bo.off .t{color:#8a90c0}',
+'.tb-cs .bo .t{font-weight:800;font-size:{19};color:#ffe58a}','.tb-cs .bo .d{font-size:{17};color:#cfd6ff;line-height:1.45;margin-top:{3}}','.tb-cs .bo .d.m{color:#8a90c0}','.tb-cs .bo .d.a{color:#9dffb8}','.tb-cs .bo.off .t{color:#8a90c0}','.tb-cs .note{font-size:{16};color:#8a90c0;line-height:1.4;margin-bottom:{4}}',
 '.tb-cs .em{font-size:{19};color:#8a90c0;padding:{4} 0}',
 '.tb-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}',   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
 '.tb-cv{pointer-events:none}',
@@ -92,10 +92,15 @@ var css=[
 '.tb-c.sel{box-shadow:0 0 0 {3} #fff3a0,0 0 {14} {4} rgba(255,211,77,.85);background:rgba(255,211,77,.12)}',
 '.tb-c.eqd::after{content:\"\";position:absolute;right:{6};top:{6};width:{14};height:{14};border-radius:50%;background:#46e07a;box-shadow:0 0 {6} #46e07a;border:{2} solid #0b2a14}',
 '.tb-c{position:absolute}',
-'.tb-info{display:flex;flex-direction:column;align-items:center;gap:{8};padding:{22} {16};text-align:center;overflow:hidden;pointer-events:none}',
-'.tb-info .ic{width:{110};height:{110};display:flex;align-items:center;justify-content:center}','.tb-info .ic span{font-size:{82}}','.tb-info .ic img{width:100%;height:100%;object-fit:contain}',
-'.tb-info .nm{font-family:var(--fh);font-weight:800;font-size:{26};color:#ffe58a;line-height:1.2}',
-'.tb-info .sl{font-size:{18};color:#9fe4ff}','.tb-info .ds{font-size:{20};line-height:1.45;color:#dfe6ff}','.tb-info .st{font-size:{18};color:#46e07a;font-weight:700}',
+'.tb-info{display:flex;flex-direction:column;align-items:center;gap:{6};padding:{16} {14};text-align:center;overflow:hidden;pointer-events:none}',
+'.tb-info.mu{padding-bottom:{78}}',
+'.tb-info .ic{width:{96};height:{96};flex:none;display:flex;align-items:center;justify-content:center}','.tb-info .ic span{font-size:{74}}','.tb-info .ic img{width:100%;height:100%;object-fit:contain}',
+'.tb-info .nm{flex:none;font-family:var(--fh);font-weight:800;font-size:{25};color:#ffe58a;line-height:1.2}',
+'.tb-info .sl{flex:none;font-size:{18};color:#9fe4ff}','.tb-info .st{flex:none;font-size:{18};color:#46e07a;font-weight:700}',
+/* mô tả dài: THANH CUỘN (vuốt dọc / lăn chuột / kéo thanh vàng bên phải) */
+'.tb-info .ds,.tb-cs .bd{flex:1 1 auto;min-height:0;width:100%;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;pointer-events:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#d9b13c rgba(0,0,0,.35)}',
+'.tb-info .ds{font-size:{20};line-height:1.45;color:#dfe6ff;text-align:left;padding-right:{6}}',
+'.tb-info .ds::-webkit-scrollbar,.tb-cs .bd::-webkit-scrollbar{width:{7}}','.tb-info .ds::-webkit-scrollbar-track,.tb-cs .bd::-webkit-scrollbar-track{background:rgba(0,0,0,.35);border-radius:{4}}','.tb-info .ds::-webkit-scrollbar-thumb,.tb-cs .bd::-webkit-scrollbar-thumb{background:#d9b13c;border-radius:{4}}',
 '.tb-info.em{justify-content:center;font-size:{20};color:#7c83b8}',
 '.tb-b{padding:0;border:0;background:transparent;cursor:pointer;border-radius:{12}}',
 '.tb-b:active{background:rgba(255,230,140,.22)}',
@@ -156,12 +161,14 @@ function renderItems(){
   for(var pk in picks)if(!byUid(pk))delete picks[pk];
   for(i=0;i<E.cell.length;i++){var t=b[i],c=E.cell[i];c.innerHTML=t?icon(t)+(t.kh?'<span class="tb-lk">🔒</span>':''):'';c.classList.toggle('sel',!!t&&!multi&&t.uid===sel);c.classList.toggle('pk',!!t&&!!picks[t.uid]);c.classList.remove('eqd');}
   for(i=0;i<8;i++){var u=eq[i],ti=u&&byUid(u),c2=E.slot[i];c2.innerHTML=ti?icon(ti)+(ti.kh?'<span class="tb-lk">🔒</span>':''):'';c2.classList.toggle('sel',!!ti&&!multi&&ti.uid===sel);c2.classList.toggle('pk',!!ti&&!!picks[ti.uid]);c2.classList.toggle('eqd',!!ti);}
-  var s=sel&&byUid(sel),a=tgt();
+  var s=sel&&byUid(sel),a=tgt(),ik=multi?'m':(s?s.uid:''),od=E.info.querySelector('.ds'),sc=(od&&E.infoKey===ik)?od.scrollTop:0;
+  E.infoKey=ik;
   if(multi){
-    E.info.className='tb-info';
-    E.info.innerHTML='<div class="nm">Chọn nhiều</div><div class="sl">Đã chọn '+a.length+' món</div>'+(a.length?'<div class="ds">'+a.slice(0,6).map(function(u){return esc(byUid(u).ten)+(byUid(u).kh?' 🔒':'');}).join('<br>')+(a.length>6?'<br>…':'')+'</div>':'<div class="ds">Chạm vào các ô trang bị cần chọn</div>');}
-  else if(s){E.info.className='tb-info';E.info.innerHTML='<div class="ic">'+icon(s)+'</div><div class="nm">'+esc(s.ten)+(s.kh?' 🔒':'')+'</div><div class="sl">'+SLOTN[s.slot]+'</div><div class="ds">'+esc(s.mo||'')+'</div>'+(isEq(s.uid)?'<div class="st">Đang trang bị</div>':'');}
+    E.info.className='tb-info mu';
+    E.info.innerHTML='<div class="nm">Chọn nhiều</div><div class="sl">Đã chọn '+a.length+' món</div><div class="ds">'+(a.length?a.map(function(u){return esc(byUid(u).ten)+(byUid(u).kh?' 🔒':'');}).join('<br>'):'Chạm vào các ô trang bị cần chọn')+'</div>';}
+  else if(s){E.info.className='tb-info';E.info.innerHTML='<div class="ic">'+icon(s)+'</div><div class="nm">'+esc(s.ten)+(s.kh?' 🔒':'')+'</div><div class="sl">'+SLOTN[s.slot]+'</div>'+(isEq(s.uid)?'<div class="st">Đang trang bị</div>':'')+'<div class="ds">'+esc(s.mo||'').split(' · ').join('<br>')+'</div>';}
   else{E.info.className='tb-info em';E.info.textContent='Chọn một trang bị';}
+  var nd=E.info.querySelector('.ds');if(nd&&sc)nd.scrollTop=sc;
   E.bChon.classList.toggle('act',multi);E.bBC.classList.toggle('on',multi);E.bTC.classList.toggle('on',multi);
   E.ovEq.classList.toggle('on',!a.some(isEq));          /* chưa chọn / món chọn chưa mặc -> nút hiện "Trang Bị"; món đã mặc -> hiện "Tháo Trang Bị" vẽ sẵn */
   E.ovKh.classList.toggle('on',!!a.length&&a.every(function(u){return byUid(u).kh;}));   /* món chọn đã khóa -> nút hiện "Mở Khóa" */
@@ -172,7 +179,26 @@ function pl(r,txt,fs){var d=mk('div','tb-pl',r.x,r.y,r.w,r.h,txt);d.style.fontSi
 function plb(r,txt,fn){var b=mk('button','tb-pl btn',r.x,r.y,r.w,r.h,txt);b.type='button';b.style.fontSize='calc(var(--u)*19)';b.addEventListener('click',fn);return b;}
 /* ===== BẢNG CHỈ SỐ: chỉ số cộng thêm từ đồ đang mặc + buff bộ ===== */
 function fmtV(S,v){var t=S?S.t:'n';return '+'+(t==='f'?Math.round(v):Math.round(v*10)/10)+(t==='p'?'%':'');}
-function setTxt(v){var o=[];if(v.ch!=null)o.push('Tỉ lệ kích hoạt '+v.ch+'%');if(v.pct!=null)o.push('Hiệu lực '+v.pct+'%');if(v.mul!=null)o.push('Mức phản '+v.mul+'%');return o.join(' · ');}
+/* MÔ TẢ CHI TIẾT từng bộ (theo luật chiến đấu ở 70-bo-trang-bi.js); v = {ch,pct,mul} */
+var BD={
+ frost:function(v){return 'Khi bị đánh: '+v.ch+'% làm đối thủ choáng 1 lượt.';},
+ mist:function(v){return 'Khi bị đánh: '+v.ch+'% giảm 50% sát thương nhận vào.';},
+ cloud:function(v){return 'Cuối mỗi lượt: '+v.ch+'% ẩn mình trong mây, đòn kế tiếp của đối thủ bị hụt.';},
+ wind:function(v){return 'Sau mỗi đòn trúng: '+v.ch+'% chém thêm, gây thêm '+v.pct+'% sát thương của đòn đó.';},
+ thunder:function(v){return 'Sau mỗi đòn trúng: '+v.ch+'% giáng sét, gây thêm sát thương bằng '+(100+v.pct)+'% đòn vừa đánh.';},
+ counter:function(v){return 'Khi đòn của đối thủ bị hụt: '+v.ch+'% phản kích, gây '+v.mul+'% sát thương cơ bản.';},
+ sun:function(v){return 'Đánh mục tiêu còn trên 60% HP: +'+v.pct+'% sát thương.';},
+ shield:function(v){return 'Đầu trận: nhận khiên bằng '+v.pct+'% HP tối đa.';},
+ thorn:function(v){return 'Khi bị đánh: '+v.ch+'% phản lại '+v.pct+'% sát thương đã nhận.';},
+ revive:function(v){return 'Khi gục lần đầu trong trận: hồi sinh với '+v.pct+'% HP tối đa (1 lần mỗi trận).';},
+ grove:function(v){return 'Cuối mỗi lượt: hồi '+v.pct+'% HP tối đa (gấp đôi khi HP dưới 50%).';},
+ lava:function(v){return 'Cuối mỗi lượt: '+v.ch+'% phun dung nham, gây sát thương bằng '+v.pct+'% Tấn công.';},
+ ambush:function(v){return 'Đầu trận: '+v.ch+'% đòn đánh đầu tiên chắc chắn chí mạng.';},
+ star:function(v){return 'Đòn chí mạng gây thêm +'+v.pct+'% sát thương.';},
+ first:function(v){return 'Luôn ra đòn trước; đòn đầu tiên gây thêm +'+v.pct+'% sát thương.';},
+ weaken:function(v){return 'Đầu trận: giảm '+v.pct+'% Tấn công của đối thủ.';},
+ judge:function(v){return 'Đánh mục tiêu dưới 30% HP: +'+v.pct+'% sát thương.';}};
+function setTxt(k,v){return BD[k]?BD[k](v):'';}
 function renderCs(){
   if(!E.cs)return;
   var mac=dangMac(),h='',LT=window.TTGLT,BO=window.TTGBO,k;
@@ -183,11 +209,15 @@ function renderCs(){
   if(LT&&LT.STATS)for(k in LT.STATS){if(T[k]){n++;h+='<div class="ln"><span>'+esc(LT.STATS[k].n)+'</span><b>'+fmtV(LT.STATS[k],T[k])+'</b></div>';}}
   if(!n)h+='<div class="em">'+(mac.length?'Các món đang mặc chưa có chỉ số':'Chưa mặc trang bị nào')+'</div>';
   h+='<div class="sec">Buff bộ trang bị</div>';
-  var act=BO&&BO.sets?BO.sets():[],cnt={},m=0;
-  act.forEach(function(x){m++;h+='<div class="bo"><div class="t">'+esc(x.ten)+' ('+x.n+'/4) · '+(x.full?'Đủ bộ':'Mốc 2 món')+'</div><div class="d">'+esc(setTxt(x.v))+'</div></div>';});
-  mac.forEach(function(t){var z=Math.floor(Number(t.bo));if(z>=0&&BO&&BO.SETS&&BO.SETS[z])cnt[z]=(cnt[z]||0)+1;});
-  var on={};act.forEach(function(x){on[x.z]=1;});
-  for(k in cnt)if(!on[k]){m++;h+='<div class="bo off"><div class="t">'+esc(BO.SETS[k].ten)+' ('+cnt[k]+'/4)</div><div class="d">Cần mặc từ 2 món cùng bộ để kích hoạt buff</div></div>';}
+  h+='<div class="note">Mặc từ 2 món cùng bộ: kích hoạt mốc 2 món; đủ 4 món: mốc 4 món (mạnh hơn). Giá trị đang áp dụng đã nhân theo phẩm và vùng của các món.</div>';
+  var act=BO&&BO.sets?BO.sets():[],cnt={},names={},m=0,on={};
+  mac.forEach(function(t){var z=Math.floor(Number(t.bo));if(z>=0&&BO&&BO.SETS&&BO.SETS[z]){cnt[z]=(cnt[z]||0)+1;(names[z]=names[z]||[]).push(t.ten);}});
+  function tiers(z,cur){var S=BO.SETS[z],K=S.k;return '<div class="d'+(cur===2?' a':' m')+'">'+(cur===2?'✔ ':'')+'Mốc 2 món (gốc): '+esc(setTxt(K,S.v2))+'</div><div class="d'+(cur===4?' a':' m')+'">'+(cur===4?'✔ ':'')+'Mốc 4 món (gốc): '+esc(setTxt(K,S.v4))+'</div>';}
+  act.forEach(function(x){m++;h+='<div class="bo"><div class="t">'+esc(x.ten)+' ('+x.n+'/4) · '+(x.full?'Đủ bộ':'Mốc 2 món')+'</div>'
+    +(names[x.z]?'<div class="d m">Đang mặc: '+esc(names[x.z].join(', '))+'</div>':'')
+    +'<div class="d a">Đang áp dụng: '+esc(setTxt(x.k,x.v))+'</div>'+tiers(x.z,x.full?4:2)+'</div>';});
+  act.forEach(function(x){on[x.z]=1;});
+  for(var kk in cnt)if(!on[kk]){m++;h+='<div class="bo off"><div class="t">'+esc(BO.SETS[kk].ten)+' ('+cnt[kk]+'/4) · chưa kích hoạt</div><div class="d m">Đang mặc: '+esc(names[kk].join(', '))+'</div><div class="d">Cần mặc thêm '+(2-cnt[kk])+' món cùng bộ để kích hoạt.</div>'+tiers(+kk,0)+'</div>';}
   if(!m)h+='<div class="em">Chưa kích hoạt buff bộ nào (mặc từ 2 món cùng bộ)</div>';
   h+='</div>';
   E.cs.innerHTML=h;

@@ -126,7 +126,7 @@ var KH=root.TTGKH,S={put:[false,false,false]},W=null;
 function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(t){if(root.TTGTBAO&&TTGTBAO.toast)TTGTBAO.toast(t,2600);else console.log('[TTG]',t);}
 function imgOf(i){var c=root.TTGBALO&&TTGBALO.CAT[i];return c&&c.img?'<img src="'+esc(c.img)+'" alt="" draggable="false">':'';}
-function mk(p,cls,x,y,w,h){var el=document.createElement('div'),d=p.d,st=el.style;el.className=cls;st.left=(x/d.w*100)+'%';st.top=(y/d.h*100)+'%';st.width=(w/d.w*100)+'%';st.height=(h/d.h*100)+'%';p.fr.appendChild(el);return el;}
+function mk(p,cls,x,y,w,h){var el=document.createElement('div'),d=p.d,st=el.style;el.className=cls;var H=d.h+(d.ex||0);st.left=(x/d.w*100)+'%';st.top=(y/H*100)+'%';st.width=(w/d.w*100)+'%';st.height=(h/H*100)+'%';p.fr.appendChild(el);return el;}
 function css(){
  if(document.querySelector('style[data-th]'))return;var s=document.createElement('style');s.setAttribute('data-th','1');
  s.textContent='.th-st{display:grid;grid-template-rows:repeat(5,1fr);pointer-events:none}'+
@@ -180,6 +180,7 @@ function auto(){
  S.put=r.items.map(function(x){return x.have>=x.n;});render();
  toast(r.ok?'Đã đặt đủ nguyên liệu. Bấm Tiến Hóa.':'Chưa đủ nguyên liệu: '+thieu(r));}
 KH.on('open',function(k){if(k!=='th')return;S.put=[false,false,false];render();});
+KH.on('change',function(k){if(k==='th')render();});   /* khóa / vứt bỏ xong: vẽ lại số nguyên liệu */
 KH.on('btn',function(k,label){
  if(k!=='th')return false;
  if(label==='Tiến Hóa'){doEvo();return true;}

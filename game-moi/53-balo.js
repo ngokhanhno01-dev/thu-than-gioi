@@ -207,5 +207,9 @@ var ICON='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><lin
 TTGNV.add({id:'balo',ten:'Balo',icon:ICON,onTap:open,r:0}); /* r:0 = hàng trên, cùng hàng với Thú Thần */
 /* list(loai): danh sách món trong Balo theo kiểu sắp xếp hiện tại (không truyền loai = lưới nguyên liệu + sách kỹ năng; 'th' = vật phẩm TIẾN HÓA, khai trong CAT với loai:'th'): [{id,n,ten,loai,ic,img,mo}]. Khung Cường hóa (72-khung-ren-cuong-hoa.js) đọc túi chính bằng hàm này. */
 function list(loai){return ids(loai||'luoi').map(function(id){var c=CAT[id];return {id:id,n:inv[id]|0,ten:c.ten,loai:c.loai,ic:c.ic,img:c.img,mo:c.mo};});}
-window.TTGBALO={open:open,close:close,add:add,count:count,reg:reg,CAT:CAT,xoaTrang:xoaTrang,list:list};
+/* khóa / xóa theo id (khung Tiến Hóa dùng cho nút Khóa / Vứt Bỏ): khóa dùng chung với Balo, vứt = xóa cả chồng */
+function isLocked(id){return !!lock[id];}
+function setLock(id,v){if(v)lock[id]=1;else delete lock[id];saveMeta();if(isOpen)render();}
+function xoaMon(id){delete inv[id];delete picks[id];if(sel===id)sel=null;save();if(isOpen)render();}
+window.TTGBALO={open:open,close:close,add:add,count:count,reg:reg,CAT:CAT,xoaTrang:xoaTrang,list:list,isLocked:isLocked,setLock:setLock,xoa:xoaMon};
 })();
