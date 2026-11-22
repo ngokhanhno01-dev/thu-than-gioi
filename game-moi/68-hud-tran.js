@@ -18,6 +18,7 @@ var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',
 var HE_MAU={thuong:'#f0f0f0',hoa:'#ff8a5c',thuy:'#58c4ff',loi:'#ffe45c',moc:'#6ce57a',bang:'#a8ecff',vo:'#ffb872',doc:'#c27cff',tho:'#d6a866',phong:'#a6f5d8',tam:'#ff98e6',trung:'#c4e45a',nham:'#c8c0b0',ma:'#b088e0',long:'#ffd24a',am:'#9a8aea',kim:'#fff0b8',tien:'#fff6d0'};
 var FS='"Noto Serif","Palatino Linotype",Georgia,serif',FB='bold 10px sans-serif';
 var img=new Image(),ok=false;img.onload=function(){ok=true;};img.src='game-moi/khung-chien-dau.webp?v=2';
+var GD=G,IMGD=img;   /* khung mặc định (bản gốc); draw() có thể thay bằng khung Khung UI đang mặc (79-khung-ui.js) cho thú của bạn */
 function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r);c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h);c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath();}
 /* chữ căn giữa tại (cx,cy), tự co cỡ chữ (tối thiểu fmin) rồi ép ngang nếu vẫn dài; viền tối + màu */
 function fit(c,t,cx,cy,maxW,fs,fmin,font,col,stroke,lw){
@@ -43,6 +44,8 @@ function rankBadge(rk){if(!rk||!root.TTGTHU||!root.TTGTHU.badges)return null;var
   if(fo||rk==='SR')RBC[rk]={c:cv[2],t:now};return cv[2];}
 function draw(ctx,o){
   if(!ok||!o)return false;
+  var F=null;try{F=(!o.enemy&&!o.mirror&&root.TTGKHUNG)?root.TTGKHUNG.equipped():null;}catch(e){F=null;}if(F&&!F.ok)F=null;
+  var G=F?F.G:GD,img=F?F.img:IMGD,NC=F?(F.light?['#2a2150',null,'#7a2a10',null]:['#fff3c4','rgba(0,0,0,.85)','#ffd36a','rgba(0,0,0,.85)']):['#0c1f45',null,'#7a2a10',null];
   var m=!!o.mirror,s=o.w/IW,X=function(x){return m?IW-x:x;};
   ctx.save();ctx.translate(o.x,o.y);ctx.scale(s,s);
   /* nền tối trong vòng Rank */
@@ -58,11 +61,11 @@ function draw(ctx,o){
   fit(ctx,rt,cx,G.cy+4,225,190,90,'{S}px TTGRank,"Kaushan Script",cursive',rt==='SR'?'#ffd1f6':cl[1],'rgba(0,6,30,.9)',12);
   ctx.shadowBlur=0;ctx.restore();}
   /* TÊN + BẬC */
-  fit(ctx,o.name||'',X((G.name.x0+G.name.x1)/2),G.name.y,G.name.x1-G.name.x0,56,34,'bold {S}px '+FS,'#0c1f45',null);
-  fit(ctx,'V'+(o.bac||1),X(G.bac.x),G.bac.y,G.bac.w,56,38,'bold {S}px '+FS,'#7a2a10',null);
+  fit(ctx,o.name||'',X((G.name.x0+G.name.x1)/2),G.name.y,G.name.x1-G.name.x0,56,34,'bold {S}px '+FS,NC[0],NC[1],8);
+  fit(ctx,'V'+(o.bac||1),X(G.bac.x),G.bac.y,G.bac.w,56,38,'bold {S}px '+FS,NC[2],NC[3],8);
   /* ĐỘ HIẾM loài (Thường/Hiếm/Sử Thi/Huyền Thoại/Truyền Thuyết): đặt ở ô tối cuối thanh Khiên; luôn phủ nền ô này để xóa dấu + cũ */
   var hm=o.hiem&&root.TTGCS&&root.TTGCS.DO_HIEM?root.TTGCS.DO_HIEM[o.hiem]:null,hx=X(G.hiem.cx);
-  ctx.save();rr(ctx,hx-G.hiem.pw/2,G.hiem.cy-G.hiem.ph/2,G.hiem.pw,G.hiem.ph,G.hiem.ph/2);ctx.fillStyle='#031938';ctx.fill();ctx.restore();
+  if(!F){ctx.save();rr(ctx,hx-G.hiem.pw/2,G.hiem.cy-G.hiem.ph/2,G.hiem.pw,G.hiem.ph,G.hiem.ph/2);ctx.fillStyle='#031938';ctx.fill();ctx.restore();}
   if(hm)fit(ctx,hm.ten,hx,G.hiem.cy+2,G.hiem.w,46,26,'bold {S}px '+FS,hm.mau,'rgba(0,0,0,.9)',8);
   /* nhãn Khiên / Tốc Độ (chữ vẽ bằng canvas để lật gương không bị ngược) */
   fit(ctx,'Khiên',X(G.sh.lx),G.sh.ly+1,G.sh.lw,38,24,'bold {S}px sans-serif','#fff','rgba(0,0,0,.85)',7);

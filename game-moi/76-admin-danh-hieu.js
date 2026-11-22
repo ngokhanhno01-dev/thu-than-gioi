@@ -80,13 +80,14 @@ function css(){
  '.adh-b{flex:none;min-width:62px;padding:5px 10px;border:1px solid #3b2200;border-radius:8px;background:linear-gradient(#ffe58a,#d9a02c);color:#3b2200;font-size:12px;font-weight:900;cursor:pointer;touch-action:manipulation}'+
  '.adh-b:active{filter:brightness(1.2)}'+
  '.adh-k{flex:none;min-width:62px;text-align:center;font-size:12px;font-weight:800;color:#7dffb0}'+
+ '.adh-v{flex:none;display:flex;flex-direction:column;gap:3px}'+
  '#adh-ft{display:flex;gap:8px;padding:8px 10px;border-top:1px solid rgba(255,255,255,.14)}'+
  '#adh-ft .adh-b{flex:1}';
  document.head.appendChild(s);}
 function build(){
  if(ov)return;css();
  ov=document.createElement('div');ov.id='adh-ov';
- ov.innerHTML='<div id="adh-bx"><div id="adh-hd"><span>🛠️ Admin · Danh hiệu</span><button type="button" id="adh-x" aria-label="Đóng">✕</button></div>'+
+ ov.innerHTML='<div id="adh-bx"><div id="adh-hd"><span>🛠️ Admin · Danh hiệu + Khung UI</span><button type="button" id="adh-x" aria-label="Đóng">✕</button></div>'+
   '<div id="adh-sub"></div><div id="adh-ls"></div>'+
   '<div id="adh-ft"><button type="button" class="adh-b" data-a="all">Trao tất cả</button></div></div>';
  document.body.appendChild(ov);bd=ov.querySelector('#adh-ls');
@@ -95,17 +96,18 @@ function build(){
   var b=t.closest?t.closest('button'):null;if(!b)return;
   var a=b.getAttribute('data-a'),id=b.getAttribute('data-id');
   if(!TB()){toast('Chưa nạp khung Trang Bị');return;}
-  if(a==='all'){var n=0;LIST.forEach(function(d){if(give(d.id)==='ok')n++;});toast(n?'Đã trao '+n+' danh hiệu, mặc ở Trang Bị':'Đã có đủ danh hiệu rồi');render();return;}
+  if(a==='all'){var n=0,n2=0,K=root.TTGKHUNG;LIST.forEach(function(d){if(give(d.id)==='ok')n++;if(K&&K.give(d.id)==='ok')n2++;});toast(n||n2?'Đã trao '+n+' danh hiệu + '+n2+' khung UI, mặc ở Trang Bị':'Đã có đủ rồi');render();return;}
+  var kid=b.getAttribute('data-k');if(kid){var K2=root.TTGKHUNG;if(!K2){toast('Chưa nạp Khung UI');return;}var r3=K2.give(kid);toast(r3==='ok'?'Đã trao: Khung UI '+by(kid).ten+' (mặc ở ô Khung UI)':r3==='had'?'Đã có khung này rồi':'Chưa trao được');render();return;}
   if(id){var d2=by(id),r=give(id);toast(r==='ok'?'Đã trao: '+d2.ten+' (mặc ở Trang Bị)':r==='had'?'Đã có danh hiệu này rồi':'Chưa trao được');render();}});
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&ov&&ov.classList.contains('on')){e.stopImmediatePropagation();close();}},true);}
 function render(){
  if(!ov)return;var sub=ov.querySelector('#adh-sub'),n=owned().length,g='',h='';
- sub.textContent='Đang có '+n+'/'+LIST.length+' danh hiệu. Trao xong vào Trang Bị > ô Danh hiệu để mặc. Muốn bỏ: Trang Bị > chọn món > Vứt bỏ.';
+ sub.textContent='Đang có '+n+'/'+LIST.length+' danh hiệu. Trao xong vào Trang Bị > ô Danh hiệu / Khung UI để mặc. Muốn bỏ: Trang Bị > chọn món > Vứt bỏ.';
  LIST.forEach(function(d){
   if(d.nhom!==g){g=d.nhom;h+='<div class="adh-g">'+esc(g.toUpperCase())+'</div>';}
   var on=has(d.id),l=lines(d).join(' · ');
   h+='<div class="adh-r'+(on?' on':'')+'"><span class="adh-ic">'+(d.img?'<img src="'+esc(d.img)+'" alt="" draggable="false" style="width:46px;height:30px;object-fit:contain;display:block">':d.ic)+'</span><span class="adh-n'+(d.glow?' gl':'')+'" style="color:'+d.col+'"><b>'+esc(d.ten)+'</b><small>'+esc(l||'Không cộng chỉ số')+'</small></span>'+
-   (on?'<span class="adh-k">✔ Đã có</span>':'<button type="button" class="adh-b" data-id="'+d.id+'">Trao</button>')+'</div>';});
+   '<span class="adh-v">'+(on?'<span class="adh-k">✔ Đã có</span>':'<button type="button" class="adh-b" data-id="'+d.id+'">Trao</button>')+(root.TTGKHUNG?(root.TTGKHUNG.has(d.id)?'<span class="adh-k">✔ Khung</span>':'<button type="button" class="adh-b" data-k="'+d.id+'">+ Khung</button>'):'')+'</span></div>';});
  bd.innerHTML=h;}
 function open(){build();render();ov.classList.add('on');}
 function close(){if(ov)ov.classList.remove('on');}
