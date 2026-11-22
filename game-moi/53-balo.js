@@ -1,4 +1,5 @@
-/* 53-balo.js - BALO của game-moi: nút Balo (khung vuông + icon) + bảng Balo + dữ liệu túi đồ.
+/* (22/11/2026) CHỌN: bật chọn nhiều thì hiện thêm 2 nút BỎ CHỌN (tắt chế độ chọn + xóa lựa chọn) / CHỌN TẤT CẢ (chọn mọi món trong túi + Ngự Thú Châu), nằm cuối bảng thông tin bên phải, làm từ khung nút CHỌN đã xóa chữ (nut-trong.webp). Nút CHỌN không còn đổi sang ảnh BỎ CHỌN nữa, chỉ phát sáng khi đang bật.
+   53-balo.js - BALO của game-moi: nút Balo (khung vuông + icon) + bảng Balo + dữ liệu túi đồ.
    Cần 52-nut-vuong.js (TTGNV) nạp trước. Ảnh khung bảng: game-moi/khung-balo.webp (1761x847, khung xanh-vàng mới: chữ BALO, nút X, chữ 4 nút KHÓA/CHỌN/VỨT BỎ/SẮP XẾP đã VẼ SẴN trong ảnh; 4x4 ô + bảng thông tin bên phải).
    BẢNG: nửa TRÁI = Ngự Thú Châu (danh sách thanh, sau này dùng khung thanh dài + bấm mở bảng nổi có nút Dùng/Đóng);
          nửa PHẢI = lưới 16 ô (4x4) Nguyên liệu (chia trang, tổng CAP ô) + bảng thông tin item (icon phóng to, tên, mô tả, số lượng)
@@ -12,7 +13,7 @@
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var KEY='ttg_moi_balo_v1',CAP=100,STACK=99,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=3',OV_KHOA='game-moi/nut-mo-khoa.webp?v=1',OV_CHON='game-moi/nut-bo-chon.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
+var KEY='ttg_moi_balo_v1',CAP=100,STACK=99,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=3',OV_KHOA='game-moi/nut-mo-khoa.webp?v=1',OV_TRONG='game-moi/nut-trong.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
 var demo=/[?&](balo|thu)=demo/.test(location.search);   /* ?thu=demo cũng bật demo Balo để có sách kỹ năng mẫu cho panel Thú Thần (không lưu) */
 var LOAI={nl:'Nguyên liệu',bong:'Ngự Thú Châu',sach:'Sách kỹ năng'};   /* sách kỹ năng nằm chung lưới 4x4 với nguyên liệu; danh mục sách khai ở 54-thu-than.js */
 /* ===== DANH MỤC ITEM ===== mỗi item: id:{loai:'nl'|'bong', ten, mo (mô tả), ic (emoji tạm) hoặc img (đường dẫn ảnh icon), cap (cấp bóng)} */
@@ -79,7 +80,11 @@ var css=[
 '.bl-sl .q{position:absolute;right:{7};bottom:{3};font-weight:800;font-size:{17};color:#fff;text-shadow:0 0 {3} #000,{1} {1} 0 #000,-{1} {1} 0 #000}',
 '.bl-sl.sel::after{content:"";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{3} solid #ffe066;border-radius:{4};box-shadow:0 0 {12} rgba(255,224,102,.75),inset 0 0 {10} rgba(255,224,102,.35);pointer-events:none}',
 '.bl-bt{padding:0;border:0;border-radius:{34};background:transparent;cursor:pointer} /* chữ KHÓA/CHỌN/VỨT BỎ/SẮP XẾP đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt, trạng thái đổi bằng ảnh phủ .bl-ov */','.bl-bt:active{background:rgba(255,224,102,.25)}',
-'.bl-ov{display:none;pointer-events:none}',   /* ảnh nút MỞ KHÓA / BỎ CHỌN đè lên nút KHÓA / CHỌN khi đổi trạng thái */
+'.bl-ov{display:none;pointer-events:none}',
+'.bl-p2{display:none;align-items:center;justify-content:center;padding:0;border:0;cursor:pointer;touch-action:manipulation;background:url('+OV_TRONG+') 0 0/100% 100% no-repeat;font-family:var(--fh);font-weight:800;font-size:{20};line-height:1;white-space:nowrap;color:#ffe9a0;-webkit-text-stroke:{1.2} #3b2200;paint-order:stroke fill;text-shadow:0 {2} 0 #5a3000,0 0 {6} rgba(0,0,0,.7)}',
+'.bl-p2.on{display:flex}','.bl-p2:active{filter:brightness(1.25)}',
+'.bl-bt.act{box-shadow:0 0 {14} {3} rgba(95,240,224,.85)}',
+'.bl-dt.mu{padding-bottom:{76}}',   /* ảnh nút MỞ KHÓA / BỎ CHỌN đè lên nút KHÓA / CHỌN khi đổi trạng thái */
 '.bl-ov.on{display:block}',
 '.bl-sl .lk,.bl-row .lk{position:absolute;left:{6};top:{4};font-size:{17};line-height:1;text-shadow:0 0 {3} #000}',
 '.bl-row .lk{position:static;font-size:{20}}',
@@ -122,10 +127,11 @@ function build(){
   /* 4 nút: vùng bấm trong suốt đặt lên 4 nút đã vẽ sẵn: [x,y,rộng,cao] (chữ trên nút nằm trong ảnh khung nên không đổi được; trạng thái hiện bằng quầng sáng + thông báo nổi) */
   /* ảnh nút đổi trạng thái (cắt từ khung mới): [x,y,rộng,cao] khớp đúng vị trí nút KHÓA / CHỌN. Đổi ảnh thì giữ nguyên kích thước/vị trí */
   E.ovK=mk('img','bl-ov',888,604,232,96);E.ovK.src=OV_KHOA;E.ovK.alt='';E.ovK.draggable=false;
-  E.ovC=mk('img','bl-ov',1120,604,232,96);E.ovC.src=OV_CHON;E.ovC.alt='';E.ovC.draggable=false;
   E.bt={};
   [['khoa',925,618,180,70,'Khóa',khoa],['chon',1138,618,190,70,'Chọn',chon],['vut',925,718,180,70,'Vứt bỏ',vut],['xep',1138,718,190,70,'Sắp xếp',xep]].forEach(function(d){
     var b=mk('button','bl-bt',d[1],d[2],d[3],d[4]);b.type='button';b.setAttribute('aria-label',d[5]);b.addEventListener('click',d[6]);E.bt[d[0]]=b;});
+  E.bBC=mk('button','bl-p2',1393,702,132,62,'Bỏ chọn');E.bBC.type='button';E.bBC.addEventListener('click',boChon);   /* 2 nút hiện khi bật CHỌN, nằm cuối bảng thông tin */
+  E.bTC=mk('button','bl-p2',1535,702,132,62,'Chọn tất cả');E.bTC.type='button';E.bTC.addEventListener('click',chonAll);
   E.ts=mk('div','bl-ts',230,665,360,52);
   E.cf=mk('div','bl-cf',215,320,470,230);
   document.body.appendChild(root);
@@ -150,6 +156,9 @@ function khoa(){var t=targets();if(!t.length){toast('Chưa chọn vật phẩm')
   t.forEach(function(id){if(allL)delete lock[id];else lock[id]=1;});saveMeta();toast(allL?'Đã mở khóa':'Đã khóa');render();}
 /* CHỌN: bật/tắt chế độ chọn nhiều ô (chạm nhiều ô để KHÓA / VỨT BỎ cùng lúc) */
 function chon(){multi=!multi;picks={};if(multi&&sel)picks[sel]=1;toast(multi?'Chọn nhiều: chạm các ô cần chọn':'Đã tắt chọn nhiều');render();}
+/* BỎ CHỌN: tắt chế độ chọn nhiều + xóa lựa chọn. CHỌN TẤT CẢ: chọn mọi món còn trong túi (lưới nguyên liệu/sách + Ngự Thú Châu) */
+function boChon(){multi=false;picks={};toast('Đã bỏ chọn');render();}
+function chonAll(){var a=ids('luoi').concat(ids('bong')).filter(function(id){return CAT[id]&&count(id)>0;});if(!a.length){toast('Túi trống');return;}a.forEach(function(id){picks[id]=1;});sel=a[0];toast('Đã chọn tất cả '+a.length+' loại');render();}
 /* VỨT BỎ: hỏi lại trước khi xóa; vứt cả chồng số lượng của món */
 function vut(){var t=targets();if(!t.length){toast('Chưa chọn vật phẩm');return;}
   var ok=t.filter(function(id){return !lock[id];});
@@ -183,7 +192,7 @@ function render(){
   for(var k in picks)if(!CAT[k]||count(k)<=0)delete picks[k];
   var tg=targets(),allLk=!!(tg.length&&tg.every(function(x){return lock[x];}));
   E.bt.khoa.setAttribute('aria-label',allLk?'Mở khóa':'Khóa');E.ovK.classList.toggle('on',allLk);   /* đang chọn món đã khóa -> hiện nút MỞ KHÓA */
-  E.bt.chon.setAttribute('aria-label',multi?'Bỏ chọn':'Chọn');E.ovC.classList.toggle('on',multi);   /* đang chọn nhiều -> hiện nút BỎ CHỌN */
+  E.bt.chon.setAttribute('aria-label','Chọn');E.bt.chon.classList.toggle('act',multi);E.bBC.classList.toggle('on',multi);E.bTC.classList.toggle('on',multi);E.dt.classList.toggle('mu',multi);   /* đang chọn nhiều -> nút CHỌN phát sáng + hiện BỎ CHỌN / CHỌN TẤT CẢ */
   var d=E.dt,oldDs=d.querySelector('.dt-ds'),keepSc=(oldDs&&d.getAttribute('data-sel')===String(sel))?oldDs.scrollTop:0;
   d.setAttribute('data-sel',sel?String(sel):'');
   if(sel){var s=CAT[sel];d.innerHTML='<div class="dt-ic">'+ic(s)+'</div><div class="dt-nm">'+esc(s.ten)+'</div><div class="dt-mt">'+esc(LOAI[s.loai]||'')+(s.loai==='sach'&&s.he&&window.TTGCS&&TTGCS.heVi?' · Hệ '+TTGCS.heVi(s.he):'')+(s.cap?' · Cấp '+s.cap:'')+' · Số lượng: '+count(sel)+(lock[sel]?' · 🔒':'')+'</div><div class="dt-ds">'+esc(s.mo||'')+'</div>';var nds=d.querySelector('.dt-ds');if(nds)nds.scrollTop=keepSc;}

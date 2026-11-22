@@ -1,3 +1,7 @@
+/* (22/11/2026) KHUNG MỚI 1667x865 (cắt nền xanh từ ảnh mới): 4 nút vẽ sẵn CHỌN / KHÓA / THÁO TRANG BỊ / VỨT BỎ + nút CHỈ SỐ dưới bục.
+   CHỈ SỐ: mở bảng nổi liệt kê chỉ số cộng từ đồ đang mặc (TTGLT.tong) + buff bộ trang bị đang kích hoạt (TTGBO.sets). KHÓA: món khóa không vứt được (trường kh của món).
+   CHỌN: bật chọn nhiều, hiện thêm 2 nút BỎ CHỌN / CHỌN TẤT CẢ (nut-trong.webp = khung nút CHỌN đã xóa chữ). THÁO TRANG BỊ: đổi thành "Trang Bị" khi món chọn chưa mặc.
+   Các dòng mô tả bên dưới có thể còn ghi khung/nút cũ (1673x867, TRANG BỊ/VỨT BỎ): tọa độ MỚI ở khối khai báo bên dưới.
 /* 55-trang-bi.js - Khung TRANG BỊ của thú (mở từ nút "Trang Bị" trong panel Thú Thần, 54-thu-than.js).
    Ảnh khung: game-moi/khung-trang-bi.webp (1798x798, khung xanh-vàng mới: chữ TRANG BỊ, nút X, chữ THÔNG TIN, 2 nút TRANG BỊ / VỨT BỎ đã VẼ SẴN trong ảnh). Hiển thị đúng cỡ gốc (1 pixel ảnh = 1 pixel máy) để không bị mờ, màn nhỏ thì tự co.
    MỌI TỌA ĐỘ tính theo PIXEL ẢNH ĐÃ CẮT 1798x798 (BW x BH). Cỡ chữ/độ dày trong CSS ({n}) vẫn tính theo thang cũ 1456 (UB) nên không phải chỉnh lại; --u = clientWidth/UB.
@@ -10,11 +14,11 @@
    API: TTGTB.open() / .close() / .isOpen() */
 (function(){
 'use strict';
-var BW=1673,BH=867,UB=1355,IMG='game-moi/khung-trang-bi.webp?v=3',OV_BO='game-moi/nut-da-trang-bi.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ ({n}) */
+var BW=1667,BH=865,UB=1355,IMG='game-moi/khung-trang-bi.webp?v=4',OV_TRONG='game-moi/nut-trong.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ ({n}) */
 var isOpen=false,openAt=0,root=null,fr=null,E={},raf=0,cur=null,petImg=null,petSrc='';
 /* ===== THÚ TRÊN BỤC (chỗ chỉnh số, px ảnh khung 1798x798) =====
    cx = tâm ngang bục, by = đường chân thú (mặt bục), size = cạnh ảnh thú (ảnh gốc 192px, to quá sẽ mờ). */
-var PET={cx:437,by:656,size:320};
+var PET={cx:438,by:648,size:320};
 var TXT={x:235,y:300,w:400,h:100};
 /* THANH VÀNG TÊN + 3 Ô TRÒN (px ảnh khung 1673x867): tâm 3 ô tròn (353,240),(442,240),(531,240), ruột ~56px */
 var HIEM={x:352,y:284,w:180,h:30};
@@ -22,17 +26,22 @@ var NM={x:292,y:160,w:300,h:36},OC_X=[353,442,531],OC_Y=240,OC_S=62;
 /* vẽ thú + vòng rune/aura theo Rank trên canvas: CW x (CHU+DOWN) px ảnh, chân thú ở y=CHU. Thú vẽ 128 điểm logic (như ở sảnh) rồi phóng s=PET.size/128 lần */
 var CV={w:460,up:420,down:70};
 /* ===== VỊ TRÍ Ô (px ảnh khung 1673x867; ruột ô, vùng bấm nở ra 6px) ===== */
-var SLOT_X=[122,672],SLOT_Y=[231,337,447,556],SLOT_W=80,SLOT_H=76;          /* 8 ô trang bị: cột trái = ô 0-3, cột phải = ô 4-7 */
-var GRID_X=[885,982,1077,1172],GRID_Y=[191,296,403,512,622,734],GRID_W=72,GRID_H=78;   /* lưới túi 4x6 = 24 ô */
-var INFO={x:1303,y:221,w:283,h:496};                                          /* bảng THÔNG TIN */
-var BTN_EQ={x:1284,y:746,w:153,h:66},BTN_VUT={x:1449,y:746,w:150,h:66};       /* nút TRANG BỊ / VỨT BỎ (đã vẽ sẵn trong ảnh) */
-var OV_BOX={x:1276,y:738,w:170,h:82};                                         /* ảnh phủ \"Đã Trang Bị\" đè lên nút TRANG BỊ */
+var SLOT_X=[115,670],SLOT_Y=[231,336,444,550],SLOT_W=85,SLOT_H=76;          /* 8 ô trang bị: cột trái = ô 0-3, cột phải = ô 4-7 */
+var GRID_X=[887,981,1074,1170],GRID_Y=[191,297,406,513,620,724],GRID_W=70,GRID_H=75;   /* lưới túi 4x6 = 24 ô */
+var INFO={x:1304,y:230,w:273,h:421};                                          /* bảng THÔNG TIN */
+/* 4 NÚT đã VẼ SẴN trong ảnh khung mới (nút chỉ là vùng bấm trong suốt): hàng trên CHỌN / KHÓA, hàng dưới THÁO TRANG BỊ / VỨT BỎ. Nút CHỈ SỐ nằm dưới bục bên trái */
+var BTN_CHON={x:1273,y:670,w:172,h:67},BTN_KHOA={x:1441,y:670,w:172,h:67},BTN_EQ={x:1268,y:741,w:177,h:64},BTN_VUT={x:1441,y:741,w:172,h:64},BTN_CS={x:322,y:790,w:240,h:52};
+/* ảnh nút trống (nut-trong.webp, cắt từ nút CHỌN rồi xóa chữ) phủ lên nút vẽ sẵn khi đổi trạng thái, chữ viết bằng CSS: "Trang Bị" đè lên THÁO TRANG BỊ (món chọn chưa mặc), "Mở Khóa" đè lên KHÓA (món chọn đã khóa) */
+/* 2 nút hiện thêm khi bật CHỌN (cũng từ nut-trong.webp), nằm cuối bảng THÔNG TIN: BỎ CHỌN (tắt chế độ chọn) / CHỌN TẤT CẢ */
+var BTN_BC={x:1318,y:586,w:124,h:58},BTN_TC={x:1447,y:586,w:124,h:58};
+/* bảng CHỈ SỐ (mở từ nút CHỈ SỐ): nằm giữa 2 cột ô trang bị, phía dưới 3 ô tròn */
+var CSP={x:212,y:296,w:450,h:480};
 /* BỐ CỤC 8 Ô: cột trái = ô 0-3, cột phải = ô 4-7 (từ trên xuống). 4 ô TRÊN = hàng 1-2 mỗi cột: ô 0 Vũ khí, ô 1 Áo giáp, ô 4 Nhẫn, ô 5 Ngọc bội. 4 ô DƯỚI (2, 3, 6, 7) = Bảo vật: dành cho 5 loại mới (Pháp Khí, Pháp Bảo, Linh Bảo, Tiên Khí, Thần Khí), mỗi ô nhận loại nào cũng được */
 var SLOTN=['Vũ khí','Áo giáp','Bảo vật 1','Bảo vật 2','Nhẫn','Ngọc bội','Bảo vật 3','Bảo vật 4'];
 /* ===== KHO TRANG BỊ =====
    items: [{uid,id,ten,ic|img,slot(0-7),mo}] (mọi món sở hữu), eq: {slot:uid} (món đang mặc). Túi = món không nằm trong eq.
    Lưu localStorage 'ttg_moi_trangbi_v1'. ?trangbi=demo: có sẵn vài món mẫu, không lưu. */
-var KEY='ttg_moi_trangbi_v1',demo=/[?&]trangbi=demo/.test(location.search),items=[],eq={},sel=null;
+var KEY='ttg_moi_trangbi_v1',demo=/[?&]trangbi=demo/.test(location.search),items=[],eq={},sel=null,multi=false,picks={},csOpen=false;
 (function(){if(demo){items=[{uid:'d1',id:'mu-da',ten:'Mũ da thú',ic:'🪖',slot:0,mo:'Mũ da cơ bản, nhẹ và bền.'},{uid:'d2',id:'ao-vai',ten:'Áo giáp vải',ic:'🥋',slot:1,mo:'Áo giáp vải dày.'},{uid:'d3',id:'giay-co',ten:'Giày cỏ linh',ic:'👢',slot:3,mo:'Giày bện từ cỏ linh, đi êm.'},{uid:'d4',id:'kiem-go',ten:'Kiếm gỗ',ic:'🗡️',slot:4,mo:'Kiếm tập luyện.'},{uid:'d5',id:'nhan-bac',ten:'Nhẫn bạc',ic:'💍',slot:6,mo:'Nhẫn bạc trơn.'},{uid:'d6',id:'mu-sat',ten:'Mũ sắt',ic:'⛑️',slot:0,mo:'Mũ sắt chắc chắn.'}];eq={0:'d1'};return;}
   try{var v=JSON.parse(localStorage.getItem(KEY)||'{}');if(v&&Array.isArray(v.items))items=v.items.filter(function(t){return t&&t.uid&&t.slot>=0&&t.slot<8;});if(v&&v.eq&&typeof v.eq==='object')eq=v.eq;}catch(e){}
   Object.keys(eq).forEach(function(k){if(!byUid(eq[k]))delete eq[k];});})();
@@ -57,6 +66,21 @@ var css=[
 '.tb-fr>*{position:absolute;box-sizing:border-box}',
 '.tb button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
 '.tb-ov{display:none;pointer-events:none}','.tb-ov.on{display:block}',
+'.tb-pl{display:none;align-items:center;justify-content:center;background:url('+OV_TRONG+') 0 0/100% 100% no-repeat;font-family:var(--fh);font-weight:800;line-height:1;white-space:nowrap;color:#ffe9a0;-webkit-text-stroke:{1.2} #3b2200;paint-order:stroke fill;text-shadow:0 {2} 0 #5a3000,0 0 {6} rgba(0,0,0,.7)}',
+'.tb-pl.on{display:flex}','.tb-pl.btn{cursor:pointer;touch-action:manipulation;border:0;padding:0}','.tb-pl.btn:active{filter:brightness(1.25)}',
+'.tb-b.act{box-shadow:0 0 {14} {3} rgba(95,240,224,.85)}',
+'.tb-c.pk::before{content:\"\";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{3} solid #5ff0e0;border-radius:{6};box-shadow:0 0 {12} rgba(95,240,224,.7);pointer-events:none}',
+'.tb-lk{position:absolute;left:{9};top:{7};font-size:{17};line-height:1;text-shadow:0 0 {3} #000;pointer-events:none}',
+'.tb-cs{display:none;flex-direction:column;gap:{8};padding:{14} {16};background:rgba(6,12,44,.95);border:{3} solid #d9b13c;border-radius:{12};box-shadow:0 0 {26} rgba(0,0,0,.8);overflow:hidden}',
+'.tb-cs.on{display:flex}',
+'.tb-cs .h{display:flex;align-items:center;justify-content:space-between;font-family:var(--fh);font-weight:800;font-size:{25};color:#ffe58a;flex:none}',
+'.tb-cs .h button{padding:0 {14};height:{34};border-radius:{8};border:{2} solid #c9992f;background:#1d1d5a;color:#ffe9a0;font-family:var(--fh);font-weight:800;font-size:{17};cursor:pointer}',
+'.tb-cs .bd{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;scrollbar-width:none}','.tb-cs .bd::-webkit-scrollbar{display:none}',
+'.tb-cs .sec{margin:{8} 0 {4};font-family:var(--fh);font-weight:800;font-size:{19};color:#9fe4ff;border-bottom:{1} solid rgba(159,228,255,.35);padding-bottom:{3}}',
+'.tb-cs .ln{display:flex;justify-content:space-between;font-size:{19};line-height:1.5;color:#dfe6ff}','.tb-cs .ln b{color:#46e07a;font-weight:800}',
+'.tb-cs .bo{margin:{4} 0 {6};padding:{6} {10};border-radius:{8};background:rgba(40,60,140,.45);border:{1} solid rgba(255,211,77,.5)}',
+'.tb-cs .bo .t{font-weight:800;font-size:{19};color:#ffe58a}','.tb-cs .bo .d{font-size:{17};color:#cfd6ff;line-height:1.4}','.tb-cs .bo.off .t{color:#8a90c0}',
+'.tb-cs .em{font-size:{19};color:#8a90c0;padding:{4} 0}',
 '.tb-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}',   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
 '.tb-cv{pointer-events:none}',
 '.tb-oc{pointer-events:none;image-rendering:auto}',
@@ -89,35 +113,87 @@ function unit(){if(!fr)return;var d=window.devicePixelRatio||1;fr.style.maxWidth
 function cell(x,y,w,h){var c=mk('button','tb-c',x-6,y-6,w+12,h+12);c.type='button';return c;}
 var tsT=0;
 function toast(t){if(window.TTGTBAO&&TTGTBAO.toast){TTGTBAO.toast(t,1800);return;}E.ts.textContent=t;E.ts.style.display='block';clearTimeout(tsT);tsT=setTimeout(function(){E.ts.style.display='none';},1800);}
-/* chọn: sel = uid món đang chọn (trong túi hoặc đang mặc) */
-function pickBag(k){var t=bag()[k];if(!t){sel=null;}else sel=(sel===t.uid)?null:t.uid;renderItems();}
-function pickSlot(k){var u=eq[k];if(!u){sel=null;renderItems();toast('Ô '+SLOTN[k]+' đang trống');return;}sel=(sel===u)?null:u;renderItems();}
-/* TRANG BỊ: mặc món chọn vào đúng ô; món cũ ở ô đó trở về túi. Món đang mặc thì nút hiện \"Đã Trang Bị\" (bấm chỉ báo). */
-function doEquip(){
-  var t=sel&&byUid(sel);if(!t){toast('Chưa chọn trang bị');return;}
+/* chọn: sel = uid món đang chọn (trong túi hoặc đang mặc). Bật CHỌN (multi) thì chạm nhiều ô, picks = {uid:1} */
+function tgt(){var a=multi?Object.keys(picks).filter(function(u){return byUid(u);}):(sel&&byUid(sel)?[sel]:[]);return a;}
+function tap(u){if(multi){if(picks[u])delete picks[u];else picks[u]=1;sel=u;}else sel=(sel===u)?null:u;renderItems();}
+function pickBag(k){var t=bag()[k];if(!t){if(!multi)sel=null;renderItems();return;}tap(t.uid);}
+function pickSlot(k){var u=eq[k];if(!u){if(!multi)sel=null;renderItems();toast('Ô '+SLOTN[k]+' đang trống');return;}tap(u);}
+/* KHÓA: món khóa không vứt được. Tất cả món đang chọn đã khóa -> mở khóa, ngược lại -> khóa hết */
+function doKhoa(){var a=tgt();if(!a.length){toast('Chưa chọn trang bị');return;}
+  var allL=a.every(function(u){return byUid(u).kh;});
+  a.forEach(function(u){var t=byUid(u);if(allL)delete t.kh;else t.kh=1;});save();renderItems();toast(allL?'Đã mở khóa':'Đã khóa '+a.length+' món');}
+/* CHỌN: bật/tắt chế độ chọn nhiều; BỎ CHỌN = tắt hẳn chế độ + xóa lựa chọn; CHỌN TẤT CẢ = chọn mọi món trong túi */
+function doChon(){multi=!multi;picks={};if(multi&&sel)picks[sel]=1;toast(multi?'Chọn nhiều: chạm các ô cần chọn':'Đã tắt chọn nhiều');renderItems();}
+function doBoChon(){multi=false;picks={};toast('Đã bỏ chọn');renderItems();}
+function doChonAll(){var b=bag();if(!b.length){toast('Túi không có trang bị');return;}b.forEach(function(t){picks[t.uid]=1;});sel=b[0].uid;toast('Đã chọn tất cả '+b.length+' món');renderItems();}
+/* TRANG BỊ / THÁO: nút dưới-trái vẽ sẵn chữ "Tháo Trang Bị"; khi món chọn CHƯA mặc thì ảnh phủ đổi thành "Trang Bị". Chọn nhiều: bấm = tháo hết món đang mặc trong số đã chọn (mặc đồ thì làm từng món). */
+function doThao(){
+  var a=tgt();if(!a.length){toast('Chưa chọn trang bị');return;}
+  var mac=a.filter(isEq);
+  if(!mac.length){if(multi){toast('Mặc đồ làm từng món: tắt Chọn rồi chọn 1 món');return;}doMac(a[0]);return;}
+  mac.forEach(function(u){for(var k in eq)if(eq[k]===u)delete eq[k];});save();renderItems();
+  toast(mac.length===1?'Đã tháo '+byUid(mac[0]).ten:'Đã tháo '+mac.length+' món');}
+function doMac(u){
+  var t=byUid(u);if(!t){toast('Chưa chọn trang bị');return;}
   if(isEq(t.uid)){toast('Món này đang được trang bị');return;}
   if(t.lv){var rt=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null,lp=rt?Math.max(1,Math.floor(rt.lv||1)):1;if(lp<t.lv){toast('Cần thú đạt cấp '+t.lv+' để mặc món này');return;}}   /* như main: đủ cấp mới được mang */
   var old=eq[t.slot]?byUid(eq[t.slot]):null;eq[t.slot]=t.uid;save();renderItems();
   toast('Đã trang bị '+t.ten+(old?' (đã cất '+old.ten+' vào túi)':''));}
-/* VỨT BỎ: hỏi lại, xóa hẳn món khỏi kho. Món đang mặc không vứt được. */
+/* VỨT BỎ: hỏi lại, xóa hẳn món khỏi kho. Món đang mặc hoặc đã KHÓA thì không vứt được (chọn nhiều: bỏ qua các món đó). */
 function doVut(){
-  var t=sel&&byUid(sel);if(!t){toast('Chưa chọn trang bị');return;}
-  if(isEq(t.uid)){toast('Món đang mặc, hãy thay món khác trước');return;}
-  var xoa=function(){items=items.filter(function(x){return x.uid!==t.uid;});if(sel===t.uid)sel=null;save();renderItems();toast('Đã vứt bỏ '+t.ten);};
-  var tx='Vứt bỏ <b>'+esc(t.ten)+'</b>?';
+  var a=tgt();if(!a.length){toast('Chưa chọn trang bị');return;}
+  var ok=a.filter(function(u){return !isEq(u)&&!byUid(u).kh;});
+  if(!ok.length){toast(a.every(isEq)?'Món đang mặc, hãy tháo hoặc thay món khác trước':'Trang bị đang khóa');return;}
+  var xoa=function(){items=items.filter(function(x){return ok.indexOf(x.uid)<0;});ok.forEach(function(u){delete picks[u];if(sel===u)sel=null;});save();renderItems();toast(ok.length===1?'Đã vứt bỏ':'Đã vứt bỏ '+ok.length+' món');};
+  var tx=ok.length===1?'Vứt bỏ <b>'+esc(byUid(ok[0]).ten)+'</b>?':'Vứt bỏ <b>'+ok.length+'</b> trang bị?';
+  if(ok.length<a.length)tx+='<br><small>(bỏ qua '+(a.length-ok.length)+' món đang mặc/đã khóa)</small>';
   if(window.TTGTBAO&&TTGTBAO.confirm){TTGTBAO.confirm(tx,[{t:'Vứt bỏ',cls:'d',cb:xoa},{t:'Hủy'}]);return;}
-  if(window.confirm('Vứt bỏ '+t.ten+'?'))xoa();}
+  if(window.confirm('Vứt bỏ '+ok.length+' trang bị?'))xoa();}
 function renderItems(){
   if(!E.cell)return;
   var b=bag(),i;
   if(sel&&!byUid(sel))sel=null;
-  for(i=0;i<E.cell.length;i++){var t=b[i],c=E.cell[i];c.innerHTML=t?icon(t):'';c.classList.toggle('sel',!!t&&t.uid===sel);c.classList.remove('eqd');}
-  for(i=0;i<8;i++){var u=eq[i],ti=u&&byUid(u),c2=E.slot[i];c2.innerHTML=ti?icon(ti):'';c2.classList.toggle('sel',!!ti&&ti.uid===sel);c2.classList.toggle('eqd',!!ti);}
-  var s=sel&&byUid(sel);
-  if(s){E.info.className='tb-info';E.info.innerHTML='<div class=\"ic\">'+icon(s)+'</div><div class=\"nm\">'+esc(s.ten)+'</div><div class=\"sl\">'+SLOTN[s.slot]+'</div><div class=\"ds\">'+esc(s.mo||'')+'</div>'+(isEq(s.uid)?'<div class=\"st\">Đang trang bị</div>':'');}
+  for(var pk in picks)if(!byUid(pk))delete picks[pk];
+  for(i=0;i<E.cell.length;i++){var t=b[i],c=E.cell[i];c.innerHTML=t?icon(t)+(t.kh?'<span class="tb-lk">🔒</span>':''):'';c.classList.toggle('sel',!!t&&!multi&&t.uid===sel);c.classList.toggle('pk',!!t&&!!picks[t.uid]);c.classList.remove('eqd');}
+  for(i=0;i<8;i++){var u=eq[i],ti=u&&byUid(u),c2=E.slot[i];c2.innerHTML=ti?icon(ti)+(ti.kh?'<span class="tb-lk">🔒</span>':''):'';c2.classList.toggle('sel',!!ti&&!multi&&ti.uid===sel);c2.classList.toggle('pk',!!ti&&!!picks[ti.uid]);c2.classList.toggle('eqd',!!ti);}
+  var s=sel&&byUid(sel),a=tgt();
+  if(multi){
+    E.info.className='tb-info';
+    E.info.innerHTML='<div class="nm">Chọn nhiều</div><div class="sl">Đã chọn '+a.length+' món</div>'+(a.length?'<div class="ds">'+a.slice(0,6).map(function(u){return esc(byUid(u).ten)+(byUid(u).kh?' 🔒':'');}).join('<br>')+(a.length>6?'<br>…':'')+'</div>':'<div class="ds">Chạm vào các ô trang bị cần chọn</div>');}
+  else if(s){E.info.className='tb-info';E.info.innerHTML='<div class="ic">'+icon(s)+'</div><div class="nm">'+esc(s.ten)+(s.kh?' 🔒':'')+'</div><div class="sl">'+SLOTN[s.slot]+'</div><div class="ds">'+esc(s.mo||'')+'</div>'+(isEq(s.uid)?'<div class="st">Đang trang bị</div>':'');}
   else{E.info.className='tb-info em';E.info.textContent='Chọn một trang bị';}
-  setBo(!!s&&isEq(s.uid));
+  E.bChon.classList.toggle('act',multi);E.bBC.classList.toggle('on',multi);E.bTC.classList.toggle('on',multi);
+  E.ovEq.classList.toggle('on',!a.some(isEq));          /* chưa chọn / món chọn chưa mặc -> nút hiện "Trang Bị"; món đã mặc -> hiện "Tháo Trang Bị" vẽ sẵn */
+  E.ovKh.classList.toggle('on',!!a.length&&a.every(function(u){return byUid(u).kh;}));   /* món chọn đã khóa -> nút hiện "Mở Khóa" */
+  if(csOpen)renderCs();
 }
+function btn(r,label,fn){var b=mk('button','tb-b',r.x,r.y,r.w,r.h);b.type='button';b.setAttribute('aria-label',label);b.addEventListener('click',fn);return b;}
+function pl(r,txt,fs){var d=mk('div','tb-pl',r.x,r.y,r.w,r.h,txt);d.style.fontSize='calc(var(--u)*'+fs+')';return d;}
+function plb(r,txt,fn){var b=mk('button','tb-pl btn',r.x,r.y,r.w,r.h,txt);b.type='button';b.style.fontSize='calc(var(--u)*19)';b.addEventListener('click',fn);return b;}
+/* ===== BẢNG CHỈ SỐ: chỉ số cộng thêm từ đồ đang mặc + buff bộ ===== */
+function fmtV(S,v){var t=S?S.t:'n';return '+'+(t==='f'?Math.round(v):Math.round(v*10)/10)+(t==='p'?'%':'');}
+function setTxt(v){var o=[];if(v.ch!=null)o.push('Tỉ lệ kích hoạt '+v.ch+'%');if(v.pct!=null)o.push('Hiệu lực '+v.pct+'%');if(v.mul!=null)o.push('Mức phản '+v.mul+'%');return o.join(' · ');}
+function renderCs(){
+  if(!E.cs)return;
+  var mac=dangMac(),h='',LT=window.TTGLT,BO=window.TTGBO,k;
+  h+='<div class="h"><span>Chỉ số trang bị</span><button type="button" data-x="1">Đóng</button></div><div class="bd">';
+  h+='<div class="ln"><span>Đang mặc</span><b>'+mac.length+'/8 món</b></div>';
+  h+='<div class="sec">Chỉ số cộng thêm</div>';
+  var T=LT&&LT.tong?LT.tong():{},n=0;
+  if(LT&&LT.STATS)for(k in LT.STATS){if(T[k]){n++;h+='<div class="ln"><span>'+esc(LT.STATS[k].n)+'</span><b>'+fmtV(LT.STATS[k],T[k])+'</b></div>';}}
+  if(!n)h+='<div class="em">'+(mac.length?'Các món đang mặc chưa có chỉ số':'Chưa mặc trang bị nào')+'</div>';
+  h+='<div class="sec">Buff bộ trang bị</div>';
+  var act=BO&&BO.sets?BO.sets():[],cnt={},m=0;
+  act.forEach(function(x){m++;h+='<div class="bo"><div class="t">'+esc(x.ten)+' ('+x.n+'/4) · '+(x.full?'Đủ bộ':'Mốc 2 món')+'</div><div class="d">'+esc(setTxt(x.v))+'</div></div>';});
+  mac.forEach(function(t){var z=Math.floor(Number(t.bo));if(z>=0&&BO&&BO.SETS&&BO.SETS[z])cnt[z]=(cnt[z]||0)+1;});
+  var on={};act.forEach(function(x){on[x.z]=1;});
+  for(k in cnt)if(!on[k]){m++;h+='<div class="bo off"><div class="t">'+esc(BO.SETS[k].ten)+' ('+cnt[k]+'/4)</div><div class="d">Cần mặc từ 2 món cùng bộ để kích hoạt buff</div></div>';}
+  if(!m)h+='<div class="em">Chưa kích hoạt buff bộ nào (mặc từ 2 món cùng bộ)</div>';
+  h+='</div>';
+  E.cs.innerHTML=h;
+  var x=E.cs.querySelector('[data-x]');if(x)x.addEventListener('click',toggleCs);}
+function toggleCs(){csOpen=!csOpen;if(!E.cs)return;E.cs.classList.toggle('on',csOpen);if(csOpen)renderCs();}
+function dangMac(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}
 function build(){
   root=document.createElement('div');root.className='tb';
   fr=document.createElement('div');fr.className='tb-fr';root.appendChild(fr);
@@ -127,14 +203,15 @@ function build(){
    E.oc=OC_X.map(function(cx){var c=mk('canvas','tb-oc',cx-OC_S/2,OC_Y-OC_S/2,OC_S,OC_S);c.width=c.height=208;return c;});
   E.cv=mk('canvas','tb-cv',PET.cx-CV.w/2,PET.by-CV.up,CV.w,CV.up+CV.down);
   E.emp=mk('div','tb-emp',TXT.x,TXT.y,TXT.w,TXT.h,'Chưa có Thú ra trận');
-  /* nút BỎ TRANG BỊ: ảnh phủ (x1376,y682 cỡ 182x74) đè lên nút TRANG BỊ vẽ sẵn khi đang chọn món ĐÃ mặc; bật/tắt bằng TTGTB.setBo(true/false) (chờ làm 8 ô trang bị để nối) */
-  E.ovB=mk('img','tb-ov',OV_BOX.x,OV_BOX.y,OV_BOX.w,OV_BOX.h);E.ovB.src=OV_BO;E.ovB.alt='';E.ovB.draggable=false;
   /* 8 ô trang bị (2 cột bên) + lưới túi 4x6 + bảng THÔNG TIN + 2 nút dưới bảng */
   E.slot=[];for(var i=0;i<8;i++)(function(k){var c=cell(SLOT_X[k<4?0:1],SLOT_Y[k%4],SLOT_W,SLOT_H);c.setAttribute('aria-label',SLOTN[k]);c.addEventListener('click',function(){pickSlot(k);});E.slot.push(c);})(i);
   E.cell=[];for(var r=0;r<6;r++)for(var q=0;q<4;q++)(function(k){var c=cell(GRID_X[k%4],GRID_Y[(k/4)|0],GRID_W,GRID_H);c.addEventListener('click',function(){pickBag(k);});E.cell.push(c);})(r*4+q);
   E.info=mk('div','tb-info',INFO.x,INFO.y,INFO.w,INFO.h);
-  var bE=mk('button','tb-b',BTN_EQ.x,BTN_EQ.y,BTN_EQ.w,BTN_EQ.h);bE.type='button';bE.setAttribute('aria-label','Trang Bị');bE.addEventListener('click',doEquip);
-  var bV=mk('button','tb-b',BTN_VUT.x,BTN_VUT.y,BTN_VUT.w,BTN_VUT.h);bV.type='button';bV.setAttribute('aria-label','Vứt Bỏ');bV.addEventListener('click',doVut);
+  E.bChon=btn(BTN_CHON,'Chọn',doChon);E.bKhoa=btn(BTN_KHOA,'Khóa',doKhoa);E.bThao=btn(BTN_EQ,'Tháo Trang Bị',doThao);btn(BTN_VUT,'Vứt Bỏ',doVut);btn(BTN_CS,'Chỉ Số',toggleCs);
+  E.ovEq=pl(BTN_EQ,'Trang Bị',25);E.ovKh=pl(BTN_KHOA,'Mở Khóa',25);   /* ảnh nút trống phủ khi đổi trạng thái (pointer-events none: bấm vẫn xuống nút trong suốt bên dưới) */
+  E.ovEq.style.pointerEvents='none';E.ovKh.style.pointerEvents='none';
+  E.bBC=plb(BTN_BC,'Bỏ chọn',doBoChon);E.bTC=plb(BTN_TC,'Chọn tất cả',doChonAll);   /* chỉ hiện khi bật CHỌN */
+  E.cs=mk('div','tb-cs',CSP.x,CSP.y,CSP.w,CSP.h);
   E.ts=document.createElement('div');E.ts.className='tb-ts';root.appendChild(E.ts);
   /* nút X vẽ sẵn trong ảnh (tâm ~ x1587,y84): vùng bấm trong suốt 124x124 */
   var x=mk('button','tb-x',1525,22,124,124);x.type='button';x.setAttribute('aria-label','Đóng');x.addEventListener('click',close);
@@ -142,7 +219,7 @@ function build(){
   /* bấm ra ngoài khung thì đóng (chặn 400ms đầu để cú chạm mở không đóng luôn) */
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
   /* Esc: bắt ở pha capture và chặn lại, để chỉ đóng khung này, KHÔNG đóng luôn panel Thú Thần bên dưới */
-  document.addEventListener('keydown',function(e){if(isOpen&&e.key==='Escape'){e.stopImmediatePropagation();close();}},true);
+  document.addEventListener('keydown',function(e){if(isOpen&&e.key==='Escape'){e.stopImmediatePropagation();if(csOpen){toggleCs();return;}close();}},true);
   window.addEventListener('resize',unit);
 }
 /* hiện thú ra trận (lấy từ TTGTHU.getRaTran()); không có thì ẩn thú, hiện chữ */
@@ -172,9 +249,9 @@ function drawPet(ts){
   if(R&&rk)R.ring(ctx,rk,x,gy,ts,'truoc');
 }
 function loop(ts){if(!isOpen){raf=0;return;}drawPet(ts);raf=requestAnimationFrame(loop);}
-function open(){if(!root)build();render();renderItems();isOpen=true;openAt=performance.now();root.classList.add('on');unit();sizeCv();fitName();if(!raf)raf=requestAnimationFrame(loop);}
-function close(){if(!root)return;isOpen=false;root.classList.remove('on');}
+function open(){if(!root)build();multi=false;picks={};csOpen=false;E.cs.classList.remove('on');render();renderItems();isOpen=true;openAt=performance.now();root.classList.add('on');unit();sizeCv();fitName();if(!raf)raf=requestAnimationFrame(loop);}
+function close(){if(!root)return;isOpen=false;multi=false;picks={};csOpen=false;if(E.cs)E.cs.classList.remove('on');root.classList.remove('on');}
 
-function setBo(on){if(E.ovB)E.ovB.classList.toggle('on',!!on);}   /* on=true: hiện nút BỎ TRANG BỊ đè lên TRANG BỊ */
+function setBo(on){}   /* giữ lại cho tương thích: nút đổi Trang Bị/Tháo Trang Bị nay tự theo món đang chọn */
 window.TTGTB={fixEq:fixEq,open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,get:getItem,update:updItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);},dangMac:function(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}};   /* dangMac: danh sách món ĐANG MẶC (đọc trường bo = số vùng 0..16 của bộ, dùng cho luật bộ trang bị trong trận: 70-bo-trang-bi.js) */
 })();

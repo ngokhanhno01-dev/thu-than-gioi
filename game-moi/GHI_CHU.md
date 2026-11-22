@@ -91,3 +91,11 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - **CHƯA có:** cửa hàng bán Vé Bảo Hộ / Đá Ngũ Sắc (main bán 1.000 / 1.500 xu), Hộp Nguyên Liệu, bán trang bị, hiệu ứng 3 giây của Đập. Hiện 2 món kia chưa có nguồn nhận (trừ demo).
 - **Thử nhanh:** thêm `?luat=demo` vào link, mở Rèn/Cường hóa lần đầu được tặng sẵn nguyên liệu 17 bộ, đá, vé, Ngũ Sắc, 20.000 Tinh Thạch (1 lần mỗi phiên).
 
+
+## 22/11/2026 - Khung Trang Bị mới + Chỉ Số / Khóa / Chọn
+- `khung-trang-bi.webp` thay bằng khung mới 1667x865 (đã cắt nền xanh). Tọa độ ô, lưới, bảng Thông Tin, 4 nút, nút Chỉ Số đều ở khối khai báo đầu `55-trang-bi.js`.
+- `nut-trong.webp` (176x78) = khung nút CHỌN đã xóa chữ, dùng cho: "Trang Bị" (phủ lên nút Tháo Trang Bị khi món chọn chưa mặc), "Mở Khóa", "Bỏ chọn", "Chọn tất cả". Chữ viết bằng CSS (font tiêu đề của game).
+- **Chỉ Số**: bảng nổi, đọc `TTGLT.tong()` (chỉ số cộng từ đồ đang mặc) và `TTGBO.sets()` (buff bộ), kèm bộ mới có 1 món (chưa đủ 2 món để kích hoạt).
+- **Khóa**: trường `kh` trên từng món trang bị (lưu cùng kho `ttg_moi_trangbi_v1`). Món khóa / đang mặc không vứt được.
+- **Chọn**: bật chọn nhiều (nút Chọn phát sáng) -> hiện 2 nút Bỏ chọn (tắt chế độ + xóa lựa chọn) / Chọn tất cả. Khóa, Vứt Bỏ, Tháo Trang Bị áp dụng cho mọi món đã chọn. Balo (`53-balo.js`) có cùng 2 nút; nút Chọn của Balo không còn đổi sang ảnh "Bỏ chọn" (chỉ phát sáng).
+- Chưa dùng nữa (có thể xóa nếu muốn): `nut-da-trang-bi.webp`, `nut-bo-trang-bi.webp`, `nut-bo-chon.webp`.
