@@ -94,7 +94,7 @@ function mainRange(z,s){var m=PIECE[s],a=val(z,m.main,0,1,m.b),b=val(z,m.main,4,
 function pickKeys(excl,n){var pool=Object.keys(STATS).filter(function(k){return k!==excl;}).map(function(k){return [k,W[k]||1];}),out=[],i,j,x,t;
   for(i=0;i<n&&pool.length;i++){t=0;pool.forEach(function(p){t+=p[1];});x=Math.random()*t;for(j=0;j<pool.length-1;j++){x-=pool[j][1];if(x<0)break;}out.push(pool.splice(j,1)[0][0]);}
   return out;}
-function roll(z,s,q){var L=pickKeys(PIECE[s].main,EQ.LINES).map(function(k){return [k,Math.round((EQ.ROLL[0]+Math.random()*(EQ.ROLL[1]-EQ.ROLL[0]))*1000)/1000];});return {z:z,s:s,q:q,e:0,L:L};}
+function roll(z,s,q){var L=pickKeys(PIECE[s].main,EQ.LINES).map(function(k){return [k,Math.round((EQ.ROLL[0]+Math.random()*(EQ.ROLL[1]-EQ.ROLL[0]))*1000)/1000];});return {z:z,s:s,q:q,e:0,L:L,v:2};}   /* v:2 = dòng đã theo khóa chỉ số demo (xem migrate) */
 /* các trường hiển thị của 1 món (tên, ảnh, mô tả, ô, bộ, cấp mặc) - dựng lại mỗi lần đổi cấp cường hóa */
 function decor(it){var P=PIECE[it.s];
   return {id:'eq-'+it.z+'-'+P.k,ten:'['+QN[it.q]+'] '+P.n+' '+zoneName(it.z)+(it.e?' +'+it.e:''),img:eqImg(it.z,it.s),slot:P.slot,bo:it.z,lv:zbStart(it.z),
@@ -109,6 +109,15 @@ function apDung(ps){if(!ps)return ps;var T=tong(),o=Object.assign({},ps),k;
     if(STATS[k].t==='f')o[k]=Math.round((o[k]||0)+T[k]);
     else o[k]=r1((o[k]||0)+T[k]);}   /* KHÔNG có trần: cộng thẳng. Giới hạn (nếu cần) do luật chiến đấu xử lý sau */
   return o;}
+/* ĐỒ CŨ trong túi (khóa của main: atk, def, spd, eva, stun, regen, crit, mag) -> khóa demo. Pháp Công (mag) đổi thành ST đặc biệt (stdb) như món Ngọc. Giữ nguyên mức roll, giá trị tính lại theo bảng mới.
+   Dòng trùng chỉ số mặc định của món (nếu có) bị bỏ. Chạy 1 lần khi nạp (món đã có v:2 thì bỏ qua). Trả số món đã chuyển. */
+var OLD2NEW={atk:'tc',def:'pt',spd:'td',eva:'ne',stun:'choang',regen:'hm',crit:'cm',mag:'stdb'};
+function migrate(){if(!root.TTGTB||!TTGTB.list||!TTGTB.update)return 0;var n=0;
+  TTGTB.list().forEach(function(it){if(it.z==null||!PIECE[it.s]||it.v===2)return;
+    var seen={},main=PIECE[it.s].main,L=[];
+    (it.L||[]).forEach(function(l){var k=OLD2NEW.hasOwnProperty(l[0])?OLD2NEW[l[0]]:l[0];if(!STATS[k]||k===main||seen[k])return;seen[k]=1;L.push([k,l[1]]);});
+    var t=Object.assign({},it,{L:L,v:2}),p=decor(t);p.L=L;p.v=2;TTGTB.update(it.uid,p);n++;});
+  return n;}
 /* ===================== RÈN (fgDo) ===================== */
 function check(z,s){var n=need(z),I=ids(z,s),miss=[],ok=true;
   ['boss','main','shared'].forEach(function(k){var have=root.TTGBALO?TTGBALO.count(I[k]):0;if(have<n[k]){ok=false;miss.push((root.TTGBALO&&TTGBALO.CAT[I[k]]?TTGBALO.CAT[I[k]].ten:I[k])+' ('+have+'/'+n[k]+')');}});
@@ -164,8 +173,9 @@ function demo(){if(!demoOn||demoDone||!root.TTGBALO)return;try{if(sessionStorage
   demoDone=true;var z,s,n,t;for(z=0;z<NZ;z++){n=need(z);TTGBALO.add(bossId(z),n.boss*PIECE.length);for(s=0;s<4;s++)TTGBALO.add(matId(z,s),n.main);TTGBALO.add(matId(z,SHARED),n.shared*PIECE.length);}
   for(t=1;t<=ENH_TIER_MAX;t++)TTGBALO.add('da_ch'+t,30);TTGBALO.add('ve_bao_ho',10);TTGBALO.add('da_ngu_sac',30);if(root.TTGTIEN)TTGTIEN.add('tt',20000);}
 regItems();
+try{migrate();}catch(e){}
 root.TTGLT={ZN:ZN,PIECE:PIECE,CATN:CATN,QN:QN,QC:QC,QB:QB,EQ:EQ,STATS:STATS,ENH:{MAX:EQ.MAX,RATE:ENH_RATE,DROP_FROM:ENH_DROP_FROM,RB_PCT:ENH_RB_PCT,TIER_MAX:ENH_TIER_MAX},
   need:need,ids:ids,check:check,ren:ren,cuongHoa:cuongHoa,tierOf:tierOf,enhNeed:enhNeed,rateAt:rateAt,rbMax:rbMax,resolve:resolve,tierZones:tierZones,
   lines:lines,lineTxt:lineTxt,mainRange:mainRange,decor:decor,tong:tong,apDung:apDung,rates:rates,roiDo:roiDo,moTa:moTa,
-  zoneName:zoneName,zoneCol:zoneCol,setName:setName,zbStart:zbStart,eqImg:eqImg,itemImg:itemImg,regItems:regItems,demo:demo};
+  zoneName:zoneName,zoneCol:zoneCol,setName:setName,zbStart:zbStart,eqImg:eqImg,itemImg:itemImg,regItems:regItems,migrate:migrate,demo:demo};
 })(typeof window!=='undefined'?window:globalThis);
