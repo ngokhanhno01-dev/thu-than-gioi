@@ -6,7 +6,7 @@
          Sức chứa (trái) + chuyển trang (phải) nằm ngay trên lưới ô.
    Mọi vị trí bên dưới tính theo pixel ẢNH ĐÃ CẮT 1761x847 (BW x BH). Cỡ chữ/độ dày trong CSS ({n}) vẫn tính theo thang cũ 1469 (UB) nên không phải chỉnh lại; --u = clientWidth/UB.
    DỮ LIỆU: kho đồ {id: số lượng} lưu ở khóa ttg_moi_balo_v1. Danh mục item (CAT) khai ở khối "DANH MỤC ITEM" bên dưới hoặc gọi TTGBALO.reg({...}).
-   API: TTGBALO.open()/close(), .add(id,n) (n âm = trừ), .count(id), .reg(items), .xoaTrang().
+   API: TTGBALO.open()/close(), .add(id,n) (n âm = trừ), .count(id), .reg(items), .xoaTrang(), .list() (đọc lưới túi cho khung Cường hóa).
    XÓA TRẮNG (21/11/2026): TTGBALO.xoaTrang() = xóa sạch túi đồ + khóa + kiểu sắp xếp (bộ nhớ và localStorage). Gọi từ màn chọn thú đầu game (65-chon-thu-dau.js) để mô phỏng người chơi lần đầu. Bỏ qua ở chế độ demo.
    THỬ BẢNG: thêm ?balo=demo vào link -> có sẵn vài item mẫu (không lưu lại). */
 (function(){
@@ -194,5 +194,7 @@ function close(){if(!root)return;E.cf.style.display='none';multi=false;picks={};
 /* ===== ICON NÚT BALO (SVG vẽ tay, màu SÁNG để nổi trên nền tối: balo vàng cam, túi xanh lam, khóa ngọc; nút tự có quầng sáng + phát sáng ở 52-nut-vuong.js) ===== */
 var ICON='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="bkG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe680"/><stop offset="1" stop-color="#ff9a1f"/></linearGradient><linearGradient id="bkC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a6f6ff"/><stop offset="1" stop-color="#2d9cff"/></linearGradient></defs><path d="M24 14C24 3 40 3 40 14" fill="none" stroke="#5a2a00" stroke-width="5.6" stroke-linecap="round"/><path d="M24 14C24 3 40 3 40 14" fill="none" stroke="#fff0a8" stroke-width="3" stroke-linecap="round"/><rect x="5.5" y="33" width="9.5" height="19" rx="4.5" fill="url(#bkC)" stroke="#5a2a00" stroke-width="2.2"/><rect x="49" y="33" width="9.5" height="19" rx="4.5" fill="url(#bkC)" stroke="#5a2a00" stroke-width="2.2"/><path d="M14 28C14 18 21 12 32 12S50 18 50 28V52C50 58 47 61 42 61H22C17 61 14 58 14 52Z" fill="url(#bkG)" stroke="#5a2a00" stroke-width="2.6" stroke-linejoin="round"/><path d="M14 28C14 18 21 12 32 12S50 18 50 28C44 34 20 34 14 28Z" fill="#fff0a0" stroke="#5a2a00" stroke-width="2.2" stroke-linejoin="round"/><rect x="19.5" y="41" width="25" height="15" rx="4.5" fill="url(#bkC)" stroke="#5a2a00" stroke-width="2.2"/><path d="M20 47H44" stroke="#fff" stroke-opacity=".75" stroke-width="1.5"/><path d="M32 26.5L36.6 32 32 38.5 27.4 32Z" fill="#8ff6ff" stroke="#05556b" stroke-width="1.8" stroke-linejoin="round"/><path d="M32 28.5L34.2 32H32Z" fill="#fff"/><path d="M18.5 24C19.5 19 23.5 15.5 28 14.5" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="2.2" stroke-linecap="round"/><path d="M56 6L57.2 9.6 60.8 10.8 57.2 12 56 15.6 54.8 12 51.2 10.8 54.8 9.6Z" fill="#fff"/></svg>';
 TTGNV.add({id:'balo',ten:'Balo',icon:ICON,onTap:open,r:0}); /* r:0 = hàng trên, cùng hàng với Thú Thần */
-window.TTGBALO={open:open,close:close,add:add,count:count,reg:reg,CAT:CAT,xoaTrang:xoaTrang};
+/* list(): danh sách món trong lưới Balo (nguyên liệu + sách kỹ năng) theo kiểu sắp xếp hiện tại: [{id,n,ten,loai,ic,img,mo}]. Khung Cường hóa (72-khung-ren-cuong-hoa.js) đọc túi chính bằng hàm này. */
+function list(){return ids('luoi').map(function(id){var c=CAT[id];return {id:id,n:inv[id]|0,ten:c.ten,loai:c.loai,ic:c.ic,img:c.img,mo:c.mo};});}
+window.TTGBALO={open:open,close:close,add:add,count:count,reg:reg,CAT:CAT,xoaTrang:xoaTrang,list:list};
 })();
