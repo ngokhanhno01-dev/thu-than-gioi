@@ -566,5 +566,5 @@ function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=M
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
   if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:n,lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv)};}
-window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges};   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+window.TTGTHU={tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges,pc:pcPaint};   /* pc(canvas có data-u=đường dẫn ảnh): vẽ thú tự phóng vừa ô (khung Tiến Hóa 72-khung-ren-cuong-hoa.js dùng) */   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
 })();
