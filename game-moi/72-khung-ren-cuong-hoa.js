@@ -2,7 +2,8 @@
    Ảnh: game-moi/khung-cuong-hoa.webp (1671x941), khung-ren.webp (1672x941), khung-tien-hoa.webp (1536x868). Ảnh gốc PNG: game-moi/khung-goc/.
    Các ô mẫu màu hồng trong ảnh gốc đã được tô nền xanh đậm; ở đây đặt sẵn nút bấm trong suốt đúng vị trí từng ô.
    TIẾN ĐỘ: KHUNG + đóng (nút X / bấm ra ngoài / Esc) + ô đã có vị trí + LƯỚI TÚI đã nối dữ liệu thật (xem khối NGUỒN TÚI): chọn ô (viền sáng), cuộn lưới bằng lăn chuột / vuốt dọc. CHƯA có logic Đập / Rèn (bấm nút: báo "Sắp có").
-   Toạ độ tính theo PIXEL ẢNH. API: TTGKH.open('ch'|'ren'|'th') / .close() / .isOpen() / .slots(loai) -> [{el,k}] để gắn đồ vào ô. */
+   Toạ độ tính theo PIXEL ẢNH. API: TTGKH.open('ch'|'ren'|'th') / .close() / .isOpen() / .slots(loai) -> [{el,k}] để gắn đồ vào ô.
+   SỬA LỖI 22/11/2026: canvas thú ở ô to khung Tiến Hóa (.kh-pc) bị luật chung canvas{position:fixed} của index.html phóng to che cả màn hình. Đã ghi đè vị trí/kích thước bằng !important (giống .tt-c canvas.pc bên 54-thu-than.js). Canvas luôn nằm TRONG ô, rộng tối đa 92% ô, giữ tỉ lệ vuông. */
 (function(){
 'use strict';
 var D={
@@ -106,7 +107,8 @@ function css(){
  '.kh-q{position:absolute;right:9%;bottom:6%;font-size:calc(var(--u)*24);font-weight:800;line-height:1;text-shadow:0 1px 2px #000,0 0 3px #000;pointer-events:none}'+
  '.kh-t{position:absolute;left:0;right:0;bottom:2%;text-align:center;font-size:calc(var(--u)*19);font-weight:800;color:#bfffd0;text-shadow:0 1px 2px #000,0 0 3px #000;pointer-events:none}'+
  '.kh-tr{touch-action:none;cursor:pointer;border-radius:12px}.kh-th{position:absolute;left:8%;right:8%;border-radius:10px;background:rgba(40,14,0,.42);box-shadow:inset 0 0 0 calc(var(--u)*2) rgba(255,246,190,.85);pointer-events:none}'+
- '.kh-c canvas.kh-pc{width:92%;height:auto;aspect-ratio:1;pointer-events:none}'+
+ /* canvas thú trong ô: PHẢI ghi đè luật chung canvas{position:fixed...} của index.html, nếu không thú bị phóng to che cả màn hình */
+ '.kh-c canvas.kh-pc{position:relative!important;left:auto!important;top:auto!important;right:auto!important;bottom:auto!important;display:block;width:92%!important;height:auto!important;max-width:92%;aspect-ratio:1/1;flex:none;pointer-events:none;image-rendering:auto!important}'+
  '.kh-c.sel{box-shadow:0 0 0 calc(var(--u)*3) #fff3a0,0 0 calc(var(--u)*14) calc(var(--u)*4) rgba(255,211,77,.85);background:rgba(255,211,77,.12)}';
  document.head.appendChild(s);
 }
