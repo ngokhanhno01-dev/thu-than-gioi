@@ -12,7 +12,7 @@
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var KEY='ttg_moi_balo_v1',CAP=100,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=3',OV_KHOA='game-moi/nut-mo-khoa.webp?v=1',OV_CHON='game-moi/nut-bo-chon.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
+var KEY='ttg_moi_balo_v1',CAP=100,STACK=99,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=3',OV_KHOA='game-moi/nut-mo-khoa.webp?v=1',OV_CHON='game-moi/nut-bo-chon.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
 var demo=/[?&](balo|thu)=demo/.test(location.search);   /* ?thu=demo cũng bật demo Balo để có sách kỹ năng mẫu cho panel Thú Thần (không lưu) */
 var LOAI={nl:'Nguyên liệu',bong:'Ngự Thú Châu',sach:'Sách kỹ năng'};   /* sách kỹ năng nằm chung lưới 4x4 với nguyên liệu; danh mục sách khai ở 54-thu-than.js */
 /* ===== DANH MỤC ITEM ===== mỗi item: id:{loai:'nl'|'bong', ten, mo (mô tả), ic (emoji tạm) hoặc img (đường dẫn ảnh icon), cap (cấp bóng)} */
@@ -117,7 +117,7 @@ function build(){
   mk('div','bl-pl',295,192,262,38,'Ngự Thú Châu'); /* chữ nằm giữa thanh vàng (thanh: x295-557, y190-233) */
   E.balls=mk('div','bl-balls',105,252,705,470);
   E.slots=[];
-  for(var r=0;r<6;r++)for(var c=0;c<4;c++){var b=mk('button','bl-sl',COLS[c],ROWS[r],SL,SL);b.type='button';(function(i){b.addEventListener('click',function(){clickSlot(i);});})(r*4+c);E.slots.push(b);}
+  for(var r=0;r<PAGE/4;r++)for(var c=0;c<4;c++){var b=mk('button','bl-sl',COLS[c],ROWS[r],SL,SL);b.type='button';(function(i){b.addEventListener('click',function(){clickSlot(i);});})(r*4+c);E.slots.push(b);}
   E.dt=mk('div','bl-dt',1385,235,290,535); /* bảng thông tin item bên phải */
   /* 4 nút: vùng bấm trong suốt đặt lên 4 nút đã vẽ sẵn: [x,y,rộng,cao] (chữ trên nút nằm trong ảnh khung nên không đổi được; trạng thái hiện bằng quầng sáng + thông báo nổi) */
   /* ảnh nút đổi trạng thái (cắt từ khung mới): [x,y,rộng,cao] khớp đúng vị trí nút KHÓA / CHỌN. Đổi ảnh thì giữ nguyên kích thước/vị trí */
@@ -137,9 +137,11 @@ function build(){
   window.addEventListener('resize',unit);
 }
 function unit(){if(fr)fr.style.setProperty('--u',(fr.clientWidth/UB)+'px');}
-function pages(){return Math.max(1,Math.ceil(CAP/PAGE));}
+/* Ô lưới: mỗi ô tối đa STACK (99) món cùng loại; số lượng lớn hơn thì tách thành nhiều ô. Trả [[id,số trong ô],...] theo thứ tự xếp hiện tại */
+function ods(){var out=[];ids('luoi').forEach(function(id){var c=inv[id]|0,n;while(c>0){n=Math.min(STACK,c);out.push([id,n]);c-=n;}});return out;}
+function pages(){return Math.max(1,Math.ceil(Math.max(CAP,ods().length)/PAGE));}
 function pick(id){sel=id;if(multi){if(picks[id])delete picks[id];else picks[id]=1;}render();}
-function clickSlot(i){var id=ids('luoi')[page*PAGE+i];if(!id)return;pick(id);}
+function clickSlot(i){var e=ods()[page*PAGE+i];if(!e)return;pick(e[0]);}
 function targets(){var a=multi?Object.keys(picks).filter(function(id){return CAT[id]&&count(id)>0;}):[];if(!a.length&&sel&&!multi)a=[sel];return a;}
 function toast(t){if(window.TTGTBAO){TTGTBAO.toast(t,1800);return;}E.ts.textContent=t;E.ts.style.display='flex';clearTimeout(tt);tt=setTimeout(function(){E.ts.style.display='none';},1800);}
 /* KHÓA: món đã khóa không vứt được. Tất cả đang khóa -> mở khóa, ngược lại -> khóa hết */
@@ -165,12 +167,12 @@ function vut(){var t=targets();if(!t.length){toast('Chưa chọn vật phẩm');
 /* SẮP XẾP: bấm đổi kiểu xếp (nhặt -> tên -> số lượng) */
 function xep(){sortMode=(sortMode+1)%3;saveMeta();page=0;toast(SORTN[sortMode]);render();}
 function render(){
-  var nl=ids('luoi'),bg=ids('bong'),i;
+  var nl=ods(),bg=ids('bong'),i;
   if(page>pages()-1)page=pages()-1;
   if(sel&&(!CAT[sel]||count(sel)<=0))sel=null;
   E.cap.textContent=nl.length+'/'+CAP;E.pg.textContent=(page+1)+'/'+pages();E.pv.disabled=page<=0;E.nx.disabled=page>=pages()-1;
-  for(i=0;i<E.slots.length;i++){var id=nl[page*PAGE+i],b=E.slots[i];
-    if(id){var it=CAT[id];b.innerHTML='<span class="i">'+ic(it)+'</span>'+(lock[id]?'<span class="lk">🔒</span>':'')+'<span class="q">'+(count(id)>1?count(id):'')+'</span>';b.setAttribute('aria-label',it.ten);}
+  for(i=0;i<E.slots.length;i++){var e=nl[page*PAGE+i],id=e&&e[0],b=E.slots[i];
+    if(id){var it=CAT[id];b.innerHTML='<span class="i">'+ic(it)+'</span>'+(lock[id]?'<span class="lk">🔒</span>':'')+'<span class="q">'+(e[1]>1?e[1]:'')+'</span>';b.setAttribute('aria-label',it.ten);}
     else{b.innerHTML='';b.removeAttribute('aria-label');}
     b.classList.toggle('sel',id===sel&&!!id&&!multi);b.classList.toggle('pk',!!id&&!!picks[id]);}
   E.balls.innerHTML='';
