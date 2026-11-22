@@ -44,6 +44,17 @@ CROP = {
     '1h': (0.50, 0.55, 0.45),   # Băng Linh (linh thể lá): mặt ở giữa thân
     '1i': (0.28, 0.50, 0.45),   # Băng Nham (khủng long giáp): đầu bên trái
     '1j': (0.30, 0.45, 0.55),   # Băng Sơn Cự Thú (voi ma mút): đầu + ngà bên trái
+    # --- vùng 1 Sương Cốc (ảnh b1) ---
+    '2a': (0.13, 0.33, 0.30),   # Sương Thát (chồn nằm ngang): đầu bên trái
+    '2b': (0.22, 0.32, 0.30),   # Vụ Dực (chim mỏ dài): đầu + mào bên trái
+    '2c': (0.30, 0.43, 0.36),   # Sương Xuyên (tê tê): đầu bên trái
+    '2d': (0.30, 0.36, 0.50),   # Sương Khải (cá giáp): đầu giáp bên trái
+    '2e': (0.27, 0.55, 0.42),   # Sương Diệp (bọ giáp): mắt lớn bên trái
+    '2f': (0.20, 0.40, 0.38),   # Vụ Tiêu (rồng-ốc): đầu bên trái
+    '2g': (0.22, 0.35, 0.42),   # Sương Viên (khỉ): đầu + bờm bên trái
+    '2h': (0.30, 0.44, 0.40),   # Vụ Tùng (cây): mặt ở thân
+    '2i': (0.24, 0.38, 0.40),   # Sương Nha (hổ răng kiếm): đầu bên trái
+    '2j': (0.23, 0.53, 0.32),   # Vạn Trượng Vụ Thú (boss): đầu bên trái
 }
 
 # Màu QUẦNG SÁNG theo vùng (z -> hex). Khóa theo số vùng của 51-thu-moi.js
