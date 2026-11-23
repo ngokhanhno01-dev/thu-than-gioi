@@ -99,6 +99,10 @@ CROP = {
     '5h': (0.25, 0.36, 0.40),   # Nguyệt Quy (rùa): đầu bên trái
     '5i': (0.33, 0.35, 0.50),   # Nguyệt Tiên (tiên): mặt bên trái
     '5j': (0.24, 0.25, 0.45),   # Nguyệt Thực Tế Quân (boss, sói): đầu bên trái-trên
+    # --- 3 thú khởi đầu (vùng 6-8; ảnh b1, thú quay mặt sang trái) ---
+    'k1': (0.24, 0.33, 0.52),   # Viêm Sư (sư tử lửa): mặt + bờm bên trái
+    'k2': (0.18, 0.50, 0.42),   # Lưu Diêu (cá cánh): đầu + mắt bên trái
+    'k3': (0.22, 0.46, 0.52),   # Lâm Trư (heo rừng): đầu + mõm bên trái
 }
 
 # Màu QUẦNG SÁNG theo vùng (z -> hex). Khóa theo số vùng của 51-thu-moi.js
