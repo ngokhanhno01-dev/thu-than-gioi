@@ -3,7 +3,8 @@
    Đổi bậc thú dùng TTGTHU.setTien(uid,n) (54-thu-than.js). Chỉ số sau tiến hóa do TTGCS.tinh tính theo tien.
 
    ITEM THEO VÙNG: 9 vùng (z0..z8) x 3 loại (Lõi, Châu, Thần Ấn) = 27 item (z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm = vùng của 3 thú khởi đầu, chưa mở: icon làm sẵn), loai:'th' (chỉ hiện trong túi của khung Tiến Hóa, không hiện ở Balo chính). Id: th-z<vùng>-<loi|chau|an>. Ảnh: game-moi/icon-th/<id>.png (128x128).
-   ITEM MẢNH THEO LOÀI (thay Mảnh theo vùng cũ th-z*-manh, đã xóa; khóa cũ còn trong Balo được dọn lúc nạp): mỗi loài thú có 1 Mảnh riêng, id th-m-<id thú> (vd th-m-1f), tên "Mảnh <tên thú>", ảnh game-moi/icon-th/th-m-<id>.png tạo bằng tools/tao-manh-ghep.py. Danh sách loài đọc từ TTGCS.dsLoai (không gõ tay). Mảnh chỉ khai cho vùng có trong CFG.vungManh (vùng đã làm ảnh mảnh xong); thêm vùng mới = thêm số vùng vào CFG.vungManh sau khi chạy script tạo ảnh.
+   ITEM MẢNH THEO LOÀI (thay Mảnh theo vùng cũ th-z*-manh, đã xóa; khóa cũ còn trong Balo được dọn lúc nạp): mỗi loài thú có 1 Mảnh riêng, id th-m-<id thú> (vd th-m-1f), tên "Mảnh <tên thú>", ảnh game-moi/icon-th/th-m-<id>.png tạo bằng tools/tao-manh-ghep.py. Danh sách loài đọc từ TTGCS.dsLoai (không gõ tay). Mảnh chỉ khai cho vùng có trong CFG.vungManh (đã gồm cả 6-8 = vùng 3 thú khởi đầu); thêm vùng mới = thêm số vùng vào CFG.vungManh sau khi chạy script tạo ảnh.
+   ẢNH DỰ PHÒNG: ảnh item nào thiếu file (chưa upload) thì tự vẽ hình viên đá màu theo loại + chữ cái đầu tên (hàm phImg, bắt sự kiện error của thẻ img có đường dẫn icon-th/), để không hiện icon ảnh vỡ. Có file thật thì ảnh thật tự dùng, không cần sửa code.
    CÔNG THỨC (CFG.cong, khóa = bậc ĐÍCH): Lõi/Châu/Thần Ấn theo VÙNG GỐC của thú (TTGCS.loai(id).goc), riêng 'manh' = Mảnh CỦA CHÍNH LOÀI ĐÓ; 3 ô vòng = 3 món.
       Bậc 1 -> 2: Mảnh loài x6 + Lõi x2 + Châu x1   Bậc 2 -> 3: Lõi x5 + Châu x3 + Thần Ấn x1 (không dùng Mảnh)
    RƠI: CHỈ thú hoang (địch source 'demo') và boss thú hoang CHẾT mới rơi (gọi từ index.html lúc thắng trận); quái vùng (source 'main') đã có bộ item riêng ở 73-luat-trang-bi.js nên KHÔNG rơi ở đây. Bắt thú không rơi.
@@ -28,8 +29,8 @@ var TEN=[
  ['Lõi Thanh Diệp','Châu Cổ Thụ','Thần Ấn Lâm Chủ']];
 var CFG={
  nutTest:true,   /* nút test "Lấy đồ TH" (hàng dưới, cạnh Lấy sách). Đặt false khi đã có nguồn rơi ổn định */
- /* vùng ĐÃ có ảnh Mảnh theo loài (chạy tools/tao-manh-ghep.py --vung <z> rồi thêm số vùng vào đây). Vùng chưa có thì chưa khai Mảnh, chưa rơi Mảnh */
- vungManh:[0,1,2,3,4,5],
+ /* vùng ĐÃ khai item Mảnh theo loài (ảnh thiếu thì dùng ảnh dự phòng; chạy tools/tao-manh-ghep.py --vung <z> rồi upload để có ảnh thật). 6-8 = vùng 3 thú khởi đầu (Lưu Diêu, Viêm Sư, Lâm Trư) */
+ vungManh:[0,1,2,3,4,5,6,7,8],
  /* công thức: khóa = bậc đích (tien mới). Mỗi phần tử = [loại item, số lượng], theo thứ tự ô vòng: trái, phải, dưới.
     'manh' = Mảnh CỦA CHÍNH LOÀI thú đang tiến hóa (th-m-<id thú>); loi/chau/an = item của vùng gốc */
  cong:{2:[['manh',6],['loi',2],['chau',1]],3:[['loi',5],['chau',3],['an',1]]},
@@ -52,7 +53,7 @@ function reg(){
  for(z=0;z<NZ;z++)for(i=0;i<3;i++){k=KIND[i];
   o[id(z,k)]={loai:'th',ten:TEN[z][i],img:D+id(z,k)+'.png',
    mo:MO[k]+' của vùng '+ZONE[z]+'. Dùng tiến hóa thú gốc vùng này'+(k==='an'?' (V2 → V3). Chỉ rơi từ boss thú hoang.':'. Rơi từ thú hoang vùng này.')};}
- /* Mảnh theo từng loài (chỉ vùng đã có ảnh) */
+ /* Mảnh theo từng loài (chỉ vùng đã khai) */
  CFG.vungManh.forEach(function(zv){dsThu(zv).forEach(function(s){
   o[idManh(s.id)]={loai:'th',ten:'Mảnh '+s.ten,img:D+idManh(s.id)+'.png',
    mo:'Mảnh của '+s.ten+' (vùng '+ZONE[zv]+'). Dùng để tiến hóa chính loài này lần 1. Rơi khi thắng '+s.ten+' hoang dã.'};});});
@@ -66,6 +67,28 @@ function nm(i){var c=root.TTGBALO&&TTGBALO.CAT[i];if(c)return c.ten;
  if(i.indexOf('th-m-')===0){var L=root.TTGCS&&TTGCS.loai?TTGCS.loai(i.slice(5)):null;return 'Mảnh '+(L?L.ten:i.slice(5));}
  return i;}
 function ra(){return root.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;}
+
+/* ===================== ẢNH DỰ PHÒNG =====================
+   Ảnh icon-th/<id>.png chưa upload (404) thì thẻ <img> báo lỗi: vẽ thay bằng viên đá màu theo loại (Lõi cam, Châu xanh, Thần Ấn tím, Mảnh đỏ) + chữ cái đầu tên. Có ảnh thật thì không chạy tới đây. */
+var PH={};
+function phImg(src){
+ var m=/icon-th\/(th-[\w-]+)\.png/.exec(src||'');if(!m)return null;var i=m[1];if(PH[i])return PH[i];
+ try{
+  var kind=i.indexOf('th-m-')===0?'manh':i.split('-').pop(),
+   COL={loi:['#ffd08a','#a8431a'],chau:['#9fe9ff','#1f5fb3'],an:['#e3bcff','#5a2aa0'],manh:['#ffa0a0','#8a1f2f']}[kind]||['#cfd6e6','#44506b'],
+   c=document.createElement('canvas'),g,gr,ten=nm(i).replace(/^(Mảnh|Lõi|Châu|Thần Ấn)\s+/,''),ch=(ten.charAt(0)||'?').toUpperCase();
+  c.width=c.height=128;g=c.getContext('2d');
+  gr=g.createRadialGradient(64,50,8,64,64,62);gr.addColorStop(0,COL[0]);gr.addColorStop(1,COL[1]);
+  g.beginPath();
+  if(kind==='manh'){g.moveTo(64,8);g.lineTo(108,50);g.lineTo(92,116);g.lineTo(34,110);g.lineTo(18,48);}
+  else{g.moveTo(64,8);g.lineTo(114,64);g.lineTo(64,120);g.lineTo(14,64);}
+  g.closePath();g.fillStyle=gr;g.fill();g.lineJoin='round';g.lineWidth=7;g.strokeStyle='rgba(10,10,40,.9)';g.stroke();g.lineWidth=3;g.strokeStyle='rgba(255,255,255,.7)';g.stroke();
+  g.font='bold 58px "Noto Serif",Georgia,serif';g.textAlign='center';g.textBaseline='middle';g.lineWidth=8;g.strokeStyle='rgba(10,10,40,.9)';g.strokeText(ch,64,68);g.fillStyle='#fff';g.fillText(ch,64,68);
+  return PH[i]=c.toDataURL('image/png');
+ }catch(e){return null;}}
+if(typeof document!=='undefined'&&!root.__ttgThPh){root.__ttgThPh=1;
+ document.addEventListener('error',function(e){var im=e.target;if(!im||im.tagName!=='IMG'||im.getAttribute('data-ph'))return;
+  var u=phImg(im.getAttribute('src'));if(!u)return;im.setAttribute('data-ph','1');im.src=u;},true);}   /* sự kiện error không nổi bọt nên bắt ở pha capture */
 
 /* ===================== LUẬT ===================== */
 function zoneOf(t){var L=root.TTGCS&&TTGCS.loai?TTGCS.loai(t.id):null,z=L&&L.goc!=null?L.goc:0;return (z>=0&&z<NZ)?z:0;}
