@@ -120,3 +120,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Icon (đã tách nền, có chữ tên nằm trong ảnh) ở `game-moi/icon/`: tham-hiem, thu-than (Linh Thú), trang-bi (Pháp Bảo), ren (Luyện Khí), balo (Túi Trữ Vật), cuong-hoa. Gắn theo id trong `TTGNV.cfg.art` (52-nut-vuong.js); thêm icon mới: bỏ ảnh webp vào thư mục đó + 1 dòng trong `art`. Ảnh gốc nền xanh đêm được tách bằng color-to-alpha (giữ hiệu ứng phát sáng).
 - **Nút Thám hiểm** = icon lớn `hero:true`, luôn nằm GIỮA thanh nút và cách đều viền trên/dưới (`cfg.heroH` = cao, `cfg.heroCy` = tâm dọc, đã đo: hở trên = hở dưới). Hai nút dài cũ (Thám hiểm, Chọn vùng) đã bỏ. Khung dài cuối icon hiện **tên vùng + số vùng**; chạm khung đó mở bảng chọn vùng, chạm phần còn lại đi thám hiểm.
 - Còn 24 ô: bên trái nút thường, bên phải đặt `rc`/`r` (Đấu trường, Phó bản, Cửa hàng, Đấu giá...).
+
+## Bảng chọn vùng (23/11/2026)
+- Bấm icon Thám hiểm -> hiện bảng `icon/khung-chon-vung.webp` (18 ô, cột trái vùng 1-9, cột phải vùng 10-18; ô chưa có vùng ghi "Sắp ra mắt"). Mỗi ô: tên vùng, số loài đã giết / tổng, hoặc "🔒 Cần N ★". Chọn vùng đã mở = đổi vùng + đi Thám hiểm luôn (`TTGDV.CFG.batDauNgay=false` thì chỉ đổi vùng). Bấm ô khóa: dòng nhắc hiện ngay dưới khung. Danh Vọng + trần cấp hiện dưới khung.
+- Thanh dưới icon Thám hiểm chỉ hiển thị vùng đang ở (không bấm chọn nữa).

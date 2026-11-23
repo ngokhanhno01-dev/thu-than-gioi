@@ -5,14 +5,15 @@
    - TRẦN CẤP thú nuôi = TTGCS.tranCap(Danh Vọng) = min(100, 10 + floor(DV x 0,55)): DV 0 -> Lv.10, DV 10 -> Lv.15 (54-thu-than.js capMax đọc TTGDV.tran()).
    - Hiển thị: ngôi sao + số trong ô nhỏ dưới chữ "Danh Vọng" ở khung trên (draw, gọi từ index.html sau drawExp). Tọa độ theo pixel khung-sanh.webp: sửa PLATE.
    CHỌN VÙNG
-   - Nút dài dưới nút Thám hiểm (ảnh nut-chon-vung.webp, chữ là DOM nên đổi theo vùng). Bấm -> bảng danh sách vùng.
+   - Bấm icon Thám hiểm (59-nut-tham-hiem.js) -> bảng chọn vùng dùng khung icon/khung-chon-vung.webp (18 ô = 2 cột x 9 hàng, tọa độ SLOT); chọn vùng đã mở thì đi Thám hiểm ngay (CFG.batDauNgay). Thanh tên vùng dưới icon Thám hiểm chỉ hiển thị vùng đang ở.
    - Vùng thứ n (n = 1, 2, 3...; theo z tăng dần trong THU_MOI.zones) cần 10 x (n-1) Danh Vọng để mở: vùng 1 mở sẵn, vùng 2 cần 10, vùng 3 cần 20... (CFG.moiVung).
    - Vùng đang chọn lưu ở ttg_moi_vung; Thám hiểm gặp thú/quái của VÙNG ĐÃ CHỌN (61-tham-hiem-tran.js đọc TTGDV.vung()).
    - Thử nhanh: thêm ?dv=30 vào link để tạm cộng 30 Danh Vọng (không lưu). */
 (function(root){
 'use strict';
 var KEY='ttg_moi_dv',KEYV='ttg_moi_vung';
-var CFG={moiVung:10,devTaps:1};   /* devTaps = số lần chạm liên tiếp (trong 1,2s) vào chữ "Danh Vọng" để mở menu ẩn các nút test; 1 = chạm 1 lần, đặt 3-5 khi ra bản thật. */
+var FW=1672,FH=941,SLOT={x:[167,852],y:[161,238,316,392,468,544,620,695,769],w:654,h:60,rows:9,n:18};   /* khung-chon-vung.webp: 2 cột x 9 hàng = 18 ô, tọa độ theo ảnh gốc 1672x941. Cột trái = vùng 1-9, cột phải = vùng 10-18 */
+var CFG={moiVung:10,devTaps:1,batDauNgay:true};   /* batDauNgay: chọn vùng xong tự đi Thám hiểm luôn (false = chỉ đổi vùng). */   /* devTaps = số lần chạm liên tiếp (trong 1,2s) vào chữ "Danh Vọng" để mở menu ẩn các nút test; 1 = chạm 1 lần, đặt 3-5 khi ra bản thật. */
 var HOT={x0:118,x1:298,y0:88,y1:238},TOPH=816,BLEED={l:10,t:6};   /* vùng chữ "Danh Vọng" (px ảnh khung-sanh.webp) + số đo khung trên giống index.html (FRM.top.h, BG_BLEED) */
 var PLATE={cx:198.5,cy:283.5,w:112,h:26};   /* ô xanh dưới chữ Danh Vọng, theo pixel ảnh khung-sanh.webp (1843x816) */
 var S={kills:{}},IDX=0,extra=0,mo0=[];
@@ -54,24 +55,24 @@ function draw(c,ox,oy,s){
   c.strokeText(n,x0+R*2+gap,cy+fs*.04);c.fillText(n,x0+R*2+gap,cy+fs*.04);
   c.restore();}
 /* ---- nút chọn vùng + bảng chọn ---- */
-var btn=null,span=null,ov=null;
+var btn=null,span=null,ov=null,tmr=0;
 function css(){var s=document.createElement('style');s.textContent=[
 '.nv .dv-vt{position:absolute;left:15.5%;width:69%;top:86.5%;height:7.1%;display:flex;align-items:center;justify-content:center;white-space:nowrap;font-family:"Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;font-style:italic;font-weight:800;letter-spacing:.01em;line-height:1;color:#ffe27a;pointer-events:none;text-shadow:0 0 .1em #fff2a8,0 0 .3em rgba(255,176,40,.8),.06em 0 0 #3a1a00,-.06em 0 0 #3a1a00,0 .06em 0 #3a1a00,0 -.06em 0 #3a1a00}',
-'#dv-ov{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(2,4,18,.62);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
-'#dv-ov .dv-pn{width:min(440px,92vw);max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#171d44,#0b0f26);border:2px solid #d9b45a;border-radius:12px;box-shadow:0 0 0 2px #0a0d22,0 0 22px rgba(90,170,255,.45);color:#fff}',
-'#dv-ov .dv-hd{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-weight:800;font-size:17px;color:#ffe27a}',
-'#dv-ov .dv-hd b{flex:1}',
-'#dv-ov .dv-x{width:30px;height:30px;border-radius:8px;border:1px solid #d9b45a;background:#1b2250;color:#ffe27a;font-size:16px;cursor:pointer}',
-'#dv-ov .dv-in{padding:0 12px 8px;font-size:13px;color:#bcd2ff;line-height:1.45}',
-'#dv-ov .dv-in em{font-style:normal;color:#ffe27a;font-weight:700}',
-'#dv-ov .dv-ls{overflow:auto;padding:4px 10px 12px;display:flex;flex-direction:column;gap:6px}',
-'#dv-ov .dv-r{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;border:1px solid #3a4a8a;background:linear-gradient(180deg,#1a2352,#10173a);cursor:pointer;min-height:38px}',
-'#dv-ov .dv-r.on{border-color:#ffd45a;box-shadow:0 0 10px rgba(255,212,90,.55) inset}',
-'#dv-ov .dv-r.kh{opacity:.55;cursor:not-allowed;filter:grayscale(.5)}',
-'#dv-ov .dv-r .n{flex:1;font-weight:700;font-size:15px}',
-'#dv-ov .dv-r .n small{display:block;font-weight:400;font-size:11px;color:#9fb4e8}',
-'#dv-ov .dv-r .t{font-size:12px;color:#bcd2ff;text-align:right;white-space:nowrap}',
-'#dv-ov .dv-r.on .t{color:#ffe27a;font-weight:700}',
+'#dv-ov{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(2,4,18,.68);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
+'#dv-ov .dvp{position:relative;background:url(game-moi/icon/khung-chon-vung.webp?v=1) 0 0/100% 100% no-repeat;color:#fff;user-select:none;-webkit-user-select:none}',
+'#dv-ov .dvw{display:flex;flex-direction:column;align-items:center;gap:6px}',
+'#dv-ov .dvw .in{display:flex;gap:18px;font-size:14px;color:#bcd2ff;white-space:nowrap;line-height:1;text-shadow:0 1px 3px #000,0 0 6px #000}',
+'#dv-ov .dvw .in em{font-style:normal;color:#ffe27a;font-weight:800}',
+'#dv-ov .dvp .x{position:absolute;left:86.2%;top:10.8%;width:3.4%;height:6%;border:0;background:rgba(10,18,50,.75);border-radius:50%;color:#ffe27a;font-size:30em;line-height:1;cursor:pointer;padding:0}',
+'#dv-ov .dvp .r{position:absolute;box-sizing:border-box;display:flex;align-items:center;gap:.6em;padding:0 3.6%;cursor:pointer;font-size:29em;line-height:1;font-weight:700;color:#e8f0ff;border-radius:8em;transition:background .12s}',
+'#dv-ov .dvp .r:active{background:rgba(255,212,90,.16)}',
+'#dv-ov .dvp .r .n{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+'#dv-ov .dvp .r .n i{font-style:normal;font-weight:400;color:#9fb4e8;font-size:.82em}',
+'#dv-ov .dvp .r .t{font-size:.82em;color:#bcd2ff;white-space:nowrap;font-weight:600}',
+'#dv-ov .dvp .r.on{background:linear-gradient(90deg,rgba(255,212,90,.28),rgba(255,212,90,.08));box-shadow:0 0 0 1px rgba(255,226,122,.9) inset,0 0 .9em rgba(255,212,90,.55)}',
+'#dv-ov .dvp .r.on .t{color:#ffe27a;font-weight:800}',
+'#dv-ov .dvp .r.kh{opacity:.5;cursor:not-allowed;filter:grayscale(.4)}',
+'#dv-ov .dvp .r.em{opacity:.32;cursor:default}',
 '#dv-hot{position:fixed;z-index:7;background:transparent;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:default}',
 '#dv-dev .dv-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px;padding:6px 12px 14px;overflow:auto}',
 '#dv-dev .dv-b{padding:12px 8px;border-radius:9px;border:1px solid #3a4a8a;background:linear-gradient(180deg,#1a2352,#10173a);color:#fff;font:700 14px "Segoe UI",system-ui,sans-serif;cursor:pointer}',
@@ -82,20 +83,25 @@ function fit(){if(!span||!btn)return;var ch=span.clientHeight,cw=span.clientWidt
   if(sw>cw)span.style.fontSize=(fs*cw/sw*.97).toFixed(2)+'px';}   /* chữ cao ~92% khung tên; tên dài thì thu nhỏ cho vừa bề ngang */
 function capNhat(){if(span){span.textContent=ten();requestAnimationFrame(fit);}if(ov&&ov.style.display==='flex')lap();}
 function lap(){
-  var l=zones(),dv=get(),cur=chi(),tc=tran(),ls=ov.querySelector('.dv-ls');
-  ov.querySelector('.dv-in').innerHTML='<em>★ Danh Vọng: '+dv+'</em> · Trần cấp thú nuôi: <em>Lv.'+tc+'</em><br>Giết thú hoang và boss (mỗi loài tính 1 lần) để tăng Danh Vọng.';
-  ls.innerHTML='';
-  l.forEach(function(z,i){var d=document.createElement('div'),mo=moRoi(i),n=0;
-    (z.thu||[]).forEach(function(t){if(S.kills[t.id])n++;});
-    d.className='dv-r'+(i===cur?' on':'')+(mo?'':' kh');
-    d.innerHTML='<div class="n">'+z.ten+' <span style="color:#9fb4e8;font-weight:400">· Vùng '+(i+1)+'</span><small>Đã giết '+n+'/'+(z.thu||[]).length+' loài</small></div><div class="t">'+(i===cur?'Đang ở đây':mo?'Bấm để sang':'🔒 Cần '+can(i)+' Danh Vọng')+'</div>';
+  var l=zones(),dv=get(),cur=chi(),tc=tran(),p=ov.querySelector('.dvp');
+  ov.querySelector('.in').innerHTML='<span>★ Danh Vọng <em>'+dv+'</em></span><span>Trần cấp thú nuôi <em>Lv.'+tc+'</em></span>';
+  var rs=p.querySelectorAll('.r');for(var k=rs.length-1;k>=0;k--)rs[k].remove();
+  for(var i=0;i<SLOT.n;i++){(function(i){
+    var z=l[i],d=document.createElement('div'),c=Math.floor(i/SLOT.rows),r=i%SLOT.rows,x=SLOT.x[c],y=SLOT.y[r];
+    d.style.left=(x/FW*100)+'%';d.style.top=(y/FH*100)+'%';d.style.width=(SLOT.w/FW*100)+'%';d.style.height=(SLOT.h/FH*100)+'%';
+    if(!z){d.className='r em';d.innerHTML='<div class="n">Sắp ra mắt</div>';p.appendChild(d);return;}
+    var mo=moRoi(i),n=0;(z.thu||[]).forEach(function(t){if(S.kills[t.id])n++;});
+    d.className='r'+(i===cur?' on':'')+(mo?'':' kh');
+    d.innerHTML='<div class="n">'+z.ten+' <i>· Vùng '+(i+1)+'</i></div><div class="t">'+(i===cur?'● Đang ở · ':'')+(mo?(n+'/'+(z.thu||[]).length):'🔒 Cần '+can(i)+' ★')+'</div>';
     d.addEventListener('click',function(){
-      if(!moRoi(i)){toast('Cần '+can(i)+' Danh Vọng để mở khóa '+z.ten+' (hiện có '+dv+')');return;}
-      set(i);dong();toast('Đã chọn '+z.ten+' Vùng '+(i+1));});
-    ls.appendChild(d);});}
+      if(!moRoi(i)){var inf=ov.querySelector('.in');inf.innerHTML='<span>🔒 Cần <em>'+can(i)+'</em> Danh Vọng để mở '+z.ten+' (hiện có <em>'+dv+'</em>)</span>';clearTimeout(tmr);tmr=setTimeout(function(){if(ov.style.display==='flex')lap();},2600);return;}   /* nhắc ngay dưới khung, không dùng toast (toast che các ô) */
+      set(i);dong();
+      if(CFG.batDauNgay&&root.TTGTHAMHIEM&&root.TTGTHAMHIEM.start)root.TTGTHAMHIEM.start();else toast('Đã chọn '+z.ten+' Vùng '+(i+1));});
+    p.appendChild(d);})(i);}}
+function size(){if(!ov)return;var p=ov.querySelector('.dvp'),w=Math.min(innerWidth*.97,(innerHeight*.97-28)*FW/FH);p.style.width=Math.round(w)+'px';p.style.height=Math.round(w*FH/FW)+'px';p.style.fontSize=(w/FW)+'px';}
 function toast(t){try{if(root.TTGTBAO&&root.TTGTBAO.toast){root.TTGTBAO.toast(t);return;}}catch(e){}
   var d=document.createElement('div');d.textContent=t;d.style.cssText='position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:70;background:rgba(10,14,40,.92);color:#ffe27a;border:1px solid #d9b45a;border-radius:8px;padding:8px 14px;font:700 14px "Segoe UI",sans-serif;max-width:90vw;text-align:center';document.body.appendChild(d);setTimeout(function(){d.remove();},2200);}
-function mo(){if(!ov)return;lap();ov.style.display='flex';}
+function mo(){if(!ov)return;size();lap();ov.style.display='flex';}
 /* ---- menu ẩn: gom nút TEST/ADMIN (TTGNV.cfg.dev) ---- */
 var hot=null,dev=null,taps=0,tapT=0;
 function moDev(){if(!dev)return;var g=dev.querySelector('.dv-g'),l=(root.TTGNV&&root.TTGNV.dev)||[];g.innerHTML='';
@@ -113,9 +119,9 @@ function init(){
   btn=document.querySelector('.nv[data-id="tham-hiem"]');if(!btn)return false;
   css();
   ov=document.createElement('div');ov.id='dv-ov';
-  ov.innerHTML='<div class="dv-pn"><div class="dv-hd"><b>Chọn vùng</b><button type="button" class="dv-x">✕</button></div><div class="dv-in"></div><div class="dv-ls"></div></div>';
+  ov.innerHTML='<div class="dvw"><div class="dvp"><button type="button" class="x" aria-label="Đóng">✕</button></div><div class="in"></div></div>';
   ov.addEventListener('click',function(e){if(e.target===ov)dong();});
-  ov.querySelector('.dv-x').addEventListener('click',dong);
+  ov.querySelector('.x').addEventListener('click',dong);
   document.body.appendChild(ov);
   dev=document.createElement('div');dev.id='dv-dev';dev.className='dv-o2';dev.style.cssText='position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(2,4,18,.55);font-family:"Segoe UI",system-ui,sans-serif';
   dev.innerHTML='<div class="dv-pn" style="width:min(440px,92vw);max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#171d44,#0b0f26);border:2px solid #d9b45a;border-radius:12px;color:#fff"><div class="dv-hd" style="display:flex;align-items:center;padding:10px 12px 4px;font-weight:800;font-size:16px;color:#ffe27a"><b style="flex:1">Menu thử (ẩn)</b><button type="button" class="dv-x" style="width:30px;height:30px;border-radius:8px;border:1px solid #d9b45a;background:#1b2250;color:#ffe27a;font-size:16px;cursor:pointer">✕</button></div><div class="dv-g"></div></div>';
@@ -127,7 +133,7 @@ function init(){
   /* tên vùng nằm trong khung dài của icon Thám hiểm (59-nut-tham-hiem.js) */
   span=document.createElement('span');span.className='dv-vt';btn.appendChild(span);
   var lay0=root.TTGNV.layout;root.TTGNV.layout=function(m){lay0(m);datHot(m);requestAnimationFrame(fit);};
-  capNhat();datHot();window.addEventListener('resize',function(){requestAnimationFrame(fit);});
+  capNhat();datHot();window.addEventListener('resize',function(){size();requestAnimationFrame(fit);});
   return true;}
 root.TTGDV={CFG:CFG,PLATE:PLATE,get:get,tran:tran,can:can,kill:kill,moMoi:moMoi,vung:vung,ten:ten,set:set,draw:draw,mo:mo,dong:dong,zones:zones};
 if(!init()){var tries=0,iv=setInterval(function(){if(init()||++tries>40)clearInterval(iv);},250);}
