@@ -8,8 +8,8 @@
 var CFG={
   life:1100,                 /* thời gian sống 1 chữ (ms); index.html lọc fx theo con số này (+ chút dư) */
   numSize:27,numRise:38,numStart:2,          /* số: cỡ chữ, bay lên bao nhiêu điểm, bắt đầu cao hơn đỉnh đầu bấy nhiêu */
-  lblSize:14,lblRise:12,lblStart:30,lblGap:15,lblMax:4,   /* chữ: cỡ, bay lên, bắt đầu cao hơn đỉnh đầu, khoảng cách giữa các tầng, tối đa tầng */
-  maxW:120                   /* chữ dài hơn mức này (điểm game) thì tự co lại */
+  lblSize:21,lblRise:14,lblStart:30,lblGap:22,lblMax:4,   /* chữ: cỡ, bay lên, bắt đầu cao hơn đỉnh đầu, khoảng cách giữa các tầng, tối đa tầng */
+  maxW:170                   /* chữ dài hơn mức này (điểm game) thì tự co lại */
 };
 var FONT='italic 900 {S}px "Noto Serif",Georgia,serif';
 function F(s){return FONT.replace('{S}',Math.max(6,Math.round(s)));}
