@@ -10,5 +10,5 @@ var FN=[
   ['dau-truong','Vạn Thú Tranh Phong'],['boss-the-gioi','Boss Thế Giới'],['pho-ban','Bí Cảnh'],['thap-thi-luyen','Tháp Thí Luyện'],
   ['cua-hang','Kỳ Trân Các'],['diem-danh','Điểm danh'],['nhiem-vu','Nhiệm vụ'],['do-giam','Đồ Giám']
 ];
-FN.forEach(function(f){TTGNV.add({id:f[0],ten:f[1],onTap:soon(f[1])});});
+FN.forEach(function(f){var o={id:f[0],ten:f[1],onTap:soon(f[1])};if(f[0]==='pho-ban'){o.beside='r';o.w=62;o.h=62;}/* Bí Cảnh: nằm ngay bên phải nút Thám hiểm, to hơn nút thường */TTGNV.add(o);});
 })();

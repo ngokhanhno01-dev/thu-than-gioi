@@ -197,7 +197,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
  <div id="tl"><div class="pn"><div class="hd"><span>Chọn thú</span><button class="x" id="tlx">Đóng</button></div><div id="tlb"></div></div></div>
 </div>
 <script src="51-thu-moi.js"></script>
-<script src="game-moi/52-nut-vuong.js?v=6"></script>
+<script src="game-moi/52-nut-vuong.js?v=7"></script>
 <script src="game-moi/64-thong-bao.js"></script>
 <script src="game-moi/63-nhan-nut.js"></script>
 <script src="game-moi/53-balo.js"></script>
@@ -231,7 +231,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/73-luat-trang-bi.js"></script>
 <script src="game-moi/74-ren-cuong-hoa.js"></script>
 <script src="game-moi/75-tien-hoa-thu.js"></script>
-<script src="game-moi/81-nut-moi.js"></script>
+<script src="game-moi/81-nut-moi.js?v=2"></script>
 <script>
 /* GAME MỚI (khung ban đầu). CHỈ CÓ MÀN NGANG, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
@@ -257,7 +257,7 @@ if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,BATTLE=null,A=null,typing=false;
 var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=2400,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.218,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
-var BP=86,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
+var BP=98,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 /* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */
 var BG_BLEED={l:10,r:10,t:6,b:8};
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
