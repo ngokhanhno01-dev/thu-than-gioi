@@ -26,7 +26,7 @@ var CFG={
   bo:{
     'thu-than':['l',0,0],'trang-bi':['l',1,0],'ren':['l',2,0],
     'balo':['l',0,1],'do-giam':['l',1,1],'cuong-hoa':['l',2,1],
-    'dau-truong':['r',0,0],'boss-the-gioi':['r',1,0],'thap-thi-luyen':['r',2,0],
+    'boss-the-gioi':['r',0,0],'thap-thi-luyen':['r',1,0],
     'cua-hang':['r',0,1],'diem-danh':['r',1,1],'nhiem-vu':['r',2,1]
   },
   dev:['nhan-chau','doi-rank','lay-sach','lay-do-th','admin','nl-test']   /* nút TEST/ADMIN: không đặt ra thanh nút, gom vào menu ẩn (chạm chữ "Danh Vọng", xem 80-danh-vong.js). Thêm id vào đây hoặc đặt o.dev:true cho nút test mới. */
