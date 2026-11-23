@@ -259,6 +259,13 @@ function showResult(){
   wr.appendChild(r);S.ov.appendChild(wr);paintEnemy(r.querySelector('canvas'),e,w);
   T(enter,CFG.bao);}   /* tự đóng sau 3 giây (chạm màn hình = đóng ngay, xem listener click trong build) */
 
+/* khung bao quanh phần có hình (alpha > 16) của ảnh; lỗi (ảnh khác nguồn...) thì lấy cả ảnh */
+function bbox(src,sw,sh){
+  try{var k=Math.min(1,256/Math.max(sw,sh)),cw=Math.max(1,Math.round(sw*k)),ch=Math.max(1,Math.round(sh*k)),cc=D.createElement('canvas');cc.width=cw;cc.height=ch;
+    var x=cc.getContext('2d');x.drawImage(src,0,0,cw,ch);var d=x.getImageData(0,0,cw,ch).data,x0=cw,y0=ch,x1=-1,y1=-1,i,j;
+    for(j=0;j<ch;j++)for(i=0;i<cw;i++)if(d[(j*cw+i)*4+3]>16){if(i<x0)x0=i;if(i>x1)x1=i;if(j<y0)y0=j;if(j>y1)y1=j;}
+    if(x1>=x0&&y1>=y0)return {x:x0/k,y:y0/k,w:(x1-x0+1)/k,h:(y1-y0+1)/k};}catch(e){}
+  return {x:0,y:0,w:sw,h:sh};}
 /* hình địch trong bảng kết quả: thú hoang vẽ bằng THU_MOI (ảnh 192), quái vùng nguồn main dùng ảnh game-moi/quai/<imageFile> */
 function paintEnemy(cv,e,w){
   if(!cv)return;var tok=S.tok,sz=Math.round(w*300/2121*.9),dpr=Math.min(3,root.devicePixelRatio||1),c=cv.getContext('2d'),n=0,im=null;
@@ -267,8 +274,15 @@ function paintEnemy(cv,e,w){
   function draw(){
     if(tok!==S.tok)return;var ok=false;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,sz,sz);
     try{
-      if(e.source==='demo'&&root.THU_MOI){if(THU_MOI.setFrame)THU_MOI.setFrame(192);ok=THU_MOI.draw(c,e.id,Math.max(1,Math.min(3,(e.tien|0)||1)),sz/2,sz*.97,sz*.95,true);}
-      else if(im&&im.complete&&im.naturalWidth){var f=Math.min(sz*.95/im.naturalWidth,sz*.95/im.naturalHeight),iw=im.naturalWidth*f,ih=im.naturalHeight*f;c.drawImage(im,(sz-iw)/2,sz*.97-ih,iw,ih);ok=true;}
+      /* VỪA KHUNG: vẽ ảnh gốc ra canvas phụ, đo vùng có hình (bỏ phần trong suốt) rồi phóng/thu vùng đó cho vừa ô, canh giữa -> thú nhỏ, vừa, lớn đều to bằng nhau trong khung */
+      var src=null,sw=0,sh=0;
+      if(e.source==='demo'&&root.THU_MOI){if(THU_MOI.setFrame)THU_MOI.setFrame(192);var oc=D.createElement('canvas');oc.width=oc.height=192;var o2=oc.getContext('2d');
+        if(THU_MOI.draw(o2,e.id,Math.max(1,Math.min(3,(e.tien|0)||1)),96,192,192,true)){src=oc;sw=sh=192;}}
+      else if(im&&im.complete&&im.naturalWidth){src=im;sw=im.naturalWidth;sh=im.naturalHeight;}
+      if(src){
+        var bb=bbox(src,sw,sh),box=sz*.9,f=Math.min(box/bb.w,box/bb.h),dw=bb.w*f,dh=bb.h*f;
+        c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';
+        c.drawImage(src,bb.x,bb.y,bb.w,bb.h,(sz-dw)/2,(sz-dh)/2,dw,dh);ok=true;}
     }catch(x){}
     if(!ok&&++n<30)T(draw,120);}
   if(e.source!=='demo'){var fl=e.record&&e.record.imageFile;if(fl){im=new Image();im.onload=function(){draw();};im.src=DIR+'quai/'+fl;}}
