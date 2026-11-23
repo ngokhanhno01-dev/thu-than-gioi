@@ -252,11 +252,76 @@ function orbScale(ts,t,dur){   /* nhịp tim lúc hút, rồi nảy 1.0 -> 1.18 
 }
 function open(ctx,ts,t,cap,Hx,Hy,dur){   /* lúc kích hoạt (châu mở): trận pháp xoay + sóng xung kích */
   var T=tier(cap),p=cl(t/dur),e=outC(p),R;
+  if(useImg(cap))return;   /* bậc 1 dùng ảnh: không vẽ trận pháp / sóng xung kích */
   ctx.save();ctx.globalCompositeOperation='lighter';
   R=20+26*e;magicRing(ctx,T,ts,Hx,Hy,R,.85*(1-p*p)*Math.min(1,p*5),ts/900);
   ctx.strokeStyle=T.rainbow?RB[rbIdx(ts/6)]:T.a;ctx.lineWidth=3*(1-p)+.5;ctx.globalAlpha=(1-p)*.9;ctx.beginPath();ctx.arc(Hx,Hy,8+66*e,0,TAU);ctx.stroke();   /* sóng xung kích */
   gl(ctx,T.b,Hx,Hy,60+30*p,.3+.2*p);
   ctx.restore();
+}
+
+
+/* ================= BẬC 1 THỦY: VFX BẰNG ẢNH (sprite sheet vfx_thuy_sheet.png) =================
+   Bỏ VFX vẽ tay của bậc 1, thay bằng 3 lớp cắt từ 1 tấm ảnh nền đen (1536x1024), hòa trộn cộng sáng ('lighter') => nền đen #000 tự trong suốt.
+   Toạ độ bên dưới tính theo kích thước GỐC W x H của sheet; tự nhân theo kích thước thật của ảnh nên đổi độ phân giải sheet vẫn đúng.
+   Đã đo trên ảnh thật: xoáy x129..768 y12..550 · hạt tinh tú x912..1418 y46..525 · luồng nước x20..1509 y563..977.
+   => Đường cắt an toàn: x=880 (giữa xoáy và hạt), y=556 (giữa 550 và 563). KHÔNG dùng 50%/55% vì xoáy chạm đúng mép x=768. */
+var SHEET={
+  file:'img/vfx/vfx_thuy_sheet.png',        /* tính từ thư mục chứa file này (game-moi/) */
+  W:1536,H:1024,
+  vortex:  {x:100, y:0,   w:700, h:556, cx:462,  cy:280},               /* vùng 1: vòng xoáy; (cx,cy) = tâm xoáy trong sheet */
+  particle:{x:900, y:11,  w:544, h:544, cx:1172, cy:283},               /* vùng 2: tinh tú; (cx,cy) = tâm sao */
+  stream:  {x:0,   y:556, w:1536,h:468, tx:20, ty:768, hx:1505, hy:768},/* vùng 3: luồng nước; (tx,ty) = gốc đuôi rộng, (hx,hy) = mũi nhọn */
+  vortexD:84,      /* đường kính xoáy ở tỉ lệ 1.0 (đơn vị game); phần xoáy trong ảnh rộng ~640px */
+  vortexMax:1.1,   /* tỉ lệ lớn nhất của xoáy */
+  vortexSpin:.0035,/* rad/ms, quay THEO chiều kim đồng hồ */
+  streamH:1.35,    /* độ dày luồng so với tỉ lệ dài (scaleY = scaleX * streamH) */
+  partN:18, partCyc:820, partSize:34
+};
+var SHEET_IM=null,BASE=(function(){try{var cs=document.currentScript;if(cs&&cs.src)return cs.src.replace(/[^\/?#]*([?#].*)?$/,'');}catch(e){}return 'game-moi/';})();
+(function(){try{var im=new Image();im.ok=false;im.onload=function(){im.ok=true;};im.src=BASE+SHEET.file;SHEET_IM=im;}catch(e){}})();
+function useImg(cap){return cap===1&&!!SHEET_IM&&SHEET_IM.ok;}   /* chưa nạp xong ảnh => tự dùng VFX vẽ tay cũ làm dự phòng */
+function sheetRect(ctx,R,dx,dy,dw,dh){var im=SHEET_IM,fx=im.naturalWidth/SHEET.W,fy=im.naturalHeight/SHEET.H;ctx.drawImage(im,R.x*fx,R.y*fy,R.w*fx,R.h*fy,dx,dy,dw,dh);}
+function beastPos(ex,ey,Hx,Hy,p,o){var q=p*p;o[0]=ex+(Hx-ex)*q;o[1]=ey+(Hy-ey)*q;return o;}   /* vị trí thú đang bị hút (khớp enemyFx ở 62-bat-thu.js) */
+var BP=[0,0];
+
+/* Lớp 1: VÒNG XOÁY: tâm xoay trùng tâm châu, quay thuận chiều kim đồng hồ, phóng 0 -> 1.1 lúc đầu, thu về 0 lúc kết thúc */
+function imgVortex(ctx,ts,t,Hx,Hy,dur){
+  var p=cl(t/dur),R=SHEET.vortex,k=SHEET.vortexD/640,u2=cl((p-CFG.seal)/(1-CFG.seal)),
+      s=SHEET.vortexMax*outC(p/.12)*(1-u2*u2);
+  if(s<=.004)return;
+  ctx.save();ctx.translate(Hx,Hy);ctx.rotate(ts*SHEET.vortexSpin);ctx.scale(s,s);
+  ctx.globalAlpha=.95;sheetRect(ctx,R,-(R.cx-R.x)*k,-(R.cy-R.y)*k,R.w*k,R.h*k);
+  ctx.restore();
+}
+/* Lớp 2: LUỒNG THỦY NĂNG: gốc đuôi rộng ở Linh Thú, mũi nhọn chĩa vào tâm châu, scaleX = khoảng cách / độ dài luồng; nhấp nháy 0.7..1.0 + rung dọc */
+function imgStream(ctx,ts,t,ex,ey,Hx,Hy,dur){
+  var p=cl(t/dur),R=SHEET.stream,b=beastPos(ex,ey,Hx,Hy,p,BP),dx=Hx-b[0],dy=Hy-b[1],dist=Math.sqrt(dx*dx+dy*dy),
+      len=R.hx-R.tx,fade=cl(t/160)*(1-cl((p-CFG.seal)/(1-CFG.seal))),
+      sx=dist/len*(.3+.7*outC(t/240)),sy=Math.min(.5,Math.max(.04,dist/len*SHEET.streamH)),
+      al=(.7+.3*(.5+.5*Math.sin(ts/55)*(.6+.4*Math.sin(ts/23))))*fade,   /* alpha dao động 0.7 -> 1.0 */
+      jy=Math.sin(ts/41)*1.8+Math.sin(ts/23)*.9;                          /* rung dọc nhẹ, nước cuồn cuộn */
+  if(dist<2||al<=.01)return;
+  ctx.save();ctx.translate(b[0],b[1]);ctx.rotate(Math.atan2(dy,dx));ctx.translate(0,jy);ctx.scale(sx,sy*(1+.05*Math.sin(ts/90)));
+  ctx.globalAlpha=al;sheetRect(ctx,R,-(R.tx-R.x),-(R.ty-R.y),R.w,R.h);
+  ctx.restore();
+}
+/* Lớp 3: HẠT TINH TÚ: 15-20 hạt sinh quanh Linh Thú, bay theo đường cong Bezier về tâm châu, nhanh dần (easeInQuad), nhỏ dần và biến mất khi chạm tâm */
+function imgParticles(ctx,ts,t,ex,ey,Hx,Hy,dur){
+  var p=cl(t/dur),I=inten(t,dur),R=SHEET.particle,b=beastPos(ex,ey,Hx,Hy,p,BP),n=Math.max(8,Math.ceil(SHEET.partN*CFG.q)),
+      j,raw,kc,tau,u,v,seed,a,r,x0,y0,dx,dy,L,cv,mx,my,x,y,sz,al;
+  for(j=0;j<n;j++){
+    raw=t/SHEET.partCyc+j*.6180339;kc=Math.floor(raw);tau=raw-kc;u=tau*tau;seed=j*7.31+kc*13.7;   /* easeInQuad */
+    a=hsh(seed)*TAU;r=8+20*hsh(seed+1.3);x0=b[0]+Math.cos(a)*r;y0=b[1]+Math.sin(a)*r*.8;
+    dx=Hx-x0;dy=Hy-y0;L=Math.sqrt(dx*dx+dy*dy)||1;cv=((j&1)?1:-1)*L*.3*(.6+.8*hsh(seed+2.1));
+    mx=x0+dx*.5-dy/L*cv;my=y0+dy*.5+dx/L*cv;v=1-u;
+    x=v*v*x0+2*v*u*mx+u*u*Hx;y=v*v*y0+2*v*u*my+u*u*Hy;
+    sz=SHEET.partSize*(1-u)*(.65+.5*hsh(seed+3.7));al=I*Math.min(1,tau*7);
+    if(sz<1.5||al<=.01)continue;
+    ctx.save();ctx.translate(x,y);ctx.rotate(ts/700+j);ctx.globalAlpha=al;
+    sheetRect(ctx,R,-(R.cx-R.x)/R.w*sz,-(R.cy-R.y)/R.h*sz,sz,sz*R.h/R.w);
+    ctx.restore();
+  }
 }
 
 /* ================= ĐIỂM VÀO ================= */
@@ -268,6 +333,9 @@ function inten(t,dur){var p=cl(t/dur);return cl(t/130)*(1-cl((p-CFG.seal)/(1-CFG
 /* LỚP SAU (trước khi vẽ ảnh châu): thú + trận pháp */
 function back(ctx,ts,t,cap,ex,ey,Hx,Hy,dur){
   var T=tier(cap),p=cl(t/dur),I=inten(t,dur);adapt(ts);
+  if(useImg(cap)){   /* bậc 1 (Thủy) bằng ảnh: xoáy + luồng nước nằm DƯỚI ảnh châu */
+    ctx.save();ctx.globalCompositeOperation='lighter';imgVortex(ctx,ts,t,Hx,Hy,dur);imgStream(ctx,ts,t,ex,ey,Hx,Hy,dur);ctx.restore();return true;
+  }
   ctx.save();ctx.globalCompositeOperation='lighter';
   beastFx(ctx,T,ts,t,dur,ex,ey,Hx,Hy,p,I);
   magicRing(ctx,T,ts,Hx,Hy,(46-16*p)*(1+.03*Math.sin(ts/70)),.5*I,ts/900);
@@ -276,6 +344,9 @@ function back(ctx,ts,t,cap,ex,ey,Hx,Hy,dur){
 /* LỚP TRƯỚC (sau khi vẽ ảnh châu): dải lụa, hạt, lõi xoáy, phong ấn */
 function front(ctx,ts,t,cap,ex,ey,Hx,Hy,dur){
   var T=tier(cap),p=cl(t/dur),I=inten(t,dur),n=T.mode==='bolt'?T.bolt.n:Math.max(2,Math.ceil(T.n*(CFG.q<1?.75:1))),i,u2=(p-CFG.seal)/(1-CFG.seal);
+  if(useImg(cap)){   /* hạt tinh tú nằm TRÊN ảnh châu */
+    ctx.save();ctx.globalCompositeOperation='lighter';imgParticles(ctx,ts,t,ex,ey,Hx,Hy,dur);ctx.restore();return true;
+  }
   if(T.pair&&(n&1))n++;
   ctx.save();ctx.globalCompositeOperation='lighter';
   prep(T,T.n,ex,ey,Hx,Hy);
