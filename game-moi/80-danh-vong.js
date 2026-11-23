@@ -56,7 +56,7 @@ function draw(c,ox,oy,s){
 /* ---- nút chọn vùng + bảng chọn ---- */
 var btn=null,span=null,ov=null;
 function css(){var s=document.createElement('style');s.textContent=[
-'.nv .dv-vt{position:absolute;left:19%;right:19%;top:0;bottom:0;display:flex;align-items:center;justify-content:center;white-space:nowrap;font-family:"Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;font-style:italic;font-weight:800;font-size:1.7em;letter-spacing:.01em;line-height:1;color:#ffe27a;pointer-events:none;text-shadow:0 0 .1em #fff2a8,0 0 .3em rgba(255,176,40,.8),.06em 0 0 #3a1a00,-.06em 0 0 #3a1a00,0 .06em 0 #3a1a00,0 -.06em 0 #3a1a00}',
+'.nv .dv-vt{position:absolute;left:15.5%;width:69%;top:86.5%;height:7.1%;display:flex;align-items:center;justify-content:center;white-space:nowrap;font-family:"Palatino Linotype","Book Antiqua",Georgia,"Times New Roman",serif;font-style:italic;font-weight:800;letter-spacing:.01em;line-height:1;color:#ffe27a;pointer-events:none;text-shadow:0 0 .1em #fff2a8,0 0 .3em rgba(255,176,40,.8),.06em 0 0 #3a1a00,-.06em 0 0 #3a1a00,0 .06em 0 #3a1a00,0 -.06em 0 #3a1a00}',
 '#dv-ov{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(2,4,18,.62);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
 '#dv-ov .dv-pn{width:min(440px,92vw);max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(180deg,#171d44,#0b0f26);border:2px solid #d9b45a;border-radius:12px;box-shadow:0 0 0 2px #0a0d22,0 0 22px rgba(90,170,255,.45);color:#fff}',
 '#dv-ov .dv-hd{display:flex;align-items:center;gap:8px;padding:10px 12px 6px;font-weight:800;font-size:17px;color:#ffe27a}',
@@ -77,8 +77,9 @@ function css(){var s=document.createElement('style');s.textContent=[
 '#dv-dev .dv-b{padding:12px 8px;border-radius:9px;border:1px solid #3a4a8a;background:linear-gradient(180deg,#1a2352,#10173a);color:#fff;font:700 14px "Segoe UI",system-ui,sans-serif;cursor:pointer}',
 '#dv-dev .dv-b:active{border-color:#ffd45a;background:#222c66}'
 ].join('\n');document.head.appendChild(s);}
-function fit(){if(!span||!btn)return;span.style.fontSize='';var cw=span.clientWidth,sw=span.scrollWidth;
-  if(cw>0&&sw>cw){var fs=parseFloat(getComputedStyle(span).fontSize)||0;if(fs)span.style.fontSize=(fs*cw/sw*.97).toFixed(2)+'px';}}
+function fit(){if(!span||!btn)return;var ch=span.clientHeight,cw=span.clientWidth;if(!ch||!cw)return;
+  var fs=ch*.92;span.style.fontSize=fs.toFixed(2)+'px';var sw=span.scrollWidth;
+  if(sw>cw)span.style.fontSize=(fs*cw/sw*.97).toFixed(2)+'px';}   /* chữ cao ~92% khung tên; tên dài thì thu nhỏ cho vừa bề ngang */
 function capNhat(){if(span){span.textContent=ten();requestAnimationFrame(fit);}if(ov&&ov.style.display==='flex')lap();}
 function lap(){
   var l=zones(),dv=get(),cur=chi(),tc=tran(),ls=ov.querySelector('.dv-ls');
@@ -109,6 +110,7 @@ function datHot(m){if(!hot)return;m=m||(root.TTGNV&&root.TTGNV.m&&root.TTGNV.m()
 function dong(){if(ov)ov.style.display='none';}
 function init(){
   if(!root.TTGNV||!root.THU_MOI||!root.TTGNV.add){return false;}
+  btn=document.querySelector('.nv[data-id="tham-hiem"]');if(!btn)return false;
   css();
   ov=document.createElement('div');ov.id='dv-ov';
   ov.innerHTML='<div class="dv-pn"><div class="dv-hd"><b>Chọn vùng</b><button type="button" class="dv-x">✕</button></div><div class="dv-in"></div><div class="dv-ls"></div></div>';
@@ -122,7 +124,7 @@ function init(){
   hot.addEventListener('click',function(){var t=Date.now();taps=(t-tapT<1200)?taps+1:1;tapT=t;if(taps>=CFG.devTaps){taps=0;moDev();}});
   document.body.appendChild(hot);
   /* nút dài ngay dưới nút Thám hiểm (hàng 1, kéo lên sát nút trên): ảnh 1200x190 -> 200 x 31,7 */
-  btn=root.TTGNV.add({id:'chon-vung',ten:'Chọn vùng',image:'game-moi/nut-chon-vung.webp?v=1',w:200,h:31.7,center:true,onTap:mo,r:1,offsetY:-14.5});
+  /* tên vùng nằm trong khung dài của icon Thám hiểm (59-nut-tham-hiem.js) */
   span=document.createElement('span');span.className='dv-vt';btn.appendChild(span);
   var lay0=root.TTGNV.layout;root.TTGNV.layout=function(m){lay0(m);datHot(m);requestAnimationFrame(fit);};
   capNhat();datHot();window.addEventListener('resize',function(){requestAnimationFrame(fit);});

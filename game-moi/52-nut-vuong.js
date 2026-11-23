@@ -17,6 +17,11 @@ var CFG={
   fill:'col', /* 'col' = xếp theo cột (nút 2 nằm dưới nút 1) | 'row' = xếp theo hàng */
   frame:'game-moi/khung-nut.webp?v=2',
   khung:false,   /* false = nút vuông KHÔNG có khung/nền (chỉ icon + chữ; sau này thay bằng ảnh icon riêng qua o.image). true = khung vàng-xanh đêm như cũ. Chỉ nút dài (Thám hiểm, Chọn vùng) luôn dùng ảnh riêng có khung. */
+  art:{'balo':'game-moi/icon/balo.webp','thu-than':'game-moi/icon/thu-than.webp','trang-bi':'game-moi/icon/trang-bi.webp','ren':'game-moi/icon/ren.webp','cuong-hoa':'game-moi/icon/cuong-hoa.webp'},   /* id nút -> ảnh icon đã tách nền (có chữ tên nằm sẵn trong ảnh). Thêm icon mới: bỏ ảnh vào game-moi/icon/ rồi thêm 1 dòng ở đây. Nút có o.image thì dùng ảnh của nó. */
+  ten:{'balo':'Túi Trữ Vật','thu-than':'Linh Thú','trang-bi':'Pháp Bảo','ren':'Luyện Khí'},   /* tên hiển thị mới (aria-label); chữ trên icon do ảnh tự mang */
+  heroH:79,   /* cao nút lớn giữa thanh (icon Thám hiểm) theo đơn vị game; ô trong khung dưới cao khoảng 81 (từ pixel đo được) */
+  heroCy:41.8, /* tâm dọc ô trong khung dưới, tính từ mép trên khung dưới (đã đo: cách đều viền vàng trên và dưới) */
+  /* BỐ CỤC 20 Ô: nút Thám hiểm (hero) nằm GIỮA, 2 bên mỗi bên 6 cột x 2 hàng = 24 ô (đang dùng 5 bên trái). Bên TRÁI = nút thường (tự xếp theo cột); bên PHẢI = đặt rc (cột tính từ mép phải) + r (hàng): vd TTGNV.add({id:'dau-truong',image:'...',rc:0,r:0}). */
   dev:['nhan-chau','doi-rank','lay-sach','lay-do-th','admin','nl-test']   /* nút TEST/ADMIN: không đặt ra thanh nút, gom vào menu ẩn (chạm chữ "Danh Vọng", xem 80-danh-vong.js). Thêm id vào đây hoặc đặt o.dev:true cho nút test mới. */
 };
 var list=[],M=null,devList=[];
@@ -39,10 +44,12 @@ document.head.appendChild(st);
 
 function add(o){
   if(o.dev||CFG.dev.indexOf(o.id)>=0){var d=document.createElement('button');d.type='button';d.setAttribute('data-id',o.id);devList.push({o:o,e:d});return d;}   /* nút test: không lên thanh nút, vào menu ẩn */
-  var e=document.createElement('button');e.type='button';e.className='nv';e.setAttribute('data-id',o.id);e.setAttribute('aria-label',o.ten||o.id);
+  if(!o.image&&CFG.art[o.id])o.image=CFG.art[o.id]+'?v=1';
+  if(CFG.ten[o.id])o.ten=CFG.ten[o.id];
+  var e=document.createElement('button');e.type='button';e.className='nv'+(o.hero?' nv-hero':'');e.setAttribute('data-id',o.id);e.setAttribute('aria-label',o.ten||o.id);
   if(o.image){e.className+=' nv-img';var im=document.createElement('img');im.className='nv-art';im.src=o.image;im.alt='';im.draggable=false;e.appendChild(im);}
   else{if(!CFG.khung)e.className+=' nv-nf';e.innerHTML=(CFG.khung?'<i class="nv-bg"></i>':'')+'<i class="nv-gl"></i><i class="nv-ic">'+(o.icon||'')+'</i>'+(CFG.khung?'<i class="nv-fr"></i>':'')+'<span class="nv-tx"></span>';e.querySelector('.nv-tx').textContent=o.ten||'';}
-  e.addEventListener('click',function(){if(o.onTap)o.onTap(e);});
+  e.addEventListener('click',function(ev){if(o.onTap)o.onTap(e,ev);});
   document.body.appendChild(e);list.push({o:o,e:e});
   if(M)layout(M);
   return e;}
@@ -52,9 +59,10 @@ function layout(m){
   var f=M.K/M.DPR,s=CFG.size*f,g=CFG.gap*f,x0=(M.I.l+CFG.left)*f,pt=(M.th+M.GAPB)*f,rows=Math.max(1,CFG.rows),
       blk=rows*s+(rows-1)*g,y0=pt+Math.max(0,(M.BP*f-blk)/2)+(CFG.dy||0)*f;
   var used={},pos=[],centered={},rcol={};
+  function dim(o){return o.hero?[CFG.heroH*(o.ratio||1.0922),CFG.heroH]:[o.w>0?o.w:CFG.size,o.h>0?o.h:CFG.size];}
   /* lượt 1: nút có chỉ định hàng (o.r: 0 = hàng trên, 1 = hàng dưới); nút center chiếm các ô lưới giao với ảnh để nút thêm sau không đè lên. */
   list.forEach(function(it,i){
-    if(it.o.center){var r=Math.min(Math.max(0,it.o.r==null?0:it.o.r|0),rows-1),w=(it.o.w>0?it.o.w:CFG.size),step=CFG.size+CFG.gap,base=M.I.l+CFG.left,left=M.I.l+(M.W-M.I.l-M.I.r)/2-w/2,first=Math.max(0,Math.floor((left-base)/step)),last=Math.max(first,Math.ceil((left+w-base)/step)-1);for(var cc=first;cc<=last;cc++)used[cc+','+r]=1;pos[i]=[first,r];centered[i]=1;return;}
+    if(it.o.center){var r=Math.min(Math.max(0,it.o.r==null?0:it.o.r|0),rows-1),w=dim(it.o)[0],step=CFG.size+CFG.gap,base=M.I.l+CFG.left,left=M.I.l+(M.W-M.I.l-M.I.r)/2-w/2,first=Math.max(0,Math.floor((left-base)/step)),last=Math.max(first,Math.ceil((left+w-base)/step)-1);for(var cc=first;cc<=last;cc++){if(it.o.hero){for(var rr=0;rr<rows;rr++)used[cc+','+rr]=1;}else used[cc+','+r]=1;}pos[i]=[first,r];centered[i]=1;return;}
     if(it.o.rc!=null){rcol[i]=Math.max(0,it.o.rc|0);pos[i]=[0,Math.min(Math.max(0,it.o.r==null?0:it.o.r|0),rows-1)];return;}   /* đặt theo mép phải: không chiếm ô lưới trái */
     if(it.o.r==null)return;var r=Math.min(Math.max(0,it.o.r|0),rows-1),c=0;while(used[c+','+r])c++;used[c+','+r]=1;pos[i]=[c,r];});
   /* lượt 2: nút không chỉ định hàng -> xếp vào ô trống đầu tiên theo kiểu CFG.fill */
@@ -62,8 +70,8 @@ function layout(m){
     for(;;n++){if(CFG.fill==='row'){r=Math.floor(n/6);c=n%6;}else{c=Math.floor(n/rows);r=n%rows;}if(!used[c+','+r])break;}
     used[c+','+r]=1;pos[i]=[c,r];});
   list.forEach(function(it,i){
-    var c=pos[i][0],r=pos[i][1],e=it.e,s2=e.style,iw=(it.o.w>0?it.o.w:CFG.size)*f,ih=(it.o.h>0?it.o.h:CFG.size)*f;
-    s2.display='block';s2.width=iw+'px';s2.height=ih+'px';s2.left=Math.round(rcol[i]!=null?(M.W-M.I.r-CFG.left)*f-(rcol[i]+1)*s-rcol[i]*g:centered[i]?(M.I.l+(M.W-M.I.l-M.I.r)/2)*f-iw/2:x0+c*(s+g))+'px';s2.top=Math.round(y0+r*(s+g)+(s-ih)/2+(it.o.offsetY||0)*f)+'px';
+    var c=pos[i][0],r=pos[i][1],e=it.e,s2=e.style,dm=dim(it.o),iw=dm[0]*f,ih=dm[1]*f;
+    s2.display='block';s2.width=iw+'px';s2.height=ih+'px';s2.left=Math.round(rcol[i]!=null?(M.W-M.I.r-CFG.left)*f-(rcol[i]+1)*s-rcol[i]*g:centered[i]?(M.I.l+(M.W-M.I.l-M.I.r)/2)*f-iw/2:x0+c*(s+g))+'px';s2.top=Math.round(it.o.hero?pt+(CFG.heroCy-dm[1]/2)*f:y0+r*(s+g)+(s-ih)/2+(it.o.offsetY||0)*f)+'px';
     s2.fontSize=(s*.17).toFixed(2)+'px';
   });}
 window.TTGNV={cfg:CFG,add:add,layout:layout,dev:devList,m:function(){return M;}};

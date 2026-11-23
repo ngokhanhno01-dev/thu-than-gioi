@@ -115,3 +115,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 ## Gom nút test + bỏ khung nút vuông (23/11/2026)
 - **Menu ẩn**: 6 nút test/admin (Nhận châu, Đổi rank, Lấy sách, Lấy đồ TH, Admin, NL test) không còn nằm ở thanh nút. `TTGNV.add` thấy id trong `CFG.dev` (52-nut-vuong.js) hoặc `o.dev:true` thì cất vào `TTGNV.dev`. Chạm chữ "Danh Vọng" ở khung trên mở menu liệt kê chúng (80-danh-vong.js: vùng chạm `HOT`, số lần chạm `CFG.devTaps`, nên đặt 3-5 khi ra bản thật). Muốn bỏ hẳn: xóa nút ở file gốc hoặc đặt `CFG.nutTest=false`.
 - **Nút vuông không khung**: `TTGNV.cfg.khung=false` (mặc định): bỏ khung vàng + nền, chỉ icon + chữ, icon to hơn. Đặt `true` để về kiểu cũ. Khi có icon riêng thì dùng `image:` trong `TTGNV.add` (ảnh vẽ nguyên nút, không chữ). Chỉ nút dài Thám hiểm và Chọn vùng giữ khung.
+
+## Icon mới + nút Thám hiểm giữa (23/11/2026)
+- Icon (đã tách nền, có chữ tên nằm trong ảnh) ở `game-moi/icon/`: tham-hiem, thu-than (Linh Thú), trang-bi (Pháp Bảo), ren (Luyện Khí), balo (Túi Trữ Vật), cuong-hoa. Gắn theo id trong `TTGNV.cfg.art` (52-nut-vuong.js); thêm icon mới: bỏ ảnh webp vào thư mục đó + 1 dòng trong `art`. Ảnh gốc nền xanh đêm được tách bằng color-to-alpha (giữ hiệu ứng phát sáng).
+- **Nút Thám hiểm** = icon lớn `hero:true`, luôn nằm GIỮA thanh nút và cách đều viền trên/dưới (`cfg.heroH` = cao, `cfg.heroCy` = tâm dọc, đã đo: hở trên = hở dưới). Hai nút dài cũ (Thám hiểm, Chọn vùng) đã bỏ. Khung dài cuối icon hiện **tên vùng + số vùng**; chạm khung đó mở bảng chọn vùng, chạm phần còn lại đi thám hiểm.
+- Còn 24 ô: bên trái nút thường, bên phải đặt `rc`/`r` (Đấu trường, Phó bản, Cửa hàng, Đấu giá...).
