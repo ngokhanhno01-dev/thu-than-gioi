@@ -1,15 +1,17 @@
 /* ===== 84-chu-tran.js (TTGCHU): SỐ SÁT THƯƠNG + CHỮ HIỆU ỨNG TRONG TRẬN =====
    Thay đoạn vẽ chữ nhỏ cũ (bold 18px bay từ giữa thân thú) trong index.html. Dữ liệu vẫn là st.fx = [{x,y,t,s,c}] như cũ (không đổi chỗ nào đẩy fx).
    - SỐ sát thương / hồi máu (chuỗi kết thúc bằng -N hoặc +N): chữ ĐẬM TO, mọc ngay ĐẦU thú rồi bay lên. Tiền tố như "Phản đòn", "Liên kích", "Khiên" tách thành chữ hiệu ứng nhỏ.
-   - CHỮ hiệu ứng (Chí mạng!, Né!, Hụt!, Khắc hệ! ×1.5, Choáng, Mù, Đối kháng!...): cùng kiểu chữ CHIẾN!/THẮNG! (viền tối dày, viền màu, ruột gradient, vầng sáng, lao vào rồi ổn định) nhưng NHỎ, xếp chồng lên TRÊN đầu thú (không che thân); nhiều chữ cùng lúc thì xếp tầng, số nằm dưới chữ.
+   - CHỮ hiệu ứng (Chí mạng!, Né!, Hụt!, Khắc hệ! ×1.5, Choáng, Mù, Đối kháng!...): cùng kiểu chữ CHIẾN!/THẮNG! (viền tối dày, viền màu, ruột gradient, vầng sáng, lao vào rồi ổn định) nhưng NHỎ, nằm trên đầu thú (không che thân).
+     1 chữ: nằm giữa phía trên đầu như cũ. Từ 2 chữ cùng bên trở lên: xếp LƯỚI 2 CỘT (trái/phải số sát thương), mỗi hàng cách nhau lblGridGap; tối đa lblMax chữ, chữ cũ nhất bị bỏ trước. (Trước đây xếp dọc 1 cột nên bị chặn bởi mép khung HUD phía trên và dồn hết vào 1 chỗ -> chữ chồng lên nhau.)
    CHỈNH: khối CFG. Màu mỗi chữ lấy từ trường c của fx (đổi màu ở chỗ index.html đẩy fx), nên không cần bảng riêng.
    API: TTGCHU.fx(ctx, ts, danhSachFx, {px:{me,en}, head:{me,en}, mid, top}) - vẽ + không giữ trạng thái. Lỗi bị nuốt (try/catch). */
 (function(root){'use strict';
 var CFG={
   life:1100,                 /* thời gian sống 1 chữ (ms); index.html lọc fx theo con số này (+ chút dư) */
   numSize:27,numRise:38,numStart:2,          /* số: cỡ chữ, bay lên bao nhiêu điểm, bắt đầu cao hơn đỉnh đầu bấy nhiêu */
-  lblSize:21,lblRise:14,lblStart:30,lblGap:22,lblMax:4,   /* chữ: cỡ, bay lên, bắt đầu cao hơn đỉnh đầu, khoảng cách giữa các tầng, tối đa tầng */
-  maxW:170                   /* chữ dài hơn mức này (điểm game) thì tự co lại */
+  lblSize:19,lblRise:14,lblStart:30,lblMax:4,   /* chữ: cỡ, bay lên, (1 chữ) bắt đầu cao hơn đỉnh đầu, tối đa chữ mỗi bên */
+  lblGridStart:12,lblGridGap:20,lblSide:20,     /* lưới 2 cột: hàng đầu cao hơn đỉnh đầu bấy nhiêu, khoảng cách giữa các hàng, khoảng hở giữa chữ và số ở giữa */
+  maxW:130                   /* chữ dài hơn mức này (điểm game) thì tự co lại */
 };
 var FONT='italic 900 {S}px "Noto Serif",Georgia,serif';
 function F(s){return FONT.replace('{S}',Math.max(6,Math.round(s)));}
@@ -33,6 +35,8 @@ function glyph(ctx,txt,x,y,fs,sc,al,P,maxW){
   var g=ctx.createLinearGradient(0,-fs*.5,0,fs*.5);g.addColorStop(0,P.a);g.addColorStop(.5,P.b);g.addColorStop(1,P.c);ctx.fillStyle=g;ctx.fillText(txt,0,0);   /* ruột gradient */
   ctx.lineWidth=Math.max(.6,fs*.012);ctx.strokeStyle='rgba(255,255,255,.6)';ctx.strokeText(txt,0,0);
   ctx.restore();}
+/* bề ngang chữ (điểm game) sau khi co theo maxW */
+function wid(ctx,txt,fs,maxW){ctx.save();ctx.font=F(fs);var w=ctx.measureText(txt).width;ctx.restore();return Math.min(w,maxW);}
 
 function fx(ctx,ts,list,o){
   try{
@@ -44,9 +48,10 @@ function fx(ctx,ts,list,o){
       if(pre)items.push({k:'l',f:f,side:side,age:age,s:pre,x:f.x,seq:i});
       if(num)items.push({k:'n',f:f,side:side,age:age,s:num,x:f.x,seq:i});}
     if(!items.length)return;
-    /* xếp tầng cho chữ cùng bên (theo thứ tự xuất hiện), số cùng bên lệch ngang để không đè nhau */
-    var cnt={me:{l:0,n:0},en:{l:0,n:0},mid:{l:0,n:0}};
-    items.sort(function(a,b){return a.f.t-b.f.t||a.seq-b.seq;});   /* tầng tính từ chữ CŨ nhất (sát đầu) lên chữ mới (cao hơn) */
+    /* xếp chỗ cho chữ cùng bên (theo thứ tự xuất hiện), số cùng bên lệch ngang để không đè nhau */
+    var cnt={me:{l:0,n:0},en:{l:0,n:0},mid:{l:0,n:0}},tot={me:0,en:0,mid:0};
+    items.sort(function(a,b){return a.f.t-b.f.t||a.seq-b.seq;});   /* chữ CŨ nhất xếp trước (gần đầu), chữ mới ra sau */
+    for(i=0;i<items.length;i++)if(items[i].k==='l')tot[items[i].side]++;
     ctx.save();
     for(i=0;i<items.length;i++){var it=items[i],c=cnt[it.side],hy=(o.head&&o.head[it.side]!=null)?o.head[it.side]:(o.mid||0),P=pal(it.f.c||'#ff4b3c'),sc,al,y,x=it.x;
       al=Math.min(1,it.age/60)*(1-Math.max(0,(it.age-L*.72)/(L*.28)));
@@ -55,8 +60,16 @@ function fx(ctx,ts,list,o){
         sc=pop(it.age,1.7);y=hy-CFG.numStart-CFG.numRise*eo(it.age/L);x+=dxn;
         glyph(ctx,it.s,x,y,CFG.numSize,sc,al,P,0);
       }else{
-        var s=Math.min(c.l++,CFG.lblMax-1);
-        sc=pop(it.age,2);y=hy-CFG.lblStart-s*CFG.lblGap-CFG.lblRise*eo(it.age/L);
+        var idx=c.l++,skip=Math.max(0,tot[it.side]-CFG.lblMax),slot=idx-skip,cntL=Math.min(tot[it.side],CFG.lblMax);
+        if(slot<0)continue;   /* quá nhiều chữ cùng lúc: bỏ chữ cũ nhất */
+        sc=pop(it.age,2);
+        if(cntL<=1){   /* 1 chữ: giữa, phía trên đầu */
+          y=hy-CFG.lblStart-CFG.lblRise*eo(it.age/L);
+        }else{         /* nhiều chữ: lưới 2 cột (trái/phải), mỗi hàng cách lblGridGap */
+          var col=(slot%2)?1:-1,row=Math.floor(slot/2),w=wid(ctx,it.s,CFG.lblSize,CFG.maxW);
+          x+=col*(w/2+CFG.lblSide);
+          y=hy-CFG.lblGridStart-row*CFG.lblGridGap-CFG.lblRise*eo(it.age/L);
+        }
         if(o.top!=null&&y<o.top)y=o.top;
         glyph(ctx,it.s,x,y,CFG.lblSize,sc,al,P,CFG.maxW);
       }}
