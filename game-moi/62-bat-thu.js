@@ -16,6 +16,7 @@ var CFG={
   meta:{1:{"sc":0.16342,"dong":[0.5008,0.4996],"mo":[0.5031,0.4196],"rung":[0.5003,0.5007],"thanhcong":[0.5019,0.4308],"thatbai":[0.4998,0.5007]},2:{"sc":0.14533,"dong":[0.5003,0.4993],"mo":[0.5003,0.4372],"rung":[0.5,0.5],"thanhcong":[0.5379,0.3361],"thatbai":[0.5,0.4993]},3:{"sc":0.15613,"dong":[0.5004,0.5],"mo":[0.4978,0.3646],"rung":[0.4994,0.5007],"thanhcong":[0.4989,0.3567],"thatbai":[0.5005,0.5]},4:{"sc":0.15672,"dong":[0.4996,0.4996],"mo":[0.5003,0.406],"rung":[0.5,0.5003],"thanhcong":[0.5181,0.4638],"thatbai":[0.5,0.5006]},5:{"sc":0.15789,"dong":[0.5,0.4996],"mo":[0.4935,0.4496],"rung":[0.5,0.5003],"thanhcong":[0.5126,0.2907],"thatbai":[0.4995,0.5006]},6:{"sc":0.14094,"dong":[0.5007,0.4994],"mo":[0.5067,0.3622],"rung":[0.5,0.5006],"thanhcong":[0.5004,0.453],"thatbai":[0.5002,0.4994]}},
   macDinh:'cao',                   /* châu chọn sẵn khi vào giao diện Ném: 'cao' = bậc cao nhất đang có (dùng được), 'thap' = thấp nhất */
   t:{bay:750,trung:150,bat:450,mo:400,hut:1400,roi:350,rung:2900,ok:1300,fail:1200},   /* thời gian từng giai đoạn (ms): bay > trúng > bật ngược > mở > hút > đóng+rơi > rung lắc > ok/fail. hut: 1000 -> 1400 để kịp nhìn rõ 6 kiểu hút riêng */
+  to:1.3,                          /* phóng to châu ở giai đoạn rơi / rung / thành công / thất bại (1 = cỡ gốc) */
   rung:{dot:3,lac:600,nghi:300},   /* RUNG: 3 nhịp, mỗi nhịp lắc ngang 600ms rồi nghỉ 300ms (nhịp sau mạnh hơn); phần dư của t.rung là nghỉ cuối */
   bat:{dx:-144,dy:-40},              /* điểm bóng lơ lửng sau khi bật ngược, lệch so với thú (đơn vị game; dx âm = về phía người chơi) */
   mau:['#00E5FF','#00E676','#FF9100','#D500F9','#7C4DFF','#FFD600'],   /* màu ánh sáng theo bậc châu 1..6 (Thủy · Mộc · Hỏa · Lôi · Thiên Hà · Hỗn Độn); màu chi tiết từng bậc nằm ở TTGHUT.TIERS (62b-hut-vfx.js) */
@@ -371,19 +372,19 @@ function draw(ctx,ts){
     p=Math.min(1,t/T.roi);q=Math.min(1,p/.65);
     var bx=Hx+(ex-Hx)*q,by=Hy+(gb-Hy)*q*q;
     if(p>.65){bx=ex;by=gb-9*Math.sin(Math.PI*(p-.65)/.35);}
-    spr(ctx,'rung',cap,bx,by,1,0);   /* tắt VFX hút: châu chuyển sang sprite shaking và rơi xuống chỗ thú */
+    spr(ctx,'rung',cap,bx,by,CFG.to,0);   /* tắt VFX hút: châu chuyển sang sprite shaking và rơi xuống chỗ thú */
   }else if(S.mode==='rung'){   /* 3 nhịp lắc NGANG (sprite shaking) xen nghỉ đứng yên + ánh sáng nhấp nháy */
     var R=CFG.rung,per=R.lac+R.nghi,idx=Math.floor(t/per),wi=t-idx*per,mau=CFG.mau[cap-1]||'#fff';
     if(idx<R.dot&&wi<R.lac){
       var env=Math.min(1,wi/70,(R.lac-wi)/100);amp=(5+idx*3)*env;
-      spr(ctx,'rung',cap,ex+Math.sin(ts/(15-idx*2))*amp,gb,1,Math.sin(ts/(19-idx*2))*(.03+.02*idx)*env);
+      spr(ctx,'rung',cap,ex+Math.sin(ts/(15-idx*2))*amp,gb,CFG.to,Math.sin(ts/(19-idx*2))*(.03+.02*idx)*env);
     }else{
-      spr(ctx,'rung',cap,ex,gb,1,0);glow(ctx,ex,gb,24,mau,.25+.25*Math.sin(ts/80));
+      spr(ctx,'rung',cap,ex,gb,CFG.to,0);glow(ctx,ex,gb,24,mau,.25+.25*Math.sin(ts/80));
     }
   }else if(S.mode==='ok'){
-    spr(ctx,'thanhcong',cap,ex,gb-4,1+.05*Math.sin(ts/120),0);okFx(ctx,ts,t,ex,gb-4);
+    spr(ctx,'thanhcong',cap,ex,gb-4,CFG.to*(1+.05*Math.sin(ts/120)),0);okFx(ctx,ts,t,ex,gb-4);
   }else if(S.mode==='fail'){
-    spr(ctx,'thatbai',cap,ex,gb,1,0,1-Math.max(0,(t-T.fail*.4)/(T.fail*.6)));failFx(ctx,ts,t,ex,gb,m);
+    spr(ctx,'thatbai',cap,ex,gb,CFG.to,0,1-Math.max(0,(t-T.fail*.4)/(T.fail*.6)));failFx(ctx,ts,t,ex,gb,m);
   }
 }
 
