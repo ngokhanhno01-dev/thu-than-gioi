@@ -124,3 +124,9 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 ## Bảng chọn vùng (23/11/2026)
 - Bấm icon Thám hiểm -> hiện bảng `icon/khung-chon-vung.webp` (18 ô, cột trái vùng 1-9, cột phải vùng 10-18; ô chưa có vùng ghi "Sắp ra mắt"). Mỗi ô: tên vùng, số loài đã giết / tổng, hoặc "🔒 Cần N ★". Chọn vùng đã mở = đổi vùng + đi Thám hiểm luôn (`TTGDV.CFG.batDauNgay=false` thì chỉ đổi vùng). Bấm ô khóa: dòng nhắc hiện ngay dưới khung. Danh Vọng + trần cấp hiện dưới khung.
 - Thanh dưới icon Thám hiểm chỉ hiển thị vùng đang ở (không bấm chọn nữa).
+
+## 8 nút mới + bảng bố cục nút (23/11/2026)
+- 8 icon mới (đã tách nền, 420x420) ở `game-moi/icon/`: `dau-truong` (Vạn Thú Tranh Phong), `boss-the-gioi`, `pho-ban` (Bí Cảnh), `thap-thi-luyen`, `cua-hang` (Kỳ Trân Các), `diem-danh`, `nhiem-vu`, `do-giam` (Đồ Giám = sưu tầm). Đăng ký ở `81-nut-moi.js`; **chức năng chưa làm**, bấm chỉ hiện thông báo "sắp ra mắt". Gắn chức năng thật: sửa hàm trong bảng `FN` của file đó.
+- **Vị trí mọi nút nằm ở MỘT bảng**: `TTGNV.cfg.bo` (52-nut-vuong.js), dạng `id: ['l'|'r', cột, hàng]`. `l` = đếm cột từ mép trái, `r` = đếm từ mép phải (0 = ngoài cùng); hàng 0 trên, 1 dưới. Nút có trong bảng thì bỏ qua `r`/`rc` cũ.
+- Bố cục hiện tại: **Trái** = nhân vật/sưu tầm (hàng trên: Linh Thú, Pháp Bảo, Luyện Khí; hàng dưới: Túi Trữ Vật, Đồ Giám, Cường hóa). **Phải** = hoạt động (hàng trên từ mép: Vạn Thú Tranh Phong, Boss Thế Giới, Bí Cảnh, Tháp Thí Luyện; hàng dưới: Kỳ Trân Các, Điểm danh, Nhiệm vụ). Ô trống để dành nằm sát nút Thám hiểm (trái còn 3 cột, phải còn 2 cột), thêm nút mới = thêm 1 dòng vào `bo` ở cột kế tiếp.
+- Lưu ý: icon Vạn Thú Tranh Phong là ảnh ngang nên hiện nhỏ hơn các icon khác trong ô vuông; chữ tên trên icon nhỏ, nếu khó đọc thì tăng `CFG.size` hoặc gửi bản ảnh vuông.
