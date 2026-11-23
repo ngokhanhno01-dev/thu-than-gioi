@@ -87,7 +87,8 @@ function css(){
 '@keyframes tx-pop{0%{opacity:0;transform:scale(.25)}55%{opacity:1;transform:scale(1.12)}78%{transform:scale(.96)}100%{opacity:1;transform:scale(1)}}',
 '#tx-ov .tx-rb{position:absolute;left:8.96%;top:32.9%;width:82%;height:56%;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:calc(var(--u)*34);padding:0 calc(var(--u)*30);box-sizing:border-box;overflow:hidden;font-weight:800;line-height:1.2;text-shadow:0 0 calc(var(--u)*8) #02061c,calc(var(--u)*3) calc(var(--u)*3) 0 #02061c,calc(var(--u)*-3) calc(var(--u)*3) 0 #02061c}',
 '#tx-ov .tx-ic{flex:none;width:calc(var(--u)*300);height:calc(var(--u)*300);display:flex;align-items:center;justify-content:center;box-sizing:border-box;border:calc(var(--u)*6) solid #d9a93c;border-radius:calc(var(--u)*24);background:linear-gradient(160deg,rgba(40,60,160,.75),rgba(8,12,60,.9));box-shadow:inset 0 0 calc(var(--u)*30) rgba(110,170,255,.45),0 0 calc(var(--u)*18) rgba(255,210,100,.35)}',
-'#tx-ov .tx-ic canvas{display:block;width:90%;height:90%}',
+'#tx-ov canvas{position:static!important;left:auto!important;top:auto!important;max-width:100%;max-height:100%;image-rendering:auto!important}',/* canvas toàn game bị ép position:fixed + pixelated trong index.html => phải ghi đè, kẻo hình bị phóng to ra cả màn hình */
+'#tx-ov .tx-ic canvas{display:block}',
 '#tx-ov .tx-tx{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:calc(var(--u)*6);text-align:left}',
 '#tx-ov .tx-rt{font-size:calc(var(--u)*46);color:#9ff5a8}',
 '#tx-ov .tx-rn{font-size:calc(var(--u)*72);color:#fff3c4;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
@@ -262,6 +263,7 @@ function showResult(){
 function paintEnemy(cv,e,w){
   if(!cv)return;var tok=S.tok,sz=Math.round(w*300/2121*.9),dpr=Math.min(3,root.devicePixelRatio||1),c=cv.getContext('2d'),n=0,im=null;
   cv.width=cv.height=Math.max(8,Math.round(sz*dpr));
+  cv.style.width=cv.style.height=sz+'px';
   function draw(){
     if(tok!==S.tok)return;var ok=false;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,sz,sz);
     try{
