@@ -1,5 +1,7 @@
 // 51-thu-moi.js - Đăng ký thú mới (chỉ khai báo + hàm vẽ, không tự chạy, không móc vào chức năng nào)
 // Ảnh nạp LƯỜI: chỉ nạp khi vẽ lần đầu. Tên là TÊN TẠM, đổi tên chỉ sửa ở file này.
+// [INTRO] Video giới thiệu lần đầu vào game: nạp module riêng game-moi/85-video-gioi-thieu.js (chỉ ở trang có màn chờ của game-moi; lỗi/thiếu file thì bỏ qua, không ảnh hưởng game).
+(function () { try { if (document.getElementById('tb-scene')) { var s = document.createElement('script'); s.src = 'game-moi/85-video-gioi-thieu.js'; document.head.appendChild(s); } } catch (e) {} })();
 (function () {
   var FRAME = 192; // cạnh khung CHỐT (px) = 192 (người dùng chốt 18/11/2026). Ảnh 192 có hậu tố -192; bản 128 cũ (không hậu tố) và 256 thử (-256) giữ nguyên để so sánh
   var DIR = 'thu-game/';
