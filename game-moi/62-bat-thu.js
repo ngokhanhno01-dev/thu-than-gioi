@@ -18,10 +18,12 @@ var CFG={
   t:{bay:750,trung:150,bat:450,mo:400,hut:1400,roi:350,rung:5000,ok:1500,fail:1200},   /* thời gian từng giai đoạn (ms): bay > trúng > bật ngược > mở > hút > đóng+rơi > rung lắc > ok/fail. hut: 1000 -> 1400 để kịp nhìn rõ 6 kiểu hút riêng */
   rung:{dot:3,lac:1000,nghi:500},   /* RUNG: 3 đợt, mỗi đợt lắc 1000ms rồi nghỉ 500ms (đợt sau mạnh hơn); phần dư của t.rung là nghỉ cuối */
   bat:{dx:-144,dy:-40},              /* điểm bóng lơ lửng sau khi bật ngược, lệch so với thú (đơn vị game; dx âm = về phía người chơi) */
-  mau:['#7fe8ff','#8cf08c','#ff9a5a','#c9a0ff','#8fb0ff','#ffe066'],   /* màu hạt hút / ánh sáng theo bậc châu 1..6 */
+  mau:['#00E5FF','#00E676','#FF9100','#D500F9','#7C4DFF','#FFD600'],   /* màu ánh sáng theo bậc châu 1..6 (Thủy · Mộc · Hỏa · Lôi · Thiên Hà · Hỗn Độn); màu chi tiết từng bậc nằm ở TTGHUT.TIERS (62b-hut-vfx.js) */
   mauBac:{E:'#ffffff',D:'#3dff6a',C:'#3fa9ff',B:'#b36bff',A:'#ffd21f',S:'#ff8a1f',SS:'#ff3030'}
 };
 var host=null,els=null,IMGS={};
+/* VFX HÚT mới nằm ở 62b-hut-vfx.js (TTGHUT), nạp động ngay cạnh file này. Chưa nạp xong / lỗi => tự dùng 6 hiệu ứng hút cũ bên dưới làm dự phòng. */
+(function(){try{var cs=document.currentScript,sc=document.createElement('script');sc.src=(cs&&cs.src?cs.src.replace(/[^\/?#]*([?#].*)?$/,''):'game-moi/')+'62b-hut-vfx.js';sc.async=false;document.head.appendChild(sc);}catch(e){}})();
 var S={mode:'off',t0:0,cap:1,capUsed:1,left:0,time:0,sel:false,win:false,last:0,got:null,selCap:1,key:''};
 
 /* ================= TIỆN ÍCH ================= */
@@ -138,7 +140,8 @@ function enemyFx(ts){
   if(m==='bat'){p=Math.max(0,1-t/250);return p>0?{a:1,s:1,dx:6*p,dy:0,r:0}:null;}
   if(m==='hut'&&host){   /* hút: thú thu nhỏ, xoay nhẹ, mờ dần, bay về phía bóng (dx,dy = độ lệch từ chỗ thú đến bóng) */
     var mm=host.m(),ey=mm.gy-60;p=Math.max(0,Math.min(1,(t-100)/(CFG.t.hut-100)));var q=p*p;
-    return {a:1-p*.85,s:1-p*.92,dx:CFG.bat.dx*q,dy:CFG.bat.dy*q,r:p*3.5,hide:p>=1};}
+    var j=root.TTGHUT?TTGHUT.beast(ts,t,CFG.t.hut):null;   /* thú rung nhẹ khi bị hút */
+    return {a:1-p*.85,s:1-p*.92,dx:CFG.bat.dx*q+(j?j.dx:0),dy:CFG.bat.dy*q+(j?j.dy:0),r:p*3.5,hide:p>=1};}
   if(m==='roi'||m==='rung'||m==='ok'||(m==='panel'&&S.win))return {hide:true};
   if(m==='fail'){p=Math.min(1,t/450);return {a:p,s:.25+.75*p,dx:0,dy:0};}
   return null;
@@ -358,9 +361,14 @@ function draw(ctx,ts){
     spr(ctx,'dong',cap,ex+(Hx-ex)*q,ey+(Hy-ey)*q-46*Math.sin(Math.PI*p),1,12.5+4*q);hitFx(ctx,ex,ey,(T.trung+t)/(T.trung*2));
   }else if(S.mode==='mo'){
     p=Math.min(1,t/T.mo);spr(ctx,'mo',cap,Hx,Hy+Math.sin(ts/240)*1.5,.55+.45*(1-(1-p)*(1-p)),0);
+    if(root.TTGHUT)TTGHUT.open(ctx,ts,t,cap,Hx,Hy,T.mo);   /* châu kích hoạt: trận pháp xoay + sóng xung kích */
   }else if(S.mode==='hut'){
-    p=Math.min(1,t/T.hut);hutFx(ctx,ts,t,cap,ex,ey,Hx,Hy);
-    spr(ctx,'mo',cap,Hx,Hy+Math.sin(ts/240)*1.5,1+.03*Math.sin(ts/90),0);
+    p=Math.min(1,t/T.hut);
+    if(root.TTGHUT){   /* VFX mới: lớp sau (thú, trận pháp) -> ảnh châu (nảy 1.0>1.18>1.0) -> lớp trước (dải lụa, hạt, lõi xoáy, phong ấn) */
+      TTGHUT.back(ctx,ts,t,cap,ex,ey,Hx,Hy,T.hut);
+      spr(ctx,'mo',cap,Hx,Hy+Math.sin(ts/240)*1.5,TTGHUT.orbScale(ts,t,T.hut),0);
+      TTGHUT.front(ctx,ts,t,cap,ex,ey,Hx,Hy,T.hut);
+    }else{hutFx(ctx,ts,t,cap,ex,ey,Hx,Hy);spr(ctx,'mo',cap,Hx,Hy+Math.sin(ts/240)*1.5,1+.03*Math.sin(ts/90),0);}
   }else if(S.mode==='roi'){   /* đóng lại, rơi xuống đất, nảy nhẹ một cái */
     p=Math.min(1,t/T.roi);q=Math.min(1,p/.65);
     var bx=Hx+(ex-Hx)*q,by=Hy+(gb-Hy)*q*q;
