@@ -342,7 +342,7 @@ function syncDom(){
   if(!(S.mode==='off'&&inBattle)&&!ready)return;
   var m=host.m(),f=m.K/m.DPR,cc=Math.round(r2(m.cx*f)),key=[m.K,m.DPR,m.W,m.H,m.th,m.gy,m.cx,m.I.t,S.mode,S.cap,S.left,countOf(S.cap)].join('|');
   if(key===S.key)return;S.key=key;
-  place(els.bat,m.cx*f,(m.I.t+152)*f,62,57);   /* nằm DƯỚI nút Chạy (index.html, ngay dưới chữ VS), không che chữ VS ở khe giữa 2 khung */
+  place(els.bat,m.cx*f,(m.I.t+122)*f,62,57);   /* nằm DƯỚI hàng khung thông tin (khung cao ~84), không che chữ VS ở khe giữa 2 khung */
   var cy=(m.gy-34)*f;
   place(els.nem,cc,cy,120,36);place(els.thoi,cc-60-8-50,cy,100,32);place(els.chip,cc+60+8+75,cy,150,44);   /* kích thước theo tỉ lệ ảnh khung (~3.4:1) */
   if(ready){var it=itemOf(S.cap),r=rateOf(S.cap);els.chip.innerHTML='<span class="ci">'+icHtml(it)+'</span><span class="ct"><span>Cấp '+S.cap+' · x'+countOf(S.cap)+'</span><span>'+(r==null?'--':Math.round(r*100)+'%')+'</span></span>';}
