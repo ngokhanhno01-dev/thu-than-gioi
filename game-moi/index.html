@@ -257,6 +257,7 @@ if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,BATTLE=null,A=null,typing=false;
 var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=2400,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.218,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
+var NHN={ok:false,im:new Image()};NHN.im.onload=function(){NHN.ok=true;};NHN.im.src='game-moi/nen-hang-nut.webp?v=1';/* nền khung dưới (thanh nút): ảnh game-moi/nen-hang-nut.webp, phủ kín + canh giữa; chưa nạp được thì dùng dải màu */
 var BP=98,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 /* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */
 var BG_BLEED={l:10,r:10,t:6,b:8};
@@ -1022,7 +1023,10 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(fx,0,fw,gy());
  ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());if(SCENE!=='sanh'){ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);}}
  /* nền khung dưới (chứa nút) */
- var pg=ctx.createLinearGradient(0,pt,0,pt+BP);pg.addColorStop(0,'#151a3a');pg.addColorStop(1,'#0c1026');ctx.fillStyle=pg;ctx.fillRect(fx,pt,fw,BP);
+ if(NHN.ok){var ia=NHN.im.naturalWidth/NHN.im.naturalHeight,ta=fw/BP,sx=0,sy=0,sw=NHN.im.naturalWidth,sh=NHN.im.naturalHeight;   /* phủ kín (cover): cắt 2 mép hoặc trên/dưới, canh giữa */
+  if(ta>ia){sh=sw/ta;sy=(NHN.im.naturalHeight-sh)/2;}else{sw=sh*ta;sx=(NHN.im.naturalWidth-sw)/2;}
+  ctx.drawImage(NHN.im,sx,sy,sw,sh,fx,pt,fw,BP);}
+ else{var pg=ctx.createLinearGradient(0,pt,0,pt+BP);pg.addColorStop(0,'#151a3a');pg.addColorStop(1,'#0c1026');ctx.fillStyle=pg;ctx.fillRect(fx,pt,fw,BP);}
  /* khung (đã dựng sẵn ở độ phân giải máy) */
  if(FL){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
  drawExp(ts);
