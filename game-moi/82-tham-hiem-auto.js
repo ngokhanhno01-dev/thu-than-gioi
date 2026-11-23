@@ -2,7 +2,7 @@
    LUỒNG: bấm Thám hiểm -> màn BẢN ĐỒ tìm kiếm (CFG.tim = 8,5 giây, thú chibi nhảy lóc cóc + bong bóng biểu cảm)
           -> bảng "Phát hiện mục tiêu" (CFG.bao = 3 giây, chạm màn hình là đóng ngay) -> vào TRẬN
           -> THẮNG (hoặc bắt thú xong / thú hoang bỏ chạy) tự quay lại BẢN ĐỒ, lặp tiếp.
-          THUA / HÒA (thú hết HP) hoặc bấm nút "Dừng" (hoặc phím Esc) => dừng vòng lặp, về màn hình chính.
+          Bấm nút "Dừng" (hoặc phím Esc) => dừng vòng lặp, về màn hình chính. THUA / HÒA: mặc định vẫn lặp tiếp (CFG.tiepKhiThua=true); đặt false thì thua là dừng.
    NỐI VỚI index.html (chỉ 4 chỗ nhỏ, tìm "TTGTX" trong index.html):
      - TTGTHAMHIEM.prep()   = chọn thú ra trận + tung địch cho vùng đang chọn (không vào trận), trả {player,ps,enemy,tag} hoặc null.
      - TTGTHAMHIEM.battle(pre) = vào trận với địch đã tung (startExplore). Trả true nếu vào được.
@@ -37,7 +37,7 @@ var MAP_VUNG={
   'vung-18':null  // TODO: Chưa có ảnh bản đồ thám hiểm (map-tham-hiem-vung-18.webp) - Bổ sung khi mở vùng
 };
 var BG_DU_PHONG=DIR+'bg-khoi-dau.webp',V='?v=1';
-var CFG={tim:8500,bao:3000,size:[64,80],hop:400,peekTiLe:.6};
+var CFG={tiepKhiThua:true,tim:8500,bao:3000,size:[64,80],hop:400,peekTiLe:.6};
 /* thứ tự thử ảnh: bản đồ riêng -> bg-<slug>.webp -> bg-khoi-dau.webp */
 function mapChain(slug){var a=[],m=MAP_VUNG[slug];if(m)a.push(m+V);if(slug)a.push(DIR+'bg-'+slug+'.webp');a.push(BG_DU_PHONG);return a;}
 
@@ -85,10 +85,15 @@ function css(){
 '#tx-ov .tx-resw{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(2,4,18,.28)}',
 '#tx-ov .tx-res{position:relative;flex:none;background:0 0/100% 100% no-repeat;filter:drop-shadow(0 0 calc(var(--u)*24) rgba(60,140,255,.55));animation:tx-pop .5s cubic-bezier(.2,1.5,.4,1) both}',
 '@keyframes tx-pop{0%{opacity:0;transform:scale(.25)}55%{opacity:1;transform:scale(1.12)}78%{transform:scale(.96)}100%{opacity:1;transform:scale(1)}}',
-'#tx-ov .tx-rb{position:absolute;left:8.96%;top:32.9%;width:82%;height:56%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:calc(var(--u)*8);box-sizing:border-box;overflow:hidden;font-weight:800;line-height:1.2;text-shadow:0 0 calc(var(--u)*8) #02061c,calc(var(--u)*3) calc(var(--u)*3) 0 #02061c,calc(var(--u)*-3) calc(var(--u)*3) 0 #02061c}',
-'#tx-ov .tx-rt{font-size:calc(var(--u)*52);color:#9ff5a8}',
-'#tx-ov .tx-rn{font-size:calc(var(--u)*80);color:#fff3c4;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
-'#tx-ov .tx-ri{font-size:calc(var(--u)*44);color:#cfe3ff;font-weight:700}',
+'#tx-ov .tx-rb{position:absolute;left:8.96%;top:32.9%;width:82%;height:56%;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:calc(var(--u)*34);padding:0 calc(var(--u)*30);box-sizing:border-box;overflow:hidden;font-weight:800;line-height:1.2;text-shadow:0 0 calc(var(--u)*8) #02061c,calc(var(--u)*3) calc(var(--u)*3) 0 #02061c,calc(var(--u)*-3) calc(var(--u)*3) 0 #02061c}',
+'#tx-ov .tx-ic{flex:none;width:calc(var(--u)*300);height:calc(var(--u)*300);display:flex;align-items:center;justify-content:center;box-sizing:border-box;border:calc(var(--u)*6) solid #d9a93c;border-radius:calc(var(--u)*24);background:linear-gradient(160deg,rgba(40,60,160,.75),rgba(8,12,60,.9));box-shadow:inset 0 0 calc(var(--u)*30) rgba(110,170,255,.45),0 0 calc(var(--u)*18) rgba(255,210,100,.35)}',
+'#tx-ov .tx-ic canvas{display:block;width:90%;height:90%}',
+'#tx-ov .tx-tx{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:calc(var(--u)*6);text-align:left}',
+'#tx-ov .tx-rt{font-size:calc(var(--u)*46);color:#9ff5a8}',
+'#tx-ov .tx-rn{font-size:calc(var(--u)*72);color:#fff3c4;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+'#tx-ov .tx-rn b{display:inline-block;margin-left:.3em;padding:0 .3em;font-size:.6em;vertical-align:.12em;color:#fff7b0;border:calc(var(--u)*4) solid #ffb800;border-radius:calc(var(--u)*14);background:rgba(120,70,0,.55)}',
+'#tx-ov .tx-ri{font-size:calc(var(--u)*40);color:#cfe3ff;font-weight:700}',
+'#tx-ov .tx-rk{font-size:calc(var(--u)*36);color:#ffd27a;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
 'body.tx-on .tbo.tst{align-items:flex-end;padding-top:0;padding-bottom:3vh}'/* thông báo thắng trận hiện ở đáy màn hình để không che thanh trạng thái */
   ].join('\n');
   D.head.appendChild(s);}
@@ -247,9 +252,25 @@ function showResult(){
       ico=e.boss?'👑':(e.source==='main'?'👹':'🐾'),wr=D.createElement('div'),r=D.createElement('div');
   wr.className='tx-resw';r.className='tx-res';r.style.width=w+'px';r.style.height=Math.round(w*IH/IW)+'px';r.style.setProperty('--u',(w/IW)+'px');
   r.style.backgroundImage='url("'+DIR+'khung-tb-0.webp?v=1")';
-  r.innerHTML='<div class="tx-rb"><div class="tx-rt">Phát hiện mục tiêu!</div><div class="tx-rn">'+ico+' '+esc(e.ten||'?')+'</div><div class="tx-ri">'+esc(tag)+(e.hienBac?' · Rank '+esc(e.bac):'')+' · Lv.'+esc(e.lv)+'</div></div>';
-  wr.appendChild(r);S.ov.appendChild(wr);
+  var kn=null,k0=null;try{if(e.boss&&e.kn&&e.kn[0]&&root.TTGCS&&TTGCS.sachKyNang)k0=TTGCS.sachKyNang(e.kn[0]);}catch(x){}
+  if(k0){var he=(root.TTGCS&&TTGCS.heVi?TTGCS.heVi(k0.he):k0.he);kn='⚔ Kỹ năng: '+k0.ten+' · '+Math.round(k0.hsTc*100)+'% sát thương '+he+' · hồi '+k0.cd+' lượt';}   /* chỉ boss thú hoang mới có kỹ năng (đọc từ sách của boss) */
+  r.innerHTML='<div class="tx-rb"><div class="tx-ic"><canvas></canvas></div><div class="tx-tx"><div class="tx-rt">Phát hiện mục tiêu!</div><div class="tx-rn">'+ico+' '+esc(e.ten||'?')+(e.source==='demo'?'<b>V'+esc(e.tien||1)+'</b>':'')+'</div><div class="tx-ri">'+esc(tag)+(e.hienBac?' · Rank '+esc(e.bac):'')+' · Lv.'+esc(e.lv)+'</div>'+(kn?'<div class="tx-rk">'+esc(kn)+'</div>':'')+'</div></div>';
+  wr.appendChild(r);S.ov.appendChild(wr);paintEnemy(r.querySelector('canvas'),e,w);
   T(enter,CFG.bao);}   /* tự đóng sau 3 giây (chạm màn hình = đóng ngay, xem listener click trong build) */
+
+/* hình địch trong bảng kết quả: thú hoang vẽ bằng THU_MOI (ảnh 192), quái vùng nguồn main dùng ảnh game-moi/quai/<imageFile> */
+function paintEnemy(cv,e,w){
+  if(!cv)return;var tok=S.tok,sz=Math.round(w*300/2121*.9),dpr=Math.min(3,root.devicePixelRatio||1),c=cv.getContext('2d'),n=0,im=null;
+  cv.width=cv.height=Math.max(8,Math.round(sz*dpr));
+  function draw(){
+    if(tok!==S.tok)return;var ok=false;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,sz,sz);
+    try{
+      if(e.source==='demo'&&root.THU_MOI){if(THU_MOI.setFrame)THU_MOI.setFrame(192);ok=THU_MOI.draw(c,e.id,Math.max(1,Math.min(3,(e.tien|0)||1)),sz/2,sz*.97,sz*.95,true);}
+      else if(im&&im.complete&&im.naturalWidth){var f=Math.min(sz*.95/im.naturalWidth,sz*.95/im.naturalHeight),iw=im.naturalWidth*f,ih=im.naturalHeight*f;c.drawImage(im,(sz-iw)/2,sz*.97-ih,iw,ih);ok=true;}
+    }catch(x){}
+    if(!ok&&++n<30)T(draw,120);}
+  if(e.source!=='demo'){var fl=e.record&&e.record.imageFile;if(fl){im=new Image();im.onload=function(){draw();};im.src=DIR+'quai/'+fl;}}
+  draw();}
 
 /* ---------- vào trận ---------- */
 function enter(){
