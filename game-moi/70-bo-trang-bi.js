@@ -2,9 +2,9 @@
    17 bộ ứng với 17 vùng z (0..16). Mặc >=2 món cùng bộ: buff v2; đủ 4 món: buff v4. Giá trị nhân (1 + z*0,03) và (1 + phẩm trung bình các món cùng bộ) như main (phẩm đọc từ trường q của món, thiếu = Phàm).
    Món trang bị khai trường  bo = số vùng (0..16)  (vd {slot:0,bo:11,...} = món bộ Dung Nham). Đọc món đang mặc qua TTGTB.dangMac().
    XEM THỬ không cần đồ: thêm ?bo=11 (hoặc ?bo=lava) vào link game = người chơi mang đủ 4 món bộ đó.
-   Sự kiện kích hoạt: hiện CHỮ tên sự kiện trên đầu thú chủ bộ; Dung Nham / Lôi Phạt / Phong Nhận / Nguyệt Ảnh còn chạy hiệu ứng đòn (31 + 33..40) với đúng nhãn của main.
+   Sự kiện kích hoạt: hiện CHỮ tên sự kiện NGAY ĐẦU thú chủ bộ rồi bay lên từ từ; Dung Nham / Lôi Phạt / Phong Nhận / Nguyệt Ảnh còn chạy hiệu ứng đòn (31 + 33..40) với đúng nhãn của main.
    Cách nối với index.html: TTGBO.attach(env) một lần; TTGBO.start() đầu trận; hit() gọi pre/dodge/crit/mod/after; fin() gọi round/dead; vòng vẽ gọi draw.
-   env = { st(): trạng thái trận, eff(side): chỉ số hiện tại (effS), px(side), gy(), hurt(side,d,now,màu): trừ máu có qua khiên, eStats(): chỉ số gốc của địch, fxText(side,nhãn): chạy hiệu ứng đòn có nhãn }.
+   env = { st(): trạng thái trận, eff(side): chỉ số hiện tại (effS), px(side), gy(), head(side) (tùy chọn: y đỉnh đầu thú, thiếu thì dùng gy()-94), hurt(side,d,now,màu): trừ máu có qua khiên, eStats(): chỉ số gốc của địch, fxText(side,nhãn): chạy hiệu ứng đòn có nhãn }.
    Khác main vì trận demo chạy thanh thời gian thật (không có "hiệp"): "cuối hiệp" = ngay sau lượt đánh của chính bên có bộ; "né đòn" = đòn của địch bị Mù/Vân Ẩn làm hụt.
    Chưa có trong demo nên bộ nào cần cũng chưa chạy: Tinh Quang chỉ nổ khi chí mạng (hiện chỉ U Ảnh Ám Sát gây chí mạng). */
 (function(root){
@@ -34,7 +34,7 @@ var EV={thunder:['Lôi Phạt Giáng Xuống','#ffe53a'],wind:['Phong Nhận Ch�
  grove:['Sinh Cơ Cổ Thụ','#8be04a'],revive:['Ngọc Hộ Mệnh','#ffe27a'],cloud:['Vân Ẩn','#c9d8ff'],mist:['Sương Tán','#9fd9c8'],sun:['Dương Diệm','#ffb84a'],
  judge:['Thần Phán','#ffd24a'],star:['Tinh Quang','#c08aff'],first:['Thiên Uy','#fff0a0'],frost:['Băng Phong','#9fe4ff'],thorn:['Phản Chấn','#9fd0ff']};
 var QB=[0,.10,.22,.38,.60];   /* phẩm Phàm/Linh/Địa/Thiên/Thần cộng thêm cho buff bộ (EQ_QBONUS của main); lấy trung bình phẩm các món cùng bộ */
-var EV_MS=1500,env=null;
+var EV_MS=1500,EV_HEAD=-4,EV_RISE=26,EV_GAP=16,env=null;   /* chữ sự kiện: tồn tại EV_MS; bắt đầu cách đỉnh đầu EV_HEAD (âm = thấp hơn đỉnh đầu một chút), bay lên EV_RISE điểm, nhiều chữ cùng bên cách nhau EV_GAP */
 function r1(x){return Math.round(x*10)/10;}
 function scale(v,z,qb){var o={},zm=1+(z||0)*ZSTEP;qb=qb||0;for(var k in v){o[k]=r1(v[k]*(1+qb)*zm);if(k==='ch')o[k]=Math.min(100,o[k]);}return o;}
 function forced(){try{var m=/[?&]bo=([\w-]+)/.exec(root.location.search);if(!m)return null;var v=m[1],z=/^\d+$/.test(v)?+v:K.indexOf(v);return z>=0&&z<K.length?z:null;}catch(e){return null;}}
@@ -107,14 +107,14 @@ function round(w,n){
 function dead(n){
  var s=S0();n=n||performance.now();
  ['me','en'].forEach(function(w){var b=A(w);if(s[w]>0||!b||!b.rv)return;b.rv=0;s[w]=Math.max(1,Math.round(mx(w)*b.rvP/100));say(w,'revive',n);s.fx.push({x:env.px(w),y:env.gy()-135,t:n,s:'+'+s[w],c:'#3c3'});});}
-/* vẽ chữ sự kiện trên đầu thú chủ bộ: hiện nhanh, giữ, mờ dần, nhiều sự kiện cùng bên thì xếp chồng */
+/* vẽ chữ sự kiện NGAY ĐẦU thú chủ bộ rồi bay lên từ từ: hiện nhanh, giữ, mờ dần; nhiều sự kiện cùng bên thì xếp chồng */
 function draw(g,ts){
  var s=S0();if(!s||!s.bo||!s.bo.ev.length)return;
  s.bo.ev=s.bo.ev.filter(function(e){return ts-e.t<EV_MS;});
  var used={me:0,en:0};
  g.save();g.font='bold 14px sans-serif';g.textAlign='center';g.textBaseline='middle';g.lineJoin='round';g.lineWidth=4;
  s.bo.ev.forEach(function(e){var u=Math.max(0,(ts-e.t)/EV_MS);if(ts<e.t)return;
-  var al=Math.min(1,u/.08,(1-u)/.3+.1),x=env.px(e.w),y=env.gy()-160-used[e.w]*16-u*10;used[e.w]++;
+  var al=Math.min(1,u/.08,(1-u)/.3+.1),x=env.px(e.w),hd=env.head?env.head(e.w):env.gy()-94,y=hd+EV_HEAD-used[e.w]*EV_GAP-u*EV_RISE;used[e.w]++;
   g.globalAlpha=Math.max(0,Math.min(1,al));g.strokeStyle='rgba(16,8,24,.92)';g.strokeText(EV[e.k][0],x,y);g.fillStyle=EV[e.k][1];g.fillText(EV[e.k][0],x,y);});
  g.restore();}
 root.TTGBO={KINDS:K,SETS:SETS,sets:sets,attach:attach,start:start,pre:pre,dodge:dodge,crit:crit,mod:mod,after:after,round:round,dead:dead,draw:draw};
