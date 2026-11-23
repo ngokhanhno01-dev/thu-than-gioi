@@ -1,5 +1,5 @@
 /* ===== 82-tham-hiem-auto.js (TTGTX): THÁM HIỂM TỰ ĐỘNG (VÒNG LẶP) =====
-   LUỒNG: bấm Thám hiểm -> màn BẢN ĐỒ tìm kiếm (CFG.tim = 5 giây, thú chibi nhảy lóc cóc + bong bóng biểu cảm)
+   LUỒNG: bấm Thám hiểm -> màn BẢN ĐỒ tìm kiếm (CFG.tim = 8,5 giây, thú chibi nhảy lóc cóc + bong bóng biểu cảm)
           -> bảng "Phát hiện mục tiêu" (CFG.bao = 3 giây, chạm màn hình là đóng ngay) -> vào TRẬN
           -> THẮNG (hoặc bắt thú xong / thú hoang bỏ chạy) tự quay lại BẢN ĐỒ, lặp tiếp.
           THUA / HÒA (thú hết HP) hoặc bấm nút "Dừng" (hoặc phím Esc) => dừng vòng lặp, về màn hình chính.
@@ -37,7 +37,7 @@ var MAP_VUNG={
   'vung-18':null  // TODO: Chưa có ảnh bản đồ thám hiểm (map-tham-hiem-vung-18.webp) - Bổ sung khi mở vùng
 };
 var BG_DU_PHONG=DIR+'bg-khoi-dau.webp',V='?v=1';
-var CFG={tim:5000,bao:3000,size:[64,80],hop:400,peekTiLe:.6};
+var CFG={tim:8500,bao:3000,size:[64,80],hop:400,peekTiLe:.6};
 /* thứ tự thử ảnh: bản đồ riêng -> bg-<slug>.webp -> bg-khoi-dau.webp */
 function mapChain(slug){var a=[],m=MAP_VUNG[slug];if(m)a.push(m+V);if(slug)a.push(DIR+'bg-'+slug+'.webp');a.push(BG_DU_PHONG);return a;}
 
@@ -201,7 +201,7 @@ function peek(side){
   T(function(){A(S.spr,[{transform:'rotate(0deg) scale('+f+',1)'},{transform:'rotate(-15deg) scale('+f+',1)',offset:.25},{transform:'rotate(15deg) scale('+f+',1)',offset:.75},{transform:'rotate(0deg) scale('+f+',1)'}],{duration:760,easing:'ease-in-out'});},320);
   return 1080;}
 
-/* ---------- KỊCH BẢN 5 GIÂY ---------- */
+/* ---------- KỊCH BẢN (CFG.tim = 8,5 giây; đổi CFG.tim thì chỉnh lại các mốc trong script) ---------- */
 function script(){
   var tok=S.tok,sz=S.sz,P0=pt(),h=CFG.hop,mode=Math.random()<CFG.peekTiLe?'peek':'pop',tHop;
   /* 0 - 1,5s: tò mò dò tìm (❓/🧐) */
@@ -214,25 +214,30 @@ function script(){
     T(function(){var f=S.face;A(S.spr,[{transform:'rotate(0deg) scale('+f+',1)'},{transform:'rotate(-9deg) scale('+f+',1)',offset:.3},{transform:'rotate(9deg) scale('+f+',1)',offset:.7},{transform:'rotate(0deg) scale('+f+',1)'}],{duration:620,easing:'ease-in-out'});},560);
     T(function(){setFace(-S.face);},980);   /* ngó sang hướng kia */
   }
-  /* 1,5 - 3,5s: đổi chỗ xa (pop/dash) + lục lọi chưa thấy (💦/💢/😵‍💫) */
-  T(function(){
-    var best=null,i,c,d,bd=-1;for(i=0;i<8;i++){c=pt();d=Math.abs(c.x-S.cur.x)+Math.abs(c.y-S.cur.y)*.5;if(d>bd){bd=d;best=c;}}
-    dash(best.x,best.y);
-    T(function(){if(tok===S.tok)bub(pick(EMO_LUC));},360);
-  },1500);
-  tHop=2150;
-  T(function(){
-    var v=vp(),ang=rnd(0,Math.PI*2),step=v.w*.075,tx=S.cur.x+Math.cos(ang)*step*3,ty=S.cur.y+Math.sin(ang)*step*1.2,c=clampPt(tx,ty);
-    hopTo(c.x,c.y,3,h,0);   /* 3 bước nhảy ngắn */
-  },tHop);
-  T(function(){bub(pick(EMO_LUC,S.bub));},2750);   /* biểu cảm hài hước thứ hai (khác cái trước) */
-  /* 3,5 - 5s: phát hiện mục tiêu: ❗ rồi 🤩 / ✨😆✨, nhảy cẫng tại chỗ */
+  /* tìm kiếm kéo dài: 2 lượt "đổi chỗ xa (pop/dash) + nhảy lóc cóc tìm" với biểu cảm 💦/💢/😵‍💫, càng lúc càng sốt ruột */
+  function leg(t0,n,emo1){
+    T(function(){
+      var best=null,i,c,d,bd=-1;for(i=0;i<8;i++){c=pt();d=Math.abs(c.x-S.cur.x)+Math.abs(c.y-S.cur.y)*.5;if(d>bd){bd=d;best=c;}}
+      dash(best.x,best.y);
+      T(function(){bub(emo1);},360);
+    },t0);
+    T(function(){
+      var v=vp(),ang=rnd(0,Math.PI*2),step=v.w*.07,c=clampPt(S.cur.x+Math.cos(ang)*step*n,S.cur.y+Math.sin(ang)*step*n*.4);
+      hopTo(c.x,c.y,n,h,0);
+    },t0+650);
+    T(function(){bub(pick(EMO_LUC,S.bub));},t0+650+Math.round(n*h*.55));   /* biểu cảm thứ hai giữa đường nhảy (khác cái trước) */
+  }
+  T(function(){bub(pick(EMO_TIM,S.bub));},1500);   /* vẫn đang tò mò, đổi sang biểu cảm kia */
+  leg(1900,3,pick(EMO_LUC));
+  leg(4300,4,pick(EMO_LUC));
+  T(function(){var f=S.face;bub('💦');A(S.spr,[{transform:'rotate(0deg) scale('+f+',1)'},{transform:'rotate(-10deg) scale('+f+',1)',offset:.25},{transform:'rotate(10deg) scale('+f+',1)',offset:.55},{transform:'rotate(-6deg) scale('+f+',1)',offset:.8},{transform:'rotate(0deg) scale('+f+',1)'}],{duration:900,easing:'ease-in-out'});},6500);   /* nghỉ thở dốc một nhịp trước khi thấy mục tiêu */
+  /* phát hiện mục tiêu: ❗ rồi 🤩 / ✨😆✨, nhảy cẫng tại chỗ */
   T(function(){
     bub('❗');
     var i;for(i=0;i<3;i++)(function(i){T(function(){hop(S.cur.x,S.cur.y,sz*.6,420,i%2?7:-7);},i*430);})(i);
-  },3500);
-  T(function(){bub(pick(EMO_VUI));},4200);
-  /* hết 5s: bảng kết quả */
+  },7000);
+  T(function(){bub(pick(EMO_VUI));},7750);
+  /* hết giờ: bảng kết quả */
   T(showResult,CFG.tim);}
 
 /* ---------- bảng kết quả ---------- */
@@ -258,9 +263,10 @@ function cycle(){
   var h=H();if(!h.prep||!h.battle){S.on=false;return;}
   var pre=h.prep();if(!pre){stop();return;}   /* prep tự báo lý do (chưa chọn thú, không có quái...) */
   S.pre=pre;S.on=true;build(zoneInfo());script();}
-function begin(){if(S.ov)return;cycle();}
+function begin(){if(S.ov)return;warm();cycle();}
 function next(){if(!S.on)return;cycle();}
 function active(){return S.on;}
 
-root.TTGTX={begin:begin,next:next,stop:stop,active:active,CFG:CFG,MAP_VUNG:MAP_VUNG,mapChain:mapChain};
+function warm(){try{var l=mapChain(zoneInfo().slug);if(l[0]){var im=new Image();im.src=l[0];S.warm=im;}}catch(e){}}   /* tải ngầm bản đồ vùng đang chọn */
+root.TTGTX={warm:warm,begin:begin,next:next,stop:stop,active:active,CFG:CFG,MAP_VUNG:MAP_VUNG,mapChain:mapChain};
 })(typeof window!=='undefined'?window:globalThis);

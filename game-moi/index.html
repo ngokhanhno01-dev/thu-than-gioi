@@ -119,11 +119,25 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
   var iv=setInterval(function(){
     var now=Date.now();
     panel.style.opacity=1;
-    var base=Math.min(100,(now-start)/MIN*100);
-    pct=ready?base:Math.min(base,90);
+    var base=Math.min(100,(now-start)/MIN*100),all=allReady(),tgt=all?100:Math.min(99,frac()*100);
+    pct=Math.min(base,tgt);   /* thanh chỉ tới 100% khi TẤT CẢ đã tải xong: ảnh khung/nút/icon/nền, ảnh thú, font, các module nạp muộn */
     paint();
-    if(ready&&pct>=100&&!shown){shown=true;pct=100;paint();el.className='ready'}
+    if(all&&pct>=100&&!shown){shown=true;pct=100;paint();el.className='ready';warmMap()}
   },50);
+  /* TẢI TRƯỚC: ảnh dùng ngay khi vào game (khung, nút, icon, nền sảnh). Trước đây vào game rồi mới tải nên màn hình bị đen/nháy một lúc. Thêm ảnh cần sớm thì thêm vào PRE. */
+  var G='game-moi/',PRE=['khung-sanh.webp?v=2','khung-hang-nut.webp?v=2','khung-nut.webp','khung-thong-bao.webp?v=1','khung-tb-0.webp?v=1','khung-tb-1.webp?v=1','khung-chien-dau.webp','khung-tien.webp','khung-thu.webp','khung-balo.webp','khung-chon-thu.webp','khung-chon-chau.webp','khung-trang-bi.webp','nen-hang-nut.png','nut-bat.webp','nut-khung.webp','nut-trong.webp','nut-mo-khoa.webp','nut-bo-chon.webp','nut-da-trang-bi.webp','nut-bo-trang-bi.webp','nut-dang-ra-tran.webp',
+    'icon/balo.webp','icon/boss-the-gioi.webp','icon/cua-hang.webp','icon/cuong-hoa.webp','icon/dau-truong.webp','icon/diem-danh.webp','icon/do-giam.webp','icon/khung-chon-vung.webp','icon/nhiem-vu.webp','icon/pho-ban.webp','icon/ren.webp','icon/tham-hiem.webp','icon/thap-thi-luyen.webp','icon/thu-than.webp','icon/trang-bi.webp',
+    'bg-khoi-dau.webp','bg-tuyet-nguyen.webp','bg-suong-coc.webp','bg-van-dao.webp','bg-phong-nguyen.webp','bg-loi-vuc.webp','bg-nguyet-cung.webp','bg-thuy-nguyet-canh.webp','bg-xich-hoa-dia.webp','bg-thanh-lam.webp'],
+    preN=0,preD=0,loadEv=false,fontOk=!(document.fonts&&document.fonts.ready),keep=[];
+  PRE.forEach(function(u){preN++;var im=new Image();keep.push(im);var f=function(){preD++};im.onload=im.onerror=f;im.src=G+u});
+  window.__ttgPre=keep;
+  if(!fontOk)document.fonts.ready.then(function(){fontOk=true},function(){fontOk=true});
+  function modOk(){return !!(window.TTGDV&&window.TTGNV&&window.TTGTX)}   /* TTGDV (80-danh-vong.js) là module nạp muộn nhất */
+  function allReady(){if(Date.now()-t0>30000)return true;return ready&&loadEv&&fontOk&&preD>=preN&&modOk()&&Date.now()-loadAt>400}
+  function frac(){var f=0;f+=Math.min(1,preN?preD/preN:1)*.55;f+=loadEv?.1:0;f+=ready?.15:0;f+=modOk()?.15:0;f+=fontOk?.05:0;return f}
+  var loadAt=Infinity;
+  window.addEventListener('load',function(){loadEv=true;loadAt=Date.now()});
+  function warmMap(){try{if(window.TTGTX&&TTGTX.warm)TTGTX.warm()}catch(e){}}   /* vào game xong thì tải ngầm bản đồ thám hiểm của vùng đang chọn */
   document.addEventListener('DOMContentLoaded',function(){floor=Math.max(floor,35)});
   window.addEventListener('load',function(){floor=Math.max(floor,75)});
   function hide(){if(done||!el)return;done=true;clearInterval(iv);el.className='out';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},700)}
