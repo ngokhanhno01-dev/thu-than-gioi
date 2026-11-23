@@ -168,7 +168,7 @@ function startAct(ts){
     var tgt=S.dx,k;for(k=0;k<8;k++){var t=rnd(-R,R);if(Math.abs(t-S.dx)>=50){tgt=t;break;}}
     if(Math.abs(tgt-S.dx)<30)tgt=clamp(S.dx+(S.dx>0?-1:1)*60,-R,R);
     var n=clamp(Math.round(Math.abs(tgt-S.dx)/CFG.hopStep),2,6);
-    S.face=tgt<S.dx?-1:1;
+    S.face=tgt<S.dx?1:-1;   /* ảnh thú gốc quay mặt sang TRÁI (face=1): đi sang phải thì lật (-1) */
     S.act={k:'hop',t0:ts,n:n,dur:CFG.hopDur,d0:S.dx,d1:tgt,h:CFG.hopH};
   }else if(r<c.hop+c.jump){
     S.act={k:'hop',t0:ts,n:Math.random()<.5?1:2,dur:CFG.hopDur+60,d0:S.dx,d1:S.dx,h:CFG.hopH*1.7};
