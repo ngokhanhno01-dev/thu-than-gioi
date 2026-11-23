@@ -7,12 +7,13 @@
    ẢNH DỰ PHÒNG: ảnh item nào thiếu file (chưa upload) thì tự vẽ hình viên đá màu theo loại + chữ cái đầu tên (hàm phImg, bắt sự kiện error của thẻ img có đường dẫn icon-th/), để không hiện icon ảnh vỡ. Có file thật thì ảnh thật tự dùng, không cần sửa code.
    CÔNG THỨC (CFG.cong, khóa = bậc ĐÍCH): Lõi/Châu/Thần Ấn theo VÙNG GỐC của thú (TTGCS.loai(id).goc), riêng 'manh' = Mảnh CỦA CHÍNH LOÀI ĐÓ; 3 ô vòng = 3 món.
       Bậc 1 -> 2: Mảnh loài x6 + Lõi x2 + Châu x1   Bậc 2 -> 3: Lõi x5 + Châu x3 + Thần Ấn x1 (không dùng Mảnh)
-   RƠI: CHỈ thú hoang (địch source 'demo') và boss thú hoang CHẾT mới rơi (gọi từ index.html lúc thắng trận); quái vùng (source 'main') đã có bộ item riêng ở 73-luat-trang-bi.js nên KHÔNG rơi ở đây. Bắt thú không rơi.
-      Mảnh: rơi Mảnh CỦA CHÍNH LOÀI địch (kể cả boss), CFG.manh = {tl % rơi (mặc định 100), min, max} (mặc định 2-4 mảnh), KHÔNG nhân may mắn.
-      Lõi/Châu/Thần Ấn (CFG.roi): nhân hệ số may mắn giống 73 (tối đa x3). Thần Ấn chỉ rơi từ boss thú hoang.
+   TỈ LỆ TIẾN HÓA (CFG.tiLe, khóa = bậc ĐÍCH, đơn vị %): V1 -> V2 = 100%, V2 -> V3 = 50%. Thất bại thì thú giữ nguyên bậc; nguyên liệu bị mất hay không do CFG.matKhiThat (mặc định true = mất).
+   MẢNH (đổi 23/11/2026): Mảnh KHÔNG còn rơi khi giết thú. Người chơi phải BẮT thú về rồi THẢ thú đi (nút Thả ở panel Thú Thần, 54-thu-than.js gọi TTGTH.manhKhiTha): mỗi con thả = đúng CFG.manhTha (=1) Mảnh CỦA CHÍNH LOÀI đó, bất kể Rank hay hệ.
+   RƠI: CHỈ thú hoang (địch source 'demo') và boss thú hoang CHẾT mới rơi Lõi/Châu/Thần Ấn (gọi từ index.html lúc thắng trận); quái vùng (source 'main') đã có bộ item riêng ở 73-luat-trang-bi.js nên KHÔNG rơi ở đây. Bắt thú không rơi.
+      Lõi/Châu/Thần Ấn (CFG.roi): nhân hệ số may mắn giống 73 (tối đa x3). Thần Ấn chỉ rơi từ boss thú hoang. Giết thú KHÔNG rơi Mảnh.
    Thú khởi đầu dùng item của vùng gốc của mình: Lưu Diêu (k2) -> z6, Viêm Sư (k1) -> z7, Lâm Trư (k3) -> z8. Số vùng theo 56b-loai.js (goc) = 51-thu-moi.js (z). LƯU Ý: 73-luat-trang-bi.js đánh số vùng khác (z6 = Dương Sơn...) vì đó là danh sách 17 vùng trang bị; id item ở đây KHÔNG dùng số của 73.
    Chưa mở vùng 6-8 thì chưa có nguồn rơi: item chỉ lấy được bằng nút test "Lấy đồ TH".
-   API: TTGTH.roiDo(enemy,mm) | .moTa(list) | .yeuCau(thu) | .tienHoa(uid) | .cap(n) (test: +item cho thú đang ra trận) | .id(z,loai) | .idManh(idThu) | .CFG */
+   API: TTGTH.roiDo(enemy,mm) | .manhKhiTha(thu) (cộng Mảnh khi thả thú) | .tenManh(idThu) | .moTa(list) | .yeuCau(thu) | .tienHoa(uid) | .cap(n) (test: +item cho thú đang ra trận) | .id(z,loai) | .idManh(idThu) | .CFG */
 (function(root){
 'use strict';
 var D='game-moi/icon-th/',NZ=9,KIND=['loi','chau','an'];
@@ -34,8 +35,12 @@ var CFG={
  /* công thức: khóa = bậc đích (tien mới). Mỗi phần tử = [loại item, số lượng], theo thứ tự ô vòng: trái, phải, dưới.
     'manh' = Mảnh CỦA CHÍNH LOÀI thú đang tiến hóa (th-m-<id thú>); loi/chau/an = item của vùng gốc */
  cong:{2:[['manh',6],['loi',2],['chau',1]],3:[['loi',5],['chau',3],['an',1]]},
- /* rơi Mảnh của chính loài địch khi THẮNG thú hoang / boss thú hoang: tl = % rơi (100 = luôn rơi), min-max mảnh mỗi lần. Không nhân may mắn */
- manh:{tl:100,min:2,max:4},
+ /* tỉ lệ thành công (%) của lần tiến hóa, khóa = bậc ĐÍCH: V1->V2 100%, V2->V3 50% */
+ tiLe:{2:100,3:50},
+ /* tiến hóa THẤT BẠI: true = mất nguyên liệu (thú giữ nguyên bậc); false = giữ lại nguyên liệu */
+ matKhiThat:true,
+ /* số Mảnh (của chính loài đó) nhận được MỖI LẦN THẢ 1 con thú, bất kể Rank / hệ. Giết thú không còn rơi Mảnh */
+ manhTha:1,
  /* rơi Lõi/Châu/Thần Ấn theo vùng: [loại item, % rơi, số lượng tối thiểu, tối đa] (nhân may mắn) */
  roi:{thuong:[['loi',20,1,1],['chau',20,1,1]],
       boss:[['loi',20,1,1],['chau',20,1,1],['an',30,1,1]]}
@@ -56,7 +61,7 @@ function reg(){
  /* Mảnh theo từng loài (chỉ vùng đã khai) */
  CFG.vungManh.forEach(function(zv){dsThu(zv).forEach(function(s){
   o[idManh(s.id)]={loai:'th',ten:'Mảnh '+s.ten,img:D+idManh(s.id)+'.png',
-   mo:'Mảnh của '+s.ten+' (vùng '+ZONE[zv]+'). Dùng để tiến hóa chính loài này lần 1. Rơi khi thắng '+s.ten+' hoang dã.'};});});
+   mo:'Mảnh của '+s.ten+' (vùng '+ZONE[zv]+'). Dùng để tiến hóa chính loài này lần 1. Nhận được khi THẢ 1 con '+s.ten+' (1 con = 1 Mảnh), không rơi khi giết.'};});});
  TTGBALO.reg(o);}
 /* dọn khóa Mảnh theo vùng CŨ (th-z*-manh) còn sót trong Balo (localStorage): trừ hết số đang có */
 function donManhCu(){
@@ -97,9 +102,11 @@ function yeuCau(t){
  if(!t)return null;var tien=Math.min(3,Math.max(1,(t.tien|0)||1));
  if(tien>=3)return {max:true,tien:tien};
  var nx=tien+1,z=zoneOf(t),it=CFG.cong[nx].map(function(r){var i=r[0]==='manh'?idManh(t.id):id(z,r[0]);return {id:i,ten:nm(i),n:r[1],have:cnt(i)};});
- return {max:false,tien:tien,next:nx,z:z,items:it,ok:it.every(function(x){return x.have>=x.n;})};}
+ return {max:false,tien:tien,next:nx,z:z,tl:tiLe(nx),items:it,ok:it.every(function(x){return x.have>=x.n;})};}
+/* tỉ lệ thành công (%) khi tiến hóa LÊN bậc nx (khóa CFG.tiLe); thiếu khai thì coi là 100 */
+function tiLe(nx){var v=CFG.tiLe&&CFG.tiLe[nx];return v==null?100:Math.max(0,Math.min(100,+v));}
 function thieu(r){return r.items.filter(function(x){return x.have<x.n;}).map(function(x){return x.ten+' ('+x.have+'/'+x.n+')';}).join(', ');}
-/* tiến hóa thật: trừ item, tăng bậc. Trả {ok,from,to} hoặc {err} */
+/* tiến hóa thật: tung tỉ lệ CFG.tiLe[bậc đích]. THÀNH CÔNG: trừ item, tăng bậc, trả {ok:true,from,to,tl}. THẤT BẠI: thú giữ nguyên bậc, trừ item nếu CFG.matKhiThat, trả {that:true,from,to,tl,mat}. Lỗi (thiếu thú / chưa đủ nguyên liệu / đã V3) trả {err} */
 function tienHoa(uid){
  var t=null,L=root.TTGTHU&&TTGTHU.list?TTGTHU.list():[],i;
  for(i=0;i<L.length;i++)if(L[i].uid===uid){t=L[i];break;}
@@ -108,22 +115,34 @@ function tienHoa(uid){
  if(r.max)return {err:'Thú đã đạt V3 (tối đa).'};
  if(!r.ok)return {err:'Chưa đủ nguyên liệu: '+thieu(r)};
  if(!root.TTGTHU||!TTGTHU.setTien)return {err:'Thiếu hàm TTGTHU.setTien (54-thu-than.js).'};
+ if(Math.random()*100>=r.tl){   /* thất bại */
+  var mat=!!CFG.matKhiThat;
+  if(mat)r.items.forEach(function(x){TTGBALO.add(x.id,-x.n);});
+  return {that:true,from:r.tien,to:r.next,tl:r.tl,mat:mat};}
  r.items.forEach(function(x){TTGBALO.add(x.id,-x.n);});
  TTGTHU.setTien(uid,r.next);
- return {ok:true,from:r.tien,to:r.next};}
+ return {ok:true,from:r.tien,to:r.next,tl:r.tl};}
 
 /* ===================== RƠI ĐỒ ===================== */
 /* enemy: địch vừa thua ({source,boss,vung}); mm: may mắn của người chơi. Chỉ thú hoang (source 'demo'). Trả [{id,q}] đã cộng vào Balo. */
 function roiDo(enemy,mm){
  var out=[];if(!enemy||enemy.source!=='demo'||!root.TTGBALO)return out;
  var z=enemy.vung|0;if(z<0||z>=NZ)return out;
- var bonus=Math.min(3,1+Math.max(0,+mm||0)/100),im=enemy.id?idManh(enemy.id):null,M=CFG.manh,q,i;
- /* Mảnh CỦA CHÍNH LOÀI địch (thú hoang và boss thú hoang đều rơi mảnh của chính nó); không nhân may mắn; chỉ rơi nếu loài đã có item Mảnh (vùng trong CFG.vungManh) */
- if(im&&TTGBALO.CAT&&TTGBALO.CAT[im]&&Math.random()*100<M.tl){q=M.min+Math.floor(Math.random()*(M.max-M.min+1));TTGBALO.add(im,q);out.push({id:im,q:q});}
+ var bonus=Math.min(3,1+Math.max(0,+mm||0)/100),q,i;
+ /* KHÔNG rơi Mảnh khi giết: Mảnh chỉ có từ việc THẢ thú (manhKhiTha). Ở đây chỉ rơi Lõi/Châu/Thần Ấn của vùng */
  CFG.roi[enemy.boss?'boss':'thuong'].forEach(function(d){
   if(Math.random()*100<Math.min(100,d[1]*bonus)){q=d[2]+Math.floor(Math.random()*(d[3]-d[2]+1));i=id(z,d[0]);TTGBALO.add(i,q);out.push({id:i,q:q});}});
  return out;}
 function moTa(list){return (list||[]).map(function(d){return nm(d.id)+' x'+d.q;}).join(', ');}
+/* THẢ THÚ = MẢNH: mỗi con thả cộng CFG.manhTha (1) Mảnh CỦA CHÍNH LOÀI đó vào Balo, bất kể Rank / hệ / bậc. thu = đối tượng thú ({id,...}).
+   Trả {id,q,ten} (ten = "Mảnh <loài>") hoặc null nếu loài chưa có item Mảnh (vùng ngoài CFG.vungManh) */
+function manhKhiTha(thu){
+ if(!thu||!thu.id||!root.TTGBALO||!TTGBALO.add)return null;
+ var im=idManh(thu.id),q=Math.max(1,CFG.manhTha|0||1);
+ if(!(TTGBALO.CAT&&TTGBALO.CAT[im]))return null;
+ TTGBALO.add(im,q);return {id:im,q:q,ten:nm(im)};}
+/* tên item Mảnh của 1 loài (để panel Thả báo trước "sẽ nhận 1 Mảnh X"); '' nếu loài chưa có item Mảnh */
+function tenManh(idThu){var im=idManh(idThu);return (root.TTGBALO&&TTGBALO.CAT&&TTGBALO.CAT[im])?nm(im):'';}
 /* TEST: cấp n bộ ĐỦ để thử cả 2 lần tiến hóa cho THÚ ĐANG RA TRẬN: Mảnh CỦA LOÀI đó + Lõi/Châu/Thần Ấn của vùng gốc nó (số lượng cộng từ CFG.cong). Trả {z,ten,manh} hoặc {err} */
 function cap(n){n=n||1;var t=ra();if(!t)return {err:'Chưa có thú ra trận: hãy đưa 1 thú ra trận ở panel Thú Thần.'};
  var z=zoneOf(t),tot={},k,st,j,im=idManh(t.id),coManh=!!(root.TTGBALO.CAT&&TTGBALO.CAT[im]);
@@ -132,7 +151,7 @@ function cap(n){n=n||1;var t=ra();if(!t)return {err:'Chưa có thú ra trận: h
  for(k in tot)if(k!=='manh')TTGBALO.add(id(z,k),tot[k]*n);
  return {z:z,ten:nm(im).replace(/^Mảnh /,''),manh:coManh};}
 
-root.TTGTH={CFG:CFG,id:id,idManh:idManh,yeuCau:yeuCau,tienHoa:tienHoa,roiDo:roiDo,moTa:moTa,cap:cap,ZONE:ZONE};
+root.TTGTH={CFG:CFG,id:id,idManh:idManh,yeuCau:yeuCau,tienHoa:tienHoa,roiDo:roiDo,moTa:moTa,cap:cap,ZONE:ZONE,manhKhiTha:manhKhiTha,tenManh:tenManh,tiLe:tiLe};
 reg();donManhCu();
 
 /* nút test (hàng dưới, cạnh "Lấy sách") */
@@ -181,7 +200,7 @@ function render(){
  w.st.innerHTML=ks.map(function(k){var a=Math.round(cur[k]||0);return '<div class="th-r">'+a+(nx?' <i>→</i> <b>'+Math.round(nx[k]||0)+'</b>':'')+'</div>';}).join('');
  if(r.max){w.cd.innerHTML='<div class="th-em">Thú đã đạt <b>V3</b> (tối đa).</div>';w.rt.textContent='';return;}
  w.cd.innerHTML='<h6>V'+r.tien+' → V'+r.next+' · vùng '+esc(ZONE[r.z])+'</h6>'+r.items.map(function(x,j){var ok=x.have>=x.n;return '<div class="th-l"><span class="'+(ok?'th-ok':'th-no')+'">'+(S.put[j]?'✔ ':ok?'○ ':'✖ ')+esc(x.ten)+'</span><span class="'+(ok?'th-ok':'th-no')+'">'+x.have+'/'+x.n+'</span></div>';}).join('');
- w.rt.textContent='100%';}
+ w.rt.textContent=r.tl+'%';}   /* ô tỉ lệ: V1→V2 100%, V2→V3 50% (CFG.tiLe) */
 function togglePut(i){
  var r=yeuCau(ra());if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}
  if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}
@@ -196,6 +215,7 @@ function doEvo(){
  if(!S.put.every(Boolean)){toast(r.ok?'Hãy đặt đủ 3 nguyên liệu vào 3 ô (chạm ô hoặc chạm món trong túi).':'Chưa đủ nguyên liệu: '+thieu(r));return;}
  var res=tienHoa(t.uid);if(res.err){toast(res.err);render();return;}
  S.put=[false,false,false];KH.refresh('th');render();
+ if(res.that){toast('Tiến hóa thất bại ('+res.tl+'%)! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' vẫn ở V'+res.from+(res.mat?', nguyên liệu đã mất.':', nguyên liệu được giữ lại.'));return;}
  toast('Tiến hóa thành công! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' V'+res.from+' → V'+res.to);}
 function auto(){
  var t=ra(),r=yeuCau(t);if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}

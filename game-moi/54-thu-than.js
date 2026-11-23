@@ -3,7 +3,7 @@
    Ảnh khung: game-moi/khung-thu.webp (1841x811, khung xanh-vàng: chữ THÚ THẦN, nút X, chữ TRANG BỊ, RA TRẬN và THẢ đã VẼ SẴN trong ảnh; khung mới 21/11/2026 thêm nút THẢ). Hiển thị tối đa đúng cỡ gốc (1 pixel ảnh = 1 pixel máy) để không bị mờ; đóng bằng nút X / bấm ngoài / Esc.
    MỌI TỌA ĐỘ bên dưới tính theo PIXEL ẢNH ĐÃ CẮT 1841x811 (BW x BH). Cỡ chữ/độ dày trong CSS ({n}) vẫn tính theo thang cũ 2200 (UB) nên không phải chỉnh lại; --u = clientWidth/UB.
    TIẾN ĐỘ: BƯỚC 1 (nút + icon) xong. BƯỚC 2 (khung + đóng) xong. BƯỚC 3 (bố cục + chọn thú + ra trận) xong.
-   NÚT THẢ: bỏ hẳn thú đang chọn khỏi kho (hỏi xác nhận, sách kỹ năng đang gắn trả về Balo). Nút MỜ khi chưa chọn thú hoặc thú đang chọn đã RA TRẬN; chỉ SÁNG khi chọn thú CHƯA ra trận. Thú 'canh-' (đồng bộ từ sảnh) bị thả thì ghi nhớ ở khóa ttg_moi_thu_tha_v1 để dongBo() không tự thêm lại.
+   NÚT THẢ: bỏ hẳn thú đang chọn khỏi kho (hỏi xác nhận, sách kỹ năng đang gắn trả về Balo). THẢ 1 con = nhận 1 Mảnh của chính loài đó (TTGTH.manhKhiTha, 75-tien-hoa-thu.js), bất kể Rank/hệ; đây là NGUỒN DUY NHẤT của Mảnh tiến hóa (giết thú không rơi nữa). Nút MỜ khi chưa chọn thú hoặc thú đang chọn đã RA TRẬN; chỉ SÁNG khi chọn thú CHƯA ra trận. Thú 'canh-' (đồng bộ từ sảnh) bị thả thì ghi nhớ ở khóa ttg_moi_thu_tha_v1 để dongBo() không tự thêm lại.
    HIỆU ỨNG NHẤN: do 63-nhan-nut.js lo cho mọi nút (nút vẽ sẵn trong ảnh khung tự được cắt mảnh ảnh để co/nảy). Đừng thêm :active{transform} vào nút nữa kẻo co đôi.
    CHƯA LÀM: bậc thú SS..D (chỉ chừa trường bac), buff/debuff/kỹ năng có sẵn (3 ô tròn), gắn/gỡ sách kỹ năng (6 ô "+"), bảng nổi.
    QUY TẮC: mở Thú Thần thì đóng Balo, mở Balo thì đóng Thú Thần (53-balo.js gọi TTGTHU.close()).
@@ -479,15 +479,17 @@ var THA_CB={
   SR:['r','⚠ Thú Rank SR cực kỳ hiếm (khoảng 1/1000)! Thả đi là mất vĩnh viễn, gần như không thể kiếm lại.']
 };
 function moTha(t){
-  var a=anhThu(t),rk=RKC[t.bac]?t.bac:'C',lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),cb=THA_CB[rk];
+  var a=anhThu(t),rk=RKC[t.bac]?t.bac:'C',lv=Math.max(1,Math.floor(t.lv||1)),tien=Math.min(3,Math.max(1,Math.floor(t.tien||1))),cb=THA_CB[rk],
+   mn=(window.TTGTH&&TTGTH.tenManh)?TTGTH.tenManh(t.id):'',   /* tên Mảnh của loài này ('' nếu loài chưa có item Mảnh) */
+   mh=mn?'<br>Thả sẽ nhận <b>1 '+esc(mn)+'</b> (dùng để tiến hóa).':'';
   if(window.TTGTBAO){
     var tit='Bạn chắc chắn muốn thả <b>'+esc(tenThu(t))+'</b> <span style="color:#fff3c4">Lv.'+lv+' · V'+tien+' · Rank</span> '+TTGTBAO.rankHtml(rk)+'?';
-    var txt='Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.<br><span class="'+(cb[0]?'tbo-w'+(cb[0]==='r'?' r':''):'')+'">'+cb[1]+'</span>';
+    var txt='Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.'+mh+'<br><span class="'+(cb[0]?'tbo-w'+(cb[0]==='r'?' r':''):'')+'">'+cb[1]+'</span>';
     var body=TTGTBAO.info({bac:t.bac,ts:true,icon:(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'?')+TTGTBAO.corner(rk),title:tit,tc:'y',text:txt},
      [{t:'Thả',cls:'d',cb:function(){tha(t.uid);}},{t:'Hủy',cb:function(){hidePop();}}]);
     try{var pc=body.querySelector('.tbo-ic canvas.pc');if(pc)pcPaint(pc);}catch(x){}   /* tự phóng vừa khung: thú nhỏ/vừa/to đều đầy đặn như ô kho */
     return;}
-  E.in.innerHTML='<div class="tt-ii"><span class="i">'+(a?'<img src="'+esc(a)+'" alt="">':'?')+'</span><div class="n">Thả '+esc(tenThu(t))+'?</div><div class="d">Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.</div></div>'
+  E.in.innerHTML='<div class="tt-ii"><span class="i">'+(a?'<img src="'+esc(a)+'" alt="">':'?')+'</span><div class="n">Thả '+esc(tenThu(t))+'?</div><div class="d">Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.'+mh+'</div></div>'
    +'<div class="tt-pb"><button type="button" class="d">Thả</button><button type="button">Hủy</button></div>';
   var bs=E.in.querySelectorAll('button');
   bs[0].addEventListener('click',function(){tha(t.uid);});
@@ -496,13 +498,14 @@ function moTha(t){
 }
 function tha(u){
   var t=byUid(u);if(!t||t.uid===rt)return;
-  var idx=thus.indexOf(t),kn=Array.isArray(t.kn)?t.kn:[],ten=tenThu(t);
+  var idx=thus.indexOf(t),kn=Array.isArray(t.kn)?t.kn:[],ten=tenThu(t),mt=null;
   if(window.TTGBALO)kn.forEach(function(id){if(id)TTGBALO.add(id,1);});   /* trả sách kỹ năng về Balo */
+  if(window.TTGTH&&TTGTH.manhKhiTha){try{mt=TTGTH.manhKhiTha(t);}catch(e){}}   /* THẢ 1 con = 1 Mảnh CỦA CHÍNH LOÀI đó (bất kể Rank / hệ); giết thú không còn rơi Mảnh (75-tien-hoa-thu.js) */
   thus.splice(idx,1);
   if(u.indexOf('canh-')===0&&thaList.indexOf(u)<0){thaList.push(u);if(!demo){try{localStorage.setItem(KTHA,JSON.stringify(thaList));}catch(e){}}}   /* thú đồng bộ từ sảnh: nhớ đã thả để không tự thêm lại */
   save();
   sel=thus[idx]?thus[idx].uid:(thus[idx-1]?thus[idx-1].uid:null);
-  hidePop();render();toast('Đã thả '+ten);
+  hidePop();render();toast('Đã thả '+ten+(mt?' · +'+mt.q+' '+mt.ten:''));
 }
 
 /* ĐỒNG BỘ THÚ Ở SẢNH: game-moi/index.html lưu thú đang đứng ở sảnh vào khóa ttg_moi_v1 {thu:loài, bm:bậc 1-3}.
