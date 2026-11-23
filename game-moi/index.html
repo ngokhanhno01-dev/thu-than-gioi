@@ -457,6 +457,30 @@ if(window.TTGBAT)TTGBAT.attach({scene:function(){return SCENE;},battle:function(
  end:function(msg){BATTLE=null;SCENE='sanh';reset();if(msg)toast(msg);if(window.TTGTX&&TTGTX.active())TTGTX.next();},   /* bắt thú xong / thú hoang bỏ chạy: vòng lặp Thám hiểm tự quay lại màn bản đồ */
  m:function(){return {K:K,DPR:DPR,W:W,H:H,I:I,th:TH(),gy:gy(),cx:I.l+(W-I.l-I.r)/2,ex:px('en'),mx:px('me')};},
  toast:toast});
+/* ===== NÚT CHẠY (bỏ chạy khỏi trận Thám hiểm) =====
+   Hiện ở góc trái dưới cảnh đấu khi đang đánh thật (BATTLE) và không đang đếm ngược / bắt thú. Bấm -> hỏi xác nhận -> coi như THUA nhưng phạt NẶNG HƠN: trừ ĐỦ số Tinh Thạch nhận được khi thắng (thua chỉ trừ một nửa); không đủ Tinh Thạch thì trừ hết số đang có.
+   Sau khi chạy: nếu đang chạy vòng lặp Thám hiểm (TTGTX) thì làm như thua (CFG.tiepKhiThua: lặp tiếp hoặc dừng). Chỉnh vị trí/kích thước ở chaySync(). */
+var chayEl=null,chayKey='';
+function chayPhat(){var e=BATTLE&&BATTLE.enemy;if(!e||!window.TTGTIEN)return 0;var lo=e.boss?'boss':(e.source==='main'?'quai':'thu'),tt=TTGTIEN.tinhThach({loai:lo,vung:e.vung,bac:e.bac});return Math.min(TTGTIEN.get('tt'),Math.max(0,tt|0));}
+function chayCan(){return SCENE==='tran'&&!!BATTLE&&!!st&&st.me>0&&st.en>0&&!st.freeze&&isFinite(nextAt);}
+function chayDo(){
+ if(!chayCan())return;var s0=st,pen=chayPhat();
+ st=Object.assign({},st,{busy:true,freeze:true});A=null;   /* đóng băng trận (mọi setTimeout của lượt đang đánh tự bỏ vì st!==s0) trong lúc hỏi */
+ var back=function(){if(st.freeze&&BATTLE){st=Object.assign({},st,{busy:false,freeze:false});nextAt=performance.now()+GAP;if(st.tg!=null)st.tg=nextAt;}},
+ go=function(){
+  var p2=chayPhat();if(p2>0&&window.TTGTIEN)TTGTIEN.add('tt',-p2);
+  BATTLE=null;SCENE='sanh';reset();
+  toast('Bỏ chạy! Tính như thua'+(p2>0?' · -'+TTGTIEN.fmt(p2)+' Tinh Thạch':''));
+  if(window.TTGTX&&TTGTX.active()){if(TTGTX.CFG.tiepKhiThua)TTGTX.next();else TTGTX.stop();}};
+ if(window.TTGTBAO&&TTGTBAO.confirm)TTGTBAO.confirm('Bỏ chạy khỏi trận?<br><small>Tính như thua'+(pen>0?', mất <b style="color:#ff9aa6">'+TTGTIEN.fmt(pen)+' Tinh Thạch</b> (nặng hơn thua)':'')+'</small>',[{t:'Chạy',cls:'d',cb:go},{t:'Ở lại',cb:back}]);
+ else go();}
+function chaySync(){
+ if(!chayEl){if(!(SCENE==='tran'&&BATTLE))return;
+  var cs=document.createElement('style');cs.textContent='.chay{position:fixed;z-index:7;display:none;box-sizing:border-box;width:100px;height:32px;border:0;padding:0 14px;background:url(game-moi/nut-khung.webp) 50% 50%/100% 100% no-repeat;color:#ffd0d6;font:800 14px/1 "Segoe UI",system-ui,sans-serif;text-shadow:0 1px 0 #000,0 0 6px rgba(255,80,100,.7);align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}.chay:active{filter:brightness(1.3)}';document.head.appendChild(cs);
+  chayEl=document.createElement('button');chayEl.type='button';chayEl.className='chay';chayEl.textContent='Chạy';chayEl.addEventListener('click',chayDo);document.body.appendChild(chayEl);}
+ var on=chayCan(),d=on?'flex':'none';if(chayEl.style.display!==d)chayEl.style.display=d;if(!on)return;
+ var f=K/DPR,key=[K,DPR,W,H,I.l,gy()].join('|');if(key===chayKey)return;chayKey=key;
+ chayEl.style.left=Math.round((I.l+10)*f)+'px';chayEl.style.top=Math.round((gy()-34)*f-16)+'px';}
 function TH(){return H-I.b-BP-GAPB;}/* chiều cao khung trên */
 function edgeY(){var t=TH();return t-Math.round(FRM.top.e.b*sTop(t));}/* mép trên của viền dưới khung trên (viền dày FRM.top.e.b px ảnh gốc, vẽ ở tỉ lệ sTop) */
 function gy(){return SCENE==='sanh'?edgeY()+1:TH()-FLOOR;}/* đường chân thú: sảnh = đứng ngay trên viền khung; trận mẫu = đứng trên đường nền như cũ */
@@ -1065,7 +1089,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  st.fx.forEach(function(f){if(ts<f.t)return;ctx.fillStyle=f.c||'#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
  if(window.TTGDEM)TTGDEM.draw(ctx,ts,DA);if(st&&st.skIn)drawSkillIn(ts);
  if(window.TTGDEM)TTGDEM.result(ctx,ts,DA,st.msg);else if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+70,gy()-170));}}
-function loop(ts){mainRaf=0;if(document.hidden)return;if(SCENE==='tran')autoTick();draw(ts);mainRaf=requestAnimationFrame(loop);}
+function loop(ts){mainRaf=0;if(document.hidden)return;if(SCENE==='tran')autoTick();draw(ts);chaySync();mainRaf=requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
 reset();resize();if(!document.hidden)mainRaf=requestAnimationFrame(loop);
 /* Màn chờ: nạp ảnh bậc đang chọn của 2 bên (vẽ ra ngoài màn để kích hoạt nạp lười) rồi mới cho hiện nút BẮT ĐẦU. Quá 30 giây màn chờ tự cho vào. */
