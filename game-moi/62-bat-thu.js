@@ -3,20 +3,20 @@
    index.html nối vào bằng: TTGBAT.attach(host), TTGBAT.frame(ts) (đầu draw), TTGBAT.draw(ctx,ts) (sau khi vẽ thú), TTGBAT.enemyFx(ts) (trong pet('en')).
    LUỒNG: bấm BẮT (đang đánh, thú hoang <60% máu) -> trận đóng băng -> giao diện Ném (3 lần, 60 giây) -> NÉM: bóng bay vòng cung -> TRÚNG (chớp) -> BẬT NGƯỢC -> MỞ -> HÚT thú -> ĐÓNG+RƠI -> RUNG 3 đợt (~5s) -> thành công / vỡ.
    Mỗi lần ném tốn 1 châu. Thành công: thú vào kho bậc tiến hóa 1, giữ ĐÚNG Rank (E..SS) đã tung lúc gặp (hiện ở thanh máu), KHÔNG tung lại. Hết lượt: thú chạy thoát, về sảnh.
-   ẢNH châu: game-moi/img/chau/<slug>-<dạng>.png với dạng = dong, mo, rung, thanhcong, thatbai. Bậc chưa có ảnh thì dùng ảnh Thương Hải Châu đổi màu tạm (hue). */
+   ẢNH châu: game-moi/img/chau/bac{1..6}-{closed,absorbing,shaking,success,failed}.png (nền trong suốt, sinh từ chau-bac{N}.png bằng tools/cat_chau_vfx.py). Mã nội bộ: dong=closed, mo=absorbing, rung=shaking, thanhcong=success, thatbai=failed.
+   CHUỖI THU PHỤC: closed (bay tới) > absorbing + VFX hút hut-vao-bac[N] (62b-hut-vfx.js) > shaking (rung ngang 3 nhịp, tắt VFX) > success (vòng trận pháp ~1.3s) / failed (vỡ, mờ dần, hiện lại thú). */
 (function(root){
 'use strict';
 
 /* ================= CFG: CHỈNH Ở ĐÂY ================= */
 var CFG={
   dir:'game-moi/img/chau/',
-  slug:['thuong-hai','thanh-moc','xich-viem','tu-tieu','tinh-than','hon-don'],   /* tên file ảnh theo bậc châu 1..6 */
-  hue:[0,-55,185,105,45,150],      /* độ xoay màu tạm khi bậc đó CHƯA có ảnh (lấy ảnh bậc 1 đổi màu) */
-  sc:{dong:.156,mo:.145,rung:.145,thanhcong:.145,thatbai:.145},   /* đơn vị game / pixel ảnh: quả châu ~40 đơn vị */
-  neo:{mo:[.42,.53]},              /* điểm neo (tỉ lệ) của ảnh: mo = viên ngọc nằm lệch trái */
+  file:{dong:'closed',mo:'absorbing',rung:'shaking',thanhcong:'success',thatbai:'failed'},   /* mã trạng thái nội bộ > tên file */
+  /* THEO TỪNG BẬC (sinh tự động bởi tools/cat_chau_vfx.py > img/chau/meta.json): sc = đơn vị game / pixel (quả châu closed ~42 đơn vị, MỌI trạng thái cùng tỉ lệ nên không méo/lệch cỡ); mỗi trạng thái = điểm neo [x,y] theo TỈ LỆ ảnh (mo = tâm lõi pha lê, thanhcong = tâm quả châu phía trên vòng trận, còn lại = tâm ảnh) */
+  meta:{1:{"sc":0.16342,"dong":[0.5008,0.4996],"mo":[0.5031,0.4196],"rung":[0.5003,0.5007],"thanhcong":[0.5019,0.4308],"thatbai":[0.4998,0.5007]},2:{"sc":0.14533,"dong":[0.5003,0.4993],"mo":[0.5003,0.4372],"rung":[0.5,0.5],"thanhcong":[0.5379,0.3361],"thatbai":[0.5,0.4993]},3:{"sc":0.15613,"dong":[0.5004,0.5],"mo":[0.4978,0.3646],"rung":[0.4994,0.5007],"thanhcong":[0.4989,0.3567],"thatbai":[0.5005,0.5]},4:{"sc":0.15672,"dong":[0.4996,0.4996],"mo":[0.5003,0.406],"rung":[0.5,0.5003],"thanhcong":[0.5181,0.4638],"thatbai":[0.5,0.5006]},5:{"sc":0.15789,"dong":[0.5,0.4996],"mo":[0.4935,0.4496],"rung":[0.5,0.5003],"thanhcong":[0.5126,0.2907],"thatbai":[0.4995,0.5006]},6:{"sc":0.14094,"dong":[0.5007,0.4994],"mo":[0.5067,0.3622],"rung":[0.5,0.5006],"thanhcong":[0.5004,0.453],"thatbai":[0.5002,0.4994]}},
   macDinh:'cao',                   /* châu chọn sẵn khi vào giao diện Ném: 'cao' = bậc cao nhất đang có (dùng được), 'thap' = thấp nhất */
-  t:{bay:750,trung:150,bat:450,mo:400,hut:1400,roi:350,rung:5000,ok:1500,fail:1200},   /* thời gian từng giai đoạn (ms): bay > trúng > bật ngược > mở > hút > đóng+rơi > rung lắc > ok/fail. hut: 1000 -> 1400 để kịp nhìn rõ 6 kiểu hút riêng */
-  rung:{dot:3,lac:1000,nghi:500},   /* RUNG: 3 đợt, mỗi đợt lắc 1000ms rồi nghỉ 500ms (đợt sau mạnh hơn); phần dư của t.rung là nghỉ cuối */
+  t:{bay:750,trung:150,bat:450,mo:400,hut:1400,roi:350,rung:2900,ok:1300,fail:1200},   /* thời gian từng giai đoạn (ms): bay > trúng > bật ngược > mở > hút > đóng+rơi > rung lắc > ok/fail. hut: 1000 -> 1400 để kịp nhìn rõ 6 kiểu hút riêng */
+  rung:{dot:3,lac:600,nghi:300},   /* RUNG: 3 nhịp, mỗi nhịp lắc ngang 600ms rồi nghỉ 300ms (nhịp sau mạnh hơn); phần dư của t.rung là nghỉ cuối */
   bat:{dx:-144,dy:-40},              /* điểm bóng lơ lửng sau khi bật ngược, lệch so với thú (đơn vị game; dx âm = về phía người chơi) */
   mau:['#00E5FF','#00E676','#FF9100','#D500F9','#7C4DFF','#FFD600'],   /* màu ánh sáng theo bậc châu 1..6 (Thủy · Mộc · Hỏa · Lôi · Thiên Hà · Hỗn Độn); màu chi tiết từng bậc nằm ở TTGHUT.TIERS (62b-hut-vfx.js) */
   mauBac:{E:'#ffffff',D:'#3dff6a',C:'#3fa9ff',B:'#b36bff',A:'#ffd21f',S:'#ff8a1f',SS:'#ff3030'}
@@ -48,23 +48,20 @@ function icHtml(it){return it&&it.img?'<img src="'+esc(it.img)+'" alt="">':'<b>'
 /* ================= ẢNH CHÂU ================= */
 function sprites(cap){
   if(IMGS[cap])return IMGS[cap];
-  var o={},ns=['dong','mo','rung','thanhcong','thatbai'];
-  ns.forEach(function(n){var im=new Image();im.ok=false;im.onload=function(){im.ok=true;};im.src=CFG.dir+CFG.slug[cap-1]+'-'+n+'.png';o[n]=im;});
+  var o={};
+  Object.keys(CFG.file).forEach(function(n){var im=new Image();im.ok=false;im.onload=function(){im.ok=true;};im.src=CFG.dir+'bac'+cap+'-'+CFG.file[n]+'.png';o[n]=im;});
   IMGS[cap]=o;return o;
 }
 function pic(cap,n){
-  var o=sprites(cap)[n];if(o.ok)return {im:o,hue:0};
-  if(cap!==1){var f=sprites(1)[n];if(f.ok)return {im:f,hue:CFG.hue[cap-1]||0};}
-  return null;
+  var o=sprites(cap)[n];return o&&o.ok?{im:o}:null;   /* chưa nạp xong ảnh => vẽ hình tròn tạm (không còn đổi màu ảnh bậc khác) */
 }
 function spr(ctx,n,cap,x,y,sc,rot,alpha){
   var p=pic(cap,n),r=20;
   ctx.save();
   if(alpha!=null)ctx.globalAlpha=alpha;
   if(!p){ctx.translate(x,y);ctx.fillStyle='#4fc3d9';ctx.strokeStyle='#103c52';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,r*sc,0,6.2832);ctx.fill();ctx.stroke();ctx.restore();return false;}
-  var im=p.im,k=CFG.sc[n]*sc,w=im.naturalWidth*k,h=im.naturalHeight*k,a=CFG.neo[n]||[.5,.5];
+  var im=p.im,M=CFG.meta[cap]||CFG.meta[1],k=M.sc*sc,w=im.naturalWidth*k,h=im.naturalHeight*k,a=M[n]||[.5,.5];   /* một hệ số k cho cả 2 chiều => KHÔNG méo tỉ lệ */
   ctx.imageSmoothingEnabled=true;try{ctx.imageSmoothingQuality='high';}catch(e){}
-  if(p.hue&&('filter' in ctx))ctx.filter='hue-rotate('+p.hue+'deg)';
   ctx.translate(x,y);if(rot)ctx.rotate(rot);
   ctx.drawImage(im,-w*a[0],-h*a[1],w,h);
   ctx.restore();return true;
@@ -96,6 +93,7 @@ function doThrow(){
   if(!cap||countOf(cap)<=0){toast('Hết châu này');return;}
   if(r==null){toast('Châu này không dùng được ở đây');return;}
   TTGBALO.add(TTGBONG.idBong(cap),-nBong());
+  sprites(cap);if(root.TTGHUT&&TTGHUT.preload)TTGHUT.preload(cap);   /* nạp sẵn sprite + texture VFX của bậc này trước khi tới pha hút */
   S.left--;S.capUsed=cap;S.win=Math.random()<r;S.mode='fly';S.t0=performance.now();
 }
 function bacBat(e){   /* Rank thú nhận khi bắt = ĐÚNG Rank đã tung lúc gặp (e.bac, hiện ở thanh máu). Chỉ khi thiếu/lạ mới tung dự phòng. */
@@ -373,19 +371,19 @@ function draw(ctx,ts){
     p=Math.min(1,t/T.roi);q=Math.min(1,p/.65);
     var bx=Hx+(ex-Hx)*q,by=Hy+(gb-Hy)*q*q;
     if(p>.65){bx=ex;by=gb-9*Math.sin(Math.PI*(p-.65)/.35);}
-    spr(ctx,'dong',cap,bx,by,1,-(1-p)*6.2832);
-  }else if(S.mode==='rung'){   /* 3 đợt lắc (ảnh rung) xen nghỉ đứng yên (ảnh dong + ánh sáng nhấp nháy) */
+    spr(ctx,'rung',cap,bx,by,1,0);   /* tắt VFX hút: châu chuyển sang sprite shaking và rơi xuống chỗ thú */
+  }else if(S.mode==='rung'){   /* 3 nhịp lắc NGANG (sprite shaking) xen nghỉ đứng yên + ánh sáng nhấp nháy */
     var R=CFG.rung,per=R.lac+R.nghi,idx=Math.floor(t/per),wi=t-idx*per,mau=CFG.mau[cap-1]||'#fff';
     if(idx<R.dot&&wi<R.lac){
-      var env=Math.min(1,wi/80,(R.lac-wi)/120);amp=(4+idx*3)*env;
-      spr(ctx,'rung',cap,ex+Math.sin(ts/(17-idx*2))*amp,gb,1,Math.sin(ts/(21-idx*3))*(.08+.07*idx)*env);
+      var env=Math.min(1,wi/70,(R.lac-wi)/100);amp=(5+idx*3)*env;
+      spr(ctx,'rung',cap,ex+Math.sin(ts/(15-idx*2))*amp,gb,1,Math.sin(ts/(19-idx*2))*(.03+.02*idx)*env);
     }else{
-      spr(ctx,'dong',cap,ex,gb,1,0);glow(ctx,ex,gb,24,mau,.25+.25*Math.sin(ts/80));
+      spr(ctx,'rung',cap,ex,gb,1,0);glow(ctx,ex,gb,24,mau,.25+.25*Math.sin(ts/80));
     }
   }else if(S.mode==='ok'){
     spr(ctx,'thanhcong',cap,ex,gb-4,1+.05*Math.sin(ts/120),0);okFx(ctx,ts,t,ex,gb-4);
   }else if(S.mode==='fail'){
-    spr(ctx,'thatbai',cap,ex,gb,1,0,1-Math.max(0,(t-T.fail*.7)/(T.fail*.3)));failFx(ctx,ts,t,ex,gb,m);
+    spr(ctx,'thatbai',cap,ex,gb,1,0,1-Math.max(0,(t-T.fail*.4)/(T.fail*.6)));failFx(ctx,ts,t,ex,gb,m);
   }
 }
 

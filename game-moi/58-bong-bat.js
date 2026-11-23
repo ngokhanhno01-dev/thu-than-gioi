@@ -56,8 +56,8 @@ var CFG={
   }
 };
 
-/* ICON ẢNH của từng bậc châu (PNG nền trong suốt, đặt ở game-moi/img/chau/). Bậc 2..6: đặt file đúng tên này là tự có (dùng chung tên với ảnh -mo/-rung/-thanhcong/-thatbai của 62-bat-thu.js). Chưa có file thì item vẫn dùng emoji ic ở trên, có file thì tự đổi sang ảnh. */
-var ANH_ICON={1:'game-moi/img/chau/thuong-hai-dong.png',2:'game-moi/img/chau/thanh-moc-dong.png',3:'game-moi/img/chau/xich-viem-dong.png',4:'game-moi/img/chau/tu-tieu-dong.png',5:'game-moi/img/chau/tinh-than-dong.png',6:'game-moi/img/chau/hon-don-dong.png'};
+/* ICON ẢNH của từng bậc châu = sprite trạng thái 1 (closed) của bộ Ngự Thú Châu mới: game-moi/img/chau/bac{1..6}-closed.png (PNG nền trong suốt, sinh bằng tools/cat_chau_vfx.py; dùng chung bộ ảnh -absorbing/-shaking/-success/-failed của 62-bat-thu.js). Chưa có file thì item vẫn dùng emoji ic ở trên, có file thì tự đổi sang ảnh. */
+var ANH_ICON={1:'game-moi/img/chau/bac1-closed.png',2:'game-moi/img/chau/bac2-closed.png',3:'game-moi/img/chau/bac3-closed.png',4:'game-moi/img/chau/bac4-closed.png',5:'game-moi/img/chau/bac5-closed.png',6:'game-moi/img/chau/bac6-closed.png'};
 
 /* ================= HÀM ================= */
 function clamp(x,a,b){return x<a?a:(x>b?b:x);}
