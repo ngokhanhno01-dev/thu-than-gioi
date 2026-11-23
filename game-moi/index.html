@@ -247,6 +247,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/75-tien-hoa-thu.js"></script>
 <script src="game-moi/81-nut-moi.js?v=4"></script>
 <script src="game-moi/82-tham-hiem-auto.js?v=1"></script>
+<script src="game-moi/83-sanh-song.js?v=1"></script>
 <script>
 /* GAME MỚI (khung ban đầu). CHỈ CÓ MÀN NGANG, cả màn hình, scale NGUYÊN: K = số pixel máy cho 1 pixel game.
    Kích thước logic W×H thay đổi theo máy (H khoảng 360). Thú vẽ đúng 128px = 1:1.
@@ -989,14 +990,18 @@ function bgDrawFx(ts,x,y,w,h){
 }
 document.addEventListener('visibilitychange',function(){bgLast=0;if(document.hidden){BGV.pause();BGV2.pause();if(bgRaf){cancelAnimationFrame(bgRaf);bgRaf=0;}if(mainRaf){cancelAnimationFrame(mainRaf);mainRaf=0;}}else{if(bgOn){try{bgCur.play();}catch(e){}if(!bgRaf)bgRaf=requestAnimationFrame(function(){bgTick(bgGen);});}if(!mainRaf)mainRaf=requestAnimationFrame(loop);}});
 /* SẢNH CHÍNH: chỉ 1 thú đứng 1 mình ở GIỮA khung (tâm = giữa mép trái và mép phải khung). Thanh trên, thông tin, nút... làm sau. */
-function petSanh(ts){var x=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.sin(ts/380)*2;
+function petSanh(ts){var x0=Math.round(I.l+(W-I.l-I.r)/2),bob=Math.sin(ts/380)*2;
+ /* TTGSANH (83-sanh-song.js): thú sảnh "đang sống" - nhảy lóc cóc, nhảy tại chỗ, ngó nghiêng. Không có module thì đứng giữa như cũ. */
+ var P=null;try{if(window.TTGSANH&&TTGSANH.pose)P=TTGSANH.pose(ts,{cx:x0,l:I.l,r:W-I.r,t:I.t,gy:py(),bob:bob});}catch(e){P=null;}
+ var x=P?P.x:x0;
+ function dpS(id,b){if(!P)return dp(id,b,x,py()+bob,true);ctx.save();ctx.translate(x,py()+bob+P.y);ctx.scale(P.face*P.sx,P.sy);var ok=dp(id,b,0,0,true);ctx.restore();return ok;}
  var rt0=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null,rk=rt0?(rt0.bac||'C'):null;if(rk&&!(window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[rk]))rk='C';
- if(window.TTGRUNE&&rk)TTGRUNE.ring(ctx,rk,x,py(),ts,'sau');   /* vòng rune Rank dưới chân (lượt sau) */
+ if(window.TTGRUNE&&rk)TTGRUNE.ring(ctx,rk,x,py(),ts,'sau');   /* vòng rune Rank dưới chân (lượt sau), đi theo thú */
  petSanh.rk=rk;petSanh.x=x;/* NHỊP THỞ mượt: không làm tròn (biên độ 2 điểm game, chu kỳ ~2,4s); đổi 2 để thở mạnh/yếu */
  var rt=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null,rid=rt&&rt.id,rb=rt?Math.max(1,Math.min(3,(rt.tien|0)||1)):bm;
  /* Vẽ thú ĐANG RA TRẬN (getRaTran mỗi khung hình). Ảnh chưa tải xong thì giữ thú vừa vẽ được (không chớp trống); không có thú ra trận thì dùng ID, bm như cũ. */
- if(rid&&window.THU_MOI&&THU_MOI.byId[rid]){if(dp(rid,rb,x,py()+bob,true)){petSanh.lid=rid;petSanh.lb=rb;return;}if(petSanh.lid&&dp(petSanh.lid,petSanh.lb,x,py()+bob,true))return;}
- dp(ID,bm,x,py()+bob,true);}
+ if(rid&&window.THU_MOI&&THU_MOI.byId[rid]){if(dpS(rid,rb)){petSanh.lid=rid;petSanh.lb=rb;return;}if(petSanh.lid&&dpS(petSanh.lid,petSanh.lb))return;}
+ dpS(ID,bm);}
 /* ===== EXP + CẤP ở góc phải khung trên. Tọa độ theo pixel ảnh khung-sanh.webp, đổi 1 chỗ ở EXPC / EXPB nếu thay ảnh khung.
    Ô TRÒN (EXPC): nền + nước EXP dâng từ đáy lên theo exp, số "exp/cần" ở giữa (tự co chữ cho vừa, số lớn vẫn đủ chỗ). Lên cấp: dâng đầy rồi về 0.
    DẢI XANH nhỏ bên dưới (EXPB): chỉ hiện "Lv.N". */
@@ -1077,7 +1082,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  drawExp(ts);
  if(window.TTGDV&&FRM.top.img&&FRM.top.img.naturalWidth){var dvS=sTop(TH());TTGDV.draw(ctx,I.l-BG_BLEED.l*dvS,-BG_BLEED.t*dvS,dvS);}   /* ngôi sao + số Danh Vọng trong ô dưới chữ Danh Vọng (80-danh-vong.js) */
  if(SCENE==='sanh'&&window.TTGTIEN)TTGTIEN.draw(ctx,fx+fw/2,I.t,fw-460);   /* khung tiền tệ: chỉ ở sảnh, giữa Danh Vọng và EXP */
- if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,py(),ts,'truoc');return;}
+ if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,py(),ts,'truoc');if(window.TTGSANH&&TTGSANH.draw)TTGSANH.draw(ctx,ts);/* bong bóng emoji + khung chat của thú sảnh, vẽ sau cùng để nằm trên thú */return;}
  pet('en',ts);pet('me',ts);
  if(window.TTGBAT&&TTGBAT.draw)TTGBAT.draw(ctx,ts);
  var DA={x:I.l,y:0,w:W-I.l-I.r,h:TH(),cx:I.l+(W-I.l-I.r)/2,cy:TH()*.46};if(st.skFx)drawSkillFx(ts);if(st.atk&&st.atk.length)drawAtkFx(ts);if(window.TTGBO)TTGBO.draw(ctx,ts);if(window.TTGDEM)TTGDEM.under(ctx,ts,DA);/* đếm ngược: nền tối + tia sáng, nằm dưới khung HUD */

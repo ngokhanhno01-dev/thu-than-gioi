@@ -17,7 +17,7 @@ function hook(){var M=root.THU_MOI;if(!M||!M.draw||M.draw.__dh)return false;
    if(im){var w=TW,h=w*im.naturalHeight/im.naturalWidth,bottom=by-128+34-DY;
     /* by-128 = đỉnh khung thú 128; +34 vì thú thường thấp hơn đỉnh khung; DY = khoảng hở trên đầu */
     var top=bottom-h;if(top<MINTOP){var k=(bottom-MINTOP)/h;if(k<.55)k=.55;w*=k;h*=k;top=bottom-h;}
-    ctx.save();ctx.shadowColor='rgba(0,0,0,.55)';ctx.shadowBlur=6;ctx.shadowOffsetY=2;
+    ctx.save();try{var tm=ctx.getTransform&&ctx.getTransform();if(tm&&tm.a<0){ctx.translate(cx,0);ctx.scale(-1,1);ctx.translate(-cx,0);}}catch(e){}/* thú sảnh quay mặt (lật ngang) thì lật lại để chữ danh hiệu không bị ngược */ctx.shadowColor='rgba(0,0,0,.55)';ctx.shadowBlur=6;ctx.shadowOffsetY=2;
     ctx.drawImage(im,cx-w/2,top,w,h);ctx.restore();}}}catch(e){}
   return ok;};
  M.draw.__dh=1;return true;}
