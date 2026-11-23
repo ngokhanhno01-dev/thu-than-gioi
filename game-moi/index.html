@@ -472,9 +472,9 @@ function chayDo(){
  go=function(){
   var p2=chayPhat();if(p2>0&&window.TTGTIEN)TTGTIEN.add('tt',-p2);
   BATTLE=null;SCENE='sanh';reset();
-  toast('Bỏ chạy! Tính như thua'+(p2>0?' · -'+TTGTIEN.fmt(p2)+' Tinh Thạch':''));
+  toast('Đã bỏ chạy'+(p2>0?' · -'+TTGTIEN.fmt(p2)+' Tinh Thạch':''));
   if(window.TTGTX&&TTGTX.active()){if(TTGTX.CFG.tiepKhiThua)TTGTX.next();else TTGTX.stop();}};
- if(window.TTGTBAO&&TTGTBAO.confirm)TTGTBAO.confirm('Bỏ chạy khỏi trận?<br><small>Tính như thua'+(pen>0?', mất <b style="color:#ff9aa6">'+TTGTIEN.fmt(pen)+' Tinh Thạch</b> (nặng hơn thua)':'')+'</small>',[{t:'Chạy',cls:'d',cb:go},{t:'Ở lại',cb:back}]);
+ if(window.TTGTBAO&&TTGTBAO.confirm)TTGTBAO.confirm('Bỏ chạy khỏi trận?<br><small>Tính là thua'+(pen>0?' · mất <b style="color:#ff9aa6">'+TTGTIEN.fmt(pen)+' Tinh Thạch</b>':'')+'</small>',[{t:'Chạy',cls:'d',cb:go},{t:'Ở lại',cb:back}]);
  else go();}
 function chaySync(){
  if(!chayEl){if(!(SCENE==='tran'&&BATTLE))return;

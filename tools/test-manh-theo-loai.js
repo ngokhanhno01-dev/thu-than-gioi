@@ -11,8 +11,14 @@ function t(ten, fn) { try { fn(); ok++; console.log('  ok  ' + ten); } catch (e)
 function voiRandom(v, fn) { var g = Math.random; Math.random = function () { return v; }; try { return fn(); } finally { Math.random = g; } }
 
 /* nạp lại 75 với môi trường giả mới; inv0 = túi đồ ban đầu */
-function nap(inv0, thuRaTran) {
-  ['TTGBALO', 'TTGTHU', 'TTGCS', 'TTGNV', 'TTGKH', 'TTGTBAO', 'THU_MOI'].forEach(function (k) { delete globalThis[k]; });
+function nap(inv0, thuRaTran, tinhThach) {
+  ['TTGBALO', 'TTGTHU', 'TTGCS', 'TTGNV', 'TTGKH', 'TTGTBAO', 'TTGTIEN', 'THU_MOI'].forEach(function (k) { delete globalThis[k]; });
+  var tt = { tt: tinhThach == null ? 1000000 : tinhThach };   /* Tinh Thạch giả (mặc định dư dả để các test cũ không vướng phí) */
+  globalThis.TTGTIEN = {
+    get: function (k) { return tt[k] | 0; },
+    add: function (k, n) { tt[k] = Math.max(0, (tt[k] | 0) + n); return tt[k]; },
+    fmt: function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+  };
   delete require.cache[require.resolve(path.join(ROOT, 'game-moi/56b-loai.js'))];
   delete require.cache[require.resolve(path.join(ROOT, 'game-moi/75-tien-hoa-thu.js'))];
   var inv = Object.assign({}, inv0 || {}), CAT = {};
@@ -31,7 +37,7 @@ function nap(inv0, thuRaTran) {
   };
   require(path.join(ROOT, 'game-moi/56b-loai.js'));   /* TTGCS thật: loai, dsLoai */
   require(path.join(ROOT, 'game-moi/75-tien-hoa-thu.js'));
-  return { inv: inv, CAT: CAT, TH: globalThis.TTGTH };
+  return { inv: inv, CAT: CAT, TH: globalThis.TTGTH, tt: function () { return globalThis.TTGTIEN.get('tt'); } };
 }
 
 console.log('Test Mảnh theo loài (thả thú = 1 mảnh)');
@@ -232,6 +238,47 @@ t('đi hết đường V1 -> V2 -> V3: lần 2 không dùng Mảnh, không vư�
   r = voiRandom(0, function () { return e.TH.tienHoa('u1'); }); assert(r.ok && thu.tien === 3);
   assert.strictEqual(e.inv['th-m-1f'], 2, 'lần 2 không trừ mảnh'); assert.strictEqual(e.inv['th-z0-loi'], 2); assert.strictEqual(e.inv['th-z0-chau'], 1); assert(!('th-z0-an' in e.inv));
   r = voiRandom(0, function () { return e.TH.tienHoa('u1'); }); assert(r.err && thu.tien === 3, 'không vượt V3');
+});
+
+/* ---------- PHÍ TINH THẠCH ---------- */
+console.log('Test phí Tinh Thạch (V1->V2 1.000, V2->V3 5.000)');
+
+t('CFG.phi: V2 = 1000, V3 = 5000; yeuCau báo phi và tt hiện có', function () {
+  var thu = { uid: 'u1', id: '1f', tien: 1 }, e = nap({}, thu, 300);
+  assert.strictEqual(e.TH.CFG.phi[2], 1000); assert.strictEqual(e.TH.CFG.phi[3], 5000);
+  var y = e.TH.yeuCau(thu); assert.strictEqual(y.phi, 1000); assert.strictEqual(y.tt, 300);
+  thu.tien = 2; assert.strictEqual(e.TH.yeuCau(thu).phi, 5000);
+});
+
+t('V1->V2 đủ nguyên liệu nhưng thiếu Tinh Thạch: báo lỗi, không trừ gì', function () {
+  var thu = { uid: 'u1', id: '1f', tien: 1 }, e = nap({ 'th-m-1f': 6, 'th-z0-loi': 2, 'th-z0-chau': 1 }, thu, 999);
+  assert.strictEqual(e.TH.yeuCau(thu).ok, false);
+  var r = e.TH.tienHoa('u1'); assert(r.err && /Tinh Thạch/.test(r.err) && thu.tien === 1);
+  assert.strictEqual(e.tt(), 999); assert.strictEqual(e.inv['th-m-1f'], 6);
+});
+
+t('V1->V2 đúng 1.000 Tinh Thạch thì tiến hóa được và trừ đúng 1.000', function () {
+  var thu = { uid: 'u1', id: '1f', tien: 1 }, e = nap({ 'th-m-1f': 6, 'th-z0-loi': 2, 'th-z0-chau': 1 }, thu, 1000);
+  var r = e.TH.tienHoa('u1'); assert(r.ok && r.phi === 1000 && thu.tien === 2); assert.strictEqual(e.tt(), 0);
+});
+
+t('V2->V3: thiếu Tinh Thạch (4.999) báo lỗi; đủ 5.000 trừ đúng 5.000', function () {
+  var thu = { uid: 'u1', id: '1f', tien: 2 }, inv = { 'th-z0-loi': 5, 'th-z0-chau': 3, 'th-z0-an': 1 };
+  var e = nap(inv, thu, 4999); assert(e.TH.tienHoa('u1').err); assert.strictEqual(e.tt(), 4999);
+  e = nap(inv, thu, 5000); var r = voiRandom(0, function () { return e.TH.tienHoa('u1'); });
+  assert(r.ok && r.phi === 5000 && thu.tien === 3); assert.strictEqual(e.tt(), 0);
+});
+
+t('V2->V3 thất bại: mất cả Tinh Thạch (matKhiThat=true); giữ lại khi matKhiThat=false', function () {
+  var thu = { uid: 'u1', id: '1f', tien: 2 }, inv = { 'th-z0-loi': 5, 'th-z0-chau': 3, 'th-z0-an': 1 };
+  var e = nap(inv, thu, 8000); var r = voiRandom(0.99, function () { return e.TH.tienHoa('u1'); });
+  assert(r.that && thu.tien === 2); assert.strictEqual(e.tt(), 3000);
+  e = nap(inv, thu, 8000); e.TH.CFG.matKhiThat = false; r = voiRandom(0.99, function () { return e.TH.tienHoa('u1'); });
+  assert(r.that && thu.tien === 2); assert.strictEqual(e.tt(), 8000);
+});
+
+t('nút test cap(1) tặng 6.000 Tinh Thạch (đủ cho cả 2 lần tiến hóa)', function () {
+  var thu = { uid: 'u1', id: '1h', tien: 1 }, e = nap({}, thu, 0); e.TH.cap(1); assert.strictEqual(e.tt(), 6000);
 });
 
 t('nút test cap(1): đủ Mảnh loài đang ra trận + Lõi/Châu/Thần Ấn vùng gốc (đủ cho cả 2 lần tiến hóa khi may mắn)', function () {

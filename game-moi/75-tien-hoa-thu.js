@@ -7,6 +7,7 @@
    ẢNH DỰ PHÒNG: ảnh item nào thiếu file (chưa upload) thì tự vẽ hình viên đá màu theo loại + chữ cái đầu tên (hàm phImg, bắt sự kiện error của thẻ img có đường dẫn icon-th/), để không hiện icon ảnh vỡ. Có file thật thì ảnh thật tự dùng, không cần sửa code.
    CÔNG THỨC (CFG.cong, khóa = bậc ĐÍCH): Lõi/Châu/Thần Ấn theo VÙNG GỐC của thú (TTGCS.loai(id).goc), riêng 'manh' = Mảnh CỦA CHÍNH LOÀI ĐÓ; 3 ô vòng = 3 món.
       Bậc 1 -> 2: Mảnh loài x6 + Lõi x2 + Châu x1   Bậc 2 -> 3: Lõi x5 + Châu x3 + Thần Ấn x1 (không dùng Mảnh)
+   PHÍ TINH THẠCH (CFG.phi, khóa = bậc ĐÍCH): V1 -> V2 = 1.000, V2 -> V3 = 5.000 (TTGTIEN 'tt', 66-tien-te.js). Thiếu Tinh Thạch thì không tiến hóa được. Trừ cùng nguyên liệu; thất bại cũng mất phí nếu CFG.matKhiThat.
    TỈ LỆ TIẾN HÓA (CFG.tiLe, khóa = bậc ĐÍCH, đơn vị %): V1 -> V2 = 100%, V2 -> V3 = 50%. Thất bại thì thú giữ nguyên bậc; nguyên liệu bị mất hay không do CFG.matKhiThat (mặc định true = mất).
    MẢNH (đổi 23/11/2026): Mảnh KHÔNG còn rơi khi giết thú. Người chơi phải BẮT thú về rồi THẢ thú đi (nút Thả ở panel Thú Thần, 54-thu-than.js gọi TTGTH.manhKhiTha): mỗi con thả = đúng CFG.manhTha (=1) Mảnh CỦA CHÍNH LOÀI đó, bất kể Rank hay hệ.
    RƠI: CHỈ thú hoang (địch source 'demo') và boss thú hoang CHẾT mới rơi Lõi/Châu/Thần Ấn (gọi từ index.html lúc thắng trận); quái vùng (source 'main') đã có bộ item riêng ở 73-luat-trang-bi.js nên KHÔNG rơi ở đây. Bắt thú không rơi.
@@ -37,6 +38,8 @@ var CFG={
  cong:{2:[['manh',6],['loi',2],['chau',1]],3:[['loi',5],['chau',3],['an',1]]},
  /* tỉ lệ thành công (%) của lần tiến hóa, khóa = bậc ĐÍCH: V1->V2 100%, V2->V3 50% */
  tiLe:{2:100,3:50},
+ /* phí Tinh Thạch mỗi lần tiến hóa, khóa = bậc ĐÍCH: V1->V2 1.000, V2->V3 5.000. Trừ cùng lúc với nguyên liệu (mất cả khi thất bại nếu matKhiThat) */
+ phi:{2:1000,3:5000},
  /* tiến hóa THẤT BẠI: true = mất nguyên liệu (thú giữ nguyên bậc); false = giữ lại nguyên liệu */
  matKhiThat:true,
  /* số Mảnh (của chính loài đó) nhận được MỖI LẦN THẢ 1 con thú, bất kể Rank / hệ. Giết thú không còn rơi Mảnh */
@@ -102,10 +105,15 @@ function yeuCau(t){
  if(!t)return null;var tien=Math.min(3,Math.max(1,(t.tien|0)||1));
  if(tien>=3)return {max:true,tien:tien};
  var nx=tien+1,z=zoneOf(t),it=CFG.cong[nx].map(function(r){var i=r[0]==='manh'?idManh(t.id):id(z,r[0]);return {id:i,ten:nm(i),n:r[1],have:cnt(i)};});
- return {max:false,tien:tien,next:nx,z:z,tl:tiLe(nx),items:it,ok:it.every(function(x){return x.have>=x.n;})};}
+ var ph=phi(nx),hv=root.TTGTIEN&&TTGTIEN.get?TTGTIEN.get('tt'):0;
+ return {max:false,tien:tien,next:nx,z:z,tl:tiLe(nx),items:it,phi:ph,tt:hv,ok:it.every(function(x){return x.have>=x.n;})&&hv>=ph};}
+/* phí Tinh Thạch khi tiến hóa LÊN bậc nx (khóa CFG.phi); thiếu khai thì 0 */
+function phi(nx){return Math.max(0,Math.floor(+(CFG.phi&&CFG.phi[nx])||0));}
+function fmtN(n){return root.TTGTIEN&&TTGTIEN.fmt?TTGTIEN.fmt(n):String(n);}
 /* tỉ lệ thành công (%) khi tiến hóa LÊN bậc nx (khóa CFG.tiLe); thiếu khai thì coi là 100 */
 function tiLe(nx){var v=CFG.tiLe&&CFG.tiLe[nx];return v==null?100:Math.max(0,Math.min(100,+v));}
-function thieu(r){return r.items.filter(function(x){return x.have<x.n;}).map(function(x){return x.ten+' ('+x.have+'/'+x.n+')';}).join(', ');}
+function thieu(r){var l=r.items.filter(function(x){return x.have<x.n;}).map(function(x){return x.ten+' ('+x.have+'/'+x.n+')';});
+ if(r.tt<r.phi)l.push('Tinh Thạch ('+fmtN(r.tt)+'/'+fmtN(r.phi)+')');return l.join(', ');}
 /* tiến hóa thật: tung tỉ lệ CFG.tiLe[bậc đích]. THÀNH CÔNG: trừ item, tăng bậc, trả {ok:true,from,to,tl}. THẤT BẠI: thú giữ nguyên bậc, trừ item nếu CFG.matKhiThat, trả {that:true,from,to,tl,mat}. Lỗi (thiếu thú / chưa đủ nguyên liệu / đã V3) trả {err} */
 function tienHoa(uid){
  var t=null,L=root.TTGTHU&&TTGTHU.list?TTGTHU.list():[],i;
@@ -115,13 +123,14 @@ function tienHoa(uid){
  if(r.max)return {err:'Thú đã đạt V3 (tối đa).'};
  if(!r.ok)return {err:'Chưa đủ nguyên liệu: '+thieu(r)};
  if(!root.TTGTHU||!TTGTHU.setTien)return {err:'Thiếu hàm TTGTHU.setTien (54-thu-than.js).'};
+ var tru=function(){r.items.forEach(function(x){TTGBALO.add(x.id,-x.n);});if(r.phi>0)TTGTIEN.add('tt',-r.phi);};   /* nguyên liệu + phí Tinh Thạch */
  if(Math.random()*100>=r.tl){   /* thất bại */
   var mat=!!CFG.matKhiThat;
-  if(mat)r.items.forEach(function(x){TTGBALO.add(x.id,-x.n);});
-  return {that:true,from:r.tien,to:r.next,tl:r.tl,mat:mat};}
- r.items.forEach(function(x){TTGBALO.add(x.id,-x.n);});
+  if(mat)tru();
+  return {that:true,from:r.tien,to:r.next,tl:r.tl,mat:mat,phi:r.phi};}
+ tru();
  TTGTHU.setTien(uid,r.next);
- return {ok:true,from:r.tien,to:r.next,tl:r.tl};}
+ return {ok:true,from:r.tien,to:r.next,tl:r.tl,phi:r.phi};}
 
 /* ===================== RƠI ĐỒ ===================== */
 /* enemy: địch vừa thua ({source,boss,vung}); mm: may mắn của người chơi. Chỉ thú hoang (source 'demo'). Trả [{id,q}] đã cộng vào Balo. */
@@ -148,6 +157,7 @@ function cap(n){n=n||1;var t=ra();if(!t)return {err:'Chưa có thú ra trận: h
  var z=zoneOf(t),tot={},k,st,j,im=idManh(t.id),coManh=!!(root.TTGBALO.CAT&&TTGBALO.CAT[im]);
  for(st in CFG.cong)CFG.cong[st].forEach(function(r){tot[r[0]]=(tot[r[0]]||0)+r[1];});
  if(coManh)TTGBALO.add(im,(tot.manh||0)*n);
+ if(root.TTGTIEN&&TTGTIEN.add){var ps=0;for(st in CFG.phi)ps+=CFG.phi[st];TTGTIEN.add('tt',ps*n);}   /* đủ Tinh Thạch cho cả 2 lần tiến hóa */
  for(k in tot)if(k!=='manh')TTGBALO.add(id(z,k),tot[k]*n);
  return {z:z,ten:nm(im).replace(/^Mảnh /,''),manh:coManh};}
 
@@ -159,7 +169,7 @@ if(CFG.nutTest&&root.TTGNV&&root.TTGBALO){
  root.TTGNV.add({id:'lay-do-th',ten:'Lấy đồ TH',r:1,rc:0,onTap:function(){
   var r=cap(1),T=root.TTGTBAO&&TTGTBAO.toast;if(!T)return;
   if(r.err)TTGTBAO.toast(r.err,2600);
-  else TTGTBAO.toast('TEST: +Mảnh '+r.ten+' (x6) +Lõi/Châu/Thần Ấn vùng '+ZONE[r.z]+(r.manh?'':' (loài này chưa có item Mảnh: vùng chưa mở trong CFG.vungManh)'),3200);
+  else TTGTBAO.toast('TEST: +Mảnh '+r.ten+' (x6) +Lõi/Châu/Thần Ấn vùng '+ZONE[r.z]+' +6.000 Tinh Thạch'+(r.manh?'':' (loài này chưa có item Mảnh: vùng chưa mở trong CFG.vungManh)'),3200);
  },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 6l10 18-10 8-10-8z" fill="#7be0ff" stroke="#0b4a7a" stroke-width="3" stroke-linejoin="round"/><path d="M22 24l10 8 10-8 8 14-18 18-18-18z" fill="#4aa8ff" stroke="#0b4a7a" stroke-width="3" stroke-linejoin="round"/></svg>'});}
 
 /* ===================== GIAO DIỆN KHUNG TIẾN HÓA ===================== */
@@ -199,7 +209,8 @@ function render(){
  var cur=stat(t,t.tien|0||1),nx=r.max?null:stat(t,r.next);
  w.st.innerHTML=ks.map(function(k){var a=Math.round(cur[k]||0);return '<div class="th-r">'+a+(nx?' <i>→</i> <b>'+Math.round(nx[k]||0)+'</b>':'')+'</div>';}).join('');
  if(r.max){w.cd.innerHTML='<div class="th-em">Thú đã đạt <b>V3</b> (tối đa).</div>';w.rt.textContent='';return;}
- w.cd.innerHTML='<h6>V'+r.tien+' → V'+r.next+' · vùng '+esc(ZONE[r.z])+'</h6>'+r.items.map(function(x,j){var ok=x.have>=x.n;return '<div class="th-l"><span class="'+(ok?'th-ok':'th-no')+'">'+(S.put[j]?'✔ ':ok?'○ ':'✖ ')+esc(x.ten)+'</span><span class="'+(ok?'th-ok':'th-no')+'">'+x.have+'/'+x.n+'</span></div>';}).join('');
+ w.cd.innerHTML='<h6>V'+r.tien+' → V'+r.next+' · vùng '+esc(ZONE[r.z])+'</h6>'+r.items.map(function(x,j){var ok=x.have>=x.n;return '<div class="th-l"><span class="'+(ok?'th-ok':'th-no')+'">'+(S.put[j]?'✔ ':ok?'○ ':'✖ ')+esc(x.ten)+'</span><span class="'+(ok?'th-ok':'th-no')+'">'+x.have+'/'+x.n+'</span></div>';}).join('')+
+  (r.phi>0?'<div class="th-l"><span class="'+(r.tt>=r.phi?'th-ok':'th-no')+'">'+(r.tt>=r.phi?'○ ':'✖ ')+'Tinh Thạch</span><span class="'+(r.tt>=r.phi?'th-ok':'th-no')+'">'+fmtN(r.tt)+'/'+fmtN(r.phi)+'</span></div>':'');
  w.rt.textContent=r.tl+'%';}   /* ô tỉ lệ: V1→V2 100%, V2→V3 50% (CFG.tiLe) */
 function togglePut(i){
  var r=yeuCau(ra());if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}
