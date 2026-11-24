@@ -1,9 +1,9 @@
 /* 85-video-gioi-thieu.js - VIDEO GIỚI THIỆU lần đầu vào game (game-moi).
    Được nạp từ 51-thu-moi.js (khối [INTRO] đầu file) nên KHÔNG cần sửa index.html.
-   LUỒNG: mở game lần đầu -> video giới thiệu phoÌ‰ kín màn hình -> hết video (hoặc bấm Bỏ qua) -> mờ dần để lộ MÀN CHỜ (#ttg-boot) -> chạm vào màn hình để vào game.
+   LUỒNG: mở game lần đầu -> video giới thiệu phủ kín màn hình -> hết video (hoặc bấm Bỏ qua) -> mờ dần để lộ MÀN CHỜ (#ttg-boot) -> chạm vào màn hình để vào game.
    Màn chờ vẫn tải game ngầm bên dưới trong lúc video chạy, nên hết video thường đã sẵn sàng.
    VIDEO: đặt file đúng đường dẫn CFG.file (game-moi/video/gioi-thieu.mp4) rồi đẩy lên GitHub là chạy. Chưa có file / lỗi tải -> tự bỏ qua, vào màn chờ như bình thường (KHÔNG ghi là đã xem, nên khi có video rồi vẫn phát ở lần vào đầu tiên).
-   "LẦN ĐẦU" = máy chưa có khóa CFG.key trong localStorage. Xem hết hoặc bấm Bỏ qua thì ghi khóa. Muon mọi người xem lại bản video mới: đổi CFG.key (ttg_moi_intro_v1 -> ttg_moi_intro_v2).
+   "LẦN ĐẦU" = máy chưa có khóa CFG.key trong localStorage. Xem hết hoặc bấm Bỏ qua thì ghi khóa. Muốn mọi người xem lại bản video mới: đổi CFG.key (ttg_moi_intro_v1 -> ttg_moi_intro_v2).
    (Hiện đang bật [XÓA DỮ LIỆU TẠM] ở 51-thu-moi.js: mỗi lần mở game đều xóa khóa này nên video phát mỗi lần mở.)
    Trình duyệt chặn tự phát có tiếng (hay gặp trên iPhone) -> hiện chữ "Chạm để xem video giới thiệu", chạm là phát có tiếng.
    KHUNG HÌNH (CFG.fit): 'cover' = phủ KÍN màn hình, cắt phần thừa ở mép (hiện dùng: video 1920x960 có sẵn dải đen ~4% trên/dưới, 'cover' cắt đúng dải đó trên màn 19,5:9); 'contain' = hiện ĐỦ cả khung, còn dải đen 4 cạnh.
