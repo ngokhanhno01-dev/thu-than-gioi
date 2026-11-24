@@ -1,5 +1,17 @@
 // 51-thu-moi.js - Đăng ký thú mới (chỉ khai báo + hàm vẽ, không tự chạy, không móc vào chức năng nào)
 // Ảnh nạp LƯỜI: chỉ nạp khi vẽ lần đầu. Tên là TÊN TẠM, đổi tên chỉ sửa ở file này.
+// [XÓA DỮ LIỆU TẠM] Chưa có kho + tài khoản online nên MỖI LẦN MỞ GAME xóa sạch dữ liệu cũ = coi như người chơi vào lần đầu (thấy lại video giới thiệu, màn chọn thú đầu).
+// Đặt ở đây vì đây là file game-moi nạp ĐẦU TIÊN, trước mọi module đọc localStorage. Xóa mọi khóa ttg_moi_* TRỪ cài đặt giao diện (bố cục nút ttg_moi_layout_v1, khung HD ttg_moi_hd), cùng danh sách với GIU của 65-chon-thu-dau.js. Không đụng khóa game bản cũ (khác tiền tố). Không chạy khi chưa cài app (TTG_BLOCK).
+// Khi đã có kho/tài khoản: đổi XOA_KHI_MO = false (hoặc xóa khối này).
+(function () {
+  var XOA_KHI_MO = true, GIU = ['ttg_moi_layout_v1', 'ttg_moi_hd'];
+  try {
+    if (!XOA_KHI_MO || window.TTG_BLOCK || !document.getElementById('tb-scene')) return;
+    var ks = [], i;
+    for (i = 0; i < localStorage.length; i++) ks.push(localStorage.key(i));
+    ks.forEach(function (k) { if (k && k.indexOf('ttg_moi_') === 0 && GIU.indexOf(k) < 0) localStorage.removeItem(k); });
+  } catch (e) {}
+})();
 // [INTRO] Video giới thiệu lần đầu vào game: nạp module riêng game-moi/85-video-gioi-thieu.js (chỉ ở trang có màn chờ của game-moi; lỗi/thiếu file thì bỏ qua, không ảnh hưởng game).
 (function () { try { if (document.getElementById('tb-scene')) { var s = document.createElement('script'); s.src = 'game-moi/85-video-gioi-thieu.js'; document.head.appendChild(s); } } catch (e) {} })();
 (function () {
