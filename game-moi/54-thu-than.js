@@ -429,7 +429,7 @@ function moList(k){
   var t=byUid(sel),kn=knOf(t),C=(window.TTGBALO&&TTGBALO.CAT)||{},rows=[];
   Object.keys(C).forEach(function(id){if(C[id].loai==='sach'&&TTGBALO.count(id)>0)rows.push(id);});
   var h='<div class="tt-pt">Chọn sách kỹ năng · Ô '+(k+1)+'</div><div class="tt-pl">';
-  if(!rows.length)h+='<div class="tt-pe">Balo chưa có sách kỹ năng</div>';
+  if(!rows.length)h+='<div class="tt-pe">Túi Trữ Vật chưa có sách kỹ năng</div>';
   rows.forEach(function(id){var it=C[id],co=kn.indexOf(id)>=0;
     h+='<div class="tt-pr'+(co?' dis':'')+'" data-id="'+esc(id)+'"><span class="i">'+icSach(it)+'</span><span class="n">'+esc(it.ten)+'</span>'+(co?'<span class="g">Đã gắn</span>':'')+'<span class="q">x'+TTGBALO.count(id)+'</span></div>';});
   h+='</div><div class="tt-pb"><button type="button">Đóng</button></div>';
@@ -456,14 +456,14 @@ function dung(id,k){
   var t=byUid(sel);if(!t)return;var kn=knOf(t);
   if(kn[k]){toast('Ô này đã có kỹ năng');return;}
   if(kn.indexOf(id)>=0){toast('Thú đã có kỹ năng này');return;}
-  if(!window.TTGBALO||TTGBALO.count(id)<=0){toast('Balo hết sách này');return;}
+  if(!window.TTGBALO||TTGBALO.count(id)<=0){toast('Túi Trữ Vật hết sách này');return;}
   var bk=sachOf(id);if(bk&&bk.he&&window.TTGCS&&TTGCS.mangDuocSach&&!TTGCS.mangDuocSach(t.id,bk.he)){toast('Thú không cùng hệ với sách này');return;}   /* sách có hệ: chỉ thú có hệ chính/phụ trùng mới gắn */
   TTGBALO.add(id,-1);kn[k]=id;save();hidePop();renderSkills();toast('Đã gắn kỹ năng');
 }
 /* GỠ: trả sách về Balo, trống ô k */
 function go(k){
   var t=byUid(sel);if(!t)return;var kn=knOf(t),id=kn[k];if(!id)return;
-  if(window.TTGBALO)TTGBALO.add(id,1);kn[k]=null;save();hidePop();renderSkills();toast('Đã gỡ, sách về Balo');
+  if(window.TTGBALO)TTGBALO.add(id,1);kn[k]=null;save();hidePop();renderSkills();toast('Đã gỡ, sách về Túi Trữ Vật');
 }
 
 /* ===== THẢ THÚ: bỏ hẳn khỏi kho. Hỏi xác nhận (dùng bảng nổi E.in). Thú đang ra trận KHÔNG thả được. ===== */
@@ -484,12 +484,12 @@ function moTha(t){
    mh=mn?'<br>Thả sẽ nhận <b>1 '+esc(mn)+'</b> (dùng để tiến hóa).':'';
   if(window.TTGTBAO){
     var tit='Bạn chắc chắn muốn thả <b>'+esc(tenThu(t))+'</b> <span style="color:#fff3c4">Lv.'+lv+' · V'+tien+' · Rank</span> '+TTGTBAO.rankHtml(rk)+'?';
-    var txt='Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.'+mh+'<br><span class="'+(cb[0]?'tbo-w'+(cb[0]==='r'?' r':''):'')+'">'+cb[1]+'</span>';
+    var txt='Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Túi Trữ Vật.'+mh+'<br><span class="'+(cb[0]?'tbo-w'+(cb[0]==='r'?' r':''):'')+'">'+cb[1]+'</span>';
     var body=TTGTBAO.info({bac:t.bac,ts:true,icon:(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'?')+TTGTBAO.corner(rk),title:tit,tc:'y',text:txt},
      [{t:'Thả',cls:'d',cb:function(){tha(t.uid);}},{t:'Hủy',cb:function(){hidePop();}}]);
     try{var pc=body.querySelector('.tbo-ic canvas.pc');if(pc)pcPaint(pc);}catch(x){}   /* tự phóng vừa khung: thú nhỏ/vừa/to đều đầy đặn như ô kho */
     return;}
-  E.in.innerHTML='<div class="tt-ii"><span class="i">'+(a?'<img src="'+esc(a)+'" alt="">':'?')+'</span><div class="n">Thả '+esc(tenThu(t))+'?</div><div class="d">Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Balo.'+mh+'</div></div>'
+  E.in.innerHTML='<div class="tt-ii"><span class="i">'+(a?'<img src="'+esc(a)+'" alt="">':'?')+'</span><div class="n">Thả '+esc(tenThu(t))+'?</div><div class="d">Thú sẽ rời khỏi kho và không lấy lại được. Sách kỹ năng đang gắn (nếu có) được trả về Túi Trữ Vật.'+mh+'</div></div>'
    +'<div class="tt-pb"><button type="button" class="d">Thả</button><button type="button">Hủy</button></div>';
   var bs=E.in.querySelectorAll('button');
   bs[0].addEventListener('click',function(){tha(t.uid);});
