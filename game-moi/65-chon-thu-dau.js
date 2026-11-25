@@ -1,6 +1,6 @@
 /* CHỌN THÚ ĐỒNG HÀNH (màn chọn thú lúc mới vào game).
    Hiện ngay sau màn chờ (nằm DƯỚI màn chờ nên khi màn chờ mờ đi là thấy luôn). Phủ toàn màn hình ngang (780x360 logic, co giãn theo máy).
-   Khung = game-moi/khung-chon-thu.webp (2000x1127, nền trong suốt; chưa có thì thử khung-chon-thu.png; không có cả hai thì vẽ khung tạm).
+   Khung = game-moi/khung-chon-thu.webp (1670x941 từ 25/11/2026, đã bỏ dấu X vẽ sẵn, nền trong suốt; chưa có thì thử khung-chon-thu.png; không có cả hai thì vẽ khung tạm).
    Mọi vị trí (tiêu đề, thanh thông tin, 3 bục, 3 bảng tên, nút Xác Nhận, nút X) tính theo TỌA ĐỘ ẢNH GỐC 2505x1412 (hàm B bên dưới), đổi ảnh khung thì chỉnh số ở đó.
 
    THÚ: 3 thú khởi đầu k2 Lưu Diêu (Thủy), k1 Viêm Sư (Hỏa), k3 Lâm Trư (Mộc), id khớp THU_MOI (51-thu-moi.js). Id nào chưa có trong THU_MOI thì bục hiện dấu "?".
@@ -22,7 +22,7 @@ var STARTERS=[
  {id:'k3',ten:'Lâm Trư',mota:'Thường + Mộc · Tank'}];
 var PX=[500,1255,2015];/* tâm 3 bục (px ảnh gốc) */
 var HINT='Chạm vào một bục để chọn thú đồng hành';
-var SRC=['game-moi/khung-chon-thu.webp?v=1','game-moi/khung-chon-thu.png?v=1'];
+var SRC=['game-moi/khung-chon-thu.webp?v=2','game-moi/khung-chon-thu.png?v=2'];
 var root=null,sel=-1,raf=0,locked=false,cvs=[],infoEl,okDim,frameOk=false;
 function read(){try{return JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){return null;}}
 function B(x0,y0,x1,y1){return 'left:'+(x0/IW*100).toFixed(3)+'%;top:'+(y0/IH*100).toFixed(3)+'%;width:'+((x1-x0)/IW*100).toFixed(3)+'%;height:'+((y1-y0)/IH*100).toFixed(3)+'%;';}
