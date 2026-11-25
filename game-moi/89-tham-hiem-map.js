@@ -241,7 +241,7 @@ function segDist2(x,y,a,b){
 function fallbackWalkable(s,x,y){
   var path=[{x:790,y:-40},{x:800,y:150},{x:770,y:260},{x:690,y:370},
     {x:650,y:480},{x:680,y:580},{x:750,y:680},{x:830,y:780},
-    {x:820,y:875},{x:760,y:1024}],i,a,b,rr=148,o,pts=[],best,proj;
+    {x:820,y:875},{x:760,y:1024}],i,a,b,rr=190,o,pts=[],best,proj;
   for(i=0;i<path.length-1;i++)if(segDist2(x,y,path[i],path[i+1])<=rr*rr)return true;
   /* Nhánh nối từ đường chính tới từng điểm rung/Boss. */
   for(i=0;i<s.v.khu.length;i++){
