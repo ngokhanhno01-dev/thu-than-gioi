@@ -57,7 +57,7 @@ var CFG={
   cooldownSauTran:900,        /* ms không cho chạm lại sau khi quay về map */
   nhanVat:{toc:190,kich:64,anh:null,nhun:3},   /* toc = đơn vị map/giây; anh = đường dẫn ảnh 512x512 quay PHẢI (null = vẽ tạm bằng THU_MOI.draw/chibi); nhun = biên độ nhún khi đi (px) */
   camera:{zoom:1},
-  joystick:{kinh:112,kinhNho:94},
+  joystick:{kinh:152,kinhNho:136,hanhTrinh:0.58},
   boss:{hoiMs:15*60*1000,luuKhoa:'ttg_map_boss_'}   /* hồi theo GIỜ THỰC (Date.now), lưu localStorage theo từng vùng */
 };
 var BRUSH=[1,2,4,7];          /* bán kính cọ Debug Mask, tính theo ô lưới */
@@ -327,7 +327,7 @@ function buildDom(s){
   var stop=el('button','position:absolute;right:max(12px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));'+BTN+';font-size:14px;padding:8px 14px','⏸ Dừng');
   var rot=el('div','position:absolute;left:0;right:0;bottom:max(150px,calc(env(safe-area-inset-bottom) + 150px));display:none;justify-content:center;pointer-events:none');
   rot.appendChild(el('div','background:rgba(8,16,28,.8);color:#ffd45c;font-size:13px;padding:6px 12px;border-radius:999px','↻ Xoay ngang màn hình để chơi'));
-  var jb=el('div','position:absolute;left:max(18px,env(safe-area-inset-left));bottom:max(18px,env(safe-area-inset-bottom));border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.35);touch-action:none');
+  var jb=el('div','position:absolute;left:18px;top:18px;width:152px;height:152px;opacity:0;pointer-events:none;border-radius:50%;background:rgba(10,22,38,.34);border:2px solid rgba(225,242,255,.42);box-shadow:0 4px 22px rgba(0,0,0,.24);touch-action:none;transition:opacity .08s');
   var kn=el('div','position:absolute;left:50%;top:50%;border-radius:50%;background:rgba(255,255,255,.55);border:2px solid rgba(255,255,255,.85);pointer-events:none');
   jb.appendChild(kn);
   /* Debug Mask: nút nhỏ góc trên trái + bảng công cụ */
@@ -367,19 +367,28 @@ function buildDom(s){
     s2.pid=null;s2.last=null;if(e.pointerType!=='mouse')s2.cursor=null;saveDraft(s2);}
   cv.addEventListener('pointerup',endStroke);
   cv.addEventListener('pointercancel',endStroke);
-  /* joystick */
-  jb.addEventListener('pointerdown',function(e){
-    if(!S||S.joy.id!==null)return;
-    S.joy.id=e.pointerId;try{jb.setPointerCapture(e.pointerId);}catch(_){}
+  /* Joystick kiểu MOBA: chạm bất kỳ đâu ở nửa trái màn hình để gọi cần analog nổi. */
+  cv.addEventListener('pointerdown',function(e){
+    var s2=S,big,r,px,py;
+    if(!s2||s2.dbg||s2.paused||s2.joy.id!==null||e.clientX>window.innerWidth*0.62)return;
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    s2.joy.id=e.pointerId;
+    big=s2.joyBase.offsetWidth||CFG.joystick.kinhNho;
+    r=big/2;px=clamp(e.clientX,r+4,window.innerWidth-r-4);py=clamp(e.clientY,r+4,window.innerHeight-r-4);
+    s2.joy.cx=px;s2.joy.cy=py;
+    s2.joyBase.style.left=(px-r)+'px';s2.joyBase.style.top=(py-r)+'px';
+    s2.joyBase.style.opacity='1';
+    try{cv.setPointerCapture(e.pointerId);}catch(_){}
     joyMove(e);e.preventDefault();});
-  jb.addEventListener('pointermove',function(e){if(S&&e.pointerId===S.joy.id){joyMove(e);e.preventDefault();}});
-  jb.addEventListener('pointerup',joyEnd);
-  jb.addEventListener('pointercancel',joyEnd);
+  cv.addEventListener('pointermove',function(e){if(S&&e.pointerId===S.joy.id){joyMove(e);e.preventDefault();}});
+  cv.addEventListener('pointerup',joyEnd);
+  cv.addEventListener('pointercancel',joyEnd);
 }
 function joyMove(e){
-  var s=S,r=s.joyBase.getBoundingClientRect(),R=r.width/2,dx=e.clientX-(r.left+R),dy=e.clientY-(r.top+R),len=Math.sqrt(dx*dx+dy*dy);
-  if(len>R&&len>0){dx*=R/len;dy*=R/len;}
-  s.joy.x=R?dx/R:0;s.joy.y=R?dy/R:0;
+  var s=S,R=s.joyBase.offsetWidth/2,travel=R*CFG.joystick.hanhTrinh,
+      dx=e.clientX-s.joy.cx,dy=e.clientY-s.joy.cy,len=Math.sqrt(dx*dx+dy*dy);
+  if(len>travel&&len>0){dx*=travel/len;dy*=travel/len;}
+  s.joy.x=travel?dx/travel:0;s.joy.y=travel?dy/travel:0;
   s.joyKnob.style.transform='translate('+dx+'px,'+dy+'px)';}
 function joyEnd(e){
   var s=S;if(!s)return;
@@ -387,7 +396,8 @@ function joyEnd(e){
   joyReset(s);}
 function joyReset(s){
   s.joy.id=null;s.joy.x=0;s.joy.y=0;
-  if(s.joyKnob)s.joyKnob.style.transform='translate(0px,0px)';}
+  if(s.joyKnob)s.joyKnob.style.transform='translate(0px,0px)';
+  if(s.joyBase)s.joyBase.style.opacity='0';}
 
 function fit(){
   var s=S;if(!s)return;
@@ -652,7 +662,7 @@ function open(host){
   v=vung(host.vung);
   if(!v){try{console.warn('[TTGMAP] không có vùng: '+host.vung);}catch(e){}return false;}
   s=S={host:host,slug:host.vung||'tuyet-nguyen',v:v,img:null,ready:false,paused:false,raf:0,last:0,clock:0,coolUntil:0,
-    keys:{},joy:{id:null,x:0,y:0},p:{x:v.xuatPhat.x,y:v.xuatPhat.y,face:1,walk:0,moving:false},
+    keys:{},joy:{id:null,x:0,y:0,cx:0,cy:0},p:{x:v.xuatPhat.x,y:v.xuatPhat.y,face:1,walk:0,moving:false},
     cam:{x:0,y:0},zoom:CFG.camera.zoom||1,vw:0,vh:0,dpr:1,khuId:0,groups:[],bossT:-1,bossMs:bossConLai(host.vung||'tuyet-nguyen'),
     hudTimer:0,sprite:null,thuFail:false,frame192:false,
     boss:null,mask:null,open:[],dbg:false,tool:'paint',bi:1,pid:null,last2:null,cursor:null,ov:null,maskDirty:true};
