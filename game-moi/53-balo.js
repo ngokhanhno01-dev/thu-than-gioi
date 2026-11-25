@@ -13,7 +13,7 @@
 (function(){
 'use strict';
 if(!window.TTGNV)return;
-var KEY='ttg_moi_balo_v1',CAP=100,STACK=99,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=4',OV_KHOA='game-moi/nut-mo-khoa.webp?v=1',OV_TRONG='game-moi/nut-trong.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
+var KEY='ttg_moi_balo_v1',CAP=100,STACK=99,PAGE=16,BW=1761,BH=847,UB=1469,IMG='game-moi/khung-balo.webp?v=5',OV_KHOA='game-moi/nut-mo-khoa.webp?v=1',OV_TRONG='game-moi/nut-trong.webp?v=1';   /* UB = thang đơn vị cũ cho cỡ chữ/độ dày ({n}) */
 var demo=/[?&](balo|thu)=demo/.test(location.search);   /* ?thu=demo cũng bật demo Balo để có sách kỹ năng mẫu cho panel Thú Thần (không lưu) */
 var LOAI={nl:'Nguyên liệu',bong:'Ngự Thú Châu',sach:'Sách kỹ năng'};   /* sách kỹ năng nằm chung lưới 4x4 với nguyên liệu; danh mục sách khai ở 54-thu-than.js */
 /* ===== DANH MỤC ITEM ===== mỗi item: id:{loai:'nl'|'bong', ten, mo (mô tả), ic (emoji tạm) hoặc img (đường dẫn ảnh icon), cap (cấp bóng)} */
