@@ -17,6 +17,7 @@
 var SW=1672,SH=941,V='?v=2',D='game-moi/';
 var IMG=D+'khung-cua-hang.webp'+V,GLOW=D+'cua-hang-sang.webp'+V,MASK=D+'cua-hang-tab-mask.webp'+V,SLOT=D+'cua-hang-o.webp'+V;
 var CFG={
+  icTT:'game-moi/icon-tien/tt.webp?v=1',icTTT:'game-moi/icon-tien/ttt.webp?v=1',   /* icon tiền cắt từ khung-tien.webp */
   lamMoiPhut:30,      /* chu kỳ làm mới hàng (phút) */
   oToiThieu:16,       /* số ô tối thiểu mỗi tab (bội của 4). 16 = 4 hàng trống để thử cuộn; đặt 8 khi đã có món thật */
   key:'ttg_moi_cuahang_lm',
@@ -74,6 +75,8 @@ var css=[
 '.sh-nm{left:calc(var(--u)*16);right:calc(var(--u)*16);top:calc(var(--u)*130);height:calc(var(--u)*44);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:calc(var(--u)*21);line-height:1.1;color:#fff3c4;text-shadow:0 0 calc(var(--u)*5) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c}',
 '.sh-sl{right:calc(var(--u)*26);top:calc(var(--u)*24);font-weight:800;font-size:calc(var(--u)*22);color:#ffe9a0;text-shadow:0 0 calc(var(--u)*4) #000,calc(var(--u)*1.5) calc(var(--u)*1.5) 0 #000}',
 '.sh-pr{left:calc(var(--u)*52);top:calc(var(--u)*181);width:calc(var(--u)*136);height:calc(var(--u)*34);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--u)*26);line-height:1;white-space:nowrap;color:#e6c8ff;text-shadow:0 0 calc(var(--u)*4) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c}',
+'.sh-ci{width:calc(var(--u)*34);height:calc(var(--u)*34);flex:none;object-fit:contain;margin-right:calc(var(--u)*8);filter:drop-shadow(0 0 calc(var(--u)*3) rgba(2,6,28,.9))}',
+'.sh-pn{display:block;line-height:1;font-variant-numeric:tabular-nums;padding-top:calc(var(--u)*2)}',
 '.sh-o.het .sh-pr{color:#ff9d9d;font-size:calc(var(--u)*24)}'
 ].join('\n');
 var stl=document.createElement('style');stl.textContent=css;document.head.appendChild(stl);
@@ -116,7 +119,7 @@ function renderList(){
     var m=L[i];
     if(!m){h+='<div class="sh-o"></div>';continue;}
     var it=cat(m),cl=conLai(m);
-    h+='<div class="sh-o hg'+(cl<=0?' het':'')+'" data-i="'+CFG.hang.indexOf(m)+'"><div class="sh-ic">'+(it.img?'<img src="'+esc(it.img)+'" alt="">':'<b style="font-weight:400">'+esc(it.ic||'?')+'</b>')+'</div><div class="sh-nm">'+esc(it.ten||m.ten)+'</div><div class="sh-sl">'+cl+'/'+m.toiDa+'</div><div class="sh-pr">'+(cl<=0?'Hết hàng':'◆ '+fmt(m.gia))+'</div></div>';
+    h+='<div class="sh-o hg'+(cl<=0?' het':'')+'" data-i="'+CFG.hang.indexOf(m)+'"><div class="sh-ic">'+(it.img?'<img src="'+esc(it.img)+'" alt="">':'<b style="font-weight:400">'+esc(it.ic||'?')+'</b>')+'</div><div class="sh-nm">'+esc(it.ten||m.ten)+'</div><div class="sh-sl">'+cl+'/'+m.toiDa+'</div><div class="sh-pr">'+(cl<=0?'Hết hàng':'<img class="sh-ci" src="'+(m.tien==='tt'?CFG.icTT:CFG.icTTT)+'" alt=""><span class="sh-pn">'+fmt(m.gia)+'</span>')+'</div></div>';
   }
   E.gd.innerHTML=h;E.ls.scrollTop=sc;
 }
