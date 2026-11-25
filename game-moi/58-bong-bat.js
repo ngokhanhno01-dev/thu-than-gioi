@@ -43,7 +43,7 @@ var CFG={
     trongSoQuaiMain:[1,1,1,1,1],           /* 5 quái thường main chọn đều */
     trongSoBoss:{main:7,demo:1},            /* boss quái 7 : boss thú hoang 1 (boss quái ~3,5%/lượt, boss thú hoang ~0,5%/lượt) */
     trongSoLoai:[15,14,13,12,11,10,8,6,6], /* trọng số tương đối cho 9 thú demo */
-    trongSoBac:{1:1,2:1,3:1},              /* bậc của thú demo thường: mặc định chia đều */
+    trongSoBac:{1:6,2:3,3:1},              /* V1 60%, V2 30%, V3 10% cho mọi lượt sinh thú/quái */
     bacBoss:3,                             /* boss luôn bậc 3 */
     bacKhiBat:1,                           /* bắt về luôn bậc 1 */
     chenhThuong:[-2,10],                   /* DỰ PHÒNG tương thích; cấp mới lấy theo vùng + độ hiếm trong 61 */
