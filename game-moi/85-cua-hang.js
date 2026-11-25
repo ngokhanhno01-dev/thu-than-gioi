@@ -13,6 +13,7 @@
      Hộp Ngự Thú Ngẫu Nhiên 20 TTT, tối đa 10 hộp mỗi đợt làm mới | Rương Ngự Thú Tự Chọn 100 TTT, tối đa 5 rương mỗi đợt.
    Số lượt đã mua lưu ở khóa ttg_moi_cuahang_mua, gắn với mốc đợt làm mới (hết 30 phút sang đợt mới thì lượt mua về 0). Chạm ô -> hỏi xác nhận -> trừ tiền + cộng vào Balo (TTGBALO). Thêm món bán: thêm 1 dòng vào CFG.hang (id phải có trong TTGBALO.CAT; ten/ic chỉ là dự phòng). */
 /* BƯỚC 2 NGỰ THÚ CHÂU (25/11/2026): tab Đạo Cụ (và Tất Cả) bán 3 ô Ngự Thú Châu NGẪU NHIÊN bằng TINH THẠCH, bốc lại mỗi đợt làm mới 30 phút. Cấu hình ở CFG.chau (trọng số bậc, số lượng, giá mỗi cái). 3 ô lưu ở khóa ttg_moi_cuahang_chau gắn với mốc anchor nên tải lại không đổi; mỗi ô chỉ mua 1 lần/đợt (xong hiện "Hết hàng"). Không đụng Hộp/Rương (86-hop-ruong.js). Bậc 6 không bán. */
+/* (25/11/2026) CHẠM Ô: chạm HÌNH/TÊN = xem thông tin vật phẩm (hộp thoại, không trừ tiền); chạm NÚT GIÁ TIỀN mới là mua (hỏi xác nhận). Áp dụng mọi ô; chỉ đổi cách chạm ở file này, không đụng 86-hop-ruong.js. */
 (function(){
 'use strict';
 var SW=1672,SH=941,V='?v=2',D='game-moi/';
@@ -83,6 +84,7 @@ var css=[
 '.sh-o.hg:active{filter:brightness(1.25)}',
 '.sh-o.het .sh-ic,.sh-o.het .sh-nm{opacity:.4;filter:grayscale(.7)}',
 '.sh-o>*{position:absolute;box-sizing:border-box;pointer-events:none}',
+'.sh-o.hg .sh-pr{pointer-events:auto;cursor:pointer}',   /* CHỈ nút giá nhận chạm để MUA; chạm hình/tên/phần còn lại của ô thì xem thông tin */
 '.sh-ic{left:calc(var(--u)*30);top:calc(var(--u)*22);width:calc(var(--u)*180);height:calc(var(--u)*112);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*80)}',
 '.sh-ic img{width:100%;height:100%;object-fit:contain}',
 '.sh-nm{left:calc(var(--u)*16);right:calc(var(--u)*16);top:calc(var(--u)*130);height:calc(var(--u)*44);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:calc(var(--u)*21);line-height:1.1;color:#fff3c4;text-shadow:0 0 calc(var(--u)*5) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c}',
@@ -192,6 +194,14 @@ function muaChau(j){
   if(window.TTGBAO)TTGBAO.confirm('<div>Mua <b>'+esc(nm)+'</b> với <b>'+fmt(tong)+'</b> '+tenTien('tt')+'?<br><small>('+CFG.chau.gia[o.cap]+' '+tenTien('tt')+' mỗi cái, mỗi ô chỉ mua được 1 lần mỗi đợt)</small></div>',[{t:'Mua',cb:xong},{t:'Hủy'}]);
   else xong();
 }
+/* XEM THÔNG TIN: chạm hình/tên ô hiện bảng mô tả (không trừ tiền). Chạm nút giá mới là mua. */
+function hopTin(it,ten,dong,mo){
+  var ic=it.img?'<img src="'+esc(it.img)+'" alt="" style="width:72px;height:72px;object-fit:contain">':'<span style="font-size:56px;line-height:1">'+esc(it.ic||'?')+'</span>';
+  var h='<div style="text-align:center">'+ic+'<br><b>'+esc(ten)+'</b><br><small>'+dong+'</small><div style="margin-top:8px;text-align:left"><small>'+esc(mo||'Chưa có mô tả.')+'</small></div></div>';
+  if(window.TTGBAO&&TTGBAO.confirm)TTGBAO.confirm(h,[{t:'Đóng'}]);else toast(ten);
+}
+function xemMon(m){var it=cat(m),cl=conLai(m);hopTin(it,it.ten||m.ten,'Giá: '+fmt(m.gia)+' '+tenTien(m.tien)+' · Còn '+cl+'/'+m.toiDa+' lượt trong đợt này',it.mo);}
+function xemChau(j){var o=chauSet().o[j];if(!o)return;var it=catChau(o);hopTin(it,it.ten||('Ngự Thú Châu bậc '+o.cap),'Bậc '+o.cap+' · Số lượng: x'+o.sl+' · Giá: '+fmt(giaO(o))+' Tinh Thạch ('+CFG.chau.gia[o.cap]+'/cái)'+(o.mua?' · Đã mua':''),it.mo||'Dùng để bắt thú hoang.');}
 function setTab(id){
   cur=id;
   E.tabs.forEach(function(b){b.classList.toggle('on',b.getAttribute('data-id')===id);b.setAttribute('aria-pressed',b.getAttribute('data-id')===id?'true':'false');});
@@ -203,7 +213,7 @@ function build(){
   root=document.createElement('div');root.className='sh';
   fr=document.createElement('div');fr.className='sh-fr';root.appendChild(fr);
   E.ls=mk('div','sh-ls',BOX.list);E.gd=document.createElement('div');E.gd.className='sh-gd';E.ls.appendChild(E.gd);
-  E.gd.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.sh-o[data-i],.sh-o[data-c]');if(!c)return;if(c.hasAttribute('data-c')){muaChau(+c.getAttribute('data-c'));return;}var m=CFG.hang[+c.getAttribute('data-i')];if(m)muaMon(m);});
+  E.gd.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.sh-o[data-i],.sh-o[data-c]');if(!c)return;var bamGia=!!(e.target.closest&&e.target.closest('.sh-pr'));if(c.hasAttribute('data-c')){var j=+c.getAttribute('data-c');if(bamGia)muaChau(j);else xemChau(j);return;}var m=CFG.hang[+c.getAttribute('data-i')];if(!m)return;if(bamGia)muaMon(m);else xemMon(m);});
   E.tabs=TABS.map(function(t,i){
     var T=BOX.tab,b=mk('button','sh-tab',{x:T.x,y:T.y0+T.pitch*i,w:T.w,h:T.h});b.type='button';b.setAttribute('data-id',t.id);b.setAttribute('aria-label',t.ten);
     var g=document.createElement('span'),l=document.createElement('span'),G=BOX.glow;g.className='sh-gl';l.className='sh-lt';
