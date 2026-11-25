@@ -24,7 +24,7 @@ var CFG={
   anhVer:'?v=2',
   tiLeGapNPC:5,               /* % tổng cho CẢ 6 NPC của 1 vùng (người dùng chốt 25/11/2026). Hướng (b): MỖI NPC sẵn sàng được tiLeGapNPC/6 % (~0,83%); đủ 6 NPC thì đúng 5%. Phần còn lại giữ nguyên tỉ lệ thú/quái/boss */
   trongSoLoai:{'boss':1,'cot-truyen':1,'tien-hoa':1,'luyen-khi':1,'san-ban':1,'thuong-nhan':1},   /* chỉnh độ hay gặp theo loại (tương đối so với trung bình các loại; bằng nhau = mỗi NPC đúng tiLeGapNPC/6) */
-  boss:{heSoManh:1.5,cao:170},   /* NPC Boss: heSoManh = nhân Máu/Tấn công/Giáp của boss thú hoang cùng vùng (đề xuất ban đầu x3, hạ còn 1,5 vì boss gốc Lv25 đã gấp ~2 máu thú V3 cùng cấp; chỉnh ở đây). cao = chiều cao ảnh NPC vẽ trong trận (px) */
+  boss:{heSoManh:1.5,cao:170,lat:true},   /* NPC Boss: heSoManh = nhân Máu/Tấn công/Giáp của boss thú hoang cùng vùng (đề xuất ban đầu x3, hạ còn 1,5 vì boss gốc Lv25 đã gấp ~2 máu thú V3 cùng cấp; chỉnh ở đây). cao = chiều cao ảnh NPC vẽ trong trận (px), lat = lật ngang ảnh để NPC quay mặt sang TRÁI (về phía thú của bạn) */
   tenVung:{0:'Tuyết Nguyên',1:'Sương Cốc',2:'Vân Đảo',3:'Phong Nguyên',4:'Lôi Vực',5:'Nguyệt Cung'},   /* dự phòng khi chưa có THU_MOI */
   /* mỗi loại: tên hiển thị, màu nhãn, hàng nút (chức năng gắn ở bước sau qua TTGNPC.hanhDong[loai]), câu chào ngẫu nhiên */
   loai:{
@@ -51,7 +51,7 @@ var CFG={
            {loi:'Ra tay đi. Thắng được ta thì ngươi mới đáng để ta liếc mắt thêm một lần. Còn nếu không... cút khỏi tuyết nguyên của ta.'}],
          /* td = cấu hình riêng của NPC Boss (đọc bởi 88-npc-boss.js). lv cố định; chiSoTu = loài lấy chỉ số gốc (boss thú hoang vùng 0: Băng Sơn Cự Thú); kyNang = id sách kỹ năng boss; he/hiem hiển thị; KHÔNG bắt được, KHÔNG bậc Rank, KHÔNG hiện Vn */
          td:{lv:25,tien:3,chiSoTu:'1j',kyNang:'sach-bang-son-ap-dinh',he:['bang'],hiem:'truyenthuyet',
-             thuong:{chau:{cap:1,n:5},tt:1000,trangBi:true,nguyenLieu:true}}}}),
+             thuong:{chau:{cap:1,n:5},tt:1000,trangBi:true,nguyenLieu:true,sach:true,sachTiLe:10,heSoExp:3}}}}),
     tao(1,[['Vụ Cốc Yêu Cơ - Mặc Sương','Yêu cơ ẩn trong màn sương dày, mê hoặc rồi ra tay với kẻ lạc đường.'],
            ['Vụ Cốc Thủ Hộ - Thanh Y Lão Bà','Bà lão canh giữ cổ đạo trong thung lũng, biết bí mật của làn sương.'],
            ['Lộ Châu Dược Sư - Tố Lộ','Dược sư hái sương mai, pha thuốc cho linh thú tiến hóa.'],

@@ -6,7 +6,7 @@
      - Không tính Danh Vọng (80-danh-vong.js chỉ nhận source 'demo'), không rơi đồ kiểu quái vùng (TTGLT.roiDo chỉ nhận 'main'), không rơi item kiểu thú hoang (TTGTH.roiDo chỉ nhận 'demo'): phần thưởng NPC do thang() bên dưới trao riêng.
    HÌNH: ảnh NPC (game-moi/npc/<id>.webp) thay cho thú trong giao diện chiến đấu (veDich, index.html gọi trong pet()). Hệ: td.he (Băng); độ hiếm: td.hiem (Truyền Thuyết); không hiện Rank, không hiện Vn.
    CHỈ SỐ: lấy chỉ số gốc của loài td.chiSoTu (boss thú hoang cùng vùng) ở cấp td.lv (cố định 25), rồi nhân Máu / Tấn công / Giáp với CFG.boss.heSoManh (87-npc.js). Kỹ năng: td.kyNang (sách kỹ năng boss, vd Băng Sơn Áp Đỉnh) + nội tại sách + buff boss vùng, đúng như boss thú hoang.
-   PHẦN THƯỞNG khi THẮNG (td.thuong): Ngự Thú Châu (chau.cap x chau.n) + Tinh Thạch cố định (tt) + 1 trang bị phẩm ngẫu nhiên của vùng (TTGLT.taoMon, gacha 55/28/12/4/1) + nguyên liệu như boss thú hoang (TTGTH.roiDo với địch giả {source:'demo',boss:true}), EXP như boss thường. KHÔNG rơi bong-6 (chặn cứng bên dưới).
+   PHẦN THƯỞNG khi THẮNG (td.thuong): Ngự Thú Châu (chau.cap x chau.n) + Tinh Thạch cố định (tt) + 1 trang bị phẩm ngẫu nhiên của vùng (TTGLT.taoMon, gacha 55/28/12/4/1) + nguyên liệu như boss thú hoang (TTGTH.roiDo với địch giả {source:'demo',boss:true}), EXP = EXP boss thường x heSoExp (3), sách kỹ năng boss rơi 10% (td.thuong.sachTiLe). KHÔNG rơi bong-6 (chặn cứng bên dưới).
    Thua/bỏ chạy: như trận thường (thua mất 1 nửa Tinh Thạch của lần thắng theo công thức boss, không nhân đôi). Chưa có giới hạn lượt/ngày.
    API (window.TTGNPC thêm): taoDich(npcId,player) | veDich(ctx,enemy,x,by,bob) | thang(enemy,mm) -> [chuỗi báo] | ttThang(enemy) -> số Tinh Thạch | hanhDong.boss
    THỬ: ?npc=z0-boss rồi bấm Thám hiểm (lượt nào cũng gặp), hoặc menu ẩn (chạm chữ "Danh Vọng") -> "Boss NPC: thắng ngay" để kiểm phần thưởng không cần đánh. */
@@ -46,9 +46,12 @@ function veDich(ctx,e,x,by,bob){
   if(!im)return;   /* ảnh chưa nạp xong thì chưa vẽ (nạp ở khung thoại trước đó nên thường đã có sẵn) */
   var w=h*(im.naturalWidth/im.naturalHeight||1);
   ctx.save();ctx.imageSmoothingEnabled=false;   /* ảnh pixel art: giữ nét */
-  ctx.drawImage(im,x-w/2,by+bob+8-h,w,h);ctx.restore();}
+  if(B.lat){ctx.translate(x,0);ctx.scale(-1,1);ctx.drawImage(im,-w/2,by+bob+8-h,w,h);}   /* lật ngang: quay mặt sang trái */
+  else ctx.drawImage(im,x-w/2,by+bob+8-h,w,h);
+  ctx.restore();}
 
 /* ---------- PHẦN THƯỞNG ---------- */
+function heSoExp(e){var n=npcCuaDich(e),t=tdCua(n).thuong||{};return Math.max(1,+t.heSoExp||1);}   /* EXP thắng = EXP boss thường x heSoExp */
 function ttThang(e){var n=npcCuaDich(e),t=tdCua(n).thuong||{};return Math.max(0,Math.floor(+t.tt||0));}
 /* trao phần thưởng (trừ Tinh Thạch: index.html cộng theo ttThang). Trả mảng chuỗi để ghép vào thông báo thắng trận */
 function thang(e,mm){
@@ -61,6 +64,9 @@ function thang(e,mm){
     var r=TTGLT.taoMon(z);
     if(r&&r.item)out.push(r.item.ten||('Trang bị phẩm '+TTGLT.QN[r.q]));   /* tên món đã có sẵn phẩm, vd "[Linh] Vòng Tuyết Nguyên" */
     else if(r&&r.err)out.push('Trang bị: '+r.err);}
+  if(th.sach&&n.td.kyNang&&root.TTGBALO){   /* sách kỹ năng boss: tỉ lệ cố định th.sachTiLe % (10%, vì NPC mạnh hơn boss thú hoang 1,5%), KHÔNG nhân may mắn */
+    var pc=+th.sachTiLe||0;
+    if(Math.random()*100<pc){TTGBALO.add(n.td.kyNang,1);var c=TTGBALO.CAT[n.td.kyNang];out.push(c?c.ten:n.td.kyNang);}}
   if(th.nguyenLieu&&root.TTGTH&&TTGTH.roiDo){   /* nguyên liệu như boss thú hoang cùng vùng (cùng tỉ lệ, cùng ảnh hưởng may mắn) */
     var rl=[];try{rl=TTGTH.roiDo({source:'demo',boss:true,vung:z},mm||0);}catch(x){}
     if(rl.length)out.push(TTGTH.moTa(rl));}
@@ -75,7 +81,7 @@ T.hanhDong.boss=function(npc,ctl,k){
   if(root.TTGTX&&TTGTX.active()&&TTGTX.vaoTran)TTGTX.vaoTran(pre);
   else if(TTGTHAMHIEM.battle)TTGTHAMHIEM.battle(pre);};   /* gọi từ nút test ngoài vòng thám hiểm: vào trận thẳng */
 
-T.taoDich=taoDich;T.veDich=veDich;T.thang=thang;T.ttThang=ttThang;
+T.taoDich=taoDich;T.veDich=veDich;T.thang=thang;T.ttThang=ttThang;T.heSoExp=heSoExp;
 
 /* ---------- NÚT TEST ẨN ---------- */
 function testThang(){

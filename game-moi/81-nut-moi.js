@@ -17,7 +17,7 @@ FN.forEach(function(f){var o={id:f[0],ten:f[1],onTap:soon(f[1])};if(f[0]==='cua-
 (function(){try{var cs=document.currentScript,s=document.createElement('script');s.src=(cs&&cs.src?cs.src.replace(/[^\/?#]*([?#].*)?$/,''):'game-moi/')+'86-hop-ruong.js?v=1';s.async=false;document.head.appendChild(s);}catch(e){}})();
 
 /* 87-npc.js (25/11/2026): NPC 6 loại mỗi vùng (dữ liệu + ảnh + khung thoại, Bước 3). Nạp động cạnh file này nên không cần sửa index.html. */
-(function(){try{var cs=document.currentScript,s=document.createElement('script');s.src=(cs&&cs.src?cs.src.replace(/[^\/?#]*([?#].*)?$/,''):'game-moi/')+'87-npc.js?v=2';s.async=false;document.head.appendChild(s);}catch(e){}})();
+(function(){try{var cs=document.currentScript,s=document.createElement('script');s.src=(cs&&cs.src?cs.src.replace(/[^\/?#]*([?#].*)?$/,''):'game-moi/')+'87-npc.js?v=3';s.async=false;document.head.appendChild(s);}catch(e){}})();
 
 /* 88-npc-boss.js (25/11/2026): bộ máy NPC loại Boss (Khiêu chiến, địch NPC trong trận, phần thưởng). Nạp SAU 87-npc.js (async=false giữ đúng thứ tự). */
-(function(){try{var cs=document.currentScript,s=document.createElement('script');s.src=(cs&&cs.src?cs.src.replace(/[^\/?#]*([?#].*)?$/,''):'game-moi/')+'88-npc-boss.js?v=1';s.async=false;document.head.appendChild(s);}catch(e){}})();
+(function(){try{var cs=document.currentScript,s=document.createElement('script');s.src=(cs&&cs.src?cs.src.replace(/[^\/?#]*([?#].*)?$/,''):'game-moi/')+'88-npc-boss.js?v=2';s.async=false;document.head.appendChild(s);}catch(e){}})();
