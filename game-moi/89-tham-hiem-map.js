@@ -230,10 +230,38 @@ function buildOpen(v){
   if(b){rb=Math.max(r,b.banKinhCham);L.push({x:b.x,y:b.y,r2:rb*rb});}
   return L;}
 /* đứng được tại (x,y)? Không có mask (n=0) hoặc đang Debug Mask => luôn được */
+/* Mask trống: dùng hành lang đi bộ dự phòng theo đường đất của Tuyết Nguyên,
+   cộng các nhánh nối tới điểm rung/Boss. Khi có maskData thật, mask luôn được ưu tiên. */
+function segDist2(x,y,a,b){
+  var dx=b.x-a.x,dy=b.y-a.y,den=dx*dx+dy*dy,
+      t=den?clamp(((x-a.x)*dx+(y-a.y)*dy)/den,0,1):0,
+      px=a.x+t*dx,py=a.y+t*dy,ex=x-px,ey=y-py;
+  return ex*ex+ey*ey;}
+function fallbackWalkable(s,x,y){
+  var path=[{x:790,y:-40},{x:800,y:150},{x:770,y:260},{x:690,y:370},
+    {x:650,y:480},{x:680,y:580},{x:750,y:680},{x:830,y:780},
+    {x:820,y:875},{x:760,y:1024}],i,a,b,rr=148,o,pts=[],best,proj;
+  for(i=0;i<path.length-1;i++)if(segDist2(x,y,path[i],path[i+1])<=rr*rr)return true;
+  /* Nhánh nối từ đường chính tới từng điểm rung/Boss. */
+  for(i=0;i<s.v.khu.length;i++){
+    var list=s.v.diem[s.v.khu[i].id]||[];
+    for(var j=0;j<list.length;j++)pts.push(list[j]);}
+  if(s.v.boss)pts.push(s.v.boss);
+  for(i=0;i<pts.length;i++){
+    o=pts[i];best=Infinity;proj=null;
+    for(var q=0;q<path.length-1;q++){
+      a=path[q];b=path[q+1];
+      var dx=b.x-a.x,dy=b.y-a.y,den=dx*dx+dy*dy,
+          t=den?clamp(((o.x-a.x)*dx+(o.y-a.y)*dy)/den,0,1):0,
+          px=a.x+t*dx,py=a.y+t*dy,d2=(o.x-px)*(o.x-px)+(o.y-py)*(o.y-py);
+      if(d2<best){best=d2;proj={x:px,y:py};}}
+    if(proj&&segDist2(x,y,proj,o)<=54*54)return true;}
+  return false;}
 function canStand(s,x,y){
   var m=s.mask,v=s.v,i,o,dx,dy,gx,gy;
-  if(s.dbg||m.n<=0)return true;
+  if(s.dbg)return true;
   for(i=0;i<s.open.length;i++){o=s.open[i];dx=x-o.x;dy=y-o.y;if(dx*dx+dy*dy<=o.r2)return true;}
+  if(m.n<=0)return fallbackWalkable(s,x,y);
   gx=clamp(Math.floor(x/(v.rong/m.w)),0,m.w-1);gy=clamp(Math.floor(y/(v.cao/m.h)),0,m.h-1);
   return m.g[gy*m.w+gx]===1;}
 /* tô/tẩy 1 dấu cọ tại toạ độ map */
@@ -558,13 +586,14 @@ function chibi(c,k){
   c.fillStyle='#2a3f6e';c.fillRect(-k*0.14,-k*0.02,k*0.1,k*0.04);c.fillRect(k*0.04,-k*0.02,k*0.1,k*0.04);}
 /* gốc toạ độ = chân nhân vật, quay PHẢI (đã scale(face,1) bên ngoài) */
 function drawSprite(s,c,k){
-  var T=root.THU_MOI,sp;
+  var sp;
+  /* Chỉ dùng sprite khi đã cấu hình ảnh nhân vật hợp lệ. Không gọi THU_MOI.draw()
+     với ID 0: hàm đó có thể không vẽ gì nhưng vẫn khiến caller bỏ qua chibi(). */
   if(CFG.nhanVat.anh){
-    if(!s.sprite){s.sprite=new Image();s.sprite.src=CFG.nhanVat.anh;}
+    if(!s.sprite){s.sprite=new Image();s.sprite.onload=function(){if(S===s&&s.ready)draw(s);};s.sprite.src=CFG.nhanVat.anh;}
     sp=s.sprite;
-    if(sp.complete&&sp.naturalWidth){c.drawImage(sp,-k/2,-k,k,k);return true;}}
-  if(!s.thuFail&&T&&typeof T.draw==='function'){
-    try{T.draw(c,0,-k/2,k);return true;}catch(e){s.thuFail=true;}}   /* lỗi 1 lần là thôi, rơi về chibi tạm */
+    if(sp.complete&&sp.naturalWidth){c.drawImage(sp,-k/2,-k,k,k);return true;}
+  }
   return false;}
 function drawPlayer(s){
   var p=s.p,c=s.ctx,k=CFG.nhanVat.kich,bob=p.moving?Math.abs(Math.sin(p.walk))*CFG.nhanVat.nhun:0;
