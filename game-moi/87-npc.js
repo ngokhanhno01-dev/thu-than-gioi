@@ -213,8 +213,10 @@ function dangMo(){return on;}
    ?npc=demo -> ép gặp 100% mỗi lượt, NPC ngẫu nhiên của vùng (bỏ qua san) | ?npc=boss (cot-truyen, tien-hoa, luyen-khi, san-ban, thuong-nhan) -> ép đúng loại của vùng đang chọn | ?npc=z0-boss (id bất kỳ) -> ép đúng NPC đó.
    Không có tham số: tung theo tỉ lệ thật, CHỈ trong số NPC san:true của vùng đang chọn; mỗi NPC = tiLeGapNPC/6 % (nhân trongSoLoai tương đối). Vùng chưa có NPC san:true thì không tung. */
 var FORCE=(function(){var m=/[?&]npc=([^&#]*)/.exec(location.search);return m?decodeURIComponent(m[1]):'';})();
+var epGap=false;   /* nút test ẩn "NPC: 100% gặp" bật/tắt: mỗi lượt thám hiểm chắc chắn gặp 1 NPC của vùng đang chọn (ưu tiên NPC san:true, vùng chưa có thì lấy NPC bất kỳ của vùng) */
 function tungGap(vung){
   vung=(vung==null)?vungHienTai():(vung|0);
+  if(epGap&&!FORCE){var ds0=list(vung),rd=ds0.filter(function(n){return n.san;});if(rd.length)ds0=rd;return ds0.length?ds0[Math.floor(Math.random()*ds0.length)].id:null;}
   if(FORCE){
     if(FORCE==='demo'){var all=list(vung);return all.length?all[Math.floor(Math.random()*all.length)].id:null;}
     if(LOAI.indexOf(FORCE)>=0){return get('z'+vung+'-'+FORCE)?'z'+vung+'-'+FORCE:null;}
@@ -234,6 +236,7 @@ function thu(){var l=LOAI[cyc%LOAI.length];cyc++;lastId='z'+vungHienTai()+'-'+l;
 function themTim(){var id=lastId||('z'+vungHienTai()+'-boss'),n=get(id);if(!n){toast('Chưa có NPC '+id);return;}toast('TEST: '+n.ten+' · tim '+congTim(id,10)+'/'+CFG.timMax);}
 if(root.TTGNV&&root.TTGNV.add){
   root.TTGNV.add({id:'npc-thu',ten:'NPC: hiện thử',dev:true,onTap:thu,icon:IC});
+  root.TTGNV.add({id:'npc-ep-gap',ten:'NPC: 100% gặp',dev:true,onTap:function(){epGap=!epGap;toast('TEST: '+(epGap?'BẬT - mỗi lượt thám hiểm chắc chắn gặp NPC vùng này':'TẮT - tỉ lệ gặp thật'));},icon:IC});
   root.TTGNV.add({id:'npc-tim',ten:'NPC +10 tim',dev:true,onTap:themTim,icon:IC});
 }
 })(typeof window!=='undefined'?window:globalThis);
