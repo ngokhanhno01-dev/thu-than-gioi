@@ -29,8 +29,11 @@ var CFG={
 };
 var BOX={
   close:{x:1515,y:128,w:130,h:130},                        /* vùng bấm phủ lên nút X vẽ sẵn */
-  tt:{x:1128,y:802,w:178,h:62},                            /* ô tiền trái: Tinh Thạch */
-  ttt:{x:1402,y:802,w:182,h:62},                           /* ô tiền phải: Thú Thần Thạch */
+  tt:{x:1128,y:802,w:168,h:62},   /* căn giữa phần ô tối bên phải ngọc: tâm x=1212 */
+  mtt:{x:1056,y:791,w:82,h:82},                            /* icon Tinh Thạch phủ lên ngọc vẽ sẵn (cùng icon ngoài sảnh) */
+  mttt:{x:1334,y:791,w:82,h:82},                           /* icon Thú Thần Thạch phủ lên ngọc tím vẽ sẵn */
+                              /* ô tiền trái: Tinh Thạch */
+  ttt:{x:1408,y:802,w:176,h:62},                           /* ô tiền phải: Thú Thần Thạch */
   tab:{x:86,y0:279,w:287,h:100,pitch:110},                 /* 4 tab xếp dọc: y = y0 + pitch * thứ tự */
   glow:{ox:-30,oy:-30,w:347,h:160},                        /* viền sáng: lệch so với góc tab, cỡ ảnh cua-hang-sang.webp */
   list:{x:396,y:244,w:1160,h:484,padL:9,padT:4,cw:284,ch:245,sw:240,sh:235},   /* vùng cuộn; padL/padT = ô đầu cách mép; cw/ch = bước cột/hàng; sw/sh = cỡ 1 ô */
@@ -48,6 +51,7 @@ var css=[
 '.sh-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer;touch-action:manipulation}',
 '.sh-x:active{box-shadow:0 0 calc(var(--u)*24) rgba(255,224,102,.85),inset 0 0 calc(var(--u)*24) rgba(255,224,102,.35)}',
 '.sh-m{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--u)*34);line-height:1;white-space:nowrap;overflow:hidden;pointer-events:none;text-shadow:0 0 calc(var(--u)*6) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c,calc(var(--u)*-2) calc(var(--u)*2) 0 #02061c}',
+'.sh-mi{object-fit:contain;pointer-events:none;filter:drop-shadow(0 0 calc(var(--u)*4) rgba(2,6,28,.8))}',
 '.sh-m.tt{color:#bdf3ff}.sh-m.ttt{color:#e6c8ff}',
 '.sh-m.lm{color:#ffe9a0;font-size:calc(var(--u)*34);letter-spacing:calc(var(--u)*.5)}',   /* đồng hồ làm mới */
 /* TAB: nút trong suốt phủ lên nhãn vẽ sẵn; tab đang chọn bật viền sáng (.sh-gl) + làm sáng thân (.sh-lt) */
@@ -156,7 +160,7 @@ function build(){
     b.addEventListener('click',function(){if(cur!==t.id)setTab(t.id);});
     return b;});
   E.x=mk('button','sh-x',BOX.close);E.x.type='button';E.x.setAttribute('aria-label','Đóng');
-  E.tt=mk('div','sh-m tt',BOX.tt);E.ttt=mk('div','sh-m ttt',BOX.ttt);E.lm=mk('div','sh-m lm',BOX.timer);
+  E.mtt=mk('img','sh-mi',BOX.mtt);E.mtt.src=CFG.icTT;E.mttt=mk('img','sh-mi',BOX.mttt);E.mttt.src=CFG.icTTT;E.tt=mk('div','sh-m tt',BOX.tt);E.ttt=mk('div','sh-m ttt',BOX.ttt);E.lm=mk('div','sh-m lm',BOX.timer);
   document.body.appendChild(root);
   E.x.addEventListener('click',close);
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
