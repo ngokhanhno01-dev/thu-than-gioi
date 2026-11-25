@@ -23,13 +23,50 @@ function createEncounter(player,rng,opts){
     if(!candidates.length){candidates=mainZone.quai.filter(function(x){return !!x.boss&&String(x.id)===forcedId;});source='main';}
     if(!candidates.length)return null;
     weights=candidates.map(function(){return 1;});
+  }else if(opts.encounter==='auto'||opts.khu!=null){
+    /* Điểm rung có cả quái (102) lẫn thú hoang; quái xuất hiện thường hơn: 70/30.
+       Quái chia theo 4 khu dựa trên thuTuTrongVung/capMo trong file 102:
+       Khu 1 = thứ tự 1-2 (yếu nhất), khu 2 = thứ tự 3,
+       khu 3 = thứ tự 4, khu 4 = thứ tự 5 (mạnh nhất). */
+    var area=clamp(Math.floor(Number(opts.khu)||1),1,4),mainChance=0.70;
+    if(rng()<mainChance){
+      source='main';
+      candidates=mainZone.quai.filter(function(x){
+        if(x.boss)return false;
+        var order=Number(x.thuTuTrongVung)||0;
+        return area===1?order>=1&&order<=2:area===2?order===3:area===3?order===4:order>=5;
+      });
+      weights=candidates.map(function(){return 1;});
+      if(!candidates.length)source='demo';
+    }else source='demo';
+    if(source==='demo'){
+      candidates=demoZone.thu.filter(function(x){
+        if(x.boss)return false;
+        var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(x.id);
+        return !opts.hiem||!h||h.key===opts.hiem;
+      });
+      weights=candidates.map(function(x,k){
+        var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(x.id);
+        return h?h.ts:((cfg.trongSoLoai||[])[k]||1);
+      });
+    }
+    /* Dữ liệu hiếm không khớp thì vẫn có mục tiêu, không làm điểm rung bị rỗng. */
+    if(!candidates.length){
+      source=source==='main'?'demo':'main';
+      candidates=source==='main'?mainZone.quai.filter(function(x){return !x.boss;}):demoZone.thu.filter(function(x){return !x.boss;});
+      weights=candidates.map(function(){return 1;});
+    }
+    if(!candidates.length)return null;
+    boss=false;
   }else if(opts.hiem!=null&&opts.hiem!==''){
-    /* Điểm rung trên TTGMAP là điểm gặp QUÁI của danh mục 102, không phải thú hoang demo.
-       File 102 không gán độ hiếm riêng cho từng quái; độ hiếm của điểm vẫn được giữ trên ev
-       để HUD/tỉ lệ điểm, còn quái được chọn trong danh sách thường của đúng vùng. */
-    source='main';
-    candidates=mainZone.quai.filter(function(x){return !x.boss;});
-    weights=candidates.map(function(){return 1;});
+    /* Tương thích các caller cũ chỉ truyền hiem: lọc thú theo độ hiếm. */
+    source='demo';
+    candidates=demoZone.thu.filter(function(x){
+      if(x.boss)return false;
+      var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(x.id);
+      return !!h&&h.key===opts.hiem;
+    });
+    weights=candidates.map(function(x){var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(x.id);return h?h.ts:1;});
     if(!candidates.length)return null;
     boss=false;
   }else{

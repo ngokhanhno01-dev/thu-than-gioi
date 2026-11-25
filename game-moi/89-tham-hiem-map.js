@@ -172,7 +172,7 @@ function tungDich(ev){
   var h=root.TTGTHAMHIEM,opts,orig,pre=null;
   if(!h||!h.prep)return null;
   if(ev&&ev.loai==='boss'){opts={boss:true};var bi=ev.bossId||(S&&S.boss&&S.boss.id);if(bi!=null)opts.bossId=bi;}
-  else opts={hiem:ev&&ev.hiem};
+  else opts={encounter:'auto',khu:ev&&ev.khu,hiem:ev&&ev.hiem};
   if(h.prep.length>=2)return h.prep(null,opts);
   orig=h.createEncounter;
   if(typeof orig!=='function')return h.prep(null);
