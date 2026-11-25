@@ -12,6 +12,7 @@
 /* BƯỚC 3 (25/11/2026): CÓ HÀNG BÁN. Tab Đặc Biệt (và Tất Cả) bán 2 món bằng Thú Thần Thạch, khai ở CFG.hang:
      Hộp Ngự Thú Ngẫu Nhiên 20 TTT, tối đa 10 hộp mỗi đợt làm mới | Rương Ngự Thú Tự Chọn 100 TTT, tối đa 5 rương mỗi đợt.
    Số lượt đã mua lưu ở khóa ttg_moi_cuahang_mua, gắn với mốc đợt làm mới (hết 30 phút sang đợt mới thì lượt mua về 0). Chạm ô -> hỏi xác nhận -> trừ tiền + cộng vào Balo (TTGBALO). Thêm món bán: thêm 1 dòng vào CFG.hang (id phải có trong TTGBALO.CAT; ten/ic chỉ là dự phòng). */
+/* BƯỚC 2 NGỰ THÚ CHÂU (25/11/2026): tab Đạo Cụ (và Tất Cả) bán 3 ô Ngự Thú Châu NGẪU NHIÊN bằng TINH THẠCH, bốc lại mỗi đợt làm mới 30 phút. Cấu hình ở CFG.chau (trọng số bậc, số lượng, giá mỗi cái). 3 ô lưu ở khóa ttg_moi_cuahang_chau gắn với mốc anchor nên tải lại không đổi; mỗi ô chỉ mua 1 lần/đợt (xong hiện "Hết hàng"). Không đụng Hộp/Rương (86-hop-ruong.js). Bậc 6 không bán. */
 (function(){
 'use strict';
 var SW=1672,SH=941,V='?v=2',D='game-moi/';
@@ -25,7 +26,15 @@ var CFG={
   hang:[   /* tab: 'dao-cu' | 'phap-bao' | 'dac-biet'; tien: 'ttt' = Thú Thần Thạch, 'tt' = Tinh Thạch; toiDa = số lượt mua tối đa mỗi đợt làm mới */
     {id:'hop-ngu-thu-ngau-nhien',tab:'dac-biet',tien:'ttt',gia:20,toiDa:10,ten:'Hộp Ngự Thú Ngẫu Nhiên',ic:'🎁'},
     {id:'ruong-ngu-thu-tu-chon',tab:'dac-biet',tien:'ttt',gia:100,toiDa:5,ten:'Rương Ngự Thú Tự Chọn',ic:'🧰'}
-  ]
+  ],
+  /* NGỰ THÚ CHÂU (Bước 2, 25/11/2026): 3 ô ngẫu nhiên, bán bằng TINH THẠCH, bốc lại mỗi đợt làm mới. Ai cũng có thể ra mọi bậc 1-5 theo trọng số (không giới hạn theo tiến độ). Bậc 6 KHÔNG bán (chỉ nhận từ NPC).
+     trongSo = trọng số bốc bậc | soLuong = các số lượng có thể ra theo bậc (chọn đều) | gia = Tinh Thạch MỖI CÁI. Giá 1 ô = gia[bậc] x số lượng. Mỗi ô chỉ mua 1 lần mỗi đợt. */
+  chau:{
+    tab:'dao-cu',soO:3,key:'ttg_moi_cuahang_chau',
+    trongSo:{1:30,2:25,3:20,4:12,5:8},
+    soLuong:{1:[10,5,3],2:[10,5,3],3:[5,3,1],4:[5,3,1],5:[2,1]},
+    gia:{1:30,2:50,3:70,4:90,5:110}
+  }
 };
 var BOX={
   close:{x:1515,y:128,w:130,h:130},                        /* vùng bấm phủ lên nút X vẽ sẵn */
@@ -117,13 +126,42 @@ try{var mv=JSON.parse(localStorage.getItem(CFG.keyMua)||'null');if(mv&&typeof mv
 function saveMua(){try{localStorage.setItem(CFG.keyMua,JSON.stringify(mua));}catch(e){}}
 function daMua(id){tick();if(mua.a!==anchor){mua={a:anchor,n:{}};saveMua();}return mua.n[id]|0;}   /* sang đợt mới (mốc đổi) thì lượt mua về 0 */
 function conLai(h){return Math.max(0,h.toiDa-daMua(h.id));}
+function tenTien(k){return k==='tt'?'Tinh Thạch':'Thú Thần Thạch';}
+/* ===== 3 Ô NGỰ THÚ CHÂU: bốc 1 lần mỗi đợt làm mới, lưu theo mốc `anchor` (khóa CFG.chau.key) nên tải lại trang / mở lại cửa hàng KHÔNG đổi ô ===== */
+var chau={a:0,o:[]};
+try{var cv=JSON.parse(localStorage.getItem(CFG.chau.key)||'null');if(cv&&typeof cv==='object'&&Array.isArray(cv.o))chau=cv;}catch(e){}
+function saveChau(){try{localStorage.setItem(CFG.chau.key,JSON.stringify(chau));}catch(e){}}
+function idBong(c){return (window.TTGBONG&&TTGBONG.idBong)?TTGBONG.idBong(c):'bong-'+c;}
+function bocBac(){var T=CFG.chau.trongSo,k,tong=0;for(k in T)tong+=T[k];var r=Math.random()*tong;for(k in T){r-=T[k];if(r<0)return +k;}return 1;}
+function bocO(){var cap=bocBac(),L=CFG.chau.soLuong[cap]||[1];return {cap:cap,sl:L[Math.floor(Math.random()*L.length)],mua:0};}
+function chauSet(){
+  tick();
+  var ok=chau.a===anchor&&chau.o.length===CFG.chau.soO&&chau.o.every(function(o){return o&&CFG.chau.gia[o.cap]&&o.sl>0;});
+  if(!ok){chau={a:anchor,o:[]};for(var i=0;i<CFG.chau.soO;i++)chau.o.push(bocO());saveChau();}   /* sang đợt mới (mốc đổi) hoặc dữ liệu hỏng: bốc lại cả 3 ô */
+  return chau;
+}
+function giaO(o){return CFG.chau.gia[o.cap]*o.sl;}
+function catChau(o){var id=idBong(o.cap),c=window.TTGBALO&&TTGBALO.CAT&&TTGBALO.CAT[id];return c||{ten:'Ngự Thú Châu bậc '+o.cap,ic:'⚪'};}
+function ents(tab){
+  var L=items(tab).map(function(m){return {h:m};});
+  if(tab==='all'||tab===CFG.chau.tab)chauSet().o.forEach(function(o,j){L.push({c:o,j:j});});   /* châu xếp SAU hàng cũ để không đổi vị trí Hộp/Rương */
+  return L;
+}
+function cell(attr,het,it,nm,sl,pr){
+  return '<div class="sh-o hg'+(het?' het':'')+'" '+attr+'><div class="sh-ic">'+(it.img?'<img src="'+esc(it.img)+'" alt="">':'<b style="font-weight:400">'+esc(it.ic||'?')+'</b>')+'</div><div class="sh-nm">'+esc(nm)+'</div><div class="sh-sl">'+sl+'</div><div class="sh-pr">'+pr+'</div></div>';
+}
 function renderList(){
-  var L=items(cur),n=Math.max(CFG.oToiThieu,Math.ceil(L.length/4)*4),h='',i,sc=E.ls?E.ls.scrollTop:0;
+  var L=ents(cur),n=Math.max(CFG.oToiThieu,Math.ceil(L.length/4)*4),h='',i,sc=E.ls?E.ls.scrollTop:0;
   for(i=0;i<n;i++){
-    var m=L[i];
-    if(!m){h+='<div class="sh-o"></div>';continue;}
-    var it=cat(m),cl=conLai(m);
-    h+='<div class="sh-o hg'+(cl<=0?' het':'')+'" data-i="'+CFG.hang.indexOf(m)+'"><div class="sh-ic">'+(it.img?'<img src="'+esc(it.img)+'" alt="">':'<b style="font-weight:400">'+esc(it.ic||'?')+'</b>')+'</div><div class="sh-nm">'+esc(it.ten||m.ten)+'</div><div class="sh-sl">'+cl+'/'+m.toiDa+'</div><div class="sh-pr">'+(cl<=0?'Hết hàng':'<img class="sh-ci" src="'+(m.tien==='tt'?CFG.icTT:CFG.icTTT)+'" alt=""><span class="sh-pn">'+fmt(m.gia)+'</span>')+'</div></div>';
+    var e=L[i];
+    if(!e){h+='<div class="sh-o"></div>';continue;}
+    if(e.h){
+      var m=e.h,it=cat(m),cl=conLai(m);
+      h+=cell('data-i="'+CFG.hang.indexOf(m)+'"',cl<=0,it,it.ten||m.ten,cl+'/'+m.toiDa,(cl<=0?'Hết hàng':'<img class="sh-ci" src="'+(m.tien==='tt'?CFG.icTT:CFG.icTTT)+'" alt=""><span class="sh-pn">'+fmt(m.gia)+'</span>'));
+    }else{
+      var o=e.c,ic=catChau(o);
+      h+=cell('data-c="'+e.j+'"',!!o.mua,ic,ic.ten,'x'+o.sl,(o.mua?'Hết hàng':'<img class="sh-ci" src="'+CFG.icTT+'" alt=""><span class="sh-pn">'+fmt(giaO(o))+'</span>'));
+    }
   }
   E.gd.innerHTML=h;E.ls.scrollTop=sc;
 }
@@ -131,13 +169,27 @@ function toast(t){if(window.TTGBAO)TTGBAO.toast(t,2200);}
 function muaMon(m){
   var it=cat(m),cl=conLai(m);
   if(cl<=0){toast('Hết lượt mua, chờ đợt làm mới');return;}
-  if(get(m.tien)<m.gia){toast('Không đủ Thú Thần Thạch');return;}
+  if(get(m.tien)<m.gia){toast('Không đủ '+tenTien(m.tien));return;}
   var xong=function(){
     if(conLai(m)<=0||get(m.tien)<m.gia||!window.TTGBALO||!window.TTGTIEN)return;
     TTGTIEN.add(m.tien,-m.gia);TTGBALO.add(m.id,1);mua.n[m.id]=(mua.n[m.id]|0)+1;saveMua();
     renderList();render();toast('Đã mua '+(it.ten||m.ten));
   };
-  if(window.TTGBAO)TTGBAO.confirm('<div>Mua <b>'+esc(it.ten||m.ten)+'</b> với <b>'+fmt(m.gia)+'</b> Thú Thần Thạch?<br><small>Còn '+cl+'/'+m.toiDa+' lượt mua trong đợt này.</small></div>',[{t:'Mua',cb:xong},{t:'Hủy'}]);
+  if(window.TTGBAO)TTGBAO.confirm('<div>Mua <b>'+esc(it.ten||m.ten)+'</b> với <b>'+fmt(m.gia)+'</b> '+tenTien(m.tien)+'?<br><small>Còn '+cl+'/'+m.toiDa+' lượt mua trong đợt này.</small></div>',[{t:'Mua',cb:xong},{t:'Hủy'}]);
+  else xong();
+}
+function muaChau(j){
+  var S=chauSet(),o=S.o[j];if(!o)return;
+  if(o.mua){toast('Ô này đã mua, chờ đợt làm mới');return;}
+  var it=catChau(o),tong=giaO(o),a0=S.a,nm=(it.ten||'Ngự Thú Châu')+' x'+o.sl;
+  if(get('tt')<tong){toast('Không đủ '+tenTien('tt'));return;}
+  var xong=function(){
+    var S2=chauSet(),o2=S2.o[j];
+    if(S2.a!==a0||!o2||o2.mua||get('tt')<tong||!window.TTGBALO||!window.TTGTIEN)return;   /* đợt đã làm mới / đã mua / hết tiền trong lúc hỏi xác nhận thì thôi */
+    TTGTIEN.add('tt',-tong);TTGBALO.add(idBong(o2.cap),o2.sl);o2.mua=1;saveChau();
+    renderList();render();toast('Đã mua '+nm);
+  };
+  if(window.TTGBAO)TTGBAO.confirm('<div>Mua <b>'+esc(nm)+'</b> với <b>'+fmt(tong)+'</b> '+tenTien('tt')+'?<br><small>('+CFG.chau.gia[o.cap]+' '+tenTien('tt')+' mỗi cái, mỗi ô chỉ mua được 1 lần mỗi đợt)</small></div>',[{t:'Mua',cb:xong},{t:'Hủy'}]);
   else xong();
 }
 function setTab(id){
@@ -151,7 +203,7 @@ function build(){
   root=document.createElement('div');root.className='sh';
   fr=document.createElement('div');fr.className='sh-fr';root.appendChild(fr);
   E.ls=mk('div','sh-ls',BOX.list);E.gd=document.createElement('div');E.gd.className='sh-gd';E.ls.appendChild(E.gd);
-  E.gd.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.sh-o[data-i]');if(c){var m=CFG.hang[+c.getAttribute('data-i')];if(m)muaMon(m);}});
+  E.gd.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.sh-o[data-i],.sh-o[data-c]');if(!c)return;if(c.hasAttribute('data-c')){muaChau(+c.getAttribute('data-c'));return;}var m=CFG.hang[+c.getAttribute('data-i')];if(m)muaMon(m);});
   E.tabs=TABS.map(function(t,i){
     var T=BOX.tab,b=mk('button','sh-tab',{x:T.x,y:T.y0+T.pitch*i,w:T.w,h:T.h});b.type='button';b.setAttribute('data-id',t.id);b.setAttribute('aria-label',t.ten);
     var g=document.createElement('span'),l=document.createElement('span'),G=BOX.glow;g.className='sh-gl';l.className='sh-lt';
@@ -178,7 +230,7 @@ function open(){
 function close(){if(!root)return;isOpen=false;root.classList.remove('on');clearInterval(timer);}
 
 loadAnchor();tick();   /* chu kỳ chạy theo giờ máy kể cả khi chưa mở cửa hàng */
-window.TTGSHOP={open:open,close:close,BOX:BOX,CFG:CFG,isOpen:function(){return isOpen;},tab:function(){return cur;},setTab:function(id){if(root)setTab(id);else cur=id;},remaining:remaining,onRefresh:function(f){if(typeof f==='function')hooks.push(f);}};
+window.TTGSHOP={open:open,close:close,BOX:BOX,CFG:CFG,isOpen:function(){return isOpen;},tab:function(){return cur;},setTab:function(id){if(root)setTab(id);else cur=id;},lamMoiNgay:function(){anchor=Date.now()-chu();saveAnchor();tick();if(isOpen){renderList();render();}},remaining:remaining,onRefresh:function(f){if(typeof f==='function')hooks.push(f);}};
 })();
 
 /* NÚT TEST ẨN (menu ẩn khi chạm chữ "Danh Vọng", xem 80-danh-vong.js): +500 Thú Thần Thạch và +1000 Tinh Thạch để thử mua. Xóa khối này khi ra bản thật. */
@@ -187,4 +239,6 @@ var T=window.TTGNV;if(!T||!T.add)return;
 T.add({id:'lay-ttt',dev:true,ten:'Lấy Thú Thần Thạch',onTap:function(){
   if(!window.TTGTIEN)return;TTGTIEN.add('ttt',500);TTGTIEN.add('tt',1000);
   if(window.TTGBAO)TTGBAO.toast('TEST: +500 Thú Thần Thạch, +1.000 Tinh Thạch',2200);}});
+T.add({id:'lam-moi-shop',dev:true,ten:'Làm mới Kỳ Trân Các',onTap:function(){   /* ép sang đợt mới ngay để thử bốc lại 3 ô châu + reset lượt mua */
+  if(window.TTGSHOP&&TTGSHOP.lamMoiNgay)TTGSHOP.lamMoiNgay();if(window.TTGBAO)TTGBAO.toast('TEST: đã sang đợt làm mới mới',2000);}});
 })();
