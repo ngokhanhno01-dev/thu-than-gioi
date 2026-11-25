@@ -9,6 +9,9 @@
    LÀM MỚI: CFG.lamMoiPhut = 30. Thanh dài dưới trái hiện "Làm mới sau: mm:ss". Mốc bắt đầu chu kỳ lưu ở localStorage khóa ttg_moi_cuahang_lm nên tắt game vẫn tính thời gian trôi. Hết 30 phút thì sang chu kỳ mới và gọi các hàm đăng ký bằng TTGSHOP.onRefresh(fn) (sau này dùng để đổi hàng bán).
    TIỀN: đọc từ 66-tien-te.js (TTGTIEN): ô trái (ngọc lam) = Tinh Thạch 'tt', ô phải (ngọc tím) = Thú Thần Thạch 'ttt'.
    Mở: nút Kỳ Trân Các (81-nut-moi.js gọi TTGSHOP.open). Đóng: nút X, chạm ngoài khung, Esc. Mọi tọa độ ở khối BOX, tính theo pixel ảnh khung (SW x SH). */
+/* BƯỚC 3 (25/11/2026): CÓ HÀNG BÁN. Tab Đặc Biệt (và Tất Cả) bán 2 món bằng Thú Thần Thạch, khai ở CFG.hang:
+     Hộp Ngự Thú Ngẫu Nhiên 20 TTT, tối đa 10 hộp mỗi đợt làm mới | Rương Ngự Thú Tự Chọn 100 TTT, tối đa 5 rương mỗi đợt.
+   Số lượt đã mua lưu ở khóa ttg_moi_cuahang_mua, gắn với mốc đợt làm mới (hết 30 phút sang đợt mới thì lượt mua về 0). Chạm ô -> hỏi xác nhận -> trừ tiền + cộng vào Balo (TTGBALO). Thêm món bán: thêm 1 dòng vào CFG.hang (id phải có trong TTGBALO.CAT; ten/ic chỉ là dự phòng). */
 (function(){
 'use strict';
 var SW=1672,SH=941,V='?v=2',D='game-moi/';
@@ -16,7 +19,12 @@ var IMG=D+'khung-cua-hang.webp'+V,GLOW=D+'cua-hang-sang.webp'+V,MASK=D+'cua-hang
 var CFG={
   lamMoiPhut:30,      /* chu kỳ làm mới hàng (phút) */
   oToiThieu:16,       /* số ô tối thiểu mỗi tab (bội của 4). 16 = 4 hàng trống để thử cuộn; đặt 8 khi đã có món thật */
-  key:'ttg_moi_cuahang_lm'
+  key:'ttg_moi_cuahang_lm',
+  keyMua:'ttg_moi_cuahang_mua',
+  hang:[   /* tab: 'dao-cu' | 'phap-bao' | 'dac-biet'; tien: 'ttt' = Thú Thần Thạch, 'tt' = Tinh Thạch; toiDa = số lượt mua tối đa mỗi đợt làm mới */
+    {id:'hop-ngu-thu-ngau-nhien',tab:'dac-biet',tien:'ttt',gia:20,toiDa:10,ten:'Hộp Ngự Thú Ngẫu Nhiên',ic:'🎁'},
+    {id:'ruong-ngu-thu-tu-chon',tab:'dac-biet',tien:'ttt',gia:100,toiDa:5,ten:'Rương Ngự Thú Tự Chọn',ic:'🧰'}
+  ]
 };
 var BOX={
   close:{x:1515,y:128,w:130,h:130},                        /* vùng bấm phủ lên nút X vẽ sẵn */
@@ -56,7 +64,17 @@ var css=[
 '.sh-ls::-webkit-scrollbar-track{margin:calc(var(--u)*10) 0;border-radius:calc(var(--u)*10);background:rgba(2,8,40,.72);border:calc(var(--u)*2) solid #8a6a22}',
 '.sh-ls::-webkit-scrollbar-thumb{border-radius:calc(var(--u)*10);border:calc(var(--u)*2) solid #5a3a00;background:linear-gradient(90deg,#ffe48a,#d99a24 55%,#ffd66b)}',
 '.sh-gd{display:grid;grid-template-columns:repeat(4,calc(var(--u)*'+BOX.list.sw+'));grid-auto-rows:calc(var(--u)*'+BOX.list.sh+');column-gap:calc(var(--u)*'+(BOX.list.cw-BOX.list.sw)+');row-gap:calc(var(--u)*'+(BOX.list.ch-BOX.list.sh)+');padding:calc(var(--u)*'+BOX.list.padT+') 0 calc(var(--u)*10) calc(var(--u)*'+BOX.list.padL+')}',
-'.sh-o{position:relative;width:calc(var(--u)*'+BOX.list.sw+');height:calc(var(--u)*'+BOX.list.sh+');background:url('+SLOT+') 0 0/100% 100% no-repeat}'
+'.sh-o{position:relative;width:calc(var(--u)*'+BOX.list.sw+');height:calc(var(--u)*'+BOX.list.sh+');background:url('+SLOT+') 0 0/100% 100% no-repeat}',
+'.sh-o.hg{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}',
+'.sh-o.hg:active{filter:brightness(1.25)}',
+'.sh-o.het .sh-ic,.sh-o.het .sh-nm{opacity:.4;filter:grayscale(.7)}',
+'.sh-o>*{position:absolute;box-sizing:border-box;pointer-events:none}',
+'.sh-ic{left:calc(var(--u)*30);top:calc(var(--u)*22);width:calc(var(--u)*180);height:calc(var(--u)*112);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*80)}',
+'.sh-ic img{width:100%;height:100%;object-fit:contain}',
+'.sh-nm{left:calc(var(--u)*16);right:calc(var(--u)*16);top:calc(var(--u)*130);height:calc(var(--u)*44);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:calc(var(--u)*21);line-height:1.1;color:#fff3c4;text-shadow:0 0 calc(var(--u)*5) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c}',
+'.sh-sl{right:calc(var(--u)*26);top:calc(var(--u)*24);font-weight:800;font-size:calc(var(--u)*22);color:#ffe9a0;text-shadow:0 0 calc(var(--u)*4) #000,calc(var(--u)*1.5) calc(var(--u)*1.5) 0 #000}',
+'.sh-pr{left:calc(var(--u)*52);top:calc(var(--u)*181);width:calc(var(--u)*136);height:calc(var(--u)*34);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--u)*26);line-height:1;white-space:nowrap;color:#e6c8ff;text-shadow:0 0 calc(var(--u)*4) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c}',
+'.sh-o.het .sh-pr{color:#ff9d9d;font-size:calc(var(--u)*24)}'
 ].join('\n');
 var stl=document.createElement('style');stl.textContent=css;document.head.appendChild(stl);
 [GLOW,MASK,SLOT].forEach(function(u){try{(new Image()).src=u;}catch(e){}});   /* tải trước cho lần mở đầu không nháy */
@@ -83,11 +101,37 @@ function remaining(){tick();return Math.max(0,chu()-(Date.now()-anchor));}
 function mmss(ms){var s=Math.ceil(ms/1000),m=Math.floor(s/60);s%=60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
 
 /* ===== LƯỚI ===== */
-function items(tab){return [];}   /* CHƯA có vật phẩm. Sau này: trả danh sách món của tab ('all' = tất cả) */
+function items(tab){return CFG.hang.filter(function(h){return tab==='all'||h.tab===tab;});}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function cat(h){var c=window.TTGBALO&&TTGBALO.CAT&&TTGBALO.CAT[h.id];return c||{ten:h.ten,ic:h.ic};}
+/* ===== LƯỢT MUA MỖI ĐỢT LÀM MỚI ===== */
+var mua={a:0,n:{}};
+try{var mv=JSON.parse(localStorage.getItem(CFG.keyMua)||'null');if(mv&&typeof mv==='object'&&mv.n)mua=mv;}catch(e){}
+function saveMua(){try{localStorage.setItem(CFG.keyMua,JSON.stringify(mua));}catch(e){}}
+function daMua(id){tick();if(mua.a!==anchor){mua={a:anchor,n:{}};saveMua();}return mua.n[id]|0;}   /* sang đợt mới (mốc đổi) thì lượt mua về 0 */
+function conLai(h){return Math.max(0,h.toiDa-daMua(h.id));}
 function renderList(){
-  var n=Math.max(CFG.oToiThieu,Math.ceil(items(cur).length/4)*4),h='',i;
-  for(i=0;i<n;i++)h+='<div class="sh-o"></div>';
-  E.gd.innerHTML=h;
+  var L=items(cur),n=Math.max(CFG.oToiThieu,Math.ceil(L.length/4)*4),h='',i,sc=E.ls?E.ls.scrollTop:0;
+  for(i=0;i<n;i++){
+    var m=L[i];
+    if(!m){h+='<div class="sh-o"></div>';continue;}
+    var it=cat(m),cl=conLai(m);
+    h+='<div class="sh-o hg'+(cl<=0?' het':'')+'" data-i="'+CFG.hang.indexOf(m)+'"><div class="sh-ic">'+(it.img?'<img src="'+esc(it.img)+'" alt="">':'<b style="font-weight:400">'+esc(it.ic||'?')+'</b>')+'</div><div class="sh-nm">'+esc(it.ten||m.ten)+'</div><div class="sh-sl">'+cl+'/'+m.toiDa+'</div><div class="sh-pr">'+(cl<=0?'Hết hàng':'◆ '+fmt(m.gia))+'</div></div>';
+  }
+  E.gd.innerHTML=h;E.ls.scrollTop=sc;
+}
+function toast(t){if(window.TTGBAO)TTGBAO.toast(t,2200);}
+function muaMon(m){
+  var it=cat(m),cl=conLai(m);
+  if(cl<=0){toast('Hết lượt mua, chờ đợt làm mới');return;}
+  if(get(m.tien)<m.gia){toast('Không đủ Thú Thần Thạch');return;}
+  var xong=function(){
+    if(conLai(m)<=0||get(m.tien)<m.gia||!window.TTGBALO||!window.TTGTIEN)return;
+    TTGTIEN.add(m.tien,-m.gia);TTGBALO.add(m.id,1);mua.n[m.id]=(mua.n[m.id]|0)+1;saveMua();
+    renderList();render();toast('Đã mua '+(it.ten||m.ten));
+  };
+  if(window.TTGBAO)TTGBAO.confirm('<div>Mua <b>'+esc(it.ten||m.ten)+'</b> với <b>'+fmt(m.gia)+'</b> Thú Thần Thạch?<br><small>Còn '+cl+'/'+m.toiDa+' lượt mua trong đợt này.</small></div>',[{t:'Mua',cb:xong},{t:'Hủy'}]);
+  else xong();
 }
 function setTab(id){
   cur=id;
@@ -100,6 +144,7 @@ function build(){
   root=document.createElement('div');root.className='sh';
   fr=document.createElement('div');fr.className='sh-fr';root.appendChild(fr);
   E.ls=mk('div','sh-ls',BOX.list);E.gd=document.createElement('div');E.gd.className='sh-gd';E.ls.appendChild(E.gd);
+  E.gd.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('.sh-o[data-i]');if(c){var m=CFG.hang[+c.getAttribute('data-i')];if(m)muaMon(m);}});
   E.tabs=TABS.map(function(t,i){
     var T=BOX.tab,b=mk('button','sh-tab',{x:T.x,y:T.y0+T.pitch*i,w:T.w,h:T.h});b.type='button';b.setAttribute('data-id',t.id);b.setAttribute('aria-label',t.ten);
     var g=document.createElement('span'),l=document.createElement('span'),G=BOX.glow;g.className='sh-gl';l.className='sh-lt';
