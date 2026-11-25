@@ -27,7 +27,7 @@ function createEncounter(player,rng,opts){
   var bands={thuong:[1,4],hiem:[4,8],suthi:[8,12],huyenthoai:[12,16],truyenthuyet:[17,17]},tier=boss?'truyenthuyet':null;
   if(source==='main'&&!boss){var ord=Number(q.thuTuTrongVung)||0;tier=q.doHiem||q.hiem||(ord<=2?'thuong':ord===3?'hiem':ord===4?'suthi':'huyenthoai');}
   if(source==='demo'&&!boss){var qi=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(q.id);tier=qi&&qi.key||hiem||'thuong';}if(!bands[tier])tier='thuong';
-  var dv=root.TTGDV&&root.TTGDV.get?root.TTGDV.get():0,cap=root.TTGCS.tranCap?root.TTGCS.tranCap(dv):270;cap=clamp(Math.floor(Number(cap)||1),1,270);
+  var cap=270; /* Trần Danh Vọng áp dụng cho THÚ NGƯỜI CHƠI; địch giữ dải cấp riêng theo vùng/độ hiếm. */
   var base=Math.max(0,Math.floor(Number(z)||0))*15,lv=clamp(randint(base+bands[tier][0],base+bands[tier][1],rng),1,cap);
   var tien=weighted([1,2,3],[Number((cfg.trongSoBac||{})[1])||1,Number((cfg.trongSoBac||{})[2])||1,Number((cfg.trongSoBac||{})[3])||1],rng);
   var bacCS=root.TTGCS.CFG,bac=typeof root.TTGCS.tungBac==='function'?root.TTGCS.tungBac(rng):(bacCS.bacQuai||'C');
