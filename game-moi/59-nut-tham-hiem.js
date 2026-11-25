@@ -11,7 +11,7 @@ TTGNV.add({id:'tham-hiem',ten:'Thám hiểm',image:'game-moi/icon/tham-hiem.webp
   onTap:function(){if(window.TTGDV&&TTGDV.mo)TTGDV.mo();else if(window.TTGTHAMHIEM&&TTGTHAMHIEM.start)TTGTHAMHIEM.start();}});
 })();
 /* Nạp danh hiệu nổi trên đầu thú ở sảnh (78-danh-hieu-tren-dau.js). */
-(function(){var s=document.createElement('script');s.src='game-moi/78-danh-hieu-tren-dau.js?v=1';document.head.appendChild(s);})();
+(function(){var s=document.createElement('script');s.src='game-moi/78-danh-hieu-tren-dau.js?v=2';document.head.appendChild(s);})();
 /* Nạp item Khung UI (79-khung-ui.js). */
 (function(){var s=document.createElement('script');s.src='game-moi/79-khung-ui.js?v=1';document.head.appendChild(s);})();
 /* Nạp Danh Vọng + nút chọn vùng (80-danh-vong.js). */
