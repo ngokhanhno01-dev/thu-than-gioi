@@ -78,10 +78,10 @@ var css=[
 '.sh-ic img{width:100%;height:100%;object-fit:contain}',
 '.sh-nm{left:calc(var(--u)*16);right:calc(var(--u)*16);top:calc(var(--u)*130);height:calc(var(--u)*44);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:calc(var(--u)*21);line-height:1.1;color:#fff3c4;text-shadow:0 0 calc(var(--u)*5) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c}',
 '.sh-sl{right:calc(var(--u)*26);top:calc(var(--u)*24);font-weight:800;font-size:calc(var(--u)*22);color:#ffe9a0;text-shadow:0 0 calc(var(--u)*4) #000,calc(var(--u)*1.5) calc(var(--u)*1.5) 0 #000}',
-'.sh-pr{left:calc(var(--u)*52);top:calc(var(--u)*181);width:calc(var(--u)*136);height:calc(var(--u)*34);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--u)*26);line-height:1;white-space:nowrap;color:#e6c8ff;text-shadow:0 0 calc(var(--u)*4) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c}',
-'.sh-ci{width:calc(var(--u)*34);height:calc(var(--u)*34);flex:none;object-fit:contain;margin-right:calc(var(--u)*8);filter:drop-shadow(0 0 calc(var(--u)*3) rgba(2,6,28,.9))}',
-'.sh-pn{display:block;line-height:1;font-variant-numeric:tabular-nums;padding-top:calc(var(--u)*2)}',
-'.sh-o.het .sh-pr{color:#ff9d9d;font-size:calc(var(--u)*24)}'
+'.sh-pr{left:calc(var(--u)*43);top:calc(var(--u)*184);width:calc(var(--u)*157);height:calc(var(--u)*38);padding:0 calc(var(--u)*14) 0 calc(var(--u)*6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--u)*28);line-height:1;white-space:nowrap;color:#3a2206;background:linear-gradient(180deg,#fff3bd 0%,#f7cf62 42%,#e0a232 100%);clip-path:polygon(4% 0,96% 0,100% 50%,96% 100%,4% 100%,0 50%);box-shadow:inset 0 calc(var(--u)*-3) calc(var(--u)*4) rgba(150,90,10,.45);text-shadow:0 calc(var(--u)*1.5) 0 rgba(255,248,210,.85)}',
+'.sh-ci{width:calc(var(--u)*34);height:calc(var(--u)*34);flex:none;object-fit:contain;filter:drop-shadow(0 calc(var(--u)*1.5) calc(var(--u)*2) rgba(60,30,0,.55))}',
+'.sh-pn{flex:1;display:block;text-align:center;line-height:1;font-variant-numeric:tabular-nums;padding-top:calc(var(--u)*1)}',
+'.sh-o.het .sh-pr{color:#7a1414;font-size:calc(var(--u)*24)}'
 ].join('\n');
 var stl=document.createElement('style');stl.textContent=css;document.head.appendChild(stl);
 [GLOW,MASK,SLOT].forEach(function(u){try{(new Image()).src=u;}catch(e){}});   /* tải trước cho lần mở đầu không nháy */
