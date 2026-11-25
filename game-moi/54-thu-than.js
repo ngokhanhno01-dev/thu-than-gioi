@@ -142,7 +142,7 @@ var css=[
 '.tt-th{position:absolute;left:{2};right:{2};border-radius:{7};background:linear-gradient(90deg,#c9992f,#ffe58a,#c9992f);box-shadow:0 0 {6} rgba(255,224,102,.5)}',
 /* 3 Ô TRÒN dưới ảnh thú: canvas, chữ bút lông neon (font-rank.woff2 = Kaushan Script cắt nhỏ) */
 '.tt-oc{pointer-events:none;image-rendering:auto!important}',
-'.tt-hiem{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{28};line-height:1;white-space:nowrap;border-radius:{18};background:rgba(4,12,40,.78);border:{2} solid currentColor;text-shadow:0 {1} {3} #000;pointer-events:none}',
+'.tt-hiem{z-index:2;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{28};line-height:1;white-space:nowrap;border-radius:{18};background:rgba(4,12,40,.78);border:{2} solid currentColor;text-shadow:0 {1} {3} #000;pointer-events:none}',
 /* NÚT RA TRẬN */
 '.tt-go{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ RA TRẬN đã vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */
 '.tt-tha{padding:0;border:0;border-radius:{18};background:transparent;cursor:pointer}',   /* chữ THẢ vẽ sẵn trong khung: nút chỉ là vùng bấm trong suốt */

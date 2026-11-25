@@ -84,7 +84,7 @@ var css=[
 '.tb-x{padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer}',   /* vùng bấm trong suốt đè lên nút X vẽ sẵn trong ảnh */
 '.tb-cv{pointer-events:none}',
 '.tb-oc{pointer-events:none;image-rendering:auto}',
-'.tb-hiem{display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{18};line-height:1;white-space:nowrap;border-radius:{14};background:rgba(4,12,40,.78);border:{1.5} solid currentColor;text-shadow:0 {1} {2} #000;pointer-events:none}',
+'.tb-hiem{z-index:2;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800;font-size:{18};line-height:1;white-space:nowrap;border-radius:{14};background:rgba(4,12,40,.78);border:{1.5} solid currentColor;text-shadow:0 {1} {2} #000;pointer-events:none}',
 '.tb-nm{display:flex;align-items:center;justify-content:center;padding:0 {10};font-family:var(--fh);font-weight:800;font-size:{20};line-height:1;white-space:nowrap;overflow:hidden;color:#3b2406;text-shadow:0 {1} 0 rgba(255,246,200,.7);pointer-events:none}',
 '.tb-emp{display:flex;align-items:center;justify-content:center;text-align:center;font-size:{28};line-height:1.4;color:#7c83b8;padding:0 {20}}',
 '.tb-c{padding:0;border:0;background:transparent;cursor:pointer;border-radius:{10};display:flex;align-items:center;justify-content:center;color:#fff}',
