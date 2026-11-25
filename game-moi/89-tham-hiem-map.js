@@ -91,7 +91,7 @@ var VUNG={
       4:[{id:'4a',x:610, y:150,ghiChu:'cột đá trái'},{id:'4b',x:1010,y:110,ghiChu:'cột đá phải'},
          {id:'4c',x:1170,y:100,ghiChu:'pha lê phải'},{id:'4d',x:780, y:90, ghiChu:'gần cổng hang'}]
     },
-    boss:{x:780,y:150,banKinhCham:38,ten:'Boss Truyền Thuyết'},   /* đứng cố định giữa quảng trường khu 4, KHÔNG có tỉ lệ ngẫu nhiên; ten chỉ là tên dự phòng khi chưa lấy được boss thật */
+    boss:{x:780,y:168,banKinhCham:38,ten:'Boss Truyền Thuyết'},   /* đứng cố định giữa quảng trường khu 4, KHÔNG có tỉ lệ ngẫu nhiên; ten chỉ là tên dự phòng khi chưa lấy được boss thật */
     /* GỢI Ý vùng nên tô khi Debug Mask (đa giác quảng trường khu 4, vẽ viền vàng đứt nét lúc bật Debug Mask). KHÔNG tự thêm vào mask. */
     maskThem:[
       {loai:'da-giac',ten:'quảng trường khu 4',pts:[[560,70],[1060,70],[1120,200],[1000,260],[560,260],[520,160]]}
@@ -184,10 +184,11 @@ function tungDich(ev){
 function findBoss(slug){
   var T=root.THU_MOI,Q=root.TTG_QUAI_MAIN,i,j,z,t,bt=3;
   try{var cx=root.TTGBONG&&root.TTGBONG.CFG&&root.TTGBONG.CFG.tx;if(cx&&cx.bacBoss)bt=Math.max(1,Math.min(3,cx.bacBoss|0));}catch(e){}
-  try{if(T&&T.zones)for(i=0;i<T.zones.length;i++){z=T.zones[i];if(z.slug!==slug||!z.thu)continue;
-    for(j=0;j<z.thu.length;j++){t=z.thu[j];if(t.boss)return {src:'demo',id:t.id,ten:t.ten,tien:bt};}}}catch(e){}
+  /* Ưu tiên Boss quái trong 102-quai-vung.js để boss trên bản đồ khớp Boss vào trận. */
   try{if(Q&&Q.zones)for(i=0;i<Q.zones.length;i++){z=Q.zones[i];if(z.slug!==slug||!z.quai)continue;
     for(j=0;j<z.quai.length;j++){t=z.quai[j];if(t.boss)return {src:'main',id:t.id,ten:t.ten,imageFile:t.imageFile||null};}}}catch(e){}
+  try{if(T&&T.zones)for(i=0;i<T.zones.length;i++){z=T.zones[i];if(z.slug!==slug||!z.thu)continue;
+    for(j=0;j<z.thu.length;j++){t=z.thu[j];if(t.boss)return {src:'demo',id:t.id,ten:t.ten,tien:bt};}}}catch(e){}
   return null;}
 
 /* ====================================================================
@@ -255,7 +256,7 @@ function fallbackWalkable(s,x,y){
           t=den?clamp(((o.x-a.x)*dx+(o.y-a.y)*dy)/den,0,1):0,
           px=a.x+t*dx,py=a.y+t*dy,d2=(o.x-px)*(o.x-px)+(o.y-py)*(o.y-py);
       if(d2<best){best=d2;proj={x:px,y:py};}}
-    if(proj&&segDist2(x,y,proj,o)<=54*54)return true;}
+    if(proj&&segDist2(x,y,proj,o)<=76*76)return true;}
   return false;}
 function canStand(s,x,y){
   var m=s.mask,v=s.v,i,o,dx,dy,gx,gy;

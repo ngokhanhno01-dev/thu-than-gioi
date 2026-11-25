@@ -24,13 +24,12 @@ function createEncounter(player,rng,opts){
     if(!candidates.length)return null;
     weights=candidates.map(function(){return 1;});
   }else if(opts.hiem!=null&&opts.hiem!==''){
-    source='demo';
-    candidates=demoZone.thu.filter(function(x){
-      if(x.boss)return false;
-      var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(x.id);
-      return !!h&&h.key===opts.hiem;
-    });
-    weights=candidates.map(function(x){var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(x.id);return h?h.ts:1;});
+    /* Điểm rung trên TTGMAP là điểm gặp QUÁI của danh mục 102, không phải thú hoang demo.
+       File 102 không gán độ hiếm riêng cho từng quái; độ hiếm của điểm vẫn được giữ trên ev
+       để HUD/tỉ lệ điểm, còn quái được chọn trong danh sách thường của đúng vùng. */
+    source='main';
+    candidates=mainZone.quai.filter(function(x){return !x.boss;});
+    weights=candidates.map(function(){return 1;});
     if(!candidates.length)return null;
     boss=false;
   }else{
