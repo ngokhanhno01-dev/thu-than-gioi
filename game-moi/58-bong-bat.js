@@ -38,7 +38,7 @@ var CFG={
 
   /* ================= THÁM HIỂM (dùng ở Bước 2) ================= */
   tx:{
-    tiLeBoss:0.04,                          /* 4% mỗi lượt gặp boss; boss thú hoang (Truyền Thuyết) ~0,5% mỗi lượt, vẫn hiếm hơn Huyền Thoại (~1%) */
+    tiLeBoss:0.04,                          /* 4% cơ hội Boss QUÁI tại điểm rung Khu 4; Boss thú vẫn đứng riêng trên bản đồ */
     tiLeQuaiMain:0.7,                      /* trong 95% lượt thường: 70% gặp QUÁI (pool main, 102 quái), 30% gặp THÚ HOANG (pool demo, 60 thú). Chỉnh số này để đổi tỉ lệ (0.5 = ngang nhau) */
     trongSoQuaiMain:[1,1,1,1,1],           /* 5 quái thường main chọn đều */
     trongSoBoss:{main:7,demo:1},            /* boss quái 7 : boss thú hoang 1 (boss quái ~3,5%/lượt, boss thú hoang ~0,5%/lượt) */
@@ -46,10 +46,10 @@ var CFG={
     trongSoBac:{1:1,2:1,3:1},              /* bậc của thú demo thường: mặc định chia đều */
     bacBoss:3,                             /* boss luôn bậc 3 */
     bacKhiBat:1,                           /* bắt về luôn bậc 1 */
-    chenhThuong:[-2,10],                   /* cấp thú hoang = L + số nguyên đều trong [min,max] */
-    chenhBoss:10,                          /* boss = L + 10 */
-    chenhQuai:[-5,0],                      /* quái cày (chưa có trong game-moi, để dùng sau) */
-    capMin:1,capMax:100,
+    chenhThuong:[-2,10],                   /* DỰ PHÒNG tương thích; cấp mới lấy theo vùng + độ hiếm trong 61 */
+    chenhBoss:10,                          /* DỰ PHÒNG tương thích; Boss mới lấy cấp theo vùng */
+    chenhQuai:[-5,0],                      /* DỰ PHÒNG tương thích; quái mới lấy cấp theo vùng + độ hiếm */
+    capMin:1,capMax:270,
     soLanNem:3,                            /* số lần ném mỗi lần bắt (Bước 3) */
     bongMoiLanNem:1,                       /* mỗi lần ném trừ 1 bóng (ĐÃ CHỐT) */
     thoiGianNemGiay:60                     /* hết 60 giây mà chưa bắt được: thú hoang bỏ chạy, về sảnh (ĐÃ CHỐT) */

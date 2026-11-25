@@ -2,7 +2,7 @@
    DANH VỌNG
    - Có được khi GIẾT thú hoang / boss thú hoang (source 'demo'). Mỗi LOÀI chỉ tính 1 lần đầu giết (1 vùng = 9 thú hoang + 1 boss = 10 Danh Vọng).
    - Lưu localStorage khóa ttg_moi_dv = {kills:{idLoài:1}}. Danh Vọng = số loài đã giết. Không bị tiêu hao (chỉ là mốc mở khóa + trần cấp).
-   - TRẦN CẤP thú nuôi = TTGCS.tranCap(Danh Vọng) = min(100, 10 + floor(DV x 0,55)): DV 0 -> Lv.10, DV 10 -> Lv.15 (54-thu-than.js capMax đọc TTGDV.tran()).
+   - TRẦN CẤP thú nuôi = TTGCS.tranCap(Danh Vọng) = min(270, max(1, floor(DV x 1,5))): DV 10 -> Lv.15, DV 180 -> Lv.270 (54-thu-than.js đọc TTGDV.tran()).
    - Hiển thị: ngôi sao + số trong ô nhỏ dưới chữ "Danh Vọng" ở khung trên (draw, gọi từ index.html sau drawExp). Tọa độ theo pixel khung-sanh.webp: sửa PLATE.
    CHỌN VÙNG
    - Bấm icon Thám hiểm (59-nut-tham-hiem.js) -> bảng chọn vùng dùng khung icon/khung-chon-vung.webp (18 ô = 2 cột x 9 hàng, tọa độ SLOT); chọn vùng đã mở thì đi Thám hiểm ngay (CFG.batDauNgay). Thanh tên vùng dưới icon Thám hiểm chỉ hiển thị vùng đang ở.

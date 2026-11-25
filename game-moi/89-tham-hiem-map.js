@@ -182,11 +182,9 @@ function tungDich(ev){
 
 /* boss của vùng theo dữ liệu game (không bịa): thú hoang boss (vẽ THU_MOI.draw) -> boss quái (ảnh quai/<imageFile>) -> null (hình vẽ tạm) */
 function findBoss(slug){
-  var T=root.THU_MOI,Q=root.TTG_QUAI_MAIN,i,j,z,t,bt=3;
+  var T=root.THU_MOI,i,j,z,t,bt=3;
   try{var cx=root.TTGBONG&&root.TTGBONG.CFG&&root.TTGBONG.CFG.tx;if(cx&&cx.bacBoss)bt=Math.max(1,Math.min(3,cx.bacBoss|0));}catch(e){}
-  /* Ưu tiên Boss quái trong 102-quai-vung.js để boss trên bản đồ khớp Boss vào trận. */
-  try{if(Q&&Q.zones)for(i=0;i<Q.zones.length;i++){z=Q.zones[i];if(z.slug!==slug||!z.quai)continue;
-    for(j=0;j<z.quai.length;j++){t=z.quai[j];if(t.boss)return {src:'main',id:t.id,ten:t.ten,imageFile:t.imageFile||null};}}}catch(e){}
+  /* Chỉ Boss THÚ đứng riêng trên bản đồ. Boss QUÁI từ 102 chỉ có cơ hội xuất hiện ở điểm rung Khu 4. */
   try{if(T&&T.zones)for(i=0;i<T.zones.length;i++){z=T.zones[i];if(z.slug!==slug||!z.thu)continue;
     for(j=0;j<z.thu.length;j++){t=z.thu[j];if(t.boss)return {src:'demo',id:t.id,ten:t.ten,tien:bt};}}}catch(e){}
   return null;}
