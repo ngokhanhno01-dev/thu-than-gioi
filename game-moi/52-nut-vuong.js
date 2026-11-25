@@ -29,7 +29,7 @@ var CFG={
     'boss-the-gioi':['r',0,0],'thap-thi-luyen':['r',1,0],
     'cua-hang':['r',0,1],'diem-danh':['r',1,1],'nhiem-vu':['r',2,1]
   },
-  dev:['nhan-chau','doi-rank','lay-sach','lay-do-th','admin','nl-test']   /* nút TEST/ADMIN: không đặt ra thanh nút, gom vào menu ẩn (chạm chữ "Danh Vọng", xem 80-danh-vong.js). Thêm id vào đây hoặc đặt o.dev:true cho nút test mới. */
+  dev:['nhan-chau','doi-rank','lay-sach','lay-do-th','admin','nl-test','lay-ttt']   /* nút TEST/ADMIN: không đặt ra thanh nút, gom vào menu ẩn (chạm chữ "Danh Vọng", xem 80-danh-vong.js). Thêm id vào đây hoặc đặt o.dev:true cho nút test mới. */
 };
 var list=[],M=null,devList=[];
 var st=document.createElement('style');

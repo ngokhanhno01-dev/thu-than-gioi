@@ -176,3 +176,11 @@ function close(){if(!root)return;isOpen=false;root.classList.remove('on');clearI
 loadAnchor();tick();   /* chu kỳ chạy theo giờ máy kể cả khi chưa mở cửa hàng */
 window.TTGSHOP={open:open,close:close,BOX:BOX,CFG:CFG,isOpen:function(){return isOpen;},tab:function(){return cur;},setTab:function(id){if(root)setTab(id);else cur=id;},remaining:remaining,onRefresh:function(f){if(typeof f==='function')hooks.push(f);}};
 })();
+
+/* NÚT TEST ẨN (menu ẩn khi chạm chữ "Danh Vọng", xem 80-danh-vong.js): +500 Thú Thần Thạch và +1000 Tinh Thạch để thử mua. Xóa khối này khi ra bản thật. */
+(function(){
+var T=window.TTGNV;if(!T||!T.add)return;
+T.add({id:'lay-ttt',dev:true,ten:'Lấy Thú Thần Thạch',onTap:function(){
+  if(!window.TTGTIEN)return;TTGTIEN.add('ttt',500);TTGTIEN.add('tt',1000);
+  if(window.TTGBAO)TTGBAO.toast('TEST: +500 Thú Thần Thạch, +1.000 Tinh Thạch',2200);}});
+})();
