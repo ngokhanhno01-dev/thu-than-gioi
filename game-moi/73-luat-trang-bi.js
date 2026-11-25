@@ -133,6 +133,13 @@ function ren(z,s){
   TTGTIEN.add('tt',-c.need.xu);
   var q=pickW(QW),it=roll(z,s,q),t=Object.assign({},it,decor(it)),uid=TTGTB.addItem(t);
   return {uid:uid,item:TTGTB.get(uid),q:q,need:c.need};}
+/* TẠO 1 MÓN TRANG BỊ NGẪU NHIÊN của vùng z (KHÔNG trừ nguyên liệu/Tinh Thạch), dùng làm phần thưởng (NPC Boss, 87/88). s = ô (0..3) và q = phẩm (0..4) bỏ trống thì bốc ngẫu nhiên (phẩm theo gacha QW 55/28/12/4/1). Trả {uid,item,q,s} hoặc {err}. */
+function taoMon(z,s,q){
+  if(!root.TTGTB||!(z>=0&&z<NZ))return {err:'Chưa nạp đủ hệ thống'};
+  if(TTGTB.list().length>=EQ.BAG)return {err:'Kho trang bị đã đầy ('+EQ.BAG+' ô)'};
+  s=(s==null)?Math.floor(Math.random()*PIECE.length):s;q=(q==null)?pickW(QW):q;if(!PIECE[s]||!(q>=0&&q<QN.length))return {err:'Sai ô hoặc phẩm'};
+  var it=roll(z,s,q),t=Object.assign({},it,decor(it)),uid=TTGTB.addItem(t);
+  return uid?{uid:uid,item:TTGTB.get(uid),q:q,s:s}:{err:'Không thêm được trang bị'};}
 /* ===================== CƯỜNG HÓA (48-enh-ui.js) ===================== */
 function tierOf(z){var v=z+1,i;for(i=0;i<ENH_TIERS.length;i++)if(v>=ENH_TIERS[i][0]&&v<=ENH_TIERS[i][1])return [i+1,ENH_TIER_MAX];return [ENH_TIER_MAX];}
 function enhNeed(e){return {stone:ENH_STONE_QTY[e],xu:ENH_XU_BASE*(e+1)};}
@@ -184,6 +191,6 @@ regItems();
 try{migrate();}catch(e){}
 root.TTGLT={ZN:ZN,PIECE:PIECE,CATN:CATN,QN:QN,QC:QC,QB:QB,EQ:EQ,STATS:STATS,ENH:{MAX:EQ.MAX,RATE:ENH_RATE,DROP_FROM:ENH_DROP_FROM,RB_PCT:ENH_RB_PCT,TIER_MAX:ENH_TIER_MAX},
   need:need,ids:ids,check:check,ren:ren,cuongHoa:cuongHoa,tierOf:tierOf,enhNeed:enhNeed,rateAt:rateAt,rbMax:rbMax,resolve:resolve,tierZones:tierZones,
-  lines:lines,lineTxt:lineTxt,mainRange:mainRange,decor:decor,tong:tong,apDung:apDung,rates:rates,roiDo:roiDo,moTa:moTa,
+  lines:lines,lineTxt:lineTxt,mainRange:mainRange,decor:decor,tong:tong,apDung:apDung,rates:rates,roiDo:roiDo,taoMon:taoMon,moTa:moTa,
   zoneName:zoneName,zoneCol:zoneCol,setName:setName,zbStart:zbStart,eqImg:eqImg,itemImg:itemImg,regItems:regItems,migrate:migrate,nhanTest:nhanTest,demo:demo};
 })(typeof window!=='undefined'?window:globalThis);

@@ -41,7 +41,7 @@ var CFG={tiepKhiThua:true,tim:8500,bao:3000,size:[64,80],hop:400,peekTiLe:.6};
 /* thứ tự thử ảnh: bản đồ riêng -> bg-<slug>.webp -> bg-khoi-dau.webp */
 function mapChain(slug){var a=[],m=MAP_VUNG[slug];if(m)a.push(m+V);if(slug)a.push(DIR+'bg-'+slug+'.webp');a.push(BG_DU_PHONG);return a;}
 
-var S={on:false,ov:null,timers:[],anims:[],phase:'',pre:null,tok:0,cur:{x:0,y:0},face:1,sz:72,sprTry:0,bub:'',onKey:null};
+var S={on:false,npcId:null,ov:null,timers:[],anims:[],phase:'',pre:null,tok:0,cur:{x:0,y:0},face:1,sz:72,sprTry:0,bub:'',onKey:null};
 var EMO_TIM=['❓','🧐'],EMO_LUC=['💦','💢','😵‍💫'],EMO_VUI=['🤩','✨😆✨'];
 
 function H(){return root.TTGTHAMHIEM||{};}
@@ -248,7 +248,9 @@ function script(){
 
 /* ---------- bảng kết quả ---------- */
 function showResult(){
-  if(!S.ov||S.phase!=='map')return;S.phase='popup';
+  if(!S.ov||S.phase!=='map')return;
+  if(S.npcId){gapNpc();return;}   /* lượt này gặp NPC thay cho bảng "Phát hiện mục tiêu" */
+  S.phase='popup';
   var e=(S.pre&&S.pre.enemy)||{},tag=(S.pre&&S.pre.tag)||'',IW=2121,IH=724,v=vp(),w=Math.round(Math.min(v.w*.92,560,v.h*.82*IW/IH)),
       ico=e.boss?'👑':(e.source==='main'?'👹':'🐾'),wr=D.createElement('div'),r=D.createElement('div');
   wr.className='tx-resw';r.className='tx-res';r.style.width=w+'px';r.style.height=Math.round(w*IH/IW)+'px';r.style.setProperty('--u',(w/IW)+'px');
@@ -288,6 +290,21 @@ function paintEnemy(cv,e,w){
   if(e.source!=='demo'){var fl=e.record&&e.record.imageFile;if(fl){im=new Image();im.onload=function(){draw();};im.src=DIR+'quai/'+fl;}}
   draw();}
 
+/* ---------- gặp NPC (87-npc.js): thay cho bảng "Phát hiện mục tiêu" + trận ----------
+   Hiện cửa sổ NPC. [Rời đi] / hết 30 giây => chạy tiếp vòng lặp (next). Khiêu chiến (NPC Boss) => đóng với lý do 'khieu-chien' rồi gọi vaoTran(pre) bên dưới. */
+function gapNpc(){
+  var id=S.npcId,tok=S.tok,ok=false;S.npcId=null;S.phase='npc';
+  try{ok=!!(root.TTGNPC&&TTGNPC.mo(id,{onClose:function(ly){
+    if(ly==='khieu-chien'||ly==='thay')return;          /* đang vào trận / đang đổi NPC: không chạy tiếp ở đây */
+    if(tok!==S.tok||!S.on)return;                        /* đã bấm Dừng (Esc) hoặc đã sang chu kỳ khác */
+    next();}}));}catch(e){ok=false;}
+  if(!ok){S.phase='popup';enter();}}                     /* không mở được NPC thì vào trận thường như cũ */
+/* vào trận với địch dựng sẵn (pre) từ NPC; trả true nếu vào được */
+function vaoTran(pre){
+  if(!S.on||!pre)return false;
+  cleanup();var ok=false;try{ok=!!(H().battle&&H().battle(pre));}catch(e){ok=false;}
+  if(!ok)S.on=false;return ok;}
+
 /* ---------- vào trận ---------- */
 function enter(){
   if(S.phase!=='popup')return;
@@ -299,11 +316,12 @@ function enter(){
 function cycle(){
   var h=H();if(!h.prep||!h.battle){S.on=false;return;}
   var pre=h.prep();if(!pre){stop();return;}   /* prep tự báo lý do (chưa chọn thú, không có quái...) */
-  S.pre=pre;S.on=true;build(zoneInfo());script();}
+  S.pre=pre;S.on=true;S.npcId=(root.TTGNPC&&TTGNPC.tungGap)?TTGNPC.tungGap():null;   /* bước tung NPC (tỉ lệ + ?npc=...) chen TRƯỚC khi vào trận; 95% còn lại giữ nguyên tỉ lệ thú/quái/boss cũ */
+  build(zoneInfo());script();}
 function begin(){if(S.ov)return;warm();cycle();}
 function next(){if(!S.on)return;cycle();}
 function active(){return S.on;}
 
 function warm(){try{var l=mapChain(zoneInfo().slug);if(l[0]){var im=new Image();im.src=l[0];S.warm=im;}}catch(e){}}   /* tải ngầm bản đồ vùng đang chọn */
-root.TTGTX={warm:warm,begin:begin,next:next,stop:stop,active:active,CFG:CFG,MAP_VUNG:MAP_VUNG,mapChain:mapChain};
+root.TTGTX={warm:warm,begin:begin,next:next,stop:stop,active:active,vaoTran:vaoTran,CFG:CFG,MAP_VUNG:MAP_VUNG,mapChain:mapChain};
 })(typeof window!=='undefined'?window:globalThis);

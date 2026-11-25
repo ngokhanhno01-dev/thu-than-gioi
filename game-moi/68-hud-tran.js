@@ -62,7 +62,7 @@ function draw(ctx,o){
   ctx.shadowBlur=0;ctx.restore();}
   /* TÊN + BẬC */
   fit(ctx,o.name||'',X((G.name.x0+G.name.x1)/2),G.name.y+(F?10:0),G.name.x1-G.name.x0,56,34,'bold {S}px '+FS,NC[0],NC[1],8);
-  fit(ctx,'V'+(o.bac||1),X(G.bac.x),G.bac.y+(F?10:0),G.bac.w,56,38,'bold {S}px '+FS,NC[2],NC[3],8);
+  if(!o.anBac)fit(ctx,'V'+(o.bac||1),X(G.bac.x),G.bac.y+(F?10:0),G.bac.w,56,38,'bold {S}px '+FS,NC[2],NC[3],8);
   /* ĐỘ HIẾM loài (Thường/Hiếm/Sử Thi/Huyền Thoại/Truyền Thuyết): đặt ở ô tối cuối thanh Khiên; luôn phủ nền ô này để xóa dấu + cũ */
   var hm=o.hiem&&root.TTGCS&&root.TTGCS.DO_HIEM?root.TTGCS.DO_HIEM[o.hiem]:null,hx=X(G.hiem.cx+(F?28:0));   /* khung Khung UI: nhích chữ độ hiếm sang phải 28 điểm */
   if(!F){ctx.save();rr(ctx,hx-G.hiem.pw/2,G.hiem.cy-G.hiem.ph/2,G.hiem.pw,G.hiem.ph,G.hiem.ph/2);ctx.fillStyle='#031938';ctx.fill();ctx.restore();}
