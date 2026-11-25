@@ -155,7 +155,7 @@ function chon(){
     if(B.count(ID_RUONG)<=0){dong();return;}
     B.add(ID_RUONG,-1);give(cap);dong();toast('Đã nhận '+ten+' x'+n);
   };
-  if(root.TTGBAO)TTGBAO.confirm('Chọn <b>'+esc(ten)+' x'+n+'</b>?<br><small>Mỗi rương chỉ chọn được 1 món, chọn xong rương sẽ mất.</small>',[{t:'Nhận',cb:nhan},{t:'Hủy'}]);
+  if(root.TTGBAO)TTGBAO.confirm('<div>Chọn <b>'+esc(ten)+' x'+n+'</b>?<br><small>Chỉ chọn được 1 món, chọn xong rương sẽ mất.</small></div>',[{t:'Nhận',cb:nhan},{t:'Hủy'}]);
   else nhan();
 }
 
