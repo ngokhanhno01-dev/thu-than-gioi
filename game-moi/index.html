@@ -125,7 +125,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
     if(all&&pct>=100&&!shown){shown=true;pct=100;paint();el.className='ready';warmMap()}
   },50);
   /* TẢI TRƯỚC: ảnh dùng ngay khi vào game (khung, nút, icon, nền sảnh). Trước đây vào game rồi mới tải nên màn hình bị đen/nháy một lúc. Thêm ảnh cần sớm thì thêm vào PRE. */
-  var G='game-moi/',PRE=['khung-sanh.webp?v=2','khung-hang-nut.webp?v=2','khung-nut.webp','khung-thong-bao.webp?v=1','khung-tb-0.webp?v=1','khung-tb-1.webp?v=1','khung-chien-dau.webp','khung-tien.webp','khung-thu.webp','khung-balo.webp','khung-chon-thu.webp','khung-chon-chau.webp','khung-trang-bi.webp','nen-hang-nut.png','nut-bat.webp','nut-khung.webp','nut-trong.webp','nut-mo-khoa.webp','nut-bo-chon.webp','nut-da-trang-bi.webp','nut-bo-trang-bi.webp','nut-dang-ra-tran.webp',
+  var G='game-moi/',PRE=['khung-sanh.webp?v=2','khung-hang-nut.webp?v=2','khung-nut.webp','khung-thong-bao.webp?v=1','khung-tb-0.webp?v=1','khung-tb-1.webp?v=1','khung-chien-dau.webp','khung-tien.webp','khung-thu.webp','khung-balo.webp','khung-cua-hang.webp?v=1','khung-chon-thu.webp','khung-chon-chau.webp','khung-trang-bi.webp','nen-hang-nut.png','nut-bat.webp','nut-khung.webp','nut-trong.webp','nut-mo-khoa.webp','nut-bo-chon.webp','nut-da-trang-bi.webp','nut-bo-trang-bi.webp','nut-dang-ra-tran.webp',
     'icon/balo.webp','icon/boss-the-gioi.webp','icon/cua-hang.webp','icon/cuong-hoa.webp','icon/dau-truong.webp','icon/diem-danh.webp','icon/do-giam.webp','icon/khung-chon-vung.webp','icon/nhiem-vu.webp','icon/pho-ban.webp','icon/ren.webp','icon/tham-hiem.webp','icon/thap-thi-luyen.webp','icon/thu-than.webp','icon/trang-bi.webp',
     'bg-khoi-dau.webp','bg-tuyet-nguyen.webp','bg-suong-coc.webp','bg-van-dao.webp','bg-phong-nguyen.webp','bg-loi-vuc.webp','bg-nguyet-cung.webp','bg-thuy-nguyet-canh.webp','bg-xich-hoa-dia.webp','bg-thanh-lam.webp'],
     preN=0,preD=0,loadEv=false,fontOk=!(document.fonts&&document.fonts.ready),keep=[];
@@ -245,7 +245,8 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/73-luat-trang-bi.js"></script>
 <script src="game-moi/74-ren-cuong-hoa.js"></script>
 <script src="game-moi/75-tien-hoa-thu.js"></script>
-<script src="game-moi/81-nut-moi.js?v=4"></script>
+<script src="game-moi/81-nut-moi.js?v=5"></script>
+<script src="game-moi/85-cua-hang.js?v=1"></script>
 <script src="game-moi/82-tham-hiem-auto.js?v=1"></script>
 <script src="game-moi/83-sanh-song.js?v=1"></script>
 <script src="game-moi/84-chu-tran.js?v=1"></script>

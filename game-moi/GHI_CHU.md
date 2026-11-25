@@ -153,3 +153,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - **Chạm vào thú** ở sảnh: thú dừng đi lại, phản ứng và nói ngay (nhóm 😖, 35% là tức giận). Chống bấm dồn 0,9s.
 - Chỉnh nhịp/tần suất ở `TTGSANH.CFG` (`idle`, `hopDur`, `hopH`, `emo`, `chat`, `range`, `maxW`, `font`). Tắt hẳn: `TTGSANH.CFG.on=false`. Thử câu nào đó: gõ trong console `TTGSANH.say('gianDu')` hoặc `TTGSANH.say('meo','nội dung')`.
 - Nối vào `index.html`: hàm `petSanh` (lấy `TTGSANH.pose` rồi vẽ thú theo tư thế) và cuối nhánh sảnh của `draw()` (`TTGSANH.draw`); thêm 1 dòng `<script>`. Không có module thì sảnh chạy như cũ.
+
+## Kỳ Trân Các (cửa hàng) - bước 1: khung + tiền tệ (25/11/2026) — `85-cua-hang.js` (TTGSHOP)
+- Khung = `game-moi/khung-cua-hang.webp` (1672x941, đã tách nền ngoài). Chữ tiêu đề, nút X, 4 nhãn trái (Tất Cả / Đạo Cụ / Pháp Bảo / Đặc Biệt), 8 ô trống, 2 ô tiền đều vẽ sẵn trong ảnh. Bấm nút Kỳ Trân Các (`81-nut-moi.js` gọi `TTGSHOP.open()`) để mở; đóng bằng nút X, chạm ngoài khung hoặc Esc.
+- **Chưa có vật phẩm / mua bán.** Hiện chỉ hiện tiền: ô trái (ngọc lam) = Tinh Thạch, ô phải (ngọc tím) = Thú Thần Thạch, đọc từ `TTGTIEN` (66-tien-te.js), cập nhật mỗi 0,5s khi bảng mở.
+- Mọi tọa độ (nút X, 2 ô tiền, 4 tab, 8 ô, ô thông tin) ở khối `BOX` đầu file, tính theo pixel ảnh khung. Thêm vật phẩm sau này: vẽ vào các ô theo `BOX`, dùng `TTGBALO.add`/`TTGTIEN.add` để mua.
