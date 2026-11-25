@@ -83,7 +83,7 @@ function draw(ctx,o){
   barFill(ctx,G.sp,Math.max(0,Math.min(1,gp)),m,gp>=.999?'#fff0a0':'#ffe27a',gp>=.999?'#f0b020':'#d9921a',5);
   fit(ctx,hasTd?String(Math.round(td)):'-',X((G.sp.x0+G.sp.x1)/2),(G.sp.y0+G.sp.y1)/2+2,300,36,24,'bold {S}px sans-serif','#fff','rgba(60,30,0,.9)',7);
   /* LV */
-  fit(ctx,'Lv.'+Math.max(1,Math.min(100,Math.floor(o.lv||1))),X(G.he.x),G.he.y+2,G.he.w,46,26,'bold {S}px sans-serif','#fff3c4','rgba(40,20,0,.9)',7);
+  fit(ctx,'Lv.'+Math.max(1,Math.min(270,Math.floor(o.lv||1))),X(G.he.x),G.he.y+2,G.he.w,46,26,'bold {S}px sans-serif','#fff3c4','rgba(40,20,0,.9)',7);
   /* HỆ (1 hoặc 2 hệ, mỗi hệ một màu): nằm ở ô Lv cũ (cuối thanh Máu); còn Lv nằm ở ô dưới vòng Rank (đã đổi chỗ 23/11/2026) */
   var he=(o.he||[]).filter(Boolean).slice(0,2),HT=(root.TTGCS&&root.TTGCS.HE_TEN)||HE_TEN;
   if(he.length){
