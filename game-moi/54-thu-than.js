@@ -219,7 +219,7 @@ function build(){
   /* --- TRÁI: thanh vàng tên + bậc (x164-566,y176-229), ảnh thú trong ô lớn (x168-558,y241-570) --- */
   E.nm=mk('div','tt-nm',200,181,330,44);
    E.hiem=mk('div','tt-hiem',283,249,160,32);   /* nhãn ĐỘ HIẾM loài: giữa mép trên ô ảnh thú */
-  E.ph=mk('div','tt-ph',168,241,390,329);
+  E.ph=mk('div','tt-ph',194,284,338,285);   /* thu nhỏ ~13%, hạ đỉnh xuống dưới nhãn độ hiếm (nhãn y 249..281), giữ nguyên tâm ngang và mép dưới */
   /* nút TIẾN HÓA (trước là TRANG BỊ): vùng bấm trong suốt đè lên tấm vàng "Tiến Hóa" vẽ sẵn dưới ô ảnh thú (x209-522,y575-632). Bấm = mở khung Tiến Hóa Thú (72-khung-ren-cuong-hoa.js). Khung Trang bị vẫn mở được từ nút Trang bị ở hàng nút dưới. */
   var eq=mk('button','tt-eq',215,578,300,52);eq.type='button';eq.setAttribute('aria-label','Tiến Hóa');
   eq.addEventListener('click',function(){if(window.TTGKH)TTGKH.open('th');else toast('Sắp có');});
