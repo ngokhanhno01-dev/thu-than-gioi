@@ -7,12 +7,14 @@
    TEST: ALWAYS=true => mỗi lần mở game đều hiện. Khi làm thật đổi ALWAYS=false => chỉ hiện khi chưa chọn thú. Link có ?chon-thu=1 luôn ép hiện.
    LƯU: lựa chọn ghi ở khóa ttg_moi_starter_v1 = {slot, id, bac, t}.
    BẤM XÁC NHẬN (21/11/2026) = BẮT ĐẦU TÀI KHOẢN MỚI, XÓA TRẮNG như người chơi lần đầu: xóa MỌI khóa localStorage ttg_moi_* (kho thú, thú ra trận, danh sách thả, thú ở sảnh, Balo/Châu/sách, khóa đồ, kiểu xếp...) TRỪ lựa chọn thú đầu, bố cục nút (ttg_moi_layout_v1) và cài đặt khung HD (ttg_moi_hd) (xem GIU bên dưới); đồng thời reset Balo trong bộ nhớ bằng TTGBALO.xoaTrang() (53-balo.js). Rồi phát đúng 1 con thú vừa chọn vào kho với Lv.1, Bậc 1 và RANK RANDOM bằng TTGCS.tungBac() (cùng bảng tỉ lệ E..SS như lúc bắt thú ở Thám hiểm), cho RA TRẬN luôn => sảnh hiện đúng thú đã chọn. Việc xóa kho thú + phát thú do TTGTHU.khoiTao() (54-thu-than.js) làm.
+   QUÀ KHỞI ĐẦU (25/11/2026): ngay SAU khi xóa trắng + phát thú, tặng CFG_CHAU_DAU (mặc định 10) Ngự Thú Châu BẬC 1 vào Balo (TTGBALO.add(TTGBONG.idBong(1), n), 58-bong-bat.js). Chỉ cộng khi bấm Xác Nhận thật (nút X không cộng). Chế độ ?thu=demo thì KHÔNG tặng (giữ nguyên Balo demo).
    Sự kiện 'ttg-starter' (detail = {slot,id,bac,uid}) vẫn bắn như cũ; TTGSTARTER.get() trả lựa chọn đã lưu.
    Nút X: đóng không chọn (không lưu, không xóa gì). Nút Xác Nhận chỉ bấm được sau khi chọn 1 bục. */
 (function(){
 'use strict';
 if(window.TTG_BLOCK)return;
 var ALWAYS=true,KEY='ttg_moi_starter_v1',IW=2505,IH=1412,TIER=1;
+var CFG_CHAU_DAU=10;   /* số Ngự Thú Châu BẬC 1 tặng khi chọn thú đầu (đặt 0 để tắt) */
 var GIU=['ttg_moi_starter_v1','ttg_moi_layout_v1','ttg_moi_hd'];   /* khóa KHÔNG xóa khi xóa trắng: lựa chọn thú đầu + cài đặt giao diện (không phải dữ liệu chơi) */
 var STARTERS=[
  {id:'k2',ten:'Lưu Diêu',mota:'Thường + Thủy · Nhanh'},
@@ -109,6 +111,11 @@ function xoaTrang(){
   ks.forEach(function(k){if(k&&k.indexOf('ttg_moi_')===0&&GIU.indexOf(k)<0)localStorage.removeItem(k);});}catch(e){}
  try{if(window.TTGBALO&&TTGBALO.xoaTrang)TTGBALO.xoaTrang();}catch(e){}
 }
+/* TẶNG CHÂU KHỞI ĐẦU: cộng CFG_CHAU_DAU Ngự Thú Châu bậc 1 vào Balo. Gọi SAU xoaTrang() (nếu không sẽ bị xóa mất). Trả số châu đã cộng (0 nếu không cộng được / đang ?thu=demo). */
+function tangChau(){
+ if(!(CFG_CHAU_DAU>0)||/[?&]thu=demo/.test(location.search))return 0;
+ try{if(window.TTGBALO&&TTGBALO.add&&window.TTGBONG&&TTGBONG.idBong){TTGBALO.add(TTGBONG.idBong(1),CFG_CHAU_DAU);return CFG_CHAU_DAU;}}catch(e){}
+ return 0;}
 /* XÁC NHẬN: bắt đầu tài khoản mới (xóa trắng). Rank tung bằng TTGCS.tungBac() = cùng bảng tỉ lệ với lúc bắt thú (62-bat-thu.js, tungBacChau). Chưa nạp TTGCS thì rơi về 'E'. */
 function confirm(){if(locked)return;
  if(sel<0){say('Hãy chọn một thú trước!',true);setTimeout(function(){if(sel<0&&!locked)say(HINT);},1400);return;}
@@ -120,7 +127,8 @@ function confirm(){if(locked)return;
  if(s.id&&window.TTGTHU&&TTGTHU.khoiTao){
   try{uid=TTGTHU.khoiTao({id:s.id,ten:s.ten,bac:bac,tien:1,lv:1,chiso:{},kn:[null,null,null,null,null,null]});}catch(e){}}
  r.uid=uid;
- say('Đã chọn '+s.ten+' · Rank '+bac+'!');
+ var nChau=tangChau();
+ say('Đã chọn '+s.ten+' · Rank '+bac+(nChau?' · +'+nChau+' Ngự Thú Châu bậc 1':'')+'!');
  try{window.dispatchEvent(new CustomEvent('ttg-starter',{detail:r}));}catch(e){}
  setTimeout(function(){close(true);},700);}
 function close(){if(!root)return;root.className=root.className.replace(' on','').replace(' ready','')+' off';
