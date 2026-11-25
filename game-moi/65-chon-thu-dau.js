@@ -15,7 +15,7 @@
 if(window.TTG_BLOCK)return;
 var ALWAYS=true,KEY='ttg_moi_starter_v1',IW=2505,IH=1412,TIER=1;
 var CFG_CHAU_DAU=10;   /* số Ngự Thú Châu BẬC 1 tặng khi chọn thú đầu (đặt 0 để tắt) */
-var TXT_QUA_TIEU_DE='Quà Khởi Đầu',TXT_QUA_MO_TA='Ngự Thú Châu dùng để bắt thú hoang khi thám hiểm. Châu đã được cất trong Balo, hãy mở Balo để xem.';   /* chữ trong bảng thông báo quà (dễ sửa) */
+var TXT_QUA_TIEU_DE='Quà Khởi Đầu',TXT_QUA_MO_TA='Ngự Thú Châu dùng để bắt thú hoang khi thám hiểm. Châu đã được cất trong Túi Trữ Vật, hãy mở Túi Trữ Vật để xem.';   /* chữ trong bảng thông báo quà (dễ sửa) */
 var GIU=['ttg_moi_starter_v1','ttg_moi_layout_v1','ttg_moi_hd'];   /* khóa KHÔNG xóa khi xóa trắng: lựa chọn thú đầu + cài đặt giao diện (không phải dữ liệu chơi) */
 var STARTERS=[
  {id:'k2',ten:'Lưu Diêu',mota:'Thường + Thủy · Nhanh'},
