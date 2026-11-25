@@ -20,6 +20,7 @@ var SW=1672,SH=941,V='?v=2',D='game-moi/';
 var IMG=D+'khung-cua-hang.webp'+V,GLOW=D+'cua-hang-sang.webp'+V,MASK=D+'cua-hang-tab-mask.webp'+V,SLOT=D+'cua-hang-o.webp'+V;
 var CFG={
   icTT:'game-moi/icon-tien/tt.webp?v=1',icTTT:'game-moi/icon-tien/ttt.webp?v=1',   /* icon tiền cắt từ khung-tien.webp */
+  moTa:{'hop-ngu-thu-ngau-nhien':'Hộp quà chứa Ngự Thú Châu, mở ra mới biết bậc nào.','ruong-ngu-thu-tu-chon':'Rương quà chứa Ngự Thú Châu, bạn tự chọn loại khi mở.'},   /* dòng "Là gì" trong bảng thông tin (chỉ để đọc, không ảnh hưởng gì khác) */
   lamMoiPhut:30,      /* chu kỳ làm mới hàng (phút) */
   oToiThieu:16,       /* số ô tối thiểu mỗi tab (bội của 4). 16 = 4 hàng trống để thử cuộn; đặt 8 khi đã có món thật */
   key:'ttg_moi_cuahang_lm',
@@ -85,6 +86,23 @@ var css=[
 '.sh-o.het .sh-ic,.sh-o.het .sh-nm{opacity:.4;filter:grayscale(.7)}',
 '.sh-o>*{position:absolute;box-sizing:border-box;pointer-events:none}',
 '.sh-o.hg .sh-pr{pointer-events:auto;cursor:pointer}',   /* CHỈ nút giá nhận chạm để MUA; chạm hình/tên/phần còn lại của ô thì xem thông tin */
+/* BẢNG THÔNG TIN VẬT PHẨM (chạm hình/tên ô): chữ nhỏ gọn, phần mô tả có thanh cuộn */
+'.sh-tin{left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(2,4,20,.62);z-index:5}',
+'.sh-tin.on{display:flex}',
+'.sh-tb{width:calc(var(--u)*600);max-width:92%;max-height:86%;box-sizing:border-box;display:flex;flex-direction:column;gap:calc(var(--u)*10);padding:calc(var(--u)*18) calc(var(--u)*22);border:calc(var(--u)*3) solid #c9992f;border-radius:calc(var(--u)*12);background:linear-gradient(180deg,#10226f,#07123f);box-shadow:0 0 calc(var(--u)*30) rgba(0,0,0,.8),inset 0 0 calc(var(--u)*20) rgba(80,140,255,.25);color:#e8ecff}',
+'.sh-th{display:flex;align-items:center;gap:calc(var(--u)*16);flex:none}',
+'.sh-ti{width:calc(var(--u)*88);height:calc(var(--u)*88);flex:none;display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*56);border:calc(var(--u)*2) solid #c9992f;border-radius:calc(var(--u)*10);background:radial-gradient(circle at 50% 35%,#34348f,#12123a)}',
+'.sh-ti img{width:88%;height:88%;object-fit:contain}',
+'.sh-tn{font-weight:800;font-size:calc(var(--u)*26);line-height:1.15;color:#ffe9a0}',
+'.sh-tm{margin-top:calc(var(--u)*4);font-size:calc(var(--u)*17);line-height:1.3;color:#9fe8de}',
+'.sh-td{flex:1 1 auto;min-height:calc(var(--u)*56);overflow-y:auto;overflow-x:hidden;padding-right:calc(var(--u)*8);font-size:calc(var(--u)*18);line-height:1.45;color:#cfd6ff;touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}',
+'.sh-td p{margin:0 0 calc(var(--u)*8)}',
+'.sh-td b{color:#ffe9a0}',
+'.sh-td::-webkit-scrollbar{width:calc(var(--u)*10)}',
+'.sh-td::-webkit-scrollbar-track{border-radius:calc(var(--u)*5);background:rgba(2,8,40,.72)}',
+'.sh-td::-webkit-scrollbar-thumb{border-radius:calc(var(--u)*5);background:linear-gradient(90deg,#ffe48a,#d99a24)}',
+'.sh-tx{flex:none;align-self:center;min-width:calc(var(--u)*150);height:calc(var(--u)*42);padding:0 calc(var(--u)*20);border:calc(var(--u)*2) solid #8a6a22;border-radius:calc(var(--u)*8);background:linear-gradient(180deg,#fff3bd,#f7cf62 45%,#e0a232);color:#3a2206;font-family:inherit;font-weight:800;font-size:calc(var(--u)*20);line-height:1;cursor:pointer;touch-action:manipulation}',
+'.sh-tx:active{filter:brightness(1.15)}',
 '.sh-ic{left:calc(var(--u)*30);top:calc(var(--u)*22);width:calc(var(--u)*180);height:calc(var(--u)*112);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*80)}',
 '.sh-ic img{width:100%;height:100%;object-fit:contain}',
 '.sh-nm{left:calc(var(--u)*16);right:calc(var(--u)*16);top:calc(var(--u)*130);height:calc(var(--u)*44);display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:calc(var(--u)*21);line-height:1.1;color:#fff3c4;text-shadow:0 0 calc(var(--u)*5) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c}',
@@ -194,14 +212,20 @@ function muaChau(j){
   if(window.TTGBAO)TTGBAO.confirm('<div>Mua <b>'+esc(nm)+'</b> với <b>'+fmt(tong)+'</b> '+tenTien('tt')+'?<br><small>('+CFG.chau.gia[o.cap]+' '+tenTien('tt')+' mỗi cái, mỗi ô chỉ mua được 1 lần mỗi đợt)</small></div>',[{t:'Mua',cb:xong},{t:'Hủy'}]);
   else xong();
 }
-/* XEM THÔNG TIN: chạm hình/tên ô hiện bảng mô tả (không trừ tiền). Chạm nút giá mới là mua. */
-function hopTin(it,ten,dong,mo){
-  var ic=it.img?'<img src="'+esc(it.img)+'" alt="" style="width:72px;height:72px;object-fit:contain">':'<span style="font-size:56px;line-height:1">'+esc(it.ic||'?')+'</span>';
-  var h='<div style="text-align:center">'+ic+'<br><b>'+esc(ten)+'</b><br><small>'+dong+'</small><div style="margin-top:8px;text-align:left"><small>'+esc(mo||'Chưa có mô tả.')+'</small></div></div>';
-  if(window.TTGBAO&&TTGBAO.confirm)TTGBAO.confirm(h,[{t:'Đóng'}]);else toast(ten);
+/* XEM THÔNG TIN: chạm hình/tên ô hiện bảng nhỏ gọn (là gì + dùng làm gì), không trừ tiền. Chạm nút giá mới là mua. */
+function hopTin(it,ten,meta,muc){
+  if(!E.tin)return;
+  var ic=it.img?'<img src="'+esc(it.img)+'" alt="">':'<b style="font-weight:400">'+esc(it.ic||'?')+'</b>';
+  var ds=muc.filter(function(m){return m[1];}).map(function(m){return '<p><b>'+esc(m[0])+':</b> '+esc(m[1])+'</p>';}).join('')||'<p>Chưa có mô tả.</p>';
+  E.tin.innerHTML='<div class="sh-tb"><div class="sh-th"><div class="sh-ti">'+ic+'</div><div><div class="sh-tn">'+esc(ten)+'</div><div class="sh-tm">'+meta+'</div></div></div><div class="sh-td">'+ds+'</div><button type="button" class="sh-tx">Đóng</button></div>';
+  E.tin.classList.add('on');E.tinAt=performance.now();
 }
-function xemMon(m){var it=cat(m),cl=conLai(m);hopTin(it,it.ten||m.ten,'Giá: '+fmt(m.gia)+' '+tenTien(m.tien)+' · Còn '+cl+'/'+m.toiDa+' lượt trong đợt này',it.mo);}
-function xemChau(j){var o=chauSet().o[j];if(!o)return;var it=catChau(o);hopTin(it,it.ten||('Ngự Thú Châu bậc '+o.cap),'Bậc '+o.cap+' · Số lượng: x'+o.sl+' · Giá: '+fmt(giaO(o))+' Tinh Thạch ('+CFG.chau.gia[o.cap]+'/cái)'+(o.mua?' · Đã mua':''),it.mo||'Dùng để bắt thú hoang.');}
+function dongTin(){if(E.tin)E.tin.classList.remove('on');}
+function xemMon(m){var it=cat(m),cl=conLai(m);
+  hopTin(it,it.ten||m.ten,'Giá '+fmt(m.gia)+' '+tenTien(m.tien)+' · Còn '+cl+'/'+m.toiDa+' lượt đợt này',[['Là gì',CFG.moTa[m.id]],['Công dụng',it.mo]]);}
+function xemChau(j){var o=chauSet().o[j];if(!o)return;var it=catChau(o);
+  hopTin(it,it.ten||('Ngự Thú Châu bậc '+o.cap),'Bậc '+o.cap+' · x'+o.sl+' · '+fmt(giaO(o))+' Tinh Thạch ('+CFG.chau.gia[o.cap]+'/cái)'+(o.mua?' · Đã mua':''),
+   [['Là gì','Ngự Thú Châu bậc '+o.cap+', quả châu dùng để bắt thú hoang.'],['Công dụng','Ném vào thú hoang khi thám hiểm để thu phục. '+(it.mo||'')]]);}
 function setTab(id){
   cur=id;
   E.tabs.forEach(function(b){b.classList.toggle('on',b.getAttribute('data-id')===id);b.setAttribute('aria-pressed',b.getAttribute('data-id')===id?'true':'false');});
@@ -221,12 +245,14 @@ function build(){
     b.appendChild(g);b.appendChild(l);
     b.addEventListener('click',function(){if(cur!==t.id)setTab(t.id);});
     return b;});
+  E.tin=document.createElement('div');E.tin.className='sh-tin';fr.appendChild(E.tin);   /* bảng thông tin vật phẩm, phủ lên cả khung */
+  E.tin.addEventListener('click',function(e){if(e.target===E.tin||(e.target.closest&&e.target.closest('.sh-tx'))){if(performance.now()-E.tinAt>250)dongTin();}});
   E.x=mk('button','sh-x',BOX.close);E.x.type='button';E.x.setAttribute('aria-label','Đóng');
   E.mtt=mk('img','sh-mi',BOX.mtt);E.mtt.src=CFG.icTT;E.mttt=mk('img','sh-mi',BOX.mttt);E.mttt.src=CFG.icTTT;E.tt=mk('div','sh-m sh-tt',BOX.tt);E.ttt=mk('div','sh-m sh-ttt',BOX.ttt);E.lm=mk('div','sh-m lm',BOX.timer);
   document.body.appendChild(root);
   E.x.addEventListener('click',close);
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
-  document.addEventListener('keydown',function(e){if(isOpen&&e.key==='Escape')close();});
+  document.addEventListener('keydown',function(e){if(isOpen&&e.key==='Escape'){if(E.tin&&E.tin.classList.contains('on'))dongTin();else close();}});
   window.addEventListener('resize',function(){unit();E.tt._dirty=E.ttt._dirty=E.lm._dirty=true;render();E.tt._dirty=E.ttt._dirty=E.lm._dirty=false;});
 }
 function open(){
@@ -237,7 +263,7 @@ function open(){
   setTab('all');render();
   clearInterval(timer);timer=setInterval(function(){var was=anchor;render();if(anchor!==was&&isOpen)renderList();},250);   /* hết 30 phút -> làm mới lưới */
 }
-function close(){if(!root)return;isOpen=false;root.classList.remove('on');clearInterval(timer);}
+function close(){if(!root)return;dongTin();isOpen=false;root.classList.remove('on');clearInterval(timer);}
 
 loadAnchor();tick();   /* chu kỳ chạy theo giờ máy kể cả khi chưa mở cửa hàng */
 window.TTGSHOP={open:open,close:close,BOX:BOX,CFG:CFG,isOpen:function(){return isOpen;},tab:function(){return cur;},setTab:function(id){if(root)setTab(id);else cur=id;},lamMoiNgay:function(){anchor=Date.now()-chu();saveAnchor();tick();if(isOpen){renderList();render();}},remaining:remaining,onRefresh:function(f){if(typeof f==='function')hooks.push(f);}};
