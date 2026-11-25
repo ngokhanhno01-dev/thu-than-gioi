@@ -9,7 +9,7 @@
    BẤM XÁC NHẬN (21/11/2026) = BẮT ĐẦU TÀI KHOẢN MỚI, XÓA TRẮNG như người chơi lần đầu: xóa MỌI khóa localStorage ttg_moi_* (kho thú, thú ra trận, danh sách thả, thú ở sảnh, Balo/Châu/sách, khóa đồ, kiểu xếp...) TRỪ lựa chọn thú đầu, bố cục nút (ttg_moi_layout_v1) và cài đặt khung HD (ttg_moi_hd) (xem GIU bên dưới); đồng thời reset Balo trong bộ nhớ bằng TTGBALO.xoaTrang() (53-balo.js). Rồi phát đúng 1 con thú vừa chọn vào kho với Lv.1, Bậc 1 và RANK RANDOM bằng TTGCS.tungBac() (cùng bảng tỉ lệ E..SS như lúc bắt thú ở Thám hiểm), cho RA TRẬN luôn => sảnh hiện đúng thú đã chọn. Việc xóa kho thú + phát thú do TTGTHU.khoiTao() (54-thu-than.js) làm.
    QUÀ KHỞI ĐẦU (25/11/2026): ngay SAU khi xóa trắng + phát thú, tặng CFG_CHAU_DAU (mặc định 10) Ngự Thú Châu BẬC 1 vào Balo (TTGBALO.add(TTGBONG.idBong(1), n), 58-bong-bat.js). Chỉ cộng khi bấm Xác Nhận thật (nút X không cộng). Chế độ ?thu=demo thì KHÔNG tặng (giữ nguyên Balo demo).
    Sự kiện 'ttg-starter' (detail = {slot,id,bac,uid}) vẫn bắn như cũ; TTGSTARTER.get() trả lựa chọn đã lưu.
-   Nút X: đóng không chọn (không lưu, không xóa gì). Nút Xác Nhận chỉ bấm được sau khi chọn 1 bục. */
+   KHÔNG CÒN NÚT X (25/11/2026): người chơi bắt buộc chọn thú rồi bấm Xác Nhận mới vào game, không đóng được màn này. Nút Xác Nhận chỉ bấm được sau khi chọn 1 bục. */
 (function(){
 'use strict';
 if(window.TTG_BLOCK)return;
@@ -52,7 +52,6 @@ function css(){
  '#cht.ready .okd{opacity:0}#cht.ready .okg{animation:chtgl 1.2s ease-in-out infinite;opacity:1}'+
  '#cht .okg{opacity:0;border-radius:2.2vh;box-shadow:0 0 2.2vh rgba(255,236,150,.9);pointer-events:none}'+
  '#cht.nofr .ok{border:1px solid #d9b24c;background:rgba(0,0,40,.6)}'+
- '#cht .x{cursor:pointer}'+
  '@keyframes chtgl{0%,100%{filter:brightness(.8)}50%{filter:brightness(1.25)}}'+
  '@keyframes chtfl{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.2vh)}}'+
  '@keyframes chtsk{0%,100%{transform:translateX(0)}25%{transform:translateX(-1vh)}75%{transform:translateX(1vh)}}';
@@ -71,7 +70,6 @@ function build(src){
    '<div class="a tx nm" style="'+B(cx-175,903-330,cx+175,993-330)+'">'+STARTERS[i].ten+'</div></div>';}
  h+='<div class="a ok tx" id="cht-ok" style="'+B(900,1150,1610,1320)+'">'+(frameOk?'':'Xác Nhận')+'</div>';
  h+='<div class="a okd" id="cht-okd" style="'+B(975,1183,1535,1292)+'"></div><div class="a okg" style="'+B(975,1183,1535,1292)+'"></div>';
- h+='<div class="a x" id="cht-x" style="'+B(2300,25,2480,205)+'">'+(frameOk?'':'✕')+'</div>';
  h+='</div>';
  root.innerHTML=h;document.body.appendChild(root);
  infoEl=document.getElementById('cht-inf');okDim=document.getElementById('cht-okd');
@@ -84,7 +82,6 @@ function build(src){
   cvs[i]=sl.querySelector('canvas.pt');
   sl.addEventListener('click',(function(k){return function(){pick(k);};})(i));}
  document.getElementById('cht-ok').addEventListener('click',confirm);
- document.getElementById('cht-x').addEventListener('click',function(){close(false);});
  sizeCv();window.addEventListener('resize',sizeCv);
  for(i=0;i<3;i++)if(STARTERS[i].id)root.querySelector('[data-q="'+i+'"]').style.display='none';
  requestAnimationFrame(function(){root.className+=' on';});
