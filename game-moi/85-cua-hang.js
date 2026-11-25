@@ -52,7 +52,7 @@ var css=[
 '.sh-x:active{box-shadow:0 0 calc(var(--u)*24) rgba(255,224,102,.85),inset 0 0 calc(var(--u)*24) rgba(255,224,102,.35)}',
 '.sh-m{display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--u)*34);line-height:1;white-space:nowrap;overflow:hidden;pointer-events:none;text-shadow:0 0 calc(var(--u)*6) #02061c,calc(var(--u)*2) calc(var(--u)*2) 0 #02061c,calc(var(--u)*-2) calc(var(--u)*2) 0 #02061c}',
 '.sh-mi{object-fit:contain;pointer-events:none;filter:drop-shadow(0 0 calc(var(--u)*4) rgba(2,6,28,.8))}',
-'.sh-m.tt{color:#bdf3ff}.sh-m.ttt{color:#e6c8ff}',
+'.sh-m.sh-tt{color:#bdf3ff}.sh-m.sh-ttt{color:#e6c8ff}',
 '.sh-m.lm{color:#ffe9a0;font-size:calc(var(--u)*34);letter-spacing:calc(var(--u)*.5)}',   /* đồng hồ làm mới */
 /* TAB: nút trong suốt phủ lên nhãn vẽ sẵn; tab đang chọn bật viền sáng (.sh-gl) + làm sáng thân (.sh-lt) */
 '.sh-tab{padding:0;border:0;background:transparent;cursor:pointer;touch-action:manipulation;overflow:visible;z-index:1}',
@@ -160,7 +160,7 @@ function build(){
     b.addEventListener('click',function(){if(cur!==t.id)setTab(t.id);});
     return b;});
   E.x=mk('button','sh-x',BOX.close);E.x.type='button';E.x.setAttribute('aria-label','Đóng');
-  E.mtt=mk('img','sh-mi',BOX.mtt);E.mtt.src=CFG.icTT;E.mttt=mk('img','sh-mi',BOX.mttt);E.mttt.src=CFG.icTTT;E.tt=mk('div','sh-m tt',BOX.tt);E.ttt=mk('div','sh-m ttt',BOX.ttt);E.lm=mk('div','sh-m lm',BOX.timer);
+  E.mtt=mk('img','sh-mi',BOX.mtt);E.mtt.src=CFG.icTT;E.mttt=mk('img','sh-mi',BOX.mttt);E.mttt.src=CFG.icTTT;E.tt=mk('div','sh-m sh-tt',BOX.tt);E.ttt=mk('div','sh-m sh-ttt',BOX.ttt);E.lm=mk('div','sh-m lm',BOX.timer);
   document.body.appendChild(root);
   E.x.addEventListener('click',close);
   root.addEventListener('click',function(e){if(e.target===root&&performance.now()-openAt>400)close();});
