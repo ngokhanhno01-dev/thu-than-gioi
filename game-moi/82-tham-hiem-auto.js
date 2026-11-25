@@ -153,7 +153,7 @@ function vaoTran(pre){
   return ok;
 }
 
-/* ---------- vòng lặp ---------- *//* ---------- vòng lặp ---------- */
+/* ---------- vòng lặp ---------- */
 function cycle(){if(!S.on)build(zoneInfo());else if(root.TTGMAP&&root.TTGMAP.resume)root.TTGMAP.resume({});}
 function begin(){if(S.on)return;warm();build(zoneInfo());script();}
 function next(kq){
@@ -164,7 +164,7 @@ function next(kq){
   S.pre=null;S.ev=null;S.phase='map';
   try{if(root.TTGMAP&&root.TTGMAP.resume)root.TTGMAP.resume(result);}catch(e){}
 }
-function active(){function active(){return S.on;}
+function active(){return S.on;}
 
 function warm(){try{var l=mapChain(zoneInfo().slug);if(l[0]){var im=new Image();im.src=l[0];S.warm=im;}}catch(e){}}   /* tải ngầm bản đồ vùng đang chọn */
 root.TTGTX={warm:warm,begin:begin,next:next,stop:stop,active:active,vaoTran:vaoTran,CFG:CFG,MAP_VUNG:MAP_VUNG,mapChain:mapChain};
