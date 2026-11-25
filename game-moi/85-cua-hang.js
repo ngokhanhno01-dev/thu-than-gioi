@@ -222,10 +222,10 @@ function hopTin(it,ten,meta,muc){
 }
 function dongTin(){if(E.tin)E.tin.classList.remove('on');}
 function xemMon(m){var it=cat(m),cl=conLai(m);
-  hopTin(it,it.ten||m.ten,'Giá '+fmt(m.gia)+' '+tenTien(m.tien)+' · Còn '+cl+'/'+m.toiDa+' lượt đợt này',[['Là gì',CFG.moTa[m.id]],['Công dụng',it.mo]]);}
+  hopTin(it,it.ten||m.ten,'Giá '+fmt(m.gia)+' '+tenTien(m.tien)+' · Còn '+cl+'/'+m.toiDa+' lượt đợt này',[['Thông tin',CFG.moTa[m.id]],['Công dụng',it.mo]]);}
 function xemChau(j){var o=chauSet().o[j];if(!o)return;var it=catChau(o);
   hopTin(it,it.ten||('Ngự Thú Châu bậc '+o.cap),'Bậc '+o.cap+' · x'+o.sl+' · '+fmt(giaO(o))+' Tinh Thạch ('+CFG.chau.gia[o.cap]+'/cái)'+(o.mua?' · Đã mua':''),
-   [['Là gì','Ngự Thú Châu bậc '+o.cap+', quả châu dùng để bắt thú hoang.'],['Công dụng','Ném vào thú hoang khi thám hiểm để thu phục. '+(it.mo||'')]]);}
+   [['Thông tin','Ngự Thú Châu bậc '+o.cap+', quả châu dùng để bắt thú hoang.'],['Công dụng','Ném vào thú hoang khi thám hiểm để thu phục. '+(it.mo||'')]]);}
 function setTab(id){
   cur=id;
   E.tabs.forEach(function(b){b.classList.toggle('on',b.getAttribute('data-id')===id);b.setAttribute('aria-pressed',b.getAttribute('data-id')===id?'true':'false');});
