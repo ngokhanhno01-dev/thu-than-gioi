@@ -323,5 +323,7 @@ function onTap(e){
     S.nextChat=ts+S.chat.dur+rr(CFG.chat.gap);
   }catch(err){}}
 
-root.TTGSANH={CFG:CFG,LINES:LINES,EMO:EMO,pose:pose,draw:draw,say:function(nhom,text){say(performance.now(),nhom||'meo',text);}};
+/* info(): vị trí thú hiện tại cho module khác (84b-nhan-vat-sanh.js: nhân vật đứng cạnh thú) */
+function info(){return {o:S.o,px:S.px,foot:S.foot,seen:S.seen,face:S.face,chat:!!S.chat};}
+root.TTGSANH={CFG:CFG,LINES:LINES,EMO:EMO,pose:pose,draw:draw,info:info,say:function(nhom,text){say(performance.now(),nhom||'meo',text);}};
 })(window);

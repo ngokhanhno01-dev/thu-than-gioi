@@ -170,3 +170,11 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Bản đồ thám hiểm (89-tham-hiem-map.js) tự dùng `TTGNHANVAT.anhMap()` nếu `CFG.nhanVat.anh` để null. Hiện mới là 1 ảnh đứng yên có nhún khi đi; sprite đi bộ 4 hướng làm sau.
 - **Thêm skin thưởng**: thêm 2 ảnh `<idSkin>-chon.png` + `<idSkin>-map.png`, thêm 1 dòng vào `SKINS` trong 64b, rồi `TTGNHANVAT.moKhoa(gioi,id)` + `TTGNHANVAT.datSkin(id)`.
 - **Khung đi bộ (26/11/2026)**: `<skin>-di-phai.png` (ngang, quay phải, trái thì lật) và `<skin>-di-truoc.png` (chính diện) là dải 2048x512 = 4 khung 512x512 xếp ngang (khung 1, 3 = bước chân; 2, 4 = chuyển/đứng; đứng yên dùng khung 2). Map đi xuống rõ rệt dùng chính diện, còn lại dùng ngang. Đi lên rõ rệt dùng quay lưng (`-di-sau.png`). Có `mac-dinh-di-cheo.png` (nghiêng 3/4) chưa dùng. Đã có đủ ngang/chính diện/quay lưng cho cả Nam và Nữ; thiếu file thì map tự dùng ảnh đứng yên.
+
+## Nhân vật ở sảnh + tương tác với thú (26/11/2026) — `84b-nhan-vat-sanh.js` (TTGNVSANH)
+- Nhân vật người chơi đứng cạnh thú ở khung trên sảnh, mặt hướng về thú; thú nhảy sang chỗ khác thì nhân vật đi theo (khung đi bộ ngang, 8 khung/giây).
+- **Chạm thú**: nhân vật chạy lại gần, vuốt ve (nhảy nhẹ 2 lần + tim bay lên), thú phản ứng và nói 1 câu vui (`TTGSANH.say('vui')`).
+- **Chạm nhân vật**: quay ra nhìn người chơi (ảnh chính diện), nhảy chào, nói 1 câu trong bong bóng.
+- **Tự động**: 9-18 giây một lần nhân vật hiện emoji, nói 1 câu, hoặc tự đi vuốt thú (không làm khi thú đang nói để khỏi chồng bong bóng).
+- Nối ở `index.html` (1 lệnh `TTGNVSANH.draw(ctx,ts,gy())` ngay sau `petSanh`) và `TTGSANH.info()` trong 83. Tắt thử bằng `?nvsanh=0`. Chỉnh cỡ/khoảng cách/tốc độ ở `CFG`, thêm câu ở `LINES` / `EMO` trong file 84b.
+- CHƯA TEST TRONG GAME (viết xong chỉ kiểm cú pháp): cần xem cỡ nhân vật (`CFG.kich`), vị trí đứng (`CFG.gap`) có hợp khung sảnh không.
