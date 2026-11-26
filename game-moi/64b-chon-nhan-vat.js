@@ -22,7 +22,7 @@ var GIOI=[
  {id:'nam',ten:'Nam Tu Sĩ',mota:'Kiên cường, thẳng như trúc'}];
 var SKINS={
  nu:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'}],
- nam:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'}]};
+ nam:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh',ten:'Giáng Sinh'}]};
 var root=null,sel=-1,locked=false,cb=null;
 function rd(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function wr(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}

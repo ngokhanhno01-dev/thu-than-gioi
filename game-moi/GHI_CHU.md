@@ -178,3 +178,10 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - **Tự động**: 9-18 giây một lần nhân vật hiện emoji, nói 1 câu, hoặc tự đi vuốt thú (không làm khi thú đang nói để khỏi chồng bong bóng).
 - Nối ở `index.html` (1 lệnh `TTGNVSANH.draw(ctx,ts,gy())` ngay sau `petSanh`) và `TTGSANH.info()` trong 83. Tắt thử bằng `?nvsanh=0`. Chỉnh cỡ/khoảng cách/tốc độ ở `CFG`, thêm câu ở `LINES` / `EMO` trong file 84b.
 - CHƯA TEST TRONG GAME (viết xong chỉ kiểm cú pháp): cần xem cỡ nhân vật (`CFG.kich`), vị trí đứng (`CFG.gap`) có hợp khung sảnh không.
+
+## Skin Nam "Giáng Sinh" (26/11/2026)
+- id `giang-sinh`, tên hiển thị "Giáng Sinh", khai trong `SKINS.nam` (64b-chon-nhan-vat.js). Chỉ có bản Nam (chưa có Nữ).
+- Ảnh ở `game-moi/nhan-vat/nam/giang-sinh-*.png`, đủ bộ như skin mặc định: `chon`, `map`, `di-truoc`, `di-phai`, `di-sau` (dải 2048x512 = 4 khung), `tran-tu-the`, `tran-ra-lenh` (512x512, nền trong suốt, chân sát đáy). `giang-sinh-4-goc-nhin.png` là bảng gốc để làm lại sprite. Chưa có `di-cheo` (skin mặc định cũng chưa dùng).
+- Đã tách nền hồng/xám bằng chroma-key; cỡ nhân vật căn theo skin mặc định (cao ~470px chính diện) để đổi skin không bị to/nhỏ.
+- Skin chưa tự phát cho người chơi: mở bằng `TTGNHANVAT.moKhoa('nam','giang-sinh')`, mặc bằng `TTGNHANVAT.datSkin('giang-sinh')` (hoặc vào bảng Nhân Vật sau khi mở khóa). Nguồn nhận (sự kiện/cửa hàng) chưa làm.
+- `59-nut-tham-hiem.js`: nâng `64b-chon-nhan-vat.js?v=5` -> `v=6` để trình duyệt nạp bản mới.
