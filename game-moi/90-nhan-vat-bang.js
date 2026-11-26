@@ -58,7 +58,7 @@ function isLocked(){var t=curItem();if(sel.k==='item')return !!(t&&t.kh);return 
 function selKey(e){return e.k==='skin'?'s:'+e.id:'i:'+e.uid;}
 /* danh sách ô lưới: skin của giới + danh hiệu/khung UI chưa mang */
 function entries(){
-  var mac=dangMac(),o=dsSkin().filter(function(s){return s.id!==mac;}).map(function(s){return{k:'skin',id:s.id};});   /* bộ đang mặc nằm ở ô Trang Phục, không lặp trong lưới */
+  var mac=dangMac(),o=dsSkin().filter(function(s){return s.id!==mac&&daMo(s.id);}).map(function(s){return{k:'skin',id:s.id};});   /* bộ đang mặc nằm ở ô Trang Phục, không lặp trong lưới */
   trongTui().forEach(function(t){o.push({k:'item',uid:t.uid});});
   return o;}
 
@@ -211,7 +211,7 @@ function render(){
   var n=N(),g=gioi(),mac=dangMac(),tb=TB(),i,a=entries();
   /* chọn hợp lệ */
   if(sel.k==='item'){if(!curItem())sel={k:'skin',id:mac};}
-  else if(!dsSkin().some(function(x){return x.id===sel.id;}))sel={k:'skin',id:mac};
+  else if(!dsSkin().some(function(x){return x.id===sel.id;})||!daMo(sel.id))sel={k:'skin',id:mac};
   var nm=(n&&n.ten&&n.ten())||'Chưa đặt tên';
   E.ten.textContent=nm;
   /* nhân vật: xem trước skin đang chọn (chọn món khác loại skin thì hiện bộ đang mặc) */

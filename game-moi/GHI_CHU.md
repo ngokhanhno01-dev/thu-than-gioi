@@ -184,5 +184,6 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Ảnh ở `game-moi/nhan-vat/nam/giang-sinh-*.png`, đủ bộ như skin mặc định: `chon`, `map`, `di-truoc`, `di-phai`, `di-sau` (dải 2048x512 = 4 khung), `tran-tu-the`, `tran-ra-lenh` (512x512, nền trong suốt, chân sát đáy). `giang-sinh-4-goc-nhin.png` là bảng gốc để làm lại sprite. Chưa có `di-cheo` (skin mặc định cũng chưa dùng).
 - Đã tách nền hồng/xám bằng chroma-key; cỡ nhân vật căn theo skin mặc định (cao ~470px chính diện) để đổi skin không bị to/nhỏ.
 - **Nút test ẩn**: chạm chữ "Danh Vọng" -> menu ẩn -> **Lấy skin Giáng Sinh** (khai ở cuối 64b, xóa khi ra bản thật). Nút chỉ MỞ KHÓA; mặc ở bảng Nhân Vật. Cần đang chọn nhân vật Nam.
+- Bảng Nhân Vật CHỈ hiện skin đã nhận (lọc `daMo` trong `entries()` của 90-nhan-vat-bang.js); skin chưa nhận không nằm trong ô. Vứt bỏ skin thì biến khỏi lưới.
 - Skin chưa tự phát cho người chơi: mở bằng `TTGNHANVAT.moKhoa('nam','giang-sinh')`, mặc bằng `TTGNHANVAT.datSkin('giang-sinh')` (hoặc vào bảng Nhân Vật sau khi mở khóa). Nguồn nhận (sự kiện/cửa hàng) chưa làm.
 - `59-nut-tham-hiem.js`: nâng `64b-chon-nhan-vat.js?v=5` -> `v=6` để trình duyệt nạp bản mới.
