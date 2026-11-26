@@ -243,3 +243,10 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 ## Tuyết Nguyên: thêm chỗ núp (26/11/2026)
 - Chủ game: dùng hết chỗ núp mỗi khu, vẫn hiện ngẫu nhiên 3-4 con. Số chỗ khu 1-4: 9, 10, 7, 6. Các vùng sau làm như vậy.
 - Nâng cache: 89 `?v=9`. Chưa chạy thử trong game.
+
+## Tuyết Nguyên, Bước 3: dấu hiệu + bóng thú (26/11/2026)
+- Bỏ vòng tròn hình thoi. Xa: xoáy tuyết + tinh thể (DAUHIEU.tuyet, VUNG.dauHieu). Gần (CFG.hienThu 150->70): bóng đen -> thú thật + hào quang màu HIEM.
+- Hào quang vẽ riêng (haoQuang), không dùng TTGRUNE.ring vì ảnh rune theo Rank D..SR, không theo 4 màu độ hiếm.
+- Thú tung sẵn lúc nhân vật lại gần, ép vào trận qua opts.chon (61-tham-hiem-tran.js). Rank (bac), cấp vẫn tung lúc vào trận.
+- Bỏ vòng đếm ngược; còn <3s thì nhấp nháy.
+- Nâng cache: 89 `?v=10`, 61 `?v=3`. CHƯA chạy thử, chưa có ảnh chụp (chủ game yêu cầu tiết kiệm quota); chờ chủ game duyệt trên máy.

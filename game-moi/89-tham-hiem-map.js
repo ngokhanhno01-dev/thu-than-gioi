@@ -52,6 +52,7 @@ var CFG={
   rung:20000,                 /* ms điểm rung hiện trước khi tự biến mất */
   hoi:15000,                  /* ms điểm hồi lại sau khi biến mất / sau khi chạm */
   soDiemHien:[3,4],           /* mỗi khu cùng lúc hiện 3-4 điểm (trong 4 điểm cố định) */
+  hienThu:{xa:150,gan:70,co:68},  /* đơn vị map: cách xa < xa thì bắt đầu hiện bóng, <= gan thì rõ thú; co = cỡ thú trên map */
   banKinhCham:24,             /* đơn vị map: khoảng cách chạm vào điểm rung */
   banKinhMaskDiem:0,          /* đơn vị map: vòng tròn đi được quanh mỗi điểm rung/boss, bất chấp mask */
   cooldownSauTran:900,        /* ms không cho chạm lại sau khi quay về map */
@@ -72,6 +73,7 @@ var VUNG={
     ten:'Tuyết Nguyên',
     anh:DIR+'map-tham-hiem-tuyet-nguyen.webp?v=2',
     rong:1536,cao:1024,
+    dauHieu:'tuyet',                          /* kiểu dấu hiệu môi trường (bảng DAUHIEU) */
     maskW:192,maskH:128,                      /* lưới va chạm: mỗi ô = rong/maskW = 8 đơn vị map */
     maskData:'192x128:0:2fo,v,6,2,42,3,1,11,1,5,3w,2,1,1f,7,3,38,27,37,24,3a,22,3c,20,3d,1z,3e,1y,3f,1w,3g,1s,3l,1o,3p,1m,3q,g,5,10,3t,e,6,y,3v,d,6,z,3v,c,5,10,3v,e,1,12,3v,1h,3v,1h,3v,1h,3w,1h,41,1b,42,1a,44,19,43,1a,43,19,43,1d,40,1h,3x,1i,a,2,3j,1t,3i,1u,3g,1l,7,4,3e,1l,2u,5,p,1m,2y,8,7,1y,31,2b,35,a,3,1t,39,5,6,1s,3c,2,6,1j,4,5,3k,1i,8,1,3l,1e,3y,1d,42,1a,43,19,44,d,8,o,43,d,f,h,3z,1,3,h,4r,q,36,7,18,u,33,6,19,w,31,6,19,x,30,5,v,2,f,v,30,5,h,2,8,a,e,t,2z,6,g,l,h,p,2z,6,g,l,j,n,1s,2,14,8,f,c,4,6,l,p,1m,3,13,a,e,b,6,6,m,18,10,4,11,b,f,b,7,7,m,16,r,5,3,5,z,d,f,a,8,a,k,15,p,g,x,e,f,2,7,1,8,c,j,14,9,1,d,i,w,e,g,1,h,d,j,14,7,3,c,i,x,c,g,1,h,g,i,15,3,11,w,a,g,2,h,h,j,2a,t,a,f,4,a,1,4,k,j,2a,q,c,a,8,9,r,l,27,l,1,3,f,6,d,4,u,n,25,k,21,o,1y,o,a,3,1s,n,1v,p,9,5,1u,m,1c,2,f,o,a,5,1y,i,1a,7,4,3,5,p,8,7,22,c,1a,9,2,4,5,q,7,7,26,7,10,3,7,a,2,5,4,r,6,7,3c,s,4,s,5,7,3b,t,4,u,4,5,3c,t,3,w,2,7,39,u,3,17,37,v,2,18,19,7,1r,w,1,18,18,a,1o,27,16,c,1n,27,15,d,1n,26,e,d,f,d,1n,26,b,j,c,d,1b,4,3,3,3,1v,2,8,7,r,9,c,1a,6,1,5,2,1v,2,7,6,u,8,b,1b,c,3,n,1,15,5,3,7,x,7,9,1b,e,1,n,3,p,3,b,f,z,8,5,1d,w,9,p,3,c,d,11,1p,x,9,o,2,e,b,13,1o,x,c,l,2,e,b,13,1p,x,b,l,2,e,b,13,1q,5,1,r,b,k,3,c,c,14,3,4,1j,2,4,q,b,k,3,c,c,14,1,7,1p,p,b,k,5,8,f,12,2,8,1o,p,b,k,t,10,2,9,1o,p,c,j,j,5,5,z,3,9,1o,p,c,j,i,7,3,z,4,a,1n,p,5,5,3,i,9,3,5,9,1,t,a,b,1n,p,3,8,3,h,2,4,1,6,4,11,c,b,1n,p,2,a,3,g,1,d,2,n,1,a,c,f,1q,l,3,b,3,t,2,n,m,g,1w,6,2,5,4,c,6,1,1,p,1,m,m,h,26,2,5,c,9,o,1,l,n,g,2e,d,8,o,1,c,2,5,o,h,2e,d,8,o,1,b,w,g,2f,d,8,o,1,b,w,9,1,5,2g,c,9,o,1,b,w,9,2m,c,9,o,1,b,x,8,2m,c,9,n,3,9,y,7,2o,a,a,n,4,7,10,6,2p,8,c,l,6,5,12,3,2s,6,d,8',   /* DÁN chuỗi từ nút "Copy Mask" vào đây (rỗng = đi tự do) */
     xuatPhat:{x:790,y:980},
@@ -207,7 +209,7 @@ function tungDich(ev){
   var h=root.TTGTHAMHIEM,opts,orig,pre=null;
   if(!h||!h.prep)return null;
   if(ev&&ev.loai==='boss'){opts={boss:true};var bi=ev.bossId||(S&&S.boss&&S.boss.id);if(bi!=null)opts.bossId=bi;}
-  else opts={encounter:'auto',khu:ev&&ev.khu,hiem:ev&&ev.hiem};
+  else opts={encounter:'auto',khu:ev&&ev.khu,hiem:ev&&ev.hiem,chon:ev&&ev.chon};
   if(h.prep.length>=2)return h.prep(null,opts);
   orig=h.createEncounter;
   if(typeof orig!=='function')return h.prep(null);
@@ -481,7 +483,7 @@ function spawnSpots(s,g,jit){
     rd=g.pts.filter(function(q){return !q.on&&s.clock>=q.hoiAt;});
     if(!rd.length)break;
     p=rd[Math.floor(Math.random()*rd.length)];
-    p.on=true;p.hiem=tungHiem(g.k);p.until=s.clock+CFG.rung*(jit?rnd(0.6,1):1);n++;}}
+    p.on=true;p.hiem=tungHiem(g.k);p.chon=null;p.thuLai=0;p.fade=0;p.until=s.clock+CFG.rung*(jit?rnd(0.6,1):1);n++;}}
 function buildSpots(s){
   var v=s.v;
   s.groups=v.khu.map(function(k){
@@ -552,7 +554,7 @@ function update(s,dt){
     for(j=0;j<g.pts.length;j++){
       sp=g.pts[j];if(!sp.on)continue;
       dx=p.x-sp.x;dy=p.y-sp.y;
-      if(dx*dx+dy*dy<=r*r){fireTouch(s,{loai:'diem',hiem:sp.hiem,khu:sp.khu,diemId:sp.id});return;}}}
+      if(dx*dx+dy*dy<=r*r){fireTouch(s,{loai:'diem',chon:sp.chon||null,hiem:sp.hiem,khu:sp.khu,diemId:sp.id});return;}}}
   b=v.boss;
   if(b&&s.bossMs===0){
     dx=p.x-b.x;dy=p.y-b.y;
@@ -564,20 +566,84 @@ function fireTouch(s,ev){
 
 /* ---------- VẼ ---------- */
 function ellipse(c,x,y,rx,ry,col){c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx,ry,0,0,6.2832);c.fill();}
-function drawSpot(s,sp){
-  var c=s.ctx,col=HIEM[sp.hiem].mau,t=s.clock/1000,left=sp.until-s.clock,r=CFG.banKinhCham*0.62,pul=1+Math.sin(t*4+sp.ph)*0.12,a=1,g,f,q;
-  if(left<3000)a=0.45+0.55*Math.abs(Math.sin(t*9));
-  c.save();c.globalAlpha=a;c.translate(sp.x,sp.y);
-  g=c.createRadialGradient(0,0,2,0,0,r*2.2*pul);g.addColorStop(0,hexA(col,0.55));g.addColorStop(1,hexA(col,0));
-  c.fillStyle=g;c.beginPath();c.arc(0,0,r*2.2*pul,0,6.2832);c.fill();
-  c.shadowColor=col;c.shadowBlur=18;c.lineWidth=3;c.strokeStyle=col;
-  c.beginPath();c.arc(0,0,r*pul,0,6.2832);c.stroke();
-  q=r*0.5;c.fillStyle=col;c.beginPath();c.moveTo(0,-q);c.lineTo(q*0.7,0);c.lineTo(0,q);c.lineTo(-q*0.7,0);c.closePath();c.fill();
-  c.shadowBlur=0;
-  f=clamp(left/CFG.rung,0,1);
+/* ---------- DẤU HIỆU MÔI TRƯỜNG + BÓNG THÚ (thay vòng tròn hình thoi) ----------
+   Xa: chỉ có dấu hiệu theo vùng (VUNG[...].dauHieu). Gần dần (CFG.hienThu): bóng đen -> thú thật + hào quang màu độ hiếm dưới chân.
+   Thú được tung sẵn (chonThu) rồi ép đúng con đó vào trận qua ev.chon -> opts.chon của createEncounter. */
+var DAUHIEU={
+  /* xoáy tuyết nhỏ + tinh thể băng lấp lánh */
+  tuyet:function(c,t,ph){
+    var i,j,a,x,y,r,k;
+    c.lineCap='round';c.lineWidth=2.2;
+    for(i=0;i<3;i++){a=t*2.4+ph+i*2.094;r=9+i*4;
+      c.strokeStyle='rgba(70,150,225,.75)';c.beginPath();c.ellipse(0,-5-i*6,r,r*0.36,0,a,a+2.3);c.stroke();
+      c.fillStyle='#ffffff';c.beginPath();c.arc(Math.cos(a+2.3)*r,-5-i*6+Math.sin(a+2.3)*r*0.36,2.2,0,6.2832);c.fill();}
+    for(j=0;j<3;j++){k=0.5+0.5*Math.sin(t*3.2+ph+j*2.3);x=(j-1)*15;y=-14-(j%2)*15+Math.sin(t*2+j)*2;r=2.5+k*3.5;
+      c.fillStyle='rgba(235,252,255,'+(0.35+0.65*k)+')';c.strokeStyle='rgba(40,125,215,'+(0.35+0.55*k)+')';c.lineWidth=1;
+      c.beginPath();c.moveTo(x,y-r*1.7);c.lineTo(x+r*0.6,y);c.lineTo(x,y+r*1.7);c.lineTo(x-r*0.6,y);c.closePath();c.fill();c.stroke();}}
+};
+function chonThu(khu,hiem){
+  try{
+    var h=root.TTGTHAMHIEM,pl=root.TTGTHU&&root.TTGTHU.getRaTran?root.TTGTHU.getRaTran():null,e;
+    if(!h||!h.createEncounter||!pl)return null;
+    e=h.createEncounter(pl,Math.random,{encounter:'auto',khu:khu,hiem:hiem});
+    if(!e)return null;
+    return {source:e.source,id:e.id,boss:!!e.boss,tien:e.tien,imageFile:e.record&&e.record.imageFile};
+  }catch(err){return null;}}
+/* khung ảnh con thú + bản bóng đen (dựng 1 lần, đủ ảnh mới nhận); chưa tải xong -> null */
+var THU_ANH={};
+function anhThu(s,ch){
+  var key=ch.source+'|'+ch.id+'|'+ch.tien,o=THU_ANH[key],T,cv,x,im,w,h,N=192;
+  if(o&&o.ok)return o;
+  if(!o)o=THU_ANH[key]={ok:false,img:null};
+  try{
+    cv=D.createElement('canvas');cv.width=cv.height=N;x=cv.getContext('2d');
+    if(ch.source==='demo'){
+      T=root.THU_MOI;if(!T||!T.draw)return null;
+      if(!s.frame192&&T.setFrame){T.setFrame(192);s.frame192=true;}
+      if(!T.draw(x,ch.id,ch.tien||1,N/2,N,N,true))return null;
+    }else{
+      if(!ch.imageFile)return null;
+      if(!o.img){o.img=new Image();o.img.src=DIR+'quai/'+ch.imageFile;}
+      im=o.img;if(!im.complete||!im.naturalWidth)return null;
+      w=im.naturalWidth;h=im.naturalHeight;var k=Math.min(N/w,N/h);w*=k;h*=k;
+      x.drawImage(im,(N-w)/2,N-h,w,h);
+    }
+    o.that=cv;
+    o.bong=D.createElement('canvas');o.bong.width=o.bong.height=N;x=o.bong.getContext('2d');
+    x.drawImage(cv,0,0);x.globalCompositeOperation='source-in';x.fillStyle='#0b1226';x.fillRect(0,0,N,N);
+    o.ok=true;return o;
+  }catch(err){return null;}}
+function haoQuang(c,col,t,ph){
+  var p=1+Math.sin(t*3+ph)*0.07,g,i,a;
+  c.save();c.scale(1,0.38);
+  g=c.createRadialGradient(0,0,4,0,0,38*p);g.addColorStop(0,hexA(col,0.75));g.addColorStop(0.65,hexA(col,0.35));g.addColorStop(1,hexA(col,0));
+  c.fillStyle=g;c.beginPath();c.arc(0,0,38*p,0,6.2832);c.fill();
+  c.lineWidth=3.5;c.strokeStyle=col;c.beginPath();c.arc(0,0,29*p,0,6.2832);c.stroke();
   c.lineWidth=2;c.strokeStyle='rgba(255,255,255,.85)';
-  c.beginPath();c.arc(0,0,r*pul+6,-Math.PI/2,-Math.PI/2+f*6.2832);c.stroke();
+  for(i=0;i<3;i++){a=t*1.6+ph+i*2.094;c.beginPath();c.arc(0,0,22,a,a+0.9);c.stroke();}
   c.restore();}
+function drawSpot(s,sp){
+  try{
+    var c=s.ctx,t=s.clock/1000,left=sp.until-s.clock,H=CFG.hienThu,a=1,dx=s.p.x-sp.x,dy=s.p.y-sp.y,d,dich,f,bong,that,o=null,size=H.co,tho;
+    if(left<3000)a=0.45+0.55*Math.abs(Math.sin(t*9));
+    d=Math.sqrt(dx*dx+dy*dy);
+    dich=clamp((H.xa-d)/(H.xa-H.gan),0,1);
+    f=sp.fade=(sp.fade||0)+(dich-(sp.fade||0))*0.15;   /* chuyển mượt */
+    if(f>0.01){
+      if(!sp.chon&&s.clock>=(sp.thuLai||0)){sp.chon=chonThu(sp.khu,sp.hiem);sp.thuLai=s.clock+1000;}
+      if(sp.chon)o=anhThu(s,sp.chon);}
+    bong=clamp(f*2.5,0,1);that=clamp(f*2-1,0,1);
+    c.save();c.translate(sp.x,sp.y);
+    if(!o||bong<1){c.globalAlpha=a*(o?1-bong:1);DAUHIEU[s.v.dauHieu||'tuyet'](c,t,sp.ph);}
+    if(f>0.01){c.globalAlpha=a*bong;haoQuang(c,HIEM[sp.hiem].mau,t,sp.ph);}
+    if(o){
+      tho=1+Math.sin(t*2.6+sp.ph)*0.025;
+      c.globalAlpha=a*bong;ellipse(c,0,1,size*0.28,size*0.08,'rgba(0,0,0,.28)');
+      c.scale(1,tho);
+      if(that<1){c.globalAlpha=a*bong*(1-that);c.drawImage(o.bong,-size/2,-size+4,size,size);}
+      if(that>0){c.globalAlpha=a*that;c.drawImage(o.that,-size/2,-size+4,size,size);}}
+    c.restore();
+  }catch(err){try{s.ctx.restore();}catch(_){}}}
 
 /* Sprite Boss thật (gốc toạ độ = chân Boss). true = đã vẽ; false = chưa có/chưa nạp xong => dùng hình vẽ tạm */
 function drawBossSprite(s,c,r,bob){
@@ -683,7 +749,7 @@ function draw(s){
   c.setTransform(d*z,0,0,d*z,-s.cam.x*z*d,-s.cam.y*z*d);
   c.drawImage(s.img,0,0,v.rong,v.cao);
   if(s.dbg)drawMask(s);
-  for(i=0;i<s.groups.length;i++){g=s.groups[i];for(j=0;j<g.pts.length;j++)if(g.pts[j].on)drawSpot(s,g.pts[j]);}
+  for(i=0;i<s.groups.length;i++){g=s.groups[i];for(j=0;j<g.pts.length;j++)if(g.pts[j].on)ents.push({y:g.pts[j].y,f:(function(sp){return function(st){drawSpot(st,sp);};})(g.pts[j])});}
   if(v.boss)ents.push({y:v.boss.y,f:drawBoss});
   ents.push({y:s.p.y,f:drawPlayer});
   ents.sort(function(a,b){return a.y-b.y;});

@@ -23,6 +23,10 @@ function createEncounter(player,rng,opts){
       if(!candidates.length){source=source==='main'?'demo':'main';if(source==='main'&&mainZone){candidates=mainZone.quai.filter(function(x){return !x.boss;});weights=candidates.map(function(){return 1;});}else if(demoZone){candidates=demoZone.thu.filter(function(x){return !x.boss;});weights=candidates.map(function(x,k){var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(x.id);return h?h.ts:((cfg.trongSoLoai||[])[k]||1);});}}
     }
   }else{if(boss){if(!mainZone)return null;source='main';candidates=mainZone.quai.filter(function(x){return !!x.boss;});weights=candidates.map(function(){return 1;});}else{source=mainZone&&(!demoZone||rng()<(Number(cfg.tiLeQuaiMain)||0.7))?'main':'demo';candidates=source==='main'?mainZone.quai.filter(function(x){return !x.boss;}):demoZone.thu.filter(function(x){return !x.boss;});weights=candidates.map(function(x,k){var h=root.TTGCS.hiemInfo&&root.TTGCS.hiemInfo(x.id);return h?h.ts:((cfg.trongSoLoai||[])[k]||1);});}}
+  if(opts.chon){ /* con thú đã hiện sẵn trên map thám hiểm: ép đúng con đó; không tìm thấy thì giữ kết quả tung thường */
+    var ch=opts.chon,list=ch.source==='main'?(mainZone&&mainZone.quai):(demoZone&&demoZone.thu),fix=(list||[]).filter(function(x){return String(x.id)===String(ch.id);})[0];
+    if(fix){source=ch.source;boss=!!ch.boss;candidates=[fix];weights=[1];if(boss)hiem='truyenthuyet';}
+  }
   q=weighted(candidates,weights,rng);if(!q)return null;
   var bands={thuong:[1,4],hiem:[4,8],suthi:[8,12],huyenthoai:[12,16],truyenthuyet:[17,17]},tier=boss?'truyenthuyet':null;
   if(source==='main'&&!boss){var ord=Number(q.thuTuTrongVung)||0;tier=q.doHiem||q.hiem||(ord<=2?'thuong':ord===3?'hiem':ord===4?'suthi':'huyenthoai');}
@@ -30,6 +34,7 @@ function createEncounter(player,rng,opts){
   var cap=270; /* Trần Danh Vọng áp dụng cho THÚ NGƯỜI CHƠI; địch giữ dải cấp riêng theo vùng/độ hiếm. */
   var base=Math.max(0,Math.floor(Number(z)||0))*15,lv=clamp(randint(base+bands[tier][0],base+bands[tier][1],rng),1,cap);
   var tien=weighted([1,2,3],[Number((cfg.trongSoBac||{})[1])||1,Number((cfg.trongSoBac||{})[2])||1,Number((cfg.trongSoBac||{})[3])||1],rng);
+  if(opts.chon&&opts.chon.tien&&String(opts.chon.id)===String(q.id))tien=opts.chon.tien;
   var bacCS=root.TTGCS.CFG,bac=typeof root.TTGCS.tungBac==='function'?root.TTGCS.tungBac(rng):(bacCS.bacQuai||'C');
   var stats=root.TTGCS.tinh({id:q.id,lv:lv,tien:tien,bac:bac,boss:boss,vung:z,vai:source==='main'?'canbang':undefined});
   return {id:q.id,ten:q.ten,source:source,boss:boss,lv:lv,tien:tien,variant:'V'+tien,bac:bac,hienBac:true,vung:z,zoneSlug:zoneSlug,rarity:tier,stats:stats,record:q};
