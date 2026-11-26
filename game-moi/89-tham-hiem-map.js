@@ -78,6 +78,138 @@ var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
    diem: các chỗ núp cố định mỗi khu (hiện ngẫu nhiên CFG.soDiemHien), đặt cạnh chỗ núp vẽ trên ảnh, nằm trên ô đi được (checkCfg() cảnh báo nếu không tới được).
    Tên khu 1, 3, 4 là TÊN TẠM tự đặt theo cảnh trong ảnh (chỉ khu 2 "Cầu Đá" là theo mô tả) - sửa ten ở đây. */
 var VUNG={
+  'thuy-nguyet-canh':{
+    ten:'Thủy Nguyệt Cảnh',
+    anh:DIR+'map-tham-hiem-thuy-nguyet-canh.webp?v=3',
+    rong:1536,cao:1024,
+    camNhay:[[740,565,885,632],[740,350,865,400],[690,850,860,920]],   /* cầu: thú không nhảy vào */
+    dauHieu:'thuy',
+    maskW:192,maskH:128,
+    maskData:'192x128:0:2fr,1,l,4,4h,7,k,8,4a,14,47,16,45,18,42,1b,41,1c,40,1c,3z,1e,3y,1e,3y,1f,3x,1f,3x,1g,3w,1f,3x,1f,3x,1e,3x,1e,3x,1d,3z,1b,40,1,a,y,43,1,b,u,45,3,a,s,46,4,a,s,46,4,b,q,45,7,a,p,44,9,9,p,42,c,3,v,41,1a,43,19,43,19,44,18,44,18,45,16,47,15,48,13,4a,11,4c,z,4e,x,4g,w,4h,u,4j,t,4k,r,4m,q,4n,o,4p,n,4q,m,4q,m,4r,m,4r,l,4s,k,4t,k,4s,l,4r,m,4q,n,4p,o,4n,q,4m,r,4l,s,4k,u,4i,u,4h,w,4g,x,4f,y,4d,z,4d,10,4c,11,4b,12,49,13,49,12,4a,12,4a,12,4a,12,4a,11,4c,10,4c,z,4e,y,4f,w,4g,v,4i,u,4i,t,4k,s,4l,r,4l,q,4n,p,4n,p,4n,p,4o,o,4o,n,4p,n,4p,n,4p,n,4p,n,4p,o,4o,o,4o,o,4o,p,4n,p,4n,p,4n,q,4m,r,4l,s,4k,t,4j,t,4j,u,4i,u,4h,v,4h,v,4h,v,4h,v,4g,w,4g,w,4g,w,25',
+    xuatPhat:{x:790,y:1000},
+    khu:[
+      {id:1,ten:'Khu 1 – Cầu Gỗ Đầu Hồ',y0:660,y1:1024,ti:{thuong:80,hiem:17,suthi:2.7,huyenthoai:0.3}},
+      {id:2,ten:'Khu 2 – Đảo Đá Sen',y0:415,y1:660,ti:{thuong:60,hiem:30,suthi:8,huyenthoai:2}},
+      {id:3,ten:'Khu 3 – Bờ Sen Trăng',y0:225,y1:415,ti:{thuong:35,hiem:35,suthi:22,huyenthoai:8}},
+      {id:4,ten:'Khu 4 – Quảng Trường Hang Thác',y0:0,y1:225,ti:{thuong:15,hiem:30,suthi:35,huyenthoai:20}}
+    ],
+    diem:{
+      1:[{id:'1a',x:636,y:716,ghiChu:'cạnh vật cản'},
+         {id:'1b',x:700,y:820,ghiChu:'cạnh vật cản'},
+         {id:'1c',x:908,y:988,ghiChu:'cạnh vật cản'},
+         {id:'1d',x:700,y:932,ghiChu:'cạnh vật cản'},
+         {id:'1e',x:868,y:740,ghiChu:'cạnh vật cản'},
+         {id:'1f',x:684,y:996,ghiChu:'cạnh vật cản'},
+         {id:'1g',x:852,y:804,ghiChu:'cạnh vật cản'}],
+      2:[{id:'2a',x:788,y:436,ghiChu:'cạnh vật cản'},
+         {id:'2b',x:668,y:548,ghiChu:'cạnh vật cản'},
+         {id:'2c',x:604,y:452,ghiChu:'cạnh vật cản'},
+         {id:'2d',x:796,y:540,ghiChu:'cạnh vật cản'},
+         {id:'2e',x:644,y:620,ghiChu:'cạnh vật cản'},
+         {id:'2f',x:884,y:644,ghiChu:'cạnh vật cản'}],
+      3:[{id:'3a',x:540,y:340,ghiChu:'cạnh vật cản'},
+         {id:'3b',x:852,y:316,ghiChu:'cạnh vật cản'},
+         {id:'3c',x:644,y:260,ghiChu:'cạnh vật cản'},
+         {id:'3d',x:652,y:356,ghiChu:'cạnh vật cản'},
+         {id:'3e',x:940,y:268,ghiChu:'cạnh vật cản'},
+         {id:'3f',x:692,y:308,ghiChu:'cạnh vật cản'}],
+      4:[{id:'4a',x:972,y:204,ghiChu:'cạnh vật cản'},
+         {id:'4b',x:700,y:156,ghiChu:'cạnh vật cản'},
+         {id:'4c',x:636,y:164,ghiChu:'cạnh vật cản'},
+         {id:'4d',x:900,y:148,ghiChu:'cạnh vật cản'}]
+    },
+    boss:{x:800,y:158,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+  },
+  'xich-hoa-dia':{
+    ten:'Xích Hỏa Địa',
+    anh:DIR+'map-tham-hiem-xich-hoa-dia.webp?v=3',
+    rong:1536,cao:1024,
+    camNhay:[[783,291,955,400],[777,491,966,629]],   /* cầu: thú không nhảy vào */
+    dauHieu:'hoa',
+    maskW:192,maskH:128,
+    maskData:'192x128:0:24p,f,l,7,3z,m,k,g,3p,1p,3m,1s,3j,1u,3h,1x,3e,1z,3c,23,38,2b,30,2j,2s,2q,2l,2r,2l,2r,2k,2s,2k,2t,2i,2u,2i,2u,2h,2v,2h,2v,2g,2w,2g,2x,2f,2x,2f,2x,2g,2w,2g,2w,2g,7,1,2o,2g,7,3,2m,2g,6,6,2l,2f,6,7,2d,3,4,2f,5,8,29,a,3,2d,4,9,29,a,5,2b,4,a,27,b,8,28,3,b,27,a,c,25,6,8,27,b,e,21,2l,c,g,1y,2m,d,i,1v,2l,e,k,1s,2m,f,k,1q,2m,g,k,1p,2q,d,l,1o,2v,7,m,1n,3q,1m,3q,1m,3r,1l,3s,1k,3s,1k,3t,1j,3t,1j,3t,1j,3e,1,e,1j,3d,2,e,1j,3c,4,d,1j,3b,6,c,1j,3b,7,b,1j,3a,8,b,1j,39,a,a,1i,d,5,2r,c,9,1i,c,7,2p,e,7,1j,b,9,2o,e,7,1j,b,b,2l,g,6,1j,a,d,2j,i,5,1j,a,d,2j,j,5,1i,9,f,2i,k,4,1i,9,f,1o,3,r,l,3,1i,9,f,17,3,e,3,r,m,2,1i,8,g,17,3,e,3,r,n,1,1i,1v,3,18,26,36,26,36,26,36,26,36,25,37,25,36,25,37,24,38,24,38,23,39,22,3c,1y,3l,1p,45,15,47,13,49,11,4a,11,35,2,14,11,30,7,14,10,30,8,14,10,3,2,2v,8,n,4,c,16,2v,8,g,e,8,18,2u,8,a,n,3,1b,2s,9,9,22,2s,9,7,25,2r,9,6,27,2q,a,3,29,2p,b,2,2b,2o,2k,2s,2f,2x,2c,31,2b,36,26,t,4,28,27,p,9,26,28,k,f,24,29,f,m,21,2b,a,r,1z,2d,5,w,1x,2e,4,x,1w,2g,2,y,1w,3h,1v,3h,1u,3i,1u,3i,1u,3i,1u,3i,1t,3k,1s,1n',
+    xuatPhat:{x:790,y:1000},
+    khu:[
+      {id:1,ten:'Khu 1 – Nền Đá Cháy',y0:680,y1:1024,ti:{thuong:80,hiem:17,suthi:2.7,huyenthoai:0.3}},
+      {id:2,ten:'Khu 2 – Cầu Đá Dung Nham',y0:430,y1:680,ti:{thuong:60,hiem:30,suthi:8,huyenthoai:2}},
+      {id:3,ten:'Khu 3 – Dốc Tro Nóng',y0:220,y1:430,ti:{thuong:35,hiem:35,suthi:22,huyenthoai:8}},
+      {id:4,ten:'Khu 4 – Đài Cổng Lửa',y0:0,y1:220,ti:{thuong:15,hiem:30,suthi:35,huyenthoai:20}}
+    ],
+    diem:{
+      1:[{id:'1a',x:316,y:756,ghiChu:'cạnh vật cản'},
+         {id:'1b',x:324,y:852,ghiChu:'cạnh vật cản'},
+         {id:'1c',x:1276,y:748,ghiChu:'cạnh vật cản'},
+         {id:'1d',x:1148,y:764,ghiChu:'cạnh vật cản'},
+         {id:'1e',x:1388,y:764,ghiChu:'cạnh vật cản'},
+         {id:'1f',x:1076,y:900,ghiChu:'cạnh vật cản'},
+         {id:'1g',x:236,y:908,ghiChu:'cạnh vật cản'}],
+      2:[{id:'2a',x:1092,y:644,ghiChu:'cạnh vật cản'},
+         {id:'2b',x:1196,y:452,ghiChu:'cạnh vật cản'},
+         {id:'2c',x:1396,y:524,ghiChu:'cạnh vật cản'},
+         {id:'2d',x:492,y:540,ghiChu:'cạnh vật cản'},
+         {id:'2e',x:1276,y:636,ghiChu:'cạnh vật cản'},
+         {id:'2f',x:492,y:652,ghiChu:'cạnh vật cản'},
+         {id:'2g',x:404,y:484,ghiChu:'cạnh vật cản'}],
+      3:[{id:'3a',x:548,y:324,ghiChu:'cạnh vật cản'},
+         {id:'3b',x:1396,y:412,ghiChu:'cạnh vật cản'},
+         {id:'3c',x:1236,y:268,ghiChu:'cạnh vật cản'},
+         {id:'3d',x:1300,y:372,ghiChu:'cạnh vật cản'},
+         {id:'3e',x:444,y:300,ghiChu:'cạnh vật cản'},
+         {id:'3f',x:452,y:396,ghiChu:'cạnh vật cản'},
+         {id:'3g',x:1204,y:332,ghiChu:'cạnh vật cản'}],
+      4:[{id:'4a',x:596,y:124,ghiChu:'cạnh vật cản'},
+         {id:'4b',x:516,y:164,ghiChu:'cạnh vật cản'},
+         {id:'4c',x:1100,y:188,ghiChu:'cạnh vật cản'},
+         {id:'4d',x:892,y:132,ghiChu:'cạnh vật cản'},
+         {id:'4e',x:1212,y:204,ghiChu:'cạnh vật cản'}]
+    },
+    boss:{x:790,y:152,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+  },
+  'thanh-lam':{
+    ten:'Thanh Lâm',
+    anh:DIR+'map-tham-hiem-thanh-lam.webp?v=3',
+    rong:1536,cao:1024,
+    camNhay:[[745,545,925,625]],   /* cầu: thú không nhảy vào */
+    dauHieu:'lam',
+    maskW:192,maskH:128,
+    maskData:'192x128:0:2ak,b,4w,k,4n,u,4f,z,4b,5,d,l,47,7,d,n,43,9,d,o,40,b,d,q,3w,d,d,u,3r,e,d,z,3l,f,d,14,3f,g,d,15,3d,h,d,15,3c,i,d,14,3d,1z,3c,20,3c,20,3c,20,3b,21,3b,21,3a,22,3a,23,39,23,38,24,38,24,37,25,37,25,37,25,36,26,36,26,36,26,b,1,2t,2k,2s,2e,2w,2g,2v,2h,2u,2i,2t,2j,2s,2k,2r,2r,2k,2s,2k,2s,2l,2r,2m,2p,2n,2o,2p,2m,2r,2j,2t,2i,2v,2i,2u,2i,2t,23,e,2,2s,24,38,24,37,25,36,26,36,26,35,27,35,27,34,29,5,f,2j,2u,2i,18,1,l,i,i,2i,u,f,l,m,e,2i,o,l,l,p,b,2i,i,r,l,t,7,2i,b,y,l,x,3,2h,6,14,l,4q,m,4m,v,4d,13,46,1b,3j,25,2p,2x,2d,2z,2c,30,2a,32,29,33,29,33,28,34,27,35,26,36,26,36,25,37,25,37,25,37,25,37,25,37,25,37,24,38,24,38,24,38,24,38,24,5,2,31,25,4,b,2s,25,4,l,2i,25,4,p,2e,25,4,p,1l,h,c,25,4,p,1l,h,c,25,4,p,1l,h,c,25,4,p,1l,h,b,26,4,p,1l,h,b,27,3,p,1l,h,a,29,6,l,1l,h,9,2b,e,c,1l,h,8,2d,m,3,1l,h,7,2f,29,h,6,2h,28,h,6,2j,26,h,5,2l,2q,2n,2o,2p,2n,2q,2l,2v,2g,30,2b,35,27,1i',
+    xuatPhat:{x:780,y:1000},
+    khu:[
+      {id:1,ten:'Khu 1 – Bãi Cỏ Đầu Rừng',y0:740,y1:1024,ti:{thuong:80,hiem:17,suthi:2.7,huyenthoai:0.3}},
+      {id:2,ten:'Khu 2 – Suối Cầu Gỗ',y0:480,y1:740,ti:{thuong:60,hiem:30,suthi:8,huyenthoai:2}},
+      {id:3,ten:'Khu 3 – Đồng Cỏ Đá Cổ',y0:270,y1:480,ti:{thuong:35,hiem:35,suthi:22,huyenthoai:8}},
+      {id:4,ten:'Khu 4 – Cửa Hang Cổ Thụ',y0:0,y1:270,ti:{thuong:15,hiem:30,suthi:35,huyenthoai:20}}
+    ],
+    diem:{
+      1:[{id:'1a',x:396,y:828,ghiChu:'cạnh vật cản'},
+         {id:'1b',x:980,y:852,ghiChu:'cạnh vật cản'},
+         {id:'1c',x:532,y:908,ghiChu:'cạnh vật cản'},
+         {id:'1d',x:1116,y:932,ghiChu:'cạnh vật cản'},
+         {id:'1e',x:1100,y:852,ghiChu:'cạnh vật cản'},
+         {id:'1f',x:396,y:940,ghiChu:'cạnh vật cản'},
+         {id:'1g',x:508,y:844,ghiChu:'cạnh vật cản'}],
+      2:[{id:'2a',x:436,y:532,ghiChu:'cạnh vật cản'},
+         {id:'2b',x:1012,y:572,ghiChu:'cạnh vật cản'},
+         {id:'2c',x:948,y:580,ghiChu:'cạnh vật cản'},
+         {id:'2d',x:956,y:676,ghiChu:'cạnh vật cản'},
+         {id:'2e',x:1052,y:500,ghiChu:'cạnh vật cản'},
+         {id:'2f',x:1124,y:588,ghiChu:'cạnh vật cản'},
+         {id:'2g',x:1068,y:692,ghiChu:'cạnh vật cản'}],
+      3:[{id:'3a',x:484,y:332,ghiChu:'cạnh vật cản'},
+         {id:'3b',x:1068,y:356,ghiChu:'cạnh vật cản'},
+         {id:'3c',x:1140,y:444,ghiChu:'cạnh vật cản'},
+         {id:'3d',x:420,y:452,ghiChu:'cạnh vật cản'},
+         {id:'3e',x:452,y:396,ghiChu:'cạnh vật cản'},
+         {id:'3f',x:1060,y:284,ghiChu:'cạnh vật cản'},
+         {id:'3g',x:1132,y:380,ghiChu:'cạnh vật cản'}],
+      4:[{id:'4a',x:924,y:180,ghiChu:'cạnh vật cản'},
+         {id:'4b',x:540,y:228,ghiChu:'cạnh vật cản'},
+         {id:'4c',x:652,y:244,ghiChu:'cạnh vật cản'},
+         {id:'4d',x:636,y:164,ghiChu:'cạnh vật cản'},
+         {id:'4e',x:1028,y:212,ghiChu:'cạnh vật cản'}]
+    },
+    boss:{x:789,y:140,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+  },
   'nguyet-cung':{
     ten:'Nguyệt Cung',
     anh:DIR+'map-tham-hiem-nguyet-cung.webp?v=3',
@@ -912,6 +1044,31 @@ var DAUHIEU={
     for(i=0;i<4;i++){k=((t*0.5+ph*0.3+i*0.25)%1);x=(i-1.5)*10+Math.sin(t*3+i*1.7+ph)*6;y=-6-k*28;
       c.save();c.translate(x,y);c.rotate(t*3+i*1.3);c.globalAlpha*=1-k;
       c.fillStyle=i%2?'#e0742c':'#c9442a';c.beginPath();c.ellipse(0,0,3.8,2,0,0,6.2832);c.fill();c.restore();}},
+  /* gợn sóng nước xanh + cánh sen/giọt sáng bay lên */
+  thuy:function(c,t,ph){
+    var i,x,y,k,r;
+    c.lineWidth=1.8;
+    for(i=0;i<3;i++){k=((t*0.5+ph*0.2+i*0.33)%1);r=6+k*20;
+      c.strokeStyle='rgba(150,225,255,'+(0.75*(1-k))+')';c.beginPath();c.ellipse(0,-3,r,r*0.38,0,0,6.2832);c.stroke();}
+    for(i=0;i<4;i++){k=((t*0.4+ph*0.3+i*0.25)%1);x=(i-1.5)*10+Math.sin(t*2+i*1.9+ph)*4;y=-6-k*30;
+      c.fillStyle='rgba(190,240,255,'+(0.9*(1-k))+')';c.beginPath();c.arc(x,y,2.2,0,6.2832);c.fill();
+      c.fillStyle='rgba(120,190,255,'+(0.3*(1-k))+')';c.beginPath();c.arc(x,y,5,0,6.2832);c.fill();}},
+  /* tàn lửa bay lên + khói nóng */
+  hoa:function(c,t,ph){
+    var i,x,y,k,w;
+    for(i=0;i<2;i++){w=Math.sin(t*1.4+ph+i*2)*5;y=-10-i*12;
+      c.fillStyle='rgba(70,40,40,'+(0.35-i*0.1)+')';c.beginPath();c.ellipse(w,y,12-i*2,5,0,0,6.2832);c.fill();}
+    for(i=0;i<5;i++){k=((t*0.6+ph*0.3+i*0.2)%1);x=(i-2)*8+Math.sin(t*3+i*1.7+ph)*5;y=-4-k*34;
+      c.fillStyle=i%2?'rgba(255,200,70,'+(1-k)+')':'rgba(255,110,40,'+(1-k)+')';c.beginPath();c.arc(x,y,2.4*(1-k*0.5),0,6.2832);c.fill();}},
+  /* đom đóm xanh lục + lá xanh rơi */
+  lam:function(c,t,ph){
+    var i,x,y,k,r;
+    for(i=0;i<4;i++){k=0.5+0.5*Math.sin(t*2.6+ph+i*1.9);x=(i-1.5)*11+Math.sin(t*1.3+i+ph)*4;y=-8-(i%2)*15-Math.sin(t*1.8+ph+i)*3;r=2+k*1.6;
+      c.fillStyle='rgba(190,255,120,'+(0.18+0.25*k)+')';c.beginPath();c.arc(x,y,r*2.6,0,6.2832);c.fill();
+      c.fillStyle='rgba(245,255,200,'+(0.55+0.45*k)+')';c.beginPath();c.arc(x,y,r,0,6.2832);c.fill();}
+    for(i=0;i<3;i++){k=((t*0.35+ph*0.1+i*0.33)%1);x=(i-1)*13+Math.sin(t*1.5+i*2+ph)*5;y=-30+k*28;
+      c.save();c.translate(x,y);c.rotate(t*1.5+i);c.globalAlpha*=Math.sin(k*3.1416)*0.9;
+      c.fillStyle='rgba(90,190,70,1)';c.beginPath();c.ellipse(0,0,4.4,2.2,0,0,6.2832);c.fill();c.restore();}},
   /* xoáy tuyết nhỏ + tinh thể băng lấp lánh */
   tuyet:function(c,t,ph){
     var i,j,a,x,y,r,k;

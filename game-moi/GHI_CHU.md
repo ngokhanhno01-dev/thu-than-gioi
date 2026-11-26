@@ -299,3 +299,9 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - VUNG['nguyet-cung']: mask Claude khoanh trước đó, chủ game đã chốt (lấy lại từ ảnh xem trước). Xuất phát (800,1000), boss (868,214) dịch phải cho giữa cổng, cầu đá cong khu 2 trong camNhay, DAUHIEU.nguyet (đom đóm trăng + cánh hoa hồng rơi). Tên khu là TÊN TẠM.
 - Chỗ núp: khu1 7, khu2 6, khu3 6, khu4 4 (đã kiểm: đi được, cách nhau >=55, cách boss >=95). checkCfg() sạch.
 - Nâng cache: 89 `?v=19`. Chưa chạy thử. Còn 3 vùng: thuy-nguyet-canh, xich-hoa-dia, thanh-lam.
+
+## Thủy Nguyệt Cảnh + Xích Hỏa Địa + Thanh Lâm: mask + chỗ núp + dấu hiệu (26/11/2026)
+- Cả 3 vùng thêm vào VUNG (mask 192x128, xuất phát (790,1000)/(790,1000)/(780,1000), boss ở cuối đường, camNhay ở cầu). Mask khoanh nhanh bằng đa giác (Xích Hỏa Địa có trừ vùng dung nham theo màu ảnh), CHƯA duyệt kỹ bằng mắt: chủ game test rồi báo chỗ nào lệch thì chỉnh.
+- Chỗ núp: tự chọn ô đi được cạnh vật cản (cách nhau >=62, cách boss >=100), mỗi khu 4-7 chỗ. DAUHIEU thêm: thuy (gợn sóng), hoa (tàn lửa), lam (đom đóm xanh).
+- Nâng cache: 89 `?v=20`. Chưa chạy thử game. Tất cả 9 vùng đã đủ.
+
