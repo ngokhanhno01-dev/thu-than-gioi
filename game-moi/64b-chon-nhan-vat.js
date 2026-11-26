@@ -145,6 +145,13 @@ function show(f,ep){
  function go(){if(done)return;done=true;build();}
  imgs.forEach(function(u){var im=new Image();im.onload=im.onerror=function(){if(--left<=0)go();};im.src=u;});
  setTimeout(go,1500);}   /* ảnh chậm quá 1,5 giây vẫn hiện màn, ảnh sẽ tự hiện khi tải xong */
+/* NÚT TEST ẨN (menu ẩn khi chạm chữ "Danh Vọng", xem 80-danh-vong.js): nhận skin Nam "Giáng Sinh" để thử. Chỉ MỞ KHÓA, mặc ở bảng Nhân Vật (icon ngoài cùng bên phải). Xóa khối này khi ra bản thật. */
+(function(){var n=0;(function dang(){var T=window.TTGNV;if(!T||!T.add){if(++n<100)setTimeout(dang,200);return;}
+ T.add({id:'lay-skin-gs',dev:true,ten:'Lấy skin Giáng Sinh',onTap:function(){
+  var B=window.TTGBAO,m=function(t){if(B&&B.toast)B.toast(t,2400);};
+  if(daMo('nam','giang-sinh')){m('TEST: đã có skin Giáng Sinh, mở bảng Nhân Vật để mặc');return;}
+  moKhoa('nam','giang-sinh');
+  m(gioi()==='nam'?'TEST: nhận skin Giáng Sinh! Mở bảng Nhân Vật để mặc':'TEST: nhận skin Giáng Sinh (chỉ dùng cho nhân vật Nam, bạn đang chọn Nữ)');}});})();})();
 window.TTGNHANVAT={get:get,show:show,gioi:gioi,skin:skin,datSkin:datSkin,moKhoa:moKhoa,daMo:daMo,anhMap:anhMap,anhDi:anhDi,anhChon:anhChon,list:GIOI,SKINS:SKINS,ten:ten,datTen:datTen,loiTen:loiTen,boSkin:boSkin,
  reset:function(){try{localStorage.removeItem(KEY);localStorage.removeItem(KEYTEN);}catch(e){}}};
 })();
