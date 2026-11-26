@@ -274,3 +274,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Chủ game đã duyệt ảnh mask (sửa 4 lần: thu mép đảo, bỏ chỗ thác khu 3/4, rìa phải khu 2, mở pha lê trái khu 1). VUNG['van-dao']: xuất phát (740,990), boss (800,170), 3 cầu gỗ trong camNhay, DAUHIEU.van (mây trôi + cánh hoa tím). Tên khu là TÊN TẠM.
 - Chỗ núp: khu1 10, khu2 10, khu3 8, khu4 6. checkCfg() sạch.
 - Nâng cache: 89 `?v=15`. Chưa chạy thử (chỉ kiểm tra trên lưới + cú pháp). Còn 6 vùng: phong-nguyen, loi-vuc, nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam.
+
+## Nút ẩn "Mở all map" (26/11/2026)
+- Menu ẩn (chạm chữ "Danh Vọng") có thêm nút đầu tiên "Mở all map: BẬT/TẮT". Bật = mọi vùng mở (bỏ qua Danh Vọng), lưu localStorage `ttg_moi_moall`; tắt = về như cũ. Chỉ để thử; khi bật, trần cấp cũng tính theo số vùng mở.
+- Nâng cache 80. Chưa chạy thử.

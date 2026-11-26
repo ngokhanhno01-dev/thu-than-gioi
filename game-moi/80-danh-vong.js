@@ -24,7 +24,8 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function zones(){var z=(root.THU_MOI&&root.THU_MOI.zones)||[];return z.slice().sort(function(a,b){return a.z-b.z;});}
 function get(){return Object.keys(S.kills).length+extra;}
 function can(i){return CFG.moiVung*Math.max(0,i);}              /* Danh Vọng cần để mở vùng thứ i+1 (i = 0..) */
-function moRoi(i){return get()>=can(i);}
+var MOALL='ttg_moi_moall',moAll=false;try{moAll=localStorage.getItem(MOALL)==='1';}catch(e){}   /* nút ẩn "Mở all map" (menu chữ Danh Vọng): bật = mọi vùng mở, chỉ để thử */
+function moRoi(i){return moAll||get()>=can(i);}
 function soVungMo(){var l=zones(),n=0;for(var i=0;i<l.length;i++)if(moRoi(i))n++;return Math.max(1,n);}   /* số vùng đã mở (vùng 1 luôn mở sẵn) */
 function tran(){return root.TTGCS&&root.TTGCS.tranCap?root.TTGCS.tranCap(soVungMo()):0;}   /* trần cấp theo VÙNG đã mở: 1 vùng = Lv.15, 2 vùng = Lv.30... (CFG.capMoiVung ở 56-chi-so.js) */
 function chi(){var l=zones();if(IDX>=l.length||!moRoi(IDX))IDX=0;return IDX;}   /* chỉ số vùng đang chọn (hợp lệ) */
@@ -106,7 +107,8 @@ function mo(){if(!ov)return;size();lap();ov.style.display='flex';}
 /* ---- menu ẩn: gom nút TEST/ADMIN (TTGNV.cfg.dev) ---- */
 var hot=null,dev=null,taps=0,tapT=0;
 function moDev(){if(!dev)return;var g=dev.querySelector('.dv-g'),l=(root.TTGNV&&root.TTGNV.dev)||[];g.innerHTML='';
-  if(!l.length){g.innerHTML='<div style="grid-column:1/-1;color:#9fb4e8;padding:8px">Chưa có nút test nào.</div>';}
+    (function(){var b=document.createElement('button');b.type='button';b.className='dv-b';b.textContent='Mở all map: '+(moAll?'BẬT':'TẮT');
+    b.addEventListener('click',function(){moAll=!moAll;try{localStorage.setItem(MOALL,moAll?'1':'0');}catch(e){}b.textContent='Mở all map: '+(moAll?'BẬT':'TẮT');capNhat();});g.appendChild(b);})();
   l.forEach(function(it){var b=document.createElement('button');b.type='button';b.className='dv-b';b.textContent=it.o.ten||it.o.id;
     b.addEventListener('click',function(){try{if(it.o.id==='admin')dongDev();if(it.o.onTap)it.o.onTap(it.e);}catch(e){}});g.appendChild(b);});
   dev.style.display='flex';}
