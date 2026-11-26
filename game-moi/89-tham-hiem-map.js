@@ -117,11 +117,11 @@ var VUNG={
          {id:'3g',x:796,y:298,ghiChu:'bụi hoa phải'}],
       4:[{id:'4a',x:625,y:196,ghiChu:'nấm tím cạnh cột đá'},
          {id:'4b',x:696,y:231,ghiChu:'bụi hoa trái'},
-         {id:'4c',x:882,y:196,ghiChu:'bụi cây phải'},
+         {id:'4c',x:924,y:196,ghiChu:'bụi cây phải'},
          {id:'4d',x:1085,y:165,ghiChu:'đá rìa quảng trường'},
          {id:'4e',x:990,y:185,ghiChu:'hoa dưới cột phải'}]
     },
-    boss:{x:780,y:168,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+    boss:{x:835,y:160,banKinhCham:38,ten:'Boss Truyền Thuyết'}
   },
   'van-dao':{
     ten:'Vân Đảo',

@@ -278,3 +278,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 ## Nút ẩn "Mở all map" (26/11/2026)
 - Menu ẩn (chạm chữ "Danh Vọng") có thêm nút đầu tiên "Mở all map: BẬT/TẮT". Bật = mọi vùng mở (bỏ qua Danh Vọng), lưu localStorage `ttg_moi_moall`; tắt = về như cũ. Chỉ để thử; khi bật, trần cấp cũng tính theo số vùng mở.
 - Nâng cache: 80 `?v=10` (trong 59), 59 `?v=17x`. Chưa chạy thử.
+
+## Boss Sương Cốc vào giữa + Boss luôn V3 (26/11/2026)
+- Sương Cốc: boss dời (780,168) -> (835,160) giữa quảng trường (chủ game báo bị lệch); chỗ núp 4c dời (882,196) -> (924,196) để cách boss >=95. checkCfg() sạch.
+- 61-tham-hiem-tran.js: trận Boss (thú & quái) luôn tien = TTGBONG.CFG.tx.bacBoss (3) = V3; bắt về vẫn V1 (bacKhiBat ở 62, không đổi).
+- Nâng cache: 61 `?v=4`, 89 `?v=16`. Chưa chạy thử.

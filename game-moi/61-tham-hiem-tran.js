@@ -35,6 +35,7 @@ function createEncounter(player,rng,opts){
   var base=Math.max(0,Math.floor(Number(z)||0))*15,lv=clamp(randint(base+bands[tier][0],base+bands[tier][1],rng),1,cap);
   var tien=weighted([1,2,3],[Number((cfg.trongSoBac||{})[1])||1,Number((cfg.trongSoBac||{})[2])||1,Number((cfg.trongSoBac||{})[3])||1],rng);
   if(opts.chon&&opts.chon.tien&&String(opts.chon.id)===String(q.id))tien=opts.chon.tien;
+  if(boss)tien=Math.max(1,Math.min(3,Number(cfg.bacBoss)||3));   /* Boss (thú & quái) luôn V3 khi đánh; bắt về theo bacKhiBat (V1) ở 62 */
   var bacCS=root.TTGCS.CFG,bac=typeof root.TTGCS.tungBac==='function'?root.TTGCS.tungBac(rng):(bacCS.bacQuai||'C');
   var stats=root.TTGCS.tinh({id:q.id,lv:lv,tien:tien,bac:bac,boss:boss,vung:z,vai:source==='main'?'canbang':undefined});
   return {id:q.id,ten:q.ten,source:source,boss:boss,lv:lv,tien:tien,variant:'V'+tien,bac:bac,hienBac:true,vung:z,zoneSlug:zoneSlug,rarity:tier,stats:stats,record:q};
