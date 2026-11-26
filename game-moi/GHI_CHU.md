@@ -204,3 +204,6 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 
 ## Skin "Tiêu Dao Tiên Tử" (26/11/2026)
 - id `tieu-dao-tien-tu`, tên "Tiêu Dao Tiên Tử", ảnh `nhan-vat/nu/tieu-dao-tien-tu-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nu`; ai cũng mặc được. Cỡ căn theo sprite nữ mặc định. Nâng version 64b `?v=13`. Voan trong suốt nên mép có thể còn vài điểm ám tím nhạt (do nền hồng gốc).
+
+## Skin "Hắc Long Tôn Giả" (26/11/2026)
+- id `hac-long-ton-gia-nam`, tên "Hắc Long Tôn Giả", ảnh `nhan-vat/nam/hac-long-ton-gia-nam-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nam`; ai cũng mặc được. Cỡ căn theo sprite nam mặc định. Nâng version 64b `?v=14`. Ảnh trận tư thế và ra lệnh đứng cùng vị trí chân; ra lệnh có rồng lửa lớn nên nhân vật dịch trái hơn các skin khác.
