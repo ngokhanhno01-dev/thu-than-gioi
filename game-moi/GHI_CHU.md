@@ -222,3 +222,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 ## Thay ảnh map thám hiểm 7 vùng còn lại (26/11/2026)
 - Đã thay map mới (webp 1536x1024) cho: thanh-lam, thuy-nguyet-canh, xich-hoa-dia, nguyet-cung, loi-vuc, van-dao, phong-nguyen. Giờ cả 9 vùng đều có map mới.
 - Nâng cache: 82 `?v=4` (V = `?v=3`). Chưa vùng nào ngoài tuyet-nguyen có trong VUNG của 89-tham-hiem-map.js; mask/điểm núp làm ở phiên sau.
+
+## Sửa lỗi Debug Mask không vuốt vẽ được (26/11/2026)
+- Nét vẽ dùng chung biến `s.last` với mốc thời gian khung hình nên chỉ tô được chấm đầu, sau đó vẽ điểm rung báo lỗi createRadialGradient. Đổi nét vẽ sang `s.last2`.
+- Nâng cache: 89 `?v=6`. Đã thử cảm ứng giả lập: một đường vuốt 10 ô -> 124 ô, không còn lỗi.
+- Tuyết Nguyên đang ở Bước 1: chờ chủ game khoanh mask và gửi chuỗi.

@@ -273,11 +273,11 @@ function stamp(s,wx,wy){
     if(dx*dx+dy*dy<=r2){k=gy*m.w+gx;if(m.g[k]!==val){m.g[k]=val;m.n+=val?1:-1;ch=true;}}}
   if(ch)s.maskDirty=true;}
 function strokeTo(s,x,y){
-  var l=s.last,dx,dy,d,st,n,i;
+  var l=s.last2,dx,dy,d,st,n,i;
   if(!l)stamp(s,x,y);
   else{dx=x-l.x;dy=y-l.y;d=Math.sqrt(dx*dx+dy*dy);st=Math.max(2,s.v.rong/s.mask.w/2);n=Math.max(1,Math.ceil(d/st));
     for(i=1;i<=n;i++)stamp(s,l.x+dx*i/n,l.y+dy*i/n);}
-  s.last={x:x,y:y};}
+  s.last2={x:x,y:y};}
 function worldAt(s,e){var r=s.cv.getBoundingClientRect();return {x:s.cam.x+(e.clientX-r.left)/s.zoom,y:s.cam.y+(e.clientY-r.top)/s.zoom};}
 
 /* ---------- Debug Mask (UI) ---------- */
@@ -294,7 +294,7 @@ function refreshDbg(s){
   if(s.bBrush)s.bBrush.textContent='Cọ '+(s.bi+1)+'/'+BRUSH.length;
   if(s.dbgInfo)s.dbgInfo.textContent='Đi được: '+m.n+'/'+(m.w*m.h)+' ô'+(m.n?'':' · rỗng = đi tự do')+' · đang Debug thì đi xuyên';}
 function setDbg(s,on){
-  on=!!on;s.dbg=on;CFG.debugMask=on;s.pid=null;s.last=null;s.cursor=null;
+  on=!!on;s.dbg=on;CFG.debugMask=on;s.pid=null;s.last2=null;s.cursor=null;
   if(s.dbgPanel)s.dbgPanel.style.display=on?'flex':'none';
   if(s.dbgBtn)s.dbgBtn.style.background=on?BG_ON:BG_OFF;
   if(!on)saveDraft(s);
@@ -355,7 +355,7 @@ function buildDom(s){
   cv.addEventListener('pointerdown',function(e){
     var s2=S,w;if(!s2||!s2.dbg||s2.paused||s2.pid!==null)return;
     s2.pid=e.pointerId;try{cv.setPointerCapture(e.pointerId);}catch(_){}
-    s2.last=null;w=worldAt(s2,e);s2.cursor=w;strokeTo(s2,w.x,w.y);e.preventDefault();});
+    s2.last2=null;w=worldAt(s2,e);s2.cursor=w;strokeTo(s2,w.x,w.y);e.preventDefault();});
   cv.addEventListener('pointermove',function(e){
     var s2=S,w;if(!s2||!s2.dbg||s2.paused)return;
     w=worldAt(s2,e);
@@ -363,7 +363,7 @@ function buildDom(s){
     else if(e.pointerType==='mouse')s2.cursor=w;});
   function endStroke(e){
     var s2=S;if(!s2||e.pointerId!==s2.pid)return;
-    s2.pid=null;s2.last=null;if(e.pointerType!=='mouse')s2.cursor=null;saveDraft(s2);}
+    s2.pid=null;s2.last2=null;if(e.pointerType!=='mouse')s2.cursor=null;saveDraft(s2);}
   cv.addEventListener('pointerup',endStroke);
   cv.addEventListener('pointercancel',endStroke);
   /* Joystick kiểu MOBA: chạm bất kỳ đâu ở nửa trái màn hình để gọi cần analog nổi. */
