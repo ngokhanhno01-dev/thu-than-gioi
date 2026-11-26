@@ -203,6 +203,8 @@ function draw(c,ts,gy){
     c.translate(S.x,fy+k*.03*ds+oy);c.scale(face*sxs*ds,sy*ds);
     c.drawImage(img,fi*512,0,512,512,-k/2,-k,k,k);
     c.restore();
+    /* danh hiệu đang mặc nổi trên đầu nhân vật (đỉnh đầu theo từng dải khung: phải .133 / trước .051 / sau .115) */
+    try{if(root.TTGDHDAU){var hf=front?.051:(vert&&img!==side?(vy>0?.051:.115):.133);TTGDHDAU.draw(c,S.x,fy+k*.03*ds+oy-k*ds*(1-hf),k*1.25*ds,2);}}catch(eT){}
     drawHearts(c,ts);
     drawBong(c,ts,o,S.x,fy-k*.95*ds+oy);
   }catch(err){try{c.restore();}catch(e2){}}}

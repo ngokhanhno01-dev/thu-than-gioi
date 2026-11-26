@@ -621,7 +621,9 @@ function drawPlayer(s){
   if(st){var fi=p.moving?Math.floor(p.walk/1.5)%4:1;   /* 12 đơn vị/giây / 1,5 = 8 khung/giây; đứng yên = khung 2 */
     c.drawImage(st,fi*512,0,512,512,-k/2,-k,k,k);}
   else if(!drawSprite(s,c,k))chibi(c,k);
-  c.restore();}
+  c.restore();
+  /* danh hiệu đang mặc nổi trên đầu nhân vật khi đi thám hiểm (đỉnh đầu: phải .133 / trước .051 / sau .115) */
+  try{if(window.TTGDHDAU){var hf=st?(p.dir==='truoc'?.051:(p.dir==='sau'?.115:.133)):.051;TTGDHDAU.draw(c,p.x,p.y-bob-k+hf*k,k*1.35,1);}}catch(eT){}}
 
 /* lớp phủ mask (chỉ khi Debug Mask): xanh bán trong suốt = đi được; viền vàng đứt nét = gợi ý quảng trường khu 4; vòng trắng = đầu cọ */
 function drawMask(s){
