@@ -216,9 +216,9 @@ function draw(c,ts,gy){
    CHỈNH: khối CFG.tran bên dưới. ?nvtran=0 trong link để tắt riêng trong trận. Mọi lỗi đều bị nuốt (try/catch). */
 CFG.tran={
   on:!/[?&]nvtran=0/.test(location.search),
-  kich:92,                 /* cỡ ô vẽ nhân vật (điểm game), bằng ở sảnh */
+  kich:124,                /* cỡ ô vẽ nhân vật trong trận (điểm game); sảnh vẫn 92. Thú vẽ 128 nên 120-130 là ngang tầm thú */
   nang:9,                  /* nâng chân ngang chân thú (thú trong trận cũng được nâng PET_LIFT=16) */
-  gap:84,                  /* cách tâm thú về phía SAU thú (bên trái) bao nhiêu điểm; tăng = đứng xa thú hơn */
+  gap:100,                 /* cách tâm thú về phía SAU thú (bên trái) bao nhiêu điểm; tăng = đứng xa thú hơn */
   le:30,                     /* chừa lề trái khung (viền khung + nửa thân) */
   petX:.218,floor:22,      /* = PET_X và FLOOR trong index.html (vị trí thú bạn trong khung trên, độ dày nền đất) */
   lenhU:.5,lenhTre:180,    /* giữ dáng ra lệnh khi đòn của thú chạy tới u<lenhU (0..1), rồi giữ thêm bấy nhiêu ms */
