@@ -189,6 +189,9 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Nâng version nạp: 64b `?v=8`, 84b `?v=4` (59-nut-tham-hiem.js), 90 `?v=5` (81-nut-moi.js).
 
 ## Skin "Tết Nguyên Đán Nam" (26/11/2026)
-- id `tet-nguyen-dan-nam`, tên "Tết Nguyên Đán Nam", ảnh `nhan-vat/nam/tet-nguyen-dan-nam-*.png` (đủ bộ như Giáng Sinh: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nam`; không phân giới như các skin khác. Bản Nữ chưa có.
+- id `tet-nguyen-dan-nam`, tên "Tết Nguyên Đán Nam", ảnh `nhan-vat/nam/tet-nguyen-dan-nam-*.png` (đủ bộ như Giáng Sinh: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nam`; không phân giới như các skin khác.
 - Chân sau ở dải đi ngang hơi tối/nhạt là do ảnh gốc. Hiệu ứng ra lệnh (phong bao lì xì + hoa mai) vươn sát mép phải khung 512 nên có thể cụt vài pixel lấp lánh.
 - Nâng version 64b `?v=9` (59-nut-tham-hiem.js).
+
+## Skin "Tết Nguyên Đán Nữ" (26/11/2026)
+- id `tet-nguyen-dan-nu`, tên "Tết Nguyên Đán Nữ", ảnh `nhan-vat/nu/tet-nguyen-dan-nu-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nu`; ai cũng mặc được. Cỡ nhân vật căn theo sprite nữ mặc định. Nâng version 64b `?v=10`. Nút "Lấy tất cả skin" tự nhận luôn skin này.
