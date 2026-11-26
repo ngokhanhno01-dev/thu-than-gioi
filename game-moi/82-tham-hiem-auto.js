@@ -36,7 +36,7 @@ var MAP_VUNG={
   'vung-17':null, // TODO: Chưa có ảnh bản đồ thám hiểm (map-tham-hiem-vung-17.webp) - Bổ sung khi mở vùng
   'vung-18':null  // TODO: Chưa có ảnh bản đồ thám hiểm (map-tham-hiem-vung-18.webp) - Bổ sung khi mở vùng
 };
-var BG_DU_PHONG=DIR+'bg-khoi-dau.webp',V='?v=2';
+var BG_DU_PHONG=DIR+'bg-khoi-dau.webp',V='?v=3';
 var CFG={tiepKhiThua:true};
 /* thứ tự thử ảnh: bản đồ riêng -> bg-<slug>.webp -> bg-khoi-dau.webp */
 function mapChain(slug){var a=[],m=MAP_VUNG[slug];if(m)a.push(m+V);if(slug)a.push(DIR+'bg-'+slug+'.webp');a.push(BG_DU_PHONG);return a;}

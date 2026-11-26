@@ -218,3 +218,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Các ảnh `bg-<slug>.webp` là ảnh nền vùng (cảnh nhìn ngang), KHÔNG phải map thám hiểm, không đụng tới.
 - Nâng cache: 89 `?v=5` (ảnh tuyết nguyên `?v=2`), 82 `?v=3` (V = `?v=2`).
 - VUNG['tuyet-nguyen'] vẫn là số liệu CŨ (mask rỗng, 16 điểm + boss ước lượng theo ảnh cũ), sẽ làm lại ở Bước 1-2 cho ảnh mới.
+
+## Thay ảnh map thám hiểm 7 vùng còn lại (26/11/2026)
+- Đã thay map mới (webp 1536x1024) cho: thanh-lam, thuy-nguyet-canh, xich-hoa-dia, nguyet-cung, loi-vuc, van-dao, phong-nguyen. Giờ cả 9 vùng đều có map mới.
+- Nâng cache: 82 `?v=4` (V = `?v=3`). Chưa vùng nào ngoài tuyet-nguyen có trong VUNG của 89-tham-hiem-map.js; mask/điểm núp làm ở phiên sau.
