@@ -227,3 +227,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Nét vẽ dùng chung biến `s.last` với mốc thời gian khung hình nên chỉ tô được chấm đầu, sau đó vẽ điểm rung báo lỗi createRadialGradient. Đổi nét vẽ sang `s.last2`.
 - Nâng cache: 89 `?v=6`. Đã thử cảm ứng giả lập: một đường vuốt 10 ô -> 124 ô, không còn lỗi.
 - Tuyết Nguyên đang ở Bước 1: chờ chủ game khoanh mask và gửi chuỗi.
+
+## Mask Tuyết Nguyên, Bước 1 (26/11/2026)
+- Chủ game đã duyệt ảnh xem trước. Kiểu đi thoải mái: chỉ chặn vật to (núi, vách, thác, sông, hồ, 2 hang, cây khô, cây thông, cột đá, cụm tháp + bậc đá); bụi tuyết, đá thấp, tinh thể nhỏ đi được. Các vùng sau khoanh theo kiểu này.
+- Nâng cache: 89 `?v=7`.
+- Còn lại: Bước 2 (đặt lại điểm núp/boss, bỏ vòng banKinhMaskDiem đang "mở lối" qua chỗ chặn), Bước 3 (dấu hiệu + bóng thú).
