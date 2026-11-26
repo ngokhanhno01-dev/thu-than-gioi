@@ -283,3 +283,9 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Sương Cốc: boss dời (780,168) -> (835,160) giữa quảng trường (chủ game báo bị lệch); chỗ núp 4c dời (882,196) -> (924,196) để cách boss >=95. checkCfg() sạch.
 - 61-tham-hiem-tran.js: trận Boss (thú & quái) luôn tien = TTGBONG.CFG.tx.bacBoss (3) = V3; bắt về vẫn V1 (bacKhiBat ở 62, không đổi).
 - Nâng cache: 61 `?v=4`, 89 `?v=16`. Chưa chạy thử.
+
+## Phong Nguyên: mask + chỗ núp + dấu hiệu (26/11/2026)
+- VUNG['phong-nguyen']: mask từ phiên trước (đi thoải mái, chặn cây/trụ đá/biển/đá lớn), xuất phát (800,1000), boss (770,150) giữa quảng trường đá, 2 cầu gỗ trong camNhay, DAUHIEU.phong (gió xoáy + lá đỏ). Tên khu là TÊN TẠM.
+- Chỗ núp: khu1 10, khu2 10, khu3 8, khu4 5 (đã kiểm trên mask: đi được, cách nhau >=55, cách boss >=95). checkCfg() sạch.
+- Chủ game CHƯA duyệt mask bằng mắt trong phiên này; nếu cần sửa thì chỉnh lại mask.
+- Nâng cache: 89 `?v=17`. Chưa chạy thử. Còn 5 vùng: loi-vuc, nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam.

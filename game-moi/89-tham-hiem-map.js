@@ -176,6 +176,58 @@ var VUNG={
     },
     boss:{x:800,y:170,banKinhCham:38,ten:'Boss Truyền Thuyết'}
   },
+  'phong-nguyen':{
+    ten:'Phong Nguyên',
+    anh:DIR+'map-tham-hiem-phong-nguyen.webp?v=3',
+    rong:1536,cao:1024,
+    camNhay:[[740,360,855,425],[740,615,885,685]],   /* 2 cầu gỗ: thú không nhảy vào */
+    dauHieu:'phong',
+    maskW:192,maskH:128,
+    maskData:'192x128:0:24u,t,4j,t,a,1,47,u,a,1,46,v,a,2,43,x,a,2,3q,5,6,z,a,9,3i,1b,a,b,3h,1w,3g,1y,3f,21,3b,26,2o,5,e,1u,a,6,2f,a,c,1v,a,7,2e,b,b,1v,a,7,2f,2g,a,7,2f,2g,a,7,2f,2g,a,7,2f,1s,b,u,31,16,b,u,32,15,b,u,d,1,2p,14,b,u,d,2,2p,13,b,u,d,2,2q,b,7,k,b,u,d,1,2r,6,c,k,b,u,d,1,2s,4,d,k,b,u,d,1,2t,3,d,k,b,u,d,1,2v,1,d,k,b,u,d,1,39,1t,9,1,1o,4,1h,23,1i,j,16,25,1h,s,11,22,1h,r,16,1x,1h,s,19,d,2y,s,b,9,p,d,2y,s,b,f,j,d,2z,r,b,l,d,d,2z,r,b,q,8,d,30,1w,3,e,30,2b,33,29,37,26,3b,24,3b,y,a,v,3c,v,a,y,3e,q,a,10,3i,k,a,12,4a,14,48,17,3w,1j,3s,1o,3o,14,c,c,3k,14,c,f,3h,14,c,g,3g,14,c,i,3e,14,c,j,3d,14,c,j,3d,14,c,j,30,1h,c,j,2z,1i,c,6,a,3,2z,1i,c,4,3e,1i,c,4,3e,1x,3f,1x,3f,1x,3f,1h,3v,1h,3v,h,j,h,4v,h,4v,h,4v,h,4v,h,4u,j,4t,k,4s,1h,3r,1m,33,e,5,14,6,h,2m,u,5,14,6,j,29,15,5,13,7,5,4,p,1u,15,6,12,7,3,8,p,1s,15,2,16,7,3,a,o,1r,2n,a,o,1r,2n,a,o,1r,2n,a,p,1q,2m,b,p,1q,2m,b,p,1q,2m,b,o,1r,3l,1k,3r,z,7,7,3z,z,4c,z,4c,10,26,a,1v,13,24,a,1t,16,u,5,14,a,1s,18,r,a,11,a,1q,1c,o,b,11,a,1o,1q,c,b,11,a,1n,1z,4,b,11,a,1m,23,1,b,11,a,1l,24,1,b,11,a,1l,24,1,b,11,a,1e,2b,1,b,11,a,r,2,k,2c,1,b,r,7,3,a,p,8,g,2c,1,b,o,n,n,c,e,2c,1,c,n,d,w,d,e,2c,1,c,n,d,w,d,e,2c,10,d,w,d,l,25,10,d,w,d,8,4,9,25,z,e,w,d,4,d,4,25,z,f,v,d,4,2m,2q,2m,2q,2m,2q,2n,2o,1m',
+    xuatPhat:{x:800,y:1000},
+    khu:[
+      {id:1,ten:'Khu 1 – Đồng Gió',y0:690,y1:1024,ti:{thuong:80,hiem:17,suthi:2.7,huyenthoai:0.3}},
+      {id:2,ten:'Khu 2 – Triền Lá Đỏ',y0:370,y1:690,ti:{thuong:60,hiem:30,suthi:8,huyenthoai:2}},
+      {id:3,ten:'Khu 3 – Bãi Trụ Đá',y0:200,y1:370,ti:{thuong:35,hiem:35,suthi:22,huyenthoai:8}},
+      {id:4,ten:'Khu 4 – Cổng Đá Cổ',y0:0,y1:200,ti:{thuong:15,hiem:30,suthi:35,huyenthoai:20}}
+    ],
+    diem:{
+      1:[{id:'1a',x:150,y:855,ghiChu:'bụi cỏ lòng đảo trái'},
+         {id:'1b',x:360,y:785,ghiChu:'cạnh gốc cây trái'},
+         {id:'1c',x:430,y:900,ghiChu:'cỏ gió cạnh trụ đá'},
+         {id:'1d',x:500,y:965,ghiChu:'cỏ dưới trụ đá'},
+         {id:'1e',x:560,y:830,ghiChu:'cỏ gió trái biển KHU 1'},
+         {id:'1f',x:640,y:790,ghiChu:'bụi cỏ cạnh đá nhỏ'},
+         {id:'1g',x:900,y:880,ghiChu:'bụi cỏ phải biển KHU 1'},
+         {id:'1h',x:960,y:810,ghiChu:'cỏ gió phải đường'},
+         {id:'1i',x:1100,y:860,ghiChu:'bụi cỏ lớn phải'},
+         {id:'1j',x:1240,y:800,ghiChu:'rìa đảo phải'}],
+      2:[{id:'2a',x:230,y:395,ghiChu:'cỏ gió rìa trái'},
+         {id:'2b',x:330,y:430,ghiChu:'bụi cỏ trái'},
+         {id:'2c',x:520,y:405,ghiChu:'cỏ lau cạnh trụ đá'},
+         {id:'2d',x:610,y:420,ghiChu:'bụi cỏ trên tảng đá'},
+         {id:'2e',x:500,y:610,ghiChu:'bụi hoa tầng dưới'},
+         {id:'2f',x:640,y:590,ghiChu:'bụi cỏ cạnh đá'},
+         {id:'2g',x:700,y:515,ghiChu:'cỏ trái đường'},
+         {id:'2h',x:830,y:450,ghiChu:'cỏ phải đường'},
+         {id:'2i',x:1010,y:540,ghiChu:'bụi cỏ cạnh biển KHU 2'},
+         {id:'2j',x:1078,y:545,ghiChu:'cỏ gần dốc phải'}],
+      3:[{id:'3a',x:420,y:235,ghiChu:'rìa trái khu 3'},
+         {id:'3b',x:520,y:245,ghiChu:'bụi cỏ trái'},
+         {id:'3c',x:640,y:255,ghiChu:'cỏ gió trên đá'},
+         {id:'3d',x:705,y:320,ghiChu:'cạnh đá lớn'},
+         {id:'3e',x:975,y:290,ghiChu:'cỏ phải biển KHU 3'},
+         {id:'3f',x:1040,y:275,ghiChu:'bụi cỏ gần đống đá'},
+         {id:'3g',x:1105,y:335,ghiChu:'cỏ lau chân trụ đá'},
+         {id:'3h',x:930,y:348,ghiChu:'cỏ gần cầu'}],
+      4:[{id:'4a',x:545,y:190,ghiChu:'bụi cỏ cạnh cây trái'},
+         {id:'4b',x:640,y:195,ghiChu:'cỏ trái quảng trường'},
+         {id:'4c',x:885,y:190,ghiChu:'dưới biển KHU 4'},
+         {id:'4d',x:965,y:185,ghiChu:'cỏ phải quảng trường'},
+         {id:'4e',x:1020,y:180,ghiChu:'cạnh đống đá phải'}]
+    },
+    boss:{x:770,y:150,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+  },
   'tuyet-nguyen':{
     ten:'Tuyết Nguyên',
     anh:DIR+'map-tham-hiem-tuyet-nguyen.webp?v=2',
@@ -745,6 +797,16 @@ var DAUHIEU={
     for(i=0;i<4;i++){k=((t*0.45+ph*0.3+i*0.25)%1);x=(i-1.5)*10+Math.sin(t*2+i*1.9+ph)*5;y=-6-k*30;
       c.save();c.translate(x,y);c.rotate(t*2+i);c.globalAlpha*=1-k;
       c.fillStyle='rgba(225,120,255,.9)';c.beginPath();c.ellipse(0,0,3.4,1.8,0,0,6.2832);c.fill();c.restore();}},
+  /* gió xoáy mảnh + lá đỏ cam bay lượn */
+  phong:function(c,t,ph){
+    var i,x,y,k,a;
+    c.lineCap='round';
+    for(i=0;i<3;i++){a=t*2.2+ph+i*2.094;y=-6-i*8;
+      c.strokeStyle='rgba(220,250,240,'+(0.7-i*0.15)+')';c.lineWidth=2.4-i*0.3;
+      c.beginPath();c.ellipse(0,y,13+i*3,4.5,0,a,a+3.2);c.stroke();}
+    for(i=0;i<4;i++){k=((t*0.5+ph*0.3+i*0.25)%1);x=(i-1.5)*10+Math.sin(t*3+i*1.7+ph)*6;y=-6-k*28;
+      c.save();c.translate(x,y);c.rotate(t*3+i*1.3);c.globalAlpha*=1-k;
+      c.fillStyle=i%2?'#e0742c':'#c9442a';c.beginPath();c.ellipse(0,0,3.8,2,0,0,6.2832);c.fill();c.restore();}},
   /* xoáy tuyết nhỏ + tinh thể băng lấp lánh */
   tuyet:function(c,t,ph){
     var i,j,a,x,y,r,k;
