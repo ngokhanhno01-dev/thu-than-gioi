@@ -264,3 +264,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 ## Quái nhào vào, thú bỏ chạy (26/11/2026)
 - Chủ game làm rõ: QUÁI (chon.source=main, mọi độ hiếm) tự nhào về người chơi (CFG.nhao); THÚ (demo) sử thi/huyền thoại chỉ chạy tránh (CFG.chay). Không nhào trong 3s sau trận, không lên cầu.
 - Nâng cache: 89 `?v=13`. Chưa chạy thử.
+
+## Sương Cốc: mask + chỗ núp + dấu hiệu (26/11/2026)
+- Chủ game đã duyệt ảnh mask. VUNG['suong-coc'] mới: điểm xuất phát (740,990), boss (780,168), 2 cầu gỗ trong camNhay, DAUHIEU.suong. Tên khu là TÊN TẠM.
+- Nhảy/nhào/chạy/60s dùng chung với Tuyết Nguyên.
+- Nâng cache: 89 `?v=14`. Chưa chạy thử (chỉ kiểm tra trên lưới + cú pháp). Còn 7 vùng.

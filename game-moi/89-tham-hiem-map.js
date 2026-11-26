@@ -78,6 +78,51 @@ var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
    diem: các chỗ núp cố định mỗi khu (hiện ngẫu nhiên CFG.soDiemHien), đặt cạnh chỗ núp vẽ trên ảnh, nằm trên ô đi được (checkCfg() cảnh báo nếu không tới được).
    Tên khu 1, 3, 4 là TÊN TẠM tự đặt theo cảnh trong ảnh (chỉ khu 2 "Cầu Đá" là theo mô tả) - sửa ten ở đây. */
 var VUNG={
+  'suong-coc':{
+    ten:'Sương Cốc',
+    anh:DIR+'map-tham-hiem-suong-coc.webp?v=3',
+    rong:1536,cao:1024,
+    camNhay:[[700,645,845,732],[765,358,902,422]],   /* 2 cầu gỗ: thú không nhảy vào */
+    dauHieu:'suong',
+    maskW:192,maskH:128,
+    maskData:'192x128:0:201,h,4t,k,4q,m,4o,q,2,5,4d,11,6,1,42,1d,3x,1i,3t,1l,3q,1k,3q,1l,3g,1v,3h,1j,41,19,46,t,7,3,49,s,4k,q,4n,p,4m,p,4l,q,4l,q,4m,p,4n,o,4p,m,4r,k,4r,o,4m,s,4j,v,4g,x,4g,x,4g,y,4f,1,5,s,4l,t,4k,u,4j,v,4g,u,4f,v,49,11,4a,11,4a,11,4a,10,4c,10,4d,z,4e,y,4g,x,4g,w,4i,v,4i,x,4m,v,8,9,40,1d,40,1c,42,1b,43,18,45,16,46,15,47,15,47,15,47,16,46,16,3o,1,b,1d,3m,1q,3l,1q,3m,1q,3m,1p,3o,1o,3o,1o,3p,1m,3t,1j,3w,1g,3z,1b,45,m,7,a,4d,f,4x,c,4z,d,4p,3,6,d,4l,r,4k,r,4j,u,4h,w,4g,x,4e,10,4c,11,4a,14,48,16,46,18,45,1d,3z,1h,3v,1i,3k,1,9,1i,3j,5,7,1i,3h,8,3,1k,3h,1v,3i,1u,3j,1s,3k,1k,1,6,3m,1i,3v,1g,3z,1d,42,1b,47,17,46,18,45,18,45,16,4a,12,4b,10,4d,z,4d,m,4r,g,4w,f,4x,f,4x,f,4x,f,4x,f,4x,f,4x,f,4x,e,2l',
+    xuatPhat:{x:740,y:990},
+    khu:[
+      {id:1,ten:'Khu 1 – Bậc Đá Sương',y0:690,y1:1024,ti:{thuong:80,hiem:17,suthi:2.7,huyenthoai:0.3}},
+      {id:2,ten:'Khu 2 – Cầu Gỗ',y0:450,y1:690,ti:{thuong:60,hiem:30,suthi:8,huyenthoai:2}},
+      {id:3,ten:'Khu 3 – Ao Sen',y0:260,y1:450,ti:{thuong:35,hiem:35,suthi:22,huyenthoai:8}},
+      {id:4,ten:'Khu 4 – Gốc Cổ Thụ',y0:0,y1:260,ti:{thuong:15,hiem:30,suthi:35,huyenthoai:20}}
+    ],
+    diem:{
+      1:[{id:'1a',x:500,y:820,ghiChu:'nấm tím trái'},
+         {id:'1b',x:600,y:800,ghiChu:'cụm đá trái đường'},
+         {id:'1c',x:630,y:872,ghiChu:'bụi hoa dưới'},
+         {id:'1d',x:868,y:780,ghiChu:'tảng đá nhỏ phải'},
+         {id:'1e',x:948,y:920,ghiChu:'nấm tím cạnh biển KHU 1'},
+         {id:'1f',x:985,y:805,ghiChu:'bụi cây cạnh cổng đá phải'},
+         {id:'1g',x:640,y:722,ghiChu:'bụi hoa đầu cầu'}],
+      2:[{id:'2a',x:635,y:590,ghiChu:'dương xỉ bờ trái'},
+         {id:'2b',x:705,y:590,ghiChu:'khối đá vuông'},
+         {id:'2c',x:790,y:525,ghiChu:'bụi cỏ giữa'},
+         {id:'2d',x:1048,y:595,ghiChu:'hoa trắng phải'},
+         {id:'2e',x:955,y:640,ghiChu:'đá dưới biển KHU 2'},
+         {id:'2f',x:950,y:498,ghiChu:'nấm tím cạnh đá'},
+         {id:'2g',x:885,y:628,ghiChu:'hoa xanh'}],
+      3:[{id:'3a',x:863,y:448,ghiChu:'cụm đá phải'},
+         {id:'3b',x:615,y:430,ghiChu:'bụi hoa trái'},
+         {id:'3c',x:665,y:392,ghiChu:'nấm tím trái biển KHU 3'},
+         {id:'3d',x:725,y:362,ghiChu:'đá thấp cạnh biển'},
+         {id:'3e',x:862,y:350,ghiChu:'bờ ao sen'},
+         {id:'3f',x:655,y:268,ghiChu:'nấm tím phía trên'},
+         {id:'3g',x:796,y:298,ghiChu:'bụi hoa phải'}],
+      4:[{id:'4a',x:625,y:196,ghiChu:'nấm tím cạnh cột đá'},
+         {id:'4b',x:696,y:231,ghiChu:'bụi hoa trái'},
+         {id:'4c',x:882,y:196,ghiChu:'bụi cây phải'},
+         {id:'4d',x:1085,y:165,ghiChu:'đá rìa quảng trường'},
+         {id:'4e',x:990,y:185,ghiChu:'hoa dưới cột phải'}]
+    },
+    boss:{x:780,y:168,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+  },
   'tuyet-nguyen':{
     ten:'Tuyết Nguyên',
     anh:DIR+'map-tham-hiem-tuyet-nguyen.webp?v=2',
@@ -627,6 +672,16 @@ function ellipse(c,x,y,rx,ry,col){c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx
    Xa: chỉ có dấu hiệu theo vùng (VUNG[...].dauHieu). Gần dần (CFG.hienThu): bóng đen -> thú thật + hào quang màu độ hiếm dưới chân.
    Thú được tung sẵn (chonThu) rồi ép đúng con đó vào trận qua ev.chon -> opts.chon của createEncounter. */
 var DAUHIEU={
+  /* đốm sáng nấm tím nhấp nháy + vài sợi sương mỏng */
+  suong:function(c,t,ph){
+    var i,x,y,k,r,w;
+    c.lineCap='round';
+    for(i=0;i<3;i++){w=Math.sin(t*1.1+ph+i*2.1)*7;y=-4-i*9;
+      c.strokeStyle='rgba(225,238,245,'+(0.5-i*0.1)+')';c.lineWidth=4-i;
+      c.beginPath();c.moveTo(-22+w,y);c.quadraticCurveTo(-8+w,y-7,4+w,y);c.quadraticCurveTo(14+w,y+6,23+w,y-1);c.stroke();}
+    for(i=0;i<4;i++){k=0.5+0.5*Math.sin(t*3+ph+i*1.7);x=(i-1.5)*11+Math.sin(t*1.6+i)*3;y=-10-(i%2)*17-Math.sin(t*2+ph+i)*3;r=2.2+k*1.8;
+      c.fillStyle='rgba(186,110,255,'+(0.18+0.27*k)+')';c.beginPath();c.arc(x,y,r*2.6,0,6.2832);c.fill();
+      c.fillStyle='rgba(240,215,255,'+(0.55+0.45*k)+')';c.beginPath();c.arc(x,y,r,0,6.2832);c.fill();}},
   /* xoáy tuyết nhỏ + tinh thể băng lấp lánh */
   tuyet:function(c,t,ph){
     var i,j,a,x,y,r,k;
