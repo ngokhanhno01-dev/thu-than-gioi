@@ -123,6 +123,59 @@ var VUNG={
     },
     boss:{x:780,y:168,banKinhCham:38,ten:'Boss Truyền Thuyết'}
   },
+  'van-dao':{
+    ten:'Vân Đảo',
+    anh:DIR+'map-tham-hiem-van-dao.webp?v=3',
+    rong:1536,cao:1024,
+    camNhay:[[700,665,880,752],[730,438,890,528],[715,292,845,352]],   /* 3 cầu gỗ: thú không nhảy vào */
+    dauHieu:'van',
+    maskW:192,maskH:128,
+    maskData:'192x128:0:2kr,19,40,1c,40,1c,40,1c,3t,1o,3o,1s,3k,1y,3f,1z,3d,1z,3d,1z,3d,1z,3d,1z,3d,1z,3d,16,1,o,3h,16,4,4,3y,15,4s,k,4s,k,4s,k,4s,k,4t,2,2,b,2,1,4y,b,51,b,51,b,51,b,4,g,3j,u,4,b,3,h,35,1a,2,b,2,i,33,29,33,29,33,29,33,29,33,29,2w,1,6,29,2v,2h,9,4,2i,2h,9,4,2i,2u,2i,2u,2i,2u,2i,1m,2,f,2,p,2i,1i,6,f,2,j,3h,1,a,e,6,f,2,f,3w,e,6,f,2,f,3w,e,6,f,2,f,3w,e,6,f,2,f,3w,e,6,f,2,f,3w,e,6,f,2,f,3w,3,5,a,2,f,2,i,3t,3,5,a,2,f,2,r,3k,2,6,a,2,f,2,e,5,6,3m,3,5,17,5,6,3m,1f,5,6,3m,1f,5,6,3m,1f,5,6,5,1,3d,1i,5,6,4,3,5,a,2w,1j,5,6,4,3,5,a,3c,13,5,6,4,i,3c,13,5,6,4,i,3c,13,5,6,4,n,37,13,5,6,4,4,7,c,37,13,5,6,4,4,7,c,37,13,5,6,4,4,8,2,3g,13,5,6,4,4,3q,1m,3q,1m,3c,20,3c,1v,3i,1m,3q,f,2,i,1,d,3z,b,6,i,2,2,4q,i,4a,i,2,i,4e,e,2,i,40,4,a,e,2,i,3z,5,a,e,2,i,3z,5,a,e,2,i,3j,3,d,5,a,e,2,i,3i,4,d,5,a,e,2,i,1,3,3d,5,d,5,a,16,38,6,d,5,a,1a,33,7,d,5,a,18,34,8,d,5,a,18,34,8,d,5,a,18,34,8,d,5,a,18,34,8,d,5,a,18,2l,1,i,q,a,18,2j,3,i,q,a,18,2h,5,i,q,a,18,2f,7,c,2e,2d,9,c,2e,2d,9,c,2e,2d,9,c,2e,2d,9,c,2e,2d,2z,2i,2u,a,6,7,6,1y,32,5,8,23,2w,5,9,28,1y,7,10,2d,1s,7,10,2g,1p,7,10,2k,1l,7,10,2o,1h,7,10,2s,1d,7,v,34,1s,3q,1d,45,14,4b,y,4e,t,4j,p,4n,p,4n,p,4n,p,2f',
+    xuatPhat:{x:740,y:990},
+    khu:[
+      {id:1,ten:'Khu 1 – Bãi Pha Lê',y0:690,y1:1024,ti:{thuong:80,hiem:17,suthi:2.7,huyenthoai:0.3}},
+      {id:2,ten:'Khu 2 – Cổng Torii',y0:450,y1:690,ti:{thuong:60,hiem:30,suthi:8,huyenthoai:2}},
+      {id:3,ten:'Khu 3 – Đình Mây',y0:290,y1:450,ti:{thuong:35,hiem:35,suthi:22,huyenthoai:8}},
+      {id:4,ten:'Khu 4 – Thiên Điện',y0:0,y1:290,ti:{thuong:15,hiem:30,suthi:35,huyenthoai:20}}
+    ],
+    diem:{
+      1:[{id:'1a',x:320,y:815,ghiChu:'tinh thể cạnh khung gỗ'},
+         {id:'1b',x:138,y:852,ghiChu:'bụi hoa góc trái'},
+         {id:'1c',x:470,y:895,ghiChu:'tảng đá thấp'},
+         {id:'1d',x:600,y:905,ghiChu:'tinh thể trái biển KHU 1'},
+         {id:'1e',x:430,y:830,ghiChu:'bụi hoa trắng'},
+         {id:'1f',x:850,y:800,ghiChu:'tinh thể phải đường'},
+         {id:'1g',x:900,y:840,ghiChu:'tinh thể nhỏ phải'},
+         {id:'1h',x:990,y:920,ghiChu:'cụm đá dưới cây phải'},
+         {id:'1i',x:1150,y:925,ghiChu:'dưới cây hoa phải'},
+         {id:'1j',x:650,y:760,ghiChu:'bụi cỏ chân cầu'}],
+      2:[{id:'2a',x:715,y:525,ghiChu:'tinh thể chân cầu'},
+         {id:'2b',x:640,y:560,ghiChu:'bụi hoa dưới cây nhỏ'},
+         {id:'2c',x:640,y:665,ghiChu:'tinh thể gờ đá trái'},
+         {id:'2d',x:950,y:545,ghiChu:'tinh thể phải đường'},
+         {id:'2e',x:925,y:605,ghiChu:'bụi hoa cạnh biển KHU 2'},
+         {id:'2f',x:990,y:660,ghiChu:'tảng đá thấp phải'},
+         {id:'2g',x:1060,y:585,ghiChu:'hoa giữa cổng torii'},
+         {id:'2h',x:1238,y:600,ghiChu:'gờ đá rào phải'},
+         {id:'2i',x:905,y:495,ghiChu:'tinh thể đầu dốc phải'},
+         {id:'2j',x:1130,y:625,ghiChu:'cạnh tinh thể to phải'}],
+      3:[{id:'3a',x:400,y:435,ghiChu:'tinh thể rìa trái'},
+         {id:'3b',x:330,y:428,ghiChu:'hàng rào rìa trái'},
+         {id:'3c',x:540,y:348,ghiChu:'bụi hoa trước đình'},
+         {id:'3d',x:630,y:392,ghiChu:'tảng đá cạnh biển KHU 3'},
+         {id:'3e',x:925,y:430,ghiChu:'tảng đá phải'},
+         {id:'3f',x:900,y:358,ghiChu:'bụi hoa phải trên'},
+         {id:'3g',x:1075,y:430,ghiChu:'cây nhỏ sau cột đá'},
+         {id:'3h',x:470,y:395,ghiChu:'bụi hoa trái'}],
+      4:[{id:'4a',x:612,y:232,ghiChu:'tinh thể trái quảng trường'},
+         {id:'4b',x:560,y:200,ghiChu:'bụi hoa cạnh cột đá trái'},
+         {id:'4c',x:968,y:220,ghiChu:'tinh thể phải quảng trường'},
+         {id:'4d',x:1048,y:212,ghiChu:'hàng rào bậc đá phải'},
+         {id:'4e',x:690,y:252,ghiChu:'bụi hoa dưới biển KHU 4'},
+         {id:'4f',x:900,y:232,ghiChu:'bụi hoa phải đường'}]
+    },
+    boss:{x:800,y:170,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+  },
   'tuyet-nguyen':{
     ten:'Tuyết Nguyên',
     anh:DIR+'map-tham-hiem-tuyet-nguyen.webp?v=2',
@@ -682,6 +735,16 @@ var DAUHIEU={
     for(i=0;i<4;i++){k=0.5+0.5*Math.sin(t*3+ph+i*1.7);x=(i-1.5)*11+Math.sin(t*1.6+i)*3;y=-10-(i%2)*17-Math.sin(t*2+ph+i)*3;r=2.2+k*1.8;
       c.fillStyle='rgba(186,110,255,'+(0.18+0.27*k)+')';c.beginPath();c.arc(x,y,r*2.6,0,6.2832);c.fill();
       c.fillStyle='rgba(240,215,255,'+(0.55+0.45*k)+')';c.beginPath();c.arc(x,y,r,0,6.2832);c.fill();}},
+  /* mây trôi xoáy nhẹ + cánh hoa tím bay lên */
+  van:function(c,t,ph){
+    var i,x,y,k,w;
+    for(i=0;i<3;i++){w=Math.sin(t*0.9+ph+i*2.2)*6;x=(i-1)*13+w;y=-6-(i%2)*8;
+      c.fillStyle='rgba(245,235,255,'+(0.45-i*0.08)+')';
+      c.beginPath();c.ellipse(x,y,13-i*2,5.5-i,0,0,6.2832);c.fill();
+      c.beginPath();c.ellipse(x+6,y-3,7,4,0,0,6.2832);c.fill();}
+    for(i=0;i<4;i++){k=((t*0.45+ph*0.3+i*0.25)%1);x=(i-1.5)*10+Math.sin(t*2+i*1.9+ph)*5;y=-6-k*30;
+      c.save();c.translate(x,y);c.rotate(t*2+i);c.globalAlpha*=1-k;
+      c.fillStyle='rgba(225,120,255,.9)';c.beginPath();c.ellipse(0,0,3.4,1.8,0,0,6.2832);c.fill();c.restore();}},
   /* xoáy tuyết nhỏ + tinh thể băng lấp lánh */
   tuyet:function(c,t,ph){
     var i,j,a,x,y,r,k;

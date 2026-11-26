@@ -269,3 +269,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Chủ game đã duyệt ảnh mask. VUNG['suong-coc'] mới: điểm xuất phát (740,990), boss (780,168), 2 cầu gỗ trong camNhay, DAUHIEU.suong. Tên khu là TÊN TẠM.
 - Nhảy/nhào/chạy/60s dùng chung với Tuyết Nguyên.
 - Nâng cache: 89 `?v=14`. Chưa chạy thử (chỉ kiểm tra trên lưới + cú pháp). Còn 7 vùng.
+
+## Vân Đảo: mask + chỗ núp + dấu hiệu (26/11/2026)
+- Chủ game đã duyệt ảnh mask (sửa 4 lần: thu mép đảo, bỏ chỗ thác khu 3/4, rìa phải khu 2, mở pha lê trái khu 1). VUNG['van-dao']: xuất phát (740,990), boss (800,170), 3 cầu gỗ trong camNhay, DAUHIEU.van (mây trôi + cánh hoa tím). Tên khu là TÊN TẠM.
+- Chỗ núp: khu1 10, khu2 10, khu3 8, khu4 6. checkCfg() sạch.
+- Nâng cache: 89 `?v=15`. Chưa chạy thử (chỉ kiểm tra trên lưới + cú pháp). Còn 6 vùng: phong-nguyen, loi-vuc, nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam.

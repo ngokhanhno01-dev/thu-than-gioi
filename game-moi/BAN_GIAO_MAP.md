@@ -6,7 +6,7 @@
 - TIẾT KIỆM QUOTA: KHÔNG chạy thử game (playwright) trừ khi chủ game yêu cầu. Chỉ `node --check` + TTGMAP.checkCfg(). Báo rõ là chưa chạy thử. Không đọc cả file .js, chỉ grep đúng đoạn.
 - Chủ game KHÔNG tự khoanh mask (khó): Claude khoanh, gửi ảnh xem trước, chủ game nhắn "được" mới đưa vào game.
 
-## Tiến độ: XONG tuyet-nguyen, suong-coc. CÒN: van-dao, phong-nguyen, loi-vuc, nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam
+## Tiến độ: XONG tuyet-nguyen, suong-coc, van-dao. CÒN: phong-nguyen, loi-vuc, nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam
 Ảnh cả 7 vùng đã có: game-moi/map-tham-hiem-<slug>.webp (1536x1024). Chủ game chưa duyệt bằng mắt 7 ảnh này -> mở xem trước.
 
 ## Mỗi vùng mới (file game-moi/89-tham-hiem-map.js; lấy VUNG['suong-coc'] làm mẫu)
