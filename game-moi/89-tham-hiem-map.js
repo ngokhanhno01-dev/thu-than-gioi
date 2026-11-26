@@ -598,8 +598,10 @@ function drawSprite(s,c,k){
   var sp;
   /* Chỉ dùng sprite khi đã cấu hình ảnh nhân vật hợp lệ. Không gọi THU_MOI.draw()
      với ID 0: hàm đó có thể không vẽ gì nhưng vẫn khiến caller bỏ qua chibi(). */
-  if(CFG.nhanVat.anh){
-    if(!s.sprite){s.sprite=new Image();s.sprite.onload=function(){if(S===s&&s.ready)draw(s);};s.sprite.src=CFG.nhanVat.anh;}
+  /* Ảnh nhân vật: CFG.nhanVat.anh nếu có, không thì ảnh map của nhân vật người chơi đã chọn (64b-chon-nhan-vat.js, kèm skin đang mặc). */
+  var src=CFG.nhanVat.anh||(window.TTGNHANVAT&&TTGNHANVAT.anhMap?TTGNHANVAT.anhMap():null);
+  if(src){
+    if(!s.sprite||s.spriteSrc!==src){s.spriteSrc=src;s.sprite=new Image();s.sprite.onload=function(){if(S===s&&s.ready)draw(s);};s.sprite.src=src;}
     sp=s.sprite;
     if(sp.complete&&sp.naturalWidth){c.drawImage(sp,-k/2,-k,k,k);return true;}
   }

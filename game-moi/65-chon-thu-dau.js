@@ -9,6 +9,7 @@
    BẤM XÁC NHẬN (21/11/2026) = BẮT ĐẦU TÀI KHOẢN MỚI, XÓA TRẮNG như người chơi lần đầu: xóa MỌI khóa localStorage ttg_moi_* (kho thú, thú ra trận, danh sách thả, thú ở sảnh, Balo/Châu/sách, khóa đồ, kiểu xếp...) TRỪ lựa chọn thú đầu, bố cục nút (ttg_moi_layout_v1) và cài đặt khung HD (ttg_moi_hd) (xem GIU bên dưới); đồng thời reset Balo trong bộ nhớ bằng TTGBALO.xoaTrang() (53-balo.js). Rồi phát đúng 1 con thú vừa chọn vào kho với Lv.1, Bậc 1 và RANK RANDOM bằng TTGCS.tungBac() (cùng bảng tỉ lệ E..SS như lúc bắt thú ở Thám hiểm), cho RA TRẬN luôn => sảnh hiện đúng thú đã chọn. Việc xóa kho thú + phát thú do TTGTHU.khoiTao() (54-thu-than.js) làm.
    QUÀ KHỞI ĐẦU (25/11/2026): ngay SAU khi xóa trắng + phát thú, tặng CFG_CHAU_DAU (mặc định 10) Ngự Thú Châu BẬC 1 vào Balo (TTGBALO.add(TTGBONG.idBong(1), n), 58-bong-bat.js). Chỉ cộng khi bấm Xác Nhận thật (nút X không cộng). Sau khi màn chọn đóng, hiện BẢNG THÔNG BÁO nhận châu (baoQua). Chế độ ?thu=demo thì KHÔNG tặng (giữ nguyên Balo demo).
    Sự kiện 'ttg-starter' (detail = {slot,id,bac,uid}) vẫn bắn như cũ; TTGSTARTER.get() trả lựa chọn đã lưu.
+   CHỌN NHÂN VẬT (26/11/2026): trước màn chọn thú có màn chọn Nam/Nữ (64b-chon-nhan-vat.js, TTGNHANVAT.show). Xác Nhận ở màn đó xong mới mở màn chọn thú này. Không nạp 64b thì mở thẳng như cũ.
    KHÔNG CÒN NÚT X (25/11/2026): người chơi bắt buộc chọn thú rồi bấm Xác Nhận mới vào game, không đóng được màn này. Nút Xác Nhận chỉ bấm được sau khi chọn 1 bục. */
 (function(){
 'use strict';
@@ -16,7 +17,7 @@ if(window.TTG_BLOCK)return;
 var ALWAYS=true,KEY='ttg_moi_starter_v1',IW=2505,IH=1412,TIER=1;
 var CFG_CHAU_DAU=10;   /* số Ngự Thú Châu BẬC 1 tặng khi chọn thú đầu (đặt 0 để tắt) */
 var TXT_QUA_TIEU_DE='Quà Khởi Đầu',TXT_QUA_MO_TA='Ngự Thú Châu dùng để bắt thú hoang khi thám hiểm. Châu đã được cất trong Túi Trữ Vật, hãy mở Túi Trữ Vật để xem.';   /* chữ trong bảng thông báo quà (dễ sửa) */
-var GIU=['ttg_moi_starter_v1','ttg_moi_layout_v1','ttg_moi_hd'];   /* khóa KHÔNG xóa khi xóa trắng: lựa chọn thú đầu + cài đặt giao diện (không phải dữ liệu chơi) */
+var GIU=['ttg_moi_starter_v1','ttg_moi_layout_v1','ttg_moi_hd','ttg_moi_nhanvat_v1','ttg_moi_nhanvat_skin_v1'];   /* khóa KHÔNG xóa khi xóa trắng: lựa chọn thú đầu + nhân vật/skin (64b-chon-nhan-vat.js) + cài đặt giao diện (không phải dữ liệu chơi) */
 var STARTERS=[
  {id:'k2',ten:'Lưu Diêu',mota:'Thường + Thủy · Nhanh'},
  {id:'k1',ten:'Viêm Sư',mota:'Thường + Hỏa · Công'},
@@ -138,8 +139,14 @@ function confirm(){if(locked)return;
 function close(){if(!root)return;root.className=root.className.replace(' on','').replace(' ready','')+' off';
  var r=root;root=null;if(raf){cancelAnimationFrame(raf);raf=0;}window.removeEventListener('resize',sizeCv);
  setTimeout(function(){if(r.parentNode)r.parentNode.removeChild(r);},500);}
+var daQuaNV=false;
 function show(force){if(root)return;
- if(!force&&!ALWAYS&&read())return;
+ var NV=window.TTGNHANVAT&&TTGNHANVAT.show?TTGNHANVAT:null;
+ if(!force&&!ALWAYS&&read()){   /* đã chọn thú rồi: chỉ nhắc chọn nhân vật nếu người chơi cũ chưa có nhân vật */
+  if(NV&&!daQuaNV&&!NV.get()){daQuaNV=true;NV.show();}
+  return;}
+ /* LUỒNG: màn chờ -> CHỌN NHÂN VẬT (64b-chon-nhan-vat.js) -> chọn thú. Chọn nhân vật xong mới mở màn chọn thú. */
+ if(NV&&!daQuaNV){daQuaNV=true;NV.show(function(){show(force);},ALWAYS||force);return;}
  sel=-1;locked=false;cvs=[];
  var im=new Image(),n=0;
  im.onload=function(){build(SRC[n]);};

@@ -162,3 +162,10 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
   - **Tab**: Tất Cả / Đạo Cụ / Pháp Bảo / Đặc Biệt. Bấm tab nào thì tab đó bật viền sáng + thân sáng nhẹ, lưới về đầu. `TTGSHOP.tab()` / `TTGSHOP.setTab(id)` (id: all, dao-cu, phap-bao, dac-biet).
   - **Lưới cuộn**: 4 cột, cuộn dọc bằng thanh cuộn vàng. Số ô = max(`CFG.oToiThieu`, số món làm tròn lên bội 4). Hiện 16 ô trống để thử cuộn; có món thật thì đặt 8 và sửa hàm `items(tab)`.
   - **Làm mới**: `CFG.lamMoiPhut=30`, thanh dài dưới trái hiện "Làm mới sau: mm:ss". Mốc chu kỳ lưu ở khóa `ttg_moi_cuahang_lm` (tính theo giờ máy, tắt game vẫn chạy). Hết chu kỳ gọi các hàm đăng ký bằng `TTGSHOP.onRefresh(fn)`.
+
+## Chọn nhân vật Nam/Nữ + skin (26/11/2026) — `64b-chon-nhan-vat.js` (TTGNHANVAT)
+- **Luồng mới**: màn chờ -> **chọn nhân vật** (Nam/Nữ) -> chọn thú đồng hành (65) -> vào game. 65 gọi `TTGNHANVAT.show(callback)`; bấm Xác Nhận ở màn nhân vật xong mới mở màn chọn thú. Người chơi cũ đã có thú mà chưa có nhân vật vẫn được nhắc chọn.
+- Lưu `ttg_moi_nhanvat_v1 = {gioi:'nu'|'nam', skin, t}`; skin đã mở lưu `ttg_moi_nhanvat_skin_v1`. Cả hai nằm trong GIU của 65 nên không mất khi xóa trắng tài khoản. Thử nhanh: `?nhan-vat=1` ép hiện màn chọn.
+- Ảnh: `game-moi/nhan-vat/<nu|nam>/<skin>-chon.png` (nhìn thẳng, 512x512, màn chọn) và `<skin>-map.png` (quay PHẢI, 512x512, bản đồ thám hiểm). `mac-dinh-4-goc-nhin.png` là bản gốc 4 góc nhìn (nền hồng) để làm sprite đi bộ sau.
+- Bản đồ thám hiểm (89-tham-hiem-map.js) tự dùng `TTGNHANVAT.anhMap()` nếu `CFG.nhanVat.anh` để null. Hiện mới là 1 ảnh đứng yên có nhún khi đi; sprite đi bộ 4 hướng làm sau.
+- **Thêm skin thưởng**: thêm 2 ảnh `<idSkin>-chon.png` + `<idSkin>-map.png`, thêm 1 dòng vào `SKINS` trong 64b, rồi `TTGNHANVAT.moKhoa(gioi,id)` + `TTGNHANVAT.datSkin(id)`.
