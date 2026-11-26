@@ -227,7 +227,7 @@ CFG.tran={
   vao:450                  /* hiện dần + trượt vào lúc vào trận (ms) */
 };
 var TR={seen:0,t0:0,lenh:0,was:false,hop:null,x:null,fy:0};
-function tranSrc(loai){var N=root.TTGNHANVAT;if(!N||!N.gioi)return null;var g=N.gioi(),s=N.skin();if(N.daMo&&!N.daMo(g,s))s='mac-dinh';return 'game-moi/nhan-vat/'+g+'/'+s+'-tran-'+loai+'.png?v=1';}
+function tranSrc(loai){var N=root.TTGNHANVAT;if(!N||!N.gioi)return null;var g=N.gioi(),s=N.skin();if(N.daMo&&!N.daMo(g,s))s='mac-dinh';return 'game-moi/nhan-vat/'+(N.thuMuc?N.thuMuc(g,s):g)+'/'+s+'-tran-'+loai+'.png?v=1';}
 function tranImg(loai){
   var src=tranSrc(loai);if(!src)return null;var e=IMG[src];
   if(!e){e=IMG[src]={img:new Image(),ok:false,bad:false};e.img.onload=function(){e.ok=true;};e.img.onerror=function(){e.bad=true;};e.img.src=src;}

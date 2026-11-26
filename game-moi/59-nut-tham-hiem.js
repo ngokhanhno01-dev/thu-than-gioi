@@ -1,7 +1,7 @@
 /* Nạp thêm màn chọn thú đồng hành (65-chon-thu-dau.js). Tạm đặt ở đây để khỏi sửa index.html (78KB); khi sửa index.html lần sau thì chuyển thành 1 dòng <script src="game-moi/65-chon-thu-dau.js"> rồi xóa đoạn này. */
 /* 26/11/2026: nạp màn CHỌN NHÂN VẬT (64b-chon-nhan-vat.js) TRƯỚC, xong (hoặc lỗi) mới nạp màn chọn thú để 65 thấy TTGNHANVAT. */
 (function(){function nap(u,f){var s=document.createElement('script');s.src=u;s.onload=s.onerror=f||function(){};document.head.appendChild(s);}
- nap('game-moi/64b-chon-nhan-vat.js?v=7',function(){nap('game-moi/65-chon-thu-dau.js?v=3');nap('game-moi/84b-nhan-vat-sanh.js?v=3');});})();   /* 84b: nhân vật đứng cạnh thú ở sảnh */
+ nap('game-moi/64b-chon-nhan-vat.js?v=8',function(){nap('game-moi/65-chon-thu-dau.js?v=3');nap('game-moi/84b-nhan-vat-sanh.js?v=4');});})();   /* 84b: nhân vật đứng cạnh thú ở sảnh */
 /* Nạp nút Admin + kho danh hiệu (76-admin-danh-hieu.js), cũng tạm đặt ở đây; sau này chuyển thành <script src> trong index.html. */
 (function(){var s=document.createElement('script');s.src='game-moi/76-admin-danh-hieu.js?v=1';document.head.appendChild(s);})();
 (function(){

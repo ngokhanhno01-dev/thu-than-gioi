@@ -21,16 +21,19 @@ var GIOI=[
  {id:'nu',ten:'Nữ Tu Sĩ',mota:'Lanh lợi, nhẹ nhàng như tuyết'},
  {id:'nam',ten:'Nam Tu Sĩ',mota:'Kiên cường, thẳng như trúc'}];
 var SKINS={
- nu:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'}],
- nam:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh',ten:'Giáng Sinh'}]};
+ nu:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh-nu',ten:'Giáng Sinh Nữ'}],
+ nam:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh-nam',ten:'Giáng Sinh Nam'}]};
+/* Skin KHÔNG bị giới hạn theo giới tính: Nam/Nữ trong tên chỉ để phân biệt, ai cũng mặc được. Mỗi skin nằm trong thư mục của giới nó thuộc về (nhan-vat/<gioi>/<idSkin>-*.png), riêng 'mac-dinh' theo giới của người chơi. */
+function thuMuc(g,s){if(s==='mac-dinh')return g;for(var k in SKINS){for(var i=0;i<SKINS[k].length;i++)if(SKINS[k][i].id===s)return k;}return g;}
+function dsSkin(g){var a=[(SKINS[g]||SKINS.nu)[0]],k,i;for(k in SKINS)for(i=0;i<SKINS[k].length;i++)if(SKINS[k][i].id!=='mac-dinh')a.push(SKINS[k][i]);return a;}   /* bộ mặc định của giới g + mọi skin thưởng của cả 2 giới */
 var root=null,sel=-1,locked=false,cb=null;
 function rd(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
 function wr(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function get(){var o=rd(KEY);return(o&&(o.gioi==='nu'||o.gioi==='nam'))?o:null;}
 function gioi(){var o=get();return o?o.gioi:'nu';}
 function skin(){var o=get();return(o&&o.skin)||'mac-dinh';}
-function daMo(g,id){if(id==='mac-dinh')return true;var o=rd(KEYSK)||{};return !!(o[g]&&o[g][id]);}
-function moKhoa(g,id){var o=rd(KEYSK)||{};if(!o[g])o[g]={};o[g][id]=1;wr(KEYSK,o);}
+function daMo(g,id){if(id==='mac-dinh')return true;var o=rd(KEYSK)||{},k;for(k in o)if(o[k]&&o[k][id])return true;return false;}   /* sở hữu tính chung cho cả tài khoản, không phân giới */
+function moKhoa(g,id){var o=rd(KEYSK)||{},h=thuMuc(g,id);if(!o[h])o[h]={};o[h][id]=1;wr(KEYSK,o);}
 function datSkin(id){var o=get();if(!o||!daMo(o.gioi,id))return false;o.skin=id;wr(KEY,o);return true;}
 /* BIỆT DANH (26/11/2026): đặt ngay sau khi chọn nhân vật, TRƯỚC màn chọn thú. Lưu ở ttg_moi_nhanvat_ten_v1 (nằm trong GIU của 65 nên không mất khi xóa trắng). */
 function ten(){var o=rd(KEYTEN);return(typeof o==='string'&&o)?o:'';}
@@ -41,12 +44,12 @@ function loiTen(s){s=chuanTen(s);var n=Array.from(s).length;
  try{if(!/^[\p{L}\p{M}\p{N} _.\-]+$/u.test(s))return 'Chỉ dùng chữ, số, dấu cách và _ . -';}catch(e){}
  return '';}
 function datTen(s){s=chuanTen(s);if(loiTen(s))return false;wr(KEYTEN,s);try{window.dispatchEvent(new CustomEvent('ttg-nhanvat-ten',{detail:{ten:s}}));}catch(e){}return true;}
-function boSkin(g,id){if(id==='mac-dinh')return false;var o=rd(KEYSK)||{};if(!o[g]||!o[g][id])return false;delete o[g][id];wr(KEYSK,o);var c=get();if(c&&c.gioi===g&&c.skin===id){c.skin='mac-dinh';wr(KEY,c);try{window.dispatchEvent(new CustomEvent('ttg-nhanvat',{detail:c}));}catch(e){}}return true;}
-function anh(g,s,loai){return DIR+g+'/'+s+'-'+loai+'.png'+V;}
+function boSkin(g,id){if(id==='mac-dinh')return false;var o=rd(KEYSK)||{},k,co=false;for(k in o)if(o[k]&&o[k][id]){delete o[k][id];co=true;}if(!co)return false;wr(KEYSK,o);var c=get();if(c&&c.skin===id){c.skin='mac-dinh';wr(KEY,c);try{window.dispatchEvent(new CustomEvent('ttg-nhanvat',{detail:c}));}catch(e){}}return true;}
+function anh(g,s,loai){return DIR+thuMuc(g,s)+'/'+s+'-'+loai+'.png'+V;}
 function anhMap(){var o=get();var g=o?o.gioi:'nu',s=(o&&o.skin)||'mac-dinh';if(!daMo(g,s))s='mac-dinh';return anh(g,s,'map');}
 /* dải khung đi bộ: 4 khung 512x512 xếp ngang (2048x512): khung 1 và 3 = bước chân, 2 và 4 = tư thế đứng/chuyển. huong: 'phai' (ngang, quay phải; quay trái thì lật), 'truoc' (chính diện) hoặc 'sau' (quay lưng). Chưa có file -> map tự dùng ảnh đứng yên anhMap(). */
-function anhDi(huong){var o=get();var g=o?o.gioi:'nu',s=(o&&o.skin)||'mac-dinh';if(!daMo(g,s))s='mac-dinh';return DIR+g+'/'+s+'-di-'+huong+'.png'+V;}
-function anhChon(g){var o=get();var s=(o&&o.gioi===g&&o.skin)||'mac-dinh';if(!daMo(g,s))s='mac-dinh';return anh(g,s,'chon');}
+function anhDi(huong){var o=get();var g=o?o.gioi:'nu',s=(o&&o.skin)||'mac-dinh';if(!daMo(g,s))s='mac-dinh';return DIR+thuMuc(g,s)+'/'+s+'-di-'+huong+'.png'+V;}
+function anhChon(g){var o=get();var s=(o&&o.gioi===g&&o.skin)||'mac-dinh';if(!daMo(g,s)||thuMuc(g,s)!==g)s='mac-dinh';return anh(g,s,'chon');}   /* thẻ chọn giới tính chỉ hiện skin của đúng giới đó */
 function css(){
  var s=document.createElement('style');
  s.textContent=
@@ -80,7 +83,7 @@ function pick(i){if(locked)return;sel=i;
 function xacNhan(){if(locked)return;
  if(sel<0){say('Hãy chọn một nhân vật trước!',true);setTimeout(function(){if(sel<0&&!locked)say(HINT);},1400);return;}
  locked=true;var g=GIOI[sel].id,old=get();
- var keep=(old&&old.gioi===g&&old.skin&&daMo(g,old.skin))?old.skin:'mac-dinh';   /* đổi giới tính thì về skin mặc định */
+ var keep=(old&&old.skin&&daMo(g,old.skin))?old.skin:'mac-dinh';   /* skin đã sở hữu giữ nguyên khi đổi giới (skin không phân giới) */
  var r={gioi:g,skin:keep,t:Date.now()};wr(KEY,r);
  say('Đã chọn '+GIOI[sel].ten+'!');
  try{window.dispatchEvent(new CustomEvent('ttg-nhanvat',{detail:r}));}catch(e){}
@@ -145,13 +148,12 @@ function show(f,ep){
  function go(){if(done)return;done=true;build();}
  imgs.forEach(function(u){var im=new Image();im.onload=im.onerror=function(){if(--left<=0)go();};im.src=u;});
  setTimeout(go,1500);}   /* ảnh chậm quá 1,5 giây vẫn hiện màn, ảnh sẽ tự hiện khi tải xong */
-/* NÚT TEST ẨN (menu ẩn khi chạm chữ "Danh Vọng", xem 80-danh-vong.js): nhận skin Nam "Giáng Sinh" để thử. Chỉ MỞ KHÓA, mặc ở bảng Nhân Vật (icon ngoài cùng bên phải). Xóa khối này khi ra bản thật. */
-(function(){var n=0;(function dang(){var T=window.TTGNV;if(!T||!T.add){if(++n<100)setTimeout(dang,200);return;}
+/* NÚT TEST ẨN (menu ẩn khi chạm chữ "Danh Vọng", xem 80-danh-vong.js): nhận 2 skin Giáng Sinh (Nam + Nữ) để thử. Chỉ MỞ KHÓA, mặc ở bảng Nhân Vật (icon ngoài cùng bên phải). Ai cũng mặc được cả 2. Xóa khối này khi ra bản thật. */
+(function(){var n=0,GS=[['nam','giang-sinh-nam'],['nu','giang-sinh-nu']];(function dang(){var T=window.TTGNV;if(!T||!T.add){if(++n<100)setTimeout(dang,200);return;}
  T.add({id:'lay-skin-gs',dev:true,ten:'Lấy skin Giáng Sinh',onTap:function(){
-  var B=window.TTGBAO,m=function(t){if(B&&B.toast)B.toast(t,2400);};
-  if(daMo('nam','giang-sinh')){m('TEST: đã có skin Giáng Sinh, mở bảng Nhân Vật để mặc');return;}
-  moKhoa('nam','giang-sinh');
-  m(gioi()==='nam'?'TEST: nhận skin Giáng Sinh! Mở bảng Nhân Vật để mặc':'TEST: nhận skin Giáng Sinh (chỉ dùng cho nhân vật Nam, bạn đang chọn Nữ)');}});})();})();
-window.TTGNHANVAT={get:get,show:show,gioi:gioi,skin:skin,datSkin:datSkin,moKhoa:moKhoa,daMo:daMo,anhMap:anhMap,anhDi:anhDi,anhChon:anhChon,list:GIOI,SKINS:SKINS,ten:ten,datTen:datTen,loiTen:loiTen,boSkin:boSkin,
+  var B=window.TTGBAO,m=function(t){if(B&&B.toast)B.toast(t,2400);},moi=0;
+  GS.forEach(function(x){if(!daMo(x[0],x[1])){moKhoa(x[0],x[1]);moi++;}});
+  m(moi?'TEST: nhận skin Giáng Sinh Nam + Giáng Sinh Nữ! Mở bảng Nhân Vật để mặc':'TEST: đã có 2 skin Giáng Sinh, mở bảng Nhân Vật để mặc');}});})();})();
+window.TTGNHANVAT={get:get,show:show,gioi:gioi,skin:skin,datSkin:datSkin,moKhoa:moKhoa,daMo:daMo,anhMap:anhMap,anhDi:anhDi,anhChon:anhChon,list:GIOI,SKINS:SKINS,thuMuc:thuMuc,dsSkin:dsSkin,ten:ten,datTen:datTen,loiTen:loiTen,boSkin:boSkin,
  reset:function(){try{localStorage.removeItem(KEY);localStorage.removeItem(KEYTEN);}catch(e){}}};
 })();

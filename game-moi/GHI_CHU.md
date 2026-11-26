@@ -179,11 +179,11 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Nối ở `index.html` (1 lệnh `TTGNVSANH.draw(ctx,ts,gy())` ngay sau `petSanh`) và `TTGSANH.info()` trong 83. Tắt thử bằng `?nvsanh=0`. Chỉnh cỡ/khoảng cách/tốc độ ở `CFG`, thêm câu ở `LINES` / `EMO` trong file 84b.
 - CHƯA TEST TRONG GAME (viết xong chỉ kiểm cú pháp): cần xem cỡ nhân vật (`CFG.kich`), vị trí đứng (`CFG.gap`) có hợp khung sảnh không.
 
-## Skin Nam "Giáng Sinh" (26/11/2026)
-- id `giang-sinh`, tên hiển thị "Giáng Sinh", khai trong `SKINS.nam` (64b-chon-nhan-vat.js). Chỉ có bản Nam (chưa có Nữ).
-- Ảnh ở `game-moi/nhan-vat/nam/giang-sinh-*.png`, đủ bộ như skin mặc định: `chon`, `map`, `di-truoc`, `di-phai`, `di-sau` (dải 2048x512 = 4 khung), `tran-tu-the`, `tran-ra-lenh` (512x512, nền trong suốt, chân sát đáy). `giang-sinh-4-goc-nhin.png` là bảng gốc để làm lại sprite. Chưa có `di-cheo` (skin mặc định cũng chưa dùng).
-- Đã tách nền hồng/xám bằng chroma-key; cỡ nhân vật căn theo skin mặc định (cao ~470px chính diện) để đổi skin không bị to/nhỏ.
-- **Nút test ẩn**: chạm chữ "Danh Vọng" -> menu ẩn -> **Lấy skin Giáng Sinh** (khai ở cuối 64b, xóa khi ra bản thật). Nút chỉ MỞ KHÓA; mặc ở bảng Nhân Vật. Cần đang chọn nhân vật Nam.
-- Bảng Nhân Vật CHỈ hiện skin đã nhận (lọc `daMo` trong `entries()` của 90-nhan-vat-bang.js); skin chưa nhận không nằm trong ô. Vứt bỏ skin thì biến khỏi lưới.
-- Skin chưa tự phát cho người chơi: mở bằng `TTGNHANVAT.moKhoa('nam','giang-sinh')`, mặc bằng `TTGNHANVAT.datSkin('giang-sinh')` (hoặc vào bảng Nhân Vật sau khi mở khóa). Nguồn nhận (sự kiện/cửa hàng) chưa làm.
-- `59-nut-tham-hiem.js`: nâng `64b-chon-nhan-vat.js?v=5` -> `v=6` để trình duyệt nạp bản mới.
+## Skin "Giáng Sinh Nam" + "Giáng Sinh Nữ" (26/11/2026)
+- 2 skin: `giang-sinh-nam` ("Giáng Sinh Nam", ảnh ở `nhan-vat/nam/`) và `giang-sinh-nu` ("Giáng Sinh Nữ", ảnh ở `nhan-vat/nu/`), khai trong `SKINS` (64b-chon-nhan-vat.js).
+- **Skin KHÔNG phân giới**: Nam/Nữ trong tên chỉ để phân biệt bộ, nhân vật Nam hay Nữ đều mặc được cả hai. Sở hữu tính chung cả tài khoản (`daMo` không xét giới). Mỗi skin tự biết thư mục ảnh của mình qua `TTGNHANVAT.thuMuc(gioi, idSkin)` (riêng `mac-dinh` theo giới người chơi); `dsSkin(gioi)` = bộ mặc định + mọi skin thưởng của cả 2 giới. Ảnh đi bộ/trận/bảng Nhân Vật (64b, 84b, 90) đều đi qua `thuMuc`. Đổi giới tính không còn reset skin đã sở hữu. Thẻ chọn Nam/Nữ chỉ hiện skin cùng giới. Khóa skin (🔒) cũng tính chung.
+- Đủ bộ ảnh mỗi skin: `<id>-chon`, `-map`, `-di-truoc`, `-di-phai`, `-di-sau` (dải 2048x512 = 4 khung), `-tran-tu-the`, `-tran-ra-lenh` (512x512, nền trong suốt, chân sát đáy), `-4-goc-nhin.png` (bảng gốc). Cỡ nhân vật căn theo đúng sprite mặc định của giới đó. Chưa có `di-cheo`.
+- **Thêm skin thưởng mới**: bỏ ảnh vào `nhan-vat/<gioi>/<idSkin>-*.png`, thêm 1 dòng vào `SKINS` (id duy nhất toàn game, khuyến nghị đuôi `-nam`/`-nu`), rồi `TTGNHANVAT.moKhoa('nam'|'nu', idSkin)`.
+- **Nút test ẩn**: chạm chữ "Danh Vọng" -> menu ẩn -> **Lấy skin Giáng Sinh** (cuối 64b, xóa khi ra bản thật). Nhận cả 2 skin cùng lúc, chỉ MỞ KHÓA; mặc ở bảng Nhân Vật.
+- Bảng Nhân Vật CHỈ hiện skin đã nhận (lọc `daMo` trong `entries()` của 90-nhan-vat-bang.js); vứt bỏ thì biến khỏi lưới. Nguồn nhận thật (sự kiện/cửa hàng) chưa làm.
+- Nâng version nạp: 64b `?v=8`, 84b `?v=4` (59-nut-tham-hiem.js), 90 `?v=5` (81-nut-moi.js).

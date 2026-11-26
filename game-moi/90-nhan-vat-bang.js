@@ -30,13 +30,14 @@ function rd(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){
 function wr(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function toast(s){try{if(root.TTGTBAO&&TTGTBAO.toast)TTGTBAO.toast(s,2200);}catch(e){}}
 function gioi(){var n=N();return n?n.gioi():'nu';}
-function dsSkin(){var n=N();return(n&&n.SKINS&&n.SKINS[gioi()])||[{id:'mac-dinh',ten:'Mặc định'}];}
+function dsSkin(){var n=N();return(n&&n.dsSkin&&n.dsSkin(gioi()))||(n&&n.SKINS&&n.SKINS[gioi()])||[{id:'mac-dinh',ten:'Mặc định'}];}   /* gồm skin của CẢ 2 giới (không phân giới) */
+function fd(id){var n=N();return(n&&n.thuMuc)?n.thuMuc(gioi(),id):gioi();}   /* thư mục ảnh của skin */
 function skinInfo(id){var a=dsSkin();for(var i=0;i<a.length;i++)if(a[i].id===id)return a[i];return a[0];}
 function dangMac(){var n=N();return n?n.skin():'mac-dinh';}
 function daMo(id){var n=N();return n?n.daMo(gioi(),id):id==='mac-dinh';}
 function khoaMap(){return rd(KEYK)||{};}
-function daKhoa(id){var o=khoaMap();return !!(o[gioi()]&&o[gioi()][id]);}
-function setKhoa(id,v){var o=khoaMap(),g=gioi();if(!o[g])o[g]={};if(v)o[g][id]=1;else delete o[g][id];wr(KEYK,o);}
+function daKhoa(id){var o=khoaMap(),k;for(k in o)if(o[k]&&o[k][id])return true;return false;}
+function setKhoa(id,v){var o=khoaMap(),k;for(k in o)if(o[k])delete o[k][id];if(v){if(!o.chung)o.chung={};o.chung[id]=1;}wr(KEYK,o);}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function pc(v,t){return (v/t*100).toFixed(3)+'%';}
 function place(el,b){el.style.left=pc(b.x,SW);el.style.top=pc(b.y,SH);el.style.width=pc(b.w,SW);el.style.height=pc(b.h,SH);}
@@ -215,7 +216,7 @@ function render(){
   var nm=(n&&n.ten&&n.ten())||'Chưa đặt tên';
   E.ten.textContent=nm;
   /* nhân vật: xem trước skin đang chọn (chọn món khác loại skin thì hiện bộ đang mặc) */
-  var showId=sel.k==='skin'?sel.id:mac,src=DIR+g+'/'+showId+'-tran-tu-the.png'+V;
+  var showId=sel.k==='skin'?sel.id:mac,src=DIR+fd(showId)+'/'+showId+'-tran-tu-the.png'+V;
   if(E.nv.getAttribute('data-s')!==src){E.nv._fb=0;E.nv.setAttribute('data-s',src);E.nv.src=src;}
   /* danh hiệu đang mang nổi trên đầu */
   var dh=macNv('dh');
@@ -223,7 +224,7 @@ function render(){
   else{E.dh.style.display='none';E.dh.removeAttribute('data-s');}
   /* 3 ô trái: Danh hiệu, Khung UI, Trang Phục đang mang */
   for(i=0;i<E.slots.length;i++){var sb=E.slots[i],it=i===0?dh:(i===1?macNv('khui'):null);
-    if(i===2){sb.innerHTML='<span class="in"><img alt="" draggable="false" src="'+DIR+g+'/'+mac+'-chon.png'+V+'"></span>';sb.className='nvb-sl'+(sel.k==='skin'&&sel.id===mac?' on':'');}
+    if(i===2){sb.innerHTML='<span class="in"><img alt="" draggable="false" src="'+DIR+fd(mac)+'/'+mac+'-chon.png'+V+'"></span>';sb.className='nvb-sl'+(sel.k==='skin'&&sel.id===mac?' on':'');}
     else if(it){sb.innerHTML='<span class="in">'+iconNv(it)+'</span>'+(it.kh?'<span class="nvb-bd">🔒</span>':'');sb.className='nvb-sl'+(sel.k==='item'&&sel.uid===it.uid?' on':'');}
     else{sb.innerHTML='';sb.className='nvb-sl';}}
   /* lưới (có lật trang) */
@@ -235,7 +236,7 @@ function render(){
     if(e.k==='skin'){
       var s=skinInfo(e.id),mo=daMo(e.id),kh=daKhoa(e.id);
       c.className='nvb-sl'+(on?' on':'')+(mo?'':' lk');
-      c.innerHTML='<span class="in"><img alt="" draggable="false" src="'+DIR+g+'/'+e.id+'-chon.png'+V+'"></span>'+(e.id===mac?'<span class="nvb-bd mac">✓</span>':'')+(kh?'<span class="nvb-bd">🔒</span>':(mo?'':'<span class="nvb-bd">🚫</span>'));
+      c.innerHTML='<span class="in"><img alt="" draggable="false" src="'+DIR+fd(e.id)+'/'+e.id+'-chon.png'+V+'"></span>'+(e.id===mac?'<span class="nvb-bd mac">✓</span>':'')+(kh?'<span class="nvb-bd">🔒</span>':(mo?'':'<span class="nvb-bd">🚫</span>'));
       c.setAttribute('aria-label',s.ten);}
     else{
       var t=tb&&tb.get(e.uid);
@@ -253,7 +254,7 @@ function render(){
       '<div class="r"><span>Khóa</span><b>'+(ti.kh?'Đang khóa':'Không')+'</b></div>'+
       (ti.mo?'<div class="mo">'+esc(ti.mo)+'</div>':'');}
   else{
-    var si=skinInfo(sel.id),mo2=daMo(sel.id),gi=null,L=(n&&n.list)||[],j;for(j=0;j<L.length;j++)if(L[j].id===g)gi=L[j];
+    var si=skinInfo(sel.id),mo2=daMo(sel.id),gi=null,L=(n&&n.list)||[],j;for(j=0;j<L.length;j++)if(L[j].id===fd(sel.id))gi=L[j];
     var tt=sel.id===mac?'<span class="ok">Đang dùng</span>':(mo2?'Đã sở hữu':'<span class="no">Chưa sở hữu</span>');
     var tp=mac==='mac-dinh'?'Mặc định':skinInfo(mac).ten;   /* Trang Phục = bộ nhân vật đang mặc */
     tin='<div class="t">'+esc(si.ten)+'</div><div class="s">'+esc(gi?gi.ten:'')+'</div>'+
