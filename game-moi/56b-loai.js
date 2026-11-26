@@ -89,7 +89,17 @@ var BANG={
   ],
   /* 3 THÚ KHỞI ĐẦU (21/11/2026): hệ chủ Thường + hệ phụ. Mỗi vùng mới tạm chỉ có 1 con; phần tử thứ 5 = false nghĩa là KHÔNG phải boss (mặc định dòng cuối vùng là boss); phần tử thứ 6 = vung dùng để TÍNH CHỈ SỐ (0 = ngang thú vùng 1, để thú khởi đầu không mạnh hơn thú Tuyết Nguyên). Khi làm đủ 10 thú cho vùng thì sắp lại. */
   6:[ /* Thủy Nguyệt Cảnh (thuy) */
-    ['k2','Lưu Diêu','n',['thuong','thuy'],false,0]
+    ['k2','Lưu Diêu','n',['thuong','thuy'],false,0],
+    ['7a','Thủy Giáp Tướng','t',['thuy']],
+    ['7b','Thủy Lãng Quỳ','t',['thuy']],
+    ['7c','Thủy Linh Nhu','n',['thuy']],
+    ['7d','Thủy Huyền Quy','t',['thuy']],
+    ['7e','Thủy Sát Giao','c',['thuy']],
+    ['7f','Thủy Nguyệt Liên','b',['thuy']],
+    ['7g','Thủy Vũ Vệ','n',['thuy']],
+    ['7h','Thủy Thương Long','c',['thuy']],
+    ['7i','Thủy Thánh Trạch','b',['thuy']],
+    ['7j','Hoài Thủy Vô Chi Kỳ','c',['thuy']]
   ],
   7:[ /* Xích Hỏa Địa (hoa) */
     ['k1','Viêm Sư','c',['thuong','hoa'],false,0]
@@ -118,7 +128,8 @@ var DO_HIEM_RIENG={
   '3a':'thuong', '3b':'thuong', '3c':'thuong', '3d':'hiem', '3e':'huyenthoai', '3f':'hiem', '3g':'suthi', '3h':'suthi', '3i':'hiem', '3j':'truyenthuyet',
   '6a':'suthi', '6b':'thuong', '6c':'hiem', '6d':'hiem', '6e':'hiem', '6f':'thuong', '6g':'suthi', '6h':'thuong', '6i':'huyenthoai', '6j':'truyenthuyet',
   '4a':'thuong', '4b':'thuong', '4c':'hiem', '4d':'suthi', '4e':'hiem', '4f':'hiem', '4g':'thuong', '4h':'suthi', '4i':'huyenthoai', '4j':'truyenthuyet',
-  '5a':'thuong', '5b':'thuong', '5c':'hiem', '5d':'thuong', '5e':'hiem', '5f':'hiem', '5g':'suthi', '5h':'suthi', '5i':'huyenthoai', '5j':'truyenthuyet'
+  '5a':'thuong', '5b':'thuong', '5c':'hiem', '5d':'thuong', '5e':'hiem', '5f':'hiem', '5g':'suthi', '5h':'suthi', '5i':'huyenthoai', '5j':'truyenthuyet',
+  '7a':'thuong', '7b':'thuong', '7c':'thuong', '7d':'hiem', '7e':'hiem', '7f':'hiem', '7g':'suthi', '7h':'suthi', '7i':'huyenthoai', '7j':'truyenthuyet'
 };
 /* ĐỘ HIẾM CỦA HỆ (khác độ hiếm loài): hệ có vùng riêng = thuong; Độc/Trùng = hiem; Võ/Nham = suthi; Ma = huyenthoai; Long = truyenthuyet.
    CHỈ LÀ DỮ LIỆU: sau này mỗi hệ hiếm sẽ có nội tại riêng theo độ hiếm; hiện chưa dùng ở đâu. Hệ không ghi ở đây = thuong. */

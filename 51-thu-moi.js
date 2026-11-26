@@ -91,7 +91,17 @@
       { id: '6j', slug: '10-phong-nguyen-vu-xa', ten: 'Phong Nguyên Vũ Xà', boss: true }
     ] },
     { z: 6, slug: 'thuy-nguyet-canh', ten: 'Thủy Nguyệt Cảnh', thu: [
-      { id: 'k2', slug: '01-luu-dieu', ten: 'Lưu Diêu', boss: false, nen: 'khoi-dau' }
+      { id: 'k2', slug: '01-luu-dieu', ten: 'Lưu Diêu', boss: false, nen: 'khoi-dau' },
+      { id: '7a', slug: '01-thuy-giap-tuong', ten: 'Thủy Giáp Tướng', boss: false },
+      { id: '7b', slug: '02-thuy-lang-quy', ten: 'Thủy Lãng Quỳ', boss: false },
+      { id: '7c', slug: '03-thuy-linh-nhu', ten: 'Thủy Linh Nhu', boss: false },
+      { id: '7d', slug: '04-thuy-huyen-quy', ten: 'Thủy Huyền Quy', boss: false },
+      { id: '7e', slug: '05-thuy-sat-giao', ten: 'Thủy Sát Giao', boss: false },
+      { id: '7f', slug: '06-thuy-nguyet-lien', ten: 'Thủy Nguyệt Liên', boss: false },
+      { id: '7g', slug: '07-thuy-vu-ve', ten: 'Thủy Vũ Vệ', boss: false },
+      { id: '7h', slug: '08-thuy-thuong-long', ten: 'Thủy Thương Long', boss: false },
+      { id: '7i', slug: '09-thuy-thanh-trach', ten: 'Thủy Thánh Trạch', boss: false },
+      { id: '7j', slug: '10-hoai-thuy-vo-chi-ky', ten: 'Hoài Thủy Vô Chi Kỳ', boss: true }
     ] },
     { z: 7, slug: 'xich-hoa-dia', ten: 'Xích Hỏa Địa', thu: [
       { id: 'k1', slug: '01-viem-su', ten: 'Viêm Sư', boss: false, nen: 'khoi-dau' }
