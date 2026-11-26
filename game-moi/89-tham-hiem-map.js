@@ -70,7 +70,7 @@ var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
 var VUNG={
   'tuyet-nguyen':{
     ten:'Tuyết Nguyên',
-    anh:DIR+'map-tham-hiem-tuyet-nguyen.webp',
+    anh:DIR+'map-tham-hiem-tuyet-nguyen.webp?v=2',
     rong:1536,cao:1024,
     maskW:192,maskH:128,                      /* lưới va chạm: mỗi ô = rong/maskW = 8 đơn vị map */
     maskData:'',                              /* DÁN chuỗi từ nút "Copy Mask" vào đây (rỗng = đi tự do) */

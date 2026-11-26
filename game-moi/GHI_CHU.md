@@ -212,3 +212,9 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Bảng Nhân Vật lệch bệ: do ảnh `tran-tu-the` của skin bị dịch trái để chừa chỗ rồng lửa. Quy tắc: `tran-tu-the` luôn đặt thân GIỮA ảnh 512 (bbox giữa ở x=256). `tran-ra-lenh` có thể RỘNG HƠN 512 (cao vẫn 512), thân đặt trùng tâm chân với tu-the, hiệu ứng tràn sang phải; code 84b vẽ theo `naturalWidth` nên ảnh 512 cũ không đổi.
 - Trong trận dịch thú/quái vào trong để chừa chỗ cho nhân vật và phụ kiện sau này: PET_X .218 -> .27 (index.html, thú phải đối xứng 1-PET_X) và CFG.tran.petX .27 (84b). Nhân vật đứng theo thú (pet - gap) nên cũng dịch vào theo. Muốn sát/xa hơn thì sửa 2 số này CÙNG LÚC.
 - Nâng cache: ảnh trận `?v=2` (84b), bảng Nhân Vật `?v=4` (90).
+
+## Thay ảnh map thám hiểm mới (26/11/2026)
+- Đã thay `map-tham-hiem-tuyet-nguyen.webp` và `map-tham-hiem-suong-coc.webp` bằng map mới (webp thật 1536x1024, ~0,5 MB mỗi ảnh; có đường mòn rõ, 4 khu, 16 chỗ núp, 4 biển KHU 1-4, cổng/hang boss trên cùng). 7 vùng còn lại chưa có map mới, giữ ảnh cũ.
+- Các ảnh `bg-<slug>.webp` là ảnh nền vùng (cảnh nhìn ngang), KHÔNG phải map thám hiểm, không đụng tới.
+- Nâng cache: 89 `?v=5` (ảnh tuyết nguyên `?v=2`), 82 `?v=3` (V = `?v=2`).
+- VUNG['tuyet-nguyen'] vẫn là số liệu CŨ (mask rỗng, 16 điểm + boss ước lượng theo ảnh cũ), sẽ làm lại ở Bước 1-2 cho ảnh mới.
