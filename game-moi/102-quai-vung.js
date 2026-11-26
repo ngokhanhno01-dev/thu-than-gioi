@@ -1,4 +1,4 @@
-/* game-moi/102-quai-vung.js — Danh mục 102 quái hoang lấy từ CSV người dùng gửi. */
+/* game-moi/102-quai-vung.js — Danh mục 102 quái hoang lấy từ CSV người dùng gửi + 6 quái vùng demo Thủy Nguyệt Cảnh (mob-221..231, soVung 18 để không đụng Dương Sơn = 7). */
 (function(root){
 'use strict';
 var all = [
@@ -1735,6 +1735,108 @@ var all = [
     "mauChuDao": "#fff0a0",
     "mauNhan": "#ffe485",
     "mauSang": "#ffe485"
+  },
+  {
+      "id": "mob-221",
+      "stt": 221,
+      "imageFile": "mob-221.png",
+      "soVung": 18,
+      "vung": "Thủy Nguyệt Cảnh",
+      "slug": "thuy-nguyet-canh",
+      "ten": "Thủy Linh Bọt Biển",
+      "tenCSV": "Thủy Linh Bọt Biển",
+      "loai": "Quai thuong",
+      "boss": false,
+      "capMo": 37,
+      "thuTuTrongVung": 1,
+      "mauChuDao": "#2f7fd8",
+      "mauNhan": "#6fc3ff",
+      "mauSang": "#b8e6ff"
+  },
+  {
+      "id": "mob-223",
+      "stt": 223,
+      "imageFile": "mob-223.png",
+      "soVung": 18,
+      "vung": "Thủy Nguyệt Cảnh",
+      "slug": "thuy-nguyet-canh",
+      "ten": "Lam Tinh Cự Giải",
+      "tenCSV": "Lam Tinh Cự Giải",
+      "loai": "Quai thuong",
+      "boss": false,
+      "capMo": 38,
+      "thuTuTrongVung": 2,
+      "mauChuDao": "#6fc3ff",
+      "mauNhan": "#b8e6ff",
+      "mauSang": "#b8e6ff"
+  },
+  {
+      "id": "mob-225",
+      "stt": 225,
+      "imageFile": "mob-225.png",
+      "soVung": 18,
+      "vung": "Thủy Nguyệt Cảnh",
+      "slug": "thuy-nguyet-canh",
+      "ten": "Nguyệt Liên Thủy Yêu",
+      "tenCSV": "Nguyệt Liên Thủy Yêu",
+      "loai": "Quai thuong",
+      "boss": false,
+      "capMo": 39,
+      "thuTuTrongVung": 3,
+      "mauChuDao": "#2f7fd8",
+      "mauNhan": "#6fc3ff",
+      "mauSang": "#b8e6ff"
+  },
+  {
+      "id": "mob-227",
+      "stt": 227,
+      "imageFile": "mob-227.png",
+      "soVung": 18,
+      "vung": "Thủy Nguyệt Cảnh",
+      "slug": "thuy-nguyet-canh",
+      "ten": "Triều Ba Giao Xà",
+      "tenCSV": "Triều Ba Giao Xà",
+      "loai": "Quai thuong",
+      "boss": false,
+      "capMo": 40,
+      "thuTuTrongVung": 4,
+      "mauChuDao": "#6fc3ff",
+      "mauNhan": "#b8e6ff",
+      "mauSang": "#b8e6ff"
+  },
+  {
+      "id": "mob-229",
+      "stt": 229,
+      "imageFile": "mob-229.png",
+      "soVung": 18,
+      "vung": "Thủy Nguyệt Cảnh",
+      "slug": "thuy-nguyet-canh",
+      "ten": "Cổ Đình Hà Bá",
+      "tenCSV": "Cổ Đình Hà Bá",
+      "loai": "Quai thuong",
+      "boss": false,
+      "capMo": 41,
+      "thuTuTrongVung": 5,
+      "mauChuDao": "#2f7fd8",
+      "mauNhan": "#6fc3ff",
+      "mauSang": "#b8e6ff"
+  },
+  {
+      "id": "mob-231",
+      "stt": 231,
+      "imageFile": "mob-231.png",
+      "soVung": 18,
+      "vung": "Thủy Nguyệt Cảnh",
+      "slug": "thuy-nguyet-canh",
+      "ten": "Nguyệt Thác Giao Vương",
+      "tenCSV": "Nguyệt Thác Giao Vương",
+      "loai": "Boss",
+      "boss": true,
+      "capMo": 37,
+      "thuTuTrongVung": 6,
+      "mauChuDao": "#6fc3ff",
+      "mauNhan": "#b8e6ff",
+      "mauSang": "#b8e6ff"
   }
 ];
 var zones = [], byId = Object.create(null), map = Object.create(null);
