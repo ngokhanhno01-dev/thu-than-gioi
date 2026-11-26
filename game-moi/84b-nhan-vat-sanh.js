@@ -10,6 +10,7 @@
 (function(root){'use strict';
 var CFG={
   on:!/[?&]nvsanh=0/.test(location.search),
+  nang:9,               /* nâng nhân vật lên bấy nhiêu điểm cho chân ngang chân thú (thú được nâng PET_LIFT=16 trong index.html; tăng số này = nhân vật đứng cao hơn) */
   kich:92,              /* cỡ ô vuông vẽ nhân vật (điểm game); nhân vật cao ~92% ô */
   gap:78,gapGan:36,     /* khoảng cách ngang tới thú khi đứng chờ / khi vuốt ve */
   toc:92,               /* tốc độ đi (điểm game/giây) */
@@ -131,7 +132,7 @@ function draw(c,ts,gy){
     var I=TTGSANH.info();if(!I||!I.o||!(ts-I.seen<200))return;
     var side=strip('phai');if(!side)return;
     var o=I.o,P={px:I.px,chat:I.chat},k=CFG.kich,dt=S.last?Math.min(.05,(ts-S.last)/1000):.016;
-    S.last=ts;S.m=c.getTransform?c.getTransform():null;S.cv=c.canvas;S.info=I;S.gy=gy;
+    gy-=CFG.nang;S.last=ts;S.m=c.getTransform?c.getTransform():null;S.cv=c.canvas;S.info=I;S.gy=gy;
     if(!S.bound&&c.canvas){S.bound=true;c.canvas.addEventListener('pointerdown',onTap,{passive:true});}
     if(S.x==null){S.x=targetX(P,o);S.next=ts+rr(CFG.tuDong);}
     /* mốc thời gian dời theo khi tab bị ẩn lâu */
