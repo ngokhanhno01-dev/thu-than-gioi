@@ -289,3 +289,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Chỗ núp: khu1 10, khu2 10, khu3 8, khu4 5 (đã kiểm trên mask: đi được, cách nhau >=55, cách boss >=95). checkCfg() sạch.
 - Chủ game CHƯA duyệt mask bằng mắt trong phiên này; nếu cần sửa thì chỉnh lại mask.
 - Nâng cache: 89 `?v=17`. Chưa chạy thử. Còn 5 vùng: loi-vuc, nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam.
+
+## Lôi Vực: mask + chỗ núp + dấu hiệu (26/11/2026)
+- VUNG['loi-vuc']: mask Claude khoanh, chủ game đã duyệt ảnh xem trước (đã sửa quanh cột đá khu 2). Xuất phát (740,990), boss (777,150) giữa quảng trường cổng, cầu đá trong camNhay, DAUHIEU.loi (tia chớp tím + tia lửa). Tên khu là TÊN TẠM.
+- Chỗ núp: khu1 7, khu2 7, khu3 7, khu4 5 (đã kiểm: đi được, cách nhau >=55, cách boss >=95).
+- Nâng cache: 89 `?v=18`. Chưa chạy thử. Còn 4 vùng: nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam (van-dao: xem trạng thái repo).

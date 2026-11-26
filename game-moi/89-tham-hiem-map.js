@@ -78,6 +78,51 @@ var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
    diem: các chỗ núp cố định mỗi khu (hiện ngẫu nhiên CFG.soDiemHien), đặt cạnh chỗ núp vẽ trên ảnh, nằm trên ô đi được (checkCfg() cảnh báo nếu không tới được).
    Tên khu 1, 3, 4 là TÊN TẠM tự đặt theo cảnh trong ảnh (chỉ khu 2 "Cầu Đá" là theo mô tả) - sửa ten ở đây. */
 var VUNG={
+  'loi-vuc':{
+    ten:'Lôi Vực',
+    anh:DIR+'map-tham-hiem-loi-vuc.webp?v=3',
+    rong:1536,cao:1024,
+    camNhay:[[686,594,891,674]],   /* cầu đá bắc qua vực: thú không nhảy vào */
+    dauHieu:'loi',
+    maskW:192,maskH:128,
+    maskData:'192x128:0:2fo,z,4d,z,4d,z,4c,11,4b,11,4b,11,4b,12,49,13,49,13,49,18,43,1k,3r,1r,3i,1v,3f,1y,3c,21,3a,22,39,24,2i,3,n,25,2g,3,o,1k,a,b,2f,4,o,1k,a,a,2f,5,a,3,b,1k,a,a,2e,6,a,3,b,1k,a,a,2d,7,a,3,b,1k,a,a,2c,8,a,3,b,1k,a,9,2d,8,a,3,b,1k,a,9,2c,9,b,1x,a,9,2b,a,b,1x,a,8,2c,b,a,1x,a,8,2b,c,a,1x,a,8,2b,c,a,1x,a,8,2b,c,a,1x,a,7,2c,c,a,1x,a,7,2c,c,a,1x,a,7,2d,b,4,2k,2d,2y,2f,2x,2f,2x,2f,x,9,1r,2g,w,9,1r,2k,s,9,1q,2q,n,9,1q,2u,j,9,1q,2z,e,9,1q,33,a,9,1q,3v,1h,3w,1f,3y,19,44,14,49,y,4e,s,4k,q,4m,p,4n,o,4o,m,4q,l,4r,k,4u,h,4x,f,4y,f,3x,1,w,i,3r,w,3,m,3l,14,1,m,3j,1t,3r,1k,g,5,37,1k,d,9,8,2,2w,1i,c,c,8,4,2u,1h,b,e,8,5,2t,1c,g,e,8,7,2r,17,l,e,8,9,2p,17,k,f,8,b,2n,18,j,f,8,b,2n,18,j,f,8,c,2m,1a,h,f,8,c,2m,1c,f,f,8,c,2m,1d,e,f,8,d,2l,26,8,d,2l,2r,2l,2r,2l,2q,2m,2q,2m,2p,2n,2p,2n,2o,2o,2o,2p,2n,2q,8,1,2d,2r,6,2,2d,2s,3,4,2d,2t,1,5,2d,2z,2d,2z,2d,2z,2d,2z,2d,2z,2d,2z,2c,30,2b,31,2b,31,2a,32,29,33,29,33,28,34,28,34,27,2x,2f,2w,2f,2w,2g,2u,2i,2t,2i,2s,2k,2r,2l,2p,2m,2p,2n,1d',
+    xuatPhat:{x:740,y:990},
+    khu:[
+      {id:1,ten:'Khu 1 – Bậc Đá Lôi',y0:730,y1:1024,ti:{thuong:80,hiem:17,suthi:2.7,huyenthoai:0.3}},
+      {id:2,ten:'Khu 2 – Cầu Vực',y0:460,y1:730,ti:{thuong:60,hiem:30,suthi:8,huyenthoai:2}},
+      {id:3,ten:'Khu 3 – Bia Lôi',y0:250,y1:460,ti:{thuong:35,hiem:35,suthi:22,huyenthoai:8}},
+      {id:4,ten:'Khu 4 – Cổng Lôi Điện',y0:0,y1:250,ti:{thuong:15,hiem:30,suthi:35,huyenthoai:20}}
+    ],
+    diem:{
+      1:[{id:'1a',x:980,y:884,ghiChu:'cạnh tinh thể/đá khu 1'},
+         {id:'1b',x:860,y:876,ghiChu:'cạnh tinh thể/đá khu 1'},
+         {id:'1c',x:660,y:788,ghiChu:'cạnh tinh thể/đá khu 1'},
+         {id:'1d',x:620,y:916,ghiChu:'cạnh tinh thể/đá khu 1'},
+         {id:'1e',x:524,y:780,ghiChu:'cạnh tinh thể/đá khu 1'},
+         {id:'1f',x:1068,y:788,ghiChu:'cạnh tinh thể/đá khu 1'},
+         {id:'1g',x:980,y:756,ghiChu:'cạnh tinh thể/đá khu 1'}],
+      2:[{id:'2a',x:500,y:660,ghiChu:'cạnh tinh thể/đá khu 2'},
+         {id:'2b',x:676,y:620,ghiChu:'cạnh tinh thể/đá khu 2'},
+         {id:'2c',x:556,y:692,ghiChu:'cạnh tinh thể/đá khu 2'},
+         {id:'2d',x:964,y:692,ghiChu:'cạnh tinh thể/đá khu 2'},
+         {id:'2e',x:1028,y:668,ghiChu:'cạnh tinh thể/đá khu 2'},
+         {id:'2f',x:1156,y:724,ghiChu:'cạnh tinh thể/đá khu 2'},
+         {id:'2g',x:924,y:540,ghiChu:'cạnh tinh thể/đá khu 2'}],
+      3:[{id:'3a',x:356,y:380,ghiChu:'cạnh tinh thể/đá khu 3'},
+         {id:'3b',x:572,y:340,ghiChu:'cạnh tinh thể/đá khu 3'},
+         {id:'3c',x:572,y:396,ghiChu:'cạnh tinh thể/đá khu 3'},
+         {id:'3d',x:700,y:356,ghiChu:'cạnh tinh thể/đá khu 3'},
+         {id:'3e',x:868,y:428,ghiChu:'cạnh tinh thể/đá khu 3'},
+         {id:'3f',x:1020,y:452,ghiChu:'cạnh tinh thể/đá khu 3'},
+         {id:'3g',x:1100,y:436,ghiChu:'cạnh tinh thể/đá khu 3'}],
+      4:[{id:'4b',x:612,y:244,ghiChu:'cạnh tinh thể/đá khu 4'},
+         {id:'4c',x:828,y:244,ghiChu:'cạnh tinh thể/đá khu 4'},
+         {id:'4d',x:916,y:228,ghiChu:'cạnh tinh thể/đá khu 4'},
+         {id:'4e',x:996,y:212,ghiChu:'cạnh tinh thể/đá khu 4'},
+         {id:'4f',x:1076,y:244,ghiChu:'cạnh tinh thể/đá khu 4'}]
+    },
+    boss:{x:777,y:150,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+  },
   'suong-coc':{
     ten:'Sương Cốc',
     anh:DIR+'map-tham-hiem-suong-coc.webp?v=3',
@@ -777,6 +822,15 @@ function ellipse(c,x,y,rx,ry,col){c.fillStyle=col;c.beginPath();c.ellipse(x,y,rx
    Xa: chỉ có dấu hiệu theo vùng (VUNG[...].dauHieu). Gần dần (CFG.hienThu): bóng đen -> thú thật + hào quang màu độ hiếm dưới chân.
    Thú được tung sẵn (chonThu) rồi ép đúng con đó vào trận qua ev.chon -> opts.chon của createEncounter. */
 var DAUHIEU={
+  /* tia chớp tím giật + tia lửa điện */
+  loi:function(c,t,ph){
+    var i,x,y,k,j;
+    k=Math.sin(t*5+ph)>0.55?1:0.45;
+    c.lineCap='round';c.lineJoin='round';
+    for(j=0;j<2;j++){c.strokeStyle=j?'rgba(255,245,200,'+k+')':'rgba(170,90,255,'+(0.5*k)+')';c.lineWidth=j?1.6:4;
+      c.beginPath();c.moveTo(-3,-34);c.lineTo(4,-24);c.lineTo(-4,-18);c.lineTo(5,-8);c.lineTo(-2,-1);c.stroke();}
+    for(i=0;i<4;i++){x=(i-1.5)*11+Math.sin(t*3+i*1.9+ph)*4;y=-6-((t*0.8+ph*0.3+i*0.25)%1)*22;
+      c.fillStyle='rgba(200,150,255,'+(0.5+0.4*Math.sin(t*6+i))+')';c.beginPath();c.arc(x,y,2,0,6.2832);c.fill();}},
   /* đốm sáng nấm tím nhấp nháy + vài sợi sương mỏng */
   suong:function(c,t,ph){
     var i,x,y,k,r,w;
