@@ -49,7 +49,12 @@ var HIEM_KEYS=['thuong','hiem','suthi','huyenthoai'];
 var CFG={
   debugMask:false,            /* true = mở sẵn Debug Mask lúc vào map (bật/tắt bằng nút "Debug Mask" hoặc phím M) */
   zIndex:50,                  /* bằng lớp phủ cũ của 82: thông báo thắng/thua (.tbo) vẫn nằm TRÊN màn bản đồ */
-  rung:20000,                 /* ms điểm rung hiện trước khi tự biến mất */
+  rung:60000,                 /* ms mỗi con thú/quái tồn tại (có đếm ngược trên đầu) rồi biến mất */
+  /* nhảy quanh chỗ núp, theo khu: banKinh = tầm quanh quẩn; buoc = dài 1 cú nhảy; tg = giây 1 cú; nghi = nghỉ [min,max] giây */
+  nhay:{1:{banKinh:35,buoc:18,tg:0.52,nghi:[1.4,2.8]},2:{banKinh:50,buoc:22,tg:0.46,nghi:[1.0,2.2]},
+        3:{banKinh:65,buoc:26,tg:0.42,nghi:[0.7,1.7]},4:{banKinh:80,buoc:30,tg:0.38,nghi:[0.5,1.4]},cao:12},
+  /* thú/quái sử thi + huyền thoại: người chơi tới gần (< gan) thì nhảy tránh `soCu` cú rồi hết sức trong `cho` giây (để còn bắt được); xaNha = không rời chỗ núp quá */
+  chay:{loai:['suthi','huyenthoai'],gan:105,soCu:3,buoc:36,tg:0.28,cho:5,xaNha:170},
   hoi:15000,                  /* ms điểm hồi lại sau khi biến mất / sau khi chạm */
   soDiemHien:[2,2],           /* mỗi khu cùng lúc hiện tối đa 2 điểm (trong các chỗ núp cố định) */
   cachNhau:180,               /* đơn vị map: 2 con đang hiện phải cách nhau ít nhất ngần này (tính cả khác khu) */
@@ -57,7 +62,7 @@ var CFG={
   hienThu:{xa:150,gan:70,co:56},  /* đơn vị map: cách xa < xa thì bắt đầu hiện bóng, <= gan thì rõ thú; co = cỡ thú trên map */
   banKinhCham:24,             /* đơn vị map: khoảng cách chạm vào điểm rung */
   banKinhMaskDiem:0,          /* đơn vị map: vòng tròn đi được quanh mỗi điểm rung/boss, bất chấp mask */
-  cooldownSauTran:900,        /* ms không cho chạm lại sau khi quay về map */
+  cooldownSauTran:3000,       /* ms không cho chạm lại sau khi quay về map */
   nhanVat:{toc:190,kich:64,anh:null,nhun:3},   /* toc = đơn vị map/giây; anh = đường dẫn ảnh 512x512 quay PHẢI (null = vẽ tạm bằng THU_MOI.draw/chibi); nhun = biên độ nhún khi đi (px) */
   camera:{zoom:1},
   joystick:{kinh:152,kinhNho:136,hanhTrinh:0.58},
@@ -75,6 +80,7 @@ var VUNG={
     ten:'Tuyết Nguyên',
     anh:DIR+'map-tham-hiem-tuyet-nguyen.webp?v=2',
     rong:1536,cao:1024,
+    camNhay:[[600,480,895,615]],              /* [x0,y0,x1,y1] thú không được nhảy vào (cầu đá, tránh chắn lối) */
     dauHieu:'tuyet',                          /* kiểu dấu hiệu môi trường (bảng DAUHIEU) */
     maskW:192,maskH:128,                      /* lưới va chạm: mỗi ô = rong/maskW = 8 đơn vị map */
     maskData:'192x128:0:2fo,v,6,2,42,3,1,11,1,5,3w,2,1,1f,7,3,38,27,37,24,3a,22,3c,20,3d,1z,3e,1y,3f,1w,3g,1s,3l,1o,3p,1m,3q,g,5,10,3t,e,6,y,3v,d,6,z,3v,c,5,10,3v,e,1,12,3v,1h,3v,1h,3v,1h,3w,1h,41,1b,42,1a,44,19,43,1a,43,19,43,1d,40,1h,3x,1i,a,2,3j,1t,3i,1u,3g,1l,7,4,3e,1l,2u,5,p,1m,2y,8,7,1y,31,2b,35,a,3,1t,39,5,6,1s,3c,2,6,1j,4,5,3k,1i,8,1,3l,1e,3y,1d,42,1a,43,19,44,d,8,o,43,d,f,h,3z,1,3,h,4r,q,36,7,18,u,33,6,19,w,31,6,19,x,30,5,v,2,f,v,30,5,h,2,8,a,e,t,2z,6,g,l,h,p,2z,6,g,l,j,n,1s,2,14,8,f,c,4,6,l,p,1m,3,13,a,e,b,6,6,m,18,10,4,11,b,f,b,7,7,m,16,r,5,3,5,z,d,f,a,8,a,k,15,p,g,x,e,f,2,7,1,8,c,j,14,9,1,d,i,w,e,g,1,h,d,j,14,7,3,c,i,x,c,g,1,h,g,i,15,3,11,w,a,g,2,h,h,j,2a,t,a,f,4,a,1,4,k,j,2a,q,c,a,8,9,r,l,27,l,1,3,f,6,d,4,u,n,25,k,21,o,1y,o,a,3,1s,n,1v,p,9,5,1u,m,1c,2,f,o,a,5,1y,i,1a,7,4,3,5,p,8,7,22,c,1a,9,2,4,5,q,7,7,26,7,10,3,7,a,2,5,4,r,6,7,3c,s,4,s,5,7,3b,t,4,u,4,5,3c,t,3,w,2,7,39,u,3,17,37,v,2,18,19,7,1r,w,1,18,18,a,1o,27,16,c,1n,27,15,d,1n,26,e,d,f,d,1n,26,b,j,c,d,1b,4,3,3,3,1v,2,8,7,r,9,c,1a,6,1,5,2,1v,2,7,6,u,8,b,1b,c,3,n,1,15,5,3,7,x,7,9,1b,e,1,n,3,p,3,b,f,z,8,5,1d,w,9,p,3,c,d,11,1p,x,9,o,2,e,b,13,1o,x,c,l,2,e,b,13,1p,x,b,l,2,e,b,13,1q,5,1,r,b,k,3,c,c,14,3,4,1j,2,4,q,b,k,3,c,c,14,1,7,1p,p,b,k,5,8,f,12,2,8,1o,p,b,k,t,10,2,9,1o,p,c,j,j,5,5,z,3,9,1o,p,c,j,i,7,3,z,4,a,1n,p,5,5,3,i,9,3,5,9,1,t,a,b,1n,p,3,8,3,h,2,4,1,6,4,11,c,b,1n,p,2,a,3,g,1,d,2,n,1,a,c,f,1q,l,3,b,3,t,2,n,m,g,1w,6,2,5,4,c,6,1,1,p,1,m,m,h,26,2,5,c,9,o,1,l,n,g,2e,d,8,o,1,c,2,5,o,h,2e,d,8,o,1,b,w,g,2f,d,8,o,1,b,w,9,1,5,2g,c,9,o,1,b,w,9,2m,c,9,o,1,b,x,8,2m,c,9,n,3,9,y,7,2o,a,a,n,4,7,10,6,2p,8,c,l,6,5,12,3,2s,6,d,8',   /* DÁN chuỗi từ nút "Copy Mask" vào đây (rỗng = đi tự do) */
@@ -488,21 +494,63 @@ function spawnSpots(s,g,jit){
       return !s.groups.some(function(h){return h.pts.some(function(o){return o.on&&Math.pow(q.x-o.x,2)+Math.pow(q.y-o.y,2)<CFG.cachNhau*CFG.cachNhau;});});});
     if(!rd.length)break;
     p=rd[Math.floor(Math.random()*rd.length)];
-    p.on=true;p.hiem=tungHiem(g.k);p.chon=null;p.thuLai=0;p.fade=0;p.until=s.clock+CFG.rung*(jit?rnd(0.6,1):1);n++;}}
+    p.on=true;p.hiem=tungHiem(g.k);p.chon=null;p.thuLai=0;p.fade=0;p.x=p.nx;p.y=p.ny;p.hop=null;p.z=0;p.conCu=0;p.choChay=0;p.nghiToi=s.clock+rnd(300,1800);p.until=s.clock+CFG.rung;n++;}}
 function buildSpots(s){
   var v=s.v;
   s.groups=v.khu.map(function(k){
     return {k:k,target:soDiemCan(),pts:(v.diem[k.id]||[]).map(function(d){
-      return {id:d.id,x:d.x,y:d.y,khu:k.id,on:false,hoiAt:0,until:0,hiem:'thuong',ph:Math.random()*6.283};})};});
+      return {id:d.id,x:d.x,y:d.y,nx:d.x,ny:d.y,khu:k.id,on:false,hoiAt:0,until:0,hiem:'thuong',ph:Math.random()*6.283};})};});
   s.groups.forEach(function(g){spawnSpots(s,g,true);});}
+function tatSpot(s,p){p.on=false;p.hop=null;p.z=0;p.x=p.nx;p.y=p.ny;p.hoiAt=s.clock+CFG.hoi;}
 function tickSpots(s){
   s.groups.forEach(function(g){
     g.pts.forEach(function(p){
       if(!p.on||s.clock<p.until)return;
-      var ready=g.pts.some(function(q){return !q.on&&s.clock>=q.hoiAt;});
-      if(visCount(g)>CFG.soDiemHien[0]||ready){p.on=false;p.hoiAt=s.clock+CFG.hoi;g.target=soDiemCan();}   /* hết hạn -> ẩn, hồi sau CFG.hoi */
-      else p.until=s.clock+1000;});                                                                        /* giữ đủ tối thiểu CFG.soDiemHien[0] điểm/khu */
+      tatSpot(s,p);g.target=soDiemCan();});   /* hết 1 phút -> biến mất, chỗ đó hồi sau CFG.hoi */
     spawnSpots(s,g,false);});}
+
+/* ---------- THÚ NHẢY QUANH CHỖ NÚP ---------- */
+/* thú đặt chân được ở (x,y)? ô đi được (chừa 1 ô quanh), đúng khu, ngoài vùng cấm, không dồn vào con khác / boss */
+function choNhay(s,sp,k,x,y){
+  var m=s.mask,v=s.v,cw=v.rong/m.w,ch=v.cao/m.h,i,q,o=[[0,0],[1,0],[-1,0],[0,1],[0,-1]],gx,gy,b=v.boss;
+  if(y<k.y0||y>=k.y1)return false;
+  if(m.n>0)for(i=0;i<o.length;i++){gx=Math.floor(x/cw)+o[i][0];gy=Math.floor(y/ch)+o[i][1];
+    if(gx<0||gy<0||gx>=m.w||gy>=m.h||m.g[gy*m.w+gx]!==1)return false;}
+  if((v.camNhay||[]).some(function(r){return x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3];}))return false;
+  if(b&&Math.pow(x-b.x,2)+Math.pow(y-b.y,2)<70*70)return false;
+  return !s.groups.some(function(g){return g.pts.some(function(q){return q!==sp&&q.on&&Math.pow(x-q.x,2)+Math.pow(y-q.y,2)<60*60;});});}
+/* tìm 1 cú nhảy theo hướng goc (lệch dần nếu vướng) */
+function timCu(s,sp,k,goc,buoc,xaNha){
+  var lech=[0,0.5,-0.5,1,-1,1.5,-1.5],i,a,x,y,d0=Math.hypot(sp.x-sp.nx,sp.y-sp.ny),d;
+  for(i=0;i<lech.length;i++){
+    a=goc+lech[i];x=sp.x+Math.cos(a)*buoc;y=sp.y+Math.sin(a)*buoc*0.8;d=Math.hypot(x-sp.nx,y-sp.ny);
+    if(d>xaNha&&d>=d0)continue;   /* ngoài tầm thì chỉ được nhảy về gần chỗ núp */
+    if(choNhay(s,sp,k,x,y)&&choNhay(s,sp,k,(sp.x+x)/2,(sp.y+y)/2))return {x:x,y:y};}
+  return null;}
+function nhaySpots(s,dt){
+  var C=CFG.chay;
+  s.groups.forEach(function(g){
+    var N=CFG.nhay[g.k.id]||CFG.nhay[1];
+    g.pts.forEach(function(sp){
+      var h=sp.hop,r,dx,dy,dich,chay=false,goc,d;
+      if(!sp.on)return;
+      if(h){
+        h.p=Math.min(1,h.p+dt/h.tg);
+        sp.x=h.x0+(h.x1-h.x0)*h.p;sp.y=h.y0+(h.y1-h.y0)*h.p;sp.z=Math.sin(h.p*Math.PI)*CFG.nhay.cao;
+        if(h.p>=1){sp.hop=null;sp.z=0;sp.dapDat=s.clock;
+          sp.nghiToi=s.clock+(sp.conCu>0?40:rnd(N.nghi[0],N.nghi[1])*1000);}
+        return;}
+      dx=sp.x-s.p.x;dy=sp.y-s.p.y;
+      if(C.loai.indexOf(sp.hiem)>=0&&!sp.conCu&&s.clock>=sp.choChay&&dx*dx+dy*dy<C.gan*C.gan){
+        sp.conCu=C.soCu;sp.choChay=s.clock+C.cho*1000;sp.nghiToi=s.clock;}
+      if(s.clock<sp.nghiToi)return;
+      if(sp.conCu>0){chay=true;sp.conCu--;goc=Math.atan2(dy,dx)+rnd(-0.3,0.3);}
+      else{
+        d=Math.hypot(sp.x-sp.nx,sp.y-sp.ny);
+        goc=d>N.banKinh?Math.atan2(sp.ny-sp.y,sp.nx-sp.x)+rnd(-0.4,0.4):rnd(0,6.2832);}
+      dich=timCu(s,sp,g.k,goc,chay?C.buoc:N.buoc,chay?C.xaNha:N.banKinh);
+      if(!dich){sp.conCu=0;sp.nghiToi=s.clock+700;return;}
+      sp.hop={x0:sp.x,y0:sp.y,x1:dich.x,y1:dich.y,p:0,tg:chay?C.tg:N.tg};});});}
 
 /* ---------- HUD KHU (B4) ---------- */
 function showHud(s,k){
@@ -549,6 +597,7 @@ function update(s,dt){
   if(k&&k.id!==s.khuId){s.khuId=k.id;showHud(s,k);}
   /* điểm rung */
   tickSpots(s);
+  try{nhaySpots(s,dt);}catch(eN){}
   /* đồng hồ boss (đọc localStorage mỗi ~250ms) */
   if(s.bossT<0||s.clock-s.bossT>=250){s.bossT=s.clock;s.bossMs=bossConLai(s.slug);}
   /* chạm (không trong cooldown; không chạm khi đang tô mask) */
@@ -639,15 +688,17 @@ function drawSpot(s,sp){
       if(sp.chon)o=anhThu(s,sp.chon);}
     bong=clamp(f*2.5,0,1);that=clamp(f*2-1,0,1);
     c.save();c.translate(sp.x,sp.y);
-    if(!o||bong<1){c.globalAlpha=a*(o?1-bong:1);DAUHIEU[s.v.dauHieu||'tuyet'](c,t,sp.ph);}
+    var z=sp.z||0,nhun=(!sp.hop&&sp.dapDat&&s.clock-sp.dapDat<160)?Math.sin((s.clock-sp.dapDat)/160*Math.PI)*0.1:0;
+    if(!o||bong<1){c.globalAlpha=a*(o?1-bong:1);c.save();c.translate(0,-z);DAUHIEU[s.v.dauHieu||'tuyet'](c,t,sp.ph);c.restore();}
     if(f>0.01){c.globalAlpha=a*bong;c.save();c.scale(size/68,size/68);haoQuang(c,HIEM[sp.hiem].mau,t,sp.ph);c.restore();}
     if(o){
       tho=1+Math.sin(t*2.6+sp.ph)*0.025;
       c.globalAlpha=a*bong;ellipse(c,0,1,size*0.28,size*0.08,'rgba(0,0,0,.28)');
-      c.scale(1,tho);
+      c.translate(0,-z);c.scale(1+nhun*0.7,tho-nhun);
       if(that<1){c.globalAlpha=a*bong*(1-that);c.drawImage(o.bong,-size/2,-size+4,size,size);}
       if(that>0){c.globalAlpha=a*that;c.drawImage(o.that,-size/2,-size+4,size,size);}}
     c.restore();
+    txt(c,Math.max(0,Math.ceil(left/1000))+'s',sp.x,sp.y-z-(40+(size-30)*bong),13,left<10000?'#ff8a7a':'#ffffff');
   }catch(err){try{s.ctx.restore();}catch(_){}}}
 
 /* Sprite Boss thật (gốc toạ độ = chân Boss). true = đã vẽ; false = chưa có/chưa nạp xong => dùng hình vẽ tạm */
@@ -827,7 +878,7 @@ function resume(kq){
   if(kq.diemId){
     for(i=0;i<s.groups.length;i++){g=s.groups[i];
       for(j=0;j<g.pts.length;j++){p=g.pts[j];
-        if(p.id===kq.diemId){p.on=false;p.hoiAt=s.clock+CFG.hoi;g.target=soDiemCan();}}}}
+        if(p.id===kq.diemId){tatSpot(s,p);g.target=soDiemCan();}}}}
   if(kq.boss)bossDanhXong(s.slug);
   s.bossMs=bossConLai(s.slug);s.bossT=-1;
   s.coolUntil=s.clock+CFG.cooldownSauTran;

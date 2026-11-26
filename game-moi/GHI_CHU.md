@@ -254,3 +254,9 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 ## Giãn thú trên map thám hiểm (26/11/2026)
 - Chủ game test: thú hiện dày, chắn lối. soDiemHien [3,4] -> [2,2]; thêm cachNhau=180, cachNguoi=130; cỡ thú 68 -> 56. Thay cho yêu cầu cũ 3-4 con mỗi khu.
 - Nâng cache: 89 `?v=11`. Chưa chạy thử, chờ chủ game.
+
+## Thú nhảy trên map thám hiểm (26/11/2026)
+- Chủ game yêu cầu (thay quy tắc rung 20s cũ): mỗi con tồn tại 60s, đếm ngược trên đầu, hết giờ biến mất (không còn tự gia hạn).
+- Nhảy quanh chỗ núp (CFG.nhay theo khu). Sử thi/huyền thoại tới gần thì nhảy tránh 3 cú rồi nghỉ 5s (CFG.chay). Không nhảy lên cầu (VUNG.camNhay), không vào ô chặn. Boss đứng yên.
+- cooldownSauTran 900 -> 3000 ms.
+- Nâng cache: 89 `?v=12`. Chưa chạy thử, chờ chủ game.
