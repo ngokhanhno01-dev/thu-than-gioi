@@ -232,3 +232,10 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Chủ game đã duyệt ảnh xem trước. Kiểu đi thoải mái: chỉ chặn vật to (núi, vách, thác, sông, hồ, 2 hang, cây khô, cây thông, cột đá, cụm tháp + bậc đá); bụi tuyết, đá thấp, tinh thể nhỏ đi được. Các vùng sau khoanh theo kiểu này.
 - Nâng cache: 89 `?v=7`.
 - Còn lại: Bước 2 (đặt lại điểm núp/boss, bỏ vòng banKinhMaskDiem đang "mở lối" qua chỗ chặn), Bước 3 (dấu hiệu + bóng thú).
+
+## Tuyết Nguyên, Bước 2: điểm núp (26/11/2026)
+- 16 điểm đặt lại cạnh chỗ núp trên map mới (đã kiểm tra trên lưới: đi được, nối với xuất phát, cách chỗ chặn ~2 ô). Boss giữ (780,168).
+- banKinhMaskDiem = 0; boss giữ vòng banKinhCham=38. Thêm checkToi() vào checkCfg().
+- Vị trí điểm cố định, spawnSpots không có jitter vị trí (chỉ jitter thời gian) nên không sửa.
+- Nâng cache: 89 `?v=8`. Chưa chạy thử trong game (chủ game yêu cầu tiết kiệm quota).
+- Tiếp theo: Bước 3.

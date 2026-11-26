@@ -11,7 +11,7 @@
      - Lưới maskW x maskH = 192x128 ô, mỗi ô = rong/maskW = 8 đơn vị map. 1 = đi được, 0 = chặn.
      - maskData = chuỗi nén RLE dạng  "192x128:<bit đầu 0|1>:<độ dài các đoạn, hệ 36, cách nhau dấu phẩy>"  (đọc theo hàng, từ trái sang phải, trên xuống dưới).
      - maskData rỗng (hoặc toàn 0) => KHÔNG chặn gì, nhân vật đi tự do. Chuỗi hỏng / sai kích thước => bỏ qua + cảnh báo console, đi tự do.
-     - Quanh mỗi điểm rung và boss luôn có vòng tròn đi được (CFG.banKinhMaskDiem) để chạm được dù điểm nằm ngoài đường.
+     - CFG.banKinhMaskDiem = 0: điểm rung không còn bẻ mask. Riêng boss giữ vòng đi được bằng boss.banKinhCham.
      - Đang bật Debug Mask thì KHÔNG chặn (đi xuyên để tới chỗ cần tô); tắt Debug Mask mới có va chạm.
      - Bản nháp tự lưu localStorage (khóa ttg_map_mask_<vùng>) CHỈ khi maskData trong file còn rỗng; khi đã dán chuỗi cố định vào file thì file thắng.
    DEBUG MASK: nút nhỏ "Debug Mask" góc trên trái (hoặc phím M). Bật lên: phủ màu xanh bán trong suốt lên vùng đi được; ngón tay/chuột kéo trên map để tô (✏ Vẽ) hoặc xoá (🧽 Tẩy);
@@ -53,7 +53,7 @@ var CFG={
   hoi:15000,                  /* ms điểm hồi lại sau khi biến mất / sau khi chạm */
   soDiemHien:[3,4],           /* mỗi khu cùng lúc hiện 3-4 điểm (trong 4 điểm cố định) */
   banKinhCham:24,             /* đơn vị map: khoảng cách chạm vào điểm rung */
-  banKinhMaskDiem:26,         /* đơn vị map: vòng tròn đi được quanh mỗi điểm rung/boss, bất chấp mask */
+  banKinhMaskDiem:0,          /* đơn vị map: vòng tròn đi được quanh mỗi điểm rung/boss, bất chấp mask */
   cooldownSauTran:900,        /* ms không cho chạm lại sau khi quay về map */
   nhanVat:{toc:190,kich:64,anh:null,nhun:3},   /* toc = đơn vị map/giây; anh = đường dẫn ảnh 512x512 quay PHẢI (null = vẽ tạm bằng THU_MOI.draw/chibi); nhun = biên độ nhún khi đi (px) */
   camera:{zoom:1},
@@ -65,7 +65,7 @@ var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
 
 /* ---------- DỮ LIỆU VÙNG ----------
    khu: y0 (trên) -> y1 (dưới) theo ảnh 1536x1024; khu 1 ở dưới cùng. ti = tỉ lệ ra thú (%), tổng mỗi khu phải = 100 (checkCfg() báo nếu lệch).
-   diem: 4 điểm rung cố định mỗi khu, vị trí ƯỚC LƯỢNG (cần chỉnh khi xem debug mask: điểm phải nằm cạnh đường).
+   diem: 4 điểm rung cố định mỗi khu, đặt cạnh chỗ núp vẽ trên ảnh, nằm trên ô đi được (checkCfg() cảnh báo nếu không tới được).
    Tên khu 1, 3, 4 là TÊN TẠM tự đặt theo cảnh trong ảnh (chỉ khu 2 "Cầu Đá" là theo mô tả) - sửa ten ở đây. */
 var VUNG={
   'tuyet-nguyen':{
@@ -82,14 +82,22 @@ var VUNG={
       {id:4,ten:'Khu 4 – Cổng Hang Băng',y0:0, y1:270, ti:{thuong:15,hiem:30,suthi:35, huyenthoai:20}}
     ],
     diem:{
-      1:[{id:'1a',x:330, y:880,ghiChu:'hồ băng trái'},{id:'1b',x:630, y:850,ghiChu:'gốc cây cụt'},
-         {id:'1c',x:120, y:860,ghiChu:'cụm pha lê góc trái'},{id:'1d',x:1100,y:880,ghiChu:'tảng đá lớn phải'}],
-      2:[{id:'2a',x:370, y:560,ghiChu:'cây khô cổ thụ'},{id:'2b',x:620, y:650,ghiChu:'suối cạnh cầu'},
-         {id:'2c',x:1130,y:600,ghiChu:'hang đá nhỏ phải'},{id:'2d',x:1000,y:620,ghiChu:'pha lê cạnh hang'}],
-      3:[{id:'3a',x:330, y:300,ghiChu:'thác nước'},{id:'3b',x:700, y:370,ghiChu:'tảng đá lớn giữa'},
-         {id:'3c',x:1020,y:330,ghiChu:'bậc thang phải'},{id:'3d',x:725, y:410,ghiChu:'pha lê'}],
-      4:[{id:'4a',x:610, y:150,ghiChu:'cột đá trái'},{id:'4b',x:1010,y:110,ghiChu:'cột đá phải'},
-         {id:'4c',x:1170,y:100,ghiChu:'pha lê phải'},{id:'4d',x:780, y:90, ghiChu:'gần cổng hang'}]
+      1:[{id:'1a',x:650,y:868,ghiChu:'bụi tuyết trái biển KHU 1'},
+         {id:'1b',x:668,y:806,ghiChu:'cạnh cụm đá nâu'},
+         {id:'1c',x:868,y:802,ghiChu:'cạnh bụi đá bên phải đường'},
+         {id:'1d',x:970,y:925,ghiChu:'cạnh cụm đá tuyết gần hang dưới'}],
+      2:[{id:'2a',x:548,y:678,ghiChu:'bụi cây cạnh suối'},
+         {id:'2b',x:652,y:740,ghiChu:'bụi tuyết trái đường'},
+         {id:'2c',x:1042,y:704,ghiChu:'bụi tuyết dưới biển KHU 2'},
+         {id:'2d',x:390,y:708,ghiChu:'cụm đá gần cây khô'}],
+      3:[{id:'3a',x:745,y:456,ghiChu:'cụm đá giữa trái'},
+         {id:'3b',x:870,y:466,ghiChu:'bụi tuyết gần sông'},
+         {id:'3c',x:968,y:400,ghiChu:'bụi tuyết dưới biển KHU 3'},
+         {id:'3d',x:736,y:300,ghiChu:'bụi đá trái đường'}],
+      4:[{id:'4a',x:676,y:212,ghiChu:'bụi đá trái quảng trường'},
+         {id:'4b',x:848,y:232,ghiChu:'tinh thể dưới biển KHU 4'},
+         {id:'4c',x:950,y:252,ghiChu:'bụi tuyết phải'},
+         {id:'4d',x:632,y:165,ghiChu:'tinh thể trái quảng trường'}]
     },
     boss:{x:780,y:168,banKinhCham:38,ten:'Boss Truyền Thuyết'},   /* đứng cố định giữa quảng trường khu 4, KHÔNG có tỉ lệ ngẫu nhiên; ten chỉ là tên dự phòng khi chưa lấy được boss thật */
     /* GỢI Ý vùng nên tô khi Debug Mask (đa giác quảng trường khu 4, vẽ viền vàng đứt nét lúc bật Debug Mask). KHÔNG tự thêm vào mask. */
@@ -149,6 +157,16 @@ function maskDec(str){
   return {w:w,h:h,g:g};}
 
 /* kiểm tra bảng cấu hình, trả mảng cảnh báo (rỗng = ổn). Tự chạy 1 lần lúc nạp file. */
+/* cảnh báo điểm rung/boss nằm ở ô chặn hoặc không nối liền với điểm xuất phát */
+function checkToi(v,slug,dec,w){
+  var W=dec.w,H=dec.h,seen=new Uint8Array(W*H),q=[],i,x,y;
+  function o(p){return clamp(Math.floor(p.y/(v.cao/H)),0,H-1)*W+clamp(Math.floor(p.x/(v.rong/W)),0,W-1);}
+  function them(k){if(dec.g[k]===1&&!seen[k]){seen[k]=1;q.push(k);}}
+  them(o(v.xuatPhat));
+  while(q.length){i=q.pop();x=i%W;y=(i-x)/W;
+    if(x>0)them(i-1);if(x<W-1)them(i+1);if(y>0)them(i-W);if(y<H-1)them(i+W);}
+  v.khu.forEach(function(k){(v.diem[k.id]||[]).forEach(function(p){if(!seen[o(p)])w.push(slug+' điểm '+p.id+': ở ô chặn hoặc không tới được');});});
+  if(v.boss&&!seen[o(v.boss)])w.push(slug+': boss ở ô chặn hoặc không tới được');}
 function checkCfg(){
   var w=[],slug,v,i,k,sum,j,d,dec;
   for(slug in VUNG){v=VUNG[slug];
@@ -162,7 +180,8 @@ function checkCfg(){
     if(v.boss.y>=v.khu[v.khu.length-1].y1)w.push(slug+': boss nằm ngoài khu cao nhất');
     if(v.maskData){dec=maskDec(v.maskData);
       if(!dec)w.push(slug+': maskData sai định dạng (sẽ bị bỏ qua, đi tự do)');
-      else if(dec.w!==(v.maskW||192)||dec.h!==(v.maskH||128))w.push(slug+': maskData '+dec.w+'x'+dec.h+' khác maskW/maskH '+(v.maskW||192)+'x'+(v.maskH||128));}}
+      else if(dec.w!==(v.maskW||192)||dec.h!==(v.maskH||128))w.push(slug+': maskData '+dec.w+'x'+dec.h+' khác maskW/maskH '+(v.maskW||192)+'x'+(v.maskH||128));
+      else checkToi(v,slug,dec,w);}}
   return w;}
 
 /* ---------- CẦU NỐI TUNG ĐỊCH ----------
