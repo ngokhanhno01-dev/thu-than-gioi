@@ -8,7 +8,8 @@
      (thú đứng yên chờ nhờ TTGSANH.hold), vuốt xong hai bên lại đi riêng. Người chơi chạm vào thú thì vẫn vuốt ngay.
    NỐI VỚI index.html: dòng vẽ sảnh gọi TTGNVSANH.draw(ctx,ts,groundY) ngay sau petSanh (nhân vật nằm trên thú, dưới bong bóng của thú).
    Cần: TTGSANH.info() (83-sanh-song.js) cho vị trí thú; TTGNHANVAT.anhDi() (64b) cho dải khung 512x512 x 4. Thiếu một trong hai hoặc ảnh chưa tải xong thì không vẽ gì (sảnh y như cũ).
-   CHỈNH: khối CFG bên dưới (cỡ, khoảng cách tới thú, tốc độ đi) và bảng LINES / EMO (thêm câu = thêm 1 chuỗi). Mọi lỗi đều bị nuốt (try/catch). ?nvsanh=0 trong link để tắt (thử so sánh). */
+   CHỈNH: khối CFG bên dưới (cỡ, khoảng cách tới thú, tốc độ đi) và bảng LINES / EMO (thêm câu = thêm 1 chuỗi). Mọi lỗi đều bị nuốt (try/catch). ?nvsanh=0 trong link để tắt (thử so sánh).
+   [26/11/2026] TRONG TRẬN ĐẤU: nhân vật cũng đứng phía SAU thú của bạn (dáng chờ), thú tấn công thì nhân vật chỉ tay ra lệnh (xem khối "NHÂN VẬT TRONG TRẬN ĐẤU" gần cuối file, chỉnh ở CFG.tran; ?nvtran=0 để tắt). Không cần sửa index.html. */
 (function(root){'use strict';
 var CFG={
   on:!/[?&]nvsanh=0/.test(location.search),
@@ -206,5 +207,61 @@ function draw(c,ts,gy){
     drawBong(c,ts,o,S.x,fy-k*.95*ds+oy);
   }catch(err){try{c.restore();}catch(e2){}}}
 
-root.TTGNVSANH={CFG:CFG,LINES:LINES,draw:draw,pos:function(){return S.x==null?null:{x:S.x,fy:S.gy+S.cy};},vuot:function(){vuot(performance.now());},chao:function(){chao(performance.now());}};
+/* ---------- [26/11/2026] NHÂN VẬT TRONG TRẬN ĐẤU: đứng phía SAU thú của bạn, ra lệnh khi thú tấn công ----------
+   Ảnh (512x512, nền trong suốt, chân sát đáy, cùng một thân để 2 dáng khớp nhau): game-moi/nhan-vat/<gioi>/<skin>-tran-tu-the.png (đứng chờ sau lưng thú)
+   và <skin>-tran-ra-lenh.png (chỉ tay ra lệnh, lúc thú tấn công). Chưa có ảnh (vd nhân vật Nữ) thì trong trận không vẽ gì, y như cũ.
+   KHÔNG SỬA index.html: tự gắn vào 2 chỗ đã có sẵn bằng cách bọc hàm (giống 83-sanh-song.js bọc TTGRUNE.ring):
+   - TTGDEM.under(ctx,ts,DA) (69-dem-nguoc.js) mỗi khung hình của trận; DA = khung trên {x,y,w,h}. Từ DA suy ra chỗ đứng của thú bạn bằng PET_X + FLOOR của index.html (ghi ở CFG.tran.petX / floor: index đổi thì đổi theo).
+   - TTGCombatFX.drawAttack(ctx,t,o) (31-combat-fx.js): o.pa = true là thú CỦA BẠN đang đánh (o.u = tiến độ 0..1) -> nhân vật đổi sang dáng ra lệnh tới khi đòn đi được lenhU, rồi giữ thêm lenhTre ms.
+   CHỈNH: khối CFG.tran bên dưới. ?nvtran=0 trong link để tắt riêng trong trận. Mọi lỗi đều bị nuốt (try/catch). */
+CFG.tran={
+  on:!/[?&]nvtran=0/.test(location.search),
+  kich:92,                 /* cỡ ô vẽ nhân vật (điểm game), bằng ở sảnh */
+  nang:9,                  /* nâng chân ngang chân thú (thú trong trận cũng được nâng PET_LIFT=16) */
+  gap:84,                  /* cách tâm thú về phía SAU thú (bên trái) bao nhiêu điểm; tăng = đứng xa thú hơn */
+  le:30,                     /* chừa lề trái khung (viền khung + nửa thân) */
+  petX:.218,floor:22,      /* = PET_X và FLOOR trong index.html (vị trí thú bạn trong khung trên, độ dày nền đất) */
+  lenhU:.5,lenhTre:180,    /* giữ dáng ra lệnh khi đòn của thú chạy tới u<lenhU (0..1), rồi giữ thêm bấy nhiêu ms */
+  vao:450                  /* hiện dần + trượt vào lúc vào trận (ms) */
+};
+var TR={seen:0,t0:0,lenh:0,was:false,hop:null,x:null,fy:0};
+function tranSrc(loai){var N=root.TTGNHANVAT;if(!N||!N.gioi)return null;var g=N.gioi(),s=N.skin();if(N.daMo&&!N.daMo(g,s))s='mac-dinh';return 'game-moi/nhan-vat/'+g+'/'+s+'-tran-'+loai+'.png?v=1';}
+function tranImg(loai){
+  var src=tranSrc(loai);if(!src)return null;var e=IMG[src];
+  if(!e){e=IMG[src]={img:new Image(),ok:false,bad:false};e.img.onload=function(){e.ok=true;};e.img.onerror=function(){e.bad=true;};e.img.src=src;}
+  return(e.ok&&!e.bad)?e.img:null;}
+/* thú của bạn đang đánh (gọi từ drawAttack đã bọc) */
+function noteAtk(u){if(u<CFG.tran.lenhU)TR.lenh=performance.now()+CFG.tran.lenhTre;}
+function drawTran(c,ts,da){
+  var Q=CFG.tran;if(!CFG.on||!Q.on||!da||!(da.w>0))return;
+  var stI=tranImg('tu-the'),li=tranImg('ra-lenh');if(!stI)return;   /* gọi cả 2 mỗi khung để ảnh được tải sẵn từ lúc vào trận */
+  var now=performance.now(),k=Q.kich;
+  if(now-TR.seen>600){TR.t0=now;TR.lenh=0;TR.was=false;TR.hop=null;}   /* vừa vào trận mới */
+  TR.seen=now;
+  var pet=Math.round(da.x+da.w*Q.petX),fy=da.h-Q.floor-Q.nang,x=Math.max(da.x+Q.le+k*.3,pet-Q.gap);
+  var cmd=now<TR.lenh,img=(cmd&&li)?li:stI;
+  if(cmd&&!TR.was)TR.hop={t0:now,dur:300,h:6};
+  TR.was=cmd;
+  var oy=0,e=now-TR.t0,al=Math.min(1,e/Q.vao),slide=(1-al)*(1-al)*26;
+  if(TR.hop){var u=(now-TR.hop.t0)/TR.hop.dur;if(u>=1)TR.hop=null;else oy=-TR.hop.h*Math.sin(Math.PI*u);}
+  else if(!cmd)oy=Math.sin(ts/420)*.9;      /* thở nhẹ */
+  TR.x=x;TR.fy=fy;
+  c.save();c.globalAlpha=al;
+  c.fillStyle='rgba(0,0,0,.28)';c.beginPath();c.ellipse(x-slide,fy-1,k*.22,k*.05,0,0,Math.PI*2);c.fill();   /* bóng dưới chân */
+  c.imageSmoothingEnabled=true;
+  c.drawImage(img,0,0,512,512,x-slide-k/2,fy+k*.03+oy-k,k,k);
+  c.restore();}
+/* bọc 2 hàm có sẵn để không phải sửa index.html; hàm gốc vẫn chạy đủ (chỉ thêm 1 bước phụ phía trước) */
+function hookFx(){var A=root.TTGCombatFX;if(!A||!A.drawAttack)return false;if(A.drawAttack.__nv)return true;
+  var o=A.drawAttack;
+  A.drawAttack=function(c,t,p){try{if(p&&p.pa&&!p.text&&p.u>=0&&p.u<1)noteAtk(p.u);}catch(e){}return o.apply(this,arguments);};
+  A.drawAttack.__nv=1;return true;}
+function hookUnder(){var D=root.TTGDEM;if(!D||!D.under)return false;if(D.under.__nv)return true;
+  var o=D.under;
+  D.under=function(c,ts,da){try{drawTran(c,ts,da);}catch(e){try{c.restore();}catch(e2){}}return o.apply(this,arguments);};
+  D.under.__nv=1;return true;}
+function hookAll(){var a=hookFx(),b=hookUnder();return a&&b;}
+hookAll();setInterval(hookAll,1000);   /* module nạp muộn / bị thay thì tự gắn lại (đã gắn rồi thì bỏ qua) */
+root.TTGNVSANH={CFG:CFG,LINES:LINES,draw:draw,pos:function(){return S.x==null?null:{x:S.x,fy:S.gy+S.cy};},vuot:function(){vuot(performance.now());},chao:function(){chao(performance.now());},
+  tran:{pos:function(){return TR.x==null?null:{x:TR.x,fy:TR.fy};},lenh:function(){TR.lenh=performance.now()+700;}}};   /* tran.lenh(): thử dáng ra lệnh bằng tay (gõ TTGNVSANH.tran.lenh() trong console lúc đang ở trận) */
 })(window);
