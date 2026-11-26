@@ -22,7 +22,7 @@ var GIOI=[
  {id:'nam',ten:'Nam Tu Sĩ',mota:'Kiên cường, thẳng như trúc'}];
 var SKINS={
  nu:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh-nu',ten:'Giáng Sinh Nữ'},{id:'tet-nguyen-dan-nu',ten:'Tết Nguyên Đán Nữ'}],
- nam:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh-nam',ten:'Giáng Sinh Nam'},{id:'tet-nguyen-dan-nam',ten:'Tết Nguyên Đán Nam'}]};
+ nam:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh-nam',ten:'Giáng Sinh Nam'},{id:'tet-nguyen-dan-nam',ten:'Tết Nguyên Đán Nam'},{id:'thanh-long-nam',ten:'Thanh Long'}]};
 /* Skin KHÔNG bị giới hạn theo giới tính: Nam/Nữ trong tên chỉ để phân biệt, ai cũng mặc được. Mỗi skin nằm trong thư mục của giới nó thuộc về (nhan-vat/<gioi>/<idSkin>-*.png), riêng 'mac-dinh' theo giới của người chơi. */
 function thuMuc(g,s){if(s==='mac-dinh')return g;for(var k in SKINS){for(var i=0;i<SKINS[k].length;i++)if(SKINS[k][i].id===s)return k;}return g;}
 function dsSkin(g){var a=[(SKINS[g]||SKINS.nu)[0]],k,i;for(k in SKINS)for(i=0;i<SKINS[k].length;i++)if(SKINS[k][i].id!=='mac-dinh')a.push(SKINS[k][i]);return a;}   /* bộ mặc định của giới g + mọi skin thưởng của cả 2 giới */
