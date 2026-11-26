@@ -263,7 +263,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Thứ tự vẽ: nền -> khung -> thú -> thanh máu -> hiệu ứng (thú nằm TRÊN khung nên chân thú không bị viền che). Chưa có ảnh khung thì vẽ viền vàng mảnh tạm.
    Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
-   VỊ TRÍ THÚ: cố định theo tỉ lệ khung (PET_X = 0.218 bề ngang khung, đúng chỗ dưới nút "Chọn thú" lúc này), KHÔNG neo vào nút nào để sau này đổi/bỏ nút không ảnh hưởng.
+   VỊ TRÍ THÚ: cố định theo tỉ lệ khung (PET_X = 0.27 bề ngang khung, dịch vào trong từ 0.218 để chừa chỗ cho nhân vật/phụ kiện, đúng chỗ dưới nút "Chọn thú" lúc này), KHÔNG neo vào nút nào để sau này đổi/bỏ nút không ảnh hưởng.
    Thú bên phải đối xứng với thú trái qua tâm khung (1 - PET_X).
    ĐỔI BẬC: 2 nút "Bạn: bậc N" và "Địch: bậc N" (id tm, te), bấm để xoay vòng 1 -> 2 -> 3 -> 1 (MAXB = 3).
    Nút mới thêm vào danh sách sẽ tự xếp vào chỗ trống cuối thanh dưới, KHÔNG làm mất bố cục đã sắp xếp.
@@ -275,7 +275,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,BATTLE=null,A=null,typing=false;
-var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=2400,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.218,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
+var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=2400,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.27,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
 var NHN={ok:false,im:new Image()};NHN.im.onload=function(){NHN.ok=true;};NHN.im.src='game-moi/nen-hang-nut.png?v=1';/* nền khung dưới (thanh nút): ảnh game-moi/nen-hang-nut.png, phủ kín + canh giữa; chưa nạp được thì dùng dải màu */
 var BP=98,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 /* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */

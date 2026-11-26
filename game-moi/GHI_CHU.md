@@ -207,3 +207,8 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 
 ## Skin "Hắc Long Tôn Giả" (26/11/2026)
 - id `hac-long-ton-gia-nam`, tên "Hắc Long Tôn Giả", ảnh `nhan-vat/nam/hac-long-ton-gia-nam-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nam`; ai cũng mặc được. Cỡ căn theo sprite nam mặc định. Nâng version 64b `?v=14`. Ảnh trận tư thế và ra lệnh đứng cùng vị trí chân; ra lệnh có rồng lửa lớn nên nhân vật dịch trái hơn các skin khác.
+
+## Chỉnh 26/11/2026 (sau khi thử Hắc Long Tôn Giả)
+- Bảng Nhân Vật lệch bệ: do ảnh `tran-tu-the` của skin bị dịch trái để chừa chỗ rồng lửa. Quy tắc: `tran-tu-the` luôn đặt thân GIỮA ảnh 512 (bbox giữa ở x=256). `tran-ra-lenh` có thể RỘNG HƠN 512 (cao vẫn 512), thân đặt trùng tâm chân với tu-the, hiệu ứng tràn sang phải; code 84b vẽ theo `naturalWidth` nên ảnh 512 cũ không đổi.
+- Trong trận dịch thú/quái vào trong để chừa chỗ cho nhân vật và phụ kiện sau này: PET_X .218 -> .27 (index.html, thú phải đối xứng 1-PET_X) và CFG.tran.petX .27 (84b). Nhân vật đứng theo thú (pet - gap) nên cũng dịch vào theo. Muốn sát/xa hơn thì sửa 2 số này CÙNG LÚC.
+- Nâng cache: ảnh trận `?v=2` (84b), bảng Nhân Vật `?v=4` (90).

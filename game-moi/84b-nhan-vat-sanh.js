@@ -222,12 +222,12 @@ CFG.tran={
   nang:9,                  /* nâng chân ngang chân thú (thú trong trận cũng được nâng PET_LIFT=16) */
   gap:100,                 /* cách tâm thú về phía SAU thú (bên trái) bao nhiêu điểm; tăng = đứng xa thú hơn */
   le:30,                     /* chừa lề trái khung (viền khung + nửa thân) */
-  petX:.218,floor:22,      /* = PET_X và FLOOR trong index.html (vị trí thú bạn trong khung trên, độ dày nền đất) */
+  petX:.27,floor:22,       /* = PET_X và FLOOR trong index.html (vị trí thú bạn trong khung trên, độ dày nền đất) */
   lenhU:.5,lenhTre:180,    /* giữ dáng ra lệnh khi đòn của thú chạy tới u<lenhU (0..1), rồi giữ thêm bấy nhiêu ms */
   vao:450                  /* hiện dần + trượt vào lúc vào trận (ms) */
 };
 var TR={seen:0,t0:0,lenh:0,was:false,hop:null,x:null,fy:0};
-function tranSrc(loai){var N=root.TTGNHANVAT;if(!N||!N.gioi)return null;var g=N.gioi(),s=N.skin();if(N.daMo&&!N.daMo(g,s))s='mac-dinh';return 'game-moi/nhan-vat/'+(N.thuMuc?N.thuMuc(g,s):g)+'/'+s+'-tran-'+loai+'.png?v=1';}
+function tranSrc(loai){var N=root.TTGNHANVAT;if(!N||!N.gioi)return null;var g=N.gioi(),s=N.skin();if(N.daMo&&!N.daMo(g,s))s='mac-dinh';return 'game-moi/nhan-vat/'+(N.thuMuc?N.thuMuc(g,s):g)+'/'+s+'-tran-'+loai+'.png?v=2';}
 function tranImg(loai){
   var src=tranSrc(loai);if(!src)return null;var e=IMG[src];
   if(!e){e=IMG[src]={img:new Image(),ok:false,bad:false};e.img.onload=function(){e.ok=true;};e.img.onerror=function(){e.bad=true;};e.img.src=src;}
@@ -251,7 +251,8 @@ function drawTran(c,ts,da){
   c.save();c.globalAlpha=al;
   c.fillStyle='rgba(0,0,0,.28)';c.beginPath();c.ellipse(x-slide,fy-1,k*.22,k*.05,0,0,Math.PI*2);c.fill();   /* bóng dưới chân */
   c.imageSmoothingEnabled=true;
-  c.drawImage(img,0,0,512,512,x-slide-k/2,fy+k*.03+oy-k,k,k);
+  var iw=img.naturalWidth||512;   /* ảnh rộng hơn 512 (vd ra-lenh có hiệu ứng lớn): vẫn đặt thân đúng chỗ cũ, phần thừa tràn sang phải */
+  c.drawImage(img,0,0,iw,512,x-slide-k/2,fy+k*.03+oy-k,k*iw/512,k);
   c.restore();}
 /* bọc 2 hàm có sẵn để không phải sửa index.html; hàm gốc vẫn chạy đủ (chỉ thêm 1 bước phụ phía trước) */
 function hookFx(){var A=root.TTGCombatFX;if(!A||!A.drawAttack)return false;if(A.drawAttack.__nv)return true;

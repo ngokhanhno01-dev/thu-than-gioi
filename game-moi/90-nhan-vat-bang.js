@@ -8,7 +8,7 @@
 (function(root){
 'use strict';
 if(root.TTG_BLOCK)return;
-var SW=1406,SH=768,D='game-moi/',V='?v=3',DIR=D+'nhan-vat/',KEYK='ttg_moi_nhanvat_khoa_v1';
+var SW=1406,SH=768,D='game-moi/',V='?v=4',DIR=D+'nhan-vat/',KEYK='ttg_moi_nhanvat_khoa_v1';
 var BOX={
   close:{x:1268,y:14,w:120,h:104},
   ten:{x:227,y:135,w:295,h:33},                 /* thanh vàng đầu cột trái: biệt danh */
