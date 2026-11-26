@@ -78,6 +78,48 @@ var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
    diem: các chỗ núp cố định mỗi khu (hiện ngẫu nhiên CFG.soDiemHien), đặt cạnh chỗ núp vẽ trên ảnh, nằm trên ô đi được (checkCfg() cảnh báo nếu không tới được).
    Tên khu 1, 3, 4 là TÊN TẠM tự đặt theo cảnh trong ảnh (chỉ khu 2 "Cầu Đá" là theo mô tả) - sửa ten ở đây. */
 var VUNG={
+  'nguyet-cung':{
+    ten:'Nguyệt Cung',
+    anh:DIR+'map-tham-hiem-nguyet-cung.webp?v=3',
+    rong:1536,cao:1024,
+    camNhay:[[450,500,705,620]],   /* cầu đá cong khu 2: thú không nhảy vào */
+    dauHieu:'nguyet',
+    maskW:192,maskH:128,
+    maskData:'192x128:0:36k,11,48,17,42,1c,3w,1j,3q,1o,3l,s,2,z,3f,w,2,10,3a,23,39,23,38,24,38,25,37,25,37,25,37,25,37,25,37,25,37,25,37,25,37,25,36,25,37,25,37,25,37,25,32,2a,2w,2g,2w,2g,2w,27,35,27,35,27,35,27,35,27,35,27,35,27,35,27,35,27,35,27,35,27,35,27,35,27,35,27,35,2g,2w,2g,2w,2g,2w,2g,2w,2g,2x,2f,2z,2d,2z,2d,30,2c,31,2b,32,24,38,24,39,23,3a,22,9,2,36,1v,9,3,3b,1p,9,5,3e,1k,9,6,3e,1j,9,5,3g,1i,9,5,3g,1i,9,5,3h,1h,9,5,2i,3,x,1g,9,5,2e,a,u,1g,9,5,2a,g,s,1t,2a,k,p,1t,29,n,m,1u,28,s,i,1u,28,11,8,1v,28,34,28,34,28,34,28,34,28,34,28,33,2b,31,2f,2x,2k,2s,2o,2o,2s,2k,2v,2g,2w,2f,2x,2e,2y,2d,2z,2c,30,2b,31,2b,31,2b,31,2b,31,2b,31,2b,31,2b,31,2b,31,2b,30,2c,2w,2g,2s,2k,2o,2o,2k,2s,2k,2s,2k,2s,2k,2s,2k,2s,2k,2s,2k,2s,2k,2s,2k,2s,2k,2s,1d',
+    xuatPhat:{x:800,y:1000},
+    khu:[
+      {id:1,ten:'Khu 1 – Bậc Đá Nguyệt',y0:720,y1:1024,ti:{thuong:80,hiem:17,suthi:2.7,huyenthoai:0.3}},
+      {id:2,ten:'Khu 2 – Cầu Đá Cong',y0:490,y1:720,ti:{thuong:60,hiem:30,suthi:8,huyenthoai:2}},
+      {id:3,ten:'Khu 3 – Đèn Lồng',y0:300,y1:490,ti:{thuong:35,hiem:35,suthi:22,huyenthoai:8}},
+      {id:4,ten:'Khu 4 – Cổng Nguyệt Cung',y0:0,y1:300,ti:{thuong:15,hiem:30,suthi:35,huyenthoai:20}}
+    ],
+    diem:{
+      1:[{id:'1a',x:579,y:788,ghiChu:'cạnh bụi/đá khu 1'},
+         {id:'1b',x:1083,y:795,ghiChu:'cạnh bụi/đá khu 1'},
+         {id:'1c',x:898,y:852,ghiChu:'cạnh bụi/đá khu 1'},
+         {id:'1d',x:634,y:900,ghiChu:'cạnh bụi/đá khu 1'},
+         {id:'1e',x:1004,y:900,ghiChu:'cạnh bụi/đá khu 1'},
+         {id:'1f',x:980,y:956,ghiChu:'cạnh bụi/đá khu 1'},
+         {id:'1g',x:476,y:972,ghiChu:'cạnh bụi/đá khu 1'}],
+      2:[{id:'2a',x:778,y:516,ghiChu:'cạnh bụi/đá khu 2'},
+         {id:'2b',x:898,y:596,ghiChu:'cạnh bụi/đá khu 2'},
+         {id:'2c',x:994,y:636,ghiChu:'cạnh bụi/đá khu 2'},
+         {id:'2d',x:1196,y:651,ghiChu:'cạnh bụi/đá khu 2'},
+         {id:'2e',x:699,y:675,ghiChu:'cạnh bụi/đá khu 2'},
+         {id:'2f',x:1035,y:699,ghiChu:'cạnh bụi/đá khu 2'}],
+      3:[{id:'3a',x:730,y:346,ghiChu:'cạnh bụi/đá khu 3'},
+         {id:'3b',x:1028,y:394,ghiChu:'cạnh bụi/đá khu 3'},
+         {id:'3c',x:915,y:428,ghiChu:'cạnh bụi/đá khu 3'},
+         {id:'3d',x:476,y:435,ghiChu:'cạnh bụi/đá khu 3'},
+         {id:'3e',x:579,y:452,ghiChu:'cạnh bụi/đá khu 3'},
+         {id:'3f',x:1059,y:476,ghiChu:'cạnh bụi/đá khu 3'}],
+      4:[{id:'4a',x:675,y:260,ghiChu:'cạnh bụi/đá khu 4'},
+         {id:'4b',x:1076,y:274,ghiChu:'cạnh bụi/đá khu 4'},
+         {id:'4c',x:596,y:284,ghiChu:'cạnh bụi/đá khu 4'},
+         {id:'4d',x:980,y:284,ghiChu:'cạnh bụi/đá khu 4'}]
+    },
+    boss:{x:868,y:214,banKinhCham:38,ten:'Boss Truyền Thuyết'}
+  },
   'loi-vuc':{
     ten:'Lôi Vực',
     anh:DIR+'map-tham-hiem-loi-vuc.webp?v=3',
@@ -841,6 +883,15 @@ var DAUHIEU={
     for(i=0;i<4;i++){k=0.5+0.5*Math.sin(t*3+ph+i*1.7);x=(i-1.5)*11+Math.sin(t*1.6+i)*3;y=-10-(i%2)*17-Math.sin(t*2+ph+i)*3;r=2.2+k*1.8;
       c.fillStyle='rgba(186,110,255,'+(0.18+0.27*k)+')';c.beginPath();c.arc(x,y,r*2.6,0,6.2832);c.fill();
       c.fillStyle='rgba(240,215,255,'+(0.55+0.45*k)+')';c.beginPath();c.arc(x,y,r,0,6.2832);c.fill();}},
+  /* đom đóm trăng xanh nhạt + cánh hoa hồng rơi chậm */
+  nguyet:function(c,t,ph){
+    var i,x,y,k,r;
+    for(i=0;i<4;i++){k=0.5+0.5*Math.sin(t*2.4+ph+i*1.9);x=(i-1.5)*11+Math.sin(t*1.3+i+ph)*4;y=-8-(i%2)*15-Math.sin(t*1.8+ph+i)*3;r=2+k*1.6;
+      c.fillStyle='rgba(150,225,255,'+(0.18+0.25*k)+')';c.beginPath();c.arc(x,y,r*2.6,0,6.2832);c.fill();
+      c.fillStyle='rgba(235,250,255,'+(0.55+0.45*k)+')';c.beginPath();c.arc(x,y,r,0,6.2832);c.fill();}
+    for(i=0;i<3;i++){k=((t*0.35+ph*0.1+i*0.33)%1);x=(i-1)*13+Math.sin(t*1.5+i*2+ph)*5;y=-30+k*28;
+      c.save();c.translate(x,y);c.rotate(t*1.2+i);c.globalAlpha*=Math.sin(k*3.1416)*0.9;
+      c.fillStyle='rgba(255,170,210,1)';c.beginPath();c.ellipse(0,0,4.2,2.2,0,0,6.2832);c.fill();c.restore();}},
   /* mây trôi xoáy nhẹ + cánh hoa tím bay lên */
   van:function(c,t,ph){
     var i,x,y,k,w;
