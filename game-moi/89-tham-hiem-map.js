@@ -496,7 +496,7 @@ function update(s,dt){
     if(!here||canStand(s,p.x,ny))p.y=ny;
     p.moving=(p.x!==ox||p.y!==oy);
     if(inp.x<-0.05)p.face=-1;else if(inp.x>0.05)p.face=1;
-    p.dir=(inp.y>0.05&&Math.abs(inp.y)>Math.abs(inp.x)*1.2)?'truoc':'phai';}   /* đi xuống rõ rệt = chính diện; còn lại (kể cả đi lên, chưa có ảnh quay lưng) = ngang */
+    p.dir=(Math.abs(inp.y)>0.05&&Math.abs(inp.y)>Math.abs(inp.x)*1.2)?(inp.y>0?'truoc':'sau'):'phai';}   /* đi xuống rõ rệt = chính diện, đi lên rõ rệt = quay lưng; còn lại = ngang */
   if(p.moving)p.walk+=dt*12;else p.walk=0;
   /* camera bám nhân vật, kẹp trong biên map */
   s.cam.x+=(clampCam(p.x-s.vw/z/2,s.vw/z,v.rong)-s.cam.x)*Math.min(1,dt*9);
@@ -617,7 +617,7 @@ function stripFor(s){
 function drawPlayer(s){
   var p=s.p,c=s.ctx,k=CFG.nhanVat.kich,st=stripFor(s),bob=(!st&&p.moving)?Math.abs(Math.sin(p.walk))*CFG.nhanVat.nhun:0;   /* khung đi bộ đã có nhún sẵn */
   ellipse(c,p.x,p.y,k*0.3*(1-bob*0.03),k*0.1,'rgba(0,0,0,.3)');
-  c.save();c.translate(p.x,p.y-bob);c.scale(p.dir==='truoc'?1:p.face,1);
+  c.save();c.translate(p.x,p.y-bob);c.scale((p.dir==='truoc'||p.dir==='sau')?1:p.face,1);
   if(st){var fi=p.moving?Math.floor(p.walk/1.5)%4:1;   /* 12 đơn vị/giây / 1,5 = 8 khung/giây; đứng yên = khung 2 */
     c.drawImage(st,fi*512,0,512,512,-k/2,-k,k,k);}
   else if(!drawSprite(s,c,k))chibi(c,k);

@@ -32,7 +32,7 @@ function moKhoa(g,id){var o=rd(KEYSK)||{};if(!o[g])o[g]={};o[g][id]=1;wr(KEYSK,o
 function datSkin(id){var o=get();if(!o||!daMo(o.gioi,id))return false;o.skin=id;wr(KEY,o);return true;}
 function anh(g,s,loai){return DIR+g+'/'+s+'-'+loai+'.png'+V;}
 function anhMap(){var o=get();var g=o?o.gioi:'nu',s=(o&&o.skin)||'mac-dinh';if(!daMo(g,s))s='mac-dinh';return anh(g,s,'map');}
-/* dải khung đi bộ: 4 khung 512x512 xếp ngang (2048x512): khung 1 và 3 = bước chân, 2 và 4 = tư thế đứng/chuyển. huong: 'phai' (ngang, quay phải; quay trái thì lật) hoặc 'truoc' (chính diện). Chưa có file -> map tự dùng ảnh đứng yên anhMap(). */
+/* dải khung đi bộ: 4 khung 512x512 xếp ngang (2048x512): khung 1 và 3 = bước chân, 2 và 4 = tư thế đứng/chuyển. huong: 'phai' (ngang, quay phải; quay trái thì lật), 'truoc' (chính diện) hoặc 'sau' (quay lưng). Chưa có file -> map tự dùng ảnh đứng yên anhMap(). */
 function anhDi(huong){var o=get();var g=o?o.gioi:'nu',s=(o&&o.skin)||'mac-dinh';if(!daMo(g,s))s='mac-dinh';return DIR+g+'/'+s+'-di-'+huong+'.png'+V;}
 function anhChon(g){var o=get();var s=(o&&o.gioi===g&&o.skin)||'mac-dinh';if(!daMo(g,s))s='mac-dinh';return anh(g,s,'chon');}
 function css(){
