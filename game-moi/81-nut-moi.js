@@ -21,3 +21,6 @@ FN.forEach(function(f){var o={id:f[0],ten:f[1],onTap:soon(f[1])};if(f[0]==='cua-
 
 /* 88-npc-boss.js (25/11/2026): bộ máy NPC loại Boss (Khiêu chiến, địch NPC trong trận, phần thưởng). Nạp SAU 87-npc.js (async=false giữ đúng thứ tự). */
 (function(){try{var cs=document.currentScript,s=document.createElement('script');s.src=(cs&&cs.src?cs.src.replace(/[^\/?#]*([?#].*)?$/,''):'game-moi/')+'88-npc-boss.js?v=2';s.async=false;document.head.appendChild(s);}catch(e){}})();
+
+/* 90-nhan-vat-bang.js (26/11/2026): bảng Nhân Vật + icon Nhân Vật ở thanh nút (ngoài cùng bên phải). Nạp SAU 88 (async=false giữ thứ tự). */
+(function(){try{var cs=document.currentScript,s=document.createElement('script');s.src=(cs&&cs.src?cs.src.replace(/[^\/?#]*([?#].*)?$/,''):'game-moi/')+'90-nhan-vat-bang.js?v=2';s.async=false;document.head.appendChild(s);}catch(e){}})();
