@@ -2,7 +2,7 @@
    DANH VỌNG
    - Có được khi GIẾT thú hoang / boss thú hoang (source 'demo'). Mỗi LOÀI chỉ tính 1 lần đầu giết (1 vùng = 9 thú hoang + 1 boss = 10 Danh Vọng).
    - Lưu localStorage khóa ttg_moi_dv = {kills:{idLoài:1}}. Danh Vọng = số loài đã giết. Không bị tiêu hao (chỉ là mốc mở khóa + trần cấp).
-   - TRẦN CẤP thú nuôi = TTGCS.tranCap(Danh Vọng) = min(270, max(1, floor(DV x 1,5))): DV 10 -> Lv.15, DV 180 -> Lv.270 (54-thu-than.js đọc TTGDV.tran()).
+   - TRẦN CẤP thú nuôi tính theo VÙNG ĐÃ MỞ (không còn theo Danh Vọng): TTGCS.tranCap(số vùng mở) = min(270, 15 x số vùng mở). Mới vào Tuyết Nguyên = Lv.15, mở Sương Cốc = Lv.30... (54-thu-than.js đọc TTGDV.tran()). Danh Vọng chỉ còn là điều kiện mở vùng.
    - Hiển thị: ngôi sao + số trong ô nhỏ dưới chữ "Danh Vọng" ở khung trên (draw, gọi từ index.html sau drawExp). Tọa độ theo pixel khung-sanh.webp: sửa PLATE.
    CHỌN VÙNG
    - Bấm icon Thám hiểm (59-nut-tham-hiem.js) -> bảng chọn vùng dùng khung icon/khung-chon-vung.webp (18 ô = 2 cột x 9 hàng, tọa độ SLOT); chọn vùng đã mở thì đi Thám hiểm ngay (CFG.batDauNgay). Thanh tên vùng dưới icon Thám hiểm chỉ hiển thị vùng đang ở.
@@ -25,7 +25,8 @@ function zones(){var z=(root.THU_MOI&&root.THU_MOI.zones)||[];return z.slice().s
 function get(){return Object.keys(S.kills).length+extra;}
 function can(i){return CFG.moiVung*Math.max(0,i);}              /* Danh Vọng cần để mở vùng thứ i+1 (i = 0..) */
 function moRoi(i){return get()>=can(i);}
-function tran(){return root.TTGCS&&root.TTGCS.tranCap?root.TTGCS.tranCap(get()):0;}
+function soVungMo(){var l=zones(),n=0;for(var i=0;i<l.length;i++)if(moRoi(i))n++;return Math.max(1,n);}   /* số vùng đã mở (vùng 1 luôn mở sẵn) */
+function tran(){return root.TTGCS&&root.TTGCS.tranCap?root.TTGCS.tranCap(soVungMo()):0;}   /* trần cấp theo VÙNG đã mở: 1 vùng = Lv.15, 2 vùng = Lv.30... (CFG.capMoiVung ở 56-chi-so.js) */
 function chi(){var l=zones();if(IDX>=l.length||!moRoi(IDX))IDX=0;return IDX;}   /* chỉ số vùng đang chọn (hợp lệ) */
 function vung(){var l=zones(),z=l[chi()];return z?z.z:0;}
 function ten(){var l=zones(),z=l[chi()];return z?z.ten+' Vùng '+(chi()+1):'';}

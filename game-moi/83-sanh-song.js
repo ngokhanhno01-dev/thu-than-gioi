@@ -84,7 +84,7 @@ var LINES={
     'Chạm khung tên vùng ngay dưới nút Thám hiểm để đổi sang vùng đã mở.',
     'Danh Vọng là số loài thú hoang và boss bạn đã hạ. Mỗi loài chỉ tính lần đầu tiên.',
     'Muốn mở vùng mới thì cần đủ Danh Vọng. Mở rồi không bị tốn đâu.',
-    'Danh Vọng càng cao thì trần cấp của ta càng cao. Đạt trần là ta ngừng nhận EXP đó!',
+    'Mở thêm vùng mới thì trần cấp của ta càng cao. Đạt trần là ta ngừng nhận EXP đó!',
     'Ngự Thú Châu chỉ ném được khi thú hoang còn dưới 60% máu. Đánh cho nó yếu rồi hãy ném.',
     'Boss khó bắt hơn thú thường. Nhớ mang đủ châu và đánh cho nó thật yếu.',
     'Châu cấp cao bắt dễ hơn ở vùng thấp, nhưng châu thấp thì không ném nổi ở vùng quá cao.',
