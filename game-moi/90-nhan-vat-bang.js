@@ -1,7 +1,7 @@
 /* 90-nhan-vat-bang.js - BẢNG NHÂN VẬT (TTGNVB) (26/11/2026). Mở bằng icon "Nhân Vật" ở thanh nút (ngoài cùng bên phải), nạp động từ 81-nut-moi.js.
    ẢNH: game-moi/khung-nhan-vat.webp (1406x768, đã tách nền xanh, bỏ dấu sao góc) + nut-trong-nv.webp (miếng che chữ "Tháo Trang Bị" để chữ do code vẽ) + icon/nhan-vat.webp. Mọi tọa độ ở khối BOX, tính theo pixel ảnh khung (SW x SH).
-   BỐ CỤC: trái = nhân vật đứng trên bục (nhỏ lại để chừa chỗ DANH HIỆU nổi trên đầu), thanh vàng = biệt danh; 8 ô hai bên: ô 1 (trên-trái) = DANH HIỆU, ô 2 = KHUNG UI (2 ô này đã chuyển từ khung Trang Bị của thú sang đây), 6 ô còn lại để dành;
-   phải = lưới 15 ô (3x5, nhiều hơn thì lật trang: lăn chuột / vuốt dọc / chạm số trang) gồm các SKIN của giới đang chọn + Danh hiệu / Khung UI trong túi (món đang mang nằm ở ô bên trái), khung Thông Tin, 4 nút:
+   BỐ CỤC: trái = nhân vật đứng trên bục (nhỏ lại để chừa chỗ DANH HIỆU nổi trên đầu), thanh vàng = biệt danh; 8 ô hai bên: ô 1 (trên-trái) = DANH HIỆU, ô 2 = KHUNG UI (2 ô này đã chuyển từ khung Trang Bị của thú sang đây), ô 3 = TRANG PHỤC (skin đang mặc), 5 ô còn lại để dành;
+   phải = lưới 15 ô (3x5, nhiều hơn thì lật trang: lăn chuột / vuốt dọc / chạm số trang) gồm các SKIN chưa mặc của giới đang chọn + Danh hiệu / Khung UI trong túi (món đang mang nằm ở ô bên trái), khung Thông Tin, 4 nút:
      Chọn = mặc món đang chọn | Khóa = khóa/mở khóa (món khóa không vứt bỏ được) | TRANG BỊ / THÁO TRANG BỊ = nút đổi chữ: món đang chọn chưa mặc -> "Trang Bị" (bấm để mặc), món đang mặc -> "Tháo Trang Bị" (bấm để tháo; skin tháo = về bộ mặc định) | Vứt Bỏ = bỏ skin đã mở / xóa danh hiệu, khung UI (không áp dụng món mặc định / đang mặc).
    DỮ LIỆU Danh hiệu + Khung UI vẫn nằm trong kho TTGTB (55-trang-bi.js: món có trường dh / khui, ô 2 và 3); khung Trang Bị của thú không còn hiện chúng. API dùng: TTGTB.macVao / thao / vut / isMac.
    Thêm skin: khai trong SKINS của 64b + ảnh <skin>-chon.png và <skin>-tran-tu-the.png; bảng này tự hiện. Đóng: nút X, chạm ngoài khung, Esc. API: TTGNVB.open()/close()/isOpen(). */
@@ -18,7 +18,7 @@ var BOX={
   tin:{x:1092,y:195,w:228,h:350},               /* khung Thông Tin */
   btn:{chon:{x:1072,y:563,w:136,h:49},khoa:{x:1210,y:563,w:132,h:49},thao:{x:1072,y:621,w:136,h:57},vut:{x:1210,y:621,w:132,h:57}},
   thaoCover:{x:1083,y:629,w:117,h:41},          /* miếng che chữ "Tháo Trang Bị" (nut-trong-nv.webp), chữ "Trang Bị" do code vẽ đè lên */
-  slotL:{xs:[144,603.5],ys:[227.5,317,404,494],s:78},   /* 8 ô bên nhân vật: 2 cột x 4 hàng. Thứ tự ô = cột trái từ trên xuống (0-3), rồi cột phải (4-7). Ô 0 = Danh hiệu, ô 1 = Khung UI */
+  slotL:{xs:[144,603.5],ys:[227.5,317,404,494],s:78},   /* 8 ô bên nhân vật: 2 cột x 4 hàng. Thứ tự ô = cột trái từ trên xuống (0-3), rồi cột phải (4-7). Ô 0 = Danh hiệu, ô 1 = Khung UI, ô 2 = Trang Phục (skin đang mặc) */
   grid:{xs:[789,897,1003.5],ys:[212,327,437,534,632],s:84},   /* 15 ô: 3 cột x 5 hàng */
   page:{x:857,y:680,w:80,h:17}                  /* số trang (chỉ hiện khi quá 15 món) */
 };
@@ -58,7 +58,7 @@ function isLocked(){var t=curItem();if(sel.k==='item')return !!(t&&t.kh);return 
 function selKey(e){return e.k==='skin'?'s:'+e.id:'i:'+e.uid;}
 /* danh sách ô lưới: skin của giới + danh hiệu/khung UI chưa mang */
 function entries(){
-  var o=dsSkin().map(function(s){return{k:'skin',id:s.id};});
+  var mac=dangMac(),o=dsSkin().filter(function(s){return s.id!==mac;}).map(function(s){return{k:'skin',id:s.id};});   /* bộ đang mặc nằm ở ô Trang Phục, không lặp trong lưới */
   trongTui().forEach(function(t){o.push({k:'item',uid:t.uid});});
   return o;}
 
@@ -118,7 +118,7 @@ function build(){
   /* 8 ô bên nhân vật: ô 0 = Danh hiệu, ô 1 = Khung UI, còn lại để dành */
   E.slots=[];
   BOX.slotL.xs.forEach(function(x,ci){BOX.slotL.ys.forEach(function(y,ri){var i=ci*4+ri,b=mk('button','nvb-sl',cell(x,y,BOX.slotL.s));b.type='button';b._i=i;
-    b.setAttribute('aria-label',i===0?'Ô Danh hiệu':(i===1?'Ô Khung UI':'Ô trang bị nhân vật'));
+    b.setAttribute('aria-label',i===0?'Ô Danh hiệu':(i===1?'Ô Khung UI':(i===2?'Ô Trang Phục':'Ô trang bị nhân vật')));
     b.addEventListener('click',function(){tapSlot(i);});E.slots.push(b);});});
   /* lưới 15 ô */
   E.cells=[];
@@ -199,7 +199,8 @@ function aVut(){
   else if(n.boSkin(gioi(),id)){sel={k:'skin',id:'mac-dinh'};render();}}
 /* chạm ô bên trái: ô 0 Danh hiệu, ô 1 Khung UI. Đang mang món thì chọn nó (rồi bấm Tháo Trang Bị) */
 function tapSlot(i){
-  if(i>1){toast('Trang bị nhân vật: sắp ra mắt');return;}
+  if(i===2){sel={k:'skin',id:dangMac()};render();return;}
+  if(i>2){toast('Trang bị nhân vật: sắp ra mắt');return;}
   var t=macNv(i===0?'dh':'khui');
   if(!t){toast(i===0?'Chưa mang danh hiệu: chọn danh hiệu trong túi rồi bấm Trang Bị':'Chưa mang khung UI: chọn khung UI trong túi rồi bấm Trang Bị');return;}
   sel={k:'item',uid:t.uid};render();}
@@ -220,9 +221,10 @@ function render(){
   var dh=macNv('dh');
   if(dh&&dh.img){if(E.dh.getAttribute('data-s')!==dh.img){E.dh.setAttribute('data-s',dh.img);E.dh.src=dh.img;}E.dh.style.display='';fitDh();}
   else{E.dh.style.display='none';E.dh.removeAttribute('data-s');}
-  /* 2 ô trái: Danh hiệu, Khung UI đang mang */
+  /* 3 ô trái: Danh hiệu, Khung UI, Trang Phục đang mang */
   for(i=0;i<E.slots.length;i++){var sb=E.slots[i],it=i===0?dh:(i===1?macNv('khui'):null);
-    if(it){sb.innerHTML='<span class="in">'+iconNv(it)+'</span>'+(it.kh?'<span class="nvb-bd">🔒</span>':'');sb.className='nvb-sl'+(sel.k==='item'&&sel.uid===it.uid?' on':'');}
+    if(i===2){sb.innerHTML='<span class="in"><img alt="" draggable="false" src="'+DIR+g+'/'+mac+'-chon.png'+V+'"></span>';sb.className='nvb-sl'+(sel.k==='skin'&&sel.id===mac?' on':'');}
+    else if(it){sb.innerHTML='<span class="in">'+iconNv(it)+'</span>'+(it.kh?'<span class="nvb-bd">🔒</span>':'');sb.className='nvb-sl'+(sel.k==='item'&&sel.uid===it.uid?' on':'');}
     else{sb.innerHTML='';sb.className='nvb-sl';}}
   /* lưới (có lật trang) */
   var np=pages();if(page>=np)page=np-1;if(page<0)page=0;
