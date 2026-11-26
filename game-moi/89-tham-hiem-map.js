@@ -53,7 +53,9 @@ var CFG={
   /* nhảy quanh chỗ núp, theo khu: banKinh = tầm quanh quẩn; buoc = dài 1 cú nhảy; tg = giây 1 cú; nghi = nghỉ [min,max] giây */
   nhay:{1:{banKinh:35,buoc:18,tg:0.52,nghi:[1.4,2.8]},2:{banKinh:50,buoc:22,tg:0.46,nghi:[1.0,2.2]},
         3:{banKinh:65,buoc:26,tg:0.42,nghi:[0.7,1.7]},4:{banKinh:80,buoc:30,tg:0.38,nghi:[0.5,1.4]},cao:12},
-  /* thú/quái sử thi + huyền thoại: người chơi tới gần (< gan) thì nhảy tránh `soCu` cú rồi hết sức trong `cho` giây (để còn bắt được); xaNha = không rời chỗ núp quá */
+  /* QUÁI (mọi độ hiếm): người chơi tới gần (< gan) thì tự nhào tới `soCu` cú rồi nghỉ `cho` giây (để còn né được); xaNha = không rời chỗ núp quá */
+  nhao:{gan:130,soCu:4,buoc:34,tg:0.3,cho:4,xaNha:170},
+  /* THÚ sử thi + huyền thoại: người chơi tới gần (< gan) thì nhảy tránh `soCu` cú rồi hết sức trong `cho` giây (để còn bắt được); xaNha = không rời chỗ núp quá */
   chay:{loai:['suthi','huyenthoai'],gan:105,soCu:3,buoc:36,tg:0.28,cho:5,xaNha:170},
   hoi:15000,                  /* ms điểm hồi lại sau khi biến mất / sau khi chạm */
   soDiemHien:[2,2],           /* mỗi khu cùng lúc hiện tối đa 2 điểm (trong các chỗ núp cố định) */
@@ -532,7 +534,7 @@ function nhaySpots(s,dt){
   s.groups.forEach(function(g){
     var N=CFG.nhay[g.k.id]||CFG.nhay[1];
     g.pts.forEach(function(sp){
-      var h=sp.hop,r,dx,dy,dich,chay=false,goc,d;
+      var h=sp.hop,r,dx,dy,dich,chay=false,goc,d,quai=!!(sp.chon&&sp.chon.source==='main'),M=quai?CFG.nhao:C,buoc;
       if(!sp.on)return;
       if(h){
         h.p=Math.min(1,h.p+dt/h.tg);
@@ -541,14 +543,15 @@ function nhaySpots(s,dt){
           sp.nghiToi=s.clock+(sp.conCu>0?40:rnd(N.nghi[0],N.nghi[1])*1000);}
         return;}
       dx=sp.x-s.p.x;dy=sp.y-s.p.y;
-      if(C.loai.indexOf(sp.hiem)>=0&&!sp.conCu&&s.clock>=sp.choChay&&dx*dx+dy*dy<C.gan*C.gan){
-        sp.conCu=C.soCu;sp.choChay=s.clock+C.cho*1000;sp.nghiToi=s.clock;}
+      if(sp.chon&&(quai||C.loai.indexOf(sp.hiem)>=0)&&!sp.conCu&&s.clock>=sp.choChay&&s.clock>=s.coolUntil&&dx*dx+dy*dy<M.gan*M.gan){
+        sp.conCu=M.soCu;sp.choChay=s.clock+M.cho*1000;sp.nghiToi=s.clock;}
       if(s.clock<sp.nghiToi)return;
-      if(sp.conCu>0){chay=true;sp.conCu--;goc=Math.atan2(dy,dx)+rnd(-0.3,0.3);}
+      if(sp.conCu>0){chay=true;sp.conCu--;goc=quai?Math.atan2(-dy,-dx)+rnd(-0.15,0.15):Math.atan2(dy,dx)+rnd(-0.3,0.3);}   /* quái lao tới, thú chạy ra xa */
       else{
         d=Math.hypot(sp.x-sp.nx,sp.y-sp.ny);
         goc=d>N.banKinh?Math.atan2(sp.ny-sp.y,sp.nx-sp.x)+rnd(-0.4,0.4):rnd(0,6.2832);}
-      dich=timCu(s,sp,g.k,goc,chay?C.buoc:N.buoc,chay?C.xaNha:N.banKinh);
+      buoc=chay?(quai?Math.min(M.buoc,Math.hypot(dx,dy)):M.buoc):N.buoc;
+      dich=timCu(s,sp,g.k,goc,buoc,chay?M.xaNha:N.banKinh);
       if(!dich){sp.conCu=0;sp.nghiToi=s.clock+700;return;}
       sp.hop={x0:sp.x,y0:sp.y,x1:dich.x,y1:dich.y,p:0,tg:chay?C.tg:N.tg};});});}
 

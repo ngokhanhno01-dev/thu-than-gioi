@@ -260,3 +260,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Nhảy quanh chỗ núp (CFG.nhay theo khu). Sử thi/huyền thoại tới gần thì nhảy tránh 3 cú rồi nghỉ 5s (CFG.chay). Không nhảy lên cầu (VUNG.camNhay), không vào ô chặn. Boss đứng yên.
 - cooldownSauTran 900 -> 3000 ms.
 - Nâng cache: 89 `?v=12`. Chưa chạy thử, chờ chủ game.
+
+## Quái nhào vào, thú bỏ chạy (26/11/2026)
+- Chủ game làm rõ: QUÁI (chon.source=main, mọi độ hiếm) tự nhào về người chơi (CFG.nhao); THÚ (demo) sử thi/huyền thoại chỉ chạy tránh (CFG.chay). Không nhào trong 3s sau trận, không lên cầu.
+- Nâng cache: 89 `?v=13`. Chưa chạy thử.
