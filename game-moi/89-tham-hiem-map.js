@@ -65,7 +65,7 @@ var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
 
 /* ---------- DỮ LIỆU VÙNG ----------
    khu: y0 (trên) -> y1 (dưới) theo ảnh 1536x1024; khu 1 ở dưới cùng. ti = tỉ lệ ra thú (%), tổng mỗi khu phải = 100 (checkCfg() báo nếu lệch).
-   diem: 4 điểm rung cố định mỗi khu, đặt cạnh chỗ núp vẽ trên ảnh, nằm trên ô đi được (checkCfg() cảnh báo nếu không tới được).
+   diem: các chỗ núp cố định mỗi khu (hiện ngẫu nhiên CFG.soDiemHien), đặt cạnh chỗ núp vẽ trên ảnh, nằm trên ô đi được (checkCfg() cảnh báo nếu không tới được).
    Tên khu 1, 3, 4 là TÊN TẠM tự đặt theo cảnh trong ảnh (chỉ khu 2 "Cầu Đá" là theo mô tả) - sửa ten ở đây. */
 var VUNG={
   'tuyet-nguyen':{
@@ -85,19 +85,35 @@ var VUNG={
       1:[{id:'1a',x:650,y:868,ghiChu:'bụi tuyết trái biển KHU 1'},
          {id:'1b',x:668,y:806,ghiChu:'cạnh cụm đá nâu'},
          {id:'1c',x:868,y:802,ghiChu:'cạnh bụi đá bên phải đường'},
-         {id:'1d',x:970,y:925,ghiChu:'cạnh cụm đá tuyết gần hang dưới'}],
+         {id:'1d',x:970,y:925,ghiChu:'cạnh cụm đá tuyết gần hang dưới'},
+         {id:'1e',x:1228,y:978,ghiChu:'tinh thể góc dưới phải'},
+         {id:'1f',x:352,y:968,ghiChu:'tảng đá dưới hồ băng'},
+         {id:'1g',x:578,y:1001,ghiChu:'gốc thông cạnh đá dưới'},
+         {id:'1h',x:210,y:816,ghiChu:'đá bờ trái hồ băng'},
+         {id:'1i',x:1006,y:796,ghiChu:'bụi cạnh cụm thông phải'}],
       2:[{id:'2a',x:548,y:678,ghiChu:'bụi cây cạnh suối'},
          {id:'2b',x:652,y:740,ghiChu:'bụi tuyết trái đường'},
          {id:'2c',x:1042,y:704,ghiChu:'bụi tuyết dưới biển KHU 2'},
-         {id:'2d',x:390,y:708,ghiChu:'cụm đá gần cây khô'}],
+         {id:'2d',x:390,y:708,ghiChu:'cụm đá gần cây khô'},
+         {id:'2e',x:868,y:652,ghiChu:'bụi tuyết đầu cầu'},
+         {id:'2f',x:960,y:754,ghiChu:'tinh thể nhỏ phải đường'},
+         {id:'2g',x:492,y:748,ghiChu:'dãy đá trên hồ băng'},
+         {id:'2h',x:520,y:624,ghiChu:'tinh thể cạnh suối'},
+         {id:'2i',x:184,y:660,ghiChu:'tinh thể gần cây khô'},
+         {id:'2j',x:1160,y:668,ghiChu:'trước hang đá'}],
       3:[{id:'3a',x:745,y:456,ghiChu:'cụm đá giữa trái'},
          {id:'3b',x:870,y:466,ghiChu:'bụi tuyết gần sông'},
          {id:'3c',x:968,y:400,ghiChu:'bụi tuyết dưới biển KHU 3'},
-         {id:'3d',x:736,y:300,ghiChu:'bụi đá trái đường'}],
+         {id:'3d',x:736,y:300,ghiChu:'bụi đá trái đường'},
+         {id:'3e',x:722,y:384,ghiChu:'tinh thể nhỏ trái đường'},
+         {id:'3f',x:1096,y:384,ghiChu:'bụi cây dưới tháp'},
+         {id:'3g',x:684,y:452,ghiChu:'bụi đá gần rừng thông'}],
       4:[{id:'4a',x:676,y:212,ghiChu:'bụi đá trái quảng trường'},
          {id:'4b',x:848,y:232,ghiChu:'tinh thể dưới biển KHU 4'},
          {id:'4c',x:950,y:252,ghiChu:'bụi tuyết phải'},
-         {id:'4d',x:632,y:165,ghiChu:'tinh thể trái quảng trường'}]
+         {id:'4d',x:632,y:165,ghiChu:'tinh thể trái quảng trường'},
+         {id:'4e',x:654,y:268,ghiChu:'cây con trái đường'},
+         {id:'4f',x:894,y:172,ghiChu:'tinh thể trước hang'}]
     },
     boss:{x:780,y:168,banKinhCham:38,ten:'Boss Truyền Thuyết'},   /* đứng cố định giữa quảng trường khu 4, KHÔNG có tỉ lệ ngẫu nhiên; ten chỉ là tên dự phòng khi chưa lấy được boss thật */
     /* GỢI Ý vùng nên tô khi Debug Mask (đa giác quảng trường khu 4, vẽ viền vàng đứt nét lúc bật Debug Mask). KHÔNG tự thêm vào mask. */

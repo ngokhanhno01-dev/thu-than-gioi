@@ -239,3 +239,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Vị trí điểm cố định, spawnSpots không có jitter vị trí (chỉ jitter thời gian) nên không sửa.
 - Nâng cache: 89 `?v=8`. Chưa chạy thử trong game (chủ game yêu cầu tiết kiệm quota).
 - Tiếp theo: Bước 3.
+
+## Tuyết Nguyên: thêm chỗ núp (26/11/2026)
+- Chủ game: dùng hết chỗ núp mỗi khu, vẫn hiện ngẫu nhiên 3-4 con. Số chỗ khu 1-4: 9, 10, 7, 6. Các vùng sau làm như vậy.
+- Nâng cache: 89 `?v=9`. Chưa chạy thử trong game.
