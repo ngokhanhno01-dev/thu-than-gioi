@@ -22,7 +22,7 @@ var GIOI=[
  {id:'nam',ten:'Nam Tu Sĩ',mota:'Kiên cường, thẳng như trúc'}];
 var SKINS={
  nu:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh-nu',ten:'Giáng Sinh Nữ'}],
- nam:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh-nam',ten:'Giáng Sinh Nam'}]};
+ nam:[{id:'mac-dinh',ten:'Đệ Tử Tuyết Môn'},{id:'giang-sinh-nam',ten:'Giáng Sinh Nam'},{id:'tet-nguyen-dan-nam',ten:'Tết Nguyên Đán Nam'}]};
 /* Skin KHÔNG bị giới hạn theo giới tính: Nam/Nữ trong tên chỉ để phân biệt, ai cũng mặc được. Mỗi skin nằm trong thư mục của giới nó thuộc về (nhan-vat/<gioi>/<idSkin>-*.png), riêng 'mac-dinh' theo giới của người chơi. */
 function thuMuc(g,s){if(s==='mac-dinh')return g;for(var k in SKINS){for(var i=0;i<SKINS[k].length;i++)if(SKINS[k][i].id===s)return k;}return g;}
 function dsSkin(g){var a=[(SKINS[g]||SKINS.nu)[0]],k,i;for(k in SKINS)for(i=0;i<SKINS[k].length;i++)if(SKINS[k][i].id!=='mac-dinh')a.push(SKINS[k][i]);return a;}   /* bộ mặc định của giới g + mọi skin thưởng của cả 2 giới */
@@ -148,12 +148,12 @@ function show(f,ep){
  function go(){if(done)return;done=true;build();}
  imgs.forEach(function(u){var im=new Image();im.onload=im.onerror=function(){if(--left<=0)go();};im.src=u;});
  setTimeout(go,1500);}   /* ảnh chậm quá 1,5 giây vẫn hiện màn, ảnh sẽ tự hiện khi tải xong */
-/* NÚT TEST ẨN (menu ẩn khi chạm chữ "Danh Vọng", xem 80-danh-vong.js): nhận 2 skin Giáng Sinh (Nam + Nữ) để thử. Chỉ MỞ KHÓA, mặc ở bảng Nhân Vật (icon ngoài cùng bên phải). Ai cũng mặc được cả 2. Xóa khối này khi ra bản thật. */
-(function(){var n=0,GS=[['nam','giang-sinh-nam'],['nu','giang-sinh-nu']];(function dang(){var T=window.TTGNV;if(!T||!T.add){if(++n<100)setTimeout(dang,200);return;}
- T.add({id:'lay-skin-gs',dev:true,ten:'Lấy skin Giáng Sinh',onTap:function(){
-  var B=window.TTGBAO,m=function(t){if(B&&B.toast)B.toast(t,2400);},moi=0;
-  GS.forEach(function(x){if(!daMo(x[0],x[1])){moKhoa(x[0],x[1]);moi++;}});
-  m(moi?'TEST: nhận skin Giáng Sinh Nam + Giáng Sinh Nữ! Mở bảng Nhân Vật để mặc':'TEST: đã có 2 skin Giáng Sinh, mở bảng Nhân Vật để mặc');}});})();})();
+/* NÚT TEST ẨN (menu ẩn khi chạm chữ "Danh Vọng", xem 80-danh-vong.js): bấm 1 lần = nhận TẤT CẢ skin đang có trong SKINS (cả Nam lẫn Nữ, tự quét nên thêm skin mới không cần sửa nút). Chỉ MỞ KHÓA, mặc ở bảng Nhân Vật (icon ngoài cùng bên phải). Ai cũng mặc được mọi skin. Xóa khối này khi ra bản thật. */
+(function(){var n=0;(function dang(){var T=window.TTGNV;if(!T||!T.add){if(++n<100)setTimeout(dang,200);return;}
+ T.add({id:'lay-skin',dev:true,ten:'Lấy tất cả skin',onTap:function(){
+  var B=window.TTGBAO,m=function(t){if(B&&B.toast)B.toast(t,2600);},moi=[],k,i,x;
+  for(k in SKINS)for(i=0;i<SKINS[k].length;i++){x=SKINS[k][i];if(x.id==='mac-dinh'||daMo(k,x.id))continue;moKhoa(k,x.id);moi.push(x.ten);}
+  m(moi.length?'TEST: nhận '+moi.length+' skin: '+moi.join(', ')+'. Mở bảng Nhân Vật để mặc':'TEST: bạn đã có đủ tất cả skin rồi');}});})();})();
 window.TTGNHANVAT={get:get,show:show,gioi:gioi,skin:skin,datSkin:datSkin,moKhoa:moKhoa,daMo:daMo,anhMap:anhMap,anhDi:anhDi,anhChon:anhChon,list:GIOI,SKINS:SKINS,thuMuc:thuMuc,dsSkin:dsSkin,ten:ten,datTen:datTen,loiTen:loiTen,boSkin:boSkin,
  reset:function(){try{localStorage.removeItem(KEY);localStorage.removeItem(KEYTEN);}catch(e){}}};
 })();

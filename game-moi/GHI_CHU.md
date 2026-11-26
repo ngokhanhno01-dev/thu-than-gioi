@@ -184,6 +184,11 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - **Skin KHÔNG phân giới**: Nam/Nữ trong tên chỉ để phân biệt bộ, nhân vật Nam hay Nữ đều mặc được cả hai. Sở hữu tính chung cả tài khoản (`daMo` không xét giới). Mỗi skin tự biết thư mục ảnh của mình qua `TTGNHANVAT.thuMuc(gioi, idSkin)` (riêng `mac-dinh` theo giới người chơi); `dsSkin(gioi)` = bộ mặc định + mọi skin thưởng của cả 2 giới. Ảnh đi bộ/trận/bảng Nhân Vật (64b, 84b, 90) đều đi qua `thuMuc`. Đổi giới tính không còn reset skin đã sở hữu. Thẻ chọn Nam/Nữ chỉ hiện skin cùng giới. Khóa skin (🔒) cũng tính chung.
 - Đủ bộ ảnh mỗi skin: `<id>-chon`, `-map`, `-di-truoc`, `-di-phai`, `-di-sau` (dải 2048x512 = 4 khung), `-tran-tu-the`, `-tran-ra-lenh` (512x512, nền trong suốt, chân sát đáy), `-4-goc-nhin.png` (bảng gốc). Cỡ nhân vật căn theo đúng sprite mặc định của giới đó. Chưa có `di-cheo`.
 - **Thêm skin thưởng mới**: bỏ ảnh vào `nhan-vat/<gioi>/<idSkin>-*.png`, thêm 1 dòng vào `SKINS` (id duy nhất toàn game, khuyến nghị đuôi `-nam`/`-nu`), rồi `TTGNHANVAT.moKhoa('nam'|'nu', idSkin)`.
-- **Nút test ẩn**: chạm chữ "Danh Vọng" -> menu ẩn -> **Lấy skin Giáng Sinh** (cuối 64b, xóa khi ra bản thật). Nhận cả 2 skin cùng lúc, chỉ MỞ KHÓA; mặc ở bảng Nhân Vật.
+- **Nút test ẩn**: chạm chữ "Danh Vọng" -> menu ẩn -> **Lấy tất cả skin** (cuối 64b, xóa khi ra bản thật). Bấm 1 lần = mở khóa MỌI skin đang khai trong `SKINS` (cả Nam lẫn Nữ, tự quét nên skin mới thêm vào `SKINS` tự có); chỉ MỞ KHÓA, mặc ở bảng Nhân Vật.
 - Bảng Nhân Vật CHỈ hiện skin đã nhận (lọc `daMo` trong `entries()` của 90-nhan-vat-bang.js); vứt bỏ thì biến khỏi lưới. Nguồn nhận thật (sự kiện/cửa hàng) chưa làm.
 - Nâng version nạp: 64b `?v=8`, 84b `?v=4` (59-nut-tham-hiem.js), 90 `?v=5` (81-nut-moi.js).
+
+## Skin "Tết Nguyên Đán Nam" (26/11/2026)
+- id `tet-nguyen-dan-nam`, tên "Tết Nguyên Đán Nam", ảnh `nhan-vat/nam/tet-nguyen-dan-nam-*.png` (đủ bộ như Giáng Sinh: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nam`; không phân giới như các skin khác. Bản Nữ chưa có.
+- Chân sau ở dải đi ngang hơi tối/nhạt là do ảnh gốc. Hiệu ứng ra lệnh (phong bao lì xì + hoa mai) vươn sát mép phải khung 512 nên có thể cụt vài pixel lấp lánh.
+- Nâng version 64b `?v=9` (59-nut-tham-hiem.js).
