@@ -31,8 +31,8 @@ var CFG={
      Muốn kiểu Pokémon gốc: khac 2, kem 0.5, mien 0, cheDo 'nhan'. Muốn chênh nhẹ hơn: giảm khac/tăng kem. */
   he:{cheDo:'nhan',khac:1.5,kem:0.7,mien:0.3},
   /* cấp / EXP / sao */
-  capMax:100,
-  tranCapNen:10,tranCapMoiSao:0.55,     /* trần cấp = min(100, 10 + floor(sao x 0,55)) */
+  capMax:270,
+  capMoiVung:15,                       /* trần cấp thú nuôi theo VÙNG: mới vào Tuyết Nguyên = Lv.15, mở Sương Cốc = Lv.30, mỗi vùng mở thêm +15 (tối đa capMax) */
   expA:25,expMu:1.5,                    /* EXP cần lên cấp n->n+1 = round(25 x n^1,5) */
   expThuongNen:10,expThuongMoiCap:8,    /* EXP thưởng = (10 + 8 x cấpQuái) x hsChenh */
   chenhMoiCap:0.1,chenhMin:0.3,chenhMax:1.5,
@@ -114,7 +114,7 @@ function tungBac(rng){
 
 /* ===== CẤP / EXP / SAO ===== */
 function expCan(n){return Math.round(CFG.expA*Math.pow(n,CFG.expMu));}   /* EXP cần để từ cấp n lên n+1 */
-function tranCap(sao){return Math.min(CFG.capMax,CFG.tranCapNen+Math.floor((sao||0)*CFG.tranCapMoiSao));}
+function tranCap(soVungMo){return Math.min(CFG.capMax,Math.max(1,Math.floor((Number(soVungMo)||0)*CFG.capMoiVung)));}   /* trần cấp theo VÙNG: số vùng đã mở x capMoiVung (1 vùng = 15, 2 vùng = 30...) */
 /* loai: 'quai' | 'thu' (thú hoang) | 'boss' */
 function expThuong(o){
   var cq=o.capQuai||1,ct=o.capThu||1;

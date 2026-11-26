@@ -107,7 +107,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 
 ## Danh Vọng + Chọn vùng (23/11/2026) — `80-danh-vong.js` (TTGDV)
 - **Danh Vọng** = số LOÀI thú hoang / boss thú hoang đã giết (mỗi loài tính 1 lần đầu; 1 vùng = 9 thú + 1 boss = 10). Lưu `ttg_moi_dv`. Hiện ngôi sao + số trong ô nhỏ dưới chữ "Danh Vọng" (tọa độ `PLATE` trong file, theo pixel khung-sanh.webp; vẽ từ index.html ngay sau `drawExp`).
-- **Trần cấp thú nuôi** = `TTGCS.tranCap(Danh Vọng)` = min(100, 10 + floor(DV x 0,55)): DV 0 -> Lv.10, DV 10 -> Lv.15 (hệ số ở 56-chi-so.js `tranCapNen`, `tranCapMoiSao`). `capMax()` trong 54-thu-than.js đọc `TTGDV.tran()`; đạt trần thì ngừng nhận EXP, vòng EXP hiện "Lv.Max" (khi có thêm Danh Vọng thì EXP chạy tiếp). Thú đã vượt trần thì giữ nguyên cấp.
+- **Trần cấp thú nuôi** = theo VÙNG ĐÃ MỞ (không còn theo Danh Vọng): `TTGCS.tranCap(số vùng mở)` = min(270, 15 x số vùng mở) (`CFG.capMoiVung` ở 56-chi-so.js). Mới vào Tuyết Nguyên = Lv.15, mở Sương Cốc = Lv.30, mỗi vùng +15. Danh Vọng chỉ còn là điều kiện mở vùng. `capMax()` trong 54-thu-than.js đọc `TTGDV.tran()`; đạt trần thì ngừng nhận EXP, vòng EXP hiện "Lv.Max". Thú đã vượt trần thì giữ nguyên cấp.
 - **Chọn vùng**: nút dài `nut-chon-vung.webp` (chữ là DOM nên đổi theo vùng) nằm dưới nút Thám hiểm; bấm mở bảng danh sách. Vùng thứ n cần 10 x (n-1) Danh Vọng (`CFG.moiVung`), không bị tiêu hao. Thám hiểm gặp thú/quái của vùng đã chọn (61-tham-hiem-tran.js đọc `TTGDV.vung()`), lưu `ttg_moi_vung`.
 - Thử nhanh: thêm `?dv=30` vào link để tạm cộng 30 Danh Vọng (không lưu).
 - Lưu ý: vùng 7, 8, 9 (Thủy Nguyệt Cảnh, Xích Hỏa Địa, Thanh Lâm) hiện mới có 1 loài mỗi vùng trong `51-thu-moi.js`, nên chưa đủ loài để kiếm đủ Danh Vọng mở các vùng sau.
@@ -162,3 +162,146 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
   - **Tab**: Tất Cả / Đạo Cụ / Pháp Bảo / Đặc Biệt. Bấm tab nào thì tab đó bật viền sáng + thân sáng nhẹ, lưới về đầu. `TTGSHOP.tab()` / `TTGSHOP.setTab(id)` (id: all, dao-cu, phap-bao, dac-biet).
   - **Lưới cuộn**: 4 cột, cuộn dọc bằng thanh cuộn vàng. Số ô = max(`CFG.oToiThieu`, số món làm tròn lên bội 4). Hiện 16 ô trống để thử cuộn; có món thật thì đặt 8 và sửa hàm `items(tab)`.
   - **Làm mới**: `CFG.lamMoiPhut=30`, thanh dài dưới trái hiện "Làm mới sau: mm:ss". Mốc chu kỳ lưu ở khóa `ttg_moi_cuahang_lm` (tính theo giờ máy, tắt game vẫn chạy). Hết chu kỳ gọi các hàm đăng ký bằng `TTGSHOP.onRefresh(fn)`.
+
+## Chọn nhân vật Nam/Nữ + skin (26/11/2026) — `64b-chon-nhan-vat.js` (TTGNHANVAT)
+- **Luồng mới**: màn chờ -> **chọn nhân vật** (Nam/Nữ) -> chọn thú đồng hành (65) -> vào game. 65 gọi `TTGNHANVAT.show(callback)`; bấm Xác Nhận ở màn nhân vật xong mới mở màn chọn thú. Người chơi cũ đã có thú mà chưa có nhân vật vẫn được nhắc chọn.
+- Lưu `ttg_moi_nhanvat_v1 = {gioi:'nu'|'nam', skin, t}`; skin đã mở lưu `ttg_moi_nhanvat_skin_v1`. Cả hai nằm trong GIU của 65 nên không mất khi xóa trắng tài khoản. Thử nhanh: `?nhan-vat=1` ép hiện màn chọn.
+- Ảnh: `game-moi/nhan-vat/<nu|nam>/<skin>-chon.png` (nhìn thẳng, 512x512, màn chọn) và `<skin>-map.png` (quay PHẢI, 512x512, bản đồ thám hiểm). `mac-dinh-4-goc-nhin.png` là bản gốc 4 góc nhìn (nền hồng) để làm sprite đi bộ sau.
+- Bản đồ thám hiểm (89-tham-hiem-map.js) tự dùng `TTGNHANVAT.anhMap()` nếu `CFG.nhanVat.anh` để null. Hiện mới là 1 ảnh đứng yên có nhún khi đi; sprite đi bộ 4 hướng làm sau.
+- **Thêm skin thưởng**: thêm 2 ảnh `<idSkin>-chon.png` + `<idSkin>-map.png`, thêm 1 dòng vào `SKINS` trong 64b, rồi `TTGNHANVAT.moKhoa(gioi,id)` + `TTGNHANVAT.datSkin(id)`.
+- **Khung đi bộ (26/11/2026)**: `<skin>-di-phai.png` (ngang, quay phải, trái thì lật) và `<skin>-di-truoc.png` (chính diện) là dải 2048x512 = 4 khung 512x512 xếp ngang (khung 1, 3 = bước chân; 2, 4 = chuyển/đứng; đứng yên dùng khung 2). Map đi xuống rõ rệt dùng chính diện, còn lại dùng ngang. Đi lên rõ rệt dùng quay lưng (`-di-sau.png`). Có `mac-dinh-di-cheo.png` (nghiêng 3/4) chưa dùng. Đã có đủ ngang/chính diện/quay lưng cho cả Nam và Nữ; thiếu file thì map tự dùng ảnh đứng yên.
+
+## Nhân vật ở sảnh + tương tác với thú (26/11/2026) — `84b-nhan-vat-sanh.js` (TTGNVSANH)
+- Nhân vật người chơi đứng cạnh thú ở khung trên sảnh, mặt hướng về thú; thú nhảy sang chỗ khác thì nhân vật đi theo (khung đi bộ ngang, 8 khung/giây).
+- **Chạm thú**: nhân vật chạy lại gần, vuốt ve (nhảy nhẹ 2 lần + tim bay lên), thú phản ứng và nói 1 câu vui (`TTGSANH.say('vui')`).
+- **Chạm nhân vật**: quay ra nhìn người chơi (ảnh chính diện), nhảy chào, nói 1 câu trong bong bóng.
+- **Tự động**: 9-18 giây một lần nhân vật hiện emoji, nói 1 câu, hoặc tự đi vuốt thú (không làm khi thú đang nói để khỏi chồng bong bóng).
+- Nối ở `index.html` (1 lệnh `TTGNVSANH.draw(ctx,ts,gy())` ngay sau `petSanh`) và `TTGSANH.info()` trong 83. Tắt thử bằng `?nvsanh=0`. Chỉnh cỡ/khoảng cách/tốc độ ở `CFG`, thêm câu ở `LINES` / `EMO` trong file 84b.
+- CHƯA TEST TRONG GAME (viết xong chỉ kiểm cú pháp): cần xem cỡ nhân vật (`CFG.kich`), vị trí đứng (`CFG.gap`) có hợp khung sảnh không.
+
+## Skin "Giáng Sinh Nam" + "Giáng Sinh Nữ" (26/11/2026)
+- 2 skin: `giang-sinh-nam` ("Giáng Sinh Nam", ảnh ở `nhan-vat/nam/`) và `giang-sinh-nu` ("Giáng Sinh Nữ", ảnh ở `nhan-vat/nu/`), khai trong `SKINS` (64b-chon-nhan-vat.js).
+- **Skin KHÔNG phân giới**: Nam/Nữ trong tên chỉ để phân biệt bộ, nhân vật Nam hay Nữ đều mặc được cả hai. Sở hữu tính chung cả tài khoản (`daMo` không xét giới). Mỗi skin tự biết thư mục ảnh của mình qua `TTGNHANVAT.thuMuc(gioi, idSkin)` (riêng `mac-dinh` theo giới người chơi); `dsSkin(gioi)` = bộ mặc định + mọi skin thưởng của cả 2 giới. Ảnh đi bộ/trận/bảng Nhân Vật (64b, 84b, 90) đều đi qua `thuMuc`. Đổi giới tính không còn reset skin đã sở hữu. Thẻ chọn Nam/Nữ chỉ hiện skin cùng giới. Khóa skin (🔒) cũng tính chung.
+- Đủ bộ ảnh mỗi skin: `<id>-chon`, `-map`, `-di-truoc`, `-di-phai`, `-di-sau` (dải 2048x512 = 4 khung), `-tran-tu-the`, `-tran-ra-lenh` (512x512, nền trong suốt, chân sát đáy), `-4-goc-nhin.png` (bảng gốc). Cỡ nhân vật căn theo đúng sprite mặc định của giới đó. Chưa có `di-cheo`.
+- **Thêm skin thưởng mới**: bỏ ảnh vào `nhan-vat/<gioi>/<idSkin>-*.png`, thêm 1 dòng vào `SKINS` (id duy nhất toàn game, khuyến nghị đuôi `-nam`/`-nu`), rồi `TTGNHANVAT.moKhoa('nam'|'nu', idSkin)`.
+- **Nút test ẩn**: chạm chữ "Danh Vọng" -> menu ẩn -> **Lấy tất cả skin** (cuối 64b, xóa khi ra bản thật). Bấm 1 lần = mở khóa MỌI skin đang khai trong `SKINS` (cả Nam lẫn Nữ, tự quét nên skin mới thêm vào `SKINS` tự có); chỉ MỞ KHÓA, mặc ở bảng Nhân Vật.
+- Bảng Nhân Vật CHỈ hiện skin đã nhận (lọc `daMo` trong `entries()` của 90-nhan-vat-bang.js); vứt bỏ thì biến khỏi lưới. Nguồn nhận thật (sự kiện/cửa hàng) chưa làm.
+- Nâng version nạp: 64b `?v=8`, 84b `?v=4` (59-nut-tham-hiem.js), 90 `?v=5` (81-nut-moi.js).
+
+## Skin "Tết Nguyên Đán Nam" (26/11/2026)
+- id `tet-nguyen-dan-nam`, tên "Tết Nguyên Đán Nam", ảnh `nhan-vat/nam/tet-nguyen-dan-nam-*.png` (đủ bộ như Giáng Sinh: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nam`; không phân giới như các skin khác.
+- Chân sau ở dải đi ngang hơi tối/nhạt là do ảnh gốc. Hiệu ứng ra lệnh (phong bao lì xì + hoa mai) vươn sát mép phải khung 512 nên có thể cụt vài pixel lấp lánh.
+- Nâng version 64b `?v=9` (59-nut-tham-hiem.js).
+
+## Skin "Tết Nguyên Đán Nữ" (26/11/2026)
+- id `tet-nguyen-dan-nu`, tên "Tết Nguyên Đán Nữ", ảnh `nhan-vat/nu/tet-nguyen-dan-nu-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nu`; ai cũng mặc được. Cỡ nhân vật căn theo sprite nữ mặc định. Nâng version 64b `?v=10`. Nút "Lấy tất cả skin" tự nhận luôn skin này.
+
+## Skin "Thanh Long" (26/11/2026)
+- id `thanh-long-nam`, tên "Thanh Long", ảnh `nhan-vat/nam/thanh-long-nam-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nam`; ai cũng mặc được. Cỡ căn theo sprite nam mặc định. Nút "Lấy tất cả skin" tự nhận luôn skin này.
+
+## Skin "Tiểu Hồ Ly" (26/11/2026)
+- id `tieu-ho-ly`, tên "Tiểu Hồ Ly", ảnh `nhan-vat/nu/tieu-ho-ly-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nu`; ai cũng mặc được. Cỡ căn theo sprite nữ mặc định. Nâng version 64b `?v=12`. Nút "Lấy tất cả skin" tự nhận luôn skin này.
+
+## Skin "Tiêu Dao Tiên Tử" (26/11/2026)
+- id `tieu-dao-tien-tu`, tên "Tiêu Dao Tiên Tử", ảnh `nhan-vat/nu/tieu-dao-tien-tu-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nu`; ai cũng mặc được. Cỡ căn theo sprite nữ mặc định. Nâng version 64b `?v=13`. Voan trong suốt nên mép có thể còn vài điểm ám tím nhạt (do nền hồng gốc).
+
+## Skin "Hắc Long Tôn Giả" (26/11/2026)
+- id `hac-long-ton-gia-nam`, tên "Hắc Long Tôn Giả", ảnh `nhan-vat/nam/hac-long-ton-gia-nam-*.png` (đủ bộ: chon, map, di-truoc/phai/sau, tran-tu-the, tran-ra-lenh, 4-goc-nhin). Khai trong `SKINS.nam`; ai cũng mặc được. Cỡ căn theo sprite nam mặc định. Nâng version 64b `?v=14`. Ảnh trận tư thế và ra lệnh đứng cùng vị trí chân; ra lệnh có rồng lửa lớn nên nhân vật dịch trái hơn các skin khác.
+
+## Chỉnh 26/11/2026 (sau khi thử Hắc Long Tôn Giả)
+- Bảng Nhân Vật lệch bệ: do ảnh `tran-tu-the` của skin bị dịch trái để chừa chỗ rồng lửa. Quy tắc: `tran-tu-the` luôn đặt thân GIỮA ảnh 512 (bbox giữa ở x=256). `tran-ra-lenh` có thể RỘNG HƠN 512 (cao vẫn 512), thân đặt trùng tâm chân với tu-the, hiệu ứng tràn sang phải; code 84b vẽ theo `naturalWidth` nên ảnh 512 cũ không đổi.
+- Trong trận dịch thú/quái vào trong để chừa chỗ cho nhân vật và phụ kiện sau này: PET_X .218 -> .27 (index.html, thú phải đối xứng 1-PET_X) và CFG.tran.petX .27 (84b). Nhân vật đứng theo thú (pet - gap) nên cũng dịch vào theo. Muốn sát/xa hơn thì sửa 2 số này CÙNG LÚC.
+- Nâng cache: ảnh trận `?v=2` (84b), bảng Nhân Vật `?v=4` (90).
+
+## Thay ảnh map thám hiểm mới (26/11/2026)
+- Đã thay `map-tham-hiem-tuyet-nguyen.webp` và `map-tham-hiem-suong-coc.webp` bằng map mới (webp thật 1536x1024, ~0,5 MB mỗi ảnh; có đường mòn rõ, 4 khu, 16 chỗ núp, 4 biển KHU 1-4, cổng/hang boss trên cùng). 7 vùng còn lại chưa có map mới, giữ ảnh cũ.
+- Các ảnh `bg-<slug>.webp` là ảnh nền vùng (cảnh nhìn ngang), KHÔNG phải map thám hiểm, không đụng tới.
+- Nâng cache: 89 `?v=5` (ảnh tuyết nguyên `?v=2`), 82 `?v=3` (V = `?v=2`).
+- VUNG['tuyet-nguyen'] vẫn là số liệu CŨ (mask rỗng, 16 điểm + boss ước lượng theo ảnh cũ), sẽ làm lại ở Bước 1-2 cho ảnh mới.
+
+## Thay ảnh map thám hiểm 7 vùng còn lại (26/11/2026)
+- Đã thay map mới (webp 1536x1024) cho: thanh-lam, thuy-nguyet-canh, xich-hoa-dia, nguyet-cung, loi-vuc, van-dao, phong-nguyen. Giờ cả 9 vùng đều có map mới.
+- Nâng cache: 82 `?v=4` (V = `?v=3`). Chưa vùng nào ngoài tuyet-nguyen có trong VUNG của 89-tham-hiem-map.js; mask/điểm núp làm ở phiên sau.
+
+## Sửa lỗi Debug Mask không vuốt vẽ được (26/11/2026)
+- Nét vẽ dùng chung biến `s.last` với mốc thời gian khung hình nên chỉ tô được chấm đầu, sau đó vẽ điểm rung báo lỗi createRadialGradient. Đổi nét vẽ sang `s.last2`.
+- Nâng cache: 89 `?v=6`. Đã thử cảm ứng giả lập: một đường vuốt 10 ô -> 124 ô, không còn lỗi.
+- Tuyết Nguyên đang ở Bước 1: chờ chủ game khoanh mask và gửi chuỗi.
+
+## Mask Tuyết Nguyên, Bước 1 (26/11/2026)
+- Chủ game đã duyệt ảnh xem trước. Kiểu đi thoải mái: chỉ chặn vật to (núi, vách, thác, sông, hồ, 2 hang, cây khô, cây thông, cột đá, cụm tháp + bậc đá); bụi tuyết, đá thấp, tinh thể nhỏ đi được. Các vùng sau khoanh theo kiểu này.
+- Nâng cache: 89 `?v=7`.
+- Còn lại: Bước 2 (đặt lại điểm núp/boss, bỏ vòng banKinhMaskDiem đang "mở lối" qua chỗ chặn), Bước 3 (dấu hiệu + bóng thú).
+
+## Tuyết Nguyên, Bước 2: điểm núp (26/11/2026)
+- 16 điểm đặt lại cạnh chỗ núp trên map mới (đã kiểm tra trên lưới: đi được, nối với xuất phát, cách chỗ chặn ~2 ô). Boss giữ (780,168).
+- banKinhMaskDiem = 0; boss giữ vòng banKinhCham=38. Thêm checkToi() vào checkCfg().
+- Vị trí điểm cố định, spawnSpots không có jitter vị trí (chỉ jitter thời gian) nên không sửa.
+- Nâng cache: 89 `?v=8`. Chưa chạy thử trong game (chủ game yêu cầu tiết kiệm quota).
+- Tiếp theo: Bước 3.
+
+## Tuyết Nguyên: thêm chỗ núp (26/11/2026)
+- Chủ game: dùng hết chỗ núp mỗi khu, vẫn hiện ngẫu nhiên 3-4 con. Số chỗ khu 1-4: 9, 10, 7, 6. Các vùng sau làm như vậy.
+- Nâng cache: 89 `?v=9`. Chưa chạy thử trong game.
+
+## Tuyết Nguyên, Bước 3: dấu hiệu + bóng thú (26/11/2026)
+- Bỏ vòng tròn hình thoi. Xa: xoáy tuyết + tinh thể (DAUHIEU.tuyet, VUNG.dauHieu). Gần (CFG.hienThu 150->70): bóng đen -> thú thật + hào quang màu HIEM.
+- Hào quang vẽ riêng (haoQuang), không dùng TTGRUNE.ring vì ảnh rune theo Rank D..SR, không theo 4 màu độ hiếm.
+- Thú tung sẵn lúc nhân vật lại gần, ép vào trận qua opts.chon (61-tham-hiem-tran.js). Rank (bac), cấp vẫn tung lúc vào trận.
+- Bỏ vòng đếm ngược; còn <3s thì nhấp nháy.
+- Nâng cache: 89 `?v=10`, 61 `?v=3`. CHƯA chạy thử, chưa có ảnh chụp (chủ game yêu cầu tiết kiệm quota); chờ chủ game duyệt trên máy.
+
+## Giãn thú trên map thám hiểm (26/11/2026)
+- Chủ game test: thú hiện dày, chắn lối. soDiemHien [3,4] -> [2,2]; thêm cachNhau=180, cachNguoi=130; cỡ thú 68 -> 56. Thay cho yêu cầu cũ 3-4 con mỗi khu.
+- Nâng cache: 89 `?v=11`. Chưa chạy thử, chờ chủ game.
+
+## Thú nhảy trên map thám hiểm (26/11/2026)
+- Chủ game yêu cầu (thay quy tắc rung 20s cũ): mỗi con tồn tại 60s, đếm ngược trên đầu, hết giờ biến mất (không còn tự gia hạn).
+- Nhảy quanh chỗ núp (CFG.nhay theo khu). Sử thi/huyền thoại tới gần thì nhảy tránh 3 cú rồi nghỉ 5s (CFG.chay). Không nhảy lên cầu (VUNG.camNhay), không vào ô chặn. Boss đứng yên.
+- cooldownSauTran 900 -> 3000 ms.
+- Nâng cache: 89 `?v=12`. Chưa chạy thử, chờ chủ game.
+
+## Quái nhào vào, thú bỏ chạy (26/11/2026)
+- Chủ game làm rõ: QUÁI (chon.source=main, mọi độ hiếm) tự nhào về người chơi (CFG.nhao); THÚ (demo) sử thi/huyền thoại chỉ chạy tránh (CFG.chay). Không nhào trong 3s sau trận, không lên cầu.
+- Nâng cache: 89 `?v=13`. Chưa chạy thử.
+
+## Sương Cốc: mask + chỗ núp + dấu hiệu (26/11/2026)
+- Chủ game đã duyệt ảnh mask. VUNG['suong-coc'] mới: điểm xuất phát (740,990), boss (780,168), 2 cầu gỗ trong camNhay, DAUHIEU.suong. Tên khu là TÊN TẠM.
+- Nhảy/nhào/chạy/60s dùng chung với Tuyết Nguyên.
+- Nâng cache: 89 `?v=14`. Chưa chạy thử (chỉ kiểm tra trên lưới + cú pháp). Còn 7 vùng.
+
+## Vân Đảo: mask + chỗ núp + dấu hiệu (26/11/2026)
+- Chủ game đã duyệt ảnh mask (sửa 4 lần: thu mép đảo, bỏ chỗ thác khu 3/4, rìa phải khu 2, mở pha lê trái khu 1). VUNG['van-dao']: xuất phát (740,990), boss (800,170), 3 cầu gỗ trong camNhay, DAUHIEU.van (mây trôi + cánh hoa tím). Tên khu là TÊN TẠM.
+- Chỗ núp: khu1 10, khu2 10, khu3 8, khu4 6. checkCfg() sạch.
+- Nâng cache: 89 `?v=15`. Chưa chạy thử (chỉ kiểm tra trên lưới + cú pháp). Còn 6 vùng: phong-nguyen, loi-vuc, nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam.
+
+## Nút ẩn "Mở all map" (26/11/2026)
+- Menu ẩn (chạm chữ "Danh Vọng") có thêm nút đầu tiên "Mở all map: BẬT/TẮT". Bật = mọi vùng mở (bỏ qua Danh Vọng), lưu localStorage `ttg_moi_moall`; tắt = về như cũ. Chỉ để thử; khi bật, trần cấp cũng tính theo số vùng mở.
+- Nâng cache: 80 `?v=10` (trong 59), 59 `?v=17x`. Chưa chạy thử.
+
+## Boss Sương Cốc vào giữa + Boss luôn V3 (26/11/2026)
+- Sương Cốc: boss dời (780,168) -> (835,160) giữa quảng trường (chủ game báo bị lệch); chỗ núp 4c dời (882,196) -> (924,196) để cách boss >=95. checkCfg() sạch.
+- 61-tham-hiem-tran.js: trận Boss (thú & quái) luôn tien = TTGBONG.CFG.tx.bacBoss (3) = V3; bắt về vẫn V1 (bacKhiBat ở 62, không đổi).
+- Nâng cache: 61 `?v=4`, 89 `?v=16`. Chưa chạy thử.
+
+## Phong Nguyên: mask + chỗ núp + dấu hiệu (26/11/2026)
+- VUNG['phong-nguyen']: mask từ phiên trước (đi thoải mái, chặn cây/trụ đá/biển/đá lớn), xuất phát (800,1000), boss (770,150) giữa quảng trường đá, 2 cầu gỗ trong camNhay, DAUHIEU.phong (gió xoáy + lá đỏ). Tên khu là TÊN TẠM.
+- Chỗ núp: khu1 10, khu2 10, khu3 8, khu4 5 (đã kiểm trên mask: đi được, cách nhau >=55, cách boss >=95). checkCfg() sạch.
+- Chủ game CHƯA duyệt mask bằng mắt trong phiên này; nếu cần sửa thì chỉnh lại mask.
+- Nâng cache: 89 `?v=17`. Chưa chạy thử. Còn 5 vùng: loi-vuc, nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam.
+
+## Lôi Vực: mask + chỗ núp + dấu hiệu (26/11/2026)
+- VUNG['loi-vuc']: mask Claude khoanh, chủ game đã duyệt ảnh xem trước (đã sửa quanh cột đá khu 2). Xuất phát (740,990), boss (777,150) giữa quảng trường cổng, cầu đá trong camNhay, DAUHIEU.loi (tia chớp tím + tia lửa). Tên khu là TÊN TẠM.
+- Chỗ núp: khu1 7, khu2 7, khu3 7, khu4 5 (đã kiểm: đi được, cách nhau >=55, cách boss >=95).
+- Nâng cache: 89 `?v=18`. Chưa chạy thử. Còn 4 vùng: nguyet-cung, thuy-nguyet-canh, xich-hoa-dia, thanh-lam (van-dao: xem trạng thái repo).
+
+## Nguyệt Cung: mask + chỗ núp + dấu hiệu (26/11/2026)
+- VUNG['nguyet-cung']: mask Claude khoanh trước đó, chủ game đã chốt (lấy lại từ ảnh xem trước). Xuất phát (800,1000), boss (868,214) dịch phải cho giữa cổng, cầu đá cong khu 2 trong camNhay, DAUHIEU.nguyet (đom đóm trăng + cánh hoa hồng rơi). Tên khu là TÊN TẠM.
+- Chỗ núp: khu1 7, khu2 6, khu3 6, khu4 4 (đã kiểm: đi được, cách nhau >=55, cách boss >=95). checkCfg() sạch.
+- Nâng cache: 89 `?v=19`. Chưa chạy thử. Còn 3 vùng: thuy-nguyet-canh, xich-hoa-dia, thanh-lam.
+
+## Thủy Nguyệt Cảnh + Xích Hỏa Địa + Thanh Lâm: mask + chỗ núp + dấu hiệu (26/11/2026)
+- Cả 3 vùng thêm vào VUNG (mask 192x128, xuất phát (790,1000)/(790,1000)/(780,1000), boss ở cuối đường, camNhay ở cầu). Mask khoanh nhanh bằng đa giác (Xích Hỏa Địa có trừ vùng dung nham theo màu ảnh), CHƯA duyệt kỹ bằng mắt: chủ game test rồi báo chỗ nào lệch thì chỉnh.
+- Chỗ núp: tự chọn ô đi được cạnh vật cản (cách nhau >=62, cách boss >=100), mỗi khu 4-7 chỗ. DAUHIEU thêm: thuy (gợn sóng), hoa (tàn lửa), lam (đom đóm xanh).
+- Nâng cache: 89 `?v=20`. Chưa chạy thử game. Tất cả 9 vùng đã đủ.
+

@@ -211,19 +211,19 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
  <div id="tl"><div class="pn"><div class="hd"><span>Chọn thú</span><button class="x" id="tlx">Đóng</button></div><div id="tlb"></div></div></div>
 </div>
 <script src="51-thu-moi.js"></script>
-<script src="game-moi/52-nut-vuong.js?v=8"></script>
+<script src="game-moi/52-nut-vuong.js?v=9"></script>
 <script src="game-moi/64-thong-bao.js"></script>
 <script src="game-moi/63-nhan-nut.js"></script>
 <script src="game-moi/53-balo.js"></script>
 <script src="game-moi/58-bong-bat.js"></script>
 <script src="game-moi/54-thu-than.js?v=4"></script>
-<script src="game-moi/59-nut-tham-hiem.js?v=11x"></script>
+<script src="game-moi/59-nut-tham-hiem.js?v=17x"></script>
 <script src="game-moi/102-quai-vung.js"></script>
-<script src="game-moi/55-trang-bi.js?v=2"></script>
+<script src="game-moi/55-trang-bi.js?v=3"></script>
 <script src="game-moi/72-khung-ren-cuong-hoa.js"></script>
 <script src="game-moi/71-nut-trang-bi.js"></script>
 <script src="game-moi/56-chi-so.js"></script>
-<script src="game-moi/61-tham-hiem-tran.js?v=2"></script>
+<script src="game-moi/61-tham-hiem-tran.js?v=4"></script>
 <script src="game-moi/62-bat-thu.js"></script>
 <script src="game-moi/66-tien-te.js"></script>
 <script src="game-moi/67-rune-rank.js"></script>
@@ -245,9 +245,10 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 <script src="game-moi/73-luat-trang-bi.js?v=2"></script>
 <script src="game-moi/74-ren-cuong-hoa.js"></script>
 <script src="game-moi/75-tien-hoa-thu.js"></script>
-<script src="game-moi/81-nut-moi.js?v=5"></script>
+<script src="game-moi/81-nut-moi.js?v=6"></script>
 <script src="game-moi/85-cua-hang.js?v=10"></script>
-<script src="game-moi/82-tham-hiem-auto.js?v=2"></script>
+<script src="game-moi/89-tham-hiem-map.js?v=20"></script>
+<script src="game-moi/82-tham-hiem-auto.js?v=4"></script>
 <script src="game-moi/83-sanh-song.js?v=1"></script>
 <script src="game-moi/84-chu-tran.js?v=1"></script>
 <script>
@@ -262,7 +263,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
    Thứ tự vẽ: nền -> khung -> thú -> thanh máu -> hiệu ứng (thú nằm TRÊN khung nên chân thú không bị viền che). Chưa có ảnh khung thì vẽ viền vàng mảnh tạm.
    Lưu riêng (khóa ttg_moi_v1 = bậc bạn bm / bậc địch be), KHÔNG nối online/Firebase.
    AUTO BATTLE: trận tự đánh liên tục. Một bên hết máu -> hiện Thắng/Thua ~1.2s -> làm mới 2 bên -> đánh tiếp.
-   VỊ TRÍ THÚ: cố định theo tỉ lệ khung (PET_X = 0.218 bề ngang khung, đúng chỗ dưới nút "Chọn thú" lúc này), KHÔNG neo vào nút nào để sau này đổi/bỏ nút không ảnh hưởng.
+   VỊ TRÍ THÚ: cố định theo tỉ lệ khung (PET_X = 0.27 bề ngang khung, dịch vào trong từ 0.218 để chừa chỗ cho nhân vật/phụ kiện, đúng chỗ dưới nút "Chọn thú" lúc này), KHÔNG neo vào nút nào để sau này đổi/bỏ nút không ảnh hưởng.
    Thú bên phải đối xứng với thú trái qua tâm khung (1 - PET_X).
    ĐỔI BẬC: 2 nút "Bạn: bậc N" và "Địch: bậc N" (id tm, te), bấm để xoay vòng 1 -> 2 -> 3 -> 1 (MAXB = 3).
    Nút mới thêm vào danh sách sẽ tự xếp vào chỗ trống cuối thanh dưới, KHÔNG làm mất bố cục đã sắp xếp.
@@ -274,7 +275,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,BATTLE=null,A=null,typing=false;
-var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=2400,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.218,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
+var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=2400,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.27,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
 var NHN={ok:false,im:new Image()};NHN.im.onload=function(){NHN.ok=true;};NHN.im.src='game-moi/nen-hang-nut.png?v=1';/* nền khung dưới (thanh nút): ảnh game-moi/nen-hang-nut.png, phủ kín + canh giữa; chưa nạp được thì dùng dải màu */
 var BP=98,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 /* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */
@@ -324,7 +325,7 @@ function noiTai(k,src,tgt,n,z){dbApply(k,tgt,n);var khu=Math.max(0,Math.min(100,
  });}
 function heTag(hs,tgt,n){var t=hs>=1.4?'Khắc hệ!':hs<=0.4?'Miễn nhiễm':hs<1?'Kém hiệu quả':null;if(t)st.fx.push({x:px(tgt),y:gy()-165,t:n,s:t+' ×'+(Math.round(hs*100)/100),c:hs>1?'#ffb347':'#9fb4d8'});}   /* hiện hệ số khắc hệ của kỹ năng để người chơi hiểu vì sao sát thương khác % */
 function castSkill(s0,k){var n0=performance.now();s0.skIn={ten:k.ten,he:k.he,t0:n0,by:'en'};
- setTimeout(function(){if(st!==s0||!BATTLE)return;s0.skIn=null;var n1=performance.now();s0.skFx={id:k.id,ten:k.ten,t0:n1,i:++knSeq};
+ setTimeout(function(){if(st!==s0||!BATTLE)return;s0.skIn=null;var n1=performance.now();s0.skFx={id:k.id,ten:k.ten,t0:n1,i:++knSeq};A={w:'en',t:n1};
  setTimeout(function(){if(st!==s0||!BATTLE)return;var n=performance.now(),a=effS('en'),z=effT('en'),
    hs=TTGCS.heHeSo?TTGCS.heHeSo(k.he,heOf(BATTLE.player)):1,d=lcsSk(TTGCS.satThuong({tc:a.tc,pt:z.pt,hsKyNang:k.hsTc,hsHe:hs}),a,z);
   if(missChk('en',n))return;knHurt('me',d,n,'#ff8a2a');heTag(hs,'me',n);lsChk('en',d,n);noiTai(k,'en','me',n,z);
@@ -358,7 +359,7 @@ function drawSkillFx(ts){var f=st.skFx,api=window.TTGCombatFX;if(!f)return;var t
    Ở đây FX chạy nhanh hơn 1/AT_K lần (AT_K=.68): trúng sau AT_HIT ms; SÁT THƯƠNG + chữ số áp đúng lúc trúng (xong trước T_DON nên không đổi nhịp trận).
    Cận chiến (mode melee): thú lao tới đúng như main (lungeP); xa: hiệu ứng bay từ chỗ bên đánh tới bên bị đánh. Bên bị đánh bị đẩy lùi / nhảy né khi hụt.
    Lỗi/thiếu TTGCombatFX: quay về kiểu cũ (thú lao 28px, trừ máu ngay). Kỹ năng boss vẫn dùng drawSkillFx (57), không chồng hiệu ứng vùng. */
-var AT_K=.68,AT_SC=1.2,AT_HIT=Math.round(665*AT_K);
+var AT_K=.68,AT_SC=1.2,AT_HIT=Math.round(665*AT_K),AT_LUNGE=26;/* AT_LUNGE: đòn TẦM XA (không cận chiến) thì bên đánh cũng nhào tới trước chừng này điểm (rồi lùi về), để khớp với nhân vật ra lệnh; 0 = đứng yên như cũ */
 function atkFxOn(){var a=window.TTGCombatFX;return !!(a&&a.drawAttack&&a.drawImpact);}
 /* VÙNG HIỆU ỨNG ĐÒN = vùng QUÊ của LOÀI thú đang đánh (TTGCS.loai(id).goc), KHÔNG phải vùng đang thám hiểm và không phải vung dùng tính chỉ số.
    Bảng BANG của demo đánh số vùng khác main ở các vùng mới, nên đổi sang số vùng hiệu ứng (0..16 của main) bằng FX_ZONE: 6 Thủy Nguyệt Cảnh -> 1 (Sương Cốc, cùng hệ thủy; main chưa có vùng này), 7 Xích Hỏa Địa -> 11, 8 Thanh Lâm -> 10.
@@ -374,7 +375,7 @@ function atkStart(w,miss){var a=window.TTGCombatFX,now=performance.now(),s=zoneO
 /* độ lệch ngang (px) của thú w do đòn thường đang chạy; null = không có đòn nào ảnh hưởng thú này */
 function atkOff(w,ts){var L=st&&st.atk;if(!L||!L.length)return null;var o=0,hit=false;
  for(var k=0;k<L.length;k++){var f=L[k],u=atkU(f,ts);if(u<0||u>=1)continue;
-  if(f.w===w){hit=true;if(f.mel){var lg=lungeP(u);o+=lg<0?lg*1.2:lg/100*Math.max(0,px('en')-px('me')-100);}}
+  if(f.w===w){hit=true;if(f.mel){var lg=lungeP(u);o+=lg<0?lg*1.2:lg/100*Math.max(0,px('en')-px('me')-100);}else{var lg2=lungeP(u);o+=lg2<0?lg2*.5:lg2/100*AT_LUNGE;}}
   else{hit=true;var hu=u-.35;
    if(f.miss)o-=16*1.1*Math.sin(Math.PI*Math.max(0,Math.min(1,(u-.28)/.42)));
    else if(hu>=0)o-=24*1.1*Math.pow(Math.max(0,1-hu/.4),2)+(hu<.25?Math.sin(ts*.07)*4*(1-hu/.25):0);}}
@@ -450,7 +451,7 @@ function stIcon(x,y,o){var S=KN_ICON.s,im=stImg(o.id);ctx.save();ctx.translate(x
 /* ĐẾM NGƯỢC 3-2-1-CHIẾN (69-dem-nguoc.js): chặn auto đánh (nextAt=Infinity) tới khi đếm xong mới cho đánh. Không có module thì đánh luôn như cũ. */
 function cdStart(){if(window.TTGDEM){nextAt=Infinity;TTGDEM.start(function(){nextAt=performance.now()+GAP;});}else nextAt=performance.now()+GAP;}
 /* TTGTX (82-tham-hiem-auto.js): chia startExplore làm 2: prepExplore = chọn thú + tung địch (chưa vào trận), startExplore(pre) = vào trận với địch đã tung. */
-function prepExplore(npcId){if(SCENE!=='sanh'){toast('Đang có trận');return null;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return null;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return null;}var ps=(window.TTGLT?TTGLT.apDung:function(x){return x;})(TTGCS.tinh(player,{mod:TTGCS.sachMod?TTGCS.sachMod(player):[]})),enemy=(npcId&&window.TTGNPC&&TTGNPC.taoDich)?TTGNPC.taoDich(npcId,player):ganSachBoss(TTGTHAMHIEM.createEncounter(player));/* npcId: địch là NPC Boss (88-npc-boss.js), không phải thú/quái tung ngẫu nhiên */if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return null;}return {player:player,ps:ps,enemy:enemy,tag:enTag(enemy)};}
+function prepExplore(npcId,opts){if(SCENE!=='sanh'){toast('Đang có trận');return null;}var player=window.TTGTHU&&TTGTHU.getRaTran?TTGTHU.getRaTran():null;if(!player){toast('Cho thú ra trận trước');return null;}if(!window.TTGCS||!window.TTGTHAMHIEM){toast('Chưa nạp dữ liệu Thám Hiểm');return null;}var ps=(window.TTGLT?TTGLT.apDung:function(x){return x;})(TTGCS.tinh(player,{mod:TTGCS.sachMod?TTGCS.sachMod(player):[]})),enemy=(npcId&&window.TTGNPC&&TTGNPC.taoDich)?TTGNPC.taoDich(npcId,player):ganSachBoss(TTGTHAMHIEM.createEncounter(player,Math.random,opts));/* npcId: địch là NPC Boss (88-npc-boss.js), không phải thú/quái tung ngẫu nhiên */if(!enemy||!enemy.stats||!ps.hp||!enemy.stats.hp){toast('Không tìm thấy quái cho vùng này');return null;}return {player:player,ps:ps,enemy:enemy,tag:enTag(enemy)};}
 function startExplore(pre){var loop=!!(pre&&pre.enemy&&pre.player);if(!loop)pre=prepExplore();if(!pre)return false;if(SCENE!=='sanh'){toast('Đang có trận');return false;}var player=pre.player,ps=pre.ps,enemy=pre.enemy;BATTLE={player:player,playerStats:ps,enemy:enemy,enemyStats:enemy.stats};var sM=khienMax(player,ps.hp),sE=khienMax(enemy,enemy.stats.hp);st={me:ps.hp,en:enemy.stats.hp,maxMe:ps.hp,maxEn:enemy.stats.hp,shMe:sM,shMaxMe:sM,shEn:sE,shMaxEn:sE,busy:false,msg:'',fx:[],kn:bossSkill(enemy),knMe:knMeList(player)};SCENE='tran';A=null;if(window.TTGBO)TTGBO.start();nextAt=Infinity;if(window.TTGDEM)TTGDEM.reset();var gm='Gặp '+enTag(enemy)+': '+enemy.ten+(enemy.hienBac?' (Rank '+enemy.bac+')':'');if(loop){cdStart();}/* vòng lặp tự động: bảng "Phát hiện mục tiêu" đã báo rồi, vào đếm ngược luôn */else if(window.TTGTBAO){toast(gm,cdStart);}else{toast(gm);cdStart();}return true;}
 if(window.TTGTHAMHIEM){TTGTHAMHIEM.prep=prepExplore;TTGTHAMHIEM.battle=startExplore;TTGTHAMHIEM.start=function(){if(window.TTGTX)TTGTX.begin();else startExplore();};}   /* bấm Thám hiểm: có TTGTX thì chạy vòng lặp (màn bản đồ 5s -> bảng kết quả 3s -> trận), không thì vào trận ngay như cũ */
 /* BẮT THÚ (62-bat-thu.js): cầu nối. freeze = đóng băng trận (st mới => mọi setTimeout của lượt đang đánh tự bỏ vì st!==s0); resume = đánh tiếp; end = kết thúc lần Thám hiểm về sảnh */
@@ -1087,7 +1088,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  drawExp(ts);
  if(window.TTGDV&&FRM.top.img&&FRM.top.img.naturalWidth){var dvS=sTop(TH());TTGDV.draw(ctx,I.l-BG_BLEED.l*dvS,-BG_BLEED.t*dvS,dvS);}   /* ngôi sao + số Danh Vọng trong ô dưới chữ Danh Vọng (80-danh-vong.js) */
  if(SCENE==='sanh'&&window.TTGTIEN)TTGTIEN.draw(ctx,fx+fw/2,I.t,fw-460);   /* khung tiền tệ: chỉ ở sảnh, giữa Danh Vọng và EXP */
- if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,py(),ts,'truoc');if(window.TTGSANH&&TTGSANH.draw)TTGSANH.draw(ctx,ts);/* bong bóng emoji + khung chat của thú sảnh, vẽ sau cùng để nằm trên thú */return;}
+ if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,py(),ts,'truoc');if(window.TTGNVSANH&&TTGNVSANH.draw)TTGNVSANH.draw(ctx,ts,gy());/* nhân vật người chơi đứng cạnh thú (84b-nhan-vat-sanh.js) */if(window.TTGSANH&&TTGSANH.draw)TTGSANH.draw(ctx,ts);/* bong bóng emoji + khung chat của thú sảnh, vẽ sau cùng để nằm trên thú */return;}
  pet('en',ts);pet('me',ts);
  if(window.TTGBAT&&TTGBAT.draw)TTGBAT.draw(ctx,ts);
  var DA={x:I.l,y:0,w:W-I.l-I.r,h:TH(),cx:I.l+(W-I.l-I.r)/2,cy:TH()*.46};if(st.skFx)drawSkillFx(ts);if(st.atk&&st.atk.length)drawAtkFx(ts);if(window.TTGBO)TTGBO.draw(ctx,ts);if(window.TTGDEM)TTGDEM.under(ctx,ts,DA);/* đếm ngược: nền tối + tia sáng, nằm dưới khung HUD */

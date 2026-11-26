@@ -2,7 +2,7 @@
    DANH VỌNG
    - Có được khi GIẾT thú hoang / boss thú hoang (source 'demo'). Mỗi LOÀI chỉ tính 1 lần đầu giết (1 vùng = 9 thú hoang + 1 boss = 10 Danh Vọng).
    - Lưu localStorage khóa ttg_moi_dv = {kills:{idLoài:1}}. Danh Vọng = số loài đã giết. Không bị tiêu hao (chỉ là mốc mở khóa + trần cấp).
-   - TRẦN CẤP thú nuôi = TTGCS.tranCap(Danh Vọng) = min(100, 10 + floor(DV x 0,55)): DV 0 -> Lv.10, DV 10 -> Lv.15 (54-thu-than.js capMax đọc TTGDV.tran()).
+   - TRẦN CẤP thú nuôi tính theo VÙNG ĐÃ MỞ (không còn theo Danh Vọng): TTGCS.tranCap(số vùng mở) = min(270, 15 x số vùng mở). Mới vào Tuyết Nguyên = Lv.15, mở Sương Cốc = Lv.30... (54-thu-than.js đọc TTGDV.tran()). Danh Vọng chỉ còn là điều kiện mở vùng.
    - Hiển thị: ngôi sao + số trong ô nhỏ dưới chữ "Danh Vọng" ở khung trên (draw, gọi từ index.html sau drawExp). Tọa độ theo pixel khung-sanh.webp: sửa PLATE.
    CHỌN VÙNG
    - Bấm icon Thám hiểm (59-nut-tham-hiem.js) -> bảng chọn vùng dùng khung icon/khung-chon-vung.webp (18 ô = 2 cột x 9 hàng, tọa độ SLOT); chọn vùng đã mở thì đi Thám hiểm ngay (CFG.batDauNgay). Thanh tên vùng dưới icon Thám hiểm chỉ hiển thị vùng đang ở.
@@ -24,8 +24,10 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function zones(){var z=(root.THU_MOI&&root.THU_MOI.zones)||[];return z.slice().sort(function(a,b){return a.z-b.z;});}
 function get(){return Object.keys(S.kills).length+extra;}
 function can(i){return CFG.moiVung*Math.max(0,i);}              /* Danh Vọng cần để mở vùng thứ i+1 (i = 0..) */
-function moRoi(i){return get()>=can(i);}
-function tran(){return root.TTGCS&&root.TTGCS.tranCap?root.TTGCS.tranCap(get()):0;}
+var MOALL='ttg_moi_moall',moAll=false;try{moAll=localStorage.getItem(MOALL)==='1';}catch(e){}   /* nút ẩn "Mở all map" (menu chữ Danh Vọng): bật = mọi vùng mở, chỉ để thử */
+function moRoi(i){return moAll||get()>=can(i);}
+function soVungMo(){var l=zones(),n=0;for(var i=0;i<l.length;i++)if(moRoi(i))n++;return Math.max(1,n);}   /* số vùng đã mở (vùng 1 luôn mở sẵn) */
+function tran(){return root.TTGCS&&root.TTGCS.tranCap?root.TTGCS.tranCap(soVungMo()):0;}   /* trần cấp theo VÙNG đã mở: 1 vùng = Lv.15, 2 vùng = Lv.30... (CFG.capMoiVung ở 56-chi-so.js) */
 function chi(){var l=zones();if(IDX>=l.length||!moRoi(IDX))IDX=0;return IDX;}   /* chỉ số vùng đang chọn (hợp lệ) */
 function vung(){var l=zones(),z=l[chi()];return z?z.z:0;}
 function ten(){var l=zones(),z=l[chi()];return z?z.ten+' Vùng '+(chi()+1):'';}
@@ -105,7 +107,8 @@ function mo(){if(!ov)return;size();lap();ov.style.display='flex';}
 /* ---- menu ẩn: gom nút TEST/ADMIN (TTGNV.cfg.dev) ---- */
 var hot=null,dev=null,taps=0,tapT=0;
 function moDev(){if(!dev)return;var g=dev.querySelector('.dv-g'),l=(root.TTGNV&&root.TTGNV.dev)||[];g.innerHTML='';
-  if(!l.length){g.innerHTML='<div style="grid-column:1/-1;color:#9fb4e8;padding:8px">Chưa có nút test nào.</div>';}
+    (function(){var b=document.createElement('button');b.type='button';b.className='dv-b';b.textContent='Mở all map: '+(moAll?'BẬT':'TẮT');
+    b.addEventListener('click',function(){moAll=!moAll;try{localStorage.setItem(MOALL,moAll?'1':'0');}catch(e){}b.textContent='Mở all map: '+(moAll?'BẬT':'TẮT');capNhat();});g.appendChild(b);})();
   l.forEach(function(it){var b=document.createElement('button');b.type='button';b.className='dv-b';b.textContent=it.o.ten||it.o.id;
     b.addEventListener('click',function(){try{if(it.o.id==='admin')dongDev();if(it.o.onTap)it.o.onTap(it.e);}catch(e){}});g.appendChild(b);});
   dev.style.display='flex';}

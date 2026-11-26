@@ -37,7 +37,7 @@ var BTN_BC={x:1318,y:586,w:124,h:58},BTN_TC={x:1447,y:586,w:124,h:58};
 /* bảng CHỈ SỐ (mở từ nút CHỈ SỐ): nằm giữa 2 cột ô trang bị, phía dưới 3 ô tròn */
 var CSP={x:212,y:296,w:450,h:480};
 /* BỐ CỤC 8 Ô: cột trái = ô 0-3, cột phải = ô 4-7 (từ trên xuống). 4 ô TRÊN = hàng 1-2 mỗi cột: ô 0 Vũ khí, ô 1 Áo giáp, ô 4 Nhẫn, ô 5 Ngọc bội. 4 ô DƯỚI (2, 3, 6, 7) = Bảo vật: dành cho 5 loại mới (Pháp Khí, Pháp Bảo, Linh Bảo, Tiên Khí, Thần Khí), mỗi ô nhận loại nào cũng được */
-var SLOTN=['Vũ khí','Áo giáp','Danh hiệu','Khung UI','Nhẫn','Ngọc bội','Bảo vật 3','Bảo vật 4'];
+var SLOTN=['Vũ khí','Áo giáp','Danh hiệu (khung Nhân Vật)','Khung UI (khung Nhân Vật)','Nhẫn','Ngọc bội','Bảo vật 3','Bảo vật 4'];
 /* ===== KHO TRANG BỊ =====
    items: [{uid,id,ten,ic|img,slot(0-7),mo}] (mọi món sở hữu), eq: {slot:uid} (món đang mặc). Túi = món không nằm trong eq.
    Lưu localStorage 'ttg_moi_trangbi_v1'. ?trangbi=demo: có sẵn vài món mẫu, không lưu. */
@@ -51,7 +51,9 @@ function save(){try{if(window.TTGTHU&&TTGTHU.lamMoi)TTGTHU.lamMoi();}catch(e){} 
 function fixEq(){var ne={},ch=false;Object.keys(eq).forEach(function(k){var t=byUid(eq[k]);if(!t)return;if(String(t.slot)!==k)ch=true;if(ne[t.slot]===undefined)ne[t.slot]=t.uid;else ch=true;});if(ch){eq=ne;save();if(isOpen)renderItems();}}
 function byUid(u){for(var i=0;i<items.length;i++)if(items[i].uid===u)return items[i];return null;}
 function isEq(u){for(var k in eq)if(eq[k]===u)return true;return false;}
-function bag(){return items.filter(function(t){return !isEq(t.uid);});}
+/* (26/11/2026) Danh hiệu (dh) + Khung UI (khui) đã CHUYỂN sang khung Nhân Vật (90-nhan-vat-bang.js): khung Trang Bị của thú không hiện chúng nữa, dữ liệu vẫn nằm trong kho này */
+function isNv(t){return !!(t&&(t.dh||t.khui));}
+function bag(){return items.filter(function(t){return !isEq(t.uid)&&!isNv(t);});}
 function getItem(u){var t=byUid(u);return t?Object.assign({},t):null;}   /* bản sao 1 món theo uid (73-luat-trang-bi.js dùng khi cường hóa) */
 function updItem(u,p){var t=byUid(u);if(!t||!p)return false;for(var k in p)t[k]=p[k];save();if(isOpen)renderItems();return true;}   /* sửa trường của 1 món (tên/cấp cường hóa...) rồi lưu */
 function addItem(t){if(!t||!t.ten||!(t.slot>=0&&t.slot<8))return null;var o=Object.assign({},t);o.uid=o.uid||('tb'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));items.push(o);save();if(isOpen)renderItems();return o.uid;}
@@ -122,7 +124,7 @@ function toast(t){if(window.TTGTBAO&&TTGTBAO.toast){TTGTBAO.toast(t,1800);return
 function tgt(){var a=multi?Object.keys(picks).filter(function(u){return byUid(u);}):(sel&&byUid(sel)?[sel]:[]);return a;}
 function tap(u){if(multi){if(picks[u])delete picks[u];else picks[u]=1;sel=u;}else sel=(sel===u)?null:u;renderItems();}
 function pickBag(k){var t=bag()[k];if(!t){if(!multi)sel=null;renderItems();return;}tap(t.uid);}
-function pickSlot(k){var u=eq[k];if(!u){if(!multi)sel=null;renderItems();toast('Ô '+SLOTN[k]+' đang trống');return;}tap(u);}
+function pickSlot(k){if(k===2||k===3){toast('Danh hiệu / Khung UI đã chuyển sang khung Nhân Vật');return;}var u=eq[k];if(!u){if(!multi)sel=null;renderItems();toast('Ô '+SLOTN[k]+' đang trống');return;}tap(u);}
 /* KHÓA: món khóa không vứt được. Tất cả món đang chọn đã khóa -> mở khóa, ngược lại -> khóa hết */
 function doKhoa(){var a=tgt();if(!a.length){toast('Chưa chọn trang bị');return;}
   var allL=a.every(function(u){return byUid(u).kh;});
@@ -160,7 +162,7 @@ function renderItems(){
   if(sel&&!byUid(sel))sel=null;
   for(var pk in picks)if(!byUid(pk))delete picks[pk];
   for(i=0;i<E.cell.length;i++){var t=b[i],c=E.cell[i];c.innerHTML=t?icon(t)+(t.kh?'<span class="tb-lk">🔒</span>':''):'';c.classList.toggle('sel',!!t&&!multi&&t.uid===sel);c.classList.toggle('pk',!!t&&!!picks[t.uid]);c.classList.remove('eqd');}
-  for(i=0;i<8;i++){var u=eq[i],ti=u&&byUid(u),c2=E.slot[i];c2.innerHTML=ti?icon(ti)+(ti.kh?'<span class="tb-lk">🔒</span>':''):'';c2.classList.toggle('sel',!!ti&&!multi&&ti.uid===sel);c2.classList.toggle('pk',!!ti&&!!picks[ti.uid]);c2.classList.toggle('eqd',!!ti);}
+  for(i=0;i<8;i++){var u=eq[i],ti=u&&byUid(u),c2=E.slot[i];if(isNv(ti))ti=null;c2.innerHTML=ti?icon(ti)+(ti.kh?'<span class="tb-lk">🔒</span>':''):'';c2.classList.toggle('sel',!!ti&&!multi&&ti.uid===sel);c2.classList.toggle('pk',!!ti&&!!picks[ti.uid]);c2.classList.toggle('eqd',!!ti);}
   var s=sel&&byUid(sel),a=tgt(),ik=multi?'m':(s?s.uid:''),od=E.info.querySelector('.ds'),sc=(od&&E.infoKey===ik)?od.scrollTop:0;
   E.infoKey=ik;
   if(multi){
@@ -203,7 +205,7 @@ function renderCs(){
   if(!E.cs)return;
   var mac=dangMac(),h='',LT=window.TTGLT,BO=window.TTGBO,k;
   h+='<div class="h"><span>Chỉ số trang bị</span><button type="button" data-x="1">Đóng</button></div><div class="bd">';
-  h+='<div class="ln"><span>Đang mặc</span><b>'+mac.length+'/8 món</b></div>';
+  h+='<div class="ln"><span>Đang mặc</span><b>'+mac.length+'/6 món</b></div>';
   h+='<div class="sec">Chỉ số cộng thêm</div>';
   var T=LT&&LT.tong?LT.tong():{},n=0;
   if(LT&&LT.STATS)for(k in LT.STATS){if(T[k]){n++;h+='<div class="ln"><span>'+esc(LT.STATS[k].n)+'</span><b>'+fmtV(LT.STATS[k],T[k])+'</b></div>';}}
@@ -223,7 +225,7 @@ function renderCs(){
   E.cs.innerHTML=h;
   var x=E.cs.querySelector('[data-x]');if(x)x.addEventListener('click',toggleCs);}
 function toggleCs(){csOpen=!csOpen;if(!E.cs)return;E.cs.classList.toggle('on',csOpen);if(csOpen)renderCs();}
-function dangMac(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}
+function dangMac(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t&&!isNv(t))o.push(t);}return o;}
 function build(){
   root=document.createElement('div');root.className='tb';
   fr=document.createElement('div');fr.className='tb-fr';root.appendChild(fr);
@@ -283,5 +285,8 @@ function open(){if(!root)build();multi=false;picks={};csOpen=false;E.cs.classLis
 function close(){if(!root)return;isOpen=false;multi=false;picks={};csOpen=false;if(E.cs)E.cs.classList.remove('on');root.classList.remove('on');}
 
 function setBo(on){}   /* giữ lại cho tương thích: nút đổi Trang Bị/Tháo Trang Bị nay tự theo món đang chọn */
-window.TTGTB={fixEq:fixEq,open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,get:getItem,update:updItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);},dangMac:function(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}};   /* dangMac: danh sách món ĐANG MẶC (đọc trường bo = số vùng 0..16 của bộ, dùng cho luật bộ trang bị trong trận: 70-bo-trang-bi.js) */
+function apiMacVao(u){var t=byUid(u);if(!t||!(t.slot>=0&&t.slot<8))return false;eq[t.slot]=t.uid;save();if(isOpen)renderItems();return true;}   /* mang 1 món vào ô của nó (món cũ ở ô đó về túi) */
+function apiThao(u){var f=false;for(var k in eq)if(eq[k]===u){delete eq[k];f=true;}if(f){save();if(isOpen)renderItems();}return f;}
+function apiVut(u){var t=byUid(u);if(!t)return false;items=items.filter(function(x){return x.uid!==u;});for(var k in eq)if(eq[k]===u)delete eq[k];delete picks[u];if(sel===u)sel=null;save();if(isOpen)renderItems();return true;}   /* xóa hẳn khỏi kho (khung Nhân Vật dùng cho danh hiệu / khung UI) */
+window.TTGTB={macVao:apiMacVao,thao:apiThao,vut:apiVut,isMac:isEq,isNv:isNv,fixEq:fixEq,open:open,close:close,isOpen:function(){return isOpen;},setBo:setBo,addItem:addItem,get:getItem,update:updItem,list:function(){return items.slice();},equipped:function(){return Object.assign({},eq);},dangMac:function(){var o=[];for(var k in eq){var t=byUid(eq[k]);if(t)o.push(t);}return o;}};   /* dangMac: danh sách món ĐANG MẶC (đọc trường bo = số vùng 0..16 của bộ, dùng cho luật bộ trang bị trong trận: 70-bo-trang-bi.js) */
 })();

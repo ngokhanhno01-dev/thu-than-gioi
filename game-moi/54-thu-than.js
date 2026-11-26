@@ -571,7 +571,7 @@ function khoiTao(t){
 }
 
 /* ===== EXP / CẤP của thú đang ra trận (công thức: TTGCS.expCan, trần cấp: TTGCS.CFG.capMax hoặc 100) ===== */
-function capGoc(){return (window.TTGCS&&TTGCS.CFG&&TTGCS.CFG.capMax)||100;}
+function capGoc(){return (window.TTGCS&&TTGCS.CFG&&TTGCS.CFG.capMax)||270;}
 function capMax(){var m=capGoc();if(window.TTGDV&&TTGDV.tran){var c=TTGDV.tran();if(c>0)m=Math.min(m,c);}return m;}   /* trần cấp = min(100, trần theo Danh Vọng) (80-danh-vong.js); thú đã vượt trần thì giữ nguyên, chỉ ngừng nhận EXP */
 function expInfo(){var t=rt&&byUid(rt);if(!t||!window.TTGCS)return null;var lv=Math.max(1,Math.floor(t.lv||1)),mx=lv>=capMax();return {uid:t.uid,lv:lv,exp:mx?0:Math.max(0,Math.floor(t.exp||0)),need:mx?0:TTGCS.expCan(lv),max:mx,tran:mx&&lv<capGoc()};}
 function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!window.TTGCS)return null;var lv0=Math.max(1,Math.floor(t.lv||1)),lv=lv0,e=Math.max(0,Math.floor(t.exp||0))+n;
