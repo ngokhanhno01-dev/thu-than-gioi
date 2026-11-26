@@ -250,3 +250,7 @@ Nút **Khung: HD 256 / 128** (cùng hàng với nút đổi bậc): bấm để 
 - Thú tung sẵn lúc nhân vật lại gần, ép vào trận qua opts.chon (61-tham-hiem-tran.js). Rank (bac), cấp vẫn tung lúc vào trận.
 - Bỏ vòng đếm ngược; còn <3s thì nhấp nháy.
 - Nâng cache: 89 `?v=10`, 61 `?v=3`. CHƯA chạy thử, chưa có ảnh chụp (chủ game yêu cầu tiết kiệm quota); chờ chủ game duyệt trên máy.
+
+## Giãn thú trên map thám hiểm (26/11/2026)
+- Chủ game test: thú hiện dày, chắn lối. soDiemHien [3,4] -> [2,2]; thêm cachNhau=180, cachNguoi=130; cỡ thú 68 -> 56. Thay cho yêu cầu cũ 3-4 con mỗi khu.
+- Nâng cache: 89 `?v=11`. Chưa chạy thử, chờ chủ game.

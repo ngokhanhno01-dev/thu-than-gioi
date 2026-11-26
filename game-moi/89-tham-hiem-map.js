@@ -51,8 +51,10 @@ var CFG={
   zIndex:50,                  /* bằng lớp phủ cũ của 82: thông báo thắng/thua (.tbo) vẫn nằm TRÊN màn bản đồ */
   rung:20000,                 /* ms điểm rung hiện trước khi tự biến mất */
   hoi:15000,                  /* ms điểm hồi lại sau khi biến mất / sau khi chạm */
-  soDiemHien:[3,4],           /* mỗi khu cùng lúc hiện 3-4 điểm (trong 4 điểm cố định) */
-  hienThu:{xa:150,gan:70,co:68},  /* đơn vị map: cách xa < xa thì bắt đầu hiện bóng, <= gan thì rõ thú; co = cỡ thú trên map */
+  soDiemHien:[2,2],           /* mỗi khu cùng lúc hiện tối đa 2 điểm (trong các chỗ núp cố định) */
+  cachNhau:180,               /* đơn vị map: 2 con đang hiện phải cách nhau ít nhất ngần này (tính cả khác khu) */
+  cachNguoi:130,              /* đơn vị map: không cho thú mới hiện sát nhân vật */
+  hienThu:{xa:150,gan:70,co:56},  /* đơn vị map: cách xa < xa thì bắt đầu hiện bóng, <= gan thì rõ thú; co = cỡ thú trên map */
   banKinhCham:24,             /* đơn vị map: khoảng cách chạm vào điểm rung */
   banKinhMaskDiem:0,          /* đơn vị map: vòng tròn đi được quanh mỗi điểm rung/boss, bất chấp mask */
   cooldownSauTran:900,        /* ms không cho chạm lại sau khi quay về map */
@@ -480,7 +482,10 @@ function visCount(g){var n=0;g.pts.forEach(function(p){if(p.on)n++;});return n;}
 function spawnSpots(s,g,jit){
   var n=visCount(g),rd,p;
   while(n<g.target){
-    rd=g.pts.filter(function(q){return !q.on&&s.clock>=q.hoiAt;});
+    rd=g.pts.filter(function(q){
+      if(q.on||s.clock<q.hoiAt)return false;
+      if(s.p&&Math.pow(q.x-s.p.x,2)+Math.pow(q.y-s.p.y,2)<CFG.cachNguoi*CFG.cachNguoi)return false;
+      return !s.groups.some(function(h){return h.pts.some(function(o){return o.on&&Math.pow(q.x-o.x,2)+Math.pow(q.y-o.y,2)<CFG.cachNhau*CFG.cachNhau;});});});
     if(!rd.length)break;
     p=rd[Math.floor(Math.random()*rd.length)];
     p.on=true;p.hiem=tungHiem(g.k);p.chon=null;p.thuLai=0;p.fade=0;p.until=s.clock+CFG.rung*(jit?rnd(0.6,1):1);n++;}}
@@ -496,7 +501,7 @@ function tickSpots(s){
       if(!p.on||s.clock<p.until)return;
       var ready=g.pts.some(function(q){return !q.on&&s.clock>=q.hoiAt;});
       if(visCount(g)>CFG.soDiemHien[0]||ready){p.on=false;p.hoiAt=s.clock+CFG.hoi;g.target=soDiemCan();}   /* hết hạn -> ẩn, hồi sau CFG.hoi */
-      else p.until=s.clock+1000;});                                                                        /* giữ đủ tối thiểu 3 điểm/khu */
+      else p.until=s.clock+1000;});                                                                        /* giữ đủ tối thiểu CFG.soDiemHien[0] điểm/khu */
     spawnSpots(s,g,false);});}
 
 /* ---------- HUD KHU (B4) ---------- */
@@ -635,7 +640,7 @@ function drawSpot(s,sp){
     bong=clamp(f*2.5,0,1);that=clamp(f*2-1,0,1);
     c.save();c.translate(sp.x,sp.y);
     if(!o||bong<1){c.globalAlpha=a*(o?1-bong:1);DAUHIEU[s.v.dauHieu||'tuyet'](c,t,sp.ph);}
-    if(f>0.01){c.globalAlpha=a*bong;haoQuang(c,HIEM[sp.hiem].mau,t,sp.ph);}
+    if(f>0.01){c.globalAlpha=a*bong;c.save();c.scale(size/68,size/68);haoQuang(c,HIEM[sp.hiem].mau,t,sp.ph);c.restore();}
     if(o){
       tho=1+Math.sin(t*2.6+sp.ph)*0.025;
       c.globalAlpha=a*bong;ellipse(c,0,1,size*0.28,size*0.08,'rgba(0,0,0,.28)');
