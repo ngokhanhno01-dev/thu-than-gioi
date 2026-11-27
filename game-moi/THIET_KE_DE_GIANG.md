@@ -78,3 +78,4 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - Làm: `st.skRun` (act đặt khi tung kỹ năng), `st.liveG` (atk đặt sau act), `gaugeAdvance(now)` trong index.html, `autoTick` dùng khi liveG, `fin` không đẩy `st.tg` lên `nextAt` khi liveG. Áp cho MỌI trận (thú, quái, boss), không riêng boss Thần.
 - Hệ quả: nhịp đánh thật của bên nhanh có thể sát khoảng thanh hơn (vì thanh không bị đóng băng ~1s mỗi đòn); thanh đầy ngay khi hết cảnh đánh thì đánh liền sau 225ms nghỉ. Có thể làm các trận nhanh hơn trước.
 - Đã kiểm tra: node --check, test node `gaugeAdvance` (500ms = 0,417 / 1,333 đúng công thức atkIv). CHƯA thử trong trận thật.
+- Nhịp trận chậm lại (27/11/2026, 19:48): `ATK_MS` 2400 -> 3600 (x1,5) trong index.html, áp mọi trận. Khoảng giữa 2 đòn thường = ATK_MS x 100/(100+td): td 50 = 2,4s, td 100 = 1,8s, td 300 = 0,9s, td 1000 = 0,33s. Tỉ lệ nhanh chậm giữ nguyên. Chưa thử trong trận thật.
