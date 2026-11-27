@@ -72,3 +72,9 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - Boss đi lang thang trên map (`89-tham-hiem-map.js`, `thanDi`): chỉ ô đi được theo mask, tốc độ 70 đơn vị/giây (người chơi 190), mỗi bước 90-290 đơn vị rồi nghỉ 1,2-3,5 giây; đứng yên khi ẩn vì có người đánh. Số chỉnh ở `CFG.than`. Vị trí do phiên map giữ, chưa chia sẻ giữa người chơi (chưa có online).
 - Danh sách chọn vùng (`80-danh-vong.js`): vùng có boss hiện icon `icon/boss-the-gioi.webp` + % máu, có người đánh thì hiện kiếm + "Giao chiến". Làm mới lúc mở bảng.
 - Đã kiểm tra: node --check, test node mô phỏng đi lang thang 120 giây trên mask hình chữ L (0 lần ra ô chặn, đứng yên khi ẩn), test node đoạn tạo icon. CHƯA thử trong game thật.
+
+## Thanh tốc độ chạy liên tục khi ra đòn thường (27/11/2026, 19:45)
+- Trước: lúc đang ra đòn (và 225ms nghỉ sau đó) thanh tốc độ của cả 2 bên đứng yên. Giờ: đòn THƯỜNG (kể cả đòn bị choáng) thì thanh vẫn chạy trong lúc đánh và lúc nghỉ; KỸ NĂNG, đòn đối kháng ('both') và lúc Thời Gian Tỉnh Lặng đang bật vẫn đứng yên như cũ.
+- Làm: `st.skRun` (act đặt khi tung kỹ năng), `st.liveG` (atk đặt sau act), `gaugeAdvance(now)` trong index.html, `autoTick` dùng khi liveG, `fin` không đẩy `st.tg` lên `nextAt` khi liveG. Áp cho MỌI trận (thú, quái, boss), không riêng boss Thần.
+- Hệ quả: nhịp đánh thật của bên nhanh có thể sát khoảng thanh hơn (vì thanh không bị đóng băng ~1s mỗi đòn); thanh đầy ngay khi hết cảnh đánh thì đánh liền sau 225ms nghỉ. Có thể làm các trận nhanh hơn trước.
+- Đã kiểm tra: node --check, test node `gaugeAdvance` (500ms = 0,417 / 1,333 đúng công thức atkIv). CHƯA thử trong trận thật.
