@@ -2,7 +2,7 @@
    LUỒNG: bấm Thám hiểm -> màn BẢN ĐỒ tìm kiếm (CFG.tim = 8,5 giây, thú chibi nhảy lóc cóc + bong bóng biểu cảm)
           -> bảng "Phát hiện mục tiêu" (CFG.bao = 3 giây, chạm màn hình là đóng ngay) -> vào TRẬN
           -> THẮNG (hoặc bắt thú xong / thú hoang bỏ chạy) tự quay lại BẢN ĐỒ, lặp tiếp.
-          Bấm nút "Dừng" (hoặc phím Esc) => dừng vòng lặp, về màn hình chính. THUA / HÒA: mặc định vẫn lặp tiếp (CFG.tiepKhiThua=true); đặt false thì thua là dừng.
+          Bấm nút "Quay lại" (hoặc phím Esc) => dừng vòng lặp, về màn hình chính. THUA / HÒA: mặc định vẫn lặp tiếp (CFG.tiepKhiThua=true); đặt false thì thua là dừng.
    NỐI VỚI index.html (chỉ 4 chỗ nhỏ, tìm "TTGTX" trong index.html):
      - TTGTHAMHIEM.prep()   = chọn thú ra trận + tung địch cho vùng đang chọn (không vào trận), trả {player,ps,enemy,tag} hoặc null.
      - TTGTHAMHIEM.battle(pre) = vào trận với địch đã tung (startExplore). Trả true nếu vào được.

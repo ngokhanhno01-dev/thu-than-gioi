@@ -87,7 +87,7 @@ var LINES={
   ],
   /* MẸO: câu nào cũng khớp chức năng thật trong game (xem GHI_CHU.md). Sửa luật game thì sửa câu ở đây cho khớp. */
   meo:[
-    'Bấm nút Thám hiểm ở giữa thanh nút, ta sẽ tự đi tìm thú và đánh liên tục. Muốn dừng thì bấm nút Dừng.',
+    'Bấm nút Thám hiểm ở giữa thanh nút, ta sẽ tự đi tìm thú và đánh liên tục. Muốn dừng thì bấm nút Quay lại.',
     'Chạm khung tên vùng ngay dưới nút Thám hiểm để đổi sang vùng đã mở.',
     'Danh Vọng là số loài thú hoang và boss bạn đã hạ. Mỗi loài chỉ tính lần đầu tiên.',
     'Muốn mở vùng mới thì cần đủ Danh Vọng. Mở rồi không bị tốn đâu.',
@@ -108,7 +108,7 @@ var LINES={
     'Icon kỹ năng dưới khung thông tin: mờ là còn hồi chiêu, sáng viền vàng là lượt sau dùng lại.',
     'Boss thú hoang có kỹ năng riêng, nhìn ở bảng Phát hiện mục tiêu trước khi vào trận.',
     'Nhãn V1, V2, V3 cạnh tên thú hoang là dạng tiến hóa của nó. Càng cao càng đáng gờm.',
-    'Đang thám hiểm mà muốn dừng thì bấm nút Dừng trên cùng, hoặc phím Esc nếu bạn chơi trên máy tính.',
+    'Đang thám hiểm mà muốn dừng thì bấm nút Quay lại ở góc trên bên phải, hoặc phím Esc nếu bạn chơi trên máy tính.',
     'Danh hiệu mặc ở Pháp Bảo sẽ nổi ngay trên đầu ta. Oai lắm đó!'
   ],
   cham:[

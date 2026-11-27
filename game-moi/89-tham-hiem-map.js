@@ -14,7 +14,7 @@
      - CFG.banKinhMaskDiem = 0: điểm rung không còn bẻ mask. Riêng boss giữ vòng đi được bằng boss.banKinhCham.
      - Đang bật Debug Mask thì KHÔNG chặn (đi xuyên để tới chỗ cần tô); tắt Debug Mask mới có va chạm.
      - Bản nháp tự lưu localStorage (khóa ttg_map_mask_<vùng>) CHỈ khi maskData trong file còn rỗng; khi đã dán chuỗi cố định vào file thì file thắng.
-   DEBUG MASK: nút nhỏ "Debug Mask" góc trên trái (hoặc phím M). Bật lên: phủ màu xanh bán trong suốt lên vùng đi được; ngón tay/chuột kéo trên map để tô (✏ Vẽ) hoặc xoá (🧽 Tẩy);
+   DEBUG MASK (27/11/2026: ĐÃ GỠ nút "Debug Mask" và phím M khỏi giao diện, chỉ còn code vẽ mask bên dưới không có bảng công cụ; muốn tô lại mask thì phải làm lại nút/bảng). Mô tả cũ: nút nhỏ "Debug Mask" góc trên trái (hoặc phím M). Bật lên: phủ màu xanh bán trong suốt lên vùng đi được; ngón tay/chuột kéo trên map để tô (✏ Vẽ) hoặc xoá (🧽 Tẩy);
      "Cọ" đổi cỡ cọ; "Copy Mask" chép chuỗi vào clipboard (và console.log) để dán vào maskData; "Xoá hết" xoá toàn bộ. Joystick/WASD vẫn đi được khi đang tô để cuộn camera.
 
    GIAO DIỆN VỚI CODE HIỆN CÓ:
@@ -27,7 +27,7 @@
      TTGMAP.open(host)   host = {vung, onTouch(ev), onStop()}   ev = {loai:'diem'|'boss', hiem:'thuong'|..., khu:1..4, diemId}
      TTGMAP.pause()      vào trận: dừng rAF + bỏ listener phím + ẨN màn bản đồ + thoát fullscreen, GIỮ NGUYÊN vị trí/trạng thái điểm/đồng hồ
      TTGMAP.resume(kq)   sau trận: kq = {diemId?, boss?:true}; điểm vừa chạm biến mất rồi hồi theo CFG.hoi; boss => bossDanhXong() (đếm 15 phút); bật cooldown chạm; hiện lại màn bản đồ
-     TTGMAP.close()      Dừng/Esc: dọn sạch, trả màn hình về sảnh
+     TTGMAP.close()      Quay lại (nút góc trên phải, trước đây là Dừng)/Esc: dọn sạch, trả màn hình về sảnh
    BOSS TRÊN MAP: lấy từ dữ liệu game theo slug vùng: boss thú hoang (THU_MOI.zones[].thu[].boss -> vẽ bằng THU_MOI.draw) ưu tiên; không có thì boss quái
      (TTG_QUAI_MAIN.zones[].quai[].boss -> ảnh game-moi/quai/<imageFile>); chưa nạp xong ảnh / không có dữ liệu thì dùng hình vẽ tạm. Trận đánh Boss ép đúng con này (opts.bossId).
 */
@@ -739,34 +739,28 @@ function buildDom(s){
   var cv=el('canvas','position:absolute;left:0;top:0;width:100%;height:100%;display:block');
   var load=el('div','position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;color:#cfe6ff;font-size:16px;pointer-events:none','Đang tải bản đồ…');
   var hud=el('div','position:absolute;left:50%;top:max(10px,env(safe-area-inset-top));transform:translateX(-50%);max-width:92%;text-align:center;pointer-events:none;background:rgba(8,16,28,.72);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:6px 12px;color:#fff;opacity:0;transition:opacity .35s');
-  var stop=el('button','position:absolute;right:max(12px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));'+BTN+';font-size:14px;padding:8px 14px','⏸ Dừng');
+  /* NÚT QUAY LẠI (thay nút Dừng cũ): khung vàng-xanh đêm của game (khung-nut.webp, cùng loại nút vuông ở sảnh) + mũi tên cong phát sáng + chữ vàng bên dưới. Bấm = stopReq() (về sảnh, như Dừng/Esc cũ). Chỉnh cỡ ở BACK_S. */
+  var BACK_S=58;
+  var stop=el('button','position:absolute;right:max(12px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));width:'+BACK_S+'px;padding:0;border:0;background:none;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;gap:1px;outline:none;transition:transform .08s,filter .12s;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55))');
+  stop.setAttribute('aria-label','Quay lại');
+  var bw=el('div','position:relative;width:'+BACK_S+'px;height:'+BACK_S+'px');
+  bw.appendChild(el('div','position:absolute;left:15%;top:15%;right:15%;bottom:15%;border-radius:9px;background:radial-gradient(circle at 50% 40%,#1b2f78 0%,#0b1442 62%,#060a26 100%)'));
+  var bfr=el('div','position:absolute;left:0;top:0;width:100%;height:100%;background:url(game-moi/khung-nut.webp?v=2) center/100% 100% no-repeat;pointer-events:none');
+  var bic=el('div','position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none');
+  bic.innerHTML='<svg viewBox="0 0 64 64" width="'+Math.round(BACK_S*.5)+'" height="'+Math.round(BACK_S*.5)+'" style="filter:drop-shadow(0 0 4px #5fe3ff) drop-shadow(0 0 9px rgba(95,227,255,.7))"><defs><linearGradient id="ttgBackG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4ffff"/><stop offset=".55" stop-color="#8fe9ff"/><stop offset="1" stop-color="#ffd86a"/></linearGradient></defs><path d="M27 13 8 31l19 18V38h13c8 0 13 4 16 12 1-15-7-26-20-26H27z" fill="url(#ttgBackG)" stroke="#1a2c70" stroke-width="3" stroke-linejoin="round"/></svg>';
+  bw.appendChild(bic);bw.appendChild(bfr);stop.appendChild(bw);
+  stop.appendChild(el('div','font:bold 11px/1.1 \'Noto Serif\',Georgia,serif;color:#ffe9a8;letter-spacing:.2px;text-shadow:0 0 3px #000,0 1px 2px #000,0 0 7px rgba(255,200,80,.5);white-space:nowrap;pointer-events:none','Quay lại'));
+  stop.addEventListener('pointerdown',function(){stop.style.transform='scale(.92)';stop.style.filter='brightness(1.25) drop-shadow(0 2px 3px rgba(0,0,0,.6))';});
+  ['pointerup','pointerleave','pointercancel'].forEach(function(n){stop.addEventListener(n,function(){stop.style.transform='';stop.style.filter='drop-shadow(0 3px 5px rgba(0,0,0,.55))';});});
   var rot=el('div','position:absolute;left:0;right:0;bottom:max(150px,calc(env(safe-area-inset-bottom) + 150px));display:none;justify-content:center;pointer-events:none');
   rot.appendChild(el('div','background:rgba(8,16,28,.8);color:#ffd45c;font-size:13px;padding:6px 12px;border-radius:999px','↻ Xoay ngang màn hình để chơi'));
   var jb=el('div','position:absolute;left:18px;top:18px;width:152px;height:152px;opacity:0;pointer-events:none;border-radius:50%;background:rgba(10,22,38,.34);border:2px solid rgba(225,242,255,.42);box-shadow:0 4px 22px rgba(0,0,0,.24);touch-action:none;transition:opacity .08s');
   var kn=el('div','position:absolute;left:50%;top:50%;border-radius:50%;background:rgba(255,255,255,.55);border:2px solid rgba(255,255,255,.85);pointer-events:none');
   jb.appendChild(kn);
-  /* Debug Mask: nút nhỏ góc trên trái + bảng công cụ */
-  var dbgBtn=el('button','position:absolute;left:max(12px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));'+BTN+';font-size:12px;padding:6px 10px','Debug Mask');
-  var panel=el('div','position:absolute;left:max(12px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 38px);display:none;flex-direction:column;gap:6px;align-items:flex-start');
-  var r1=el('div','display:flex;gap:6px'),r2=el('div','display:flex;gap:6px'),r3=el('div','display:flex;gap:6px');
-  var bPaint=el('button',BTN+';font-size:12px;padding:6px 10px','✏ Vẽ'),bErase=el('button',BTN+';font-size:12px;padding:6px 10px','🧽 Tẩy'),
-      bBrush=el('button',BTN+';font-size:12px;padding:6px 10px','Cọ'),bCopy=el('button',BTN+';font-size:12px;padding:6px 10px','Copy Mask'),
-      bClear=el('button',BTN+';font-size:12px;padding:6px 10px','Xoá hết'),
-      info=el('div','pointer-events:none;color:#fff;font-size:11px;background:rgba(8,16,28,.72);border-radius:8px;padding:4px 8px');
-  r1.appendChild(bPaint);r1.appendChild(bErase);r2.appendChild(bBrush);r2.appendChild(bCopy);r3.appendChild(bClear);
-  panel.appendChild(r1);panel.appendChild(r2);panel.appendChild(r3);panel.appendChild(info);
   root_.appendChild(cv);root_.appendChild(hud);root_.appendChild(load);root_.appendChild(rot);root_.appendChild(jb);root_.appendChild(stop);
-  root_.appendChild(dbgBtn);root_.appendChild(panel);
   D.body.appendChild(root_);
   s.root=root_;s.cv=cv;s.ctx=cv.getContext('2d');s.load=load;s.hud=hud;s.rot=rot;s.joyBase=jb;s.joyKnob=kn;
-  s.dbgBtn=dbgBtn;s.dbgPanel=panel;s.bPaint=bPaint;s.bErase=bErase;s.bBrush=bBrush;s.dbgInfo=info;
   stop.addEventListener('click',function(e){e.preventDefault();stopReq();});
-  dbgBtn.addEventListener('click',function(e){e.preventDefault();if(S)setDbg(S,!S.dbg);});
-  bPaint.addEventListener('click',function(e){e.preventDefault();if(S){S.tool='paint';refreshDbg(S);}});
-  bErase.addEventListener('click',function(e){e.preventDefault();if(S){S.tool='erase';refreshDbg(S);}});
-  bBrush.addEventListener('click',function(e){e.preventDefault();if(S){S.bi=(S.bi+1)%BRUSH.length;refreshDbg(S);}});
-  bCopy.addEventListener('click',function(e){e.preventDefault();copyMask();});
-  bClear.addEventListener('click',function(e){e.preventDefault();if(S)clearMask(S);});
   /* tô mask bằng ngón tay/chuột trực tiếp trên canvas (chỉ khi Debug Mask bật) */
   cv.addEventListener('pointerdown',function(e){
     var s2=S,w;if(!s2||!s2.dbg||s2.paused||s2.pid!==null)return;
@@ -831,7 +825,6 @@ function onKeyDown(e){
   var s=S;if(!s)return;
   var c=e.code;
   if(c==='Escape'){e.preventDefault();stopReq();return;}
-  if(c==='KeyM'){if(!e.repeat)setDbg(s,!s.dbg);e.preventDefault();return;}
   if(c==='KeyW'||c==='KeyA'||c==='KeyS'||c==='KeyD'||c==='ArrowUp'||c==='ArrowDown'||c==='ArrowLeft'||c==='ArrowRight'){
     s.keys[c]=true;e.preventDefault();}}
 function onKeyUp(e){var s=S;if(!s)return;if(s.keys[e.code]){s.keys[e.code]=false;e.preventDefault();}}
