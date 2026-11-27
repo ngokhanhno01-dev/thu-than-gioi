@@ -290,7 +290,7 @@ img,canvas,video,svg{-webkit-user-drag:none;user-drag:none}
 if(window.TTG_BLOCK)return;
 var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getElementById('sa');
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,BATTLE=null,A=null,typing=false;
-var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=3600,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.27,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
+var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=4100,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.27,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
 var NHN={ok:false,im:new Image()};NHN.im.onload=function(){NHN.ok=true;};NHN.im.src='game-moi/nen-hang-nut.png?v=1';/* nền khung dưới (thanh nút): ảnh game-moi/nen-hang-nut.png, phủ kín + canh giữa; chưa nạp được thì dùng dải màu */
 var BP=98,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 /* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */
@@ -760,12 +760,12 @@ function hit(w){var s0=st,n0=performance.now(),dl=atkFxOn()?AT_HIT:0,nn=n0+dl,tl
    NHỊP TRẬN chỉnh ở dòng khai báo đầu: GAP = nghỉ giữa các vòng, T_DON = mỗi lượt đánh thường (và khoảng nghỉ giữa 2 bên trong vòng), END_WAIT = dừng khi hết trận.
    Kỹ năng dài KN_INTRO + KN_T_END (xem khối KỸ NĂNG ĐỘC QUYỀN BOSS). */
 /* THANH ĐÁNH THƯỜNG (thanh vàng trên khung) CHẠY THỜI GIAN THẬT, hồi chiêu kỹ năng cũng tính bằng thời gian.
-   Thời gian giữa 2 đòn đánh thường = ATK_MS x 100/(100+td) ms (ATK_MS=3600 từ 27/11/2026, trước là 2400: ví dụ cũ td 20 = 2,0s; giảm dần, không bao giờ về 0): td 40=1,71s · td 50=1,6s · td 100=1,2s · td 200=0,8s.
+   Thời gian giữa 2 đòn đánh thường = ATK_MS/(1+căn(td/100)) ms từ 27/11/2026, ATK_MS=4100 (công thức cũ ATK_MS x 100/(100+td), ATK_MS 2400 rồi 3600, trước là 2400: ví dụ cũ td 20 = 2,0s; giảm dần, không bao giờ về 0). Công thức mới: td 20=2,83s · td 50=2,4s · td 100=2,05s · td 300=1,5s · td 1.000=0,99s · td 5.000=0,51s.
    Thanh g (0..1) đầy theo khoảng đó; đầy thì đánh: kỹ năng đã hết hồi chiêu (theo lượt) thì tung kỹ năng THAY đòn thường, chưa thì đánh thường. Vào trận cả 2 thanh ĐẦY: td cao hơn đánh trước, bên kia ngay sau (bằng nhau: tung ngẫu nhiên st.rnd; BATTLE.seed giống nhau ở 2 máy/server thì giống nhau).
    Hồi chiêu kỹ năng, choáng, buff, debuff đều đếm theo LƯỢT ĐÁNH của từng bên (hồi chiêu & buff: bên đánh; debuff: bên bị đánh); tốc độ chỉ làm lượt đến nhanh hay chậm.
    Không giới hạn lượt liền. Trận mẫu (không có BATTLE): luân phiên, nghỉ GAP_ACT. */
 function mkRnd(seed){var a=(seed==null?Math.floor(Math.random()*4294967296):seed)>>>0;return function(){a=(a+0x6D2B79F5)>>>0;var t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
-function atkIv(td){return ATK_MS*TD_K/(TD_K+Math.max(0,td||0));}/* ms giữa 2 đòn đánh thường */
+function atkIv(td){return ATK_MS/(1+Math.sqrt(Math.max(0,td||0)/TD_K));}/* ms giữa 2 đòn đánh thường (27/11/2026: đường cong căn bậc hai, vì thú cấp 270 tốc độ > 5.000; td 50 = 2,4s · 100 = 2,05s · 1.000 = 0,99s · 5.000 = 0,51s) */
 function gaugeInit(){if(!st.rnd)st.rnd=mkRnd(BATTLE&&BATTLE.seed);if(!st.g)st.g={me:1,en:1};if(!st.run)st.run={w:null};if(st.clk==null)st.clk=0;if(st.tg==null)st.tg=performance.now();}
 /* mỗi khung hình: chạy đồng hồ + thanh theo thời gian thật; trả bên tới lượt ('me'|'en') hoặc null */
 function gaugeStep(now){
