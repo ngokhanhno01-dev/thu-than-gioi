@@ -130,6 +130,11 @@
       { id: '9j', slug: '10-thanh-lam-cung-ky', ten: 'Thanh Lâm Cùng Kỳ', boss: true }
     ] }
   ];
+  /* THÚ THẦN (boss thế giới, 27/11/2026): KHÔNG nằm trong zones (không thành vùng, không tính Danh Vọng/map/thám hiểm). Chỉ đăng ký vào byId để vẽ + hiện ở bảng thú.
+     Ảnh: thu-game/than/<slug>-b<bậc>-192.png. Thêm Thời Gian / Thái Cực: thêm dòng vào thanZone.thu. */
+  var thanZone = { z: 17, slug: 'than', ten: 'Thần', thu: [
+    { id: 'th1', slug: 'de-giang', ten: 'Đế Giang', boss: true }
+  ] };
   var byId = {}, cache = {};
   zones.forEach(function (zn) {
     zn.thu.forEach(function (t) {
@@ -137,6 +142,7 @@
       byId[t.id] = t;
     });
   });
+  thanZone.thu.forEach(function (t) { t.z = thanZone.z; t.zone = thanZone.slug; t.frame = FRAME; byId[t.id] = t; });
   function getImg(id, bac) {
     var t = byId[id]; if (!t) return null;
     var k = id + '-' + bac + '-' + FRAME, e = cache[k];
@@ -160,5 +166,5 @@
     return true;
   }
   function setFrame(n) { FRAME = (n === 256 || n === 192) ? n : 128; THU_MOI.FRAME = FRAME; } // chỉ để xem thử
-  window.THU_MOI = { FRAME: FRAME, setFrame: setFrame, zones: zones, byId: byId, draw: draw, onload: null };
+  window.THU_MOI = { FRAME: FRAME, setFrame: setFrame, zones: zones, than: thanZone, byId: byId, draw: draw, onload: null };
 })();

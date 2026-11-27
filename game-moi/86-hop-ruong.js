@@ -189,5 +189,6 @@ function lay(){B.add(ID_HOP,3);B.add(ID_RUONG,3);toast('TEST: +3 Hộp, +3 Rươ
 if(/[?&]hop=demo/.test(location.search)){B.add(ID_HOP,5);B.add(ID_RUONG,5);}
 if(root.TTGNV)root.TTGNV.add({id:'lay-hop',ten:'Lấy hộp',dev:true,onTap:lay,icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="12" y="26" width="40" height="28" rx="4" fill="#d83a3a" stroke="#5a0f0f" stroke-width="3"/><rect x="10" y="18" width="44" height="12" rx="3" fill="#ffd24a" stroke="#7a4a00" stroke-width="3"/><path d="M32 18v36" stroke="#ffd24a" stroke-width="5"/></svg>'});
 
-root.TTGHOP={CFG:CFG,BOX:BOX,roll:roll,moHop:moHop,moRuong:moRuong,ID_HOP:ID_HOP,ID_RUONG:ID_RUONG};
+root.TTGHOP={dangKy:function(id,fn){ITEMS[id]={open:fn};},   /* module khác đăng ký vật phẩm có nút Mở trong Balo (104-trung-than.js) */
+CFG:CFG,BOX:BOX,roll:roll,moHop:moHop,moRuong:moRuong,ID_HOP:ID_HOP,ID_RUONG:ID_RUONG};
 })(typeof window!=='undefined'?window:globalThis);

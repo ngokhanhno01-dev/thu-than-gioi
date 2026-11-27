@@ -248,6 +248,7 @@ img,canvas,video,svg{-webkit-user-drag:none;user-drag:none}
 <script src="game-moi/60-fx-thuy-nguyet.js?v=1"></script>
 <script src="game-moi/60b-fx-viem-long.js?v=1"></script>
 <script src="game-moi/60c-fx-van-moc.js?v=1"></script>
+<script src="game-moi/60d-fx-de-giang.js?v=1"></script>
 <script src="game-moi/70-bo-trang-bi.js"></script>
 <script src="game-moi/77-luat-chien-dau.js"></script>
 <script src="game-moi/73-luat-trang-bi.js?v=2"></script>
@@ -255,6 +256,7 @@ img,canvas,video,svg{-webkit-user-drag:none;user-drag:none}
 <script src="game-moi/75-tien-hoa-thu.js"></script>
 <script src="game-moi/81-nut-moi.js?v=6"></script>
 <script src="game-moi/85-cua-hang.js?v=10"></script>
+<script src="game-moi/104-trung-than.js?v=1"></script>
 <script src="game-moi/89-tham-hiem-map.js?v=20"></script>
 <script src="game-moi/82-tham-hiem-auto.js?v=4"></script>
 <script src="game-moi/83-sanh-song.js?v=1"></script>
@@ -419,8 +421,8 @@ function atkFxOn(){var a=window.TTGCombatFX;return !!(a&&a.drawAttack&&a.drawImp
 /* VÙNG HIỆU ỨNG ĐÒN = vùng QUÊ của LOÀI thú đang đánh (TTGCS.loai(id).goc), KHÔNG phải vùng đang thám hiểm và không phải vung dùng tính chỉ số.
    Bảng BANG của demo đánh số vùng khác main ở các vùng mới, nên đổi sang số vùng hiệu ứng (0..16 của main) bằng FX_ZONE: 6 Thủy Nguyệt Cảnh -> 17 (hiệu ứng riêng đánh XA, 60-fx-thuy-nguyet.js), 7 Xích Hỏa Địa -> 11, 8 Thanh Lâm -> 10.
    Quái nguồn main (không có trong bảng loài) dùng vung của chính quái (vùng nó sinh ra). */
-var FX_ZONE={6:17,7:11,8:10};
-function zoneOfW(w){try{var m=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null;if(!m)return 0;var z=null,l=window.TTGCS&&TTGCS.loai?TTGCS.loai(m.id):null;if(l&&l.goc!=null)z=l.goc;else z=m.vung;z=Math.floor(+z)||0;if(FX_ZONE[z]!=null)z=FX_ZONE[z];return Math.max(0,Math.min(17,z));}catch(e){return 0;}}
+var FX_ZONE={6:17,7:11,8:10,17:18};   /* 17 -> 18: boss Thần Đế Giang (th1, vung 17) có hiệu ứng đòn thường riêng (60d-fx-de-giang.js); 17 của Thủy Nguyệt Cảnh là số hiệu ứng, không phải số vùng thô */
+function zoneOfW(w){try{var m=BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy):null;if(!m)return 0;var z=null,l=window.TTGCS&&TTGCS.loai?TTGCS.loai(m.id):null;if(l&&l.goc!=null)z=l.goc;else z=m.vung;z=Math.floor(+z)||0;if(FX_ZONE[z]!=null)z=FX_ZONE[z];return Math.max(0,Math.min(18,z));}catch(e){return 0;}}
 function atkU(f,ts){return (ts-f.t0)/(1900*AT_K);}
 function lungeP(x){if(x<=0)return 0;if(x<.14)return -14*Math.sin(x/.14*Math.PI/2);if(x<.35){var q=(x-.14)/.21;return -14+114*q*q*(1.4-.4*q);}if(x<.42)return 100;if(x<.72){var q2=(x-.42)/.3;return 100*(1-q2*q2*(3-2*q2));}return 0;}
 function smo(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);}
@@ -438,7 +440,7 @@ function atkOff(w,ts){var L=st&&st.atk;if(!L||!L.length)return null;var o=0,hit=
 function drawAtkFx(ts){var L=st.atk,api=window.TTGCombatFX;if(!L||!L.length)return;if(!api||!api.drawAttack){st.atk=null;return;}
  var sc=AT_SC,tt=ts/1000,fw=W-I.l-I.r;st.atk=L=L.filter(function(f){return atkU(f,ts)<1;});
  L.forEach(function(f){var u=atkU(f,ts);if(u<0)return;var pa=f.w==='me',att=pa?'me':'en',tg=pa?'en':'me',
-   ox0=px(att)-(pa?85:272)*sc,ox1=px(tg)-(pa?272:85)*sc,tn=f.s===17&&!f.text,ox=(f.mel||tn)?ox1:ox0+(ox1-ox0)*smo((u-.18)/.25),oy=py()-204*sc;   /* xa: tụ lực ở bên đánh, bay tới bên bị đánh */
+   ox0=px(att)-(pa?85:272)*sc,ox1=px(tg)-(pa?272:85)*sc,tn=(f.s===17||f.s===18)&&!f.text,ox=(f.mel||tn)?ox1:ox0+(ox1-ox0)*smo((u-.18)/.25),oy=py()-204*sc;   /* xa: tụ lực ở bên đánh, bay tới bên bị đánh */
   ctx.save();ctx.beginPath();ctx.rect(I.l,0,fw,TH());ctx.clip();
   ctx.save();ctx.translate(ox,oy);ctx.scale(sc,sc);ctx.imageSmoothingEnabled=true;window.BSPD=1/AT_K;
   try{api.drawAttack(ctx,tt,{on:1,s:f.s,u:u,pa:pa,sx:tn?(px(att)-ox1)/sc:undefined,cl:0,cr:false,miss:f.miss,h:'',i:f.i,text:f.text||''});}catch(e){window.__fxAtkErr='atk: '+(e&&e.message||e);}
