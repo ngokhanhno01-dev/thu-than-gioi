@@ -1283,7 +1283,7 @@ function open(host){
   fit();
   setDbg(s,!!CFG.debugMask);
   window.addEventListener('resize',fit);
-  try{var rf=s.root.requestFullscreen||s.root.webkitRequestFullscreen;if(rf){var pr=rf.call(s.root);if(pr&&pr.catch)pr.catch(function(){});}}catch(e){}
+  /* 27/11/2026: BỎ requestFullscreen. Gọi nó làm Chrome hiện thông báo 'Để thoát khỏi chế độ toàn màn hình...' mỗi lần vào map. Bản cài (PWA) đã tự toàn màn hình + khóa ngang theo pwa-moi.webmanifest, giống phần còn lại của game (xem chú thích đầu index.html). */
   try{if(screen.orientation&&screen.orientation.lock)screen.orientation.lock('landscape').catch(function(){});}catch(e){}
   s.img=new Image();
   s.img.onload=function(){

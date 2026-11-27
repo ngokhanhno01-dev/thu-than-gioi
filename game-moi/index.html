@@ -100,7 +100,12 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 #tl .it.on{border-color:#ffe066;background:#4a3f12;color:#ffe9a0}
 #tp{position:absolute;left:calc(146px + env(safe-area-inset-left,0px));top:calc(74px + env(safe-area-inset-top,0px));z-index:20;font:bold 11px sans-serif;padding:3px 8px;border:1px solid #a98cf0;border-radius:3px;background:#3a2a5c;color:#fff;opacity:.85;touch-action:manipulation}
 #tst{position:absolute;left:50%;transform:translateX(-50%);top:calc(30px + env(safe-area-inset-top,0px));background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 8px;border-radius:3px;opacity:0;transition:opacity .2s;pointer-events:none!important;z-index:30;white-space:nowrap}
-</style></head><body>
+/* 27/11/2026: chặn chọn chữ + menu 'Tìm kiếm bằng Google / Lens' của Chrome khi đè giữ vào chữ, ảnh. Chỉ ô nhập liệu được chọn chữ. */
+*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text}
+img,canvas,video,svg{-webkit-user-drag:none;user-drag:none}
+</style><script>(function(){function ok(t){return t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);}
+['selectstart','contextmenu','dragstart'].forEach(function(n){document.addEventListener(n,function(e){if(!ok(e.target))e.preventDefault();},true);});})();</script></head><body>
 <div id="ttg-boot" role="status" aria-live="polite">
   <div class="scene" id="tb-scene">
     <div class="pic"></div><div class="mist m1"></div><div class="mist m2"></div><div class="glow"></div><div class="moon"></div><canvas id="tb-fx"></canvas><div class="shade"></div>
