@@ -564,6 +564,7 @@ function doiRank(){var t=rt&&byUid(rt);if(!t)return null;var i=RK_ORD.indexOf(RK
 /* setTien(uid,n): đổi bậc tiến hóa (1-3) của 1 thú, lưu + vẽ lại panel. Dùng cho khung Tiến Hóa (75-tien-hoa-thu.js). Trả bậc mới hoặc null nếu không có thú. */
 function setTien(u,n){var t=byUid(u);if(!t)return null;n=Math.max(1,Math.min(3,Math.floor(n)||1));t.tien=n;save();if(isOpen)render();return n;}
 function list(){dongBo();return thus.map(function(t){return Object.assign({},t);});}
+function setLv(n){var t=rt&&byUid(rt);if(!t)return null;n=Math.max(1,Math.min(capGoc(),Math.floor(n)||1));t.lv=n;t.exp=0;save();if(isOpen)render();return n;}   /* NÚT TEST: đặt cấp thú ra trận, BỎ QUA trần cấp theo vùng (tối đa capMax = 270), EXP về 0 */
 function getRaTran(){var t=rt&&byUid(rt);return t?Object.assign({},t):null;}   /* sau này nối vào trận đấu/sảnh bằng hàm này */
 /* khoiTao(thu): TÀI KHOẢN MỚI. Xóa sạch kho + thú ra trận + danh sách thả (bộ nhớ và localStorage), thêm đúng con `thu`, cho ra trận luôn. Trả uid (null nếu đang ở chế độ ?thu=demo hoặc thiếu id). Không đụng Balo. */
 function khoiTao(t){
@@ -584,5 +585,17 @@ function addExp(n){var t=rt&&byUid(rt);n=Math.max(0,Math.floor(n)||0);if(!t||!wi
   while(lv<capMax()&&e>=TTGCS.expCan(lv)){e-=TTGCS.expCan(lv);lv++;}
   var tr=lv>=capMax()&&lv<capGoc();if(lv>=capMax())e=0;t.lv=lv;t.exp=e;save();return {gain:(lv0>=capMax()?0:n),lv0:lv0,lv1:lv,exp:e,need:lv>=capMax()?0:TTGCS.expCan(lv),tran:tr};}
 function lamMoi(){try{if(isOpen&&E&&E.cap)renderStats();}catch(e){}}   /* gọi khi đổi trang bị (55-trang-bi.js) để trang chỉ số cập nhật */
-window.TTGTHU={lamMoi:lamMoi,tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,setTien:setTien,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges,pc:pcPaint};   /* pc(canvas có data-u=đường dẫn ảnh): vẽ thú tự phóng vừa ô (khung Tiến Hóa 72-khung-ren-cuong-hoa.js dùng) */   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+window.TTGTHU={setLv:setLv,lamMoi:lamMoi,tha:tha,open:open,close:close,isOpen:function(){return isOpen;},add:add,list:list,getRaTran:getRaTran,doiRank:doiRank,setTien:setTien,khoiTao:khoiTao,anh:anhThu,expInfo:expInfo,addExp:addExp,ten:tenThu,badges:drawBadges,pc:pcPaint};   /* pc(canvas có data-u=đường dẫn ảnh): vẽ thú tự phóng vừa ô (khung Tiến Hóa 72-khung-ren-cuong-hoa.js dùng) */   /* anh(thu) = đường dẫn ảnh thú (dùng cho khung Trang Bị) */
+})();
+/* NÚT TEST ẨN (menu ẩn: chạm chữ "Danh Vọng"): đổi cấp thú đang ra trận. Xóa khối này khi ra bản thật. */
+(function(){
+  function cm(){return (window.TTGCS&&TTGCS.CFG&&TTGCS.CFG.capMax)||270;}   /* trần gốc 270 (khối này nằm ngoài hàm bao nên không gọi được capGoc) */
+  function tt(m){try{var b=window.TTGBAO||window.TTGTBAO;if(b&&b.toast)b.toast(m,2200);}catch(e){}}
+  function doi(f){var t=window.TTGTHU&&TTGTHU.getRaTran&&TTGTHU.getRaTran();if(!t){tt('Chưa có thú ra trận');return;}var n=TTGTHU.setLv(f(Math.max(1,Math.floor(t.lv||1))));tt('TEST: thú đạt cấp '+n+(n>=cm()?' (tối đa)':''));}
+  if(window.TTGNV&&TTGNV.add){
+    TTGNV.add({id:'thu-lv-1',dev:true,ten:'Thú +1 cấp',onTap:function(){doi(function(l){return l+1;});}});
+    TTGNV.add({id:'thu-lv-10',dev:true,ten:'Thú +10 cấp',onTap:function(){doi(function(l){return l+10;});}});
+    TTGNV.add({id:'thu-lv-max',dev:true,ten:'Thú lên cấp tối đa',onTap:function(){doi(function(){return cm();});}});
+    TTGNV.add({id:'thu-lv-reset',dev:true,ten:'Thú về cấp 1',onTap:function(){doi(function(){return 1;});}});
+  }
 })();
