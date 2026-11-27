@@ -13,8 +13,9 @@ if(!B||!G)return;
 var D='game-moi/',V='?v=1',SW=1502,SH=881,FRAME=D+'khung-chon-vat-pham.webp'+V;
 var ID_HOP='hop-ngu-thu-ngau-nhien',ID_RUONG='ruong-ngu-thu-tu-chon';
 var CFG={
-  qty:{1:10,2:8,3:5,4:3,5:2,6:1},            /* số Ngự Thú Châu nhận được theo bậc (cả hộp lẫn rương) */
-  tiLe:{1:40,2:28,3:17,4:9,5:4,6:2}          /* HỘP: trọng số trúng từng bậc (cộng lại 100 = %). Bậc càng cao càng hiếm */
+  capMax:5,                                  /* 27/11/2026: hộp + rương CHỈ ra châu 1..5. BỎ châu 6 (Hỗn Độn Thần Châu) */
+  qty:{1:10,2:8,3:5,4:3,5:2},                /* số Ngự Thú Châu nhận được theo châu (cả hộp lẫn rương) */
+  tiLe:{1:40,2:28,3:17,4:9,5:4}              /* HỘP: trọng số trúng từng châu (% tự chia lại theo tổng). Châu càng cao càng hiếm */
 };
 var BOX={
   slotX:[167,376,585],slotY:[289,467,644],slotW:155,slotH:131,   /* 9 ô lưới 3x3 (ruột ô, đọc theo hàng); chỉ dùng 6 ô đầu cho bậc 1-6 */
@@ -32,7 +33,8 @@ function chauId(cap){return G.idBong(cap);}
 function chauItem(cap){return B.CAT[chauId(cap)]||{ten:'Ngự Thú Châu',ic:'⚪'};}
 function chauTen(cap){return chauItem(cap).ten;}
 function icHtml(it){return it&&it.img?'<img src="'+esc(it.img)+'" alt="">':'<b>'+esc((it&&it.ic)||'?')+'</b>';}
-function maxCap(){return G.CFG.capBongMax||6;}
+function maxCap(){return Math.min(CFG.capMax,G.CFG.capBongMax||6);}
+function bacTen(c){return chauItem(c).bac||('Bậc '+c);}   /* Hoàng / Huyền / Địa / Thiên Giai / Đặc Biệt (58-bong-bat.js) */
 function toast(t){if(root.TTGBAO)TTGBAO.toast(t,2200);}
 function tong(){var s=0,c;for(c=1;c<=maxCap();c++)s+=Math.max(0,+CFG.tiLe[c]||0);return s;}
 function roll(){   /* chọn 1 bậc theo trọng số CFG.tiLe */
@@ -46,11 +48,11 @@ function give(cap){var n=CFG.qty[cap]|0;B.add(chauId(cap),n);return n;}
 
 /* ================= KHAI ITEM VÀO BALO ================= */
 function moTaHop(){
-  var a=[],c;for(c=1;c<=maxCap();c++)a.push('Bậc '+c+': x'+CFG.qty[c]+' ('+pct(c)+'%)');
-  return 'Mở ra nhận ngẫu nhiên Ngự Thú Châu của 1 bậc (bậc càng cao càng hiếm). '+a.join(' · ')+'.';
+  var a=[],c;for(c=1;c<=maxCap();c++)a.push(chauTen(c)+': x'+CFG.qty[c]+' ('+pct(c)+'%)');
+  return 'Mở ra nhận ngẫu nhiên 1 loại Ngự Thú Châu (châu càng cao càng hiếm). '+a.join(' · ')+'.';
 }
 function moTaRuong(){
-  var a=[],c;for(c=1;c<=maxCap();c++)a.push('Bậc '+c+' x'+CFG.qty[c]);
+  var a=[],c;for(c=1;c<=maxCap();c++)a.push(chauTen(c)+' x'+CFG.qty[c]);
   return 'Mở ra rồi tự chọn ĐÚNG 1 loại Ngự Thú Châu: '+a.join(', ')+'. Chọn xong rương sẽ mất.';
 }
 var DEF={};
@@ -134,11 +136,11 @@ function render(){
   for(i=0;i<E.slots.length;i++){var b=E.slots[i];c=i+1;
     if(c>maxCap()){b.style.visibility='hidden';b.innerHTML='';continue;}
     it=chauItem(c);b.style.visibility='visible';b.className='hr-sl'+(c===sel?' sel':'');
-    b.innerHTML=icHtml(it)+'<span class="b">Bậc '+c+'</span><span class="q">x'+CFG.qty[c]+'</span>';
+    b.innerHTML=icHtml(it)+'<span class="b">'+esc(bacTen(c))+'</span><span class="q">x'+CFG.qty[c]+'</span>';
     b.setAttribute('aria-label',it.ten);}
   if(!sel){E.vw.className='hr-vw hint';E.vw.innerHTML='Chạm một Ngự Thú Châu để xem,<br>rồi bấm Chọn (chỉ nhận được 1 loại)';return;}
   it=chauItem(sel);E.vw.className='hr-vw';
-  E.vw.innerHTML='<div class="ic">'+icHtml(it)+'</div><div class="tx"><div class="nm">'+esc(it.ten)+'</div><div class="mt">Bậc '+sel+'</div><div class="rt">Nhận: x'+CFG.qty[sel]+'</div><div class="ds">'+esc(it.mo||'')+'</div></div>';
+  E.vw.innerHTML='<div class="ic">'+icHtml(it)+'</div><div class="tx"><div class="nm">'+esc(it.ten)+'</div><div class="mt">'+esc(bacTen(sel))+'</div><div class="rt">Nhận: x'+CFG.qty[sel]+'</div><div class="ds">'+esc(it.mo||'')+'</div></div>';
 }
 function pick(c){if(c>maxCap())return;sel=c;render();}
 function moRuong(){

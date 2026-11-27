@@ -2,7 +2,7 @@
    NPC đầu tiên: z0-boss "Băng Tộc Thiếu Chủ - Tố Nữ Mạc Ly". NPC Boss khác chỉ cần thêm cấu hình `td` trong CFG.npc (87-npc.js), không sửa file này.
    LUỒNG: gặp NPC (87) -> khung chat -> [Khiêu chiến] -> prep(npcId) dựng địch NPC (taoDich) -> vào trận bằng bộ máy cũ (startExplore trong index.html).
    ĐỊCH NPC = địch giả source:'npc' (không phải 'main' / 'demo'), nên các hệ thống cũ tự bỏ qua nó:
-     - KHÔNG BẮT ĐƯỢC: 62-bat-thu.js chỉ cho bắt source==='demo' (canCatch) => nút Bắt không hiện.
+     - KHÔNG BẮT ĐƯỢC: 62-bat-thu.js chỉ hỏi Bắt/Giết với source==='demo' (catchable) => thắng là giết luôn.
      - Không tính Danh Vọng (80-danh-vong.js chỉ nhận source 'demo'), không rơi đồ kiểu quái vùng (TTGLT.roiDo chỉ nhận 'main'), không rơi item kiểu thú hoang (TTGTH.roiDo chỉ nhận 'demo'): phần thưởng NPC do thang() bên dưới trao riêng.
    HÌNH: ảnh NPC (game-moi/npc/<id>.webp) thay cho thú trong giao diện chiến đấu (veDich, index.html gọi trong pet()). Hệ: td.he (Băng); độ hiếm: td.hiem (Truyền Thuyết); không hiện Rank, không hiện Vn.
    CHỈ SỐ: lấy chỉ số gốc của loài td.chiSoTu (boss thú hoang cùng vùng) ở cấp td.lv (cố định 25), rồi nhân Máu / Tấn công / Giáp với CFG.boss.heSoManh (87-npc.js). Kỹ năng: td.kyNang (sách kỹ năng boss, vd Băng Sơn Áp Đỉnh) + nội tại sách + buff boss vùng, đúng như boss thú hoang.
@@ -59,7 +59,7 @@ function thang(e,mm){
   var th=tdCua(n).thuong||{},z=n.vung|0;
   if(th.chau&&root.TTGBALO&&root.TTGBONG){   /* Ngự Thú Châu (không bao giờ bậc 6) */
     var cap=clamp(Math.floor(th.chau.cap||1),1,BONG_MAX_CHO_PHEP),sl=Math.max(1,Math.floor(th.chau.n||1)),id=TTGBONG.idBong(cap);
-    TTGBALO.add(id,sl);out.push('Ngự Thú Châu bậc '+cap+' x'+sl);}
+    TTGBALO.add(id,sl);var itC=TTGBALO.CAT&&TTGBALO.CAT[id];out.push(((itC&&itC.ten)||('Ngự Thú Châu bậc '+cap))+' x'+sl);}
   if(th.trangBi&&root.TTGLT&&TTGLT.taoMon){   /* 1 trang bị phẩm ngẫu nhiên của vùng */
     var r=TTGLT.taoMon(z);
     if(r&&r.item)out.push(r.item.ten||('Trang bị phẩm '+TTGLT.QN[r.q]));   /* tên món đã có sẵn phẩm, vd "[Linh] Vòng Tuyết Nguyên" */

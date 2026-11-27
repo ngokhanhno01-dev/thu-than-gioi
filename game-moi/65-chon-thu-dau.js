@@ -120,7 +120,7 @@ function baoQua(n){
  if(!(n>0)||!window.TTGTBAO||!TTGTBAO.info)return;
  var it=(window.TTGBALO&&TTGBALO.CAT&&window.TTGBONG&&TTGBONG.idBong)?TTGBALO.CAT[TTGBONG.idBong(1)]:null,
   ten=(it&&it.ten)||'Ngự Thú Châu',ic=it?(it.img?'<img src="'+it.img+'" alt="">':(it.ic||'?')):'?';
- TTGTBAO.info({icon:ic,tc:'y',modal:true,title:TXT_QUA_TIEU_DE,sub:'Nhận được <b>'+ten+' x'+n+'</b> (bậc 1)',text:TXT_QUA_MO_TA},[{t:'Đã hiểu'}]);}
+ TTGTBAO.info({icon:ic,tc:'y',modal:true,title:TXT_QUA_TIEU_DE,sub:'Nhận được <b>'+ten+' x'+n+'</b> ('+((it&&it.bac)||'bậc 1')+')',text:TXT_QUA_MO_TA},[{t:'Đã hiểu'}]);}
 /* XÁC NHẬN: bắt đầu tài khoản mới (xóa trắng). Rank tung bằng TTGCS.tungBac() = cùng bảng tỉ lệ với lúc bắt thú (62-bat-thu.js, tungBacChau). Chưa nạp TTGCS thì rơi về 'E'. */
 function confirm(){if(locked)return;
  if(sel<0){say('Hãy chọn một thú trước!',true);setTimeout(function(){if(sel<0&&!locked)say(HINT);},1400);return;}
@@ -133,7 +133,7 @@ function confirm(){if(locked)return;
   try{uid=TTGTHU.khoiTao({id:s.id,ten:s.ten,bac:bac,tien:1,lv:1,chiso:{},kn:[null,null,null,null,null,null]});}catch(e){}}
  r.uid=uid;
  var nChau=tangChau();
- say('Đã chọn '+s.ten+' · Rank '+bac+(nChau?' · +'+nChau+' Ngự Thú Châu bậc 1':'')+'!');
+ say('Đã chọn '+s.ten+' · Rank '+bac+(nChau?' · +'+nChau+' '+((window.TTGBALO&&TTGBALO.CAT[TTGBONG.idBong(1)]||{}).ten||'Ngự Thú Châu')+' (Hoàng Giai)':'')+'!');
  try{window.dispatchEvent(new CustomEvent('ttg-starter',{detail:r}));}catch(e){}
  setTimeout(function(){close(true);setTimeout(function(){baoQua(nChau);},520);},700);}   /* đợi màn chọn mờ hẳn (~500ms) rồi mới hiện bảng quà */
 function close(){if(!root)return;root.className=root.className.replace(' on','').replace(' ready','')+' off';
