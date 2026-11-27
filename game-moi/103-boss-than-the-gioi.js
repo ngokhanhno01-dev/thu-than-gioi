@@ -30,7 +30,7 @@
     hapHoiDonThuong: 0.003,           /* máu <= 10%: mỗi đòn thường của người chơi gây 0,3% máu tối đa (cố định, không theo Công/Giáp/chí mạng) */
     hapHoiKyNang: 0.01,               /* máu <= 10%: mỗi kỹ năng gây 1% máu tối đa (cố định) */
     tocDau: 50,                       /* tốc độ boss lúc vào trận (đòn thường cách nhau ~1,6 giây) */
-    tocMoiDot: 50,                    /* mỗi lần boss ra đòn: +50 tốc độ, tối đa bằng tốc độ thật. Reset mỗi trận */
+    tocMoiDot: 10,                    /* mỗi lần boss ra đòn: +10 tốc độ, tối đa bằng tốc độ thật. Reset mỗi trận */
     khoaGiay: 60,                     /* người thua bị khóa 60 giây */
     tranQuaHanGiay: 600,              /* người đang đánh không báo kết quả sau 10 phút: nhả boss */
     dsVung: null,                     /* null = lấy THU_MOI.zones (các vùng đang có). Hoặc mảng z, vd [0,1,2] */
