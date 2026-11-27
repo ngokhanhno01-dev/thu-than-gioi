@@ -17,8 +17,9 @@
    API: TTGTH.roiDo(enemy,mm) | .manhKhiTha(thu) (cộng Mảnh khi thả thú) | .tenManh(idThu) | .moTa(list) | .yeuCau(thu) | .tienHoa(uid) | .cap(n) (test: +item cho thú đang ra trận) | .id(z,loai) | .idManh(idThu) | .CFG */
 (function(root){
 'use strict';
-var D='game-moi/icon-th/',NZ=9,KIND=['loi','chau','an'];
+var D='game-moi/icon-th/',NZ=9,ZT=17,ZLIST=[0,1,2,3,4,5,6,7,8,17],KIND=['loi','chau','an'];/* ZT = vùng Thần (Không Gian, z17): item Lõi Tinh Hà / Châu Hư Thiên / Thần Ấn Đế Giang, dùng cho thú Thần (Đế Giang). Số vùng thường 0..8 giữ nguyên */
 var ZONE=['Tuyết Nguyên','Sương Cốc','Vân Đảo','Phong Nguyên','Lôi Vực','Nguyệt Cung','Thủy Nguyệt Cảnh','Xích Hỏa Địa','Thanh Lâm'];
+ZONE[ZT]='Không Gian';
 var TEN=[
  ['Lõi Hàn Sương','Châu Tuyết Phách','Thần Ấn Băng Sơn'],
  ['Lõi Vụ Linh','Châu Mộc Sương','Thần Ấn Vụ Thú'],
@@ -29,10 +30,11 @@ var TEN=[
  ['Lõi Triều Nguyệt','Châu Lam Ba','Thần Ấn Thủy Nguyệt'],
  ['Lõi Xích Diễm','Châu Liệt Diễm','Thần Ấn Viêm Vương'],
  ['Lõi Thanh Diệp','Châu Cổ Thụ','Thần Ấn Lâm Chủ']];
+TEN[ZT]=['Lõi Tinh Hà','Châu Hư Thiên','Thần Ấn Đế Giang'];
 var CFG={
  nutTest:true,   /* nút test "Lấy đồ TH" (hàng dưới, cạnh Lấy sách). Đặt false khi đã có nguồn rơi ổn định */
  /* vùng ĐÃ khai item Mảnh theo loài (ảnh thiếu thì dùng ảnh dự phòng; chạy tools/tao-manh-ghep.py --vung <z> rồi upload để có ảnh thật). 6-8 = vùng 3 thú khởi đầu (Lưu Diêu, Viêm Sư, Lâm Trư) */
- vungManh:[0,1,2,3,4,5,6,7,8],
+ vungManh:[0,1,2,3,4,5,6,7,8,17],
  /* công thức: khóa = bậc đích (tien mới). Mỗi phần tử = [loại item, số lượng], theo thứ tự ô vòng: trái, phải, dưới.
     'manh' = Mảnh CỦA CHÍNH LOÀI thú đang tiến hóa (th-m-<id thú>); loi/chau/an = item của vùng gốc */
  cong:{2:[['manh',6],['loi',2],['chau',1]],3:[['loi',5],['chau',3],['an',1]]},
@@ -58,9 +60,9 @@ function dsThu(z){
  return [];}
 function reg(){
  if(!root.TTGBALO||!TTGBALO.reg)return;var o={},z,i,k;
- for(z=0;z<NZ;z++)for(i=0;i<3;i++){k=KIND[i];
+ ZLIST.forEach(function(z){for(i=0;i<3;i++){k=KIND[i];
   o[id(z,k)]={loai:'th',ten:TEN[z][i],img:D+id(z,k)+'.png',
-   mo:MO[k]+' của vùng '+ZONE[z]+'. Dùng tiến hóa thú gốc vùng này'+(k==='an'?' (V2 → V3). Chỉ rơi từ boss thú hoang.':'. Rơi từ thú hoang vùng này.')};}
+   mo:MO[k]+' của vùng '+ZONE[z]+'. Dùng tiến hóa thú gốc vùng này'+(k==='an'?' (V2 → V3). Chỉ rơi từ boss thú hoang.':'. Rơi từ thú hoang vùng này.')};}});
  /* Mảnh theo từng loài (chỉ vùng đã khai) */
  CFG.vungManh.forEach(function(zv){dsThu(zv).forEach(function(s){
   o[idManh(s.id)]={loai:'th',ten:'Mảnh '+s.ten,img:D+idManh(s.id)+'.png',
@@ -99,7 +101,7 @@ if(typeof document!=='undefined'&&!root.__ttgThPh){root.__ttgThPh=1;
   var u=phImg(im.getAttribute('src'));if(!u)return;im.setAttribute('data-ph','1');im.src=u;},true);}   /* sự kiện error không nổi bọt nên bắt ở pha capture */
 
 /* ===================== LUẬT ===================== */
-function zoneOf(t){var L=root.TTGCS&&TTGCS.loai?TTGCS.loai(t.id):null,z=L&&L.goc!=null?L.goc:0;return (z>=0&&z<NZ)?z:0;}
+function zoneOf(t){var L=root.TTGCS&&TTGCS.loai?TTGCS.loai(t.id):null,z=L&&L.goc!=null?L.goc:0;return ((z>=0&&z<NZ)||z===ZT)?z:0;}
 /* yêu cầu tiến hóa của 1 thú: {max:true} nếu đã Bậc 3, ngược lại {tien,next,z,items:[{id,ten,n,have}],ok} */
 function yeuCau(t){
  if(!t)return null;var tien=Math.min(3,Math.max(1,(t.tien|0)||1));
@@ -136,7 +138,7 @@ function tienHoa(uid){
 /* enemy: địch vừa thua ({source,boss,vung}); mm: may mắn của người chơi. Chỉ thú hoang (source 'demo'). Trả [{id,q}] đã cộng vào Balo. */
 function roiDo(enemy,mm){
  var out=[];if(!enemy||enemy.source!=='demo'||!root.TTGBALO)return out;
- var z=enemy.vung|0;if(z<0||z>=NZ)return out;
+ var z=enemy.vung|0;if(!((z>=0&&z<NZ)||z===ZT))return out;
  var bonus=Math.min(3,1+Math.max(0,+mm||0)/100),q,i;
  /* KHÔNG rơi Mảnh khi giết: Mảnh chỉ có từ việc THẢ thú (manhKhiTha). Ở đây chỉ rơi Lõi/Châu/Thần Ấn của vùng */
  CFG.roi[enemy.boss?'boss':'thuong'].forEach(function(d){
