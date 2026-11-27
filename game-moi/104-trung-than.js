@@ -56,7 +56,7 @@
     var bac = (root.TTGCS && TTGCS.tungBac) ? TTGCS.tungBac() : 'E';
     B.add(id, -1);
     var uid = TTGTHU.add({ id: T.loai, ten: tenLoai(T.loai), bac: bac, tien: 1, lv: 1, chiso: {}, kn: [null, null, null, null, null, null] });
-    if (root.TTGDROP) TTGDROP.show({ tieude: 'Trứng nở!', ten: tenLoai(T.loai), muc: bac, nhan: 'Rank ' + bac, nguon: 'Thú Thần · cấp 1 · tiến hóa 1', icon: (TTGTHU.anh && TTGTHU.anh({ id: T.loai, tien: 1 })) || T.img, fb: '', ms: (bac === 'SR' ? 5200 : 3600) });
+    if (root.TTGDROP) TTGDROP.show({ no: 1, tieude: 'Trứng nở!', ten: tenLoai(T.loai), muc: bac, nhan: 'Rank ' + bac, nguon: 'Thú Thần · cấp 1 · tiến hóa 1', icon: (TTGTHU.anh && TTGTHU.anh({ id: T.loai, tien: 1 })) || T.img, fb: '', ms: (bac === 'SR' ? 5200 : 3600) });
     else toast('Trứng nở! Nhận ' + tenLoai(T.loai) + ' (Rank ' + bac + ')');
     return uid;
   }
