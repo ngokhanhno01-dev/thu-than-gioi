@@ -33,6 +33,8 @@
     key: 'ttg_btg_v1'
   };
   var nowFn = function () { return Date.now(); };
+  var TEST = null, TESTDB = null;   /* CHẾ ĐỘ TEST (nút ẩn, 105): 1 boss giả ở vùng chỉ định, KHÔNG dính lịch thật / lần thật / khóa thật. Chỉ nằm trong bộ nhớ trang */
+  function kk(u) { return (TEST ? 't:' : '') + u; }
   var DB = { lan: {}, khoa: {} };     /* lan[maLan] = {hp, vung, soChay, dangDanh, tDanh, chet}; khoa[uid] = ms hết khóa */
   try { var o = JSON.parse(root.localStorage.getItem(CFG.key) || 'null'); if (o && o.lan && o.khoa) DB = o; } catch (e) {}
   function save() { try { root.localStorage.setItem(CFG.key, JSON.stringify(DB)); } catch (e) {} }
@@ -54,6 +56,7 @@
   /* khung đang chạy tại thời điểm t */
   function lich(t) {
     t = T(t);
+    if (TEST) return { maLan: 'test#' + TEST.n, loai: TEST.loai, batDau: t - 1000, ketThuc: t + 3600000, coMat: true, vungGoc: TEST.vung, ngay: 'test', test: true, tiepTheo: { loai: TEST.loai, batDau: t + 3600000 } };
     var H = 3600000, lech = CFG.lechGio * H, tv = t + lech, kh = CFG.khungGio * H;
     var soKhung = Math.floor(tv / kh), dauKhung = soKhung * kh - lech;      /* số khung tính từ epoch (giờ VN) */
     var n = CFG.thuTu.length, loai = CFG.thuTu[((soKhung % n) + n) % n];
@@ -66,6 +69,7 @@
              tiepTheo: { loai: loaiSau, batDau: sauKhung + CFG.batDauPhut * 60000 } };
   }
   function lanCua(L) {
+    if (L.test) { if (!TESTDB || TESTDB.ma !== L.maLan) TESTDB = { ma: L.maLan, s: { hp: 1, vung: L.vungGoc, soChay: 0, dangDanh: null, tDanh: 0, chet: false } }; return TESTDB.s; }
     var s = DB.lan[L.maLan];
     if (!s) {
       s = DB.lan[L.maLan] = { hp: 1, vung: L.vungGoc, soChay: 0, dangDanh: null, tDanh: 0, chet: false };
@@ -78,8 +82,8 @@
     if (s.dangDanh && t - s.tDanh > CFG.tranQuaHanGiay * 1000) { s.dangDanh = null; save(); }
   }
   function khoaCon(uid, t) {   /* số giây còn bị khóa (0 = khiêu chiến được) */
-    t = T(t); var u = DB.khoa[uid] || 0;
-    if (u && u <= t) { delete DB.khoa[uid]; save(); return 0; }
+    t = T(t); var key = kk(uid), u = DB.khoa[key] || 0;
+    if (u && u <= t) { delete DB.khoa[key]; save(); return 0; }
     return u ? Math.ceil((u - t) / 1000) : 0;
   }
   function mocKe(hp) {   /* mốc chạy kế tiếp dưới hp; null nếu đã <= khongChayDuoi */
@@ -89,7 +93,7 @@
   }
   function trangThai(t) {
     t = T(t); var L = lich(t);
-    var out = { loai: L.loai, coMat: L.coMat, batDau: L.batDau, ketThuc: L.ketThuc, tiepTheo: L.tiepTheo, maLan: L.maLan, vung: null, hp: 1, dangDanh: null, chet: false };
+    var out = { test: !!L.test, loai: L.loai, coMat: L.coMat, batDau: L.batDau, ketThuc: L.ketThuc, tiepTheo: L.tiepTheo, maLan: L.maLan, vung: null, hp: 1, dangDanh: null, chet: false };
     if (!L.coMat) return out;
     var s = lanCua(L); nhaQuaHan(s, t);
     out.vung = s.vung; out.hp = s.hp; out.dangDanh = s.dangDanh; out.chet = s.chet; out.soChay = s.soChay;
@@ -117,7 +121,7 @@
   }
   function cuaToi(uid, t) {
     var L = lich(t); if (!L.coMat) return null;
-    var s = DB.lan[L.maLan]; return s && s.dangDanh === uid ? s : null;
+    var s = L.test ? (TESTDB && TESTDB.s) : DB.lan[L.maLan]; return s && s.dangDanh === uid ? s : null;
   }
   function chay(uid, hp, t) {   /* trận đánh tới mốc chạy: boss sang vùng khác, giữ máu */
     t = T(t); var s = cuaToi(uid, t); if (!s) return loi('Không phải trận của bạn');
@@ -136,11 +140,14 @@
     t = T(t); var s = cuaToi(uid, t); if (!s) return loi('Không phải trận của bạn');
     kq = kq || {};
     if (kq.kq === 'thang') { s.hp = 0; s.chet = true; }
-    else { if (kq.hp != null) s.hp = Math.max(0.0001, Math.min(1, +kq.hp)); DB.khoa[uid] = t + CFG.khoaGiay * 1000; }
+    else { if (kq.hp != null) s.hp = Math.max(0.0001, Math.min(1, +kq.hp)); DB.khoa[kk(uid)] = t + CFG.khoaGiay * 1000; }
     s.dangDanh = null; save();
     return { ok: true, chet: s.chet, hp: s.hp, khoa: s.chet ? 0 : CFG.khoaGiay };
   }
   root.TTGBTG = { CFG: CFG, lich: lich, trangThai: trangThai, vaoDanh: vaoDanh, chay: chay, ketThuc: ketThuc, khoaCon: khoaCon, mocKe: mocKe, uid: uid, huy: huy,
+    datTest: function (loai, z) { TEST = { loai: loai, vung: z, n: Date.now() }; TESTDB = null; return trangThai(); },
+    tatTest: function () { TEST = null; TESTDB = null; },
+    dangTest: function () { return !!TEST; },
     datDongHo: function (fn) { nowFn = typeof fn === 'function' ? fn : function () { return Date.now(); }; },
     xoa: function () { DB = { lan: {}, khoa: {} }; save(); } };
 })(typeof window !== 'undefined' ? window : globalThis);

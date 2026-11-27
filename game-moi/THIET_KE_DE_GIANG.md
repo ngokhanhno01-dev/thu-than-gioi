@@ -40,8 +40,14 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 ## Nối vào map và trận (bước 5, 27/11/2026)
 - 1 vs 1: chỉ 1 người đánh boss Thần một lúc (bỏ ý "tối đa 5 người"). Người khác thấy boss ẨN + icon 2 kiếm chéo + chữ "Đang giao chiến".
 - Map (`89`): boss đứng ở 1 ô đi được trong khu cao nhất của vùng mà `103` chọn (cố định theo lần xuất hiện + số lần chạy). Chạm -> `TTGBTG.vaoDanh` (82) -> trận. Bị khóa: boss mờ + đếm ngược, không chạm được.
-- Trận (`61` opts.than): cấp 270, V3, bậc C CỐ ĐỊNH (không tung Rank vì máu là trạng thái toàn cục), ẩn Rank, nền theo `nen` của thú Thần. Máu bắt đầu = máu toàn cục.
+- Trận (`61` opts.than): cấp 270, V3, Rank TUNG mỗi trận như thú hoang (máu toàn cục là TỈ LỆ nên Rank không ảnh hưởng), nền theo `nen` của thú Thần. Máu bắt đầu = máu toàn cục.
 - Bỏ chạy: máu tụt tới mốc 10% kế tiếp (90/80/70...) và còn > 10% -> boss chạy sang vùng khác, giữ MÁU THỰC còn lại (không hồi), người đánh không nhận thưởng, không bị khóa. Máu <= 10% đánh đến cùng.
 - Thua / hòa / bấm Chạy: boss hiện lại cùng vùng với máu còn lại, người đánh bị khóa 60 giây. Thắng: boss chết tới hết khung, thưởng như boss thú hoang + rơi trứng (`104`, 0,5%).
 - Không bắt bằng châu (`62` catchable/rateOf chặn `e.than`).
 - Chưa làm: hết thời gian trận; tài khoản thật/server (uid tạm lưu `ttg_btg_uid`); người đang đánh tắt trang thì sau 10 phút (`tranQuaHanGiay`) mới nhả boss.
+
+### Cập nhật theo người dùng (27/11/2026)
+- Thua / hòa / Chạy: KHÔNG trừ Tinh Thạch, chỉ khóa 60 giây. Giết lần đầu vẫn +1 Danh Vọng (cả 3 boss).
+- Boss chạy giữ máu thực còn lại (bản đồ và thông báo đều hiện %).
+- `105-bao-boss-than.js`: dòng chữ chạy ngang trên cùng khi boss xuất hiện (kèm vùng) / bỏ chạy (kèm vùng + % máu) / bị hạ.
+- Nút test ẩn (chạm "Danh Vọng"): Test Đế Giang / Chúc Long / Vô Cực (đặt ở VÙNG ĐANG CHỌN) + Tắt test. Test không đụng lịch, lần, khóa thật (`TTGBTG.datTest/tatTest`).

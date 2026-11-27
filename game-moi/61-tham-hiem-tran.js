@@ -6,11 +6,12 @@ function weighted(items,weights,rng){var total=0,i,w;for(i=0;i<items.length;i++)
 function createEncounter(player,rng,opts){
   rng=typeof rng==='function'?rng:Math.random;opts=opts||{};
   if(!player||!root.TTGCS||!root.TTGBONG||!root.THU_MOI||!root.TTG_QUAI_MAIN)return null;
-  if(opts.than!=null){   /* BOSS THẦN THẾ GIỚI (103): không thuộc vùng đang chơi; cấp 270, V3, bậc C CỐ ĐỊNH (máu là trạng thái toàn cục nên không tung Rank), ẩn Rank, nền theo thú Thần */
+  if(opts.than!=null){   /* BOSS THẦN THẾ GIỚI (103): không thuộc vùng đang chơi; cấp 270, V3, Rank TUNG mỗi trận (E..SR như thú hoang; máu toàn cục là TỈ LỆ nên Rank không ảnh hưởng), nền theo thú Thần */
     var tn=root.THU_MOI.than,tq=tn&&tn.thu.filter(function(x){return x.id===String(opts.than);})[0];
     if(!tq)return null;
-    return {id:tq.id,ten:tq.ten,source:'demo',boss:true,than:true,lv:270,tien:3,variant:'V3',bac:'C',hienBac:false,vung:tn.z,zoneSlug:tq.nen||tn.slug,rarity:'truyenthuyet',
-      stats:root.TTGCS.tinh({id:tq.id,lv:270,tien:3,bac:'C',boss:true,vung:tn.z}),record:tq};}
+    var tbac=typeof root.TTGCS.tungBac==='function'?root.TTGCS.tungBac(rng):(root.TTGCS.CFG.bacQuai||'C');
+    return {id:tq.id,ten:tq.ten,source:'demo',boss:true,than:true,lv:270,tien:3,variant:'V3',bac:tbac,hienBac:true,vung:tn.z,zoneSlug:tq.nen||tn.slug,rarity:'truyenthuyet',
+      stats:root.TTGCS.tinh({id:tq.id,lv:270,tien:3,bac:tbac,boss:true,vung:tn.z}),record:tq};}
   var cfg=root.TTGBONG.CFG.tx||{},species=root.TTGCS.loai(player.id),z=species&&species.vung!=null?species.vung:0;
   if(root.TTGDV&&root.TTGDV.vung)z=root.TTGDV.vung();
   var demoZone=null,i;for(i=0;i<root.THU_MOI.zones.length;i++)if(root.THU_MOI.zones[i].z===z){demoZone=root.THU_MOI.zones[i];break;}
