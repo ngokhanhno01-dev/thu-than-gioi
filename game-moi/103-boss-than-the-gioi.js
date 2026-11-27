@@ -1,5 +1,6 @@
 /* ===== 103-boss-than-the-gioi.js (TTGBTG): TRẠNG THÁI THẾ GIỚI + LỊCH 3 BOSS THẦN (27/11/2026) =====
-   CHƯA nối vào map / trận (bước 5). File này thuần logic, không DOM; mọi số ở CFG.
+   ĐÃ NỐI (27/11/2026, bước 5): map 89 (vẽ boss, ẩn + icon 2 kiếm khi có người đánh, đếm khóa), cầu nối 82 (vaoDanh/huy), trận index.html (bỏ chạy ở mốc, thua khóa, thắng rớt trứng). File này thuần logic, không DOM; mọi số ở CFG.
+   1 vs 1 (người dùng chốt 27/11/2026): chỉ 1 người đánh 1 lúc, bỏ hẳn ý 'tối đa 5 người đánh chung'.
 
    LỊCH (phương án A, người dùng chốt 27/11/2026): giờ Việt Nam (UTC+7). Chu kỳ 12 tiếng chia 3 khung 4 tiếng:
      0-4h & 12-16h: Đế Giang (th1) · 4-8h & 16-20h: Chúc Long (th2) · 8-12h & 20-24h: Vô Cực (th3).
@@ -96,6 +97,14 @@
     return out;
   }
   function loi(m) { return { ok: false, loi: m }; }
+  var uidMem = null;
+  function uid() {   /* id người chơi tạm (chưa có tài khoản/server): tạo 1 lần, lưu localStorage 'ttg_btg_uid' (khác tiền tố ttg_moi_ nên không bị xóa) */
+    if (uidMem) return uidMem;
+    var k = 'ttg_btg_uid', v = null;
+    try { v = root.localStorage.getItem(k); } catch (e) {}
+    if (!v) { v = 'u' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); try { root.localStorage.setItem(k, v); } catch (e) {} }
+    return (uidMem = v);
+  }
   function vaoDanh(uid, t) {
     t = T(t); var L = lich(t);
     if (!L.coMat) return loi('Boss Thần chưa xuất hiện');
@@ -119,6 +128,10 @@
     s.dangDanh = null; save();
     return { ok: true, vung: s.vung, hp: s.hp };
   }
+  function huy(u, t) {   /* nhả boss KHÔNG phạt (lỗi dựng trận, không vào được trận): không khóa, giữ nguyên máu */
+    t = T(t); var s = cuaToi(u, t); if (!s) return loi('Không phải trận của bạn');
+    s.dangDanh = null; save(); return { ok: true };
+  }
   function ketThuc(uid, kq, t) {   /* kq = {kq:'thang'|'thua', hp} */
     t = T(t); var s = cuaToi(uid, t); if (!s) return loi('Không phải trận của bạn');
     kq = kq || {};
@@ -127,7 +140,7 @@
     s.dangDanh = null; save();
     return { ok: true, chet: s.chet, hp: s.hp, khoa: s.chet ? 0 : CFG.khoaGiay };
   }
-  root.TTGBTG = { CFG: CFG, lich: lich, trangThai: trangThai, vaoDanh: vaoDanh, chay: chay, ketThuc: ketThuc, khoaCon: khoaCon, mocKe: mocKe,
+  root.TTGBTG = { CFG: CFG, lich: lich, trangThai: trangThai, vaoDanh: vaoDanh, chay: chay, ketThuc: ketThuc, khoaCon: khoaCon, mocKe: mocKe, uid: uid, huy: huy,
     datDongHo: function (fn) { nowFn = typeof fn === 'function' ? fn : function () { return Date.now(); }; },
     xoa: function () { DB = { lan: {}, khoa: {} }; save(); } };
 })(typeof window !== 'undefined' ? window : globalThis);

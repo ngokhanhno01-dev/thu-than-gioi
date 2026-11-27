@@ -126,9 +126,15 @@ function build(zi){
       S.ev=ev;
       if(!root.TTGMAP||!root.TTGMAP.pause)return;
       root.TTGMAP.pause();
-      var pre=null;
+      var pre=null,btg=null,B=root.TTGBTG;
+      if(ev.loai==='than'){   /* boss Thần: xin vào đánh (1 vs 1, bị khóa / có người đang đánh thì không vào được) */
+        btg=B&&B.vaoDanh?B.vaoDanh(B.uid()):null;
+        if(!btg||!btg.ok){
+          try{if(root.TTGTBAO&&root.TTGTBAO.toast)root.TTGTBAO.toast((btg&&btg.loi)||'Chưa khiêu chiến được boss Thần',2600);}catch(e){}
+          try{root.TTGMAP.resume({});}catch(e){}S.ev=null;return;}}
       try{pre=root.TTGMAP.tungDich(ev);}catch(e){pre=null;}
-      if(!pre){try{root.TTGMAP.resume({});}catch(e){}S.ev=null;return;}
+      if(!pre){if(btg){try{B.huy(B.uid());}catch(e){}}try{root.TTGMAP.resume({});}catch(e){}S.ev=null;return;}
+      if(btg&&pre.enemy)pre.enemy.btg={moc:btg.mocChay,hp:btg.hp,uid:B.uid(),maLan:btg.maLan};   /* index.html đọc: máu bắt đầu = hp toàn cục, mốc bỏ chạy */
       S.pre=pre;
       root.TTGTX.vaoTran(pre);
     },
@@ -147,6 +153,7 @@ function vaoTran(pre){
   var ok=false;
   try{ok=!!(H().battle&&H().battle(pre));}catch(e){ok=false;}
   if(!ok){
+    if(pre.enemy&&pre.enemy.btg){try{root.TTGBTG.huy(pre.enemy.btg.uid);}catch(e){}}   /* không vào được trận: nhả boss Thần, không phạt */
     S.pre=null;S.ev=null;
     try{if(root.TTGMAP)root.TTGMAP.resume({});}catch(e){}
   }

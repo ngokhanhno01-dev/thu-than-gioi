@@ -68,7 +68,8 @@ var CFG={
   nhanVat:{toc:190,kich:64,anh:null,nhun:3},   /* toc = đơn vị map/giây; anh = đường dẫn ảnh 512x512 quay PHẢI (null = vẽ tạm bằng THU_MOI.draw/chibi); nhun = biên độ nhún khi đi (px) */
   camera:{zoom:1},
   joystick:{kinh:152,kinhNho:136,hanhTrinh:0.58},
-  boss:{hoiMs:15*60*1000,luuKhoa:'ttg_map_boss_'}   /* hồi theo GIỜ THỰC (Date.now), lưu localStorage theo từng vùng */
+  boss:{hoiMs:15*60*1000,luuKhoa:'ttg_map_boss_'},   /* hồi theo GIỜ THỰC (Date.now), lưu localStorage theo từng vùng */
+  than:{banKinhCham:42}   /* boss Thần thế giới (103): vòng chạm */
 };
 var BRUSH=[1,2,4,7];          /* bán kính cọ Debug Mask, tính theo ô lưới */
 var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
@@ -530,6 +531,40 @@ function soDiemCan(rng){var a=CFG.soDiemHien;return Math.floor(rnd(a[0],a[1]+1,r
 function bossKey(slug){return CFG.boss.luuKhoa+(slug||'tuyet-nguyen');}
 function bossReadyAt(slug){var v=0;try{v=+localStorage.getItem(bossKey(slug))||0;}catch(e){}return v;}
 function bossConLai(slug,now){return Math.max(0,bossReadyAt(slug)-(now==null?Date.now():now));}   /* ms còn lại; 0 = boss đang đứng đó */
+/* ---------- BOSS THẦN THẾ GIỚI (27/11/2026) ----------
+   Trạng thái + lịch ở 103-boss-than-the-gioi.js (TTGBTG). Map chỉ ĐỌC trạng thái ~250ms/lần và vẽ:
+   - đúng vùng + đang trong khung có mặt + chưa chết: đứng ở 1 ô đi được trong khu cao nhất (vị trí cố định theo lần xuất hiện + số lần chạy, không phụ thuộc người chơi)
+   - có người khác đang đánh (1 vs 1): boss ẨN, hiện icon 2 kiếm chéo + chữ "Đang giao chiến"
+   - người chơi này vừa thua: boss mờ + đếm ngược khóa (khoaCon), chạm không vào được tới khi hết khóa */
+function thanSlug(z){var Z=root.THU_MOI&&root.THU_MOI.zones,i;if(Z)for(i=0;i<Z.length;i++)if(Z[i].z===z)return Z[i].slug;return null;}
+function thanUid(){return root.TTGBTG&&root.TTGBTG.uid?root.TTGBTG.uid():'local';}
+function thanRng(str){var h=2166136261,i;for(i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return function(){h^=h<<13;h>>>=0;h^=h>>>17;h^=h<<5;h>>>=0;return h/4294967296;};}
+/* ô đi được (chừa 1 ô quanh) giống choNhay, không cần group */
+function thanDiDuoc(s,x,y){
+  var m=s.mask,v=s.v,cw,ch,i,o=[[0,0],[1,0],[-1,0],[0,1],[0,-1]],gx,gy;
+  if(m&&m.n>0){cw=v.rong/m.w;ch=v.cao/m.h;
+    for(i=0;i<o.length;i++){gx=Math.floor(x/cw)+o[i][0];gy=Math.floor(y/ch)+o[i][1];
+      if(gx<0||gy<0||gx>=m.w||gy>=m.h||m.g[gy*m.w+gx]!==1)return false;}}
+  return !(v.camNhay||[]).some(function(r){return x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3];});}
+function thanViTri(s,key){
+  var v=s.v,k=v.khu&&v.khu[v.khu.length-1],b=v.boss,rnd=thanRng(key),i,x,y,y0,y1;
+  y0=k?k.y0:0;y1=k?k.y1:v.cao;
+  for(i=0;i<80;i++){
+    x=80+rnd()*(v.rong-160);y=y0+(y1-y0)*(0.15+rnd()*0.7);
+    if(b&&Math.pow(x-b.x,2)+Math.pow(y-b.y,2)<130*130)continue;
+    if(thanDiDuoc(s,x,y))return {key:key,x:x,y:y};}
+  return {key:key,x:b?b.x-130:v.rong/2,y:b?b.y+30:v.cao/2};}
+function thanLamMoi(s){
+  var B=root.TTGBTG,st,key,o;
+  s.than=null;
+  if(!B)return;
+  try{st=B.trangThai();}catch(e){return;}
+  if(!st||!st.coMat||st.chet||thanSlug(st.vung)!==s.slug)return;
+  key=st.maLan+'|'+st.vung+'|'+(st.soChay||0);
+  if(!s.thanPos||s.thanPos.key!==key)s.thanPos=thanViTri(s,key);
+  o=root.THU_MOI&&root.THU_MOI.byId&&root.THU_MOI.byId[st.loai];
+  s.than={loai:st.loai,ten:(o&&o.ten)||st.loai,hp:st.hp,dangDanh:st.dangDanh,hien:!!st.hien,khoa:B.khoaCon(thanUid()),x:s.thanPos.x,y:s.thanPos.y,r:CFG.than.banKinhCham};}
 function bossDanhXong(slug,now){var t=(now==null?Date.now():now)+CFG.boss.hoiMs;try{localStorage.setItem(bossKey(slug),String(t));}catch(e){}return t;}
 function dinhDangDem(ms){var s=Math.ceil(ms/1000),m=Math.floor(s/60);s%=60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
 
@@ -587,7 +622,8 @@ function checkCfg(){
 function tungDich(ev){
   var h=root.TTGTHAMHIEM,opts,orig,pre=null;
   if(!h||!h.prep)return null;
-  if(ev&&ev.loai==='boss'){opts={boss:true};var bi=ev.bossId||(S&&S.boss&&S.boss.id);if(bi!=null)opts.bossId=bi;}
+  if(ev&&ev.loai==='than'){opts={than:ev.bossId};}   /* boss Thần: 61 dựng riêng (cấp 270, V3, bậc C) */
+  else if(ev&&ev.loai==='boss'){opts={boss:true};var bi=ev.bossId||(S&&S.boss&&S.boss.id);if(bi!=null)opts.bossId=bi;}
   else opts={encounter:'auto',khu:ev&&ev.khu,hiem:ev&&ev.hiem,chon:ev&&ev.chon};
   if(h.prep.length>=2)return h.prep(null,opts);
   orig=h.createEncounter;
@@ -965,6 +1001,7 @@ function update(s,dt){
   try{nhaySpots(s,dt);}catch(eN){}
   /* đồng hồ boss (đọc localStorage mỗi ~250ms) */
   if(s.bossT<0||s.clock-s.bossT>=250){s.bossT=s.clock;s.bossMs=bossConLai(s.slug);}
+  if(s.thanT<0||s.clock-s.thanT>=250){s.thanT=s.clock;thanLamMoi(s);}   /* boss Thần: đọc trạng thái thế giới */
   /* chạm (không trong cooldown; không chạm khi đang tô mask) */
   if(s.clock<s.coolUntil||s.dbg)return;
   r=CFG.banKinhCham;
@@ -974,6 +1011,9 @@ function update(s,dt){
       sp=g.pts[j];if(!sp.on)continue;
       dx=p.x-sp.x;dy=p.y-sp.y;
       if(dx*dx+dy*dy<=r*r){fireTouch(s,{loai:'diem',chon:sp.chon||null,hiem:sp.hiem,khu:sp.khu,diemId:sp.id});return;}}}
+  if(s.than&&s.than.hien&&s.than.khoa===0){   /* chạm boss Thần (ẩn khi có người đánh, không chạm khi đang bị khóa) */
+    dx=p.x-s.than.x;dy=p.y-s.than.y;
+    if(dx*dx+dy*dy<=s.than.r*s.than.r){fireTouch(s,{loai:'than',khu:4,bossId:s.than.loai});return;}}
   b=v.boss;
   if(b&&s.bossMs===0){
     dx=p.x-b.x;dy=p.y-b.y;
@@ -1182,6 +1222,43 @@ function drawBoss(s){
   else txt(c,nm,b.x,b.y-lab,15,'#ffd45c');
   c.restore();}
 
+/* icon 2 kiếm chéo (gốc toạ độ = chân boss) */
+function drawKiem(c,r,t){
+  var k=r*1.15,sg,pul=0.5+0.5*Math.sin(t*5);
+  c.save();c.translate(0,-r*0.95);
+  c.fillStyle='rgba(255,70,70,'+(0.18+0.12*pul)+')';c.beginPath();c.arc(0,0,k*(1.0+0.08*pul),0,6.2832);c.fill();
+  c.lineJoin='round';c.strokeStyle='#1a2438';c.lineWidth=3;
+  for(sg=-1;sg<=1;sg+=2){
+    c.save();c.rotate(sg*0.78+Math.sin(t*9)*0.03*sg);
+    c.fillStyle='#e8f3ff';c.beginPath();c.rect(-k*0.07,-k*0.95,k*0.14,k*1.3);c.fill();c.stroke();
+    c.fillStyle='#ffd45c';c.beginPath();c.rect(-k*0.3,k*0.35,k*0.6,k*0.12);c.fill();c.stroke();
+    c.fillStyle='#8a5a2b';c.beginPath();c.rect(-k*0.06,k*0.47,k*0.12,k*0.3);c.fill();c.stroke();
+    c.restore();}
+  c.restore();}
+function drawThan(s){
+  var t=s.than,c=s.ctx,T=s.clock/1000,r,bob,size,y0,g,ok=false,khoa,o,lab;
+  if(!t)return;
+  r=t.r;
+  if(t.dangDanh){
+    c.save();c.translate(t.x,t.y);ellipse(c,0,0,r*0.9,r*0.28,'rgba(0,0,0,.3)');drawKiem(c,r,T);c.restore();
+    c.save();c.globalAlpha=1;txt(c,'Đang giao chiến',t.x,t.y-r*2.5,14,'#ffb0b0');c.restore();return;}
+  khoa=t.khoa>0;bob=Math.sin(T*2)*3;size=r*3.6;y0=-r*0.9+bob;
+  c.save();c.translate(t.x,t.y);
+  c.globalAlpha=khoa?0.4:1;
+  ellipse(c,0,0,r*0.9,r*0.28,'rgba(0,0,0,.35)');
+  if(!khoa){
+    g=c.createRadialGradient(0,y0,r*0.3,0,y0,r*1.7+Math.sin(T*3)*6);
+    g.addColorStop(0,'rgba(255,215,106,.55)');g.addColorStop(1,'rgba(180,90,255,0)');
+    c.fillStyle=g;c.beginPath();c.arc(0,y0,r*1.8,0,6.2832);c.fill();}
+  try{o=root.THU_MOI;if(o&&o.draw){if(!s.frame192&&o.setFrame){o.setFrame(192);s.frame192=true;}ok=!!o.draw(c,t.loai,3,0,bob,size,true);}}catch(e){ok=false;}
+  if(!ok){c.fillStyle='#6f55d6';c.beginPath();c.arc(0,y0,r*0.9,0,6.2832);c.fill();c.lineWidth=3;c.strokeStyle='#ffd76a';c.stroke();}   /* hình vẽ tạm khi chưa nạp xong ảnh */
+  c.restore();
+  lab=ok?r*3.9:r*2.15;
+  c.save();c.globalAlpha=1;
+  if(khoa)txt(c,'⏳ '+t.khoa+' giây',t.x,t.y-lab,15,'#ffffff');
+  else txt(c,t.ten+' · '+Math.round(t.hp*100)+'%',t.x,t.y-lab,15,'#ffd76a');
+  c.restore();}
+
 function chibi(c,k){
   c.fillStyle='#3d7be0';c.beginPath();c.ellipse(0,-k*0.24,k*0.22,k*0.24,0,0,6.2832);c.fill();
   c.fillStyle='#ff6b6b';c.fillRect(-k*0.2,-k*0.5,k*0.4,k*0.08);
@@ -1245,6 +1322,7 @@ function draw(s){
   if(s.dbg)drawMask(s);
   for(i=0;i<s.groups.length;i++){g=s.groups[i];for(j=0;j<g.pts.length;j++)if(g.pts[j].on)ents.push({y:g.pts[j].y,f:(function(sp){return function(st){drawSpot(st,sp);};})(g.pts[j])});}
   if(v.boss)ents.push({y:v.boss.y,f:drawBoss});
+  if(s.than)ents.push({y:s.than.y,f:drawThan});
   ents.push({y:s.p.y,f:drawPlayer});
   ents.sort(function(a,b){return a.y-b.y;});
   for(i=0;i<ents.length;i++)ents[i].f(s);}
@@ -1271,7 +1349,7 @@ function open(host){
   if(!v){try{console.warn('[TTGMAP] không có vùng: '+host.vung);}catch(e){}return false;}
   s=S={host:host,slug:host.vung||'tuyet-nguyen',v:v,img:null,ready:false,paused:false,raf:0,last:0,clock:0,coolUntil:0,
     keys:{},joy:{id:null,x:0,y:0,cx:0,cy:0},p:{x:v.xuatPhat.x,y:v.xuatPhat.y,face:1,walk:0,moving:false},
-    cam:{x:0,y:0},zoom:CFG.camera.zoom||1,vw:0,vh:0,dpr:1,khuId:0,groups:[],bossT:-1,bossMs:bossConLai(host.vung||'tuyet-nguyen'),
+    cam:{x:0,y:0},zoom:CFG.camera.zoom||1,vw:0,vh:0,dpr:1,khuId:0,groups:[],bossT:-1,than:null,thanPos:null,thanT:-1,bossMs:bossConLai(host.vung||'tuyet-nguyen'),
     hudTimer:0,sprite:null,thuFail:false,frame192:false,
     boss:null,mask:null,open:[],dbg:false,tool:'paint',bi:1,pid:null,last2:null,cursor:null,ov:null,maskDirty:true};
   s.last=0;
@@ -1318,7 +1396,7 @@ function resume(kq){
       for(j=0;j<g.pts.length;j++){p=g.pts[j];
         if(p.id===kq.diemId){tatSpot(s,p);g.target=soDiemCan();}}}}
   if(kq.boss)bossDanhXong(s.slug);
-  s.bossMs=bossConLai(s.slug);s.bossT=-1;
+  s.bossMs=bossConLai(s.slug);s.bossT=-1;s.thanT=-1;thanLamMoi(s);   /* sau trận: đọc lại trạng thái boss Thần ngay (chạy sang vùng khác / chết / khóa) */
   s.coolUntil=s.clock+CFG.cooldownSauTran;
   if(s.root)s.root.style.display='block';
   fit();

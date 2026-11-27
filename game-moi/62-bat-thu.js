@@ -42,7 +42,7 @@ function toast(t){if(host&&host.toast)host.toast(t);else{try{console.log(t);}cat
 function itemOf(cap){var B=root.TTGBALO;return B&&B.CAT?B.CAT[TTGBONG.idBong(cap)]:null;}
 function countOf(cap){return root.TTGBALO?TTGBALO.count(TTGBONG.idBong(cap)):0;}
 function hiemOf(e){return (root.TTGCS&&TTGCS.doHiem&&TTGCS.doHiem(e.id))||e.rarity||'thuong';}   /* độ hiếm LOÀI (56b) trước; e.rarity của boss bị ép 'truyenthuyet' */
-function rateOf(cap){var e=enemy();if(!e)return null;return TTGBONG.tiLeBat(cap,e.boss?'truyenthuyet':hiemOf(e),e.vung||0);}
+function rateOf(cap){var e=enemy();if(!e||e.than)return null;return TTGBONG.tiLeBat(cap,e.boss?'truyenthuyet':hiemOf(e),e.vung||0);}
 function owned(){var a=[],c;for(c=1;c<=TTGBONG.CFG.capBongMax;c++)if(countOf(c)>0)a.push(c);return a;}
 function usable(){return owned().filter(function(c){return rateOf(c)!=null;});}
 function pickDefault(){var u=usable();if(!u.length)return 0;return CFG.macDinh==='thap'?u[0]:u[u.length-1];}
@@ -73,7 +73,7 @@ function spr(ctx,n,cap,x,y,sc,rot,alpha){
 /* ================= TRẠNG THÁI ================= */
 /* thú này có được hỏi Bắt/Giết không: chỉ thú hoang (nguồn demo, kể cả boss thú hoang); quái main, NPC boss, thú Thần (chỉ có từ trứng) thì không */
 function catchable(e){
-  if(!e||e.source!=='demo'||!root.TTGBONG||!TTGBONG.tiLeBat)return false;
+  if(!e||e.than||e.source!=='demo'||!root.TTGBONG||!TTGBONG.tiLeBat)return false;   /* e.than = boss Thần: KHÔNG bắt bằng châu, giết thì rớt trứng (104) */
   return TTGBONG.tiLeBat(1,e.boss?'truyenthuyet':hiemOf(e),e.vung||0)!=null;
 }
 /* index.html gọi khi thắng trận. Trả về true = module nhận xử lý và SẼ gọi xong(kq) đúng 1 lần; false = index.html tự phát thưởng giết như cũ */
