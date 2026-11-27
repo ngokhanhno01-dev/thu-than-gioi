@@ -798,11 +798,11 @@ function act(s0,w){
  if(st!==s0||st.me<=0||st.en<=0)return T_DON;
  if(w==='me'){
   if(st.stun>0){st.stun--;st.fx.push({x:px('me'),y:gy()-135,t:performance.now(),s:'Choáng',c:'#ffe45c'});return T_DON;}
-  var sm=knMeDecide();if(sm){st.skRun=true;castMe(s0,sm);return knTm(sm.id).end+KN_INTRO+tcPadK('me',sm);}
+  var sm=knMeDecide();if(sm){st.skRun=!sm.thaiCuc;castMe(s0,sm);return knTm(sm.id).end+KN_INTRO+tcPadK('me',sm);}
   hit('me');return tlTurn();}
  var sk=knDecide();/* boss hết hồi chiêu: dùng kỹ năng thay đòn thường */
  if(st.stunEn>0){st.stunEn--;st.fx.push({x:px('en'),y:gy()-135,t:performance.now(),s:'Choáng',c:'#ffe45c'});return T_DON;}
- if(sk){st.skRun=true;castSkill(s0,sk);return knTm(sk.id).end+KN_INTRO+tcPadK('en',sk);}
+ if(sk){st.skRun=!sk.thaiCuc;castSkill(s0,sk);return knTm(sk.id).end+KN_INTRO+tcPadK('en',sk);}
  hit('en');return tlTurn();}
 function atk(w){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;
  if(w==null){st.alt=st.alt?0:1;w=st.alt?'me':'en';}   /* trận mẫu không có BATTLE: luân phiên */
