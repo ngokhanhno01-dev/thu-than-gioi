@@ -8,7 +8,7 @@
 
 /* hệ chủ đạo của vùng z (hệ của kỹ năng cơ bản vùng, dùng ở bước D). Khớp mục 8 THIET_KE_CHI_SO.md */
 var HE_VUNG=['bang','thuy','tien','phong','loi','tam','thuy','hoa','moc'];
-HE_VUNG[16]='khonggian';   /* z16 Thần Điện (boss Đế Giang, hệ Không Gian) */  /* z0..z5, z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm */
+HE_VUNG[17]='khonggian';   /* z17 = vùng 18 (boss Đế Giang, hệ Không Gian) */  /* z0..z5, z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm */
 
 /* vai: t = tank, c = cong (công), n = nhanh, b = canbang (cân bằng) */
 var VAI={t:'tank',c:'cong',n:'nhanh',b:'canbang'};
@@ -128,8 +128,8 @@ var BANG={
     ['9i','Mộc Thanh Lân','c',['moc']],
     ['9j','Thanh Lâm Cùng Kỳ','c',['moc']]
   ],
-  16:[ /* Thần Điện (khonggian): BOSS THẦN, phẩm chất Thần. Chỉ số tính như boss vùng cuối z16, cấp tối đa 270 (xem THIET_KE_CHI_SO.md mục 9). Chưa đăng ký vào vùng/map, chưa có ảnh thú. */
-    ['th1','Đế Giang','c',['khonggian'],true,16]
+  17:[ /* Vùng 18 (khonggian): BOSS THẦN Đế Giang, chỉ số = x2 boss thú hoang vùng 18 (CFG.hsBossLoai, xem THIET_KE_DE_GIANG.md). Chưa đăng ký vào vùng/map, chưa có ảnh thú. */
+    ['th1','Đế Giang','c',['khonggian'],true,17]
   ]
 };
 

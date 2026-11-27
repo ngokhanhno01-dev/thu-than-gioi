@@ -16,8 +16,8 @@ var CFG={
   goc:{hp:150,tc:40,pt:30,td:40,mm:10},
   hsVungMoiZ:0.3,        /* hp,tc,pt,td nhân (1 + 0,3 x z); mm KHÔNG nhân theo vùng */
   hsBoss:1.6,            /* boss: hp,tc,pt,td nhân thêm */
-  hsThan:1.5,            /* PHẨM CHẤT THẦN (độ hiếm 'than', bậc 6 trên Truyền Thuyết): hp,tc,pt,td nhân thêm (mm không nhân). Muốn 'áp đảo hẳn' thì tăng lên 2 */
-  hsMauBossLoai:{th1:10},/* Máu nhân thêm CHỈ KHI ĐÁNH BOSS (tinh() nhận thu.boss === true rõ ràng từ trận). Thú bắt về (không có thu.boss) giữ chỉ số bình thường. th1 = Đế Giang, x10 chốt 27/11/2026 (5 người cùng đánh) */
+  hsThan:1,              /* PHẨM CHẤT THẦN (độ hiếm 'than'): hp,tc,pt,td nhân thêm cho thú Thần nói chung. Đặt 1 = không nhân (27/11/2026: Đế Giang không còn x1,5, dùng hsBossLoai bên dưới) */
+  hsBossLoai:{th1:2},    /* CHỈ SỐ BOSS RIÊNG THEO LOÀI: hp,tc,pt,td nhân thêm KHI ĐÁNH BOSS (tinh() nhận thu.boss === true từ trận). th1 = Đế Giang: x2 so với boss thú hoang vùng 18 (z17, vung 17), chốt 27/11/2026. Thú nở từ trứng (không có cờ boss) không nhân */
   /* nhân theo vai trò (hp,tc,pt,td) */
   vai:{
     tank:    {hp:1.3, tc:0.8, pt:1.4, td:0.7},
@@ -159,7 +159,7 @@ function tinh(thu,ctx){
     var hT=(root.TTGCS&&root.TTGCS.doHiem&&root.TTGCS.doHiem(thu.id)==='than')?CFG.hsThan:1;   /* phẩm chất Thần: nhân thêm hp,tc,pt,td */
     ['hp','tc','pt'].forEach(function(k){base[k]=b[k]*(1+CFG.hsCap[k]*(lv-1))*CFG.hsTien[k][tien-1]*hb*hT;});
     base.td=b.td*(1+CFG.hsCap.td*(lv-1))*CFG.hsTien.td[tien-1]*hb*hT;
-    if(thu.boss===true&&CFG.hsMauBossLoai[thu.id])base.hp*=CFG.hsMauBossLoai[thu.id];   /* Máu x10 chỉ lúc ĐÁNH boss (thu.boss === true do trận truyền); bắt về thì không có cờ này */
+    if(thu.boss===true&&CFG.hsBossLoai[thu.id]){var hbl=CFG.hsBossLoai[thu.id];['hp','tc','pt','td'].forEach(function(k){base[k]*=hbl;});}   /* x2 (Đế Giang) lúc ĐÁNH boss: boss vùng 18 x2 */
     base.mm=b.mm*CFG.hsTien.mm[tien-1];     /* mm: không theo cấp, không theo bậc */
   }
   var mod={};
