@@ -822,8 +822,8 @@ function atk(w){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;
    /* thắng thú hoang bắt được (62: nguồn demo, không phải thú Thần): hỏi Bắt/Giết (30 giây, không bấm = Giết). Còn lại phát thưởng giết như cũ */
    setTimeout(function(){if(st!==s0)return;if(!(won&&encounter&&eb&&window.TTGBAT&&TTGBAT.hoi&&TTGBAT.hoi(eb.enemy,xong)))xong('giet');},END_WAIT);}   /* TTGTX: THẮNG hoặc THUA/HÒA đều quay lại màn bản đồ tìm mục tiêu mới (TTGTX.CFG.tiepKhiThua=false thì thua là dừng) */
   else{st.busy=false;nextAt=performance.now()+GAP_ACT;if(st.tg!=null&&!st.liveG)st.tg=nextAt;}};
- st.skRun=false;var khienTruoc=(w==='me'||w==='en')&&!!tcOf(w==='me'?'en':'me');var durA=w==='both'?actClash(s0):act(s0,w);
- st.liveG=(w!=='both'&&!st.skRun&&!khienTruoc&&!(st.tl&&st.tl.on));   /* cảnh phản đòn Thái Cực Đồ: thanh đứng yên (không chạy ngầm trong lúc xem phản đòn) */   /* đòn THƯỜNG: thanh tốc độ vẫn chạy trong lúc ra đòn (kỹ năng thì vẫn đứng yên như cũ) */
+ st.skRun=false;var durA=w==='both'?actClash(s0):act(s0,w);
+ st.liveG=(w!=='both'&&!st.skRun&&!(st.tl&&st.tl.on));   /* đòn THƯỜNG (kể cả cảnh phản đòn Thái Cực Đồ): thanh vẫn chạy bình thường */   /* đòn THƯỜNG: thanh tốc độ vẫn chạy trong lúc ra đòn (kỹ năng thì vẫn đứng yên như cũ) */
  setTimeout(fin,durA);}
 function autoTick(){if(!AUTO||!st)return;var now=performance.now();
  if(!BATTLE||!window.TTGCS){if(!st.busy&&now>=nextAt)atk();return;}
