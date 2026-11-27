@@ -104,7 +104,17 @@
       { id: '7j', slug: '10-hoai-thuy-vo-chi-ky', ten: 'Hoài Thủy Vô Chi Kỳ', boss: true }
     ] },
     { z: 7, slug: 'xich-hoa-dia', ten: 'Xích Hỏa Địa', thu: [
-      { id: 'k1', slug: '01-viem-su', ten: 'Viêm Sư', boss: false, nen: 'khoi-dau' }
+      { id: 'k1', slug: '01-viem-su', ten: 'Viêm Sư', boss: false, nen: 'khoi-dau' },
+      { id: '8a', slug: '01-hoa-tinh-thu', ten: 'Hỏa Tinh Thử', boss: false },
+      { id: '8b', slug: '02-hoa-nham-giac', ten: 'Hỏa Nham Giác', boss: false },
+      { id: '8c', slug: '03-hoa-nham-yet', ten: 'Hỏa Nham Yết', boss: false },
+      { id: '8d', slug: '04-hoa-diem-dau', ten: 'Hỏa Diễm Đấu', boss: false },
+      { id: '8e', slug: '05-hoa-da-buc', ten: 'Hỏa Dạ Bức', boss: false },
+      { id: '8f', slug: '06-tam-nhan-hoa-vien', ten: 'Tam Nhãn Hỏa Viên', boss: false },
+      { id: '8g', slug: '07-hoa-linh-phuong', ten: 'Hỏa Linh Phương', boss: false },
+      { id: '8h', slug: '08-hoa-viem-giao', ten: 'Hỏa Viêm Giao', boss: false },
+      { id: '8i', slug: '09-hoa-thanh-ly', ten: 'Hỏa Thanh Ly', boss: false },
+      { id: '8j', slug: '10-xich-diem-ma-vuong', ten: 'Xích Diễm Ma Vương', boss: true }
     ] },
     { z: 8, slug: 'thanh-lam', ten: 'Thanh Lâm', thu: [
       { id: 'k3', slug: '01-lam-tru', ten: 'Lâm Trư', boss: false, nen: 'khoi-dau' }
