@@ -116,12 +116,13 @@ ZONE_MAU = {
     6: '#4a90ff',   # Thủy Nguyệt Cảnh
     7: '#ff6a3a',   # Xích Hỏa Địa
     8: '#6adf5a',   # Thanh Lâm
+    17: '#b46cff',  # Thần (Không Gian)
 }
 
 # Màu VIỀN theo ĐỘ HIẾM (0..4). Chọn kiểu kim loại / đá quý, tránh bảng neon của Rank (E..SR).
 # TODO(độ hiếm): bảng này và DO_HIEM_MAC_DINH phải khớp với TTGCS.DO_HIEM / bảng độ hiếm ở 56b-loai.js khi mục 2 xong.
-DO_HIEM_TEN = ['Thường', 'Hiếm', 'Sử Thi', 'Huyền Thoại', 'Truyền Thuyết']
-DO_HIEM_MAU = ['#b9c0c9', '#3ec9a7', '#b06cff', '#ffb020', '#ff3d5a']
+DO_HIEM_TEN = ['Thường', 'Hiếm', 'Sử Thi', 'Huyền Thoại', 'Truyền Thuyết', 'Thần']
+DO_HIEM_MAU = ['#b9c0c9', '#3ec9a7', '#b06cff', '#ffb020', '#ff3d5a', '#ffd76a']
 
 
 def doc_do_hiem_rieng(goc):
@@ -332,7 +333,7 @@ def main():
             if not f:
                 print('  thiếu ảnh', v['slug'], t['slug'], 'b%d' % a.form); continue
             chi_so = thu_thuong.index(t) if not t['boss'] else 9
-            dh = DH_RIENG.get(t['id'], do_hiem_mac_dinh(chi_so, t['boss']))   # ưu tiên độ hiếm đã chốt trong 56b-loai.js
+            dh = 5 if v['slug'] == 'than' else DH_RIENG.get(t['id'], do_hiem_mac_dinh(chi_so, t['boss']))   # ưu tiên độ hiếm đã chốt trong 56b-loai.js
             im = Image.open(f)
             out = tao_manh(t['id'], im, mau_vung, DO_HIEM_MAU[dh])
             out.save(os.path.join(ra, 'th-m-%s.png' % t['id']))
