@@ -10,12 +10,14 @@
   var B = root.TTGBALO;
   if (!B) return;
   var CFG = {
-    tiLeRoi: { th1: 0.005 },   /* 0,5% khi giết Đế Giang (người dùng chốt 27/11/2026) */
+    tiLeRoi: { th1: 0.005, th2: 0.005 },   /* 0,5% khi giết Đế Giang (người dùng chốt 27/11/2026); Chúc Long đặt TẠM bằng Đế Giang, chờ chốt */
     soTest: 3                  /* nút test: số trứng mỗi lần bấm */
   };
   var TRUNG = {   /* id vật phẩm -> loài boss */
     'trung-de-giang': { loai: 'th1', ten: 'Trứng Đế Giang', img: 'game-moi/icon-item/trung-de-giang.png',
-      mo: 'Trứng của Đế Giang, Thú Thần hệ Không Gian. Bấm Mở: nở ngay thành Đế Giang cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' }
+      mo: 'Trứng của Đế Giang, Thú Thần hệ Không Gian. Bấm Mở: nở ngay thành Đế Giang cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' },
+    'trung-chuc-long': { loai: 'th2', ten: 'Trứng Chúc Long', img: 'game-moi/icon-item/trung-chuc-long.png',
+      mo: 'Trứng của Chúc Long, Thú Thần hệ Thời Gian. Bấm Mở: nở ngay thành Chúc Long cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' }
   };
   var items = {};
   Object.keys(TRUNG).forEach(function (id) { items[id] = { loai: 'nl', ten: TRUNG[id].ten, img: TRUNG[id].img, mo: TRUNG[id].mo }; });
@@ -43,7 +45,7 @@
     return uid;
   }
 
-  function lay(n) { n = n || CFG.soTest; Object.keys(TRUNG).forEach(function (id) { B.add(id, n); }); toast('TEST: +' + n + ' ' + 'Trứng Đế Giang'); }
+  function lay(n, loai) { n = n || CFG.soTest; var ten = []; Object.keys(TRUNG).forEach(function (id) { if (loai && TRUNG[id].loai !== loai) return; B.add(id, n); ten.push(TRUNG[id].ten); }); toast('TEST: +' + n + ' ' + ten.join(', ')); }
 
   /* nút "Mở" trong Balo: dùng chung nút của 86-hop-ruong.js (nạp động, có thể đến sau file này) */
   var tries = 0;
@@ -53,7 +55,10 @@
   })();
 
   /* NÚT TEST ẨN */
-  if (root.TTGNV && root.TTGNV.add) root.TTGNV.add({ id: 'lay-trung-dg', dev: true, ten: 'Lấy trứng Đế Giang', onTap: function () { lay(); } });
+  if (root.TTGNV && root.TTGNV.add) {
+    root.TTGNV.add({ id: 'lay-trung-dg', dev: true, ten: 'Lấy trứng Đế Giang', onTap: function () { lay(null, 'th1'); } });
+    root.TTGNV.add({ id: 'lay-trung-cl', dev: true, ten: 'Lấy trứng Chúc Long', onTap: function () { lay(null, 'th2'); } });
+  }
 
   root.TTGTRUNG = { CFG: CFG, TRUNG: TRUNG, idTrung: idTrung, roi: roi, mo: mo, lay: lay };
 })(typeof window !== 'undefined' ? window : globalThis);
