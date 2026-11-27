@@ -102,7 +102,7 @@ function setBtns(list){list=(list||[]).slice(0,2);var n=list.length;fr.style.bac
  if(n===1)put(btn[0],BOX.b1);else if(n===2){put(btn[0],BOX.b2a);put(btn[1],BOX.b2b);}
  list.forEach(function(d,i){var b=btn[i];b.style.display='flex';b.textContent=d.t;b.className='tbo-b'+(d.cls?' '+d.cls:'');
  b.onclick=function(ev){ev.stopPropagation();close();if(d.cb)d.cb();};});}
-function toast(t,ms,cb){if(mode==='confirm'||mode==='panel'){if(cb)cb();return;}open('toast',520,false);setBtns([]);msg.textContent=t;onc=cb||null;fr.onclick=close;tm=setTimeout(close,3000);/* thông báo không có nút: luôn tự tắt sau 3 giây */}
+function toast(t,ms,cb,html){if(mode==='confirm'||mode==='panel'){if(cb)cb();return;}open('toast',520,false);setBtns([]);if(html)msg.innerHTML=t;else msg.textContent=t;onc=cb||null;fr.onclick=close;tm=setTimeout(close,3000);/* thông báo không có nút: luôn tự tắt sau 3 giây */}
 function confirm(html,list){open('confirm',760,true);setBtns(list);msg.innerHTML=html;wrap.onclick=function(e){if(e.target===wrap)close();};}
 function panel(html,list,o){open('panel',960,true);o=o||{};setBtns(list);if(o.row)msg.className='tbo-m row';msg.innerHTML=html;wrap.onclick=null;return msg;}
 /* BẢNG THÔNG TIN: chữ nhỏ bên TRÁI (tiêu đề, dòng phụ, mô tả có thanh CUỘN), ô hình nhỏ có khung bên PHẢI.

@@ -100,7 +100,7 @@
     var out = { test: !!L.test, loai: L.loai, coMat: L.coMat, batDau: L.batDau, ketThuc: L.ketThuc, tiepTheo: L.tiepTheo, maLan: L.maLan, vung: null, hp: 1, dangDanh: null, chet: false };
     if (!L.coMat) return out;
     var s = lanCua(L); nhaQuaHan(s, t);
-    out.vung = s.vung; out.hp = s.hp; out.dangDanh = s.dangDanh; out.chet = s.chet; out.soChay = s.soChay; out.nguoiGiet = s.chet ? (s.nguoiGiet || null) : null;
+    out.vung = s.vung; out.hp = s.hp; out.dangDanh = s.dangDanh; out.chet = s.chet; out.soChay = s.soChay; out.nguoiGiet = s.chet ? (s.nguoiGiet || null) : null; out.nguoiChay = s.nguoiChay || null;
     out.hien = !s.chet && !s.dangDanh;   /* hiện trên map (không ai đánh, chưa chết) */
     return out;
   }
@@ -127,10 +127,11 @@
     var L = lich(t); if (!L.coMat) return null;
     var s = L.test ? (TESTDB && TESTDB.s) : DB.lan[L.maLan]; return s && s.dangDanh === uid ? s : null;
   }
-  function chay(uid, hp, t) {   /* trận đánh tới mốc chạy: boss sang vùng khác, giữ máu */
+  function chay(uid, hp, t, ten) {   /* trận đánh tới mốc chạy: boss sang vùng khác, giữ máu; ten = biệt danh người đánh làm boss chạy (để thông báo) */
     t = T(t); var s = cuaToi(uid, t); if (!s) return loi('Không phải trận của bạn');
     var L = lich(t);
     s.hp = Math.max(0, Math.min(1, +hp || 0)); s.soChay++;
+    s.nguoiChay = String(ten == null ? '' : ten).replace(/\s+/g, ' ').trim().slice(0, 40) || 'Một người chơi';
     var vs = dsVung().filter(function (z) { return z !== s.vung; });
     if (vs.length) s.vung = vs[Math.floor(hat(L.maLan + '|chay' + s.soChay) * vs.length)];
     s.dangDanh = null; save();

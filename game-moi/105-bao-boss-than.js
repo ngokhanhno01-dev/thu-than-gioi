@@ -45,7 +45,7 @@
     pre = s.test ? '[TEST] ' : '';
     if (key && !s.chet) {
       if (!last || last.key !== key) show(pre + '⚔ Boss Thần ' + bossTen(s.loai) + ' đã xuất hiện tại ' + zoneTen(s.vung) + '! Mau đến khiêu chiến!');
-      else if ((s.soChay || 0) > last.soChay) show(pre + '⚔ Boss Thần ' + bossTen(s.loai) + ' bị thương, bỏ chạy sang ' + zoneTen(s.vung) + '! Còn ' + Math.round(s.hp * 100) + '% máu.');
+      else if ((s.soChay || 0) > last.soChay) show(pre + '⚔ Boss Thần ' + bossTen(s.loai) + ' bị ' + (s.nguoiChay || 'một người chơi') + ' đánh bị thương, bỏ chạy sang ' + zoneTen(s.vung) + '! Còn ' + Math.round(s.hp * 100) + '% máu.');
     } else if (key && s.chet && last && !last.chet) {
       show(pre + '⚔ Boss Thần ' + bossTen(s.loai) + ' đã bị hạ bởi ' + (s.nguoiGiet || 'một người chơi') + '!');
     }
