@@ -556,7 +556,7 @@ if(CFG.nutTest&&root.TTGNV&&root.TTGBALO){
     toast(b?'TEST: Rank thú ra trận = '+b+' (áp dụng từ trận sau)':'TEST: chưa có thú ra trận');
   },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 8l7 15 16 2-12 11 3 16-14-8-14 8 3-16L9 25l16-2z" fill="#ffd24a" stroke="#7a4a00" stroke-width="3" stroke-linejoin="round"/></svg>'});
   root.TTGNV.add({id:'lay-sach',ten:'Lấy sách',r:0,rc:0,onTap:function(){
-    var ids=['sach-bang-son-ap-dinh','sach-suong-nuot','sach-con-bang-trien-si','sach-vu-xa-trien','sach-thien-loi-giang','sach-nguyet-thuc-nuot','sach-thuy-long-pha-nguyet'];
+    var ids=['sach-bang-son-ap-dinh','sach-suong-nuot','sach-con-bang-trien-si','sach-vu-xa-trien','sach-thien-loi-giang','sach-nguyet-thuc-nuot','sach-thuy-long-pha-nguyet','sach-viem-long-pha-nhat'];
     ids.forEach(function(i){TTGBALO.add(i,2);});
     toast('TEST: +2 mỗi loại sách kỹ năng boss');
   },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="14" y="10" width="36" height="44" rx="4" fill="#5b3cc4" stroke="#1d0f5c" stroke-width="3"/><rect x="14" y="10" width="8" height="44" rx="3" fill="#3a2494"/><path d="M36 20l3 7 7 1-5 5 1 7-6-4-6 4 1-7-5-5 7-1z" fill="#ffd24a"/></svg>'});

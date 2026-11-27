@@ -68,6 +68,8 @@ Giao diện thú có 3 ô tròn: ô 1 BUFF (nội tại), ô 2 DEBUFF, ô 3 ĐÒ
 - ks3 Vũ Xà Triền (Phong Nguyên Vũ Xà, hệ phong): 140% tc, cd 4. Nội tại Xà Hành: sau khi dùng kỹ năng, Xuyên Giáp +15% trong 3 lượt. Mô tả: thân rắn gió quấn chặt đối thủ rồi siết lại, vòng xoáy gió trói chân.
 - ks4 Thiên Lôi Giáng (Lôi Vực Chiến Thần, hệ lôi): 220% tc, cd 6. Nội tại Lôi Kích: 30% làm choáng đối thủ 1 lượt (bị kc chặn). Mô tả: chiến thần giơ vũ khí gọi cột sét từ trời đánh thẳng xuống đối thủ.
 - ks5 Nguyệt Thực Nuốt (Nguyệt Thực Tế Quân, hệ ám): 200% tc, cd 5. Nội tại Nguyệt Mê: sau khi dùng kỹ năng, gây mù, đối thủ đánh hụt 40% trong 2 lượt. Mô tả: mặt trăng bị bóng đen che khuất, vòng tối nuốt lấy đối thủ.
+- ks6 Thủy Long Phá Nguyệt (boss 7j Hoài Thủy Vô Chi Kỳ, hệ thủy): 150% tc, cd 5. Nội tại Thủy Ấn: trúng thì gắn ấn (né thì không dính); kỹ năng kế tiếp đánh trúng mục tiêu có ấn gây x2 sát thương rồi ấn mất.
+- ks7 Viêm Long Phá Nhật (boss 8j Xích Diễm Ma Vương, hệ hỏa): 200% tc, cd 5. Nội tại Hỏa Ấn: trúng thì gắn ấn 3 lượt (né thì không dính); cuối mỗi lượt của bên dính, chịu sát thương chuẩn bằng 40% Công của người gắn (chốt lúc trúng; khiên vẫn đỡ; không cộng dồn, trúng lại thì làm mới).
 - Lưu ý: hệ ks2 (phong) và ks5 (ám) là hệ chủ đạo của boss, khác hệ vùng (tiên, tâm linh). Muốn đổi số thì sửa một dòng trong KY_NANG_BOSS (56c-buff.js), rồi cập nhật mục này.
 - ĐÃ BỎ (22/11/2026): lớp lạnh (ks0), tự +30% tốc độ (ks2), giảm tốc độ đối thủ (ks3, ks5). Lý do: trận chưa có hệ tốc độ/lớp lạnh nên không chạy, trong khi mô tả sách lại nói có. QUY TẮC: chỉ khai hiệu ứng mà trận ĐÃ chạy được (danh sách ở chú thích trên bảng KY_NANG_BOSS). Muốn thêm hiệu ứng mới thì viết code trận trước, rồi mới khai vào kỹ năng.
 
