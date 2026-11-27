@@ -57,15 +57,14 @@
     '.tdr-sp{position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none}',
     '.tdr-sp i{position:absolute;width:6px;height:6px;border-radius:50%;opacity:0;animation:tdr-sp 1.5s ease-in-out infinite}',
     '@keyframes tdr-sp{0%{opacity:0;transform:translateY(6px) scale(.4)}40%{opacity:1}100%{opacity:0;transform:translateY(-22px) scale(1.1)}}',
-    '.tdr.no{width:min(96vw,520px);padding:16px 22px 16px 16px;gap:18px;border-radius:20px;border:3px solid #ffd76a;background:radial-gradient(circle at 18% 50%,rgba(var(--rgb),.38),transparent 55%),radial-gradient(1.5px 1.5px at 20% 30%,#fff,transparent),radial-gradient(1.5px 1.5px at 60% 70%,#bfe3ff,transparent),radial-gradient(1px 1px at 82% 28%,#fff,transparent),radial-gradient(1px 1px at 45% 85%,#ffe9a8,transparent),linear-gradient(160deg,#1a1f7a,#070a34 60%,#10063a);box-shadow:0 0 0 2px #7a5a12,0 0 0 4px rgba(255,215,106,.55),0 0 26px rgba(var(--rgb),.85),0 0 54px rgba(var(--rgb),.4),inset 0 0 22px rgba(var(--rgb),.35),inset 0 0 0 3px rgba(10,12,50,.9),inset 0 0 0 4px rgba(255,215,106,.5)}',
-    '.tdr.no::before,.tdr.no::after{content:"";position:absolute;width:20px;height:20px;background:linear-gradient(135deg,#fff7c9,#ffd76a 45%,#9a6a10);transform:rotate(45deg);border:2px solid #4a3306;box-shadow:0 0 10px #ffd76a;z-index:2}',
-    '.tdr.no::before{left:-13px;top:50%;margin-top:-10px}.tdr.no::after{right:-13px;top:50%;margin-top:-10px}',
-    '.tdr-orn{position:absolute;left:50%;top:-12px;width:64px;height:20px;margin-left:-32px;background:linear-gradient(90deg,transparent,#ffd76a 30%,#fff7c9 50%,#ffd76a 70%,transparent);clip-path:polygon(0 60%,30% 60%,40% 0,50% 40%,60% 0,70% 60%,100% 60%,100% 100%,0 100%);filter:drop-shadow(0 0 6px #ffd76a);opacity:.95}',
-    '.tdr.no .tdr-ic{width:116px;height:116px;border-radius:16px;border:3px solid #ffd76a;background:radial-gradient(circle,rgba(var(--rgb),.5),rgba(6,8,36,.95) 75%);box-shadow:0 0 16px rgba(var(--rgb),.9),inset 0 0 14px rgba(var(--rgb),.5);overflow:visible}',
-    '.tdr.no .tdr-ic canvas,.tdr.no .tdr-ic img{width:132%;height:132%;max-width:none;margin:-8%;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.7)) drop-shadow(0 0 10px rgba(var(--rgb),.8));image-rendering:auto}',
-    '.tdr.no .tdr-hd{font-size:13px}.tdr.no .tdr-tag{font-size:13px;padding:2px 12px}',
-    '.tdr.no .tdr-nm{font-size:30px;letter-spacing:.02em}',
-    '.tdr.no .tdr-sb{font-size:14px}',
+    '.tdn{position:relative;flex:none;width:min(92vw,330px);background-size:100% 100%;background-repeat:no-repeat;animation:tdr-in .3s cubic-bezier(.2,1.4,.4,1);font-family:"Noto Serif",Georgia,serif;filter:drop-shadow(0 0 10px rgba(var(--rgb),.7))}',
+    '.tdn-ic{position:absolute;display:flex;align-items:center;justify-content:center}',
+    '.tdn-ic img{width:118%;height:118%;max-width:none;object-fit:contain;flex:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.8))}',
+    '.tdn-tx{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:1px;padding:0 6px;box-sizing:border-box;min-width:0}',
+    '.tdn-hd{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:.04em;color:#c9d2ff;text-transform:uppercase;white-space:nowrap}',
+    '.tdn-tag{padding:0 6px;border-radius:7px;font-size:9px;font-weight:800;letter-spacing:0;color:#0a0c28;background:rgb(var(--rgb))}',
+    '.tdn-nm{font-size:17px;font-weight:800;line-height:1.15;color:rgb(var(--rgb));text-shadow:0 0 6px rgba(var(--rgb),.8),0 1px 0 #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+    '.tdn-sb{font-size:9px;font-weight:600;color:#cfd6ff;line-height:1.2;white-space:nowrap}',
     '.tdr-fl{position:fixed;left:0;top:0;right:0;bottom:0;z-index:399;pointer-events:none;background:radial-gradient(circle at 50% 14%,rgba(255,255,255,.55),rgba(255,80,200,.18) 38%,transparent 72%);animation:tdr-fl .9s ease-out forwards}',
     '@keyframes tdr-fl{from{opacity:1}to{opacity:0}}'
   ].join('\n');
@@ -118,15 +117,36 @@
   }
   function remove(el) { el.classList.add('out'); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 380); }
 
+
+  /* THẺ TRỨNG NỞ: mỗi boss Thần có khung riêng (game-moi/khung-no/<tên>.png). Toạ độ ô = tỉ lệ [trái, trên, rộng, cao] trên ảnh khung. rgb = màu tên + nhãn. */
+  var KHUNG = {
+    th1: { f: 'de-giang', r: 720 / 287, rgb: '208,130,255', ic: [0.076, 0.32, 0.188, 0.451], tx: [0.30, 0.32, 0.621, 0.451] },
+    th2: { f: 'chuc-long', r: 720 / 300, rgb: '255,215,106', ic: [0.09, 0.311, 0.18, 0.431], tx: [0.305, 0.311, 0.614, 0.419] },
+    th3: { f: 'vo-cuc', r: 1899 / 590, rgb: '109,255,192', ic: [0.096, 0.195, 0.2, 0.619], tx: [0.346, 0.271, 0.571, 0.551] }
+  };
+  function showNo(o, k) {
+    ensure();
+    var el = D.createElement('div'), pc = function (a) { return 'left:' + (a[0] * 100) + '%;top:' + (a[1] * 100) + '%;width:' + (a[2] * 100) + '%;height:' + (a[3] * 100) + '%'; };
+    el.className = 'tdn'; el.style.setProperty('--rgb', k.rgb);
+    el.style.backgroundImage = 'url(game-moi/khung-no/' + k.f + '.png)'; el.style.aspectRatio = String(k.r);
+    var ic = D.createElement('div'); ic.className = 'tdn-ic'; ic.style.cssText = pc(k.ic);
+    if (o.icon) { var im = new Image(); im.alt = ''; im.src = o.icon; ic.appendChild(im); cropAnh(o.icon, function (u) { im.src = u; }); }
+    var tx = D.createElement('div'); tx.className = 'tdn-tx'; tx.style.cssText = pc(k.tx);
+    tx.innerHTML = '<div class="tdn-hd"><span>' + esc(o.tieude || 'Trứng nở!') + '</span><span class="tdn-tag">' + esc(o.nhan || '') + '</span></div><div class="tdn-nm">' + esc(o.ten || '') + '</div>' + (o.nguon ? '<div class="tdn-sb">' + esc(o.nguon) + '</div>' : '');
+    el.appendChild(ic); el.appendChild(tx); box.appendChild(el);
+    while (box.children.length > MAXV) box.removeChild(box.firstChild);
+    setTimeout(function () { remove(el); }, o.ms || 3600);
+    return el;
+  }
   function show(o) {
     o = o || {};
     if (!D.body) { setTimeout(function () { show(o); }, 300); return; }
+    if (o.no && KHUNG[o.no]) return showNo(o, KHUNG[o.no]);
     ensure();
     var m = M[o.muc] || M.E, el = D.createElement('div');
-    el.className = 'tdr' + (m.rb ? ' rb' : '') + (m.hi ? ' hi' : '') + (o.no ? ' no hi' : '');
-    if (o.no) { var orn = D.createElement('div'); orn.className = 'tdr-orn'; el.appendChild(orn); }
+    el.className = 'tdr' + (m.rb ? ' rb' : '') + (m.hi ? ' hi' : '');
     el.style.setProperty('--rgb', m.rgb);
-    el.appendChild(iconNode(o.icon, o.fb, !!o.no));
+    el.appendChild(iconNode(o.icon, o.fb));
     var tx = D.createElement('div'); tx.className = 'tdr-tx';
     tx.innerHTML = '<div class="tdr-hd"><span>' + esc(o.tieude || 'Nhận được') + '</span><span class="tdr-tag">' + esc(o.nhan || m.nhan) + '</span></div>' +
       '<div class="tdr-nm' + (m.rb ? ' rbt' : '') + '">' + esc(o.ten || '') + '</div>' +

@@ -10,7 +10,7 @@
   var D = root.document;
   if (!D || !root.TTGBTG) return;
   /* nạp động module thông báo rơi đồ (106) nếu chưa có (để tô 7 màu tên boss) */
-  (function () { try { if (root.TTGDROP || root.__tdrLoad) return; root.__tdrLoad = 1; var cs = D.currentScript, s = D.createElement('script'); s.src = (cs && cs.src ? cs.src.replace(/[^\/?#]*([?#].*)?$/, '') : 'game-moi/') + '106-thong-bao-roi.js?v=3'; D.head.appendChild(s); } catch (e) {} })();
+  (function () { try { if (root.TTGDROP || root.__tdrLoad) return; root.__tdrLoad = 1; var cs = D.currentScript, s = D.createElement('script'); s.src = (cs && cs.src ? cs.src.replace(/[^\/?#]*([?#].*)?$/, '') : 'game-moi/') + '106-thong-bao-roi.js?v=4'; D.head.appendChild(s); } catch (e) {} })();
   var CFG = { pollMs: 1000, toc: 130, cao: 64 };   /* toc = px/giây */
   var TONE = {   /* [màu viền, nền trái, nền phải] */
     xh:   ['#ffd76a', 'rgba(40,16,70,.92)', 'rgba(120,44,20,.92)'],
