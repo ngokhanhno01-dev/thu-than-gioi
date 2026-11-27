@@ -60,7 +60,7 @@ function donCoBan(z){return DON_CO_BAN[z]?{ten:DON_CO_BAN[z],hsKyNang:1,hoiChieu
    3. cd và số liệu chỉ sửa Ở ĐÂY. 54-thu-than.js đọc cd từ bảng này (hàm cdSach), KHÔNG khai cd riêng cho sách boss.
    4. Sửa xong thì cập nhật THIET_KE_CHI_SO.md mục 7b và GHI_CHU.md cho khớp.
    ev của KỸ NĂNG (k.ev, chạy khi kỹ năng trúng): hutMau{pct} hút % sát thương thành máu | choang{xs,luot} choáng (kc chặn).
-   ev của NỘI TẠI (noiTai.ev, chạy sau khi dùng kỹ năng): debuff{stat:'pt' hoặc 'tc',pct,luot} lên đối thủ (giảm theo khu) | buHutMau{pct,luot} | buXuyenGiap{pct,luot} | khienSau{pctHp} | gayMu{pct,luot} (giảm theo khu) | choangNT{xs,luot} (kc chặn).
+   ev của NỘI TẠI (noiTai.ev, chạy sau khi dùng kỹ năng): debuff{stat:'pt' hoặc 'tc',pct,luot} lên đối thủ (giảm theo khu) | buHutMau{pct,luot} | buXuyenGiap{pct,luot} | khienSau{pctHp} | gayMu{pct,luot} (giảm theo khu) | choangNT{xs,luot} (kc chặn) | thuyAn (gắn Thủy Ấn: kỹ năng kế tiếp trúng x2 rồi mất ấn).
    CHƯA CÓ CODE CHẠY, ĐỪNG KHAI cho kỹ năng: tuBuff (tự buff), debuff với stat khác pt/tc (vd tốc độ td), lop (lớp lạnh). Trận demo chưa có hệ tốc độ/lớp lạnh. */
 var KY_NANG_BOSS=[
   {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:5,ev:[],
@@ -75,7 +75,9 @@ var KY_NANG_BOSS=[
   {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:6,ev:[],
    noiTai:{ten:'Lôi Kích',mod:[],ev:[{k:'choangNT',xs:30,luot:1}]}},
   {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:5,ev:[],
-   noiTai:{ten:'Nguyệt Mê',mod:[],ev:[{k:'gayMu',pct:40,luot:2}]}}
+   noiTai:{ten:'Nguyệt Mê',mod:[],ev:[{k:'gayMu',pct:40,luot:2}]}},
+  {id:'thuy-long-pha-nguyet',ten:'Thủy Long Phá Nguyệt',boss:'7j',he:'thuy',hsTc:1.5,cd:5,ev:[],
+   noiTai:{ten:'Thủy Ấn',mod:[],ev:[{k:'thuyAn'}]}}
 ];
 /* SÁCH KỸ NĂNG = NGUỒN DUY NHẤT: mỗi sách (id 'sach-'+id kỹ năng) gồm 3 phần theo đúng thiết kế:
    (1) CHỈ SỐ = % sát thương theo hệ (hsTc, he; vd 180% sát thương Băng) + hồi chiêu cd (+ ev kèm theo của kỹ năng nếu có: hút máu, choáng...);
@@ -88,7 +90,7 @@ function sachBuffs(thu){var r=[];((thu&&thu.kn)||[]).forEach(function(b){var k=s
 function sachMod(thu){var o=[];sachBuffs(thu).forEach(function(h){(h.mod||[]).forEach(function(m){o.push({stat:m.stat,pct:m.pct});});});return o;}   /* chỉ số từ sách -> TTGCS.tinh(thu,{mod:sachMod(thu)}) */
 var STAT_VI={hp:'Máu',tc:'Tấn công',pt:'Giáp',td:'Tốc độ',mm:'May mắn',ne:'Né',cx:'Chính xác',cm:'Chí mạng',khu:'Kháng',hutm:'Hút máu',pd:'Phản đòn'};
 var HE_VI={bang:'Băng',thuy:'Thủy',phong:'Phong',loi:'Lôi',am:'Âm',hoa:'Hỏa',moc:'Mộc',tho:'Thổ',doc:'Độc',kim:'Kim'};
-function evVi(e){if(e.k==='lop')return 'gắn '+e.them+' lớp lạnh';if(e.k==='hutMau')return 'hút '+e.pct+'% sát thương thành máu';if(e.k==='tuBuff')return 'bản thân +'+e.pct+'% '+(STAT_VI[e.stat]||e.stat)+' '+e.luot+' lượt';if(e.k==='debuff')return 'giảm '+Math.abs(e.pct)+'% '+(STAT_VI[e.stat]||e.stat)+' đối thủ trong '+e.luot+' lượt';if(e.k==='choang')return e.xs+'% làm choáng '+e.luot+' lượt';if(e.k==='khienDau')return 'khiên đầu trận '+e.pctHp+'% máu';if(e.k==='buHutMau')return 'sau khi dùng kỹ năng: hút '+e.pct+'% sát thương gây ra thành máu trong '+e.luot+' lượt';if(e.k==='khienSau')return 'sau khi dùng kỹ năng: nhận khiên bằng '+e.pctHp+'% máu tối đa';if(e.k==='buXuyenGiap')return 'sau khi dùng kỹ năng: Xuyên Giáp +'+e.pct+'% trong '+e.luot+' lượt';if(e.k==='choangNT')return 'khi dùng kỹ năng: '+e.xs+'% làm choáng đối thủ '+e.luot+' lượt';if(e.k==='gayMu')return 'sau khi dùng kỹ năng: gây mù, đối thủ đánh hụt '+e.pct+'% trong '+e.luot+' lượt';return '';}
+function evVi(e){if(e.k==='thuyAn')return 'trúng thì gắn 1 Thủy Ấn (đối thủ né được thì không dính). Kỹ năng kế tiếp đánh trúng đối thủ có ấn gây gấp đôi sát thương (chiêu này: 300%) rồi ấn biến mất';if(e.k==='lop')return 'gắn '+e.them+' lớp lạnh';if(e.k==='hutMau')return 'hút '+e.pct+'% sát thương thành máu';if(e.k==='tuBuff')return 'bản thân +'+e.pct+'% '+(STAT_VI[e.stat]||e.stat)+' '+e.luot+' lượt';if(e.k==='debuff')return 'giảm '+Math.abs(e.pct)+'% '+(STAT_VI[e.stat]||e.stat)+' đối thủ trong '+e.luot+' lượt';if(e.k==='choang')return e.xs+'% làm choáng '+e.luot+' lượt';if(e.k==='khienDau')return 'khiên đầu trận '+e.pctHp+'% máu';if(e.k==='buHutMau')return 'sau khi dùng kỹ năng: hút '+e.pct+'% sát thương gây ra thành máu trong '+e.luot+' lượt';if(e.k==='khienSau')return 'sau khi dùng kỹ năng: nhận khiên bằng '+e.pctHp+'% máu tối đa';if(e.k==='buXuyenGiap')return 'sau khi dùng kỹ năng: Xuyên Giáp +'+e.pct+'% trong '+e.luot+' lượt';if(e.k==='choangNT')return 'khi dùng kỹ năng: '+e.xs+'% làm choáng đối thủ '+e.luot+' lượt';if(e.k==='gayMu')return 'sau khi dùng kỹ năng: gây mù, đối thủ đánh hụt '+e.pct+'% trong '+e.luot+' lượt';return '';}
 function modVi(a){return (a||[]).map(function(m){return (m.pct>0?'+':'')+m.pct+'% '+(STAT_VI[m.stat]||m.stat);}).join(', ');}
 /* mô tả sách (Balo/bảng thú): sinh từ đúng dữ liệu bảng nên không lệch số. Chỉ số = % sát thương + hệ; Nội tại = hiệu ứng kèm; Hiệu ứng = hình ảnh. */
 function sachMoTa(bid,ngan){var k=sachKyNang(bid);if(!k)return '';var n=k.noiTai||{},nt=[modVi(n.mod)].concat((n.ev||[]).map(evVi)).filter(Boolean).join(', '),
