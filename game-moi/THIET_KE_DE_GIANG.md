@@ -21,7 +21,7 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - Vô Cực (th3, Thần thứ 3) (27/11/2026, phiên 4): đăng ký thú (nền `con-luan-thien-canh`), đánh thường `fx-boss/vo-cuc-don-thuong.png` (60d), trứng `trung-vo-cuc` (rơi 0,5% TẠM, nút test ẩn "Lấy trứng Vô Cực"), bộ item z19: Lõi Lưỡng Nghi / Châu Hỗn Nguyên / Thần Ấn Vô Cực + Mảnh th-m-th3. TẠM, chờ chốt: vai Tank, hệ `vocuc` trung tính, tên item, chỉ số x2 boss z17. Chưa có kỹ năng, chưa nối rơi vào trận.
 
 ## Thái Cực Đồ (sách Vô Cực, 27/11/2026)
-- Đỡ 5 đòn (không giới hạn lượt). Mỗi đòn phản 60% Công, đòn 5 phản 200% Công: sát thương chuẩn, có thể chí mạng. Hồi chiêu TẠM 6, chỉ đếm khi khiên đã mất. Chỉnh số ở `56c-buff.js` (`thaiCuc:{hits,pct,last}`).
+- Đỡ 5 đòn (không giới hạn lượt). Mỗi đòn phản 60% Công, đòn 5 phản 200% Công: sát thương chuẩn, có thể chí mạng. Hồi chiêu 8 (đã chốt), chỉ đếm khi khiên đã mất. Đỡ Vạn Mộc Hồi Xuân: lấy buff VÀ phản (đã chốt). Chỉnh số ở `56c-buff.js` (`thaiCuc:{hits,pct,last}`).
 - Đỡ kỹ năng: debuff dội lại người tung, buff của kỹ năng về người giữ khiên.
 - Người dùng chốt 27/11/2026: Vạn Mộc Hồi Xuân (địch tự buff) bị lấy buff và TỐN 1 tầng; Thời Gian Tỉnh Lặng KHÔNG bị cướp (buff chỉ sống trong kỹ năng đó), khiên chỉ chặn cú nổ; sát thương phụ không tốn tầng; đòn phản CÓ hút máu (bản chất là "chuyển đòn đánh").
 - Cách làm hiện tại: tầng nào bị trừ thì phản 1 đòn (kể cả đỡ Vạn Mộc, cú nổ). Khiên đỡ trước né/hụt; thiêu đốt/debuff dính từ trước vẫn còn; phản đòn không kích khiên bên kia.

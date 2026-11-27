@@ -91,8 +91,8 @@ var KY_NANG_BOSS=[
   /* BOSS THẦN Chúc Long (hệ Thời Gian). Thời Gian Tỉnh Lặng: tinhLang={tcPct:% Tấn công cộng thêm cho người dùng, hits:số đòn đánh thường cộng dồn rồi nổ}. Chạy ở index.html (tlBegin/tlAcc/tlBoom). cd TẠM 8 (chỉ đếm khi hết ngưng đọng), chờ người dùng chốt. hsTc=0: không dùng công thức sát thương kỹ năng. */
   {id:'thoi-gian-tinh-lang',ten:'Thời Gian Tỉnh Lặng',boss:'th2',he:'thoigian',hsTc:0,cd:8,ev:[],tinhLang:{tcPct:100,hits:5},
    mt:'Ngưng đọng thời gian: thú đối phương đứng yên, các đòn đánh thường được tích lại rồi nổ một lần'},
-  /* BOSS THẦN Vô Cực (hệ Vô Cực). Thái Cực Đồ: thaiCuc={hits:số đòn đỡ được, pct:% Công phản mỗi đòn, last:% Công phản ở đòn cuối}. Chạy ở index.html (tcBlock/tcReflect/tcHit). cd TẠM 6 (chỉ đếm khi khiên đã mất), chờ người dùng chốt. hsTc=0. */
-  {id:'thai-cuc-do',ten:'Thái Cực Đồ',boss:'th3',he:'vocuc',hsTc:0,cd:6,ev:[],thaiCuc:{hits:5,pct:60,last:200},
+  /* BOSS THẦN Vô Cực (hệ Vô Cực). Thái Cực Đồ: thaiCuc={hits:số đòn đỡ được, pct:% Công phản mỗi đòn, last:% Công phản ở đòn cuối}. Chạy ở index.html (tcBlock/tcReflect/tcHit). cd 8 (người dùng chốt 27/11/2026; chỉ đếm khi khiên đã mất). hsTc=0. */
+  {id:'thai-cuc-do',ten:'Thái Cực Đồ',boss:'th3',he:'vocuc',hsTc:0,cd:8,ev:[],thaiCuc:{hits:5,pct:60,last:200},
    mt:'Dựng Thái Cực Đồ làm khiên, bát quái hiện dưới chân đối thủ'}
 ];
 /* SÁCH KỸ NĂNG = NGUỒN DUY NHẤT: mỗi sách (id 'sach-'+id kỹ năng) gồm 3 phần theo đúng thiết kế:
