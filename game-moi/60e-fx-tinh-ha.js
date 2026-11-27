@@ -146,5 +146,13 @@
   if(fa>.01){g.save();g.globalAlpha=.85*fa;g.fillStyle='#f3e6ff';g.fillRect(G.x0-20,G.y0-20,G.w+40,G.h+40);g.restore()}
   g.restore()}
 
- window.TTGTinhHa={ID,dur:{[ID]:{hit:HIT,end:END}},under,draw,sp:SP,SHOTS};
+ /* RUNG MÀN (px, rung cả canvas ở index.html): mỗi lần lỗ không gian bắn ra rung 1 cái; dồn lực (CH0-LAUNCH) rung dữ dội dần; 6 lỗ bắn đồng loạt 1 cái mạnh; NỔ LỚN ở HIT rung mạnh nhất rồi tắt dần. Cùng kiểu Thời Gian Tỉnh Lặng. */
+ function shake(f,ts){
+  const t=ts-f.t0;if(t<0||t>END)return 0;let a=0;
+  for(const S of SHOTS){const d=t-S.t;if(d>=0&&d<220)a=Math.max(a,5*(1-d/220))}
+  if(t>=CH0&&t<LAUNCH)a=Math.max(a,3+8*ph(t,CH0,LAUNCH));
+  if(t>=LAUNCH&&t<LAUNCH+300)a=Math.max(a,12*(1-(t-LAUNCH)/300));
+  if(t>=HIT&&t<HIT+1100)a=Math.max(a,28*Math.pow(1-(t-HIT)/1100,1.5));
+  return a}
+ window.TTGTinhHa={ID,dur:{[ID]:{hit:HIT,end:END}},under,draw,shake,sp:SP,SHOTS};
 })();

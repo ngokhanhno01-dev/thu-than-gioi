@@ -354,7 +354,8 @@ function tlTurn(){var x=st.tlX||0;st.tlX=0;return T_DON+x;}   /* đòn cuối k�
 function tlGeo(tl){var tg=tl.tgt;return{x0:I.l,y0:0,w:W-I.l-I.r,h:TH(),tx:px(tg),ty:gy()-70,gy:gy(),hy:headY(tg)};}
 function tlUnder(ts){var tl=st&&st.tl;if(!tl||!window.TTGThoiGian)return;try{TTGThoiGian.under(ctx,st,ts,tlGeo(tl));}catch(e){window.__fxBossErr='tl-under: '+(e&&e.message||e);}}
 function tlOver(ts){var tl=st&&st.tl;if(!tl||!window.TTGThoiGian)return;try{TTGThoiGian.over(ctx,st,ts,tlGeo(tl));if(TTGThoiGian.done(tl,ts))st.tl=null;}catch(e){window.__fxBossErr='tl-over: '+(e&&e.message||e);}}
-var tlShK=0;function tlShake(ts){var amp=0,tl=st&&st.tl;if(tl&&window.TTGThoiGian)try{amp=TTGThoiGian.shake(tl,ts)||0;}catch(e){}   /* rung cả màn hình (canvas) */
+var tlShK=0;function tlShake(ts){var amp=0,tl=st&&st.tl,sf=st&&st.skFx;if(tl&&window.TTGThoiGian)try{amp=TTGThoiGian.shake(tl,ts)||0;}catch(e){}
+ if(sf&&sf.id==='tinh-ha-van-lac'&&window.TTGTinhHa&&TTGTinhHa.shake)try{amp=Math.max(amp,TTGTinhHa.shake(sf,ts)||0);}catch(e){}   /* Tinh Hà Vẫn Lạc cũng rung màn */   /* rung cả màn hình (canvas) */
  if(amp>.3){var dx=(Math.random()-.5)*2*amp,dy=(Math.random()-.5)*2*amp;cv.style.transform='translate('+dx.toFixed(1)+'px,'+dy.toFixed(1)+'px) scale(1.02)';tlShK=1;}else if(tlShK){cv.style.transform='';tlShK=0;}}
 function tickL(L){return L.filter(function(d){if(d.fresh){d.fresh=false;return true;}d.luot--;return d.luot>0;});}
 function dbTick(sd){if(!st)return;if(st.dt&&st.dt[sd])st.dt[sd]=tickL(st.dt[sd]);if(st.db&&st.db[sd])st.db[sd]=tickL(st.db[sd]);if(st.bf&&st.bf[sd])st.bf[sd]=tickL(st.bf[sd]);}/* đếm lùi theo lượt của CHÍNH bên đó: buff tính lượt của bên đánh (bên cầm buff), debuff tính lượt của bên bị đánh (bên mang debuff). Mục mới gắn vào bên đang đánh thì bỏ qua lần đếm của lượt vừa dùng (fresh). */
