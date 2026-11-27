@@ -7,7 +7,8 @@
 'use strict';
 
 /* hệ chủ đạo của vùng z (hệ của kỹ năng cơ bản vùng, dùng ở bước D). Khớp mục 8 THIET_KE_CHI_SO.md */
-var HE_VUNG=['bang','thuy','tien','phong','loi','tam','thuy','hoa','moc'];  /* z0..z5, z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm */
+var HE_VUNG=['bang','thuy','tien','phong','loi','tam','thuy','hoa','moc'];
+HE_VUNG[16]='khonggian';   /* z16 Thần Điện (boss Đế Giang, hệ Không Gian) */  /* z0..z5, z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm */
 
 /* vai: t = tank, c = cong (công), n = nhanh, b = canbang (cân bằng) */
 var VAI={t:'tank',c:'cong',n:'nhanh',b:'canbang'};
@@ -126,20 +127,24 @@ var BANG={
     ['9h','Mộc Nham Hùng','t',['moc']],
     ['9i','Mộc Thanh Lân','c',['moc']],
     ['9j','Thanh Lâm Cùng Kỳ','c',['moc']]
+  ],
+  16:[ /* Thần Điện (khonggian): BOSS THẦN, phẩm chất Thần. Chỉ số tính như boss vùng cuối z16, cấp tối đa 270 (xem THIET_KE_CHI_SO.md mục 9). Chưa đăng ký vào vùng/map, chưa có ảnh thú. */
+    ['th1','Đế Giang','c',['khonggian'],true,16]
   ]
 };
 
-/* ĐỘ HIẾM LOÀI (5 bậc, khác Rank E..SR của từng cá thể): thuong < hiem < suthi < huyenthoai < truyenthuyet.
+/* ĐỘ HIẾM LOÀI (6 bậc, khác Rank E..SR của từng cá thể): thuong < hiem < suthi < huyenthoai < truyenthuyet < than.
    ts = trọng số GẶP thú hoang (61-tham-hiem-tran.js): con càng hiếm càng ít gặp. mau = màu chữ nhãn (khớp DO_HIEM_MAU của tools/tao-manh-ghep.py).
    QUY TẮC MẶC ĐỊNH mỗi vùng 10 con theo thứ tự trong BANG: 3 Thường, 3 Hiếm, 2 Sử Thi, 1 Huyền Thoại, con cuối (boss) Truyền Thuyết. Thú khởi đầu (k1-k3) = Thường.
    Muốn đổi 1 con: thêm vào DO_HIEM_RIENG, vd {'1c':'suthi'}. */
-var DO_HIEM_THU=['thuong','hiem','suthi','huyenthoai','truyenthuyet'];
+var DO_HIEM_THU=['thuong','hiem','suthi','huyenthoai','truyenthuyet','than'];
 var DO_HIEM={
   thuong:{ten:'Thường',mau:'#b9c0c9',ts:40},
   hiem:{ten:'Hiếm',mau:'#3ec9a7',ts:25},
   suthi:{ten:'Sử Thi',mau:'#b06cff',ts:12},
   huyenthoai:{ten:'Huyền Thoại',mau:'#ffb020',ts:8},
-  truyenthuyet:{ten:'Truyền Thuyết',mau:'#ff3d5a',ts:1}
+  truyenthuyet:{ten:'Truyền Thuyết',mau:'#ff3d5a',ts:1},
+  than:{ten:'Thần',mau:'#ffd76a',ts:0.1}   /* bậc 6, trên Truyền Thuyết: vàng ánh kim, tỉ lệ gặp 0,1 (Truyền Thuyết = 1). Chỉ số nhân thêm CFG.hsThan (56-chi-so.js) */
 };
 /* ĐỘ HIẾM TỪNG CON do người dùng chốt (danh-sach-do-hiem, 22/11/2026). Con nào không có ở đây thì theo quy tắc mặc định bên dưới. */
 var DO_HIEM_RIENG={
@@ -151,6 +156,7 @@ var DO_HIEM_RIENG={
   '5a':'thuong', '5b':'thuong', '5c':'hiem', '5d':'thuong', '5e':'hiem', '5f':'hiem', '5g':'suthi', '5h':'suthi', '5i':'huyenthoai', '5j':'truyenthuyet',
   '7a':'thuong', '7b':'thuong', '7c':'thuong', '7d':'hiem', '7e':'hiem', '7f':'hiem', '7g':'suthi', '7h':'suthi', '7i':'huyenthoai', '7j':'truyenthuyet',
   '8a':'thuong', '8b':'thuong', '8c':'thuong', '8d':'hiem', '8e':'hiem', '8f':'hiem', '8g':'suthi', '8h':'suthi', '8i':'huyenthoai', '8j':'truyenthuyet',
+  'th1':'than',
   '9a':'thuong', '9b':'thuong', '9c':'thuong', '9d':'hiem', '9e':'hiem', '9f':'hiem', '9g':'suthi', '9h':'suthi', '9i':'huyenthoai', '9j':'truyenthuyet'
 };
 /* ĐỘ HIẾM CỦA HỆ (khác độ hiếm loài): hệ có vùng riêng = thuong; Độc/Trùng = hiem; Võ/Nham = suthi; Ma = huyenthoai; Long = truyenthuyet.

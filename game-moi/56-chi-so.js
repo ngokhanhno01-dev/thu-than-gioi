@@ -16,6 +16,8 @@ var CFG={
   goc:{hp:150,tc:40,pt:30,td:40,mm:10},
   hsVungMoiZ:0.3,        /* hp,tc,pt,td nhân (1 + 0,3 x z); mm KHÔNG nhân theo vùng */
   hsBoss:1.6,            /* boss: hp,tc,pt,td nhân thêm */
+  hsThan:1.5,            /* PHẨM CHẤT THẦN (độ hiếm 'than', bậc 6 trên Truyền Thuyết): hp,tc,pt,td nhân thêm (mm không nhân). Muốn 'áp đảo hẳn' thì tăng lên 2 */
+  hsMauBossLoai:{th1:10},/* Máu nhân thêm CHỈ KHI ĐÁNH BOSS (tinh() nhận thu.boss === true rõ ràng từ trận). Thú bắt về (không có thu.boss) giữ chỉ số bình thường. th1 = Đế Giang, x10 chốt 27/11/2026 (5 người cùng đánh) */
   /* nhân theo vai trò (hp,tc,pt,td) */
   vai:{
     tank:    {hp:1.3, tc:0.8, pt:1.4, td:0.7},
@@ -50,7 +52,7 @@ function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 /* ===== HỆ: 18 hệ (khung khắc chế lấy theo Pokémon, đổi tên cho hợp game) =====
    BANG_HE[hệ tấn công] = {khac:[hệ bị khắc], kem:[hệ kháng], mien:[hệ miễn nhiễm]}. Sửa quan hệ nào cứ sửa ở đây. Hệ không liệt kê = x1.
    Thêm hệ mới: thêm vào HE_TEN + một dòng BANG_HE + (nếu cần) thêm tên vào dòng của các hệ khác. */
-var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên'};
+var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',khonggian:'Không Gian'};
 var HE=Object.keys(HE_TEN);
 function ds(x){return x?x.split(' '):[];}
 function H(khac,kem,mien){return {khac:ds(khac),kem:ds(kem),mien:ds(mien)};}
@@ -72,7 +74,8 @@ var BANG_HE={
   long:  H('long','kim','tien'),
   am:    H('tam ma','vo am tien',''),
   kim:   H('bang nham tien','hoa thuy loi kim',''),
-  tien:  H('vo long am','hoa doc kim','')
+  tien:  H('vo long am','hoa doc kim',''),
+  khonggian:H('ma long am tam tien','kim','')   /* Không Gian (hệ của boss Đế Giang): khắc Ma, Long, Ám, Tâm Linh, Tiên; bị Kim kháng. Chốt 27/11/2026, chỉnh ở dòng này */
 };
 /* hs một đòn hệ heDon lên 1 hệ mục tiêu h */
 function heMot(heDon,h){
@@ -153,8 +156,10 @@ function tinh(thu,ctx){
   else{
     b=goc(thu.id,vung,vai,boss);base={};
     var hb=hsBac(bac);
-    ['hp','tc','pt'].forEach(function(k){base[k]=b[k]*(1+CFG.hsCap[k]*(lv-1))*CFG.hsTien[k][tien-1]*hb;});
-    base.td=b.td*(1+CFG.hsCap.td*(lv-1))*CFG.hsTien.td[tien-1]*hb;
+    var hT=(root.TTGCS&&root.TTGCS.doHiem&&root.TTGCS.doHiem(thu.id)==='than')?CFG.hsThan:1;   /* phẩm chất Thần: nhân thêm hp,tc,pt,td */
+    ['hp','tc','pt'].forEach(function(k){base[k]=b[k]*(1+CFG.hsCap[k]*(lv-1))*CFG.hsTien[k][tien-1]*hb*hT;});
+    base.td=b.td*(1+CFG.hsCap.td*(lv-1))*CFG.hsTien.td[tien-1]*hb*hT;
+    if(thu.boss===true&&CFG.hsMauBossLoai[thu.id])base.hp*=CFG.hsMauBossLoai[thu.id];   /* Máu x10 chỉ lúc ĐÁNH boss (thu.boss === true do trận truyền); bắt về thì không có cờ này */
     base.mm=b.mm*CFG.hsTien.mm[tien-1];     /* mm: không theo cấp, không theo bậc */
   }
   var mod={};
