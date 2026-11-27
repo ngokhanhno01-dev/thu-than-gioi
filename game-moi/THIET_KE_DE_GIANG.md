@@ -59,5 +59,5 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - Thú Công S 270 V3: đòn thường ~1,6% máu boss, kỹ năng 500% ~8% (Vô Cực tank: 0,8% / 3,8%).
 - Đã kiểm tra: node --check, node tính lại chỉ số; thú nuôi th1 cấp 1 không đổi. CHƯA thử trong trận thật (chưa biết boss đánh thú mình có thắng nổi 10% đầu không).
 
-- Máu x30: Đế Giang 2.821.830 / Chúc Long 2.665.050 / Vô Cực 4.075.980. Thú Công S 270: đòn thường ~0,26%, kỹ năng 500% ~1,3% (Vô Cực tank ~0,13% / 0,64%).
+- Máu x30: Đế Giang 2.821.825 / Chúc Long 2.665.057 / Vô Cực 4.075.969. Thú Công S 270: đòn thường ~0,26%, kỹ năng 500% ~1,3% (Vô Cực tank ~0,13% / 0,64%).
 - Ý chưa làm (người dùng nêu 27/11): tốc độ boss vào trận chỉ 50 rồi mỗi đợt +50 để thú cấp thấp kịp đánh 1 cái. Chờ chốt 'đợt' là gì.
