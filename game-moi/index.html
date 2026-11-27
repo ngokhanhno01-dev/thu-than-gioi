@@ -882,6 +882,13 @@ var BGV=document.getElementById('bgv'),BGV2=document.getElementById('bgv2'),bgOn
  'xich-hoa-dia':{image:'game-moi/bg-xich-hoa-dia.webp',fit:true,fy:.55,fx:['firefly','mist'],mistY:[.55,.7],mistOpacity:.16,mistRgb:'130,75,75',flyRgb:'255,150,60'},
  'thanh-lam':{image:'game-moi/bg-thanh-lam.webp',fit:true,fy:.55,fx:['leaf','firefly'],leafRgb:'150,215,110',flyRgb:'255,240,150'},
  /* NGOẠI LỆ: 3 thú khởi đầu (k1 Viêm Sư, k2 Lưu Diêu, k3 Lâm Trư) dùng chung nền này thay vì nền vùng của mình. Gắn bằng cờ nen:'khoi-dau' trên thú ở 51-thu-moi.js (t.zone vẫn giữ để tìm ảnh thú). */
+ /* 3 vùng THẦN (27/11/2026): mỗi boss Thần có nền riêng, gắn bằng cờ nen trên thú ở 51-thu-moi.js. Hiện chỉ th1 Đế Giang dùng Tinh Vực Đoạn Không; hai nền còn lại chờ thú Thời Gian / Thái Cực. */
+ 'tinh-vuc-doan-khong':{image:'game-moi/bg-tinh-vuc-doan-khong.webp',fit:true,fy:.55,fx:['star','firefly','glint'],flyRgb:'215,175,255',glintRgb:'228,200,255',
+  crystals:[[.206,.6],[.49,.585],[.68,.61],[.89,.77],[.04,.81],[.32,.82]]},
+ 'thoi-quang-co-vuc':{image:'game-moi/bg-thoi-quang-co-vuc.webp',fit:true,fy:.55,fx:['star','firefly','glint'],flyRgb:'255,215,120',glintRgb:'170,255,255',
+  crystals:[[.09,.36],[.32,.45],[.5,.4],[.68,.45],[.92,.36]]},
+ 'con-luan-thien-canh':{image:'game-moi/bg-con-luan-thien-canh.webp',fit:true,fy:.55,fx:['mist','firefly','glint'],mistY:[.5,.62],mistOpacity:.2,mistRgb:'220,245,255',flyRgb:'170,255,230',glintRgb:'190,255,240',
+  crystals:[[.15,.92],[.83,.92],[.5,.1],[.2,.1]]},
  'khoi-dau':{image:'game-moi/bg-khoi-dau.webp',fit:true,fy:.55,fx:['leaf','firefly'],leafRgb:'255,196,220',flyRgb:'190,235,255'}},
  bgCur=BGV,bgNxt=BGV2,bgSw=false,bgFile='',bgGen=0,bgImageOn=false,bgLastImageOn=false,
  bgImg=null,bgConf=null,bgBase=null,bgGeo=null,bgSpr=null,bgKW=0,bgKH=0,bgKM=0,bgKI=null,bgClock=0,bgLast=0,bgSnow=[],bgFly=[],bgBolts=[],bgBoltNext=0,BG_IMGS={};

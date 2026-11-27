@@ -133,7 +133,7 @@
   /* THÚ THẦN (boss thế giới, 27/11/2026): KHÔNG nằm trong zones (không thành vùng, không tính Danh Vọng/map/thám hiểm). Chỉ đăng ký vào byId để vẽ + hiện ở bảng thú.
      Ảnh: thu-game/than/<slug>-b<bậc>-192.png. Thêm Thời Gian / Thái Cực: thêm dòng vào thanZone.thu. */
   var thanZone = { z: 17, slug: 'than', ten: 'Thần', thu: [
-    { id: 'th1', slug: 'de-giang', ten: 'Đế Giang', boss: true }
+    { id: 'th1', slug: 'de-giang', ten: 'Đế Giang', boss: true, nen: 'tinh-vuc-doan-khong' }
   ] };
   var byId = {}, cache = {};
   zones.forEach(function (zn) {
