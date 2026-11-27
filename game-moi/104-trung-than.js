@@ -10,7 +10,7 @@
   var B = root.TTGBALO;
   if (!B) return;
   var CFG = {
-    tiLeRoi: { th1: 0.005, th2: 0.005, th3: 0.005 },   /* 0,5% khi giết Đế Giang (người dùng chốt 27/11/2026); Chúc Long và Vô Cực đặt TẠM bằng Đế Giang, chờ chốt */
+    tiLeRoi: { th1: 0.005, th2: 0.005, th3: 0.005 },   /* 0,5% khi giết boss Thần, cả 3 con (người dùng chốt 27/11/2026). Sách kỹ năng boss Thần: 1,5% như boss thường (TY_LE_ROI_SACH, 56c-buff.js) */
     soTest: 3                  /* nút test: số trứng mỗi lần bấm */
   };
   var TRUNG = {   /* id vật phẩm -> loài boss */
