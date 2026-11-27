@@ -10,7 +10,7 @@
   var D = root.document;
   if (!D || !root.TTGBTG) return;
   /* nạp động module thông báo rơi đồ (106) nếu chưa có (để tô 7 màu tên boss) */
-  (function () { try { if (root.TTGDROP || root.__tdrLoad) return; root.__tdrLoad = 1; var cs = D.currentScript, s = D.createElement('script'); s.src = (cs && cs.src ? cs.src.replace(/[^\/?#]*([?#].*)?$/, '') : 'game-moi/') + '106-thong-bao-roi.js?v=1'; D.head.appendChild(s); } catch (e) {} })();
+  (function () { try { if (root.TTGDROP || root.__tdrLoad) return; root.__tdrLoad = 1; var cs = D.currentScript, s = D.createElement('script'); s.src = (cs && cs.src ? cs.src.replace(/[^\/?#]*([?#].*)?$/, '') : 'game-moi/') + '106-thong-bao-roi.js?v=2'; D.head.appendChild(s); } catch (e) {} })();
   var CFG = { pollMs: 1000, toc: 130, cao: 34 };   /* toc = px/giây */
   var TONE = {   /* [màu viền, nền trái, nền phải] */
     xh:   ['#ffd76a', 'rgba(40,16,70,.92)', 'rgba(120,44,20,.92)'],
@@ -25,7 +25,7 @@
   function vung(t) { return '<b style="color:#7fe9ff">' + esc(t) + '</b>'; }
   function nguoi(t) { return '<b style="color:#ffe066">' + esc(t) + '</b>'; }
   function mau(hp) { var p = Math.round(hp * 100), c = p > 50 ? '#7dff8a' : p > 20 ? '#ffb347' : '#ff5a6e'; return '<b style="color:' + c + '">' + p + '%</b>'; }
-  function ic(e) { return '<span class="ic">' + e + '</span>'; }
+  function ic(l) { var p = ''; try { p = root.TTGTHU && TTGTHU.anh ? TTGTHU.anh({ id: l, tien: 1 }) : ''; } catch (e) {} return p ? '<span class="ic"><img src="' + p + '" alt=""></span>' : ''; }   /* icon = ảnh thật của boss */
 
   function ensure() {
     if (bar) return;
@@ -33,6 +33,7 @@
     st.textContent = '#ttgbtg-bar{position:fixed;left:0;right:0;top:0;height:' + CFG.cao + 'px;overflow:hidden;background:linear-gradient(90deg,rgba(40,16,70,.92),rgba(120,44,20,.92));border-bottom:2px solid #ffd76a;box-shadow:0 2px 10px rgba(0,0,0,.5);z-index:2147483000;pointer-events:none;display:none}' +
       '#ttgbtg-txt{position:absolute;left:0;top:0;line-height:' + CFG.cao + 'px;white-space:nowrap;font:700 15px "Noto Serif",sans-serif;color:#fff3c4;text-shadow:0 1px 2px #000;will-change:transform}' +
       '#ttgbtg-txt .ic{display:inline-block;margin-right:6px;font-size:18px;vertical-align:-2px}' +
+      '#ttgbtg-txt .ic img{width:28px;height:28px;object-fit:contain;vertical-align:-9px;filter:drop-shadow(0 1px 2px #000)}' +
       '@keyframes ttgbtg-run{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}';
     D.head.appendChild(st);
     bar = D.createElement('div'); bar.id = 'ttgbtg-bar';
@@ -64,10 +65,10 @@
     key = s.coMat ? s.maLan : null;
     pre = s.test ? '<span style="color:#9aa3d6">[TEST]</span> ' : '';
     if (key && !s.chet) {
-      if (!last || last.key !== key) show(pre + ic('⚔️') + 'Boss Thần ' + boss(bossTen(s.loai)) + ' đã xuất hiện tại ' + vung(zoneTen(s.vung)) + '! <b style="color:#ffe066">Mau đến khiêu chiến!</b>', 'xh');
-      else if ((s.soChay || 0) > last.soChay) show(pre + ic('💨') + 'Boss Thần ' + boss(bossTen(s.loai)) + ' bị ' + nguoi(s.nguoiChay || 'một người chơi') + ' đánh bị thương, bỏ chạy sang ' + vung(zoneTen(s.vung)) + '! Còn ' + mau(s.hp) + ' máu.', 'chay');
+      if (!last || last.key !== key) show(pre + ic(s.loai) + 'Boss Thần ' + boss(bossTen(s.loai)) + ' đã xuất hiện tại ' + vung(zoneTen(s.vung)) + '! <b style="color:#ffe066">Mau đến khiêu chiến!</b>', 'xh');
+      else if ((s.soChay || 0) > last.soChay) show(pre + ic(s.loai) + 'Boss Thần ' + boss(bossTen(s.loai)) + ' bị ' + nguoi(s.nguoiChay || 'một người chơi') + ' đánh bị thương, bỏ chạy sang ' + vung(zoneTen(s.vung)) + '! Còn ' + mau(s.hp) + ' máu.', 'chay');
     } else if (key && s.chet && last && !last.chet) {
-      show(pre + ic('🏆') + 'Boss Thần ' + boss(bossTen(s.loai)) + ' đã bị hạ bởi ' + nguoi(s.nguoiGiet || 'một người chơi') + '!', 'ha');
+      show(pre + ic(s.loai) + 'Boss Thần ' + boss(bossTen(s.loai)) + ' đã bị hạ bởi ' + nguoi(s.nguoiGiet || 'một người chơi') + '!', 'ha');
     }
     last = key ? { key: key, soChay: s.soChay || 0, chet: !!s.chet } : null;
   }

@@ -152,7 +152,7 @@ function roiDo(enemy,mm){
   if(Math.random()*100<Math.min(100,d[1]*bonus)){q=d[2]+Math.floor(Math.random()*(d[3]-d[2]+1));i=id(z,d[0]);TTGBALO.add(i,q);out.push({id:i,q:q});}});
  return out;}
 /* RƠI KHI HẠ BOSS THẦN: chỉ gọi khi boss Thần (th1...) chết. idThu = id loài ('th1'). Rơi item bộ của chính con đó (CFG.roiThan). Trả [{id,q}] đã cộng Balo.
-   Tỉ lệ TẠM = như boss thú hoang (người dùng chưa chốt). CHƯA nối vào trận (boss Thần chưa ra map). */
+   Tỉ lệ TẠM = như boss thú hoang (người dùng chưa chốt). Đã nối vào trận (index.html: roiThan khi giết boss Thần). */
 function roiThan(idThu,mm){
  var out=[],z=THAN_Z[idThu];if(z==null||!root.TTGBALO)return out;
  var bonus=Math.min(3,1+Math.max(0,+mm||0)/100),q,i;

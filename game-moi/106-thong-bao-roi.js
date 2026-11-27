@@ -1,5 +1,5 @@
 /* ===== 106-thong-bao-roi.js (TTGDROP): THÔNG BÁO NHẬN / RƠI VẬT PHẨM (27/11/2026) =====
-   Thẻ thông báo gọn: [ICON có viền phát sáng] + dòng nhỏ (tiêu đề + nhãn độ hiếm) + TÊN VẬT PHẨM tô màu theo độ hiếm + nguồn / số lượng.
+   Thẻ thông báo gọn: [ICON có viền phát sáng] + dòng nhỏ (tiêu đề + nhãn độ hiếm) + TÊN VẬT PHẨM tô màu theo độ hiếm + nguồn / số lượng. Thẻ nằm DƯỚI dòng chữ chạy ngang (46px) để không bị che. TTGDROP.sach(idSach, nguon) = thẻ nhặt sách kỹ năng (màu xanh ngọc).
    Màu theo độ hiếm (khớp màu Rank của 64-thong-bao.js): E trắng, D xanh lá, C lam, B tím, A vàng, S cam, SS đỏ, SR + THẦN = 7 MÀU CẦU VỒNG (chữ chạy màu, viền chạy màu, hạt lấp lánh, nháy sáng màn hình).
    Bậc độ hiếm thú (thuong/hiem/suthi/huyenthoai/truyenthuyet) cũng dùng được trong tham số muc.
    API:
@@ -22,6 +22,7 @@
     S:  { nhan: 'Huyền thoại',  c: '#ff8000', rgb: '255,128,0', hi: 1 },
     SS: { nhan: 'Truyền thuyết',c: '#ff1744', rgb: '255,23,68', hi: 1 },
     SR: { nhan: 'Cực phẩm',     c: '#ff4fd8', rgb: '255,64,64', hi: 1, rb: 1 },
+    sach: { nhan: 'Sách kỹ năng', c: '#4fd8ff', rgb: '60,200,255', hi: 1 },
     than: { nhan: 'Thần phẩm',  c: '#ff4fd8', rgb: '255,64,64', hi: 1, rb: 1 }
   };
   M.thuong = M.E; M.hiem = M.C; M.suthi = M.B; M.huyenthoai = M.A; M.truyenthuyet = M.S;
@@ -29,7 +30,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   var css = [
-    '#tdr-box{position:fixed;left:50%;top:0;transform:translateX(-50%);padding-top:calc(env(safe-area-inset-top,0px) + 4vh);z-index:400;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(94vw,440px);font-family:"Noto Serif","Palatino Linotype",Georgia,serif}',
+    '#tdr-box{position:fixed;left:50%;top:0;transform:translateX(-50%);padding-top:calc(env(safe-area-inset-top,0px) + 46px);z-index:400;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(94vw,440px);font-family:"Noto Serif","Palatino Linotype",Georgia,serif}',
     '.tdr{position:relative;display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;padding:10px 14px 10px 10px;border-radius:14px;color:#fff;background:linear-gradient(160deg,rgba(20,26,80,.95),rgba(6,8,36,.97));border:2px solid rgb(var(--rgb));box-shadow:0 0 14px rgba(var(--rgb),.7),inset 0 0 14px rgba(var(--rgb),.25);animation:tdr-in .3s cubic-bezier(.2,1.4,.4,1)}',
     '.tdr.hi{box-shadow:0 0 22px rgba(var(--rgb),.9),0 0 44px rgba(var(--rgb),.45),inset 0 0 18px rgba(var(--rgb),.35)}',
     '.tdr.out{animation:tdr-out .35s ease-in forwards}',
@@ -77,7 +78,7 @@
     var isImg = ic && (ic.indexOf('/') >= 0 || /\.(png|webp|jpe?g|gif|svg)(\?|$)/i.test(ic));
     if (isImg) {
       var im = new Image(); im.alt = '';
-      im.onerror = function () { wrap.textContent = fb || '🎁'; };
+      im.onerror = function () { wrap.textContent = fb == null ? '🎁' : fb; };
       im.src = ic; wrap.appendChild(im);
     } else wrap.textContent = ic || fb || '🎁';
     return wrap;
@@ -110,5 +111,11 @@
     return el;
   }
 
-  root.TTGDROP = { M: M, show: show, tenHtml: tenHtml };
+  /* SÁCH KỸ NĂNG rơi từ boss: thẻ xanh ngọc (trứng Thần = 7 màu hiếm hơn). Icon = ảnh thật game-moi/icon-kn/<id>.png */
+  function sach(id, nguon, so) {
+    var c = root.TTGBALO && TTGBALO.CAT && TTGBALO.CAT[id], ten = (c && c.ten) || 'Sách kỹ năng';
+    return show({ tieude: 'Nhặt được sách!', ten: ten, so: so || 1, muc: 'sach', nhan: 'Sách kỹ năng', nguon: nguon || '', icon: 'game-moi/icon-kn/' + String(id).replace(/^sach-/, '') + '.png', fb: '', ms: 4200 });
+  }
+
+  root.TTGDROP = { M: M, show: show, tenHtml: tenHtml, sach: sach };
 })(typeof window !== 'undefined' ? window : globalThis);

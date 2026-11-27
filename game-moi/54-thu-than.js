@@ -142,6 +142,13 @@ var css=[
 '.tt-c canvas.pc{position:absolute!important;left:12%!important;top:9%!important;width:76%;height:auto;aspect-ratio:1;pointer-events:none;image-rendering:auto}',
 '.tt-c .b{position:absolute;left:{8};top:{2};font-family:"TTGRank","Kaushan Script",cursive;font-weight:400;font-size:{36};line-height:1;color:var(--rl);-webkit-text-stroke:{2} var(--rl);text-shadow:0 0 {3} var(--rc),0 0 {8} var(--rc),0 0 {16} var(--rc);filter:drop-shadow(0 {2} 0 rgba(0,6,40,.85));pointer-events:none}',
 '.tt-c .rt{position:absolute;left:8%;right:8%;bottom:{9};height:{25};display:flex;align-items:center;justify-content:center;border-radius:{6};background:linear-gradient(180deg,#ffe58a,#c58a1e);color:#3b2406;font-family:var(--fh);font-weight:800;font-size:{17};line-height:1;white-space:nowrap}',
+/* THÚ THẦN (độ hiếm loài 'than'): KHUNG VÀNG ÁNH KIM riêng (viền kép + nền ấm), hiệu ứng Rank GIẢM: chỉ 2 hạt, mờ, không xoay màu; chữ Rank vẫn rõ để chọn thú */
+'.tt-c.than{background:radial-gradient(circle at 50% 38%,rgba(255,215,106,.20),rgba(40,28,6,.0) 72%)}',
+'.tt-c.than::before{content:"";position:absolute;left:{2};top:{2};right:{2};bottom:{2};border:{4} solid transparent;border-radius:{8};background:linear-gradient(135deg,#fff3b8,#d6a53a 28%,#7a5412 52%,#ffe58a 78%,#c9992f) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;box-shadow:0 0 {8} rgba(255,215,106,.45);pointer-events:none;z-index:1}',
+'.tt-c.than::after{content:"";position:absolute;left:{9};top:{9};right:{9};bottom:{9};border:{1} solid rgba(255,229,138,.5);border-radius:{4};pointer-events:none;z-index:1}',
+'.tt-c.than.sel::after{left:{3};top:{3};right:{3};bottom:{3};border:{4} solid #ffe066;border-radius:{6};box-shadow:0 0 {16} rgba(255,224,102,.85),inset 0 0 {14} rgba(255,224,102,.4)}',
+'.tt-c.than .rk{opacity:.28;animation:none!important;filter:none!important}',
+'.tt-c.than .b.sr{filter:drop-shadow(0 {2} 0 rgba(0,6,40,.85))}',
 '.tt-c.sel::after{content:"";position:absolute;left:{3};top:{3};right:{3};bottom:{3};border:{4} solid #ffe066;border-radius:{6};box-shadow:0 0 {16} rgba(255,224,102,.85),inset 0 0 {14} rgba(255,224,102,.4);pointer-events:none}',
 /* rãnh + thumb cuộn (phủ kín rãnh vẽ sẵn trong ảnh để không lộ thumb vẽ sẵn ở trên cùng) */
 '.tt-rail{border-radius:{9};background:#0d0e34;border:{2} solid #8a6a2a;touch-action:none;cursor:pointer}',
@@ -315,10 +322,10 @@ function renderGrid(){
     var t=thus[row0*4+i],c=E.cells[i];
     if(t){
       var a=anhThu(t);
-      c.innerHTML=(window.TTGTBAO&&t.bac?TTGTBAO.fx(t.bac,4):'')+(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'')+'<span class="b'+(t.bac==='SR'?' sr':'')+'" style="--rc:'+RKC[RKC[t.bac]?t.bac:'C'][0]+';--rl:'+RKC[RKC[t.bac]?t.bac:'C'][1]+'">'+(RKC[t.bac]?t.bac:'C')+'</span>'+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
+      var th=window.TTGCS&&TTGCS.doHiem&&TTGCS.doHiem(t.id)==='than';c.classList.toggle('than',!!th);c.innerHTML=(window.TTGTBAO&&t.bac?TTGTBAO.fx(t.bac,th?2:4):'')+(a?'<canvas class="pc" width="192" height="192" data-u="'+esc(a)+'"></canvas>':'')+'<span class="b'+(t.bac==='SR'?' sr':'')+'" style="--rc:'+RKC[RKC[t.bac]?t.bac:'C'][0]+';--rl:'+RKC[RKC[t.bac]?t.bac:'C'][1]+'">'+(RKC[t.bac]?t.bac:'C')+'</span>'+(t.uid===rt?'<span class="rt">Ra trận</span>':'');
       var pc=c.querySelector('canvas.pc');if(pc)pcPaint(pc);
       c.setAttribute('aria-label',tenThu(t));c.style.pointerEvents='';
-    }else{c.innerHTML='';c.removeAttribute('aria-label');c.style.pointerEvents='none';}
+    }else{c.classList.remove('than');c.innerHTML='';c.removeAttribute('aria-label');c.style.pointerEvents='none';}
     c.classList.toggle('sel',!!t&&t.uid===sel);
   }
   /* thumb: cao theo tỉ lệ 4 hàng / tổng số hàng (tối thiểu 12%); không cuộn được thì thumb phủ kín rãnh */
