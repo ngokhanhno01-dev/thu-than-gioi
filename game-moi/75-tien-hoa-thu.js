@@ -19,7 +19,8 @@
 'use strict';
 var D='game-moi/icon-th/',NZ=9,ZT=17,ZLIST=[0,1,2,3,4,5,6,7,8,17],KIND=['loi','chau','an'];/* ZT = vùng Thần (Không Gian, z17): item Lõi Tinh Hà / Châu Hư Thiên / Thần Ấn Đế Giang, dùng cho thú Thần (Đế Giang). Số vùng thường 0..8 giữ nguyên */
 var ZONE=['Tuyết Nguyên','Sương Cốc','Vân Đảo','Phong Nguyên','Lôi Vực','Nguyệt Cung','Thủy Nguyệt Cảnh','Xích Hỏa Địa','Thanh Lâm'];
-ZONE[ZT]='Không Gian';
+ZONE[ZT]='Đế Giang';
+function vTen(z){return z===ZT?'thú Thần '+ZONE[z]:'vùng '+ZONE[z];}/* z17 KHÔNG phải vùng thám hiểm: chỉ là khóa nội bộ của bộ item Thần Đế Giang */
 var TEN=[
  ['Lõi Hàn Sương','Châu Tuyết Phách','Thần Ấn Băng Sơn'],
  ['Lõi Vụ Linh','Châu Mộc Sương','Thần Ấn Vụ Thú'],
@@ -46,10 +47,13 @@ var CFG={
  matKhiThat:true,
  /* số Mảnh (của chính loài đó) nhận được MỖI LẦN THẢ 1 con thú, bất kể Rank / hệ. Giết thú không còn rơi Mảnh */
  manhTha:1,
+ /* rơi khi hạ boss Thần: [loại item, % rơi, số lượng tối thiểu, tối đa]. TẠM = boss thú hoang; chờ người dùng chốt */
+ roiThan:[['loi',20,1,1],['chau',20,1,1],['an',30,1,1]],
  /* rơi Lõi/Châu/Thần Ấn theo vùng: [loại item, % rơi, số lượng tối thiểu, tối đa] (nhân may mắn) */
  roi:{thuong:[['loi',20,1,1],['chau',20,1,1]],
       boss:[['loi',20,1,1],['chau',20,1,1],['an',30,1,1]]}
 };
+var THAN_Z={th1:17};
 var MO={loi:'Lõi tinh hoa',chau:'Châu tinh hoa',an:'Thần Ấn'};
 function id(z,k){return 'th-z'+z+'-'+k;}
 function idManh(t){return 'th-m-'+t;}
@@ -62,11 +66,11 @@ function reg(){
  if(!root.TTGBALO||!TTGBALO.reg)return;var o={},z,i,k;
  ZLIST.forEach(function(z){for(i=0;i<3;i++){k=KIND[i];
   o[id(z,k)]={loai:'th',ten:TEN[z][i],img:D+id(z,k)+'.png',
-   mo:MO[k]+' của vùng '+ZONE[z]+'. Dùng tiến hóa thú gốc vùng này'+(k==='an'?' (V2 → V3). Chỉ rơi từ boss thú hoang.':'. Rơi từ thú hoang vùng này.')};}});
+   mo:z===ZT?MO[k]+' của thú Thần '+ZONE[z]+'. Dùng tiến hóa Đế Giang'+(k==='an'?' (V2 → V3)':'')+'. Chỉ rơi khi hạ boss Thần, không có ở nơi khác.':MO[k]+' của vùng '+ZONE[z]+'. Dùng tiến hóa thú gốc vùng này'+(k==='an'?' (V2 → V3). Chỉ rơi từ boss thú hoang.':'. Rơi từ thú hoang vùng này.')};}});
  /* Mảnh theo từng loài (chỉ vùng đã khai) */
  CFG.vungManh.forEach(function(zv){dsThu(zv).forEach(function(s){
   o[idManh(s.id)]={loai:'th',ten:'Mảnh '+s.ten,img:D+idManh(s.id)+'.png',
-   mo:'Mảnh của '+s.ten+' (vùng '+ZONE[zv]+'). Dùng để tiến hóa chính loài này lần 1. Nhận được khi THẢ 1 con '+s.ten+' (1 con = 1 Mảnh), không rơi khi giết.'};});});
+   mo:'Mảnh của '+s.ten+' ('+(zv===ZT?'thú Thần':'vùng '+ZONE[zv])+'). Dùng để tiến hóa chính loài này lần 1. Nhận được khi THẢ 1 con '+s.ten+' (1 con = 1 Mảnh), không rơi khi giết.'};});});
  TTGBALO.reg(o);}
 /* dọn khóa Mảnh theo vùng CŨ (th-z*-manh) còn sót trong Balo (localStorage): trừ hết số đang có */
 function donManhCu(){
@@ -138,10 +142,18 @@ function tienHoa(uid){
 /* enemy: địch vừa thua ({source,boss,vung}); mm: may mắn của người chơi. Chỉ thú hoang (source 'demo'). Trả [{id,q}] đã cộng vào Balo. */
 function roiDo(enemy,mm){
  var out=[];if(!enemy||enemy.source!=='demo'||!root.TTGBALO)return out;
- var z=enemy.vung|0;if(!((z>=0&&z<NZ)||z===ZT))return out;
+ var z=enemy.vung|0;if(!(z>=0&&z<NZ))return out;/* z17 (Thần) KHÔNG rơi từ thú hoang: dùng roiThan */
  var bonus=Math.min(3,1+Math.max(0,+mm||0)/100),q,i;
  /* KHÔNG rơi Mảnh khi giết: Mảnh chỉ có từ việc THẢ thú (manhKhiTha). Ở đây chỉ rơi Lõi/Châu/Thần Ấn của vùng */
  CFG.roi[enemy.boss?'boss':'thuong'].forEach(function(d){
+  if(Math.random()*100<Math.min(100,d[1]*bonus)){q=d[2]+Math.floor(Math.random()*(d[3]-d[2]+1));i=id(z,d[0]);TTGBALO.add(i,q);out.push({id:i,q:q});}});
+ return out;}
+/* RƠI KHI HẠ BOSS THẦN: chỉ gọi khi boss Thần (th1...) chết. idThu = id loài ('th1'). Rơi item bộ của chính con đó (CFG.roiThan). Trả [{id,q}] đã cộng Balo.
+   Tỉ lệ TẠM = như boss thú hoang (người dùng chưa chốt). CHƯA nối vào trận (boss Thần chưa ra map). */
+function roiThan(idThu,mm){
+ var out=[],z=THAN_Z[idThu];if(z==null||!root.TTGBALO)return out;
+ var bonus=Math.min(3,1+Math.max(0,+mm||0)/100),q,i;
+ CFG.roiThan.forEach(function(d){
   if(Math.random()*100<Math.min(100,d[1]*bonus)){q=d[2]+Math.floor(Math.random()*(d[3]-d[2]+1));i=id(z,d[0]);TTGBALO.add(i,q);out.push({id:i,q:q});}});
  return out;}
 function moTa(list){return (list||[]).map(function(d){return nm(d.id)+' x'+d.q;}).join(', ');}
@@ -163,7 +175,7 @@ function cap(n){n=n||1;var t=ra();if(!t)return {err:'Chưa có thú ra trận: h
  for(k in tot)if(k!=='manh')TTGBALO.add(id(z,k),tot[k]*n);
  return {z:z,ten:nm(im).replace(/^Mảnh /,''),manh:coManh};}
 
-root.TTGTH={CFG:CFG,id:id,idManh:idManh,yeuCau:yeuCau,tienHoa:tienHoa,roiDo:roiDo,moTa:moTa,cap:cap,ZONE:ZONE,manhKhiTha:manhKhiTha,tenManh:tenManh,tiLe:tiLe};
+root.TTGTH={roiThan:roiThan,CFG:CFG,id:id,idManh:idManh,yeuCau:yeuCau,tienHoa:tienHoa,roiDo:roiDo,moTa:moTa,cap:cap,ZONE:ZONE,manhKhiTha:manhKhiTha,tenManh:tenManh,tiLe:tiLe};
 reg();donManhCu();
 
 /* nút test (hàng dưới, cạnh "Lấy sách") */
@@ -171,7 +183,7 @@ if(CFG.nutTest&&root.TTGNV&&root.TTGBALO){
  root.TTGNV.add({id:'lay-do-th',ten:'Lấy đồ TH',r:1,rc:0,onTap:function(){
   var r=cap(1),T=root.TTGTBAO&&TTGTBAO.toast;if(!T)return;
   if(r.err)TTGTBAO.toast(r.err,2600);
-  else TTGTBAO.toast('TEST: +Mảnh '+r.ten+' (x6) +Lõi/Châu/Thần Ấn vùng '+ZONE[r.z]+' +6.000 Tinh Thạch'+(r.manh?'':' (loài này chưa có item Mảnh: vùng chưa mở trong CFG.vungManh)'),3200);
+  else TTGTBAO.toast('TEST: +Mảnh '+r.ten+' (x6) +Lõi/Châu/Thần Ấn '+vTen(r.z)+' +6.000 Tinh Thạch'+(r.manh?'':' (loài này chưa có item Mảnh: vùng chưa mở trong CFG.vungManh)'),3200);
  },icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><path d="M32 6l10 18-10 8-10-8z" fill="#7be0ff" stroke="#0b4a7a" stroke-width="3" stroke-linejoin="round"/><path d="M22 24l10 8 10-8 8 14-18 18-18-18z" fill="#4aa8ff" stroke="#0b4a7a" stroke-width="3" stroke-linejoin="round"/></svg>'});}
 
 /* ===================== GIAO DIỆN KHUNG TIẾN HÓA ===================== */
@@ -211,7 +223,7 @@ function render(){
  var cur=stat(t,t.tien|0||1),nx=r.max?null:stat(t,r.next);
  w.st.innerHTML=ks.map(function(k){var a=Math.round(cur[k]||0);return '<div class="th-r">'+a+(nx?' <i>→</i> <b>'+Math.round(nx[k]||0)+'</b>':'')+'</div>';}).join('');
  if(r.max){w.cd.innerHTML='<div class="th-em">Thú đã đạt <b>V3</b> (tối đa).</div>';w.rt.textContent='';return;}
- w.cd.innerHTML='<h6>V'+r.tien+' → V'+r.next+' · vùng '+esc(ZONE[r.z])+'</h6>'+r.items.map(function(x,j){var ok=x.have>=x.n;return '<div class="th-l"><span class="'+(ok?'th-ok':'th-no')+'">'+(S.put[j]?'✔ ':ok?'○ ':'✖ ')+esc(x.ten)+'</span><span class="'+(ok?'th-ok':'th-no')+'">'+x.have+'/'+x.n+'</span></div>';}).join('')+
+ w.cd.innerHTML='<h6>V'+r.tien+' → V'+r.next+' · '+esc(vTen(r.z))+'</h6>'+r.items.map(function(x,j){var ok=x.have>=x.n;return '<div class="th-l"><span class="'+(ok?'th-ok':'th-no')+'">'+(S.put[j]?'✔ ':ok?'○ ':'✖ ')+esc(x.ten)+'</span><span class="'+(ok?'th-ok':'th-no')+'">'+x.have+'/'+x.n+'</span></div>';}).join('')+
   (r.phi>0?'<div class="th-l"><span class="'+(r.tt>=r.phi?'th-ok':'th-no')+'">'+(r.tt>=r.phi?'○ ':'✖ ')+'Tinh Thạch</span><span class="'+(r.tt>=r.phi?'th-ok':'th-no')+'">'+fmtN(r.tt)+'/'+fmtN(r.phi)+'</span></div>':'');
  w.rt.textContent=r.tl+'%';}   /* ô tỉ lệ: V1→V2 100%, V2→V3 50% (CFG.tiLe) */
 function togglePut(i){
@@ -247,6 +259,6 @@ KH.on('pick',function(k,item){
  var r=yeuCau(ra());if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}
  if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}
  var key=String(item.key),j,idx=-1;for(j=0;j<r.items.length;j++)if(r.items[j].id===key)idx=j;
- if(idx<0){toast(nm(key)+': không dùng được cho thú này (V'+r.tien+' → V'+r.next+' cần item vùng '+ZONE[r.z]+').');return;}
+ if(idx<0){toast(nm(key)+': không dùng được cho thú này (V'+r.tien+' → V'+r.next+' cần item '+vTen(r.z)+').');return;}
  togglePut(idx);});
 })(typeof window!=='undefined'?window:globalThis);
