@@ -130,7 +130,8 @@ var BANG={
   ],
   17:[ /* Vùng 18 (khonggian): BOSS THẦN Đế Giang, chỉ số = x2 boss thú hoang vùng 18 (CFG.hsBossLoai, xem THIET_KE_DE_GIANG.md). Chưa đăng ký vào vùng/map, chưa có ảnh thú. */
     ['th1','Đế Giang','c',['khonggian'],true,17],
-    ['th2','Chúc Long','n',['thoigian'],true,17]   /* Thời Gian: vai Nhanh, chỉ số x2 boss z17 (hsBossLoai), hệ Thời Gian tạm trung tính */
+    ['th2','Chúc Long','n',['thoigian'],true,17],   /* Thời Gian: vai Nhanh, chỉ số x2 boss z17 (hsBossLoai), hệ Thời Gian tạm trung tính */
+    ['th3','Vô Cực','t',['vocuc'],true,17]   /* Vô Cực: vai Tank (TẠM), chỉ số x2 boss z17 (hsBossLoai), hệ tạm trung tính */
   ]
 };
 
@@ -157,7 +158,7 @@ var DO_HIEM_RIENG={
   '5a':'thuong', '5b':'thuong', '5c':'hiem', '5d':'thuong', '5e':'hiem', '5f':'hiem', '5g':'suthi', '5h':'suthi', '5i':'huyenthoai', '5j':'truyenthuyet',
   '7a':'thuong', '7b':'thuong', '7c':'thuong', '7d':'hiem', '7e':'hiem', '7f':'hiem', '7g':'suthi', '7h':'suthi', '7i':'huyenthoai', '7j':'truyenthuyet',
   '8a':'thuong', '8b':'thuong', '8c':'thuong', '8d':'hiem', '8e':'hiem', '8f':'hiem', '8g':'suthi', '8h':'suthi', '8i':'huyenthoai', '8j':'truyenthuyet',
-  'th1':'than', 'th2':'than',
+  'th1':'than', 'th2':'than', 'th3':'than',
   '9a':'thuong', '9b':'thuong', '9c':'thuong', '9d':'hiem', '9e':'hiem', '9f':'hiem', '9g':'suthi', '9h':'suthi', '9i':'huyenthoai', '9j':'truyenthuyet'
 };
 /* ĐỘ HIẾM CỦA HỆ (khác độ hiếm loài): hệ có vùng riêng = thuong; Độc/Trùng = hiem; Võ/Nham = suthi; Ma = huyenthoai; Long = truyenthuyet.

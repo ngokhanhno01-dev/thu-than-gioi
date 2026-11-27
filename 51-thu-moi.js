@@ -134,7 +134,8 @@
      Ảnh: thu-game/than/<slug>-b<bậc>-192.png. Thêm Thời Gian / Thái Cực: thêm dòng vào thanZone.thu. */
   var thanZone = { z: 17, slug: 'than', ten: 'Thần', thu: [
     { id: 'th1', slug: 'de-giang', ten: 'Đế Giang', boss: true, nen: 'tinh-vuc-doan-khong' },
-    { id: 'th2', slug: 'chuc-long', ten: 'Chúc Long', boss: true, nen: 'thoi-quang-co-vuc' }
+    { id: 'th2', slug: 'chuc-long', ten: 'Chúc Long', boss: true, nen: 'thoi-quang-co-vuc' },
+    { id: 'th3', slug: 'vo-cuc', ten: 'Vô Cực', boss: true, nen: 'con-luan-thien-canh' }
   ] };
   var byId = {}, cache = {};
   zones.forEach(function (zn) {

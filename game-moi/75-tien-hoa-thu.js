@@ -17,10 +17,10 @@
    API: TTGTH.roiDo(enemy,mm) | .manhKhiTha(thu) (cộng Mảnh khi thả thú) | .tenManh(idThu) | .moTa(list) | .yeuCau(thu) | .tienHoa(uid) | .cap(n) (test: +item cho thú đang ra trận) | .id(z,loai) | .idManh(idThu) | .CFG */
 (function(root){
 'use strict';
-var D='game-moi/icon-th/',NZ=9,ZT=17,ZT2=18,ZLIST=[0,1,2,3,4,5,6,7,8,17,18],KIND=['loi','chau','an'];/* ZT = khóa bộ item thú Thần Đế Giang (z17): Lõi Tinh Hà / Châu Hư Thiên / Thần Ấn Đế Giang. ZT2 = khóa bộ item thú Thần Chúc Long (z18): Lõi Thời Luân / Châu Thời Cảnh / Thần Ấn Chúc Long. Cả hai chỉ là khóa nội bộ, KHÔNG phải vùng thám hiểm (loài th1/th2 đều có goc 17 trong 56b-loai.js; bộ item tra theo THAN_Z). Số vùng thường 0..8 giữ nguyên */
+var D='game-moi/icon-th/',NZ=9,ZT=17,ZT2=18,ZT3=19,ZLIST=[0,1,2,3,4,5,6,7,8,17,18,19],KIND=['loi','chau','an'];/* ZT = khóa bộ item thú Thần Đế Giang (z17): Lõi Tinh Hà / Châu Hư Thiên / Thần Ấn Đế Giang. ZT2 = khóa bộ item thú Thần Chúc Long (z18): Lõi Thời Luân / Châu Thời Cảnh / Thần Ấn Chúc Long. Cả hai chỉ là khóa nội bộ, KHÔNG phải vùng thám hiểm (loài th1/th2 đều có goc 17 trong 56b-loai.js; bộ item tra theo THAN_Z). Số vùng thường 0..8 giữ nguyên */
 var ZONE=['Tuyết Nguyên','Sương Cốc','Vân Đảo','Phong Nguyên','Lôi Vực','Nguyệt Cung','Thủy Nguyệt Cảnh','Xích Hỏa Địa','Thanh Lâm'];
-ZONE[ZT]='Đế Giang';ZONE[ZT2]='Chúc Long';
-function isThan(z){return z===ZT||z===ZT2;}
+ZONE[ZT]='Đế Giang';ZONE[ZT2]='Chúc Long';ZONE[ZT3]='Vô Cực';/* ZT3 = khóa bộ item thú Thần Vô Cực (z19), cũng chỉ là khóa nội bộ */
+function isThan(z){return z===ZT||z===ZT2||z===ZT3;}
 function vTen(z){return isThan(z)?'thú Thần '+ZONE[z]:'vùng '+ZONE[z];}/* z17 KHÔNG phải vùng thám hiểm: chỉ là khóa nội bộ của bộ item Thần Đế Giang */
 var TEN=[
  ['Lõi Hàn Sương','Châu Tuyết Phách','Thần Ấn Băng Sơn'],
@@ -34,6 +34,7 @@ var TEN=[
  ['Lõi Thanh Diệp','Châu Cổ Thụ','Thần Ấn Lâm Chủ']];
 TEN[ZT]=['Lõi Tinh Hà','Châu Hư Thiên','Thần Ấn Đế Giang'];
 TEN[ZT2]=['Lõi Thời Luân','Châu Thời Cảnh','Thần Ấn Chúc Long'];/* tên TẠM, chờ người dùng chốt */
+TEN[ZT3]=['Lõi Lưỡng Nghi','Châu Hỗn Nguyên','Thần Ấn Vô Cực'];/* tên TẠM, chờ người dùng chốt */
 var CFG={
  nutTest:true,   /* nút test "Lấy đồ TH" (hàng dưới, cạnh Lấy sách). Đặt false khi đã có nguồn rơi ổn định */
  /* vùng ĐÃ khai item Mảnh theo loài (ảnh thiếu thì dùng ảnh dự phòng; chạy tools/tao-manh-ghep.py --vung <z> rồi upload để có ảnh thật). 6-8 = vùng 3 thú khởi đầu (Lưu Diêu, Viêm Sư, Lâm Trư) */
@@ -55,7 +56,7 @@ var CFG={
  roi:{thuong:[['loi',20,1,1],['chau',20,1,1]],
       boss:[['loi',20,1,1],['chau',20,1,1],['an',30,1,1]]}
 };
-var THAN_Z={th1:17,th2:18};/* loài Thần -> khóa bộ item */
+var THAN_Z={th1:17,th2:18,th3:19};/* loài Thần -> khóa bộ item */
 var MO={loi:'Lõi tinh hoa',chau:'Châu tinh hoa',an:'Thần Ấn'};
 function id(z,k){return 'th-z'+z+'-'+k;}
 function idManh(t){return 'th-m-'+t;}

@@ -1,4 +1,4 @@
-/* ===== 60d-fx-de-giang.js — Boss THẦN Đế Giang (th1, hệ Không Gian) và Chúc Long (th2, hệ Thời Gian): ĐÒN THƯỜNG đánh xa (sprite) =====
+/* ===== 60d-fx-de-giang.js — Boss THẦN Đế Giang (th1, hệ Không Gian) Chúc Long (th2, hệ Thời Gian), Vô Cực (th3): ĐÒN THƯỜNG đánh xa (sprite) =====
    Nạp SAU 57-fx-ky-nang-boss.js và 60-fx-thuy-nguyet.js; chờ API.__fxBoss rồi bọc ngoài cùng drawAttack / drawImpact. Chỉ nhận:
      - đòn thường: S.s === 18 (index.html: FX_ZONE 17 -> 18, vì th1 có vung 17), không có nhãn sự kiện (text).
    Mọi thứ khác (kỹ năng, sự kiện trang bị có text) chuyển nguyên cho chuỗi cũ. Kỹ năng Tinh Hà Vẫn Lạc CHƯA có hiệu ứng riêng.
@@ -11,12 +11,14 @@
  const ZONE_DG=18,GY=204;
  const base=((document.currentScript&&document.currentScript.src)||'').replace(/[^\/]*$/,'');
  function load(file,cw,ch){const o={ok:false,img:new Image(),cw,ch};o.img.onload=()=>{o.ok=true};o.img.src=base+'fx-boss/'+file;return o}
- const DT=load('de-giang-don-thuong.png',480,405),CT=load('chuc-long-don-thuong.png',480,405);
+ const DT=load('de-giang-don-thuong.png',480,405),CT=load('chuc-long-don-thuong.png',480,405),VC=load('vo-cuc-don-thuong.png',480,405);
  /* Bảng theo loài (S.sp = id loài người đánh). ax/ay = điểm neo trong ô (px ô) của 6 ô; off1/off2 = đầu mũi cách tâm ô ở ô 2/ô 3; rot = độ xoay lỗ mở (rad).
-    th1 Đế Giang: lỗ đen xoay. th2 Chúc Long (Thời Gian): đồng hồ cát + đồng hồ, giữ thẳng (xoay ít); mũi giáo vàng; ô nổ có vòng mặt đất (neo ay 290). Số đo từ ảnh, chưa xem trong trận thật. */
+    th1 Đế Giang: lỗ đen xoay. th2 Chúc Long (Thời Gian): đồng hồ cát + đồng hồ, giữ thẳng (xoay ít); mũi giáo vàng; ô nổ có vòng mặt đất (neo ay 290).
+    th3 Vô Cực: vòng Thái Cực xoay -> dải âm dương -> sao chổi Thái Cực -> nổ -> xoáy -> tan. Số đo từ ảnh, chưa xem trong trận thật. */
  const SPR={
   th1:{sh:DT,ax:[240,240,240,240,240,240],ay:[202,202,202,250,250,250],off1:203,off2:233,rot:.9},
-  th2:{sh:CT,ax:[210,240,240,247,225,255],ay:[172,200,200,290,250,250],off1:177,off2:217,rot:.12}
+  th2:{sh:CT,ax:[210,240,240,247,225,255],ay:[172,200,200,290,250,250],off1:177,off2:217,rot:.12},
+  th3:{sh:VC,ax:[252,240,240,228,240,239],ay:[196,203,204,250,250,250],off1:236,off2:225,rot:.9}
  };
  const cl=v=>v<0?0:v>1?1:v,ph=(v,a,b)=>cl((v-a)/(b-a)),eo=v=>1-(1-v)*(1-v),lerp=(a,b,v)=>a+(b-a)*v;
  const hs=n=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v)};
