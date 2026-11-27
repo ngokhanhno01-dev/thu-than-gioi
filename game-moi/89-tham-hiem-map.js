@@ -69,7 +69,7 @@ var CFG={
   camera:{zoom:1},
   joystick:{kinh:152,kinhNho:136,hanhTrinh:0.58},
   boss:{hoiMs:15*60*1000,luuKhoa:'ttg_map_boss_'},   /* hồi theo GIỜ THỰC (Date.now), lưu localStorage theo từng vùng */
-  than:{banKinhCham:42}   /* boss Thần thế giới (103): vòng chạm */
+  than:{banKinhCham:42,tocDo:70,buocMin:90,buocMax:290,nghiMin:1.2,nghiMax:3.5}   /* boss Thần thế giới (103): vòng chạm; tocDo = đơn vị map/giây khi đi lang thang (người chơi 190); mỗi bước đi dài buocMin..buocMax, nghỉ nghiMin..nghiMax giây */
 };
 var BRUSH=[1,2,4,7];          /* bán kính cọ Debug Mask, tính theo ô lưới */
 var MASK_KEY='ttg_map_mask_'; /* + slug vùng: bản nháp mask */
@@ -565,6 +565,25 @@ function thanLamMoi(s){
   if(!s.thanPos||s.thanPos.key!==key)s.thanPos=thanViTri(s,key);
   o=root.THU_MOI&&root.THU_MOI.byId&&root.THU_MOI.byId[st.loai];
   s.than={loai:st.loai,ten:(o&&o.ten)||st.loai,hp:st.hp,dangDanh:st.dangDanh,hien:!!st.hien,khoa:B.khoaCon(thanUid()),x:s.thanPos.x,y:s.thanPos.y,r:CFG.than.banKinhCham};}
+/* BOSS THẦN ĐI LANG THANG (27/11/2026): chỉ đi trên ô đi được (mask, tránh vùng cấm nhảy), mỗi bước chọn điểm gần (buocMin..buocMax) có đường thẳng đi được, rồi nghỉ. Đứng yên khi ẩn (có người đánh). Vị trí do phiên map này giữ (chưa có online), khóa theo lần xuất hiện + số lần chạy nên chạy sang vùng khác thì sinh vị trí mới */
+function thanDuongTrong(s,x0,y0,x1,y1){var n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/10)),i;for(i=1;i<=n;i++)if(!thanDiDuoc(s,x0+(x1-x0)*i/n,y0+(y1-y0)*i/n))return false;return true;}
+function thanDi(s,dt){
+  var P=s.thanPos,w=s.thanWalk,C=CFG.than,rnd,i,a,d,x,y,dx,dy,dist,st;
+  if(!P||!s.than||!s.than.hien)return;
+  if(!w||w.key!==P.key)w=s.thanWalk={key:P.key,n:0,tx:null,ty:null,wait:C.nghiMin};
+  if(w.wait>0){w.wait-=dt;return;}
+  if(w.tx==null){
+    rnd=thanRng(P.key+'|'+(w.n++));
+    for(i=0;i<30;i++){
+      a=rnd()*Math.PI*2;d=C.buocMin+rnd()*(C.buocMax-C.buocMin);
+      x=P.x+Math.cos(a)*d;y=P.y+Math.sin(a)*d;
+      if(x<60||y<60||x>s.v.rong-60||y>s.v.cao-60)continue;
+      if(thanDiDuoc(s,x,y)&&thanDuongTrong(s,P.x,P.y,x,y)){w.tx=x;w.ty=y;break;}}
+    if(w.tx==null){w.wait=C.nghiMin;return;}}
+  dx=w.tx-P.x;dy=w.ty-P.y;dist=Math.hypot(dx,dy);st=C.tocDo*dt;
+  if(dist<=st){P.x=w.tx;P.y=w.ty;w.tx=null;w.wait=C.nghiMin+thanRng(P.key+'|n'+w.n)()*(C.nghiMax-C.nghiMin);}
+  else{P.x+=dx/dist*st;P.y+=dy/dist*st;}
+  s.than.x=P.x;s.than.y=P.y;}
 function bossDanhXong(slug,now){var t=(now==null?Date.now():now)+CFG.boss.hoiMs;try{localStorage.setItem(bossKey(slug),String(t));}catch(e){}return t;}
 function dinhDangDem(ms){var s=Math.ceil(ms/1000),m=Math.floor(s/60);s%=60;return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;}
 
@@ -1002,6 +1021,7 @@ function update(s,dt){
   /* đồng hồ boss (đọc localStorage mỗi ~250ms) */
   if(s.bossT<0||s.clock-s.bossT>=250){s.bossT=s.clock;s.bossMs=bossConLai(s.slug);}
   if(s.thanT<0||s.clock-s.thanT>=250){s.thanT=s.clock;thanLamMoi(s);}   /* boss Thần: đọc trạng thái thế giới */
+  try{thanDi(s,dt);}catch(eT){}   /* boss Thần đi lang thang */
   /* chạm (không trong cooldown; không chạm khi đang tô mask) */
   if(s.clock<s.coolUntil||s.dbg)return;
   r=CFG.banKinhCham;

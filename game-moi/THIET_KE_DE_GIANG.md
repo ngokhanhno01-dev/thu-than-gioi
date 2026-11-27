@@ -66,3 +66,9 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - TỐC ĐỘ TĂNG THEO ĐỢT: boss vào trận tốc độ `tocDau` 50, mỗi lần boss ra đòn (1 đợt) +`tocMoiDot` 10 (đổi từ 50 sang 10 cùng ngày vì +50 quá gắt), tối đa bằng tốc độ thật. Reset mỗi trận (st mới). Làm trong `effS('en')`, đếm `st.btgDot` ở `atk`.
 - Nhịp thực tế với +10: đợt 0 = 1,6s/đòn, đợt 10 = 0,96s, đợt 30 = 0,53s, đợt 100 = 0,21s (với +50 thì đợt 5 đã 0,6s, quá gắt). Chưa đặt trần tốc độ.
 - Đã kiểm tra: node --check các file, test node `btgDmg` (trên 10% giữ nguyên, <=10% cố định, boss thường không đổi) và công thức tốc độ. CHƯA thử trong trận thật.
+
+## Sửa theo test của người dùng (27/11/2026, 19:40)
+- BUG Vô Cực bất tử: nguyên nhân là tốc độ boss bắt đầu rất chậm (50) trong khi thú nhanh hơn nhiều, hồi chiêu Thái Cực Đồ (đếm theo lượt của MÌNH, chỉ khi khiên đã mất) hết rất nhanh nên khiên dựng lại liên tục, mọi đòn boss bị đỡ. Sửa: trong trận boss Thần, hồi chiêu Thái Cực Đồ đếm theo LƯỢT BOSS (khiên đã mất), `knMeDecide` + `atk` trong index.html. Tức mỗi chu kỳ boss đánh trúng ít nhất 7 đòn không khiên. Chỉ áp trận boss Thần, PvE thường/PvP không đổi.
+- Boss đi lang thang trên map (`89-tham-hiem-map.js`, `thanDi`): chỉ ô đi được theo mask, tốc độ 70 đơn vị/giây (người chơi 190), mỗi bước 90-290 đơn vị rồi nghỉ 1,2-3,5 giây; đứng yên khi ẩn vì có người đánh. Số chỉnh ở `CFG.than`. Vị trí do phiên map giữ, chưa chia sẻ giữa người chơi (chưa có online).
+- Danh sách chọn vùng (`80-danh-vong.js`): vùng có boss hiện icon `icon/boss-the-gioi.webp` + % máu, có người đánh thì hiện kiếm + "Giao chiến". Làm mới lúc mở bảng.
+- Đã kiểm tra: node --check, test node mô phỏng đi lang thang 120 giây trên mask hình chữ L (0 lần ra ô chặn, đứng yên khi ẩn), test node đoạn tạo icon. CHƯA thử trong game thật.
