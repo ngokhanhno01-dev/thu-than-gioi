@@ -22,5 +22,7 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 
 ## Thái Cực Đồ (sách Vô Cực, 27/11/2026)
 - Đỡ 5 đòn (không giới hạn lượt). Mỗi đòn phản 60% Công, đòn 5 phản 200% Công: sát thương chuẩn, có thể chí mạng. Hồi chiêu TẠM 6, chỉ đếm khi khiên đã mất. Chỉnh số ở `56c-buff.js` (`thaiCuc:{hits,pct,last}`).
-- Đỡ kỹ năng: debuff dội lại người tung, buff của kỹ năng về người giữ khiên. Cách hiểu TẠM, chờ người dùng xác nhận: kỹ năng tự buff (Vạn Mộc Hồi Xuân) bị đoạt nhưng không tốn tầng; Thời Gian Tỉnh Lặng bị đoạt (người tung bị ngưng đọng, tốn 1 tầng); sát thương phụ (phản đòn, đồ trang bị) bị miễn, không tốn tầng; khiên đỡ trước né/hụt; thiêu đốt/debuff dính từ trước vẫn còn; phản đòn không hút máu và không kích khiên bên kia.
+- Đỡ kỹ năng: debuff dội lại người tung, buff của kỹ năng về người giữ khiên.
+- Người dùng chốt 27/11/2026: Vạn Mộc Hồi Xuân (địch tự buff) bị lấy buff và TỐN 1 tầng; Thời Gian Tỉnh Lặng KHÔNG bị cướp (buff chỉ sống trong kỹ năng đó), khiên chỉ chặn cú nổ; sát thương phụ không tốn tầng; đòn phản CÓ hút máu (bản chất là "chuyển đòn đánh").
+- Cách làm hiện tại: tầng nào bị trừ thì phản 1 đòn (kể cả đỡ Vạn Mộc, cú nổ). Khiên đỡ trước né/hụt; thiêu đốt/debuff dính từ trước vẫn còn; phản đòn không kích khiên bên kia.
 - Hình (`60g-fx-thai-cuc.js`): đòn 1-4 dùng dạng 2,3,4,5; đòn 5 chạy dạng 3->4->5->6. CHƯA xem trong game.
