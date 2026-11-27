@@ -100,7 +100,7 @@
     var out = { test: !!L.test, loai: L.loai, coMat: L.coMat, batDau: L.batDau, ketThuc: L.ketThuc, tiepTheo: L.tiepTheo, maLan: L.maLan, vung: null, hp: 1, dangDanh: null, chet: false };
     if (!L.coMat) return out;
     var s = lanCua(L); nhaQuaHan(s, t);
-    out.vung = s.vung; out.hp = s.hp; out.dangDanh = s.dangDanh; out.chet = s.chet; out.soChay = s.soChay;
+    out.vung = s.vung; out.hp = s.hp; out.dangDanh = s.dangDanh; out.chet = s.chet; out.soChay = s.soChay; out.nguoiGiet = s.chet ? (s.nguoiGiet || null) : null;
     out.hien = !s.chet && !s.dangDanh;   /* hiện trên map (không ai đánh, chưa chết) */
     return out;
   }
@@ -143,7 +143,7 @@
   function ketThuc(uid, kq, t) {   /* kq = {kq:'thang'|'thua', hp} */
     t = T(t); var s = cuaToi(uid, t); if (!s) return loi('Không phải trận của bạn');
     kq = kq || {};
-    if (kq.kq === 'thang') { s.hp = 0; s.chet = true; }
+    if (kq.kq === 'thang') { s.hp = 0; s.chet = true; s.nguoiGiet = String(kq.ten == null ? '' : kq.ten).replace(/\s+/g, ' ').trim().slice(0, 40) || 'Một người chơi'; }   /* biệt danh người hạ boss (kq.ten) để thông báo; sau này server tự điền theo tài khoản */
     else { if (kq.hp != null) s.hp = Math.max(0.0001, Math.min(1, +kq.hp)); DB.khoa[kk(uid)] = t + CFG.khoaGiay * 1000; }
     s.dangDanh = null; save();
     return { ok: true, chet: s.chet, hp: s.hp, khoa: s.chet ? 0 : CFG.khoaGiay };

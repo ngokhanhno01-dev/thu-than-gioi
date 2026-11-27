@@ -79,3 +79,8 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - Hệ quả: nhịp đánh thật của bên nhanh có thể sát khoảng thanh hơn (vì thanh không bị đóng băng ~1s mỗi đòn); thanh đầy ngay khi hết cảnh đánh thì đánh liền sau 225ms nghỉ. Có thể làm các trận nhanh hơn trước.
 - Đã kiểm tra: node --check, test node `gaugeAdvance` (500ms = 0,417 / 1,333 đúng công thức atkIv). CHƯA thử trong trận thật.
 - Nhịp trận (27/11/2026, 19:50): thú cấp 270 có tốc độ > 5.000 nên công thức cũ ATK_MS x 100/(100+td) cho khoảng ~70ms, không phân biệt được 5.000 với 6.000 và cảnh đánh (~1s) quyết định nhịp. Đổi `atkIv` sang `ATK_MS/(1+căn(td/100))`, ATK_MS 4100, áp mọi trận: td 20 = 2,83s, 50 = 2,4s, 100 = 2,05s, 300 = 1,5s, 1.000 = 0,99s, 3.000 = 0,63s, 5.000 = 0,51s, 6.000 = 0,47s. Boss Thần vào 50, +10 mỗi lần ra đòn: đợt 10 = 1,84s, đợt 30 = 1,43s, đợt 100 = 0,97s. Chưa thử trong trận thật.
+
+
+## Thông báo người hạ boss (27/11/2026)
+- Boss Thần bị hạ: dòng chữ chạy ngang báo "đã bị hạ bởi <biệt danh>". Biệt danh lấy từ `TTGNHANVAT.ten()` lúc thắng, truyền vào `TTGBTG.ketThuc(uid,{kq:'thang',ten})`, lưu ở trạng thái lượt boss (`nguoiGiet`) và trả ra qua `trangThai()`. Không có biệt danh thì hiện "một người chơi".
+- Hiện offline: thông báo chỉ thấy trên máy người vừa hạ boss. Khi có server: server ghi `nguoiGiet` theo tài khoản và mọi máy đọc `trangThai()` như cũ, không phải sửa phần hiển thị (105).
