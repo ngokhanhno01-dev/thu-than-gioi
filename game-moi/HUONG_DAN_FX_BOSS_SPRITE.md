@@ -37,3 +37,6 @@ Hạt/sóng vẽ qua `pixelLayer` (ép màu pixel); ảnh sprite vẽ thẳng l�
 ## Mốc thời gian gợi ý cho 2 skill còn lại
 - Thiên Lôi Giáng: 1 mây tụ 0–.2 · 2 mây tối, tia nhỏ .2–.4 · 3 sét chính giáng .4–.665 · 4 nổ chói lúc trúng .665–.9 · 5 cột sét phụ + điện bò .9–1.3 · 6 khói, tàn lửa 1.3–END. Code cũ: sét chính ở TH-.06, ba cột phụ ở TH+.13, +.29, +.44.
 - Nguyệt Thực Nuốt: 1 trăng đen hiện 0–.2 · 2 ánh sáng nhỏ giọt .2–.4 · 3 xoáy tối ở chân, tia bạc bị hút .4–.665 · 4 nổ tối + vòng bạc .665–.9 · 5 sóng tối lan .9–1.3 · 6 tan 1.3–END. Trăng cố định trên đầu địch (y≈59, bán kính ≈46 trong code cũ), tan sau TH+.2.
+
+## Cảnh dài riêng: Tinh Hà Vẫn Lạc (`60e-fx-tinh-ha.js`)
+Không đi qua canvas FX 360x250 như các kỹ năng trên: dài 11,8s, vẽ thẳng lên canvas trận. `index.html` có `knTm(id)` lấy thời lượng riêng (`TTGTinhHa.dur[id]={hit:9900,end:11800}` thay `KN_T_HIT/KN_T_END`), nền đen vẽ TRƯỚC thú (`under`), lỗ/đạn/nổ vẽ SAU thú (`draw`). Mốc thời gian ghi ở đầu file 60e. Chỉnh số lượng lỗ/phát bắn ở `NP`, `NS`, `B0`, `B1`.
