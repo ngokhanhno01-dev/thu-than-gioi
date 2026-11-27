@@ -36,11 +36,11 @@ function nBong(){return Number(txc().bongMoiLanNem)||1;}
 function battle(){return host&&host.battle?host.battle():null;}
 function enemy(){var b=battle();return b&&b.enemy||null;}
 function hpPct(){var s=host.st();return s&&s.maxEn?(s.en/s.maxEn*100):100;}
-function hpMax(){var m=TTGBONG.CFG.mocHP;return m[m.length-1];}
+function hpMax(){return 101;}   /* TẠM giữa bước 1 và 2: bỏ điều kiện máu; bước 2 thay cả luồng nút Bắt */
 function toast(t){if(host&&host.toast)host.toast(t);else{try{console.log(t);}catch(e){}}}
 function itemOf(cap){var B=root.TTGBALO;return B&&B.CAT?B.CAT[TTGBONG.idBong(cap)]:null;}
 function countOf(cap){return root.TTGBALO?TTGBALO.count(TTGBONG.idBong(cap)):0;}
-function rateOf(cap){var e=enemy();if(!e)return null;return TTGBONG.tinhTiLe(cap,hpPct(),!!e.boss,e.vung||0);}
+function rateOf(cap){var e=enemy();if(!e)return null;return TTGBONG.tiLeBat(cap,e.rarity||(root.TTGCS&&TTGCS.doHiem&&TTGCS.doHiem(e.id))||'thuong',e.vung||0);}
 function owned(){var a=[],c;for(c=1;c<=TTGBONG.CFG.capBongMax;c++)if(countOf(c)>0)a.push(c);return a;}
 function usable(){return owned().filter(function(c){return rateOf(c)!=null;});}
 function pickDefault(){var u=usable();if(!u.length)return 0;return CFG.macDinh==='thap'?u[0]:u[u.length-1];}

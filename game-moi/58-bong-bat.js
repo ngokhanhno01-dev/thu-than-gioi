@@ -1,4 +1,4 @@
-/* 58-bong-bat.js — NGỰ THÚ CHÂU (bóng bắt thú) + BẢNG TỈ LỆ + HẰNG SỐ THÁM HIỂM (Bước 1, chưa gắn giao diện).
+/* 58-bong-bat.js — NGỰ THÚ CHÂU (bóng bắt thú) + BẢNG TỈ LỆ + HẰNG SỐ THÁM HIỂM.
    Hàm thuần, không DOM. Mọi con số nằm ở khối CFG ngay dưới để dễ chỉnh.
    Nạp sau 53-balo.js (cần window.TTGBALO.reg). */
 (function(){
@@ -6,35 +6,39 @@
 
 /* ================= CFG: CHỈNH SỐ Ở ĐÂY ================= */
 var CFG={
-  /* --- BÓNG: 6 cấp, 17 vùng chia đều: mỗi cấp bóng "phụ trách" 3 vùng (z 0-2 -> bóng 1, 3-5 -> bóng 2, ... 15-16 -> bóng 6) --- */
+  /* --- NGỰ THÚ CHÂU (đổi 27/11/2026): châu 1-4 = 4 BẬC thường (Hoàng < Huyền < Địa < Thiên Giai), châu 5-6 = bậc ĐẶC BIỆT.
+     Không còn giới hạn vùng: châu nào cũng ném được ở mọi vùng. Không phụ thuộc máu, không phụ thuộc Rank. --- */
   capBongMax:6,
-  vungMoiCap:3,            /* số vùng mỗi cấp bóng phụ trách. capVung(z) = min(capBongMax, floor(z / vungMoiCap) + 1) */
-
-  /* --- TỈ LỆ BẮT: bóng đúng cấp vùng (chênh = 0). Mốc HP còn lại, tính theo % --- */
-  mocHP:[20,30,40,50,60],  /* dưới 20, dưới 30, dưới 40, dưới 50, dưới 60. Từ 60 trở lên: KHÔNG ném được (tinhTiLe trả null) */
-  /* xác suất (0..1) ứng với từng mốc ở trên, theo thứ tự */
-  tiLeThuong:[0.65,0.50,0.38,0.28,0.18],
-  tiLeBoss:  [0.25,0.18,0.12,0.08,0.05],   /* boss khó bắt hơn */
-
-  /* --- BÓNG THẤP/CAO SO VỚI VÙNG (tính theo từng vùng, delta = z - vùng đầu của bóng = z - (cap-1)*vungMoiCap) ---
-     delta 0..2 (vùng nằm trong 3 vùng của bóng): tiLe = tiLeGoc * (1 - giamMoiVung)^delta   (vùng đầu đủ tỉ lệ, vùng sau giảm xíu)
-     delta >= 3 (vùng quá cao so với bóng): KHÔNG ném được, cần bóng cấp cao hơn
-     delta < 0 (bóng cao hơn vùng): xác suất trượt nhân (1 - buMoiCap)^(|delta|/vungMoiCap) => dễ bắt hơn */
-  giamMoiVungThuong:0.10,
-  giamMoiVungBoss:0.10,
-  buMoiCapThuong:0.35,
-  buMoiCapBoss:0.30,
-  tiLeToiDa:0.99,          /* không bao giờ chắc chắn 100% */
-
-  /* --- NGỰ THÚ CHÂU: 6 bậc. ic = emoji tạm (hiện khi chưa có file ảnh). Ảnh icon: xem ANH_ICON bên dưới --- */
   bong:[
-    {cap:1,ten:'Thương Hải Châu',ic:'🔵'},
-    {cap:2,ten:'Thanh Mộc Châu',ic:'🟢'},
-    {cap:3,ten:'Xích Viêm Châu',ic:'🔴'},
-    {cap:4,ten:'Tử Tiêu Châu',ic:'🟣'},
-    {cap:5,ten:'Tinh Thần Châu',ic:'⭐'},
-    {cap:6,ten:'Hỗn Độn Thần Châu',ic:'⚫'}
+    {cap:1,ten:'Thương Hải Châu',bac:'Hoàng Giai',ic:'🔵'},
+    {cap:2,ten:'Thanh Mộc Châu',bac:'Huyền Giai',ic:'🟢'},
+    {cap:3,ten:'Xích Viêm Châu',bac:'Địa Giai',ic:'🔴'},
+    {cap:4,ten:'Tử Tiêu Châu',bac:'Thiên Giai',ic:'🟣'},
+    {cap:5,ten:'Tinh Thần Châu',bac:'Đặc Biệt',ic:'⭐',dacBiet:true},
+    {cap:6,ten:'Hỗn Độn Thần Châu',bac:'Đặc Biệt',ic:'⚫',dacBiet:true}
   ],
+
+  /* --- TỈ LỆ BẮT châu thường (cap 1-4) ở VÙNG 1, theo độ hiếm loài (56b-loai.js). Thứ tự cột = cap 1..4.
+     Vùng N (vùng người chơi thấy, = z + 1): tiLe = goc * (1 - giamMoiVung[cap])^(N - 1). Giảm theo tỉ lệ nên không bao giờ về 0.
+     Boss thú hoang dùng CHUNG bảng này theo độ hiếm (Truyền Thuyết), không còn bảng boss riêng. --- */
+  tiLeGoc:{
+    thuong:      [0.86,0.92,0.96,0.99],
+    hiem:        [0.60,0.74,0.86,0.94],
+    suthi:       [0.30,0.48,0.66,0.82],
+    huyenthoai:  [0.10,0.22,0.40,0.60],
+    truyenthuyet:[0.02,0.07,0.18,0.35]
+  },
+  giamMoiVung:[0.07,0.05,0.035,0.02],
+  tiLeToiDa:0.99,          /* châu thường không bao giờ chắc chắn 100% */
+  doHiemKhongBat:['than'], /* 3 thú Thần chỉ có từ trứng */
+
+  /* --- CHÂU ĐẶC BIỆT: bắt 100% mọi thú bắt được, và TUNG LẠI Rank trong khoảng riêng (để săn Rank).
+     Trọng số TẠM (người dùng nhờ tính, chưa chốt), tổng = 100. Rank lúc gặp cao hơn Rank tung ra thì giữ Rank lúc gặp. --- */
+  rankDacBiet:{
+    5:{B:45,A:32,S:18,SS:5},          /* Tinh Thần Châu: B..SS */
+    6:{A:50,S:33,SS:15,SR:2}          /* Hỗn Độn Thần Châu: A..SR */
+  },
+  rankThuTu:['E','D','C','B','A','S','SS','SR'],
 
   /* ================= THÁM HIỂM (dùng ở Bước 2) ================= */
   tx:{
@@ -50,9 +54,9 @@ var CFG={
     chenhBoss:10,                          /* DỰ PHÒNG tương thích; Boss mới lấy cấp theo vùng */
     chenhQuai:[-5,0],                      /* DỰ PHÒNG tương thích; quái mới lấy cấp theo vùng + độ hiếm */
     capMin:1,capMax:270,
-    soLanNem:3,                            /* số lần ném mỗi lần bắt (Bước 3) */
+    soLanNem:2,                            /* tối đa 2 lần ném mỗi con (chốt 27/11/2026); trúng thì dừng */
     bongMoiLanNem:1,                       /* mỗi lần ném trừ 1 bóng (ĐÃ CHỐT) */
-    thoiGianNemGiay:60                     /* hết 60 giây mà chưa bắt được: thú hoang bỏ chạy, về sảnh (ĐÃ CHỐT) */
+    thoiGianChonGiay:30                    /* thú gục: 30 giây chung cho chọn Bắt/Giết VÀ ném. Hết giờ: chưa ném lần nào = Giết; đã ném hụt = thú chạy */
   }
 };
 
@@ -60,32 +64,32 @@ var CFG={
 var ANH_ICON={1:'game-moi/img/chau/bac1-closed.png',2:'game-moi/img/chau/bac2-closed.png',3:'game-moi/img/chau/bac3-closed.png',4:'game-moi/img/chau/bac4-closed.png',5:'game-moi/img/chau/bac5-closed.png',6:'game-moi/img/chau/bac6-closed.png'};
 
 /* ================= HÀM ================= */
-function clamp(x,a,b){return x<a?a:(x>b?b:x);}
+function laDacBiet(cap){var b=CFG.bong[(cap|0)-1];return !!(b&&b.dacBiet);}
 
-/* cấp bóng "đúng" của một vùng; z = chỉ số vùng 0..16 */
-function capVung(z){
-  z=(z|0);if(z<0)z=0;
-  return Math.min(CFG.capBongMax,Math.floor(z/CFG.vungMoiCap)+1);
+/* xác suất bắt (0..1), hoặc null nếu con này không bắt được bằng châu.
+   cap: 1..6. doHiem: 'thuong'..'truyenthuyet' (TTGCS.doHiem). z: chỉ số vùng trong code (0 = Vùng 1). */
+function tiLeBat(cap,doHiem,z){
+  cap=cap|0;if(cap<1||cap>CFG.capBongMax)return null;
+  if(CFG.doHiemKhongBat.indexOf(doHiem)>=0)return null;
+  if(laDacBiet(cap))return 1;
+  var hang=CFG.tiLeGoc[doHiem]||CFG.tiLeGoc.thuong,n=Math.max(0,Math.floor(Number(z)||0));
+  return Math.min(CFG.tiLeToiDa,hang[cap-1]*Math.pow(1-CFG.giamMoiVung[cap-1],n));
+}
+/* tương thích chỗ gọi cũ (62-bat-thu.js): tham số máu & boss bỏ qua, cần thêm doHiem */
+function tinhTiLe(cap,_hp,_boss,z,doHiem){return tiLeBat(cap,doHiem||(_boss?'truyenthuyet':'thuong'),z);}
+
+/* Rank của thú bắt được. Châu thường: giữ Rank lúc gặp. Châu đặc biệt: tung lại trong khoảng, giữ cái cao hơn. */
+function rankKhiBat(cap,rankGap,rng){
+  var T=CFG.rankDacBiet[cap|0];if(!T)return rankGap;
+  rng=typeof rng==='function'?rng:Math.random;
+  var ks=Object.keys(T),tong=0,i,x;for(i=0;i<ks.length;i++)tong+=T[ks[i]];
+  x=rng()*tong;var r=ks[ks.length-1];for(i=0;i<ks.length;i++){x-=T[ks[i]];if(x<0){r=ks[i];break;}}
+  var o=CFG.rankThuTu;return o.indexOf(rankGap)>o.indexOf(r)?rankGap:r;
 }
 
-/* xác suất bắt (0..1) hoặc null nếu không ném được.
-   capBong: 1..6. phanTramHP: 0..100 (HP còn lại của thú hoang). laBoss: true/false. vung: chỉ số vùng z của thú hoang (mặc định 0). */
-function tinhTiLe(capBong,phanTramHP,laBoss,vung){
-  capBong=capBong|0;
-  if(!(capBong>=1))return null;
-  if(!(phanTramHP<CFG.mocHP[CFG.mocHP.length-1]))return null;   /* từ 60% trở lên (hoặc NaN) */
-  var delta=(vung||0)-(capBong-1)*CFG.vungMoiCap;
-  if(delta>=CFG.vungMoiCap)return null;                          /* vùng quá cao so với bóng */
-  var bang=laBoss?CFG.tiLeBoss:CFG.tiLeThuong,i=0;
-  while(i<CFG.mocHP.length-1&&phanTramHP>=CFG.mocHP[i])i++;
-  var goc=bang[i],p;
-  if(delta>=0)p=goc*Math.pow(1-(laBoss?CFG.giamMoiVungBoss:CFG.giamMoiVungThuong),delta);
-  else p=1-(1-goc)*Math.pow(1-(laBoss?CFG.buMoiCapBoss:CFG.buMoiCapThuong),-delta/CFG.vungMoiCap);
-  return Math.min(CFG.tiLeToiDa,p);
-}
-
-/* bóng có dùng được ở vùng này không (để Bước 3 lọc bóng trong Balo) */
-function dungDuoc(capBong,vung){return ((vung||0)-((capBong|0)-1)*CFG.vungMoiCap)<CFG.vungMoiCap;}
+/* không còn giới hạn vùng (giữ hàm cho chỗ gọi cũ) */
+function capVung(){return 1;}
+function dungDuoc(){return true;}
 
 /* id item trong Balo cho từng cấp: bong-1 .. bong-6 */
 function idBong(cap){return 'bong-'+cap;}
@@ -94,13 +98,12 @@ function idBong(cap){return 'bong-'+cap;}
 function dangKy(){
   var B=window.TTGBALO;
   if(!B||typeof B.reg!=='function')return false;
-  var o={},i,b,z0,z1;
+  var o={},i,b,R;
   for(i=0;i<CFG.bong.length;i++){
-    b=CFG.bong[i];
-    z0=(b.cap-1)*CFG.vungMoiCap+1;
-    z1=b.cap>=CFG.capBongMax?17:b.cap*CFG.vungMoiCap;
-    o[idBong(b.cap)]={loai:'bong',ten:b.ten,cap:b.cap,ic:b.ic,
-      mo:'Dành cho vùng '+z0+'-'+z1+'. Vùng sau trong dải thì tỉ lệ giảm dần; vùng thấp hơn thì dễ bắt hơn; vùng cao hơn dải thì không ném được.'};
+    b=CFG.bong[i];R=CFG.rankDacBiet[b.cap];
+    o[idBong(b.cap)]={loai:'bong',ten:b.ten,cap:b.cap,bac:b.bac,ic:b.ic,
+      mo:b.dacBiet?('Bậc '+b.bac+'. Bắt chắc chắn mọi thú hoang bắt được. Thú bắt được nhận Rank '+Object.keys(R)[0]+' đến '+Object.keys(R).slice(-1)[0]+' (Rank lúc gặp cao hơn thì giữ).')
+        :('Bậc '+b.bac+'. Ném được ở mọi vùng; vùng càng cao, thú càng hiếm thì tỉ lệ càng thấp.')};
   }
   B.reg(o);
   /* nâng icon emoji lên ảnh khi file ảnh tải được (không có file thì giữ emoji) */
@@ -113,5 +116,5 @@ function dangKy(){
 }
 dangKy();
 
-window.TTGBONG={CFG:CFG,capVung:capVung,tinhTiLe:tinhTiLe,dungDuoc:dungDuoc,idBong:idBong,dangKy:dangKy};
+window.TTGBONG={CFG:CFG,capVung:capVung,tinhTiLe:tinhTiLe,tiLeBat:tiLeBat,rankKhiBat:rankKhiBat,laDacBiet:laDacBiet,dungDuoc:dungDuoc,idBong:idBong,dangKy:dangKy};
 })();
