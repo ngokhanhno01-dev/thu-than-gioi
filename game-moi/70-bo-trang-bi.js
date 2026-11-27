@@ -52,7 +52,7 @@ function A(w){var s=S0();return s&&s.bo&&s.bo[w]||null;}
 function mx(w){var s=S0();return w==='me'?s.maxMe:s.maxEn;}
 function say(w,k,n){var s=S0(),e=EV[k];if(!s||!s.bo||!e)return;s.bo.ev.push({w:w,k:k,t:n});}
 function hurt(w,x,n,col){env.hurt(w,x,n,col);}
-function heal(w,h,n){var s=S0();s[w]=Math.min(mx(w),s[w]+h);s.fx.push({x:env.px(w),y:env.gy()-135,t:n,s:'+'+h,c:'#3c3'});}
+function heal(w,h,n){var s=S0();if(env.hoiHs)h=Math.floor(h*env.hoiHs(w));if(h<=0)return;s[w]=Math.min(mx(w),s[w]+h);s.fx.push({x:env.px(w),y:env.gy()-135,t:n,s:'+'+h,c:'#3c3'});}
 function baseDmg(from,to){var a=env.eff(from),z=env.eff(to);return root.TTGCS?root.TTGCS.satThuong({tc:a.tc,pt:z.pt,hsHe:1}):1;}
 function stunned(w){var s=S0();return (w==='me'?s.stun:s.stunEn)>0;}
 /* ĐẦU TRẬN: gọi sau khi st đã tạo */

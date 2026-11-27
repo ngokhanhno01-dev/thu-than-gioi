@@ -25,7 +25,8 @@ function rnd(r){return (r||Math.random)()*100;}
 function clamp(x,a,b){return x<a?a:(x>b?b:x);}
 function chiMangGoc(){var c=root.TTGCS&&root.TTGCS.CFG&&root.TTGCS.CFG.chiMang;return c>0?c:CFG.chiMangGoc;}
 /* 1. tỉ lệ đòn trúng (0..100) */
-function tiLeTrung(a,t){return clamp(100+v(a,'cx')-Math.max(0,v(t,'ne')-v(a,'kne')),clamp(CFG.sanTrung,0,100),100);}
+function cxRaw(a){var x=a&&+a.cx;return x?x:0;}   /* Chính xác CHO PHÉP ÂM (debuff Diệt Thế): âm thì đòn của bên đó trượt thêm, kể cả khi đối thủ không có Né */
+function tiLeTrung(a,t){return clamp(100+cxRaw(a)-Math.max(0,v(t,'ne')-v(a,'kne')),clamp(CFG.sanTrung,0,100),100);}
 function truot(a,t,r){return rnd(r)>=tiLeTrung(a,t);}                 /* true = đòn BỊ NÉ */
 /* 2. chí mạng */
 function chiMang(a,r){return rnd(r)<v(a,'cm');}
