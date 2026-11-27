@@ -30,6 +30,9 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 ## PvP (LÀM SAU, ý người dùng 27/11/2026, CHƯA CÓ CODE)
 - Hai bên tới lượt dùng kỹ năng cùng lúc: tốc độ cao hơn dùng trước.
 - Tốc độ bằng nhau: không chạy 2 cảnh kỹ năng, chỉ 1 hiệu ứng nổ ở giữa, HÒA: mỗi bên mất máu bằng Công của đối thủ, và vẫn nhận buff / dính debuff của kỹ năng. Mục tiêu: giảm hiệu ứng nhưng giữ cái hay của kỹ năng.
-- Chưa chốt: sát thương hòa có phải sát thương chuẩn / chí mạng không; kỹ năng kéo dài (Thái Cực Đồ, Thời Gian Tỉnh Lặng) xử lý thế nào khi hòa; "bằng nhau" là bằng đúng hay cho sai lệch; có tính hồi chiêu cả 2 không.
+- ĐÃ CHỐT: sát thương hòa = 100% Công đối thủ, sát thương chuẩn, KHÔNG chí mạng.
+- ĐÃ CHỐT: kỹ năng kéo dài (Thái Cực Đồ, Thời Gian Tỉnh Lặng) khi hòa KHÔNG kích hoạt.
+- ĐÃ CHỐT: "tốc bằng nhau" = trước khi ra chiêu, 2 thanh đánh cùng đầy trong 1 lượt (trong code là nhánh 'both' của `gaugeStep`, hiện cho sai lệch CLASH_MS=60 ms).
+- Chưa chốt: hồi chiêu khi hòa (đề xuất: cả 2 tính là đã dùng).
 - Code hiện tại (`actClash`, CLASH_MS=60 trong index.html) khác luật này: 2 kỹ năng đối kháng thì tung lần lượt cả hai.
 - Cân bằng Thái Cực Đồ (440% Công): người dùng đã tính, giữ nguyên.
