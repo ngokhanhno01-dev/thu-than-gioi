@@ -33,9 +33,9 @@ var CFG={
      trongSo = trọng số bốc bậc | soLuong = các số lượng có thể ra theo bậc (chọn đều) | gia = Tinh Thạch MỖI CÁI. Giá 1 ô = gia[bậc] x số lượng. Mỗi ô chỉ mua 1 lần mỗi đợt. */
   chau:{
     tab:'dao-cu',soO:3,key:'ttg_moi_cuahang_chau',
-    trongSo:{1:30,2:25,3:20,4:12,5:8},
-    soLuong:{1:[10,5,3],2:[10,5,3],3:[5,3,1],4:[5,3,1],5:[2,1]},
-    gia:{1:30,2:50,3:70,4:90,5:110}
+    trongSo:{1:30,2:25,3:20,4:12},   /* chỉ bán châu thường 1-4 (Hoàng..Thiên Giai). Châu 5, 6 (Đặc Biệt) KHÔNG bán ở Kỳ Trân Các (27/11/2026) */
+    soLuong:{1:[10,5,3],2:[10,5,3],3:[5,3,1],4:[5,3,1]},
+    gia:{1:30,2:50,3:70,4:90}
   }
 };
 var BOX={
