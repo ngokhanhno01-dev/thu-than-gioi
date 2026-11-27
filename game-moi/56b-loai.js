@@ -115,7 +115,17 @@ var BANG={
     ['8j','Xích Diễm Ma Vương','c',['hoa']]
   ],
   8:[ /* Thanh Lâm (moc) */
-    ['k3','Lâm Trư','t',['thuong','moc'],false,0]
+    ['k3','Lâm Trư','t',['thuong','moc'],false,0],
+    ['9a','Mộc Nhĩ Thố','n',['moc']],
+    ['9b','Mộc Giác Tượng','t',['moc']],
+    ['9c','Mộc Phong Trùng','c',['moc']],
+    ['9d','Mộc Linh Lộc','n',['moc']],
+    ['9e','Mộc Nha Trư','t',['moc']],
+    ['9f','Mộc Điệp Linh','n',['moc']],
+    ['9g','Mộc Khổng Tước','n',['moc']],
+    ['9h','Mộc Nham Hùng','t',['moc']],
+    ['9i','Mộc Thanh Lân','c',['moc']],
+    ['9j','Thanh Lâm Cùng Kỳ','c',['moc']]
   ]
 };
 
@@ -140,7 +150,8 @@ var DO_HIEM_RIENG={
   '4a':'thuong', '4b':'thuong', '4c':'hiem', '4d':'suthi', '4e':'hiem', '4f':'hiem', '4g':'thuong', '4h':'suthi', '4i':'huyenthoai', '4j':'truyenthuyet',
   '5a':'thuong', '5b':'thuong', '5c':'hiem', '5d':'thuong', '5e':'hiem', '5f':'hiem', '5g':'suthi', '5h':'suthi', '5i':'huyenthoai', '5j':'truyenthuyet',
   '7a':'thuong', '7b':'thuong', '7c':'thuong', '7d':'hiem', '7e':'hiem', '7f':'hiem', '7g':'suthi', '7h':'suthi', '7i':'huyenthoai', '7j':'truyenthuyet',
-  '8a':'thuong', '8b':'thuong', '8c':'thuong', '8d':'hiem', '8e':'hiem', '8f':'hiem', '8g':'suthi', '8h':'suthi', '8i':'huyenthoai', '8j':'truyenthuyet'
+  '8a':'thuong', '8b':'thuong', '8c':'thuong', '8d':'hiem', '8e':'hiem', '8f':'hiem', '8g':'suthi', '8h':'suthi', '8i':'huyenthoai', '8j':'truyenthuyet',
+  '9a':'thuong', '9b':'thuong', '9c':'thuong', '9d':'hiem', '9e':'hiem', '9f':'hiem', '9g':'suthi', '9h':'suthi', '9i':'huyenthoai', '9j':'truyenthuyet'
 };
 /* ĐỘ HIẾM CỦA HỆ (khác độ hiếm loài): hệ có vùng riêng = thuong; Độc/Trùng = hiem; Võ/Nham = suthi; Ma = huyenthoai; Long = truyenthuyet.
    CHỈ LÀ DỮ LIỆU: sau này mỗi hệ hiếm sẽ có nội tại riêng theo độ hiếm; hiện chưa dùng ở đâu. Hệ không ghi ở đây = thuong. */

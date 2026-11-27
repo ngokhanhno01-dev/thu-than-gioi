@@ -117,7 +117,17 @@
       { id: '8j', slug: '10-xich-diem-ma-vuong', ten: 'Xích Diễm Ma Vương', boss: true }
     ] },
     { z: 8, slug: 'thanh-lam', ten: 'Thanh Lâm', thu: [
-      { id: 'k3', slug: '01-lam-tru', ten: 'Lâm Trư', boss: false, nen: 'khoi-dau' }
+      { id: 'k3', slug: '01-lam-tru', ten: 'Lâm Trư', boss: false, nen: 'khoi-dau' },
+      { id: '9a', slug: '01-moc-nhi-tho', ten: 'Mộc Nhĩ Thố', boss: false },
+      { id: '9b', slug: '02-moc-giac-tuong', ten: 'Mộc Giác Tượng', boss: false },
+      { id: '9c', slug: '03-moc-phong-trung', ten: 'Mộc Phong Trùng', boss: false },
+      { id: '9d', slug: '04-moc-linh-loc', ten: 'Mộc Linh Lộc', boss: false },
+      { id: '9e', slug: '05-moc-nha-tru', ten: 'Mộc Nha Trư', boss: false },
+      { id: '9f', slug: '06-moc-diep-linh', ten: 'Mộc Điệp Linh', boss: false },
+      { id: '9g', slug: '07-moc-khong-tuoc', ten: 'Mộc Khổng Tước', boss: false },
+      { id: '9h', slug: '08-moc-nham-hung', ten: 'Mộc Nham Hùng', boss: false },
+      { id: '9i', slug: '09-moc-thanh-lan', ten: 'Mộc Thanh Lân', boss: false },
+      { id: '9j', slug: '10-thanh-lam-cung-ky', ten: 'Thanh Lâm Cùng Kỳ', boss: true }
     ] }
   ];
   var byId = {}, cache = {};
