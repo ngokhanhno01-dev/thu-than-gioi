@@ -75,6 +75,7 @@ canvas{position:fixed;left:0;top:0;image-rendering:pixelated;image-rendering:cri
 /* ẨN TOÀN BỘ NÚT để làm lại (code nút vẫn còn, chỉ không hiện/không bấm được). Muốn hiện lại: xóa dòng ngay dưới. */
 #ui .ub,#edb,#edt,#edq,#tp,#tl{display:none!important}
 /* Lớp nút ảo (DOM, nằm trên canvas). Mỗi nút: left/top theo px, phóng to/thu nhỏ bằng transform scale */
+body.ttg-tran .nv,body.ttg-tran #dv-hot{display:none!important}
 #ui{position:fixed;left:0;top:0;right:0;bottom:0;z-index:5;pointer-events:none;font-family:sans-serif}
 #ui>*{pointer-events:auto}
 .ub{position:absolute;left:0;top:0;transform-origin:0 0;touch-action:none;white-space:nowrap;box-sizing:border-box;height:18px;display:flex;align-items:center;padding:0 5px;font:bold 9px/1 sans-serif;color:#fff;background:#1c3a46;border:1px solid #8a6d2f;border-radius:3px;-webkit-tap-highlight-color:transparent}
@@ -292,7 +293,7 @@ var cv=document.getElementById('g'),ctx=cv.getContext('2d'),sa=document.getEleme
 var ID=(/[?&]thu=(\w+)/.exec(location.search)||[])[1];if(!window.THU_MOI||!THU_MOI.byId[ID])ID=null;var KEY='ttg_moi_v1',LKEY='ttg_moi_layout_v1',W=640,H=360,K=1,DPR=1,I={l:0,r:0,t:0,b:0},bm=1,be=1,st,BATTLE=null,A=null,typing=false;
 var AUTO=true,nextAt=0,GAP=450,GAP_ACT=225,ATK_MS=4100,TD_K=100,CLASH_MS=60,HOA_MAX=2,T_DON=750,END_WAIT=1200,PET_X=.27,MAXB=3,SCENE=/[?&]canh=tran/.test(location.search)?'tran':'sanh';/* SCENE: 'sanh' = sảnh chính (mặc định, 1 thú đứng giữa) | 'tran' = trận mẫu (nút Đấu trường bật/tắt, hoặc thêm ?canh=tran vào link) */
 var NHN={ok:false,im:new Image()};NHN.im.onload=function(){NHN.ok=true;};NHN.im.src='game-moi/nen-hang-nut.png?v=1';/* nền khung dưới (thanh nút): ảnh game-moi/nen-hang-nut.png, phủ kín + canh giữa; chưa nạp được thì dùng dải màu */
-var BP=98,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
+var BP=98,BP0=98,FSON=false,GAPB=0,FLOOR=22,FSC=.48,FL=null,frOK=false;/* BP = cao khung dưới (nút); GAPB = khe giữa 2 khung; FLOOR = bề dày nền đất trong khung trên; FSC = tỉ lệ vẽ khung trên */
 /* Độ lấn của khung ra ngoài mép màn hình (px ảnh khung gốc, nhân tỉ lệ vẽ khi dùng). Tăng = khung sát mép hơn nhưng cắt bớt họa tiết góc; đặt 0 = như cũ. Dải viền ngoài của ảnh dày khoảng 16px (trên) và 20px (hai bên). */
 var BG_BLEED={l:10,r:10,t:6,b:8};
 try{var sv=JSON.parse(localStorage.getItem(KEY)||'{}');bm=sv.bm||1;be=sv.be||1;if(!ID&&sv.thu&&THU_MOI.byId[sv.thu])ID=sv.thu;}catch(e){}if(!ID)ID='1a';
@@ -675,7 +676,7 @@ function chaySync(){
   var cs=document.createElement('style');cs.textContent='.chay{position:fixed;z-index:7;display:none;box-sizing:border-box;width:100px;height:32px;border:0;padding:0 14px;background:url(game-moi/nut-khung.webp) 50% 50%/100% 100% no-repeat;color:#ffd0d6;font:800 14px/1 "Segoe UI",system-ui,sans-serif;text-shadow:0 1px 0 #000,0 0 6px rgba(255,80,100,.7);align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}.chay:active{filter:brightness(1.3)}';document.head.appendChild(cs);
   chayEl=document.createElement('button');chayEl.type='button';chayEl.className='chay';chayEl.textContent='Chạy';chayEl.addEventListener('click',chayDo);document.body.appendChild(chayEl);}
  var on=chayCan(),d=on?'flex':'none';if(chayEl.style.display!==d)chayEl.style.display=d;if(!on)return;
- var f=K/DPR,cx=I.l+(W-I.l-I.r)/2,HM2=112,hw2=Math.min(250,Math.floor((W-I.l-I.r-2*HM2-16)/2)),key=[K,DPR,W,H,I.l,I.r,I.t].join('|');if(key===chayKey)return;chayKey=key;
+ var f=K/DPR,cx=I.l+(W-I.l-I.r)/2,HM2=hudHM(),hw2=hudHW(),key=[K,DPR,W,H,I.l,I.r,I.t,FSON].join('|');if(key===chayKey)return;chayKey=key;
  /* khoảng trống NGAY TRÊN chữ VS: đỉnh chữ VS = tâm VS - 0,58 cỡ chữ (cỡ VS tối đa 46, co theo khe giữa 2 khung); nút thu nhỏ vừa khoảng trống đó (cao 18-32 điểm màn hình) và đặt sát trên đỉnh chữ */
  var vc=window.TTGDEM&&TTGDEM.CFG?TTGDEM.CFG.vs:{max:46,dy:.45},rt=window.TTGHUD&&TTGHUD.ratio?TTGHUD.ratio:.3,fsV=Math.min(vc.max,Math.max(12,(W-I.l-I.r-2*HM2-2*hw2-10)/1.2)),vsTop=(I.t+6)+hw2*rt*vc.dy-fsV*.58,
  hC=Math.max(18,Math.min(32,(vsTop-2)*f-2)),tC=Math.max(2,vsTop*f-hC-1);
@@ -683,7 +684,12 @@ function chaySync(){
  chayEl.style.left=Math.round(cx*f-hC*1.55)+'px';chayEl.style.top=Math.round(tC)+'px';}   /* nút Bắt (62-bat-thu.js) vẫn nằm DƯỚI chữ VS */
 function TH(){return H-I.b-BP-GAPB;}/* chiều cao khung trên */
 function edgeY(){var t=TH();return t-Math.round(FRM.top.e.b*sTop(t));}/* mép trên của viền dưới khung trên (viền dày FRM.top.e.b px ảnh gốc, vẽ ở tỉ lệ sTop) */
-function gy(){return SCENE==='sanh'?edgeY()+1:TH()-FLOOR;}/* đường chân thú: sảnh = đứng ngay trên viền khung; trận mẫu = đứng trên đường nền như cũ */
+function gy(){return SCENE==='sanh'?edgeY()+1:FSON?Math.round(TH()-H*FS_DAT):TH()-FLOOR;}
+/* TRẬN TOÀN MÀN HÌNH: vào trận (SCENE='tran') thì bỏ khung trên/dưới, Danh Vọng, EXP, hàng nút; nền vùng phủ kín màn hình. FS_DAT = khoảng từ chân thú tới đáy màn (tỉ lệ chiều cao). FS_HM = lề 2 bên của 2 khung máu (sảnh dùng 112 để chừa Danh Vọng/EXP). */
+var FS_DAT=.2,FS_HM=14,FS_HW=290;
+function hudHM(){return FSON?FS_HM:112;}
+function hudHW(){var hm=hudHM();return Math.min(FSON?FS_HW:250,Math.floor((W-I.l-I.r-2*hm-16)/2));}
+function fsSync(){var on=SCENE==='tran';if(on===FSON)return;FSON=on;BP=on?0:BP0;try{document.body.classList.toggle('ttg-tran',on);}catch(e){}chayKey='';bgKW=-1;resize();}/* đường chân thú: sảnh = đứng ngay trên viền khung; trận mẫu = đứng trên đường nền như cũ */
 /* ===== KHUNG (ảnh khung-game.webp, cắt 9 mảnh) ===== */
 /* KHUNG MỚI: 2 ảnh riêng, cắt 9 mảnh. w,h = cỡ ảnh; sl,sr,st,sb = bề rộng/cao mảnh góc (px ảnh, gồm cả họa tiết góc); e = độ dày viền thật mỗi cạnh (px ảnh, dùng căn nền + chân thú).
    Tỉ lệ vẽ: khung trên s = th/(h - lấn trên), khung dưới s = BP/(h - lấn dưới) => cao đúng khít, chỉ mảnh giữa bị kéo giãn ngang. Chưa nạp được ảnh thì vẽ viền vàng mảnh tạm. */
@@ -707,6 +713,7 @@ function buildFrame(){
  var m=HD?K:1,fx=I.l,fw=W-I.l-I.r,th=TH(),pt=th+GAPB;
  FL=document.createElement('canvas');FL.width=cv.width;FL.height=cv.height;
  var c=FL.getContext('2d');c.imageSmoothingEnabled=true;try{c.imageSmoothingQuality='high';}catch(e){}
+ if(FSON)return;/* trận toàn màn hình: không vẽ khung */
  if(frOK&&FRM.top.img.naturalWidth>0&&FRM.bot.img.naturalWidth>0){
   var s1=sTop(th),s2=sBot(),q=BG_BLEED;
   /* khung trên: lấn ra trái, phải, trên (cạnh dưới giữ nguyên vì giáp khung dưới + thú đứng trên đó) */
@@ -1059,7 +1066,7 @@ var BG_FX_CFG={
  boltFlash:.23      /* độ sáng bầu trời lúc sét chớp (0 = tắt) */
 };
 /* Vùng nền trong khung trên (đơn vị game, tính từ mép trái/trên của màn hình): trả về {l,t,r,b} = độ dày viền hiệu dụng mỗi cạnh. */
-function bgInset(th){var s=sTop(th),ov=1,q=BG_BLEED;
+function bgInset(th){if(FSON)return{l:-I.l,r:-I.r,t:0,b:-I.b};var s=sTop(th),ov=1,q=BG_BLEED;
  return {l:Math.round((BG_EDGE.l-q.l)*s)-ov,r:Math.round((BG_EDGE.r-q.r)*s)-ov,t:Math.round((BG_EDGE.t-q.t)*s)-ov,b:Math.round(BG_EDGE.b*s)-ov};}
 /* Nạp ảnh nền của vùng (nạp 1 lần khi vùng đó được dùng). Lỗi/chưa nạp xong thì vẫn chạy video hoặc nền trời cũ. */
 function bgImgFor(z){var c=BG_FX_ZONE[z];if(!c)return null;var o=BG_IMGS[z];
@@ -1300,18 +1307,18 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
  ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);
  /* nền khung trên: trời + đất (sau này mỗi vùng đổi nền ở đây) */
-  if(bgOn||bgImageOn){ctx.clearRect(fx,0,fw,th);if(bgImageOn){var be2=bgInset(th),bl=be2.l,br=be2.r,bt=be2.t,bb=be2.b;bgDrawFx(ts,fx+bl,bt,fw-bl-br,th-bt-bb);}}else{
+  if(bgOn||bgImageOn){if(FSON)ctx.clearRect(0,0,W,H);else ctx.clearRect(fx,0,fw,th);if(bgImageOn){var be2=bgInset(th),bl=be2.l,br=be2.r,bt=be2.t,bb=be2.b;bgDrawFx(ts,fx+bl,bt,fw-bl-br,th-bt-bb);}}else{
  var g=ctx.createLinearGradient(0,0,0,gy());g.addColorStop(0,'#9fc4ee');g.addColorStop(1,'#dfeefb');ctx.fillStyle=g;ctx.fillRect(fx,0,fw,gy());
  ctx.fillStyle='#e8f1fa';ctx.fillRect(fx,gy(),fw,th-gy());if(SCENE!=='sanh'){ctx.fillStyle='#c4d6ea';ctx.fillRect(fx,gy(),fw,2);}}
  /* nền khung dưới (chứa nút) */
- if(NHN.ok){var ia=NHN.im.naturalWidth/NHN.im.naturalHeight,ta=fw/BP,sx=0,sy=0,sw=NHN.im.naturalWidth,sh=NHN.im.naturalHeight;   /* phủ kín (cover): cắt 2 mép hoặc trên/dưới, canh giữa */
+if(FSON){}else if(NHN.ok){var ia=NHN.im.naturalWidth/NHN.im.naturalHeight,ta=fw/BP,sx=0,sy=0,sw=NHN.im.naturalWidth,sh=NHN.im.naturalHeight;   /* phủ kín (cover): cắt 2 mép hoặc trên/dưới, canh giữa */
   if(ta>ia){sh=sw/ta;sy=(NHN.im.naturalHeight-sh)/2;}else{sw=sh*ta;sx=(NHN.im.naturalWidth-sw)/2;}
   ctx.drawImage(NHN.im,sx,sy,sw,sh,fx,pt,fw,BP);}
  else{var pg=ctx.createLinearGradient(0,pt,0,pt+BP);pg.addColorStop(0,'#151a3a');pg.addColorStop(1,'#0c1026');ctx.fillStyle=pg;ctx.fillRect(fx,pt,fw,BP);}
  /* khung (đã dựng sẵn ở độ phân giải máy) */
- if(FL){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
- drawExp(ts);
- if(window.TTGDV&&FRM.top.img&&FRM.top.img.naturalWidth){var dvS=sTop(TH());TTGDV.draw(ctx,I.l-BG_BLEED.l*dvS,-BG_BLEED.t*dvS,dvS);}   /* ngôi sao + số Danh Vọng trong ô dưới chữ Danh Vọng (80-danh-vong.js) */
+if(FL&&!FSON){ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(FL,0,0);ctx.restore();}
+if(!FSON)drawExp(ts);
+ if(!FSON&&window.TTGDV&&FRM.top.img&&FRM.top.img.naturalWidth){var dvS=sTop(TH());TTGDV.draw(ctx,I.l-BG_BLEED.l*dvS,-BG_BLEED.t*dvS,dvS);}   /* ngôi sao + số Danh Vọng trong ô dưới chữ Danh Vọng (80-danh-vong.js) */
  if(SCENE==='sanh'&&window.TTGTIEN)TTGTIEN.draw(ctx,fx+fw/2,I.t,fw-460);   /* khung tiền tệ: chỉ ở sảnh, giữa Danh Vọng và EXP */
  if(SCENE==='sanh'){petSanh(ts);if(window.TTGRUNE&&petSanh.rk)TTGRUNE.ring(ctx,petSanh.rk,petSanh.x,py(),ts,'truoc');if(window.TTGNVSANH&&TTGNVSANH.draw)TTGNVSANH.draw(ctx,ts,gy());/* nhân vật người chơi đứng cạnh thú (84b-nhan-vat-sanh.js) */if(window.TTGSANH&&TTGSANH.draw)TTGSANH.draw(ctx,ts);/* bong bóng emoji + khung chat của thú sảnh, vẽ sau cùng để nằm trên thú */return;}
  if(st.skFx&&st.skFx.tm&&st.skFx.id==='tinh-ha-van-lac'&&window.TTGTinhHa){try{TTGTinhHa.under(ctx,st.skFx,ts,knGeo(st.skFx));}catch(e){window.__fxBossErr='tinh-ha-nen: '+(e&&e.message||e);}}   /* nền đen kỹ năng cảnh dài: vẽ TRƯỚC thú để thú nằm trên nền đen */
@@ -1322,7 +1329,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  var DA={x:I.l,y:0,w:W-I.l-I.r,h:TH(),cx:I.l+(W-I.l-I.r)/2,cy:TH()*.46};if(st.skFx)drawSkillFx(ts);if(st.atk&&st.atk.length)drawAtkFx(ts);drawAn(ts);tlOver(ts);tcDraw(ts,'over');if(window.TTGBO)TTGBO.draw(ctx,ts);if(window.TTGDEM)TTGDEM.under(ctx,ts,DA);/* đếm ngược: nền tối + tia sáng, nằm dưới khung HUD */
  var ox=140,bw=Math.min(220,Math.floor((W-2*ox-40)/2)),by=I.t+32,mePet=BATTLE&&THU_MOI.byId[BATTLE.player.id],meName=BATTLE?(BATTLE.player.ten||(mePet&&mePet.ten)||'Thú của bạn'):THU_MOI.byId[ID].ten,enName=BATTLE?BATTLE.enemy.ten+' ['+enTag(BATTLE.enemy)+']':THU_MOI.byId[ID].ten,maxMe=BATTLE?BATTLE.playerStats.hp:100,maxEn=BATTLE?BATTLE.enemyStats.hp:100;
   /* KHUNG THÔNG TIN (68-hud-tran.js): khung thú bạn bên trái (vòng Rank bên trái), khung địch bên phải (lật gương). Ảnh chưa nạp xong thì dùng thanh máu cũ. */
-  var HM=112,hw=Math.min(250,Math.floor((W-I.l-I.r-2*HM-16)/2)),hy=I.t+6,P=BATTLE?BATTLE.player:null,EN=BATTLE?BATTLE.enemy:null;
+  var HM=hudHM(),hw=hudHW(),hy=I.t+6,P=BATTLE?BATTLE.player:null,EN=BATTLE?BATTLE.enemy:null;
   var TD=(function(){if(!BATTLE||!window.TTGCS)return{me:null,en:null,max:0,gm:null,ge:null};var m=effS('me').td||0,e=effS('en').td||0;return{me:m,en:e,max:Math.max(m,e),gm:gaugeOf('me'),ge:gaugeOf('en')};})();/* tốc độ 2 bên (đã tính buff/debuff), khớp ordFirst */
   var okHud=window.TTGHUD&&TTGHUD.ready()&&TTGHUD.draw(ctx,{x:I.l+HM,y:hy,w:hw,rank:P?((window.TTGBAO&&TTGBAO.RKC&&TTGBAO.RKC[P.bac])?P.bac:'C'):null,name:meName,hiem:(P&&window.TTGCS&&TTGCS.doHiem?TTGCS.doHiem(P.id):null),bac:P?P.tien:bm,lv:P?P.lv:1,he:heOf(P||{id:ID}),hp:st.me,hpMax:maxMe,sh:st.shMe||0,shMax:st.shMaxMe||0,td:TD.me,tdMax:TD.max,gauge:TD.gm});
   if(okHud){TTGHUD.draw(ctx,{x:W-I.r-HM-hw,y:hy,w:hw,mirror:true,enemy:true,rank:EN&&EN.hienBac?EN.bac:null,name:enName,hiem:(EN&&EN.hiem)||(EN&&window.TTGCS&&TTGCS.doHiem?TTGCS.doHiem(EN.id):null),anBac:!!(EN&&EN.anBac),bac:EN?EN.tien:be,lv:EN?EN.lv:1,he:heOf(EN||{id:ID}),hp:st.en,hpMax:maxEn,sh:st.shEn||0,shMax:st.shMaxEn||0,td:TD.en,tdMax:TD.max,gauge:TD.ge});if(window.TTGDEM)TTGDEM.vs(ctx,ts,I.l+HM+hw,W-I.r-HM-hw,hy+hw*TTGHUD.ratio*TTGDEM.CFG.vs.dy);knIcons(ts,I.l+HM,W-I.r-HM,hy+hw*TTGHUD.ratio+KN_ICON.dy,hw);}/* VS nằm giữa 2 khung, tự co theo khe + lề */
@@ -1332,7 +1339,7 @@ function draw(ts){bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  if(window.TTGCHU&&TTGCHU.fx)TTGCHU.fx(ctx,ts,st.fx,{px:{me:px('me'),en:px('en')},head:{me:headY('me'),en:headY('en')},mid:gy()-110,top:I.t+104});/* 84-chu-tran.js: số đậm mọc từ đầu thú bay lên + chữ hiệu ứng kiểu CHIẾN! nhỏ xếp trên đầu */else st.fx.forEach(function(f){if(ts<f.t)return;ctx.fillStyle=f.c||'#d11';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(f.s,f.x,f.y-Math.round((ts-f.t)/20));});
  if(window.TTGDEM)TTGDEM.draw(ctx,ts,DA);if(st&&st.skIn)drawSkillIn(ts);drawTip(ts);
  if(window.TTGDEM)TTGDEM.result(ctx,ts,DA,st.msg);else if(st.msg){ctx.fillStyle='#123';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(st.msg,W/2,Math.max(I.t+70,gy()-170));}}
-function loop(ts){mainRaf=0;if(document.hidden)return;if(SCENE==='tran')autoTick();draw(ts);tlShake(ts);chaySync();mainRaf=requestAnimationFrame(loop);}
+function loop(ts){mainRaf=0;if(document.hidden)return;fsSync();if(SCENE==='tran')autoTick();draw(ts);tlShake(ts);chaySync();mainRaf=requestAnimationFrame(loop);}
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200);});
 reset();resize();if(!document.hidden)mainRaf=requestAnimationFrame(loop);
 /* Màn chờ: nạp ảnh bậc đang chọn của 2 bên (vẽ ra ngoài màn để kích hoạt nạp lười) rồi mới cho hiện nút BẮT ĐẦU. Quá 30 giây màn chờ tự cho vào. */
