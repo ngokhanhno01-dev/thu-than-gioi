@@ -60,4 +60,9 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - Đã kiểm tra: node --check, node tính lại chỉ số; thú nuôi th1 cấp 1 không đổi. CHƯA thử trong trận thật (chưa biết boss đánh thú mình có thắng nổi 10% đầu không).
 
 - Máu x30: Đế Giang 2.821.825 / Chúc Long 2.665.057 / Vô Cực 4.075.969. Thú Công S 270: đòn thường ~0,26%, kỹ năng 500% ~1,3% (Vô Cực tank ~0,13% / 0,64%).
-- Ý chưa làm (người dùng nêu 27/11): tốc độ boss vào trận chỉ 50 rồi mỗi đợt +50 để thú cấp thấp kịp đánh 1 cái. Chờ chốt 'đợt' là gì.
+
+### Cơ hội cho cấp thấp (27/11/2026, người dùng chọn ý 1 và 3; ý sàn sát thương và chia thưởng theo sát thương KHÔNG làm)
+- HẤP HỐI: boss Thần còn <= 10% máu thì mọi đòn người chơi gây sát thương CỐ ĐỊNH: đòn thường 0,3% máu tối đa, kỹ năng 1% (`TTGBTG.CFG.hapHoiDonThuong/hapHoiKyNang`, 103). Không theo Công/Giáp/chí mạng/hệ. Máu x30: đòn thường ~8.465, kỹ năng ~28.218 (Đế Giang), tức ~34 đòn thường để hạ 10% cuối. Hàm `btgDmg` trong index.html, gọi ở đòn thường (`hit`), kỹ năng người chơi và `tlAcc` (Thời Gian Tỉnh Lặng).
+- TỐC ĐỘ TĂNG THEO ĐỢT: boss vào trận tốc độ `tocDau` 50, mỗi lần boss ra đòn (1 đợt) +`tocMoiDot` 50, tối đa bằng tốc độ thật. Reset mỗi trận (st mới). Làm trong `effS('en')`, đếm `st.btgDot` ở `atk`.
+- Nhịp thực tế: đợt 0 = 1,6s/đòn, đợt 1 = 1,2s, đợt 5 = 0,6s, đợt 20 = 0,2s, đợt ~119 chạm tốc độ thật (0,04s). Tức +50 mỗi đợt làm boss nhanh rất sớm, cần cân lại nếu thấy quá gắt (thêm trần hoặc đổi `tocMoiDot`).
+- Đã kiểm tra: node --check các file, test node `btgDmg` (trên 10% giữ nguyên, <=10% cố định, boss thường không đổi) và công thức tốc độ. CHƯA thử trong trận thật.
