@@ -532,7 +532,7 @@ if(window.TTGBO)TTGBO.attach({st:function(){return st;},eff:function(w){return e
 var KN_ICON={s:26,gap:4,dy:3,max:3},KNI={},HE_MAU_KN={bang:'#8fe3ff',thuy:'#58a8ff',phong:'#7fe8b0',loi:'#ffe45c',am:'#a98cf0',hoa:'#ff8a5c',moc:'#6ce57a',tho:'#d6a866',doc:'#c27cff',kim:'#fff0b8',thoigian:'#ffd76a',vocuc:'#5dffc0'};
 function knImg(id){var o=KNI[id];if(!o){o=KNI[id]={img:new Image(),ok:false};o.img.onload=function(){o.ok=true;};o.img.onerror=function(){o.ok=false;};o.img.src='game-moi/icon-kn/'+id+'.png';}return o.ok?o.img:null;}
 function knMeList(p){var r=[];(p&&p.kn||[]).forEach(function(id){var k=id&&window.TTGCS&&TTGCS.sachKyNang?TTGCS.sachKyNang(id):null;if(k)r.push({k:k,cd:KN_START});});return r;}/* kỹ năng thú bạn: đọc t.kn (id sách) -> kỹ năng của sách */
-function knMeDecide(){var a=st&&st.knMe,r=null;if(!a||!BATTLE)return null;if(khoaKn('me')||tlOn('me'))return null;a.forEach(function(n){if(n.k.thaiCuc&&tcOf('me'))return;if(n.cd>0)n.cd--;else if(!r){n.cd=Math.max(0,n.k.cd-1);r=n.k;}});return r;}
+function knMeDecide(){var a=st&&st.knMe,r=null;if(!a||!BATTLE)return null;if(khoaKn('me')||tlOn('me'))return null;var btgE=!!(BATTLE.enemy&&BATTLE.enemy.btg);a.forEach(function(n){if(n.k.thaiCuc&&tcOf('me'))return;if(n.k.thaiCuc&&btgE){if(n.cd<=0&&!r){n.cd=Math.max(0,n.k.cd-1);r=n.k;}return;}if(n.cd>0)n.cd--;else if(!r){n.cd=Math.max(0,n.k.cd-1);r=n.k;}});return r;}
 /* thú bạn dùng kỹ năng của sách: cùng FX/sát thương/hiệu ứng như boss nhưng đánh từ trái sang địch (FX pa:true, đích x=272). Lượt kéo dài KN_T_END. */
 function castMe(s0,k){var n0=performance.now(),tm=knTm(k.id);s0.skIn={ten:k.ten,he:k.he,t0:n0,by:'me'};
  setTimeout(function(){if(st!==s0||!BATTLE)return;s0.skIn=null;var n1=performance.now();s0.skFx={id:k.id,ten:k.ten,t0:n1,i:++knSeq,by:'me',tm:tm.hit===KN_T_HIT?null:tm};A={w:'me',t:n1};tcStart(k,'me',n1);
@@ -806,7 +806,8 @@ function atk(w){if(st.busy||st.me<=0||st.en<=0)return;var s0=st;
  if(w==null){st.alt=st.alt?0:1;w=st.alt?'me':'en';}   /* trận mẫu không có BATTLE: luân phiên */
  else if(w==='both'){gaugeInit();st.g.me=Math.max(0,st.g.me-1);st.g.en=Math.max(0,st.g.en-1);st.run={w:'both'};st.hoa=(st.hoa||0)+1;}
  else{gaugeInit();st.g[w]=Math.max(0,st.g[w]-1);st.run={w:w};st.hoa=0;}
- if((w==='en'||w==='both')&&BATTLE&&BATTLE.enemy&&BATTLE.enemy.btg)st.btgDot=(st.btgDot||0)+1;   /* mỗi lần boss Thần ra đòn = 1 đợt */
+ if((w==='en'||w==='both')&&BATTLE&&BATTLE.enemy&&BATTLE.enemy.btg)st.btgDot=(st.btgDot||0)+1;
+ if((w==='en'||w==='both')&&BATTLE&&BATTLE.enemy&&BATTLE.enemy.btg&&st.knMe&&!tcOf('me'))st.knMe.forEach(function(n){if(n.k.thaiCuc&&n.cd>0)n.cd--;});   /* trận boss Thần: hồi chiêu Thái Cực Đồ đếm theo LƯỢT CỦA BOSS (khiên đã mất), không theo lượt mình, để thú nhanh không dựng khiên liên tục khi boss còn chậm (bug bất tử 27/11) */   /* mỗi lần boss Thần ra đòn = 1 đợt */
  st.busy=true;st.actor=w;
  var fin=function(){if(st!==s0)return;hoaTick(w);mocTick(w);if(window.TTGBO&&w){if(w==='both'){TTGBO.round('me');TTGBO.round('en');}else TTGBO.round(w);lcsRound(w);TTGBO.dead();}   /* cuối lượt: Sinh Cơ/Dung Nham/Vân Ẩn; rồi Ngọc Hộ Mệnh trước khi xét thắng/thua */
   if(w==='both'){dbTick('me');dbTick('en');}else dbTick(w);

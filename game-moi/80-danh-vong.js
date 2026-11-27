@@ -73,6 +73,8 @@ function css(){var s=document.createElement('style');s.textContent=[
 '#dv-ov .dvp .r .t{font-size:.82em;color:#bcd2ff;white-space:nowrap;font-weight:600}',
 '#dv-ov .dvp .r.on{background:linear-gradient(90deg,rgba(255,212,90,.28),rgba(255,212,90,.08));box-shadow:0 0 0 1px rgba(255,226,122,.9) inset,0 0 .9em rgba(255,212,90,.55)}',
 '#dv-ov .dvp .r.on .t{color:#ffe27a;font-weight:800}',
+'#dv-ov .dvp .r .bt{display:inline-flex;align-items:center;gap:.25em;font-size:.82em;font-weight:800;color:#ffd76a;text-shadow:0 0 .5em rgba(255,200,60,.8);white-space:nowrap}',
+'#dv-ov .dvp .r .bt img{height:1.5em;width:1.5em;object-fit:contain;filter:drop-shadow(0 0 .35em rgba(255,200,60,.9))}',
 '#dv-ov .dvp .r.kh{opacity:.5;cursor:not-allowed;filter:grayscale(.4)}',
 '#dv-ov .dvp .r.em{opacity:.32;cursor:default}',
 '#dv-hot{position:fixed;z-index:7;background:transparent;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:default}',
@@ -94,7 +96,8 @@ function lap(){
     if(!z){d.className='r em';d.innerHTML='<div class="n">Sắp ra mắt</div>';p.appendChild(d);return;}
     var mo=moRoi(i),n=0;(z.thu||[]).forEach(function(t){if(S.kills[t.id])n++;});
     d.className='r'+(i===cur?' on':'')+(mo?'':' kh');
-    d.innerHTML='<div class="n">'+z.ten+' <i>· Vùng '+(i+1)+'</i></div><div class="t">'+(i===cur?'● Đang ở · ':'')+(mo?(n+'/'+(z.thu||[]).length):'🔒 Cần '+can(i)+' ★')+'</div>';
+    var bt='';try{var bs=root.TTGBTG&&root.TTGBTG.trangThai&&root.TTGBTG.trangThai();if(bs&&bs.coMat&&!bs.chet&&bs.vung===z.z)bt='<div class="bt" title="Boss Thần đang ở vùng này">'+(bs.dangDanh?'<span>⚔️</span>':'<img src="game-moi/icon/boss-the-gioi.webp" alt="">')+'<span>'+(bs.dangDanh?'Giao chiến':Math.round(bs.hp*100)+'%')+'</span></div>';}catch(e){}   /* icon boss Thần đang ở vùng nào (103): đang có người đánh thì hiện kiếm */
+    d.innerHTML='<div class="n">'+z.ten+' <i>· Vùng '+(i+1)+'</i></div>'+bt+'<div class="t">'+(i===cur?'● Đang ở · ':'')+(mo?(n+'/'+(z.thu||[]).length):'🔒 Cần '+can(i)+' ★')+'</div>';
     d.addEventListener('click',function(){
       if(!moRoi(i)){var inf=ov.querySelector('.in');inf.innerHTML='<span>🔒 Cần <em>'+can(i)+'</em> Danh Vọng để mở '+z.ten+' (hiện có <em>'+dv+'</em>)</span>';clearTimeout(tmr);tmr=setTimeout(function(){if(ov.style.display==='flex')lap();},2600);return;}   /* nhắc ngay dưới khung, không dùng toast (toast che các ô) */
       set(i);dong();
