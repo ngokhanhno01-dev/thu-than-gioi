@@ -33,6 +33,6 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - ĐÃ CHỐT: sát thương hòa = 100% Công đối thủ, sát thương chuẩn, KHÔNG chí mạng.
 - ĐÃ CHỐT: kỹ năng kéo dài (Thái Cực Đồ, Thời Gian Tỉnh Lặng) khi hòa KHÔNG kích hoạt.
 - ĐÃ CHỐT: "tốc bằng nhau" = trước khi ra chiêu, 2 thanh đánh cùng đầy trong 1 lượt (trong code là nhánh 'both' của `gaugeStep`, hiện cho sai lệch CLASH_MS=60 ms).
-- Chưa chốt: hồi chiêu khi hòa (đề xuất: cả 2 tính là đã dùng).
+- ĐÃ CHỐT: khi hòa, cả 2 bên tính là đã dùng chiêu (vào hồi chiêu).
 - Code hiện tại (`actClash`, CLASH_MS=60 trong index.html) khác luật này: 2 kỹ năng đối kháng thì tung lần lượt cả hai.
 - Cân bằng Thái Cực Đồ (440% Công): người dùng đã tính, giữ nguyên.
