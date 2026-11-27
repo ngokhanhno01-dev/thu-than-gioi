@@ -4,11 +4,14 @@
    Thú nở từ trứng KHÔNG có cờ boss nên không bị nhân hsBossLoai.
    API: TTGTRUNG.CFG, .idTrung(loaiBoss), .roi(loaiBoss[,rng]) (tung tỉ lệ rơi, trúng thì +1 trứng vào Balo, trả id trứng hoặc null), .mo(idTrung) (nở trứng, trả uid thú hoặc null), .lay(n) (TEST).
    CHƯA nối vào trận: boss Thần chưa đánh được (chưa lên map). Khi nối: gọi TTGTRUNG.roi('th1') ngay lúc boss chết.
+   THÔNG BÁO (27/11/2026): trứng rơi = thẻ 106-thong-bao-roi.js (TTGDROP), TÊN TRỨNG 7 MÀU + icon + nháy sáng; dòng chạy ngang báo toàn màn hình. Trứng nở = thẻ màu theo Rank (SR cũng 7 màu).
    NÚT TEST ẨN: menu ẩn (chạm chữ "Danh Vọng") -> "Lấy trứng Đế Giang". Xóa khối cuối file khi ra bản thật. */
 (function (root) {
   'use strict';
   var B = root.TTGBALO;
   if (!B) return;
+  /* nạp động module thông báo rơi đồ (106) nếu chưa có */
+  (function () { try { var D = root.document; if (root.TTGDROP || root.__tdrLoad || !D) return; root.__tdrLoad = 1; var cs = D.currentScript, s = D.createElement('script'); s.src = (cs && cs.src ? cs.src.replace(/[^\/?#]*([?#].*)?$/, '') : 'game-moi/') + '106-thong-bao-roi.js?v=1'; D.head.appendChild(s); } catch (e) {} })();
   var CFG = {
     tiLeRoi: { th1: 0.005, th2: 0.005, th3: 0.005 },   /* 0,5% khi giết boss Thần, cả 3 con (người dùng chốt 27/11/2026). Sách kỹ năng boss Thần: 1,5% như boss thường (TY_LE_ROI_SACH, 56c-buff.js) */
     soTest: 3                  /* nút test: số trứng mỗi lần bấm */
@@ -28,11 +31,21 @@
   function idTrung(loai) { for (var id in TRUNG) if (TRUNG[id].loai === loai) return id; return null; }
   function toast(t) { try { var b = root.TTGBAO || root.TTGTBAO; if (b && b.toast) b.toast(t, 2600); } catch (e) {} }
   function tenLoai(loai) { var o = root.THU_MOI && THU_MOI.byId && THU_MOI.byId[loai]; return (o && o.ten) || loai; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function nm(ten, muc) { return root.TTGDROP ? TTGDROP.tenHtml(ten, muc) : '<b>' + esc(ten) + '</b>'; }
+
+  /* THÔNG BÁO TRỨNG RƠI: thẻ 7 màu + dòng chạy ngang */
+  function baoRoi(id) {
+    var T = TRUNG[id]; if (!T) return;
+    if (root.TTGDROP) TTGDROP.show({ tieude: 'Boss Thần rơi vật phẩm!', ten: T.ten, so: 1, muc: 'than', nhan: 'Thần phẩm', nguon: 'Rơi từ boss ' + tenLoai(T.loai), icon: T.img, fb: '🥚' });
+    else toast('Nhận được ' + T.ten + '!');
+    try { if (root.TTGBAOBTG && TTGBAOBTG.show) TTGBAOBTG.show('<span class="ic">🥚</span> Bạn đã nhặt được ' + nm(T.ten, 'than') + ' từ boss Thần ' + nm(tenLoai(T.loai), 'than') + '! <b style="color:#ffe066">Cực hiếm!</b>', 'roi'); } catch (e) {}
+  }
 
   function roi(loai, rng) {
     var id = idTrung(loai), p = CFG.tiLeRoi[loai];
     if (!id || !p) return null;
-    if (((rng || Math.random)()) < p) { B.add(id, 1); return id; }
+    if (((rng || Math.random)()) < p) { B.add(id, 1); baoRoi(id); return id; }
     return null;
   }
 
@@ -43,7 +56,8 @@
     var bac = (root.TTGCS && TTGCS.tungBac) ? TTGCS.tungBac() : 'E';
     B.add(id, -1);
     var uid = TTGTHU.add({ id: T.loai, ten: tenLoai(T.loai), bac: bac, tien: 1, lv: 1, chiso: {}, kn: [null, null, null, null, null, null] });
-    toast('Trứng nở! Nhận ' + tenLoai(T.loai) + ' (Rank ' + bac + ')');
+    if (root.TTGDROP) TTGDROP.show({ tieude: 'Trứng nở!', ten: tenLoai(T.loai), muc: bac, nhan: 'Rank ' + bac, nguon: 'Thú Thần · cấp 1 · tiến hóa 1', icon: '🐣', ms: (bac === 'SR' ? 5200 : 3600) });
+    else toast('Trứng nở! Nhận ' + tenLoai(T.loai) + ' (Rank ' + bac + ')');
     return uid;
   }
 
@@ -61,7 +75,8 @@
     root.TTGNV.add({ id: 'lay-trung-dg', dev: true, ten: 'Lấy trứng Đế Giang', onTap: function () { lay(null, 'th1'); } });
     root.TTGNV.add({ id: 'lay-trung-cl', dev: true, ten: 'Lấy trứng Chúc Long', onTap: function () { lay(null, 'th2'); } });
     root.TTGNV.add({ id: 'lay-trung-vc', dev: true, ten: 'Lấy trứng Vô Cực', onTap: function () { lay(null, 'th3'); } });
+    root.TTGNV.add({ id: 'test-bao-trung', dev: true, ten: 'Test thông báo rơi trứng', onTap: function () { baoRoi('trung-de-giang'); } });
   }
 
-  root.TTGTRUNG = { CFG: CFG, TRUNG: TRUNG, idTrung: idTrung, roi: roi, mo: mo, lay: lay };
+  root.TTGTRUNG = { CFG: CFG, TRUNG: TRUNG, idTrung: idTrung, roi: roi, mo: mo, lay: lay, bao: baoRoi };
 })(typeof window !== 'undefined' ? window : globalThis);
