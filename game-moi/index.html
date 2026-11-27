@@ -434,7 +434,7 @@ function lungeP(x){if(x<=0)return 0;if(x<.14)return -14*Math.sin(x/.14*Math.PI/2
 function smo(x){x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);}
 function atkStart(w,miss){var a=window.TTGCombatFX,now=performance.now(),s=zoneOfW(w),zz=null;try{zz=a.getZone(s);}catch(e){}
  st.atk=(st.atk||[]).filter(function(f){return Math.abs(f.t0-now)<120;});   /* đòn mới thay đòn cũ (như main); 2 đòn đối kháng cùng lúc thì cùng chạy */
- st.atk.push({w:w,s:s,t0:now,i:++knSeq,miss:!!miss,mel:!!(zz&&zz.mode==='melee')});}
+ st.atk.push({w:w,s:s,sp:(BATTLE?(w==='me'?BATTLE.player:BATTLE.enemy).id:null),t0:now,i:++knSeq,miss:!!miss,mel:!!(zz&&zz.mode==='melee')});}
 /* độ lệch ngang (px) của thú w do đòn thường đang chạy; null = không có đòn nào ảnh hưởng thú này */
 function atkOff(w,ts){var L=st&&st.atk;if(!L||!L.length)return null;var o=0,hit=false;
  for(var k=0;k<L.length;k++){var f=L[k],u=atkU(f,ts);if(u<0||u>=1)continue;
@@ -449,10 +449,10 @@ function drawAtkFx(ts){var L=st.atk,api=window.TTGCombatFX;if(!L||!L.length)retu
    ox0=px(att)-(pa?85:272)*sc,ox1=px(tg)-(pa?272:85)*sc,tn=(f.s===17||f.s===18)&&!f.text,ox=(f.mel||tn)?ox1:ox0+(ox1-ox0)*smo((u-.18)/.25),oy=py()-204*sc;   /* xa: tụ lực ở bên đánh, bay tới bên bị đánh */
   ctx.save();ctx.beginPath();ctx.rect(I.l,0,fw,TH());ctx.clip();
   ctx.save();ctx.translate(ox,oy);ctx.scale(sc,sc);ctx.imageSmoothingEnabled=true;window.BSPD=1/AT_K;
-  try{api.drawAttack(ctx,tt,{on:1,s:f.s,u:u,pa:pa,sx:tn?(px(att)-ox1)/sc:undefined,cl:0,cr:false,miss:f.miss,h:'',i:f.i,text:f.text||''});}catch(e){window.__fxAtkErr='atk: '+(e&&e.message||e);}
+  try{api.drawAttack(ctx,tt,{on:1,s:f.s,u:u,pa:pa,sx:tn?(px(att)-ox1)/sc:undefined,cl:0,cr:false,miss:f.miss,h:'',i:f.i,sp:f.sp,text:f.text||''});}catch(e){window.__fxAtkErr='atk: '+(e&&e.message||e);}
   ctx.restore();
   ctx.save();ctx.translate(ox1,oy);ctx.scale(sc,sc);ctx.imageSmoothingEnabled=true;window.BSPD=1/AT_K;
-  try{if(u>=.35&&u<.9)api.drawImpact(ctx,{k:f.miss?'miss':'hit',s:f.s,q:Math.max(0,Math.min(.9999,(u-.35)/.55)),pp:pa,text:f.text||'',i:f.i,d:f.miss?0:1,r:1,h:''},tt);
+  try{if(u>=.35&&u<.9)api.drawImpact(ctx,{k:f.miss?'miss':'hit',s:f.s,sp:f.sp,q:Math.max(0,Math.min(.9999,(u-.35)/.55)),pp:pa,text:f.text||'',i:f.i,d:f.miss?0:1,r:1,h:''},tt);
    if(f.miss&&api.drawDodge)api.drawDodge(ctx,u,pa,tt);}catch(e){window.__fxAtkErr='imp: '+(e&&e.message||e);}
   ctx.restore();ctx.restore();});
  ctx.imageSmoothingEnabled=false;}

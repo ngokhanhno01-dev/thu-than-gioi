@@ -17,7 +17,7 @@ var CFG={
   hsVungMoiZ:0.3,        /* hp,tc,pt,td nhân (1 + 0,3 x z); mm KHÔNG nhân theo vùng */
   hsBoss:1.6,            /* boss: hp,tc,pt,td nhân thêm */
   hsDoHiem:{thuong:1,hiem:1.03,suthi:1.06,huyenthoai:1.10,truyenthuyet:1.20,than:1.35},   /* HỆ SỐ THEO ĐỘ HIẾM LOÀI (56b-loai.js): hp,tc,pt,td nhân thêm cho thú KHÔNG phải đang đánh với tư cách boss (thú nuôi, thú hoang thường). Lúc thu.boss === true (trận đánh boss) KHÔNG nhân, để chỉ số boss giữ nguyên theo hsBoss/hsBossLoai. Truyền Thuyết 1,20 và Thần 1,35 do người dùng chốt 27/11/2026 (săn khó nên thưởng cao). mm không nhân */
-  hsBossLoai:{th1:2},    /* CHỈ SỐ BOSS RIÊNG THEO LOÀI: hp,tc,pt,td nhân thêm KHI ĐÁNH BOSS (tinh() nhận thu.boss === true từ trận). th1 = Đế Giang: x2 so với boss thú hoang vùng 18 (z17, vung 17), chốt 27/11/2026. Thú nở từ trứng (không có cờ boss) không nhân */
+  hsBossLoai:{th1:2,th2:2},    /* CHỈ SỐ BOSS RIÊNG THEO LOÀI: hp,tc,pt,td nhân thêm KHI ĐÁNH BOSS (tinh() nhận thu.boss === true từ trận). th1 = Đế Giang: x2 so với boss thú hoang vùng 18 (z17, vung 17), chốt 27/11/2026. Thú nở từ trứng (không có cờ boss) không nhân */
   /* nhân theo vai trò (hp,tc,pt,td) */
   vai:{
     tank:    {hp:1.3, tc:0.8, pt:1.4, td:0.7},
@@ -52,7 +52,7 @@ function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 /* ===== HỆ: 18 hệ (khung khắc chế lấy theo Pokémon, đổi tên cho hợp game) =====
    BANG_HE[hệ tấn công] = {khac:[hệ bị khắc], kem:[hệ kháng], mien:[hệ miễn nhiễm]}. Sửa quan hệ nào cứ sửa ở đây. Hệ không liệt kê = x1.
    Thêm hệ mới: thêm vào HE_TEN + một dòng BANG_HE + (nếu cần) thêm tên vào dòng của các hệ khác. */
-var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',khonggian:'Không Gian'};
+var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',khonggian:'Không Gian',thoigian:'Thời Gian'};
 var HE=Object.keys(HE_TEN);
 function ds(x){return x?x.split(' '):[];}
 function H(khac,kem,mien){return {khac:ds(khac),kem:ds(kem),mien:ds(mien)};}
@@ -75,7 +75,8 @@ var BANG_HE={
   am:    H('tam ma','vo am tien',''),
   kim:   H('bang nham tien','hoa thuy loi kim',''),
   tien:  H('vo long am','hoa doc kim',''),
-  khonggian:H('ma long am tam tien','kim','')   /* Không Gian (hệ của boss Đế Giang): khắc Ma, Long, Ám, Tâm Linh, Tiên; bị Kim kháng. Chốt 27/11/2026, chỉnh ở dòng này */
+  khonggian:H('ma long am tam tien','kim',''),   /* Không Gian (hệ của boss Đế Giang): khắc Ma, Long, Ám, Tâm Linh, Tiên; bị Kim kháng. Chốt 27/11/2026, chỉnh ở dòng này */
+  thoigian:H('','','')   /* Thời Gian (hệ của boss Chúc Long): TẠM chưa khắc/bị khắc hệ nào, chờ người dùng chốt bảng khắc hệ (27/11/2026) */
 };
 /* hs một đòn hệ heDon lên 1 hệ mục tiêu h */
 function heMot(heDon,h){
