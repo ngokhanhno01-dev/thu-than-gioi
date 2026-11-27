@@ -51,3 +51,10 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - Boss chạy giữ máu thực còn lại (bản đồ và thông báo đều hiện %).
 - `105-bao-boss-than.js`: dòng chữ chạy ngang trên cùng khi boss xuất hiện (kèm vùng) / bỏ chạy (kèm vùng + % máu) / bị hạ.
 - Nút test ẩn (chạm "Danh Vọng"): Test Đế Giang / Chúc Long / Vô Cực (đặt ở VÙNG ĐANG CHỌN) + Tắt test. Test không đụng lịch, lần, khóa thật (`TTGBTG.datTest/tatTest`).
+
+## Máu boss Thần tăng (27/11/2026, phiên 5)
+- Lý do: thú 270 đánh 1 đòn là tụt hơn 10% máu nên boss chạy ngay (đòn thường thú Công S ~7,7%, kỹ năng 500% ~38%).
+- `CFG.hsBossHp = {th1:5, th2:5, th3:5}` (56-chi-so.js): chỉ nhân Máu, chỉ khi `thu.boss === true`, sau `hsBossLoai`. Tấn công, Giáp, Tốc độ giữ nguyên. Thú nuôi/trứng không bị ảnh hưởng. Máu toàn cục lưu theo tỉ lệ 0..1 nên không hỏng lần đang chạy.
+- Cấp 270, V3, bậc C: Đế Giang Máu 470.304 / Chúc Long 444.176 / Vô Cực 679.328 (trước x5: 94.061 / 88.835 / 135.866).
+- Thú Công S 270 V3: đòn thường ~1,6% máu boss, kỹ năng 500% ~8% (Vô Cực tank: 0,8% / 3,8%).
+- Đã kiểm tra: node --check, node tính lại chỉ số; thú nuôi th1 cấp 1 không đổi. CHƯA thử trong trận thật (chưa biết boss đánh thú mình có thắng nổi 10% đầu không).

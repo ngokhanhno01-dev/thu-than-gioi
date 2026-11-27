@@ -17,6 +17,7 @@ var CFG={
   hsVungMoiZ:0.3,        /* hp,tc,pt,td nhân (1 + 0,3 x z); mm KHÔNG nhân theo vùng */
   hsBoss:1.6,            /* boss: hp,tc,pt,td nhân thêm */
   hsDoHiem:{thuong:1,hiem:1.03,suthi:1.06,huyenthoai:1.10,truyenthuyet:1.20,than:1.35},   /* HỆ SỐ THEO ĐỘ HIẾM LOÀI (56b-loai.js): hp,tc,pt,td nhân thêm cho thú KHÔNG phải đang đánh với tư cách boss (thú nuôi, thú hoang thường). Lúc thu.boss === true (trận đánh boss) KHÔNG nhân, để chỉ số boss giữ nguyên theo hsBoss/hsBossLoai. Truyền Thuyết 1,20 và Thần 1,35 do người dùng chốt 27/11/2026 (săn khó nên thưởng cao). mm không nhân */
+  hsBossHp:{th1:5,th2:5,th3:5},    /* MÁU BOSS THẦN: chỉ nhân thêm hp (KHÔNG đụng tc,pt,td) khi thu.boss === true, sau hsBossLoai. Thêm 27/11/2026 vì thú 270 đánh 1 hit đã tụt >10% máu nên boss chạy ngay. Chỉnh số ở đây, mỗi boss một số. Máu toàn cục (103) lưu theo tỉ lệ 0..1 nên đổi số này không làm hỏng lần đang chạy */
   hsBossLoai:{th1:2,th2:2,th3:2},    /* CHỈ SỐ BOSS RIÊNG THEO LOÀI: hp,tc,pt,td nhân thêm KHI ĐÁNH BOSS (tinh() nhận thu.boss === true từ trận). th1 = Đế Giang: x2 so với boss thú hoang vùng 18 (z17, vung 17), chốt 27/11/2026. Thú nở từ trứng (không có cờ boss) không nhân */
   /* nhân theo vai trò (hp,tc,pt,td) */
   vai:{
@@ -162,6 +163,7 @@ function tinh(thu,ctx){
     ['hp','tc','pt'].forEach(function(k){base[k]=b[k]*(1+CFG.hsCap[k]*(lv-1))*CFG.hsTien[k][tien-1]*hb*hT;});
     base.td=b.td*(1+CFG.hsCap.td*(lv-1))*CFG.hsTien.td[tien-1]*hb*hT;
     if(thu.boss===true&&CFG.hsBossLoai[thu.id]){var hbl=CFG.hsBossLoai[thu.id];['hp','tc','pt','td'].forEach(function(k){base[k]*=hbl;});}   /* x2 (Đế Giang) lúc ĐÁNH boss: boss vùng 18 x2 */
+    if(thu.boss===true&&CFG.hsBossHp[thu.id])base.hp*=CFG.hsBossHp[thu.id];   /* máu riêng boss Thần (xem hsBossHp) */
     base.mm=b.mm*CFG.hsTien.mm[tien-1];     /* mm: không theo cấp, không theo bậc */
   }
   var mod={};
