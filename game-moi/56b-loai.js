@@ -144,7 +144,7 @@ var DO_HIEM={
   suthi:{ten:'Sử Thi',mau:'#b06cff',ts:12},
   huyenthoai:{ten:'Huyền Thoại',mau:'#ffb020',ts:8},
   truyenthuyet:{ten:'Truyền Thuyết',mau:'#ff3d5a',ts:1},
-  than:{ten:'Thần',mau:'#ffd76a',ts:0.1}   /* bậc 6, trên Truyền Thuyết: vàng ánh kim, tỉ lệ gặp 0,1 (Truyền Thuyết = 1). Chỉ số nhân thêm CFG.hsThan (56-chi-so.js) */
+  than:{ten:'Thần',mau:'#ffd76a',ts:0.1}   /* bậc 6, trên Truyền Thuyết: vàng ánh kim, tỉ lệ gặp 0,1 (Truyền Thuyết = 1). Chỉ số nhân thêm CFG.hsDoHiem.than (56-chi-so.js) */
 };
 /* ĐỘ HIẾM TỪNG CON do người dùng chốt (danh-sach-do-hiem, 22/11/2026). Con nào không có ở đây thì theo quy tắc mặc định bên dưới. */
 var DO_HIEM_RIENG={
