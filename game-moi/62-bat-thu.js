@@ -404,7 +404,8 @@ var CSS=[
 '.btx .ct{display:flex;flex-direction:column}',
 '.btx.kh{background:url(game-moi/nut-khung.webp) 50% 50%/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:0 18px;white-space:nowrap;overflow:visible}',   /* khung ảnh cho Thôi / Ném / chip châu */
 '.btx.kh.g{filter:grayscale(.9) brightness(.9)}',
-'.btx.dem{pointer-events:none;cursor:default;font-size:15px;color:#ffe9a0}',   /* ô đếm giây giữa [Giết] và [Bắt] */
+'.btx.kh.do{background-image:url(game-moi/nut-khung-do.webp)}',   /* nút Giết: khung nền đỏ */
+'.btx.dem{pointer-events:none;cursor:default;font-size:15px;color:#ffe9a0;background-image:url(game-moi/nut-khung-den.webp)}',   /* ô đếm giây giữa [Giết] và [Bắt]: khung nền đen */
 '.btx.dem.gap{color:#ff6b6b}',
 '.bts-dem{left:0;right:0;top:calc(var(--u)*-6);text-align:center;font-weight:800;font-size:calc(var(--u)*40);color:#ffe9a0;text-shadow:0 0 4px #000,1px 1px 0 #000;pointer-events:none}',
 '.bts,.btr{position:fixed;left:0;top:0;right:0;bottom:0;z-index:9;display:none;align-items:center;justify-content:center;background:rgba(3,4,18,.72);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}',
@@ -443,7 +444,7 @@ function build(){
   var st=document.createElement('style');st.textContent=CSS;document.head.appendChild(st);
   els={};
   /* thanh Bắt/Giết khi thú hoang gục: [Giết] [đếm giây] [Bắt] */
-  els.giet=btn('kh g','Giết',kill);
+  els.giet=btn('kh do','Giết',kill);
   els.dem=btn('kh dem','',function(){});
   els.bat=btn('kh','Bắt',start);
   /* khung chọn châu */
