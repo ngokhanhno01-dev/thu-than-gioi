@@ -26,3 +26,10 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 - Người dùng chốt 27/11/2026: Vạn Mộc Hồi Xuân (địch tự buff) bị lấy buff và TỐN 1 tầng; Thời Gian Tỉnh Lặng KHÔNG bị cướp (buff chỉ sống trong kỹ năng đó), khiên chỉ chặn cú nổ; sát thương phụ không tốn tầng; đòn phản CÓ hút máu (bản chất là "chuyển đòn đánh").
 - Cách làm hiện tại: tầng nào bị trừ thì phản 1 đòn (kể cả đỡ Vạn Mộc, cú nổ). Khiên đỡ trước né/hụt; thiêu đốt/debuff dính từ trước vẫn còn; phản đòn không kích khiên bên kia.
 - Hình (`60g-fx-thai-cuc.js`): đòn 1-4 dùng dạng 2,3,4,5; đòn 5 chạy dạng 3->4->5->6. CHƯA xem trong game.
+
+## PvP (LÀM SAU, ý người dùng 27/11/2026, CHƯA CÓ CODE)
+- Hai bên tới lượt dùng kỹ năng cùng lúc: tốc độ cao hơn dùng trước.
+- Tốc độ bằng nhau: không chạy 2 cảnh kỹ năng, chỉ 1 hiệu ứng nổ ở giữa, HÒA: mỗi bên mất máu bằng Công của đối thủ, và vẫn nhận buff / dính debuff của kỹ năng. Mục tiêu: giảm hiệu ứng nhưng giữ cái hay của kỹ năng.
+- Chưa chốt: sát thương hòa có phải sát thương chuẩn / chí mạng không; kỹ năng kéo dài (Thái Cực Đồ, Thời Gian Tỉnh Lặng) xử lý thế nào khi hòa; "bằng nhau" là bằng đúng hay cho sai lệch; có tính hồi chiêu cả 2 không.
+- Code hiện tại (`actClash`, CLASH_MS=60 trong index.html) khác luật này: 2 kỹ năng đối kháng thì tung lần lượt cả hai.
+- Cân bằng Thái Cực Đồ (440% Công): người dùng đã tính, giữ nguyên.
