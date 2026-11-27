@@ -54,7 +54,10 @@ Bổ sung cho THIET_KE_CHI_SO.md (mục 7b có kỹ năng và debuff Diệt Th�
 
 ## Máu boss Thần tăng (27/11/2026, phiên 5)
 - Lý do: thú 270 đánh 1 đòn là tụt hơn 10% máu nên boss chạy ngay (đòn thường thú Công S ~7,7%, kỹ năng 500% ~38%).
-- `CFG.hsBossHp = {th1:5, th2:5, th3:5}` (56-chi-so.js): chỉ nhân Máu, chỉ khi `thu.boss === true`, sau `hsBossLoai`. Tấn công, Giáp, Tốc độ giữ nguyên. Thú nuôi/trứng không bị ảnh hưởng. Máu toàn cục lưu theo tỉ lệ 0..1 nên không hỏng lần đang chạy.
+- `CFG.hsBossHp = {th1:30, th2:30, th3:30}` (lần đầu x5, nâng x30 cùng ngày vì boss ở lại 30 phút) (56-chi-so.js): chỉ nhân Máu, chỉ khi `thu.boss === true`, sau `hsBossLoai`. Tấn công, Giáp, Tốc độ giữ nguyên. Thú nuôi/trứng không bị ảnh hưởng. Máu toàn cục lưu theo tỉ lệ 0..1 nên không hỏng lần đang chạy.
 - Cấp 270, V3, bậc C: Đế Giang Máu 470.304 / Chúc Long 444.176 / Vô Cực 679.328 (trước x5: 94.061 / 88.835 / 135.866).
 - Thú Công S 270 V3: đòn thường ~1,6% máu boss, kỹ năng 500% ~8% (Vô Cực tank: 0,8% / 3,8%).
 - Đã kiểm tra: node --check, node tính lại chỉ số; thú nuôi th1 cấp 1 không đổi. CHƯA thử trong trận thật (chưa biết boss đánh thú mình có thắng nổi 10% đầu không).
+
+- Máu x30: Đế Giang 2.821.830 / Chúc Long 2.665.050 / Vô Cực 4.075.980. Thú Công S 270: đòn thường ~0,26%, kỹ năng 500% ~1,3% (Vô Cực tank ~0,13% / 0,64%).
+- Ý chưa làm (người dùng nêu 27/11): tốc độ boss vào trận chỉ 50 rồi mỗi đợt +50 để thú cấp thấp kịp đánh 1 cái. Chờ chốt 'đợt' là gì.

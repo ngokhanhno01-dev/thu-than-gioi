@@ -17,7 +17,7 @@ var CFG={
   hsVungMoiZ:0.3,        /* hp,tc,pt,td nhân (1 + 0,3 x z); mm KHÔNG nhân theo vùng */
   hsBoss:1.6,            /* boss: hp,tc,pt,td nhân thêm */
   hsDoHiem:{thuong:1,hiem:1.03,suthi:1.06,huyenthoai:1.10,truyenthuyet:1.20,than:1.35},   /* HỆ SỐ THEO ĐỘ HIẾM LOÀI (56b-loai.js): hp,tc,pt,td nhân thêm cho thú KHÔNG phải đang đánh với tư cách boss (thú nuôi, thú hoang thường). Lúc thu.boss === true (trận đánh boss) KHÔNG nhân, để chỉ số boss giữ nguyên theo hsBoss/hsBossLoai. Truyền Thuyết 1,20 và Thần 1,35 do người dùng chốt 27/11/2026 (săn khó nên thưởng cao). mm không nhân */
-  hsBossHp:{th1:5,th2:5,th3:5},    /* MÁU BOSS THẦN: chỉ nhân thêm hp (KHÔNG đụng tc,pt,td) khi thu.boss === true, sau hsBossLoai. Thêm 27/11/2026 vì thú 270 đánh 1 hit đã tụt >10% máu nên boss chạy ngay. Chỉnh số ở đây, mỗi boss một số. Máu toàn cục (103) lưu theo tỉ lệ 0..1 nên đổi số này không làm hỏng lần đang chạy */
+  hsBossHp:{th1:30,th2:30,th3:30},    /* MÁU BOSS THẦN: chỉ nhân thêm hp (KHÔNG đụng tc,pt,td) khi thu.boss === true, sau hsBossLoai. Thêm 27/11/2026 vì thú 270 đánh 1 hit đã tụt >10% máu nên boss chạy ngay. Chỉnh số ở đây, mỗi boss một số. Máu toàn cục (103) lưu theo tỉ lệ 0..1 nên đổi số này không làm hỏng lần đang chạy */
   hsBossLoai:{th1:2,th2:2,th3:2},    /* CHỈ SỐ BOSS RIÊNG THEO LOÀI: hp,tc,pt,td nhân thêm KHI ĐÁNH BOSS (tinh() nhận thu.boss === true từ trận). th1 = Đế Giang: x2 so với boss thú hoang vùng 18 (z17, vung 17), chốt 27/11/2026. Thú nở từ trứng (không có cờ boss) không nhân */
   /* nhân theo vai trò (hp,tc,pt,td) */
   vai:{
