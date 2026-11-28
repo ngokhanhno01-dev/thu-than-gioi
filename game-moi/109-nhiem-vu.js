@@ -1,13 +1,13 @@
 /* 109-nhiem-vu.js - BẢNG NHIỆM VỤ (nút "Nhiệm vụ" ở thanh nút, 81-nut-moi.js gọi TTGNHIEMVU.open).
    BƯỚC 1 (28/11/2026): khung + rương điểm hoạt động. BƯỚC 2: 2 tab đổi sáng + danh sách cuộn + thanh cuộn thật.
-   BƯỚC 3 (28/11/2026): NỘI DUNG NHIỆM VỤ THẬT: Ngày 5 nhiệm vụ (100 điểm), Tuần 10 nhiệm vụ (100 điểm) => 35 + 10 = 45 nhiệm vụ / tuần.
+   BƯỚC 3 (28/11/2026): NỘI DUNG NHIỆM VỤ THẬT, XOAY VÒNG: mỗi ngày 5 nhiệm vụ (100 điểm) khác nhau, mỗi tuần 10 nhiệm vụ (100 điểm) khác nhau; ngày lặp theo tháng (31 bộ), tuần lặp mỗi 4 tuần.
    ẢNH: khung-nhiem-vu.webp (khung trống 1281x1164) | nhiem-vu-hang-trong.webp (1 hàng, KHÔNG có nút) | nhiem-vu-nut-sang.webp (nút Nhận sáng: đã xong, bấm được) | nhiem-vu-nut-xam.webp (nút Nhận xám: chưa xong) | "Đã nhận" = chữ xám vẽ bằng CSS | nhiem-vu-tab-sang.webp, nhiem-vu-ic-ngay/tuan.webp.
    3 TRẠNG THÁI NÚT: chưa xong = xám (bấm báo tiến độ) | xong chưa nhận = sáng (bấm để nhận thưởng + cộng điểm) | đã nhận = dấu "Đã nhận".
    ĐIỂM HOẠT ĐỘNG: cộng khi BẤM NHẬN (không cộng lúc hoàn thành). Mỗi tab có thanh điểm + 4 rương riêng (mốc 25/50/75/100).
    LÀM MỚI: tab Ngày reset 0h mỗi ngày; tab Tuần reset 0h sáng thứ Hai (giờ máy người chơi). Phần chưa nhận thì mất.
    LƯU: localStorage khóa ttg_moi_nhiemvu_v2.
    ĐẾM TIẾN ĐỘ: các file khác gọi TTGNHIEMVU.sk(sự kiện, giá trị). Sự kiện: 'thang' (thắng trận Thám Hiểm, truyền enemy), 'bat' (bắt thành công 1 thú), 'cuonghoa', 'tienhoa', 'mua' (1 lần mua ở Kỳ Trân Các), 'chi' (số Tinh Thạch đã chi, truyền số), 'bosstg' (đánh Boss Thế Giới), 'daututruong' (thắng Vạn Thú Tranh Phong - hệ thống chưa làm), 'daydu' (tự phát khi tab Ngày đủ 100 điểm).
-   PHẦN THƯỞNG: {t:'tt'|'ttt'|'chau'|'hop'|'ruong', n:số, cap:bậc châu}. tt = Tinh Thạch, ttt = Thú Thần Thạch (TIỀN NẠP: chỉ phát ở chỗ đã chốt, KHÔNG cho ở Đấu Trường). Sửa số ở CFG.ngay / CFG.tuan / CFG.ruong.
+   PHẦN THƯỞNG: {t:'tt'|'ttt'|'chau'|'hop'|'ruong', n:số, cap:bậc châu}. tt = Tinh Thạch, ttt = Thú Thần Thạch (TIỀN NẠP: chỉ phát ở chỗ đã chốt, KHÔNG cho ở Đấu Trường). Sửa số ở CFG.slot (kho nhiệm vụ xoay vòng) / CFG.diem / CFG.ruong. Xem bộ nhiệm vụ: TTGNHIEMVU.lich('ngay'|'tuan', 'YYYY-MM-DD'), TTGNHIEMVU.hienTai('ngay'|'tuan').
    API: TTGNHIEMVU.open() | .close() | .isOpen() | .tab(t) | .sk(ev,v) | .diem() | .setDiem(n) (thử) | .xong(id) (thử: đặt nhiệm vụ đã đủ) | .daNhan(i) | .reset()
    Đóng: nút X, chạm ngoài khung, Esc. */
 (function(){
@@ -17,28 +17,36 @@ var IC={tt:D+'icon-tien/tt.webp?v=1',ttt:D+'icon-tien/ttt.webp?v=1',hop:D+'img/v
 /* ===== DỮ LIỆU NHIỆM VỤ (chốt 28/11/2026) =====
    id | ten | mo (dòng mô tả) | ic (emoji tạm, đổi ảnh sau) | ev (sự kiện đếm) | need (mục tiêu) | diem (điểm hoạt động khi bấm Nhận) | th (thưởng)
    Điểm: Ngày 15+15+20+25+25 = 100 | Tuần 10 x 10 = 100. Đấu trường KHÔNG thưởng Thú Thần Thạch. Tinh Thạch đã nâng (chợ 50 -> 200). */
+function Q(ten,mo,ic,ev,need,th){return {ten:ten,mo:mo,ic:ic,ev:ev,need:need,th:th};}
+function TT(n){return {t:'tt',n:n};}function TTT(n){return {t:'ttt',n:n};}function CH(cap,n){return {t:'chau',cap:cap,n:n};}
 var CFG={
   key:'ttg_moi_nhiemvu_v2',
   moc:[25,50,75,100],
+  diem:{ngay:[15,15,20,25,25],tuan:[10,10,10,10,10,10,10,10,10,10]},   /* điểm hoạt động theo VỊ TRÍ (ô) nhiệm vụ */
+  /* XOAY VÒNG THEO THÁNG: mỗi ô có nhiều biến thể.
+     NGÀY: ô i lấy biến thể (ngày trong tháng - 1 + lệch[i]) % số biến thể => 31 ngày không ngày nào trùng bộ 5, sang tháng sau lặp lại.
+     TUẦN: ô i lấy biến thể (số tuần + i) % 4, số tuần đếm liên tục theo thứ Hai => 4 tuần liền nhau 4 bộ khác nhau, hết 4 tuần (~1 tháng) lặp lại. */
+  lech:[0,2,4,1,3],
+  slot:{
   ngay:[
-    {id:'d1',ten:'Dạo Chợ Kỳ Trân',mo:'Mua 1 món ở Kỳ Trân Các',ic:'🛒',ev:'mua',need:1,diem:15,th:{t:'tt',n:200}},
-    {id:'d2',ten:'Thám Hiểm',mo:'Thắng 10 trận Thám Hiểm',ic:'⚔️',ev:'thang',need:10,diem:15,th:{t:'tt',n:500}},
-    {id:'d3',ten:'Săn Thú',mo:'Bắt thành công 3 thú',ic:'🐾',ev:'bat',need:3,diem:20,th:{t:'chau',cap:1,n:5}},
-    {id:'d4',ten:'Rèn Luyện',mo:'Cường hóa trang bị 3 lần',ic:'🔨',ev:'cuonghoa',need:3,diem:25,th:{t:'tt',n:400}},
-    {id:'d5',ten:'Diệt Thủ Lĩnh',mo:'Hạ 2 Boss khi Thám Hiểm',ic:'👹',ev:'bosskill',need:2,diem:25,th:{t:'ttt',n:2}}
+    [Q('Dạo Chợ Kỳ Trân','Mua 1 món ở Kỳ Trân Các','🛒','mua',1,TT(200)),Q('Khởi Động','Thắng 5 trận Thám Hiểm','⚔️','thang',5,TT(250)),Q('Thử Vận May','Bắt thành công 1 thú','🐾','bat',1,TT(250)),Q('Gõ Búa','Cường hóa trang bị 1 lần','🔨','cuonghoa',1,TT(250)),Q('Khách Quen','Mua 2 món ở Kỳ Trân Các','🏮','mua',2,TT(300)),Q('Tiêu Xài','Chi 500 Tinh Thạch ở Kỳ Trân Các','💰','chi',500,TT(300))],
+    [Q('Thám Hiểm','Thắng 10 trận Thám Hiểm','⚔️','thang',10,TT(500)),Q('Lên Đường','Thắng 8 trận Thám Hiểm','🧭','thang',8,TT(400)),Q('Săn Thú Nhỏ','Bắt thành công 2 thú','🪤','bat',2,TT(400)),Q('Rèn Nhẹ','Cường hóa trang bị 2 lần','⚒️','cuonghoa',2,TT(350)),Q('Đi Đây Đi Đó','Thám Hiểm ở 2 vùng khác nhau','🗺️','vung',2,TT(450)),Q('Chi Tiêu','Chi 1000 Tinh Thạch ở Kỳ Trân Các','💰','chi',1000,TT(450))],
+    [Q('Săn Thú','Bắt thành công 3 thú','🐾','bat',3,CH(1,5)),Q('Chiến Binh','Thắng 15 trận Thám Hiểm','🛡️','thang',15,CH(1,4)),Q('Đánh Thủ Lĩnh','Hạ 1 Boss khi Thám Hiểm','👹','bosskill',1,TT(600)),Q('Thợ Rèn','Cường hóa trang bị 3 lần','🔨','cuonghoa',3,TT(450)),Q('Mua Sắm','Mua 3 món ở Kỳ Trân Các','🛍️','mua',3,CH(1,4)),Q('Thợ Săn Chăm Chỉ','Bắt thành công 4 thú','🏹','bat',4,CH(1,6))],
+    [Q('Rèn Luyện','Cường hóa trang bị 4 lần','🔨','cuonghoa',4,TT(500)),Q('Thợ Săn','Bắt thành công 4 thú','🏹','bat',4,CH(1,8)),Q('Bền Bỉ','Thắng 20 trận Thám Hiểm','🛡️','thang',20,TT(800)),Q('Hạ Thủ Lĩnh','Hạ 2 Boss khi Thám Hiểm','👹','bosskill',2,TT(900)),Q('Du Ngoạn','Thám Hiểm ở 3 vùng khác nhau','🗺️','vung',3,TT(700)),Q('Đại Gia Nhỏ','Chi 1500 Tinh Thạch ở Kỳ Trân Các','💰','chi',1500,TT(650)),Q('Tay Săn Lão Luyện','Bắt thành công 5 thú','🐾','bat',5,CH(2,2))],
+    [Q('Diệt Thủ Lĩnh','Hạ 2 Boss khi Thám Hiểm','👹','bosskill',2,TTT(2)),Q('Chinh Phạt','Thắng 30 trận Thám Hiểm','🏰','thang',30,TT(1000)),Q('Săn Liên Hoàn','Bắt thành công 5 thú','🐾','bat',5,CH(2,3)),Q('Bậc Thầy Rèn','Cường hóa trang bị 6 lần','⚒️','cuonghoa',6,TT(900)),Q('Sát Thủ Lĩnh','Hạ 3 Boss khi Thám Hiểm','💀','bosskill',3,TTT(2)),Q('Đại Gia','Chi 2000 Tinh Thạch ở Kỳ Trân Các','💰','chi',2000,TT(1000)),Q('Chiến Thần','Thắng 25 trận Thám Hiểm','⚔️','thang',25,CH(2,3))]
   ],
   tuan:[
-    {id:'w1',ten:'Thám Hiểm Bền Bỉ',mo:'Thắng 60 trận Thám Hiểm',ic:'🛡️',ev:'thang',need:60,diem:10,th:{t:'tt',n:2500}},
-    {id:'w2',ten:'Bậc Thầy Săn Thú',mo:'Bắt 20 thú',ic:'🏹',ev:'bat',need:20,diem:10,th:{t:'chau',cap:2,n:5}},
-    {id:'w3',ten:'Du Hành Các Vùng',mo:'Thám Hiểm ở 3 vùng khác nhau',ic:'🗺️',ev:'vung',need:3,diem:10,th:{t:'tt',n:1800}},
-    {id:'w4',ten:'Thợ Rèn Chăm Chỉ',mo:'Cường hóa trang bị 20 lần',ic:'⚒️',ev:'cuonghoa',need:20,diem:10,th:{t:'tt',n:2200}},
-    {id:'w5',ten:'Tiến Hóa',mo:'Tiến hóa thú 1 lần',ic:'🌟',ev:'tienhoa',need:1,diem:10,th:{t:'ttt',n:5}},
-    {id:'w6',ten:'Sát Thủ Lĩnh',mo:'Hạ 10 Boss khi Thám Hiểm',ic:'💀',ev:'bosskill',need:10,diem:10,th:{t:'ttt',n:8}},
-    {id:'w7',ten:'Đại Gia Kỳ Trân',mo:'Chi 2000 Tinh Thạch ở Kỳ Trân Các',ic:'💰',ev:'chi',need:2000,diem:10,th:{t:'ttt',n:3}},
-    {id:'w8',ten:'Siêng Năng',mo:'Đạt đủ 100 điểm hoạt động ngày, 5 lần',ic:'📅',ev:'daydu',need:5,diem:10,th:{t:'chau',cap:3,n:3}},
-    {id:'w9',ten:'Săn Boss Thế Giới',mo:'Đánh Boss Thế Giới 3 lần',ic:'🐉',ev:'bosstg',need:3,diem:10,th:{t:'ttt',n:10}},
-    {id:'w10',ten:'Đấu Trường',mo:'Thắng 5 trận Vạn Thú Tranh Phong',ic:'🏟️',ev:'daututruong',need:5,diem:10,th:{t:'tt',n:3000}}
-  ],
+    [Q('Thám Hiểm Bền Bỉ','Thắng 60 trận Thám Hiểm','🛡️','thang',60,TT(2500)),Q('Chinh Chiến Không Ngừng','Thắng 40 trận Thám Hiểm','⚔️','thang',40,TT(1800)),Q('Binh Đoàn Bất Bại','Thắng 80 trận Thám Hiểm','🏰','thang',80,TT(3200)),Q('Anh Hùng Vùng Đất','Thắng 100 trận Thám Hiểm','👑','thang',100,TT(4000))],
+    [Q('Bậc Thầy Săn Thú','Bắt 20 thú','🏹','bat',20,CH(2,5)),Q('Thợ Săn Lão Luyện','Bắt 12 thú','🐾','bat',12,CH(2,3)),Q('Vua Săn Thú','Bắt 25 thú','🦅','bat',25,CH(2,6)),Q('Truy Tìm Linh Thú','Bắt 30 thú','🔮','bat',30,CH(3,2))],
+    [Q('Du Hành Các Vùng','Thám Hiểm ở 3 vùng khác nhau','🗺️','vung',3,TT(1800)),Q('Lữ Khách Bốn Phương','Thám Hiểm ở 4 vùng khác nhau','🧭','vung',4,TT(2200)),Q('Chinh Phục Bản Đồ','Thám Hiểm ở 5 vùng khác nhau','🌏','vung',5,TT(3000)),Q('Khai Phá Biên Cương','Thám Hiểm ở 4 vùng khác nhau','⛰️','vung',4,TT(2400))],
+    [Q('Thợ Rèn Chăm Chỉ','Cường hóa trang bị 20 lần','⚒️','cuonghoa',20,TT(2200)),Q('Rèn Không Nghỉ','Cường hóa trang bị 15 lần','🔨','cuonghoa',15,TT(1700)),Q('Bậc Thầy Lò Rèn','Cường hóa trang bị 25 lần','🔥','cuonghoa',25,TT(2800)),Q('Thần Rèn','Cường hóa trang bị 30 lần','✨','cuonghoa',30,TT(3300))],
+    [Q('Tiến Hóa','Tiến hóa thú 1 lần','🌟','tienhoa',1,TTT(5)),Q('Đột Phá','Tiến hóa thú 1 lần','💫','tienhoa',1,TTT(5)),Q('Thăng Hoa','Tiến hóa thú 2 lần','🌠','tienhoa',2,TTT(8)),Q('Hóa Rồng','Tiến hóa thú 2 lần','🐲','tienhoa',2,TTT(8))],
+    [Q('Sát Thủ Lĩnh','Hạ 10 Boss khi Thám Hiểm','💀','bosskill',10,TTT(8)),Q('Thợ Săn Thủ Lĩnh','Hạ 8 Boss khi Thám Hiểm','👹','bosskill',8,TTT(6)),Q('Bão Tố Thủ Lĩnh','Hạ 12 Boss khi Thám Hiểm','⚡','bosskill',12,TTT(10)),Q('Diệt Vương','Hạ 15 Boss khi Thám Hiểm','👑','bosskill',15,TTT(12))],
+    [Q('Đại Gia Kỳ Trân','Chi 2000 Tinh Thạch ở Kỳ Trân Các','💰','chi',2000,TTT(3)),Q('Khách VIP','Chi 1500 Tinh Thạch ở Kỳ Trân Các','🏮','chi',1500,TTT(2)),Q('Trùm Kỳ Trân','Chi 2500 Tinh Thạch ở Kỳ Trân Các','💎','chi',2500,TTT(4)),Q('Phú Ông','Chi 3000 Tinh Thạch ở Kỳ Trân Các','🪙','chi',3000,TTT(5))],
+    [Q('Siêng Năng','Đạt đủ 100 điểm hoạt động ngày, 5 lần','📅','daydu',5,CH(3,3)),Q('Chăm Chỉ','Đạt đủ 100 điểm hoạt động ngày, 4 lần','📆','daydu',4,CH(3,2)),Q('Kiên Trì','Đạt đủ 100 điểm hoạt động ngày, 6 lần','🗓️','daydu',6,CH(3,4)),Q('Bền Chí','Đạt đủ 100 điểm hoạt động ngày, 5 lần','⏳','daydu',5,CH(3,3))],
+    [Q('Săn Boss Thế Giới','Đánh Boss Thế Giới 3 lần','🐉','bosstg',3,TTT(10)),Q('Thử Sức Boss Thế Giới','Đánh Boss Thế Giới 2 lần','🐲','bosstg',2,TTT(6)),Q('Thợ Săn Cự Thú','Đánh Boss Thế Giới 3 lần','🦖','bosstg',3,TTT(10)),Q('Hạ Boss Thế Giới','Đánh Boss Thế Giới 4 lần','☄️','bosstg',4,TTT(12))],
+    [Q('Đấu Trường','Thắng 5 trận Vạn Thú Tranh Phong','🏟️','daututruong',5,TT(3000)),Q('Đấu Sĩ Mới','Thắng 3 trận Vạn Thú Tranh Phong','🥊','daututruong',3,TT(2000)),Q('Quán Quân','Thắng 7 trận Vạn Thú Tranh Phong','🏆','daututruong',7,TT(4000)),Q('Tranh Phong','Thắng 5 trận Vạn Thú Tranh Phong','🎖️','daututruong',5,TT(3000))]
+  ]},
   ruong:{   /* rương mốc 25/50/75/100 điểm của từng tab */
     ngay:[{t:'tt',n:1000},{t:'chau',cap:1,n:10},{t:'ttt',n:5},{t:'hop',n:1}],
     tuan:[{t:'tt',n:3500},{t:'chau',cap:3,n:5},{t:'ttt',n:15},{t:'ruong',n:1}]
@@ -68,13 +76,23 @@ var root,fr,E={},isOpen=false,openAt=0,tab='ngay',loaded=false,S={ngay:null,tuan
 function dayKey(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
 function weekKey(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return 'T'+d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
 function keyOf(t){return t==='ngay'?dayKey():weekKey();}
-function blank(t){return {k:keyOf(t),diem:0,nhan:[0,0,0,0],q:{},vung:[]};}
+function planIx(t,d){   /* d = ngày (Date) -> mảng chỉ số biến thể cho từng ô */
+  d=d||new Date();var sl=CFG.slot[t],i,ix=[];
+  if(t==='ngay'){var dom=d.getDate();for(i=0;i<sl.length;i++)ix.push((dom-1+CFG.lech[i])%sl[i].length);}
+  else{var m=new Date(d.getFullYear(),d.getMonth(),d.getDate());m.setDate(m.getDate()-((m.getDay()+6)%7));var wk=Math.floor(Date.UTC(m.getFullYear(),m.getMonth(),m.getDate())/864e5/7)%4;   /* chu kỳ 4 tuần liên tục: 2 tuần liền nhau luôn khác bộ */for(i=0;i<sl.length;i++)ix.push((wk+i)%sl[i].length);}
+  return ix;
+}
+function blank(t){return {k:keyOf(t),ix:planIx(t),diem:0,nhan:[0,0,0,0],q:{},vung:[]};}
+function L(t){   /* danh sách nhiệm vụ hiện tại của tab (đã gắn id, điểm) */
+  var T=S[t],ix=T&&T.ix,sl=CFG.slot[t];
+  return sl.map(function(v,i){var q=v[(ix&&ix[i]|0)%v.length];return {id:t.charAt(0)+i+'_'+((ix&&ix[i]|0)%v.length),ten:q.ten,mo:q.mo,ic:q.ic,ev:q.ev,need:q.need,th:q.th,diem:CFG.diem[t][i]};});
+}
 function checkReset(){['ngay','tuan'].forEach(function(t){if(!S[t]||S[t].k!==keyOf(t))S[t]=blank(t);});}
 function ld(){
   if(loaded){checkReset();return;}
   loaded=true;
   try{var j=JSON.parse(localStorage.getItem(CFG.key)||'null');
-    if(j)['ngay','tuan'].forEach(function(t){var o=j[t];if(o&&typeof o==='object'&&o.k===keyOf(t)){S[t]={k:o.k,diem:Math.max(0,Math.min(100,+o.diem||0)),nhan:[0,1,2,3].map(function(i){return o.nhan&&o.nhan[i]?1:0;}),q:o.q&&typeof o.q==='object'?o.q:{},vung:Array.isArray(o.vung)?o.vung:[]};}});
+    if(j)['ngay','tuan'].forEach(function(t){var o=j[t];if(o&&typeof o==='object'&&o.k===keyOf(t)&&Array.isArray(o.ix)){S[t]={k:o.k,ix:o.ix,diem:Math.max(0,Math.min(100,+o.diem||0)),nhan:[0,1,2,3].map(function(i){return o.nhan&&o.nhan[i]?1:0;}),q:o.q&&typeof o.q==='object'?o.q:{},vung:Array.isArray(o.vung)?o.vung:[]};}});
   }catch(e){}
   checkReset();
 }
@@ -110,13 +128,14 @@ function give(r){
 /* ===== ĐẾM TIẾN ĐỘ (các file khác gọi TTGNHIEMVU.sk) ===== */
 function tang(ev,n){
   if(!(n>0))return;
-  ['ngay','tuan'].forEach(function(t){CFG[t].forEach(function(q){if(q.ev!==ev)return;var o=qs(t,q.id);if(o.c||o.p>=q.need)return;o.p=Math.min(q.need,o.p+n);});});
+  ['ngay','tuan'].forEach(function(t){L(t).forEach(function(q){if(q.ev!==ev)return;var o=qs(t,q.id);if(o.c||o.p>=q.need)return;o.p=Math.min(q.need,o.p+n);});});
 }
 function vungMoi(z){
-  var T=S.tuan;z=String(z);
-  if(T.vung.indexOf(z)>=0)return;
-  T.vung.push(z);
-  CFG.tuan.forEach(function(q){if(q.ev==='vung'){var o=qs('tuan',q.id);if(!o.c)o.p=Math.min(q.need,T.vung.length);}});
+  z=String(z);
+  ['ngay','tuan'].forEach(function(t){
+    var T=S[t];if(T.vung.indexOf(z)>=0)return;T.vung.push(z);
+    L(t).forEach(function(q){if(q.ev==='vung'){var o=qs(t,q.id);if(!o.c)o.p=Math.min(q.need,T.vung.length);}});
+  });
 }
 function sk(ev,v){
   try{
@@ -195,7 +214,7 @@ function fitAll(){if(E.txN){fit(E.txN);fit(E.txT);}}
 
 /* ===== DANH SÁCH HÀNG + THANH CUỘN ===== */
 function rowHtml(t,i){
-  var q=CFG[t][i],o=qs(t,q.id),done=o.p>=q.need,f=Math.min(1,o.p/q.need),h;
+  var q=L(t)[i],o=qs(t,q.id),done=o.p>=q.need,f=Math.min(1,o.p/q.need),h;
   h='<div class="nv-h'+(o.c?' done':'')+'" data-i="'+i+'">'
    +'<div class="nv-hi" style="'+rb(R.ic)+'">'+esc(q.ic)+'</div>'
    +'<div class="nv-hn" style="'+rb(R.ten)+'">'+esc(q.ten)+'</div>'
@@ -210,7 +229,7 @@ function rowHtml(t,i){
   return h+'</div>';
 }
 function dsHang(keep){
-  var n=CFG[tab].length,h='',i,y=E.ls.scrollTop;
+  var n=L(tab).length,h='',i,y=E.ls.scrollTop;
   for(i=0;i<n;i++)h+=rowHtml(tab,i);
   E.ls.innerHTML=h;E.ls.scrollTop=keep?y:0;syncThumb();
 }
@@ -229,7 +248,7 @@ function setTab(t){
   render();dsHang();
 }
 function nhanNV(i){
-  ld();var q=CFG[tab][i];if(!q)return;
+  ld();var q=L(tab)[i];if(!q)return;
   var o=qs(tab,q.id);
   if(o.c)return;
   if(o.p<q.need)return toast(q.ten+': '+fmtN(o.p)+'/'+fmtN(q.need)+' - chưa hoàn thành');
@@ -318,7 +337,9 @@ window.TTGNHIEMVU={
   diem:function(){ld();return S[tab].diem;},
   setDiem:function(n){ld();S[tab].diem=Math.max(0,Math.min(100,+n||0));save();render();return S[tab].diem;},
   congDiem:function(n){ld();return window.TTGNHIEMVU.setDiem(S[tab].diem+(+n||0));},
-  xong:function(id){ld();['ngay','tuan'].forEach(function(t){CFG[t].forEach(function(q){if(q.id===id)qs(t,id).p=q.need;});});save();refresh();},
+  xong:function(id){ld();['ngay','tuan'].forEach(function(t){L(t).forEach(function(q){if(q.id===id||q.ten===id)qs(t,q.id).p=q.need;});});save();refresh();},
+  hienTai:function(t){ld();return L(t).map(function(q){return q.id+' '+q.ten+' ('+q.mo+')';});},
+  lich:function(t,ngay){var d=ngay?new Date(ngay):new Date(),ix=planIx(t,d);return CFG.slot[t].map(function(v,i){return v[ix[i]].ten;});},
   daNhan:function(i){ld();return !!S[tab].nhan[i];},
   reset:function(){ld();S={ngay:blank('ngay'),tuan:blank('tuan')};save();refresh();},
   CFG:CFG
