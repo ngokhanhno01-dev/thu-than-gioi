@@ -102,8 +102,11 @@ var BANG_HE_VUNG={
   hoavien:H('huyen suong','kim phong',''),
   thandien:H('kim duong','am huyen','')
 };
-var BANG_HE={khonggian:BANG_HE_CU.khonggian,thoigian:BANG_HE_CU.thoigian,vocuc:BANG_HE_CU.vocuc};
+var BANG_HE={};
 Object.keys(BANG_HE_VUNG).forEach(function(k){BANG_HE[k]=BANG_HE_VUNG[k];});
+/* 3 HỆ THẦN (Không Gian, Thời Gian, Vô Cực), chốt 28/11/2026: cân bằng với nhau (đòn của nhau x1) và KHẮC cả 18 hệ vùng (x1,5). Hệ vùng đánh lại 3 hệ Thần = x1 (không khắc, không kém). */
+var HE_THAN=['khonggian','thoigian','vocuc'],HE_18=Object.keys(BANG_HE_VUNG);
+HE_THAN.forEach(function(k){BANG_HE[k]=H(HE_18.join(' '),'','');});
 /* hs một đòn hệ heDon lên 1 hệ mục tiêu h */
 function heMot(heDon,h){
   var r=BANG_HE[heDon];if(!r)return 1;
