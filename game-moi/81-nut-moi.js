@@ -10,7 +10,7 @@ var FN=[
   ['dau-truong','Vạn Thú Tranh Phong'],['boss-the-gioi','Boss Thế Giới'],['pho-ban','Bí Cảnh'],['thap-thi-luyen','Tháp Thí Luyện'],
   ['cua-hang','Kỳ Trân Các'],['diem-danh','Điểm danh'],['nhiem-vu','Nhiệm vụ'],['do-giam','Đồ Giám']
 ];
-FN.forEach(function(f){var o={id:f[0],ten:f[1],onTap:soon(f[1])};if(f[0]==='cua-hang')o.onTap=function(){if(window.TTGSHOP)TTGSHOP.open();else soon(f[1])();};/* Kỳ Trân Các: mở bảng cửa hàng (85-cua-hang.js) */if(f[0]==='pho-ban'){o.beside='r';o.w=62;o.h=62;}else if(f[0]==='dau-truong'){o.beside='l';o.w=74;o.h=74;}/* Vạn Thú Tranh Phong (trái) và Bí Cảnh (phải) kẹp hai bên nút Thám hiểm, to hơn nút thường */TTGNV.add(o);});
+FN.forEach(function(f){var o={id:f[0],ten:f[1],onTap:soon(f[1])};if(f[0]==='cua-hang')o.onTap=function(){if(window.TTGSHOP)TTGSHOP.open();else soon(f[1])();};/* Kỳ Trân Các: mở bảng cửa hàng (85-cua-hang.js) */if(f[0]==='pho-ban'){o.beside='r';o.w=62;o.h=62;}else if(f[0]==='dau-truong'){o.beside='l';o.w=74;o.h=74;}/* Vạn Thú Tranh Phong (trái) và Bí Cảnh (phải) kẹp hai bên nút Thám hiểm, to hơn nút thường */if(f[0]==='do-giam')o.onTap=function(){if(window.TTGDOGIAM)TTGDOGIAM.open();else soon(f[1])();};/* Đồ Giám: mở sách (108-do-giam.js) */TTGNV.add(o);});
 })();
 
 /* 86-hop-ruong.js (25/11/2026): Hộp Ngự Thú Ngẫu Nhiên + Rương Ngự Thú Tự Chọn. Nạp động cạnh file này nên không cần sửa index.html. */
