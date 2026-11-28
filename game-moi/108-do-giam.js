@@ -2,7 +2,7 @@
    Mở: nút Đồ Giám (81-nut-moi.js). Chạm mũi tên ở góc trang, hoặc vuốt ngang, hoặc chạm vùng trống của trang = lật. Chạm 1 ô thú = mở bảng chi tiết (chạm bất kỳ đâu để đóng bảng).
    Đóng: nút X trên khung, chạm ngoài sách, Esc (Esc đóng bảng chi tiết trước).
    Ảnh: game-moi/do-giam/lat-0..7.webp (1280x718, nền trong suốt): 0 = sách phẳng (khung nghỉ), 1..7 = các khung lật. Lật tới: 0,1,2,3,4,5,6,7,0; lật lùi chạy ngược. Chỉnh nhịp lật ở NHIP.
-   NỘI DUNG: mỗi VÙNG ĐÃ MỞ (THU_MOI.zones, xếp theo z) = 1 cặp trang, đúng 10 con: trang trái 5 con đầu, trang phải 5 con sau (con thứ 10 là boss vùng, viền vàng). Cuối sách: 1 cặp trang Thú Thần (boss thế giới, 3 con ở trang trái; trang phải ghi lịch xuất hiện).
+   NỘI DUNG: mỗi VÙNG ĐÃ MỞ (THU_MOI.zones, xếp theo z) = 1 cặp trang, đúng 10 con: trang trái 6 con (3 Thường + 3 Hiếm), trang phải 4 con (2 Sử Thi trên; Huyền Thoại + Truyền Thuyết dưới), xếp theo độ hiếm (con thứ 10 là boss vùng, viền vàng). Cuối sách: 1 cặp trang Thú Thần (boss thế giới, 3 con ở trang trái; trang phải ghi lịch xuất hiện).
      Vùng chưa mở KHÔNG có trong THU_MOI.zones nên tự ẩn, số trang tự tính; thêm vùng mới vào 51-thu-moi.js là sách tự dài thêm.
      Ô thú: ĐÃ BẮT = ảnh màu + tên; CHƯA BẮT = bóng đen + "???". Cả hai đều hiện ĐỘ HIẾM (TTGCS.hiemInfo). Bảng chi tiết: V1/V2/V3 (ảnh b1..b3), Hệ (TTGCS.loai), Độ hiếm, NƠI GẶP (vùng / boss vùng / lịch boss Thần theo TTGBTG.CFG), trạng thái.
      "Đã bắt" = có trong kho thú hiện tại (TTGTHU.list) HOẶC từng bắt: nhớ ở khóa localStorage ttg_dg_dabat_v1 (khóa KHÔNG mang tiền tố ttg_moi_ vì 51-thu-moi.js xóa các khóa đó khi mở game), nên thả thú đi vẫn không mất trong Đồ Giám. */
@@ -15,14 +15,16 @@ var XB={x:1197,y:122,r:48};   /* tâm + bán kính chạm của nút X, theo pix
 var CXT=367,CXP=919,CW=140,CH=138,GAPX=15,Y1=222,Y2=366,PY=517,AR={r:30,dx:-218};
 var IMG=[],ov=null,cv=null,cx=null,page=0,anim=null,raf=0,down=null,chon=null,thieu=0,retry=0,rt=0,SIL={},dabat={};
 /* ----- DỮ LIỆU ----- */
+var TH_HIEM=['thuong','hiem','suthi','huyenthoai','truyenthuyet','than'];
+function xepHiem(a){var k=function(t){var h=null;try{h=TTGCS.doHiem(t.id);}catch(e){}var i=TH_HIEM.indexOf(h);return i<0?0:i;};return a.map(function(t,i){return[t,i];}).sort(function(x,y){return(k(x[0])-k(y[0]))||(x[1]-y[1]);}).map(function(x){return x[0];});}
 function trangList(){var L=[],zs=(root.THU_MOI&&THU_MOI.zones||[]).slice().sort(function(a,b){return a.z-b.z;});
-  zs.forEach(function(z){L.push({k:'vung',z:z});});
-  if(root.THU_MOI&&THU_MOI.than&&THU_MOI.than.thu&&THU_MOI.than.thu.length)L.push({k:'than',z:THU_MOI.than});
+  zs.forEach(function(z){L.push({k:'vung',z:z,thu:xepHiem(z.thu)});});
+  if(root.THU_MOI&&THU_MOI.than&&THU_MOI.than.thu&&THU_MOI.than.thu.length)L.push({k:'than',z:THU_MOI.than,thu:THU_MOI.than.thu});
   return L;}
-function docDaBat(){var o={};try{var a=JSON.parse(localStorage.getItem(KDB)||'[]');if(Array.isArray(a))a.forEach(function(i){o[i]=1;});}catch(e){}return o;}
+function docDaBat(){var o={};try{var a=JSON.parse(localStorage.getItem(KDB)||'{}');if(Array.isArray(a))a.forEach(function(i){o[i]=1;});else if(a&&typeof a==='object')Object.keys(a).forEach(function(i){o[i]=Math.max(1,Math.min(3,+a[i]||1));});}catch(e){}return o;}
 function capNhatDaBat(){dabat=docDaBat();var moi=false;
-  try{if(root.TTGTHU&&TTGTHU.list)TTGTHU.list().forEach(function(t){if(t&&t.id&&!dabat[t.id]){dabat[t.id]=1;moi=true;}});}catch(e){}
-  if(moi){try{localStorage.setItem(KDB,JSON.stringify(Object.keys(dabat)));}catch(e){}}}
+  try{if(root.TTGTHU&&TTGTHU.list)TTGTHU.list().forEach(function(t){if(!t||!t.id)return;var v=Math.max(1,Math.min(3,+t.tien||1));if((dabat[t.id]||0)<v){dabat[t.id]=v;moi=true;}});}catch(e){}
+  if(moi){try{localStorage.setItem(KDB,JSON.stringify(dabat));}catch(e){}}}
 function heTen(k){return(root.TTGCS&&TTGCS.HE_TEN&&TTGCS.HE_TEN[k])||k;}
 var HE_THAN={th1:['khonggian'],th2:['thoigian'],th3:['vocuc']};
 function heCua(id){var l=null;try{l=root.TTGCS&&TTGCS.loai?TTGCS.loai(id):null;}catch(e){}var h=(l&&l.he&&l.he.length)?l.he:(HE_THAN[id]||[]);return h.map(heTen).join(' · ')||'Chưa rõ';}
@@ -59,8 +61,8 @@ function moc(t,huong){var seq=huong>0?[0,1,2,3,4,5,6,7,0]:[0,7,6,5,4,3,2,1,0],i,
   for(i=0;i<N;i++){n=NHIP[i];if(t<n.giu)return[seq[i],seq[i],0,i];t-=n.giu;if(t<n.hoa){var u=t/n.hoa;return[seq[i],seq[i+1],u*u*(3-2*u),i];}t-=n.hoa;}
   return null;}
 /* ----- Ô THÚ: danh sách ô của trang p = [{t,z,than,x,y,w,h,boss}] ----- */
-function oCua(p){var tr=trangList()[p],o=[];if(!tr)return o;var th=tr.z.thu,than=tr.k==='than';
-  for(var i=0;i<th.length;i++){var tp=i<5?0:1,j=i%5,hang=j<3?0:1,vt=hang?j-3:j,so=hang?2:3,cxx=tp?CXP:CXT;
+function oCua(p){var tr=trangList()[p],o=[];if(!tr)return o;var th=tr.thu,than=tr.k==='than';
+  for(var i=0;i<th.length;i++){var tp=i<6?0:1,j=tp?i-6:i,hang=tp?(j<2?0:1):(j<3?0:1),vt=tp?j%2:j%3,so=tp?2:3,cxx=tp?CXP:CXT;   /* trái 6 con (3+3: Thường, Hiếm), phải 4 con (2+2: Sử Thi / Huyền Thoại, Truyền Thuyết) */
     if(than){if(tp)continue;so=th.length;vt=i;hang=0;}
     var x0=cxx-(so*CW+(so-1)*GAPX)/2+vt*(CW+GAPX),y=hang?Y2:Y1;
     o.push({t:th[i],z:tr.z,than:than,x:x0,y:y,w:CW,h:CH,boss:!!th[i].boss&&!than});}
@@ -95,7 +97,7 @@ function veO(o){var t=o.t,id=t.id,da=!!dabat[id],h=hiemCua(id);
   if(o.boss){rr(o.x+4,o.y+4,o.w-8,o.h-8,9);cx.lineWidth=1;cx.strokeStyle='rgba(255,215,106,.55)';cx.stroke();}
   cx.restore();
   var mx=o.x+o.w/2;
-  veThu(id,1,mx,o.y+99,o.w-22,86,da);
+  veThu(id,da?dabat[id]:1,mx,o.y+99,o.w-22,86,da);
   chuVe(da?t.ten:'???',mx,o.y+114,15,da?'#ffe9a8':'#9fb2e8',true,true,o.w-12);
   chuVe(h.ten,mx,o.y+129,11,h.mau,true,true,o.w-12);
   if(o.boss)chuVe('BOSS',o.x+o.w-24,o.y+14,10,'#ffd76a',true,true);}
@@ -104,7 +106,7 @@ function veMuiTen(huong,x,ok){cx.save();cx.globalAlpha=ok?1:.28;cx.beginPath();c
 function veTrang(a){
   var L=trangList(),tr=L[page];cx.save();cx.globalAlpha=a;
   if(!tr){chuVe('Chưa có nội dung',640,360,26,'#ffe9a8',true,true);cx.restore();return;}
-  var than=tr.k==='than',z=tr.z,th=z.thu,nb=0;th.forEach(function(t){if(dabat[t.id])nb++;});
+  var than=tr.k==='than',z=tr.z,th=tr.thu,nb=0;th.forEach(function(t){if(dabat[t.id])nb++;});
   chuVe(than?'Thú Thần':z.ten,CXT,196,26,'#ffe9a8',true,true);
   if(than){chuVe('Boss thế giới',CXP,196,24,'#ffe9a8',true,true);
     var C=(root.TTGBTG&&TTGBTG.CFG)||{},m=C.coMatPhut||30,kg=C.khungGio||4,n=(C.thuTu||[1,2,3]).length;
@@ -120,7 +122,7 @@ function veChiTiet(o){
   cx.save();cx.fillStyle='rgba(14,30,104,.98)';rr(px,py,pw,ph,18);cx.fill();cx.lineWidth=3;cx.strokeStyle=o.boss||o.than?'#ffd76a':h.mau;cx.stroke();cx.restore();
   /* V1 V2 V3 */
   var xs=[px+95,px+235,px+375],ss=[104,128,150];
-  for(var b=1;b<=3;b++){var i=b-1;veThu(id,b,xs[i],py+215,ss[i]*1.05,ss[i]*1.15,da);chuVe('V'+b,xs[i],py+238,16,'#ffe9a8',true,true);}
+  for(var b=1;b<=3;b++){var i=b-1;veThu(id,b,xs[i],py+215,ss[i]*1.05,ss[i]*1.15,da&&b<=dabat[id]);chuVe('V'+b,xs[i],py+238,16,'#ffe9a8',true,true);}
   var tx=px+470,l=0;
   function dong(nh,gt,mau,px2,gd){chuVe(nh,tx,py+60+l,15,'#9fb2e8',false,true,260,'left');l+=gd?0:22;chuVe(gt,tx,py+60+l,px2||19,mau||'#ffe9a8',true,true,290,'left');l+=34;}
   chuVe(da?t.ten:'???',tx,py+34,28,da?'#ffe9a8':'#9fb2e8',true,true,290,'left');
