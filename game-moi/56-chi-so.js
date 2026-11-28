@@ -89,9 +89,9 @@ var BANG_HE_VUNG={
   phong:H('van suong','loi thandien',''),
   loi:H('kim phong','thien van',''),
   nguyet:H('duong hoa','tinh huyen',''),
-  thuy:H('hoa kim','tuyet lam',''),
+  thuy:H('hoa kim','tuyet hoavien',''),
   hoa:H('tuyet hoavien','thuy nguyet',''),
-  lam:H('thuy ngoc','tuyet kim',''),
+  lam:H('thandien ngoc','tuyet kim',''),
   duong:H('tuyet suong','am nguyet',''),
   huyen:H('tinh nguyet','ngoc thien',''),
   kim:H('lam hoavien','thuy loi',''),
@@ -99,8 +99,8 @@ var BANG_HE_VUNG={
   am:H('thien duong','ngoc thandien',''),
   tinh:H('nguyet thandien','suong huyen',''),
   thien:H('huyen loi','am van',''),
-  hoavien:H('ngoc thandien','hoa kim',''),
-  thandien:H('phong am','tinh hoavien','')
+  hoavien:H('ngoc thuy','hoa kim',''),
+  thandien:H('phong am','lam tinh','')
 };
 var BANG_HE={khonggian:BANG_HE_CU.khonggian,thoigian:BANG_HE_CU.thoigian,vocuc:BANG_HE_CU.vocuc};
 Object.keys(BANG_HE_VUNG).forEach(function(k){BANG_HE[k]=BANG_HE_VUNG[k];});
