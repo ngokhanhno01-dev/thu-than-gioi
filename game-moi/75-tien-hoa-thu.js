@@ -241,10 +241,18 @@ function doEvo(){
  var t=ra();if(!t){toast('Chưa có thú ra trận để tiến hóa.');return;}
  var r=yeuCau(t);if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}
  if(!S.put.every(Boolean)){toast(r.ok?'Hãy đặt đủ 3 nguyên liệu vào 3 ô (chạm ô hoặc chạm món trong túi).':'Chưa đủ nguyên liệu: '+thieu(r));return;}
+ var ten=root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú',before=root.TTGTHU&&TTGTHU.anh?TTGTHU.anh(t):'';   /* chụp hình thú bậc CŨ trước khi đổi bậc, cho hiệu ứng */
  var res=tienHoa(t.uid);if(res.err){toast(res.err);render();return;}
  S.put=[false,false,false];KH.refresh('th');render();
- if(res.that){toast('Tiến hóa thất bại ('+res.tl+'%)! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' vẫn ở V'+res.from+(res.mat?', nguyên liệu đã mất.':', nguyên liệu được giữ lại.'));return;}
- try{window.TTGNHIEMVU&&TTGNHIEMVU.sk('tienhoa');}catch(_){}toast('Tiến hóa thành công! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' V'+res.from+' → V'+res.to);}
+ if(res.that){fx(res,t,before,ten,'Tiến hóa thất bại ('+res.tl+'%)! '+ten+' vẫn ở V'+res.from+(res.mat?', nguyên liệu đã mất.':', nguyên liệu được giữ lại.'));return;}
+ try{window.TTGNHIEMVU&&TTGNHIEMVU.sk('tienhoa');}catch(_){}
+ fx(res,t,before,ten,'Tiến hóa thành công! '+ten+' V'+res.from+' → V'+res.to);}
+/* hiệu ứng tiến hóa toàn màn hình (110-hieu-ung-tien-hoa.js): chạy xong mới hiện thông báo. Không có file hiệu ứng thì hiện thông báo ngay như cũ. Kết quả đã tính xong trước khi chiếu. */
+function fx(res,t,before,ten,msg){
+ if(root.TTGTHFX&&TTGTHFX.play&&before){
+  var after=res.ok&&root.TTGTHU&&TTGTHU.anh?TTGTHU.anh(Object.assign({},t,{tien:res.to})):'';
+  TTGTHFX.play({before:before,after:after,ok:!!res.ok,ten:ten,from:res.from,to:res.to},function(){toast(msg);});}
+ else toast(msg);}
 function auto(){
  var t=ra(),r=yeuCau(t);if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}
  if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}
