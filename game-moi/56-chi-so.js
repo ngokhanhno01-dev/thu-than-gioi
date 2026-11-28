@@ -81,25 +81,25 @@ var BANG_HE_CU={   /* BẢNG KHẮC CHẾ CŨ (18 hệ), KHÔNG CÒN DÙNG từ 
   vocuc:H('','','')   /* Vô Cực (hệ của boss Vô Cực): TẠM chưa khắc/bị khắc hệ nào, chờ người dùng chốt */
 };
 /* BẢNG KHẮC CHẾ ĐANG DÙNG: để TRỐNG (mọi đòn x1) cho tới khi chốt khắc chế theo hệ vùng mới. Chỉ giữ 3 hệ Thần. Thêm hệ: BANG_HE.tuyet=H('khắc','kém','miễn') (khóa cách nhau bằng dấu cách) */
-/* BẢNG KHẮC CHẾ 18 HỆ VÙNG (28/11/2026, do người dùng chốt theo 3 nhóm Tự Nhiên / Bầu Trời / Vũ Trụ & Tâm Linh). Mỗi hệ khắc đúng 2 hệ; hệ A khắc B thì B đánh A bị kém. Số lần bị khắc mỗi hệ có thể khác nhau. Không có miễn nhiễm. 3 hệ Thần (Không Gian, Thời Gian, Vô Cực) giữ bảng riêng: đòn của họ lên hệ vùng và ngược lại = x1. Hệ số khắc/kém chỉnh ở CFG.he. */
+/* BẢNG KHẮC CHẾ 18 HỆ VÙNG (28/11/2026, bản 2 do người dùng chốt theo 3 nhóm Tự Nhiên / Bầu Trời / Vũ Trụ & Tâm Linh). Mỗi hệ khắc đúng 2 hệ; hệ A khắc B thì B đánh A bị kém. Mỗi hệ cũng bị đúng 2 hệ khắc. Không có miễn nhiễm. 3 hệ Thần (Không Gian, Thời Gian, Vô Cực) giữ bảng riêng: đòn của họ lên hệ vùng và ngược lại = x1. Hệ số khắc/kém chỉnh ở CFG.he. */
 var BANG_HE_VUNG={
-  tuyet:H('lam phong','hoa duong',''),
+  tuyet:H('van phong','hoa duong',''),
   suong:H('nguyet tinh','hoavien van',''),
-  van:H('duong suong','phong',''),
+  van:H('duong suong','phong tuyet',''),
   phong:H('van hoavien','tuyet thien',''),
   loi:H('thuy kim','ngoc thien',''),
   nguyet:H('thien huyen','suong tinh',''),
-  thuy:H('hoa ngoc','lam hoavien loi',''),
+  thuy:H('hoa ngoc','lam loi',''),
   hoa:H('lam tuyet','thuy ngoc',''),
-  lam:H('thuy ngoc','hoa kim tuyet',''),
+  lam:H('thuy ngoc','hoa kim',''),
   duong:H('tuyet am','van thandien',''),
-  huyen:H('tinh thandien','nguyet',''),
+  huyen:H('tinh thandien','hoavien nguyet',''),
   kim:H('lam hoavien','loi thandien',''),
   ngoc:H('hoa loi','thuy lam',''),
   am:H('thien thandien','duong tinh',''),
   tinh:H('am nguyet','suong huyen',''),
   thien:H('phong loi','nguyet am',''),
-  hoavien:H('thuy suong','kim phong',''),
+  hoavien:H('huyen suong','kim phong',''),
   thandien:H('kim duong','am huyen','')
 };
 var BANG_HE={khonggian:BANG_HE_CU.khonggian,thoigian:BANG_HE_CU.thoigian,vocuc:BANG_HE_CU.vocuc};
