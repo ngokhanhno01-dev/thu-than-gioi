@@ -227,7 +227,7 @@ img,canvas,video,svg{-webkit-user-drag:none;user-drag:none}
 <script src="game-moi/55-trang-bi.js?v=3"></script>
 <script src="game-moi/72-khung-ren-cuong-hoa.js"></script>
 <script src="game-moi/71-nut-trang-bi.js"></script>
-<script src="game-moi/56-chi-so.js"></script>
+<script src="game-moi/56-chi-so.js?v=2"></script>
 <script src="game-moi/61-tham-hiem-tran.js?v=7"></script>
 <script src="game-moi/62-bat-thu.js?v=6"></script>
 <script src="game-moi/66-tien-te.js"></script>
@@ -452,7 +452,7 @@ function drawAn(ts){if(!st||(!st.an&&!st.chay))return;['me','en'].forEach(functi
  L.forEach(function(a,i){var im=stImg(a.id);if(!im)return;
   var pop=Math.max(0,1-(ts-a.t0)/320),S=Math.round(24*(1+.8*pop)),x=px(w)+(atkOff(w,ts)||0)+(i-(L.length-1)/2)*28,y=headY(w)-8+Math.round(Math.sin(ts/300+i)*2);
   ctx.save();ctx.imageSmoothingEnabled=true;ctx.shadowColor=a.glow;ctx.shadowBlur=8+4*Math.sin(ts/220);ctx.drawImage(im,x-S/2,y-S/2,S,S);ctx.restore();});});}
-function heTag(hs,tgt,n){var t=hs>=1.4?'Khắc hệ!':hs<=0.4?'Miễn nhiễm':hs<1?'Kém hiệu quả':null;if(t)st.fx.push({x:px(tgt),y:gy()-165,t:n,s:t+' ×'+(Math.round(hs*100)/100),c:hs>1?'#ffb347':'#9fb4d8'});}   /* hiện hệ số khắc hệ của kỹ năng để người chơi hiểu vì sao sát thương khác % */
+function heTag(hs,tgt,n){var t=hs>=1.15?'Khắc hệ!':hs<=0.4?'Miễn nhiễm':hs<1?'Kém hiệu quả':null;if(t)st.fx.push({x:px(tgt),y:gy()-165,t:n,s:t+' ×'+(Math.round(hs*100)/100),c:hs>1?'#ffb347':'#9fb4d8'});}   /* hiện hệ số khắc hệ của kỹ năng để người chơi hiểu vì sao sát thương khác % */
 function castSkill(s0,k){var n0=performance.now(),tm=knTm(k.id);s0.skIn={ten:k.ten,he:k.he,t0:n0,by:'en'};
  setTimeout(function(){if(st!==s0||!BATTLE)return;s0.skIn=null;var n1=performance.now();s0.skFx={id:k.id,ten:k.ten,t0:n1,i:++knSeq,tm:tm.hit===KN_T_HIT?null:tm};A={w:'en',t:n1};tcStart(k,'en',n1);
  setTimeout(function(){if(st!==s0||!BATTLE)return;var n=performance.now(),a=effS('en'),z=effT('en'),

@@ -14,10 +14,10 @@ var CFG={
   hsTien:{hp:[1,1.35,1.8],tc:[1,1.35,1.8],pt:[1,1.35,1.8],td:[1,1.1,1.2],mm:[1,1.5,2.2]},
   /* gốc loài vùng z=0, cấp 1, vai Cân bằng */
   goc:{hp:150,tc:40,pt:30,td:40,mm:10},
-  hsVungMoiZ:0.3,        /* hp,tc,pt,td nhân (1 + 0,3 x z); mm KHÔNG nhân theo vùng */
+  hsVungMoiZ:0,          /* 28/11/2026: BỎ hệ số vùng trong chỉ số (đặt 0) để thú vùng thấp vẫn dùng được; vùng cao mạnh nhờ CẤP cao hơn. Phần thưởng EXP / Tinh Thạch vẫn tăng theo vùng. Công thức cũ: hp,tc,pt,td nhân (1 + hsVungMoiZ x z) */
   hsBoss:1.6,            /* boss: hp,tc,pt,td nhân thêm */
   hsDoHiem:{thuong:1,hiem:1.03,suthi:1.06,huyenthoai:1.10,truyenthuyet:1.20,than:1.35},   /* HỆ SỐ THEO ĐỘ HIẾM LOÀI (56b-loai.js): hp,tc,pt,td nhân thêm cho thú KHÔNG phải đang đánh với tư cách boss (thú nuôi, thú hoang thường). Lúc thu.boss === true (trận đánh boss) KHÔNG nhân, để chỉ số boss giữ nguyên theo hsBoss/hsBossLoai. Truyền Thuyết 1,20 và Thần 1,35 do người dùng chốt 27/11/2026 (săn khó nên thưởng cao). mm không nhân */
-  hsBossHp:{th1:30,th2:30,th3:30},    /* MÁU BOSS THẦN: chỉ nhân thêm hp (KHÔNG đụng tc,pt,td) khi thu.boss === true, sau hsBossLoai. Thêm 27/11/2026 vì thú 270 đánh 1 hit đã tụt >10% máu nên boss chạy ngay. Chỉnh số ở đây, mỗi boss một số. Máu toàn cục (103) lưu theo tỉ lệ 0..1 nên đổi số này không làm hỏng lần đang chạy */
+  hsBossHp:{th1:129.7,th2:137.33,th3:89.79},    /* 28/11/2026: bỏ hệ số vùng, chỉnh để máu cả 3 boss Thần khoảng 2 triệu ở cấp 270 (boss không dùng Rank). Ghi chú gốc: */ /* MÁU BOSS THẦN: chỉ nhân thêm hp (KHÔNG đụng tc,pt,td) khi thu.boss === true, sau hsBossLoai. Thêm 27/11/2026 vì thú 270 đánh 1 hit đã tụt >10% máu nên boss chạy ngay. Chỉnh số ở đây, mỗi boss một số. Máu toàn cục (103) lưu theo tỉ lệ 0..1 nên đổi số này không làm hỏng lần đang chạy */
   hsBossLoai:{th1:2,th2:2,th3:2},    /* CHỈ SỐ BOSS RIÊNG THEO LOÀI: hp,tc,pt,td nhân thêm KHI ĐÁNH BOSS (tinh() nhận thu.boss === true từ trận). th1 = Đế Giang: x2 so với boss thú hoang vùng 18 (z17, vung 17), chốt 27/11/2026. Thú nở từ trứng (không có cờ boss) không nhân */
   /* nhân theo vai trò (hp,tc,pt,td) */
   vai:{
@@ -32,7 +32,7 @@ var CFG={
   bacQuai:'C',bacThuHoang:'C',bacBoss:'A',   /* DỰ PHÒNG, không còn dùng: mọi địch (quái, boss, thú hoang) tung Rank bằng tungBac lúc gặp (61-tham-hiem-tran.js) và giữ nguyên khi bắt */
   /* hệ: hệ số một đòn lên MỖI hệ của mục tiêu. cheDo 'nhan' = nhân các hệ số của 2 hệ (song hệ cùng yếu 1,5x1,5=2,25), 'tb' = trung bình.
      Muốn kiểu Pokémon gốc: khac 2, kem 0.5, mien 0, cheDo 'nhan'. Muốn chênh nhẹ hơn: giảm khac/tăng kem. */
-  he:{cheDo:'nhan',khac:1.5,kem:0.7,mien:0.3},
+  he:{cheDo:'nhan',khac:1.5,kem:0.7,mien:0.3,than:1.2},   /* than = hệ số đòn của 3 hệ Thần lên 18 hệ vùng (chốt 28/11/2026) */
   /* cấp / EXP / sao */
   capMax:270,
   capMoiVung:15,                       /* trần cấp thú nuôi theo VÙNG: mới vào Tuyết Nguyên = Lv.15, mở Sương Cốc = Lv.30, mỗi vùng mở thêm +15 (tối đa capMax) */
@@ -104,14 +104,14 @@ var BANG_HE_VUNG={
 };
 var BANG_HE={};
 Object.keys(BANG_HE_VUNG).forEach(function(k){BANG_HE[k]=BANG_HE_VUNG[k];});
-/* 3 HỆ THẦN (Không Gian, Thời Gian, Vô Cực), chốt 28/11/2026: cân bằng với nhau (đòn của nhau x1) và KHẮC cả 18 hệ vùng (x1,5). Hệ vùng đánh lại 3 hệ Thần = x1 (không khắc, không kém). */
+/* 3 HỆ THẦN (Không Gian, Thời Gian, Vô Cực), chốt 28/11/2026: cân bằng với nhau (đòn của nhau x1) và KHẮC cả 18 hệ vùng (x CFG.he.than = 1,2). Hệ vùng đánh lại 3 hệ Thần = x1 (không khắc, không kém). */
 var HE_THAN=['khonggian','thoigian','vocuc'],HE_18=Object.keys(BANG_HE_VUNG);
 HE_THAN.forEach(function(k){BANG_HE[k]=H(HE_18.join(' '),'','');});
 /* hs một đòn hệ heDon lên 1 hệ mục tiêu h */
 function heMot(heDon,h){
   var r=BANG_HE[heDon];if(!r)return 1;
   if(r.mien.indexOf(h)>=0)return CFG.he.mien;
-  if(r.khac.indexOf(h)>=0)return CFG.he.khac;
+  if(r.khac.indexOf(h)>=0)return HE_THAN.indexOf(heDon)>=0?CFG.he.than:CFG.he.khac;
   if(r.kem.indexOf(h)>=0)return CFG.he.kem;
   return 1;
 }
