@@ -15,6 +15,8 @@ var G={cx:257,cy:237,r:150,                       /* vòng tròn Rank */
   lv:{x:1478,y:262,w:140},he:{x:257,y:407,w:165},
   hiem:{cx:1432,cy:176,pw:200,ph:62,w:190}};   /* ô tối cuối thanh Khiên (chỗ dấu + đỏ cũ): phủ nền rồi vẽ nhãn ĐỘ HIẾM loài */
 var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',tuyet:'Tuyết',suong:'Sương',van:'Vân',nguyet:'Nguyệt',lam:'Lâm',duong:'Dương',huyen:'Huyền',ngoc:'Ngọc',tinh:'Tinh',thien:'Thiên',hoavien:'Hoa',thandien:'Thần'};
+function heC(k){var T=root.TTGCS,d=T&&T.heMauDong&&T.heMauDong(k);return d||HE_MAU[k]||'#fff';}   /* hệ đặc biệt: màu động */
+function heV(k){var T=root.TTGCS;return (T&&T.heMauDong&&T.heMauDong(k)&&T.heVien)?T.heVien(T.heMauDong(k)):'rgba(0,0,30,.9)';}
 var HE_MAU={thuong:'#f0f0f0',hoa:'#ff8a5c',thuy:'#58c4ff',loi:'#ffe45c',moc:'#6ce57a',bang:'#a8ecff',vo:'#ffb872',doc:'#c27cff',tho:'#d6a866',phong:'#a6f5d8',tam:'#ff98e6',trung:'#c4e45a',nham:'#c8c0b0',ma:'#b088e0',long:'#ffd24a',am:'#9a8aea',kim:'#fff0b8',tien:'#fff6d0',tuyet:'#a8ecff',suong:'#8fd8e8',van:'#fff6d0',nguyet:'#ff98e6',lam:'#6ce57a',duong:'#ffb347',huyen:'#8a7bff',ngoc:'#6fe8c8',tinh:'#8aa8ff',thien:'#cfe9ff',hoavien:'#ff7ac8',thandien:'#fff0a0'};
 var FS='"Noto Serif","Palatino Linotype",Georgia,serif',FB='bold 10px sans-serif';
 var img=new Image(),ok=false;img.onload=function(){ok=true;};img.src='game-moi/khung-chien-dau.webp?v=2';
@@ -89,8 +91,8 @@ function draw(ctx,o){
   if(he.length){
     /* ô Hệ nhỏ: 1 hệ = 1 dòng chữ to; 2 hệ = 2 dòng xếp dọc (mỗi dòng 1 màu) cho dễ đọc, không ép chữ ngang */
     var hcx=X(G.lv.x),hcy=G.lv.y+2,hw2=G.lv.w-6;
-    if(he.length===1)fit(ctx,HT[he[0]]||HE_TEN[he[0]]||he[0],hcx,hcy,hw2,40,24,'bold {S}px sans-serif',HE_MAU[he[0]]||'#fff','rgba(0,0,30,.9)',6);
-    else he.forEach(function(k,i){fit(ctx,HT[k]||HE_TEN[k]||k,hcx,hcy+(i?15:-15),hw2,28,18,'bold {S}px sans-serif',HE_MAU[k]||'#fff','rgba(0,0,30,.9)',5);});}
+    if(he.length===1)fit(ctx,HT[he[0]]||HE_TEN[he[0]]||he[0],hcx,hcy,hw2,40,24,'bold {S}px sans-serif',heC(he[0]),heV(he[0]),6);
+    else he.forEach(function(k,i){fit(ctx,HT[k]||HE_TEN[k]||k,hcx,hcy+(i?15:-15),hw2,28,18,'bold {S}px sans-serif',heC(k),heV(k),5);});}
   ctx.restore();return true;}
 root.TTGHUD={draw:draw,ratio:IH/IW,G:G,ready:function(){return ok;}};
 })(typeof window!=='undefined'?window:globalThis);

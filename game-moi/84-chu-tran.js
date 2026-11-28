@@ -23,6 +23,7 @@ function rgb(h){h=String(h||'#d11');if(h.charAt(0)!=='#')return[221,17,17];if(h.
 function mix(a,b,k){return 'rgb('+Math.round(a[0]+(b[0]-a[0])*k)+','+Math.round(a[1]+(b[1]-a[1])*k)+','+Math.round(a[2]+(b[2]-a[2])*k)+')';}
 var CC={};
 function pal(c){var p=CC[c];if(p)return p;var a=rgb(c),W=[255,255,255],B=[0,0,0];
+  if(a[0]*.3+a[1]*.59+a[2]*.11<80)return CC[c]={a:mix(a,W,.25),b:mix(a,W,.08),c:mix(a,B,.2),line:'#f4f4f4',glow:'#ffffff'};   /* chữ đen (Vô Cực): ruột đen, viền trắng sáng */
   return CC[c]={a:mix(a,W,.78),b:mix(a,W,.12),c:mix(a,B,.42),line:mix(a,B,.78),glow:c};}
 
 /* vẽ 1 chữ kiểu CHIẾN! thu nhỏ tại (x,y) (tâm chữ), sc = hệ số pop, al = độ đậm */
@@ -53,7 +54,7 @@ function fx(ctx,ts,list,o){
     items.sort(function(a,b){return a.f.t-b.f.t||a.seq-b.seq;});   /* chữ CŨ nhất xếp trước (gần đầu), chữ mới ra sau */
     for(i=0;i<items.length;i++)if(items[i].k==='l')tot[items[i].side]++;
     ctx.save();
-    for(i=0;i<items.length;i++){var it=items[i],c=cnt[it.side],hy=(o.head&&o.head[it.side]!=null)?o.head[it.side]:(o.mid||0),P=pal(it.f.c||'#ff4b3c'),sc,al,y,x=it.x;
+    for(i=0;i<items.length;i++){var it=items[i],c=cnt[it.side],hy=(o.head&&o.head[it.side]!=null)?o.head[it.side]:(o.mid||0),P=pal((it.f.he&&root.TTGCS&&root.TTGCS.heMauDong&&root.TTGCS.heMauDong(it.f.he,ts))||it.f.c||'#ff4b3c'),sc,al,y,x=it.x;
       al=Math.min(1,it.age/60)*(1-Math.max(0,(it.age-L*.72)/(L*.28)));
       if(it.k==='n'){
         var j=c.n++,dxn=j?((j%2?1:-1)*Math.ceil(j/2)*16):0;

@@ -188,6 +188,14 @@ function doHiem(id){return DO_HIEM_LOAI[id]||null;}
 function hiemInfo(id){var k=DO_HIEM_LOAI[id],d=k&&DO_HIEM[k];return d?{key:k,ten:d.ten,mau:d.mau,ts:d.ts,cau:d.cau?1:0}:null;}
 /* CẦU VỒNG 7 MÀU cho nhãn Đặc Biệt: dải màu chạy theo thời gian. cauVongCanvas(ctx,x0,x1) -> gradient canvas; CAU_VONG_CSS = class DOM .ttg-cau */
 var CAU_VONG=['#ff3b3b','#ff9a1f','#ffe14a','#4cdc5a','#3fb6ff','#4a5cff','#b45cff'];
+/* MÀU ĐỘNG CHO 3 HỆ ĐẶC BIỆT (28/11/2026): heMauDong(khóa hệ, ms) -> '#rrggbb' đổi theo thời gian, null nếu không phải hệ đặc biệt. Chỉnh dải màu và tốc độ ở đây.
+   Không Gian: tím phối hồng, xanh dương, xanh ngọc. Thời Gian: vàng kim phối trắng ngà và xanh trời. Vô Cực: đen trắng luân phiên (bát quái). Màu đổi theo 12 bước mỗi đoạn để bộ nhớ đệm màu của chữ nổi không phình ra. */
+var HE_DONG={khonggian:{ms:3600,c:['#8f5bff','#c04bff','#ff5fd2','#5a7dff','#4fd8ff']},thoigian:{ms:3200,c:['#ffd76a','#fff3c4','#8fd8ff','#ffb347']},vocuc:{ms:3000,c:['#ffffff','#9a9a9a','#111111','#9a9a9a']}};
+function hexRgb(h){var n=parseInt(h.slice(1),16);return[n>>16&255,n>>8&255,n&255];}
+function rgbHex(a){return '#'+a.map(function(v){v=Math.max(0,Math.min(255,Math.round(v)));return (v<16?'0':'')+v.toString(16);}).join('');}
+function heMauDong(he,ms){var d=HE_DONG[he];if(!d)return null;var n=d.c.length,p=(((ms==null?Date.now():ms)%d.ms)/d.ms)*n,i=Math.floor(p)%n,k=Math.round((p-Math.floor(p))*12)/12,a=hexRgb(d.c[i]),b=hexRgb(d.c[(i+1)%n]);return rgbHex([a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k,a[2]+(b[2]-a[2])*k]);}
+/* viền chữ hợp màu: chữ tối thì viền sáng, chữ sáng thì viền tối */
+function heVien(col){var a=hexRgb(String(col||'#ffffff').length===7?col:'#ffffff');return (a[0]*.3+a[1]*.59+a[2]*.11)<80?'rgba(255,255,255,.92)':'rgba(0,0,30,.9)';}
 function cauVongCanvas(c,x0,x1){var w=Math.max(1,x1-x0),g=c.createLinearGradient(x0,0,x1,0),n=CAU_VONG.length,i,ph=(Date.now()/2400)%1;for(i=0;i<=n;i++){g.addColorStop(i/n,CAU_VONG[(i+Math.floor(ph*n))%n]);}return g;}
 (function(){var D=root.document;if(!D||D.getElementById('ttg-cau-css'))return;var s=D.createElement('style');s.id='ttg-cau-css';s.textContent='@keyframes ttgCau{to{background-position:200% 0}}.ttg-cau{background:linear-gradient(90deg,#ff3b3b,#ff9a1f,#ffe14a,#4cdc5a,#3fb6ff,#4a5cff,#b45cff,#ff3b3b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent!important;animation:ttgCau 2.4s linear infinite;filter:drop-shadow(0 0 2px rgba(0,0,0,.85))}';(D.head||D.documentElement).appendChild(s);})();
 function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
@@ -195,7 +203,7 @@ function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
 function mangDuocSach(id,heSach){var o=LOAI[id];return !!o&&o.he.indexOf(heSach)>=0;}
 function heVung(z){return HE_VUNG[z]||null;}
 
-root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,heTheoTenVung:heTheoTenVung,HE_THEO_TEN_VUNG:HE_THEO_TEN_VUNG,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo,cauVongCanvas:cauVongCanvas,HE_DO_HIEM:HE_DO_HIEM,doHiemHe:doHiemHe});
+root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,heTheoTenVung:heTheoTenVung,heMauDong:heMauDong,heVien:heVien,HE_THEO_TEN_VUNG:HE_THEO_TEN_VUNG,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo,cauVongCanvas:cauVongCanvas,HE_DO_HIEM:HE_DO_HIEM,doHiemHe:doHiemHe});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
 })(typeof window!=='undefined'?window:globalThis);
 
