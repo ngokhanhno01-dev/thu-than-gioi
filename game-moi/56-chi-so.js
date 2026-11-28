@@ -53,7 +53,7 @@ function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 /* ===== HỆ: 18 hệ (khung khắc chế lấy theo Pokémon, đổi tên cho hợp game) =====
    BANG_HE[hệ tấn công] = {khac:[hệ bị khắc], kem:[hệ kháng], mien:[hệ miễn nhiễm]}. Sửa quan hệ nào cứ sửa ở đây. Hệ không liệt kê = x1.
    Thêm hệ mới: thêm vào HE_TEN + một dòng BANG_HE + (nếu cần) thêm tên vào dòng của các hệ khác. */
-var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',khonggian:'Không Gian',thoigian:'Thời Gian',vocuc:'Vô Cực',tuyet:'Tuyết',suong:'Sương',van:'Vân',nguyet:'Nguyệt',lam:'Lâm'};   /* 28/11/2026: HỆ THEO TÊN VÙNG (tuyet,suong,van,phong,loi,nguyet,thuy,hoa,lam); các khóa cũ giữ lại để tương thích */
+var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',khonggian:'Không Gian',thoigian:'Thời Gian',vocuc:'Vô Cực',tuyet:'Tuyết',suong:'Sương',van:'Vân',nguyet:'Nguyệt',lam:'Lâm',duong:'Dương',huyen:'Huyền',ngoc:'Ngọc',tinh:'Tinh',thien:'Thiên',hoavien:'Hoa',thandien:'Thần'};   /* +7 hệ vùng còn lại (28/11/2026). Kim và Ám đã có sẵn. hoavien = hệ 'Hoa' của Linh Hoa Viên (khóa 'hoa' đã là Hỏa); thandien = hệ 'Thần' của Thần Điện */   /* 28/11/2026: HỆ THEO TÊN VÙNG (tuyet,suong,van,phong,loi,nguyet,thuy,hoa,lam); các khóa cũ giữ lại để tương thích */
 var HE=Object.keys(HE_TEN);
 function ds(x){return x?x.split(' '):[];}
 function H(khac,kem,mien){return {khac:ds(khac),kem:ds(kem),mien:ds(mien)};}

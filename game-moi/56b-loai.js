@@ -8,6 +8,9 @@
 
 /* hệ chủ đạo của vùng z (hệ của kỹ năng cơ bản vùng, dùng ở bước D). Khớp mục 8 THIET_KE_CHI_SO.md */
 var HE_VUNG=['tuyet','suong','van','phong','loi','nguyet','thuy','hoa','lam'];   /* 28/11/2026: HỆ = TÊN VÙNG (Tuyết Nguyên=Tuyết, Sương Cốc=Sương, Vân Đảo=Vân, Phong Nguyên=Phong, Lôi Vực=Lôi, Nguyệt Cung=Nguyệt, Thủy Nguyệt Cảnh=Thủy, Xích Hỏa Địa=Hỏa, Thanh Lâm=Lâm) */
+/* HỆ THEO TÊN VÙNG cho đủ 21 vùng (18 vùng + 3 boss Thần). Vùng nào làm sau chỉ cần điền thú, hệ lấy theo tên vùng, không phụ thuộc số z. Khóa hệ theo HE_TEN (56-chi-so.js). */
+var HE_THEO_TEN_VUNG={'Tuyết Nguyên':'tuyet','Sương Cốc':'suong','Vân Đảo':'van','Phong Nguyên':'phong','Lôi Vực':'loi','Nguyệt Cung':'nguyet','Dương Sơn':'duong','Huyền Uyên':'huyen','Kim Khoáng':'kim','Ngọc Động':'ngoc','Thanh Lâm':'lam','Xích Hỏa Địa':'hoa','Hắc Ám Lâm':'am','Tử Tinh Hải':'tinh','Thiên Không':'thien','Linh Hoa Viên':'hoavien','Thần Điện':'thandien','Thủy Nguyệt Cảnh':'thuy','Đế Giang':'khonggian','Chúc Long':'thoigian','Vô Cực':'vocuc'};
+function heTheoTenVung(ten){return HE_THEO_TEN_VUNG[ten]||null;}
 HE_VUNG[17]='khonggian';   /* z17 = vùng 18 (boss Đế Giang, hệ Không Gian) */  /* z0..z5, z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm */
 
 /* vai: t = tank, c = cong (công), n = nhanh, b = canbang (cân bằng) */
@@ -192,7 +195,7 @@ function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
 function mangDuocSach(id,heSach){var o=LOAI[id];return !!o&&o.he.indexOf(heSach)>=0;}
 function heVung(z){return HE_VUNG[z]||null;}
 
-root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo,cauVongCanvas:cauVongCanvas,HE_DO_HIEM:HE_DO_HIEM,doHiemHe:doHiemHe});
+root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,heTheoTenVung:heTheoTenVung,HE_THEO_TEN_VUNG:HE_THEO_TEN_VUNG,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo,cauVongCanvas:cauVongCanvas,HE_DO_HIEM:HE_DO_HIEM,doHiemHe:doHiemHe});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
 })(typeof window!=='undefined'?window:globalThis);
 

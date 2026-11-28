@@ -14,8 +14,8 @@ var G={cx:257,cy:237,r:150,                       /* vòng tròn Rank */
   sp:{x0:639,x1:1532,y0:309,y1:357,lx:563,ly:333,lw:118},      /* thanh TỐC ĐỘ (dưới) + nhãn */
   lv:{x:1478,y:262,w:140},he:{x:257,y:407,w:165},
   hiem:{cx:1432,cy:176,pw:200,ph:62,w:190}};   /* ô tối cuối thanh Khiên (chỗ dấu + đỏ cũ): phủ nền rồi vẽ nhãn ĐỘ HIẾM loài */
-var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',tuyet:'Tuyết',suong:'Sương',van:'Vân',nguyet:'Nguyệt',lam:'Lâm'};
-var HE_MAU={thuong:'#f0f0f0',hoa:'#ff8a5c',thuy:'#58c4ff',loi:'#ffe45c',moc:'#6ce57a',bang:'#a8ecff',vo:'#ffb872',doc:'#c27cff',tho:'#d6a866',phong:'#a6f5d8',tam:'#ff98e6',trung:'#c4e45a',nham:'#c8c0b0',ma:'#b088e0',long:'#ffd24a',am:'#9a8aea',kim:'#fff0b8',tien:'#fff6d0',tuyet:'#a8ecff',suong:'#8fd8e8',van:'#fff6d0',nguyet:'#ff98e6',lam:'#6ce57a'};
+var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',tuyet:'Tuyết',suong:'Sương',van:'Vân',nguyet:'Nguyệt',lam:'Lâm',duong:'Dương',huyen:'Huyền',ngoc:'Ngọc',tinh:'Tinh',thien:'Thiên',hoavien:'Hoa',thandien:'Thần'};
+var HE_MAU={thuong:'#f0f0f0',hoa:'#ff8a5c',thuy:'#58c4ff',loi:'#ffe45c',moc:'#6ce57a',bang:'#a8ecff',vo:'#ffb872',doc:'#c27cff',tho:'#d6a866',phong:'#a6f5d8',tam:'#ff98e6',trung:'#c4e45a',nham:'#c8c0b0',ma:'#b088e0',long:'#ffd24a',am:'#9a8aea',kim:'#fff0b8',tien:'#fff6d0',tuyet:'#a8ecff',suong:'#8fd8e8',van:'#fff6d0',nguyet:'#ff98e6',lam:'#6ce57a',duong:'#ffb347',huyen:'#8a7bff',ngoc:'#6fe8c8',tinh:'#8aa8ff',thien:'#cfe9ff',hoavien:'#ff7ac8',thandien:'#fff0a0'};
 var FS='"Noto Serif","Palatino Linotype",Georgia,serif',FB='bold 10px sans-serif';
 var img=new Image(),ok=false;img.onload=function(){ok=true;};img.src='game-moi/khung-chien-dau.webp?v=2';
 var GD=G,IMGD=img;   /* khung mặc định (bản gốc); draw() có thể thay bằng khung Khung UI đang mặc (79-khung-ui.js) cho thú của bạn */
