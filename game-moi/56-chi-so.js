@@ -81,13 +81,13 @@ var BANG_HE_CU={   /* BẢNG KHẮC CHẾ CŨ (18 hệ), KHÔNG CÒN DÙNG từ 
   vocuc:H('','','')   /* Vô Cực (hệ của boss Vô Cực): TẠM chưa khắc/bị khắc hệ nào, chờ người dùng chốt */
 };
 /* BẢNG KHẮC CHẾ ĐANG DÙNG: để TRỐNG (mọi đòn x1) cho tới khi chốt khắc chế theo hệ vùng mới. Chỉ giữ 3 hệ Thần. Thêm hệ: BANG_HE.tuyet=H('khắc','kém','miễn') (khóa cách nhau bằng dấu cách) */
-/* BẢNG KHẮC CHẾ 18 HỆ VÙNG (28/11/2026, bản nháp theo chủ đề, chỉnh ở đây). Mỗi hệ khắc đúng 2 hệ (x1,5) và bị đúng 2 hệ khắc; hệ A khắc B thì B đánh A bị kém (x0,7). Không có miễn nhiễm. 3 hệ Thần (Không Gian, Thời Gian, Vô Cực) giữ bảng riêng, đòn của họ lên hệ vùng và ngược lại = x1. */
+/* BẢNG KHẮC CHẾ 18 HỆ VÙNG (28/11/2026, bản nháp theo chủ đề, chỉnh ở đây). Mỗi hệ khắc đúng 2 hệ (x1,5) và bị đúng 2 hệ khắc; hệ A khắc B thì B đánh A bị kém (x0,7). Không có miễn nhiễm, không có cặp khắc lẫn nhau. 3 hệ Thần (Không Gian, Thời Gian, Vô Cực) giữ bảng riêng, đòn của họ lên hệ vùng và ngược lại = x1. */
 var BANG_HE_VUNG={
   tuyet:H('lam thuy','hoa duong',''),
-  suong:H('thandien tinh','duong phong',''),
-  van:H('loi thien','loi phong',''),
-  phong:H('van suong','hoavien thandien',''),
-  loi:H('kim van','van thandien',''),
+  suong:H('van tinh','duong phong',''),
+  van:H('loi thien','phong suong',''),
+  phong:H('van suong','loi thandien',''),
+  loi:H('kim phong','thien van',''),
   nguyet:H('duong hoa','tinh huyen',''),
   thuy:H('hoa kim','tuyet lam',''),
   hoa:H('tuyet hoavien','thuy nguyet',''),
@@ -96,11 +96,11 @@ var BANG_HE_VUNG={
   huyen:H('tinh nguyet','ngoc thien',''),
   kim:H('lam hoavien','thuy loi',''),
   ngoc:H('am huyen','lam hoavien',''),
-  am:H('thien duong','ngoc thien',''),
+  am:H('thien duong','ngoc thandien',''),
   tinh:H('nguyet thandien','suong huyen',''),
-  thien:H('am huyen','am van',''),
-  hoavien:H('ngoc phong','hoa kim',''),
-  thandien:H('phong loi','tinh suong','')
+  thien:H('huyen loi','am van',''),
+  hoavien:H('ngoc thandien','hoa kim',''),
+  thandien:H('phong am','tinh hoavien','')
 };
 var BANG_HE={khonggian:BANG_HE_CU.khonggian,thoigian:BANG_HE_CU.thoigian,vocuc:BANG_HE_CU.vocuc};
 Object.keys(BANG_HE_VUNG).forEach(function(k){BANG_HE[k]=BANG_HE_VUNG[k];});
