@@ -437,6 +437,7 @@ function refresh(){if(isOpen){render();dsHang(true);}}
 
 window.TTGNHIEMVU={
   xemThuong:function(r){if(root&&r)showReward(r);},   /* thử: TTGNHIEMVU.xemThuong({t:'tt',n:500}) */
+  coThuong:function(){try{ld();return ['ngay','tuan'].some(function(t){var T=S[t];if(!T)return false;return L(t).some(function(q){var o=qs(t,q.id);return !o.c&&o.p>=q.need;})||CFG.moc.some(function(m,i){return !T.nhan[i]&&T.diem>=m;});});}catch(e){return false;}},   /* true = có nhiệm vụ đã xong chưa nhận, hoặc rương đủ điểm chưa mở (111-cham-do.js dùng để báo chấm đỏ) */
   open:open,close:close,tab:function(t){if(t&&root)setTab(t);return tab;},isOpen:function(){return isOpen;},sk:sk,
   diem:function(){ld();return S[tab].diem;},
   setDiem:function(n){ld();S[tab].diem=Math.max(0,Math.min(100,+n||0));save();render();return S[tab].diem;},
