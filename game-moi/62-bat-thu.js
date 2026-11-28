@@ -506,7 +506,7 @@ function syncDom(){
   if(!hoiOn)return;
   var m=host.m(),f=m.K/m.DPR,cc=Math.round(m.cx*f),key=[m.K,m.DPR,m.W,m.H,m.th,m.gy,m.cx,m.I.t,S.mode,giay,S.left,owned().length].join('|');
   if(key===S.key)return;S.key=key;
-  var cy=(m.gy-34)*f;   /* sát khung dưới, dưới chân 2 thú (chỗ nút Ném cũ) => không che thú / hiệu ứng */
+  var cy=(m.H-m.I.b-27)*f;   /* sát đáy màn hình (trận toàn màn hình), dưới chân 2 thú => không che thú / hiệu ứng */
   place(els.giet,cc-60-8-50,cy,100,34);place(els.dem,cc,cy,120,34);place(els.bat,cc+60+8+50,cy,100,34);
   els.dem.textContent=giay+'s'+(S.nem?' · còn '+S.left:'');els.dem.className='btx kh dem'+(giay<=5?' gap':'');
   els.bat.className='btx kh'+(owned().length?'':' g');

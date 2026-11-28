@@ -240,7 +240,7 @@ function drawTran(c,ts,da){
   var now=performance.now(),k=Q.kich;
   if(now-TR.seen>600){TR.t0=now;TR.lenh=0;TR.was=false;TR.hop=null;}   /* vừa vào trận mới */
   TR.seen=now;
-  var pet=Math.round(da.x+da.w*Q.petX),fy=da.h-Q.floor-Q.nang,x=Math.max(da.x+Q.le+k*.3,pet-Q.gap);
+  var pet=Math.round(da.x+da.w*Q.petX),fy=(da.gy!=null?da.gy:da.h-Q.floor)-Q.nang,x=Math.max(da.x+Q.le+k*.3,pet-Q.gap);
   var cmd=now<TR.lenh,img=(cmd&&li)?li:stI;
   if(cmd&&!TR.was)TR.hop={t0:now,dur:300,h:6};
   TR.was=cmd;
