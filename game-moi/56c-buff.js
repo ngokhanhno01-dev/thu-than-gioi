@@ -63,25 +63,25 @@ function donCoBan(z){return DON_CO_BAN[z]?{ten:DON_CO_BAN[z],hsKyNang:1,hoiChieu
    ev của NỘI TẠI (noiTai.ev, chạy sau khi dùng kỹ năng): debuff{stat:'pt' hoặc 'tc',pct,luot} lên đối thủ (giảm theo khu) | buHutMau{pct,luot} | buXuyenGiap{pct,luot} | khienSau{pctHp} | gayMu{pct,luot} (giảm theo khu) | choangNT{xs,luot} (kc chặn) | thuyAn (gắn Thủy Ấn: kỹ năng kế tiếp trúng x2 rồi mất ấn) | dietThe{luot,td,pt,cx,tc,gh,kn} (debuff gộp Diệt Thế: giảm tốc độ/giáp/chính xác/tấn công, giảm hồi máu, khóa kỹ năng; xem dtApply) | mocTam{pct,max} (kỹ năng tự dùng tuHoi: +1 Mộc Tâm mỗi lần dùng, tối đa max, giữ đến hết trận; cuối mỗi lượt của chính bên đó hồi pct% máu tối đa x số Mộc Tâm) | hoaAn{pct,luot} (gắn Hỏa Ấn: cuối mỗi lượt của bên dính, chịu pct% Công người gắn, sát thương chuẩn).
    CHƯA CÓ CODE CHẠY, ĐỪNG KHAI cho kỹ năng: tuBuff (tự buff), debuff đơn với stat khác pt/tc (tốc độ/chính xác/giảm hồi máu/khóa kỹ năng CHỈ có trong ev gộp 'dietThe'), lop (lớp lạnh). */
 var KY_NANG_BOSS=[
-  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'bang',hsTc:1.8,cd:5,ev:[],
+  {id:'bang-son-ap-dinh',ten:'Băng Sơn Áp Đỉnh',boss:'1j',he:'tuyet',hsTc:1.8,cd:5,ev:[],
    mt:'Triệu hồi 1 ngọn núi băng trấn áp đối thủ',
    noiTai:{ten:'Lạnh Thấu Xương',mod:[],ev:[{k:'debuff',stat:'pt',pct:-20,luot:2}]}},
-  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'thuy',hsTc:1.5,cd:5,ev:[{k:'hutMau',pct:30}],
+  {id:'suong-nuot',ten:'Sương Nuốt',boss:'2j',he:'suong',hsTc:1.5,cd:5,ev:[{k:'hutMau',pct:30}],
    noiTai:{ten:'Huyết Sương',mod:[],ev:[{k:'buHutMau',pct:10,luot:3}]}},
-  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'phong',hsTc:2.0,cd:5,ev:[],
+  {id:'con-bang-trien-si',ten:'Côn Bằng Triển Sí',boss:'3j',he:'van',hsTc:2.0,cd:5,ev:[],
    noiTai:{ten:'Vân Cánh',mod:[],ev:[{k:'khienSau',pctHp:20}]}},
   {id:'vu-xa-trien',ten:'Vũ Xà Triền',boss:'6j',he:'phong',hsTc:1.4,cd:4,ev:[],
    noiTai:{ten:'Xà Hành',mod:[],ev:[{k:'buXuyenGiap',pct:15,luot:3}]}},
   {id:'thien-loi-giang',ten:'Thiên Lôi Giáng',boss:'4j',he:'loi',hsTc:2.2,cd:6,ev:[],
    noiTai:{ten:'Lôi Kích',mod:[],ev:[{k:'choangNT',xs:30,luot:1}]}},
-  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'am',hsTc:2.0,cd:5,ev:[],
+  {id:'nguyet-thuc-nuot',ten:'Nguyệt Thực Nuốt',boss:'5j',he:'nguyet',hsTc:2.0,cd:5,ev:[],
    noiTai:{ten:'Nguyệt Mê',mod:[],ev:[{k:'gayMu',pct:40,luot:2}]}},
   {id:'thuy-long-pha-nguyet',ten:'Thủy Long Phá Nguyệt',boss:'7j',he:'thuy',hsTc:1.5,cd:5,ev:[],
    noiTai:{ten:'Thủy Ấn',mod:[],ev:[{k:'thuyAn'}]}},
   {id:'viem-long-pha-nhat',ten:'Viêm Long Phá Nhật',boss:'8j',he:'hoa',hsTc:2.0,cd:5,ev:[],
    noiTai:{ten:'Hỏa Ấn',mod:[],ev:[{k:'hoaAn',pct:40,luot:3}]}},
   /* KỸ NĂNG TỰ DÙNG (tuHoi): không gây sát thương, không né/hụt, dùng lên chính bản thân: hồi tuHoi.pct% máu tối đa ngay + nội tại Mộc Tâm. hsTc=0 (không dùng). cd 3 = chu kỳ 3 lượt. */
-  {id:'van-moc-hoi-xuan',ten:'Vạn Mộc Hồi Xuân',boss:'9j',he:'moc',hsTc:0,cd:3,tuHoi:{pct:20},ev:[],
+  {id:'van-moc-hoi-xuan',ten:'Vạn Mộc Hồi Xuân',boss:'9j',he:'lam',hsTc:0,cd:3,tuHoi:{pct:20},ev:[],
    noiTai:{ten:'Mộc Tâm',mod:[],ev:[{k:'mocTam',pct:5,max:10}]}},
   /* BOSS THẦN (phẩm chất Thần, hệ Không Gian). Diệt Thế: 1 debuff gộp, chạy ở index.html (dtApply/effS/hoiHs/knDecide). Số chỉnh ngay dòng dưới: td/pt/cx/tc = % (cx tính theo ĐIỂM Chính xác), gh = % giảm hồi máu, kn = khóa kỹ năng.
      Kháng (khu) giảm hiệu lực các số % ở trên; khóa kỹ năng KHÔNG bị Kháng chặn. */
@@ -105,7 +105,7 @@ function sachBoss(bossId){for(var i=0;i<KY_NANG_BOSS.length;i++)if(KY_NANG_BOSS[
 function sachBuffs(thu){var r=[];((thu&&thu.kn)||[]).forEach(function(b){var k=sachKyNang(b);if(!k)return;var n=k.noiTai||{};r.push({mod:n.mod||[],ev:n.ev||[]});});return r;}   /* sách không cộng chỉ số: chỉ nội tại */
 function sachMod(thu){var o=[];sachBuffs(thu).forEach(function(h){(h.mod||[]).forEach(function(m){o.push({stat:m.stat,pct:m.pct});});});return o;}   /* chỉ số từ sách -> TTGCS.tinh(thu,{mod:sachMod(thu)}) */
 var STAT_VI={hp:'Máu',tc:'Tấn công',pt:'Giáp',td:'Tốc độ',mm:'May mắn',ne:'Né',cx:'Chính xác',cm:'Chí mạng',khu:'Kháng',hutm:'Hút máu',pd:'Phản đòn'};
-var HE_VI={vocuc:'Vô Cực',thoigian:'Thời Gian',khonggian:'Không Gian',bang:'Băng',thuy:'Thủy',phong:'Phong',loi:'Lôi',am:'Âm',hoa:'Hỏa',moc:'Mộc',tho:'Thổ',doc:'Độc',kim:'Kim'};
+var HE_VI={tuyet:'Tuyết',suong:'Sương',van:'Vân',nguyet:'Nguyệt',lam:'Lâm',vocuc:'Vô Cực',thoigian:'Thời Gian',khonggian:'Không Gian',bang:'Băng',thuy:'Thủy',phong:'Phong',loi:'Lôi',am:'Âm',hoa:'Hỏa',moc:'Mộc',tho:'Thổ',doc:'Độc',kim:'Kim'};
 function evVi(e){if(e.k==='dietThe')return 'gắn Diệt Thế lên đối thủ trong '+e.luot+' lượt: Tốc độ '+e.td+'%, Giáp '+e.pt+'%, Chính xác '+e.cx+' điểm, Tấn công '+e.tc+'%, hồi máu giảm '+e.gh+'% và KHÔNG dùng được kỹ năng (các chỉ số giảm theo Kháng của đối thủ, khóa kỹ năng thì không)';if(e.k==='mocTam')return 'mỗi lần dùng được 1 Mộc Tâm (cộng dồn tối đa '+e.max+', giữ đến hết trận). Mỗi lượt, mỗi Mộc Tâm hồi '+e.pct+'% máu tối đa (tối đa '+(e.pct*e.max)+'% máu mỗi lượt), bắt đầu tính từ lượt kế tiếp';if(e.k==='hoaAn')return 'trúng thì gắn Hỏa Ấn trong '+e.luot+' lượt (đối thủ né được thì không dính): mỗi lượt đối thủ bị thiêu đốt, chịu sát thương chuẩn bằng '+e.pct+'% Công của người dùng chiêu';if(e.k==='thuyAn')return 'trúng thì gắn 1 Thủy Ấn (đối thủ né được thì không dính). Kỹ năng kế tiếp đánh trúng đối thủ có ấn gây gấp đôi sát thương (chiêu này: 300%) rồi ấn biến mất';if(e.k==='lop')return 'gắn '+e.them+' lớp lạnh';if(e.k==='hutMau')return 'hút '+e.pct+'% sát thương thành máu';if(e.k==='tuBuff')return 'bản thân +'+e.pct+'% '+(STAT_VI[e.stat]||e.stat)+' '+e.luot+' lượt';if(e.k==='debuff')return 'giảm '+Math.abs(e.pct)+'% '+(STAT_VI[e.stat]||e.stat)+' đối thủ trong '+e.luot+' lượt';if(e.k==='choang')return e.xs+'% làm choáng '+e.luot+' lượt';if(e.k==='khienDau')return 'khiên đầu trận '+e.pctHp+'% máu';if(e.k==='buHutMau')return 'sau khi dùng kỹ năng: hút '+e.pct+'% sát thương gây ra thành máu trong '+e.luot+' lượt';if(e.k==='khienSau')return 'sau khi dùng kỹ năng: nhận khiên bằng '+e.pctHp+'% máu tối đa';if(e.k==='buXuyenGiap')return 'sau khi dùng kỹ năng: Xuyên Giáp +'+e.pct+'% trong '+e.luot+' lượt';if(e.k==='choangNT')return 'khi dùng kỹ năng: '+e.xs+'% làm choáng đối thủ '+e.luot+' lượt';if(e.k==='gayMu')return 'sau khi dùng kỹ năng: gây mù, đối thủ đánh hụt '+e.pct+'% trong '+e.luot+' lượt';return '';}
 function modVi(a){return (a||[]).map(function(m){return (m.pct>0?'+':'')+m.pct+'% '+(STAT_VI[m.stat]||m.stat);}).join(', ');}
 /* mô tả sách (Balo/bảng thú): sinh từ đúng dữ liệu bảng nên không lệch số. Chỉ số = % sát thương + hệ; Nội tại = hiệu ứng kèm; Hiệu ứng = hình ảnh. */

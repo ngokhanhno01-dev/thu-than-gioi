@@ -7,7 +7,7 @@
 'use strict';
 
 /* hệ chủ đạo của vùng z (hệ của kỹ năng cơ bản vùng, dùng ở bước D). Khớp mục 8 THIET_KE_CHI_SO.md */
-var HE_VUNG=['bang','thuy','tien','phong','loi','tam','thuy','hoa','moc'];
+var HE_VUNG=['tuyet','suong','van','phong','loi','nguyet','thuy','hoa','lam'];   /* 28/11/2026: HỆ = TÊN VÙNG (Tuyết Nguyên=Tuyết, Sương Cốc=Sương, Vân Đảo=Vân, Phong Nguyên=Phong, Lôi Vực=Lôi, Nguyệt Cung=Nguyệt, Thủy Nguyệt Cảnh=Thủy, Xích Hỏa Địa=Hỏa, Thanh Lâm=Lâm) */
 HE_VUNG[17]='khonggian';   /* z17 = vùng 18 (boss Đế Giang, hệ Không Gian) */  /* z0..z5, z6 Thủy Nguyệt Cảnh, z7 Xích Hỏa Địa, z8 Thanh Lâm */
 
 /* vai: t = tank, c = cong (công), n = nhanh, b = canbang (cân bằng) */
@@ -172,6 +172,7 @@ Object.keys(BANG).forEach(function(zs){
   var z=+zs;THEO_VUNG[z]=[];
   BANG[zs].forEach(function(r,i){
     var o={id:r[0],ten:r[1],goc:z,vung:r[5]!=null?r[5]:z,vai:VAI[r[2]],he:r[3].slice(),boss:r[4]!==undefined?!!r[4]:i===BANG[zs].length-1};
+    o.he=(z<=8&&HE_VUNG[z])?[HE_VUNG[z]]:o.he.slice(0,1);   /* 28/11/2026: mỗi thú CHỈ 1 HỆ = hệ của vùng quê (bỏ hệ phụ); thú Thần (vùng 17+) giữ hệ riêng */
     LOAI[o.id]=o;THEO_VUNG[z].push(o.id);
     DO_HIEM_LOAI[o.id]=DO_HIEM_RIENG[o.id]||(z>=6?'thuong':(o.boss?'truyenthuyet':DO_HIEM_MD[Math.min(i,8)]));
   });
@@ -183,7 +184,7 @@ function doHiem(id){return DO_HIEM_LOAI[id]||null;}
 /* {key,ten,mau,ts} để vẽ nhãn, hoặc null */
 function hiemInfo(id){var k=DO_HIEM_LOAI[id],d=k&&DO_HIEM[k];return d?{key:k,ten:d.ten,mau:d.mau,ts:d.ts}:null;}
 function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
-/* sách kỹ năng: thú chỉ mang được sách thuộc 1 trong 2 hệ của chính nó (hệ khác không mang được). heSach = khóa hệ như 'bang','vo'. */
+/* sách kỹ năng: thú chỉ mang được sách cùng HỆ của nó (mỗi thú 1 hệ; hệ khác không mang được). heSach = khóa hệ như 'bang','vo'. */
 function mangDuocSach(id,heSach){var o=LOAI[id];return !!o&&o.he.indexOf(heSach)>=0;}
 function heVung(z){return HE_VUNG[z]||null;}
 

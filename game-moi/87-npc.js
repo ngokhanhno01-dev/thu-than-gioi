@@ -50,7 +50,7 @@ var CFG={
            {loi:'Đi ngang qua? Hừ. Kẻ yếu như ngươi rồi cũng như bông tuyết, chưa chạm đất đã tan trước hơi thở của ta.',tra:'Vậy ngươi muốn gì?'},
            {loi:'Ra tay đi. Thắng được ta thì ngươi mới đáng để ta liếc mắt thêm một lần. Còn nếu không... cút khỏi tuyết nguyên của ta.'}],
          /* td = cấu hình riêng của NPC Boss (đọc bởi 88-npc-boss.js). lv cố định; chiSoTu = loài lấy chỉ số gốc (boss thú hoang vùng 0: Băng Sơn Cự Thú); kyNang = id sách kỹ năng boss; he/hiem hiển thị; KHÔNG bắt được, KHÔNG bậc Rank, KHÔNG hiện Vn */
-         td:{lv:25,tien:3,chiSoTu:'1j',kyNang:'sach-bang-son-ap-dinh',he:['bang'],hiem:'truyenthuyet',
+         td:{lv:25,tien:3,chiSoTu:'1j',kyNang:'sach-bang-son-ap-dinh',he:['tuyet'],hiem:'truyenthuyet',
              thuong:{chau:{cap:1,n:5},tt:1000,trangBi:true,nguyenLieu:true,sach:true,sachTiLe:10,heSoExp:3}}}}),
     tao(1,[['Vụ Cốc Yêu Cơ - Mặc Sương','Yêu cơ ẩn trong màn sương dày, mê hoặc rồi ra tay với kẻ lạc đường.'],
            ['Vụ Cốc Thủ Hộ - Thanh Y Lão Bà','Bà lão canh giữ cổ đạo trong thung lũng, biết bí mật của làn sương.'],

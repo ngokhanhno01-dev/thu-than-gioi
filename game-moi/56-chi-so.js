@@ -53,11 +53,11 @@ function clamp(v,a,b){return v<a?a:(v>b?b:v);}
 /* ===== HỆ: 18 hệ (khung khắc chế lấy theo Pokémon, đổi tên cho hợp game) =====
    BANG_HE[hệ tấn công] = {khac:[hệ bị khắc], kem:[hệ kháng], mien:[hệ miễn nhiễm]}. Sửa quan hệ nào cứ sửa ở đây. Hệ không liệt kê = x1.
    Thêm hệ mới: thêm vào HE_TEN + một dòng BANG_HE + (nếu cần) thêm tên vào dòng của các hệ khác. */
-var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',khonggian:'Không Gian',thoigian:'Thời Gian',vocuc:'Vô Cực'};
+var HE_TEN={thuong:'Thường',hoa:'Hỏa',thuy:'Thủy',loi:'Lôi',moc:'Mộc',bang:'Băng',vo:'Võ',doc:'Độc',tho:'Thổ',phong:'Phong',tam:'Tâm Linh',trung:'Trùng',nham:'Nham',ma:'Ma',long:'Long',am:'Ám',kim:'Kim',tien:'Tiên',khonggian:'Không Gian',thoigian:'Thời Gian',vocuc:'Vô Cực',tuyet:'Tuyết',suong:'Sương',van:'Vân',nguyet:'Nguyệt',lam:'Lâm'};   /* 28/11/2026: HỆ THEO TÊN VÙNG (tuyet,suong,van,phong,loi,nguyet,thuy,hoa,lam); các khóa cũ giữ lại để tương thích */
 var HE=Object.keys(HE_TEN);
 function ds(x){return x?x.split(' '):[];}
 function H(khac,kem,mien){return {khac:ds(khac),kem:ds(kem),mien:ds(mien)};}
-var BANG_HE={
+var BANG_HE_CU={   /* BẢNG KHẮC CHẾ CŨ (18 hệ), KHÔNG CÒN DÙNG từ 28/11/2026 vì hệ đã đổi theo vùng; giữ để tham khảo khi làm khắc chế mới */
   thuong:H('','nham kim','ma'),
   hoa:   H('moc bang trung kim','hoa thuy nham long',''),
   thuy:  H('hoa tho nham','thuy moc long',''),
@@ -80,6 +80,8 @@ var BANG_HE={
   thoigian:H('','',''),   /* Thời Gian (hệ của boss Chúc Long): TẠM chưa khắc/bị khắc hệ nào, chờ người dùng chốt bảng khắc hệ (27/11/2026) */
   vocuc:H('','','')   /* Vô Cực (hệ của boss Vô Cực): TẠM chưa khắc/bị khắc hệ nào, chờ người dùng chốt */
 };
+/* BẢNG KHẮC CHẾ ĐANG DÙNG: để TRỐNG (mọi đòn x1) cho tới khi chốt khắc chế theo hệ vùng mới. Chỉ giữ 3 hệ Thần. Thêm hệ: BANG_HE.tuyet=H('khắc','kém','miễn') (khóa cách nhau bằng dấu cách) */
+var BANG_HE={khonggian:BANG_HE_CU.khonggian,thoigian:BANG_HE_CU.thoigian,vocuc:BANG_HE_CU.vocuc};
 /* hs một đòn hệ heDon lên 1 hệ mục tiêu h */
 function heMot(heDon,h){
   var r=BANG_HE[heDon];if(!r)return 1;
