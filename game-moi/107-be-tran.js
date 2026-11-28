@@ -1,10 +1,11 @@
 /* ===== 107-be-tran.js (TTGBE): BỆ ĐỨNG 2 BÊN TRONG TRẬN (28/11/2026) =====
    Vẽ bằng canvas (không dùng ảnh): đảo đá nổi mặt elip, viền sáng + vòng khắc. MÀU TỰ LẤY THEO NỀN VÙNG đang đánh (lấy màu trung bình nửa dưới ảnh nền).
-   index.html gọi TTGBE.draw(ctx,ts,{xs:[tâm bệ trái,tâm bệ phải],y:tâm mặt bệ,m:số pixel máy/1 đơn vị game,bg:ảnh nền|null}) TRƯỚC khi vẽ thú.
-   Chỉnh cỡ ở CFG: rx = nửa bề ngang mặt bệ, ry = nửa bề sâu mặt bệ, day = độ dày vách đá, da = độ nhọn đá dưới đáy. */
+   2 LOẠI BỆ: 'lon' = bên có nhân vật (đủ chỗ cho nhân vật + thú) | 'nho' = bên chỉ có thú/quái (canh giữa con đó).
+   index.html gọi TTGBE.draw(ctx,ts,{be:[{x:tâm bệ,loai:'lon'|'nho'} bên trái, bên phải],y:tâm mặt bệ,m:số pixel máy/1 đơn vị game,bg:ảnh nền|null}) TRƯỚC khi vẽ thú.
+   Chỉnh cỡ ở CFG.lon / CFG.nho: rx = nửa bề ngang mặt bệ, ry = nửa bề sâu mặt bệ, day = độ dày vách đá, da = độ nhọn đá dưới đáy. */
 (function(root){
 'use strict';
-var CFG={rx:108,ry:22,day:10,da:13,le:16};   /* le = chừa lề quanh hình cho quầng sáng */
+var CFG={lon:{rx:108,ry:22,day:10,da:13},nho:{rx:76,ry:19,day:9,da:11},le:16};   /* le = chừa lề quanh hình cho quầng sáng */
 var HUE=[],CACHE={};
 function hue(img){   /* [h,s] trung bình của nửa dưới ảnh nền; chưa có ảnh thì xanh đêm */
   if(!img||!img.naturalWidth)return[215,45];
@@ -20,8 +21,8 @@ function hue(img){   /* [h,s] trung bình của nửa dưới ảnh nền; chưa
 function col(h,s,l,a){return'hsla('+h+','+s+'%,'+l+'%,'+(a==null?1:a)+')';}
 function rnd(n){var r=Math.sin(n*91.7+13.3)*43758.5453;return r-Math.floor(r);}
 function ell(c,x,y,a,b,t0,t1){c.beginPath();c.ellipse(x,y,a,b,0,t0||0,t1==null?6.2832:t1);}
-function build(h,s,m,seed){
-  var rx=CFG.rx,ry=CFG.ry,day=CFG.day,da=CFG.da,le=CFG.le,w=2*(rx+le),H=2*ry+day+da+2*le;
+function build(h,s,m,seed,Z){
+  var rx=Z.rx,ry=Z.ry,day=Z.day,da=Z.da,le=CFG.le,w=2*(rx+le),H=2*ry+day+da+2*le;
   var cv=document.createElement('canvas');cv.width=Math.ceil(w*m);cv.height=Math.ceil(H*m);
   var c=cv.getContext('2d');c.scale(m,m);var x=rx+le,y=ry+le,g,i,a,N=22;
   /* bóng đổ + quầng sáng dưới đáy */
@@ -49,11 +50,12 @@ function build(h,s,m,seed){
   return{cv:cv,w:w,h:H,ox:x,oy:y};}
 function draw(ctx,ts,o){
   var hs=hue(o.bg),i;
-  for(i=0;i<o.xs.length;i++){
-    var k=[hs[0],hs[1],o.m].join('|'),b=CACHE[k]||(CACHE[k]=build(hs[0],hs[1],o.m,1)),x=o.xs[i];
+  for(i=0;i<o.be.length;i++){
+    var loai=o.be[i].loai==='lon'?'lon':'nho',Z=CFG[loai];
+    var k=[hs[0],hs[1],o.m,loai].join('|'),b=CACHE[k]||(CACHE[k]=build(hs[0],hs[1],o.m,1,Z)),x=o.be[i].x;
     ctx.save();ctx.imageSmoothingEnabled=true;if(i){ctx.save();ctx.translate(x,0);ctx.scale(-1,1);ctx.drawImage(b.cv,-b.ox,o.y-b.oy,b.w,b.h);ctx.restore();}else ctx.drawImage(b.cv,x-b.ox,o.y-b.oy,b.w,b.h);
     /* mép bệ thở sáng nhẹ */
-    ctx.globalCompositeOperation='lighter';ctx.lineWidth=2.5;ctx.strokeStyle=col(hs[0],85,60,.12+.1*Math.sin(ts/520+i*2));ell(ctx,x,o.y,CFG.rx,CFG.ry,0,Math.PI);ctx.stroke();
+    ctx.globalCompositeOperation='lighter';ctx.lineWidth=2.5;ctx.strokeStyle=col(hs[0],85,60,.12+.1*Math.sin(ts/520+i*2));ell(ctx,x,o.y,Z.rx,Z.ry,0,Math.PI);ctx.stroke();
     ctx.restore();}}
 root.TTGBE={draw:draw,CFG:CFG};
 })(typeof window!=='undefined'?window:globalThis);
