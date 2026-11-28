@@ -37,3 +37,5 @@ Icon nhiệm vụ không còn dùng pixel art: bảng `RIC` trong `109-nhiem-vu.
 Icon BẮT THÚ (chan, ngoc) = `icon-nv/bat-thu.webp`: icon Thú Thần Thạch (`icon-tien/ttt.webp`) đổi sang màu xanh lục + thêm vài tia sáng. Không dùng icon Ngự Thú Châu vì châu đã là phần thưởng.
 
 Các icon nhiệm vụ còn lại (gio, kiem, bando, bua, khien, quy, vuong, sao, rong, lich, cup) là ảnh vẽ riêng cùng phong cách huy hiệu viền vàng, nằm trong `icon-nv/` (256px, webp trong suốt). `catcat` dùng chung icon `lich`.
+
+Phần thưởng vật phẩm của nhiệm vụ tuần chỉ dùng đồ cường hóa (Đá Cường Hóa bậc 1-5, Đá Ngũ Sắc, Vé Bảo Hộ), không dùng vật phẩm vùng `th-z*`.
