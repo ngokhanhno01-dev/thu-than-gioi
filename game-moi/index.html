@@ -857,7 +857,7 @@ function saveLay(){try{localStorage.setItem(LKEY,JSON.stringify(lay));}catch(e){
 function winToast(head,xp,dvN,dvMo,tt,items,rn){
  var h=[head],ic=function(src,q,nm){return '<span style="display:inline-flex;align-items:center;gap:2px;margin:0 5px;white-space:nowrap" title="'+String(nm||'').replace(/"/g,'')+'"><img src="'+src+'" alt="" draggable="false" style="width:1.5em;height:1.5em;object-fit:contain">×'+q+'</span>';},r=[],i,c;
  if(xp)h.push('+'+xp.gain+' EXP'+(xp.tran?' (trần cấp)':''));
- if(dvN)h.push('+'+dvN+' DV');
+ if(dvN)h.push('+'+dvN+' ⭐');
  if(dvMo&&dvMo.length)h.push('Mở khóa '+dvMo.join(', '));
  if(xp&&xp.lv1>xp.lv0)h.push('Lên cấp '+xp.lv1+'!');
  if(tt&&window.TTGTIEN)r.push(ic('game-moi/icon-tien/tt.webp',TTGTIEN.fmt(tt),'Tinh Thạch'));
