@@ -13,7 +13,7 @@
   /* nạp động module thông báo rơi đồ (106) nếu chưa có */
   (function () { try { var D = root.document; if (root.TTGDROP || root.__tdrLoad || !D) return; root.__tdrLoad = 1; var cs = D.currentScript, s = D.createElement('script'); s.src = (cs && cs.src ? cs.src.replace(/[^\/?#]*([?#].*)?$/, '') : 'game-moi/') + '106-thong-bao-roi.js?v=2'; D.head.appendChild(s); } catch (e) {} })();
   var CFG = {
-    tiLeRoi: { th1: 0.005, th2: 0.005, th3: 0.005 },   /* 0,5% khi giết boss Thần, cả 3 con (người dùng chốt 27/11/2026). Sách kỹ năng boss Thần: 1,5% như boss thường (TY_LE_ROI_SACH, 56c-buff.js) */
+    tiLeRoi: { th1: 0.015, th2: 0.015, th3: 0.015 },   /* 1,5% khi giết boss Thần, cả 3 con (chốt 28/11/2026, trước 0,5%). Sách kỹ năng boss Thần: 5% (TY_LE_ROI_SACH_THAN, 56c-buff.js) */
     soTest: 3                  /* nút test: số trứng mỗi lần bấm */
   };
   var TRUNG = {   /* id vật phẩm -> loài boss */

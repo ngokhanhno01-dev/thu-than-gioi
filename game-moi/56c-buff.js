@@ -114,6 +114,7 @@ function sachMoTa(bid,ngan){var k=sachKyNang(bid);if(!k)return '';var n=k.noiTai
   heT='Hệ '+(HE_VI[k.he]||k.he);
   if(ngan)return cs+', hồi chiêu '+k.cd+' lượt.'+(n.ten?' Nội tại '+n.ten+': '+(nt||'-')+'.':'');   /* bản ngắn cho bảng chọn kỹ năng trong Thú Thần */
   return heT+'. '+(k.mt?k.mt+'. ':'')+'Chỉ số: '+cs+', hồi chiêu '+k.cd+' lượt.'+(n.ten?' Nội tại '+n.ten+': '+(nt||'-')+((n.ev||[]).some(function(e){return e.k==='debuff'||e.k==='gayMu'||e.k==='choangNT';})?' (giảm theo Kháng của đối thủ)':'')+'.':'')+' Hiệu ứng: hình ảnh kỹ năng khi tung chiêu. Chỉ thú có hệ chính hoặc phụ trùng hệ sách mới gắn được.';}
+var TY_LE_ROI_SACH_THAN=5;   /* % rơi sách RIÊNG cho 3 boss Thần (chốt 28/11/2026); boss thường dùng số dưới */
 var TY_LE_ROI_SACH=1.5;   /* % rơi sách kỹ năng boss, CHỈ khi giết chết boss (bắt không rơi); mm nhân thêm như tỉ lệ rớt item */
 function kyNangBoss(z){return KY_NANG_BOSS[z]?copy(KY_NANG_BOSS[z]):null;}
 
@@ -186,7 +187,7 @@ function hoiLuot(thu,hpMax){return Math.floor(hpMax*tongEv(thu,'hoiLuot','pctHp'
 function khienDau(thu,hpMax){return Math.floor(hpMax*tongEv(thu,'khienDau','pctHp')/100);}
 
 root.TTGCS=Object.assign(root.TTGCS||{},{
-  VUNG_BUFF:VUNG,DON_CO_BAN:DON_CO_BAN,donCoBan:donCoBan,KY_NANG_BOSS:KY_NANG_BOSS,kyNangBoss:kyNangBoss,sachKyNang:sachKyNang,sachBoss:sachBoss,sachMod:sachMod,sachMoTa:sachMoTa,heVi:function(h){return HE_VI[h]||h;},TY_LE_ROI_SACH:TY_LE_ROI_SACH,vungBuff:vungBuff,debuffVung:debuffVung,buffBoss:buffBoss,
+  VUNG_BUFF:VUNG,DON_CO_BAN:DON_CO_BAN,donCoBan:donCoBan,KY_NANG_BOSS:KY_NANG_BOSS,kyNangBoss:kyNangBoss,sachKyNang:sachKyNang,sachBoss:sachBoss,sachMod:sachMod,sachMoTa:sachMoTa,heVi:function(h){return HE_VI[h]||h;},TY_LE_ROI_SACH:TY_LE_ROI_SACH,TY_LE_ROI_SACH_THAN:TY_LE_ROI_SACH_THAN,vungBuff:vungBuff,debuffVung:debuffVung,buffBoss:buffBoss,
   modTinh:modTinh,modTam:modTam,suKien:suKien,hoiLuot:hoiLuot,khienDau:khienDau
 });
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;

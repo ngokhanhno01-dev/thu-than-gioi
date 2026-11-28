@@ -12,7 +12,7 @@
      vaoDanh(uid) trả mocChay = mốc 10% kế tiếp DƯỚI máu hiện tại (1,0 -> 0,9; 0,85 -> 0,8). Trận đánh xuống tới mốc đó thì gọi chay(uid, hp):
      boss sang vùng KHÁC (ngẫu nhiên theo hạt giống + số lần chạy), giữ máu còn lại. Máu <= 10% (CFG.khongChayDuoi): mocChay = null, đánh đến cùng.
      Người làm boss chạy: mặc định KHÔNG nhận thưởng (index.html quyết định, ghi ở đây để nhớ).
-     ketThuc(uid, {kq:'thang'|'thua', hp}): thắng => boss chết tới hết khung; thua => boss hiện lại cùng vùng, máu = hp truyền vào (giữ sát thương đã gây), người thua bị khóa CFG.khoaGiay (60s).
+     ketThuc(uid, {kq:'thang'|'thua', hp}): thắng => boss chết tới hết khung; thua => boss hiện lại cùng vùng, máu = hp truyền vào (giữ sát thương đã gây), người thua bị khóa CFG.khoaGiay (15s).
    TRÊN MAP: trangThai().dangDanh != null => người khác thấy boss ẩn + icon 2 kiếm chéo (bước 5 vẽ).
    LƯU: localStorage khóa 'ttg_btg_v1' (KHÔNG dùng tiền tố ttg_moi_ vì 51-thu-moi.js xóa các khóa đó). Sau này thay load()/save() bằng server.
    AN TOÀN: người đang đánh mà tắt trang thì sau CFG.tranQuaHanGiay giây coi như bỏ trận (nhả boss, máu giữ nguyên). Hết thời gian trận thật / tối đa 5 người đánh chung: CHƯA LÀM.
@@ -31,7 +31,7 @@
     hapHoiKyNang: 0.01,               /* máu <= 10%: mỗi kỹ năng gây 1% máu tối đa (cố định) */
     tocDau: 50,                       /* tốc độ boss lúc vào trận (đòn thường cách nhau ~1,6 giây) */
     tocMoiDot: 10,                    /* mỗi lần boss ra đòn: +10 tốc độ, tối đa bằng tốc độ thật. Reset mỗi trận */
-    khoaGiay: 60,                     /* người thua bị khóa 60 giây */
+    khoaGiay: 15,                     /* người thua bị khóa 15 giây (chốt 28/11/2026, trước 60) */
     tranQuaHanGiay: 600,              /* người đang đánh không báo kết quả sau 10 phút: nhả boss */
     dsVung: null,                     /* null = lấy THU_MOI.zones (các vùng đang có). Hoặc mảng z, vd [0,1,2] */
     key: 'ttg_btg_v1'

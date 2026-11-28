@@ -64,6 +64,13 @@ Ví dụ Đế Giang cấp 270, V3 (chưa tính khắc hệ và buff):
 
 Boss và thú Thần người chơi nuôi đều giảm khoảng 6,1 lần ở máu, công, thủ, tốc độ.
 
+**Cập nhật sau khi thử (ĐÃ làm, thay cho số 2 triệu ở trên):**
+
+- Máu 3 boss Thần: khoảng **1.000.000** (`hsBossHp`: th1 64.85, th2 68.665, th3 44.895).
+- Thua trận chờ **15 giây** (`khoaGiay`).
+- Rơi trứng khi giết boss Thần: **1,5%** (`104-trung-than.js`).
+- Rơi sách khi giết boss Thần: **5%** (`TY_LE_ROI_SACH_THAN`), vẫn nhân may mắn như trước. Boss thường giữ 1,5%.
+
 ## 4. Hệ Thần (ĐÃ làm)
 
 - Không Gian, Thời Gian, Vô Cực đánh 18 hệ vùng: từ x1,5 xuống **x1,2**.
