@@ -35,3 +35,5 @@ Không còn 5/10 nhiệm vụ cố định. Mỗi **ô** nhiệm vụ có nhiề
 Icon nhiệm vụ không còn dùng pixel art: bảng `RIC` trong `109-nhiem-vu.js` ánh xạ tên icon (tham số 3 của `Q()`) sang ảnh thật trong `game-moi/icon`, `icon-tien`, `img/chau`. Đổi icon = sửa 1 dòng trong `RIC`. Tên không có trong `RIC` vẫn rơi về pixel art `PX`.
 
 Icon BẮT THÚ (chan, ngoc) = `icon-nv/bat-thu.webp`: icon Thú Thần Thạch (`icon-tien/ttt.webp`) đổi sang màu xanh lục + thêm vài tia sáng. Không dùng icon Ngự Thú Châu vì châu đã là phần thưởng.
+
+Các icon nhiệm vụ còn lại (gio, kiem, bando, bua, khien, quy, vuong, sao, rong, lich, cup) là ảnh vẽ riêng cùng phong cách huy hiệu viền vàng, nằm trong `icon-nv/` (256px, webp trong suốt). `catcat` dùng chung icon `lich`.

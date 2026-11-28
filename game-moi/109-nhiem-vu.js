@@ -45,7 +45,7 @@ function pxUrl(name){
     return pxCache[name]=c.toDataURL('image/png');}catch(e){return null;}
 }
 /* ICON THẬT CỦA GAME (thay pixel art): tên icon trong Q() -> ảnh trong game-moi. Tên không có ở đây thì rơi về pixel art PX. */
-var RIC={gio:'icon/cua-hang.webp',kiem:'icon/tham-hiem.webp',bando:'icon/pho-ban.webp',bua:'icon/cuong-hoa.webp',tien:'icon-tien/tt.webp',chan:'icon-nv/bat-thu.webp',ngoc:'icon-nv/bat-thu.webp',khien:'icon/trang-bi.webp',quy:'icon/boss-the-gioi.webp',vuong:'icon/thu-than.webp',sao:'icon/thu-than.webp',rong:'icon/boss-the-gioi.webp',lich:'icon/diem-danh.webp',catcat:'icon/diem-danh.webp',cup:'icon/dau-truong.webp'};
+var RIC={gio:'icon-nv/gio.webp',kiem:'icon-nv/kiem.webp',bando:'icon-nv/bando.webp',bua:'icon-nv/bua.webp',tien:'icon-tien/tt.webp',chan:'icon-nv/bat-thu.webp',ngoc:'icon-nv/bat-thu.webp',khien:'icon-nv/khien.webp',quy:'icon-nv/quy.webp',vuong:'icon-nv/vuong.webp',sao:'icon-nv/sao.webp',rong:'icon-nv/rong.webp',lich:'icon-nv/lich.webp',catcat:'icon-nv/lich.webp',cup:'icon-nv/cup.webp'};
 function icQ(name){
   if(RIC[name])return '<img src="'+D+RIC[name]+'" alt="">';
   var u=pxUrl(name);return u?'<img class="px" src="'+u+'" alt="">':esc(name);}
