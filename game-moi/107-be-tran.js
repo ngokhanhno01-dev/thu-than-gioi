@@ -50,8 +50,8 @@ function build(h,s,m,seed){
 function draw(ctx,ts,o){
   var hs=hue(o.bg),i;
   for(i=0;i<o.xs.length;i++){
-    var k=[hs[0],hs[1],o.m,i].join('|'),b=CACHE[k]||(CACHE[k]=build(hs[0],hs[1],o.m,i+1)),x=o.xs[i];
-    ctx.save();ctx.imageSmoothingEnabled=true;ctx.drawImage(b.cv,x-b.ox,o.y-b.oy,b.w,b.h);
+    var k=[hs[0],hs[1],o.m].join('|'),b=CACHE[k]||(CACHE[k]=build(hs[0],hs[1],o.m,1)),x=o.xs[i];
+    ctx.save();ctx.imageSmoothingEnabled=true;if(i){ctx.save();ctx.translate(x,0);ctx.scale(-1,1);ctx.drawImage(b.cv,-b.ox,o.y-b.oy,b.w,b.h);ctx.restore();}else ctx.drawImage(b.cv,x-b.ox,o.y-b.oy,b.w,b.h);
     /* mép bệ thở sáng nhẹ */
     ctx.globalCompositeOperation='lighter';ctx.lineWidth=2.5;ctx.strokeStyle=col(hs[0],85,60,.12+.1*Math.sin(ts/520+i*2));ell(ctx,x,o.y,CFG.rx,CFG.ry,0,Math.PI);ctx.stroke();
     ctx.restore();}}

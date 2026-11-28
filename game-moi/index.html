@@ -234,7 +234,7 @@ img,canvas,video,svg{-webkit-user-drag:none;user-drag:none}
 <script src="game-moi/67-rune-rank.js"></script>
 <script src="game-moi/68-hud-tran.js?v=2"></script>
 <script src="game-moi/69-dem-nguoc.js"></script>
-<script src="game-moi/107-be-tran.js?v=1"></script>
+<script src="game-moi/107-be-tran.js?v=2"></script>
 <script src="game-moi/31-combat-fx.js"></script>
 <script src="game-moi/33-attack-fx.js"></script>
 <script src="game-moi/34-attack-fx-2b.js"></script>
@@ -1306,9 +1306,9 @@ function drawExp(ts){
   ctx.lineWidth=Math.max(1.5,lf*.26);ctx.strokeStyle='#020618';ctx.fillStyle='#ffd45a';
   ctx.strokeText(lt,bx+bw/2,by+bh/2+.5);ctx.fillText(lt,bx+bw/2,by+bh/2+.5);}
  ctx.restore();}
-/* bệ trái đặt giữa nhân vật và thú của bạn (chưa có nhân vật thì giữa thú); bệ phải đối xứng ở địch */
+/* bệ trái đặt giữa nhân vật và thú của bạn; bệ phải ĐỐI XỨNG GƯƠNG qua tâm màn: thú địch đứng phía trong, phía ngoài chừa chỗ cho nhân vật đối thủ (PvP sau này) */
 function beDraw(ts){if(!window.TTGBE)return;var nv=window.TTGNVSANH&&TTGNVSANH.tran&&TTGNVSANH.tran.pos(),mx=px('me'),cx=nv&&nv.x<mx?Math.round((nv.x+mx)/2)+4:mx-40;
- TTGBE.draw(ctx,ts,{xs:[cx,px('en')],y:py()+3,m:HD?K:1,bg:bgImageOn&&bgImg?bgImg.img:null});}
+ TTGBE.draw(ctx,ts,{xs:[cx,2*I.l+(W-I.l-I.r)-cx],y:py()+3,m:HD?K:1,bg:bgImageOn&&bgImg?bgImg.img:null});}
 function draw(ts){fullSync();bgSync();if(window.TTGBAT&&TTGBAT.frame)TTGBAT.frame(ts);
  var th=TH(),fx=I.l,fw=W-I.l-I.r,pt=th+GAPB;
  ctx.fillStyle='#0b1020';ctx.fillRect(0,0,W,H);
