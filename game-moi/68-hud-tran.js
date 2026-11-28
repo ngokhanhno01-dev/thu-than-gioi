@@ -27,7 +27,7 @@ function fit(c,t,cx,cy,maxW,fs,fmin,font,col,stroke,lw){
   var sx=w>maxW?maxW/w:1;
   c.save();c.translate(cx,cy);c.scale(sx,1);c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';
   if(stroke){c.lineWidth=lw||8;c.strokeStyle=stroke;c.strokeText(t,0,0);}
-  c.fillStyle=col;c.fillText(t,0,0);c.restore();}
+  c.fillStyle=(typeof col==='function')?col(c,w):col;c.fillText(t,0,0);c.restore();}
 function barFill(c,b,p,mir,c1,c2,n){
   n=n||6;var w=b.x1-b.x0,h=b.y1-b.y0,x=mir?IW-b.x1:b.x0;
   c.save();rr(c,x+n,b.y0+n,w-2*n,h-2*n,(h-2*n)/2);c.clip();
@@ -66,7 +66,7 @@ function draw(ctx,o){
   /* ĐỘ HIẾM loài (Thường/Hiếm/Sử Thi/Huyền Thoại/Truyền Thuyết): đặt ở ô tối cuối thanh Khiên; luôn phủ nền ô này để xóa dấu + cũ */
   var hm=o.hiem&&root.TTGCS&&root.TTGCS.DO_HIEM?root.TTGCS.DO_HIEM[o.hiem]:null,hx=X(G.hiem.cx+(F?28:0));   /* khung Khung UI: nhích chữ độ hiếm sang phải 28 điểm */
   if(!F){ctx.save();rr(ctx,hx-G.hiem.pw/2,G.hiem.cy-G.hiem.ph/2,G.hiem.pw,G.hiem.ph,G.hiem.ph/2);ctx.fillStyle='#031938';ctx.fill();ctx.restore();}
-  if(hm)fit(ctx,hm.ten,hx,G.hiem.cy+2,G.hiem.w,46,26,'bold {S}px '+FS,hm.mau,'rgba(0,0,0,.9)',8);
+  if(hm)fit(ctx,hm.ten,hx,G.hiem.cy+2,G.hiem.w,46,26,'bold {S}px '+FS,(hm.cau&&root.TTGCS.cauVongCanvas)?function(c,w){return root.TTGCS.cauVongCanvas(c,-w/2,w/2);}:hm.mau,'rgba(0,0,0,.9)',8);
   /* nhãn Khiên / Tốc Độ (chữ vẽ bằng canvas để lật gương không bị ngược) */
   fit(ctx,'Khiên',X(G.sh.lx),G.sh.ly+1,G.sh.lw,38,24,'bold {S}px sans-serif','#fff','rgba(0,0,0,.85)',7);
   fit(ctx,'Tốc Độ',X(G.sp.lx),G.sp.ly+1,G.sp.lw,38,24,'bold {S}px sans-serif','#fff','rgba(0,0,0,.85)',7);

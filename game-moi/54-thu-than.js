@@ -385,7 +385,7 @@ function ocDraw(cv,items,gap){
     g.strokeStyle=cf;g.lineWidth=it.lw2||3;g.strokeText(it.t,x,base);g.fillStyle=cf;g.fillText(it.t,x,base);   /* lõi: stroke cùng màu làm nét bút đậm hơn */
     y+=bx.a+bx.d+gap;}
 }
-function renderHiem(t){if(!E.hiem)return;var h=t&&window.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(t.id):null;E.hiem.style.display=h?'flex':'none';if(h){E.hiem.textContent=h.ten;E.hiem.style.color=h.mau;}}
+function renderHiem(t){if(!E.hiem)return;var h=t&&window.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(t.id):null;E.hiem.style.display=h?'flex':'none';if(h){E.hiem.textContent=h.ten;E.hiem.style.color=h.mau;E.hiem.classList.toggle('ttg-cau',!!h.cau);}}
 function renderBadges(t){if(E.oc)drawBadges(E.oc,t);}
 /* vẽ 3 ô Lv/Bậc/Rank vào 3 canvas 208x208 (cvs). Dùng chung cho khung Trang Bị (55-trang-bi.js) qua TTGTHU.badges */
 function drawBadges(cvs,t){

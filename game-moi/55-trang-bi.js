@@ -263,7 +263,7 @@ function render(){
   else{petSrc='';petImg=null;E.cv.style.display='none';E.emp.style.display='flex';}
   E.nm.textContent=t&&TTGTHU.ten?TTGTHU.ten(t):'';if(t)fitName();
   if(TTGTHU&&TTGTHU.badges)TTGTHU.badges(E.oc,t||null);
-  var hm=t&&window.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(t.id):null;E.hiem.style.display=hm?'flex':'none';if(hm){E.hiem.textContent=hm.ten;E.hiem.style.color=hm.mau;}
+  var hm=t&&window.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(t.id):null;E.hiem.style.display=hm?'flex':'none';if(hm){E.hiem.textContent=hm.ten;E.hiem.style.color=hm.mau;E.hiem.classList.toggle('ttg-cau',!!hm.cau);}
 }
 /* canvas thú + vòng rune + aura (giống sảnh/Thám Hiểm: lượt 'sau' = vòng+aura, vẽ thú, lượt 'truoc' = nửa vòng đè chân thú) */
 function sizeCv(){if(!E.cv)return;var r=E.cv.getBoundingClientRect(),d=window.devicePixelRatio||1,w=Math.max(1,Math.round(r.width*d)),h=Math.max(1,Math.round(r.height*d));if(E.cv.width!==w||E.cv.height!==h){E.cv.width=w;E.cv.height=h;}}

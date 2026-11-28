@@ -30,7 +30,7 @@ function capNhatDaBat(){dabat=docDaBat();var moi=false;
 function heTen(k){return(root.TTGCS&&TTGCS.HE_TEN&&TTGCS.HE_TEN[k])||k;}
 var HE_THAN={th1:['khonggian'],th2:['thoigian'],th3:['vocuc']};
 function heCua(id){var l=null;try{l=root.TTGCS&&TTGCS.loai?TTGCS.loai(id):null;}catch(e){}var h=(l&&l.he&&l.he.length)?l.he:(HE_THAN[id]||[]);return h.map(heTen).join(' · ')||'Chưa rõ';}
-function hiemCua(id){var h=null;try{h=root.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(id):null;}catch(e){}return h||{ten:'Chưa rõ',mau:'#b9c0c9'};}
+function hiemCua(id){var h=null;try{h=root.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(id):null;}catch(e){}if(h&&h.cau)h={ten:h.ten,mau:'#cau',ts:h.ts,key:h.key,cau:1};return h||{ten:'Chưa rõ',mau:'#b9c0c9'};}
 function gioStr(h){return h+'h';}
 function noiGap(t,z,than){
   if(/^k\d/.test(t.id))return['Thú khởi đầu','Chọn 1 trong 3 con khi bắt đầu game'];
@@ -76,7 +76,7 @@ function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r)
 function chuVe(t,x,y,px,mau,bold,vien,maxW,al){cx.save();cx.font=(bold?'bold ':'')+px+'px "Noto Serif",Georgia,serif';cx.textAlign=al||'center';cx.textBaseline='middle';
   if(maxW){var w=cx.measureText(t).width;if(w>maxW){px=Math.max(9,Math.floor(px*maxW/w));cx.font=(bold?'bold ':'')+px+'px "Noto Serif",Georgia,serif';}}
   if(vien){cx.lineWidth=px>16?5:4;cx.lineJoin='round';cx.strokeStyle='rgba(4,10,50,.9)';cx.strokeText(t,x,y);}
-  cx.fillStyle=mau;cx.fillText(t,x,y);cx.restore();}
+  cx.fillStyle=(mau==='#cau'&&root.TTGCS&&TTGCS.cauVongCanvas)?(function(){var w=cx.measureText(t).width,x0=cx.textAlign==='left'?x:(cx.textAlign==='right'?x-w:x-w/2);return TTGCS.cauVongCanvas(cx,x0,x0+w);})():mau;cx.fillText(t,x,y);cx.restore();}
 var CROP={};
 function crop(id,bac){var k=id+'-'+bac,c=CROP[k];if(c)return c;if(!root.THU_MOI)return null;
   var t=D.createElement('canvas');t.width=t.height=192;var g=t.getContext('2d');

@@ -146,7 +146,7 @@ var DO_HIEM={
   suthi:{ten:'Sử Thi',mau:'#b06cff',ts:12},
   huyenthoai:{ten:'Huyền Thoại',mau:'#ffb020',ts:8},
   truyenthuyet:{ten:'Truyền Thuyết',mau:'#ff3d5a',ts:1},
-  than:{ten:'Thần',mau:'#ffd76a',ts:0.1}   /* bậc 6, trên Truyền Thuyết: vàng ánh kim, tỉ lệ gặp 0,1 (Truyền Thuyết = 1). Chỉ số nhân thêm CFG.hsDoHiem.than (56-chi-so.js) */
+  than:{ten:'Đặc Biệt',mau:'#ffd76a',ts:0.1,cau:1}   /* bậc 6, trên Truyền Thuyết: vàng ánh kim, tỉ lệ gặp 0,1 (Truyền Thuyết = 1). Chỉ số nhân thêm CFG.hsDoHiem.than (56-chi-so.js) */
 };
 /* ĐỘ HIẾM TỪNG CON do người dùng chốt (danh-sach-do-hiem, 22/11/2026). Con nào không có ở đây thì theo quy tắc mặc định bên dưới. */
 var DO_HIEM_RIENG={
@@ -182,13 +182,17 @@ function loai(id){var o=LOAI[id];return o?{id:o.id,ten:o.ten,goc:o.goc,vung:o.vu
 /* độ hiếm của loài: khóa 'thuong'|'hiem'|'suthi'|'huyenthoai'|'truyenthuyet' hoặc null nếu không phải loài thú (vd quái main) */
 function doHiem(id){return DO_HIEM_LOAI[id]||null;}
 /* {key,ten,mau,ts} để vẽ nhãn, hoặc null */
-function hiemInfo(id){var k=DO_HIEM_LOAI[id],d=k&&DO_HIEM[k];return d?{key:k,ten:d.ten,mau:d.mau,ts:d.ts}:null;}
+function hiemInfo(id){var k=DO_HIEM_LOAI[id],d=k&&DO_HIEM[k];return d?{key:k,ten:d.ten,mau:d.mau,ts:d.ts,cau:d.cau?1:0}:null;}
+/* CẦU VỒNG 7 MÀU cho nhãn Đặc Biệt: dải màu chạy theo thời gian. cauVongCanvas(ctx,x0,x1) -> gradient canvas; CAU_VONG_CSS = class DOM .ttg-cau */
+var CAU_VONG=['#ff3b3b','#ff9a1f','#ffe14a','#4cdc5a','#3fb6ff','#4a5cff','#b45cff'];
+function cauVongCanvas(c,x0,x1){var w=Math.max(1,x1-x0),g=c.createLinearGradient(x0,0,x1,0),n=CAU_VONG.length,i,ph=(Date.now()/2400)%1;for(i=0;i<=n;i++){g.addColorStop(i/n,CAU_VONG[(i+Math.floor(ph*n))%n]);}return g;}
+(function(){var D=root.document;if(!D||D.getElementById('ttg-cau-css'))return;var s=D.createElement('style');s.id='ttg-cau-css';s.textContent='@keyframes ttgCau{to{background-position:200% 0}}.ttg-cau{background:linear-gradient(90deg,#ff3b3b,#ff9a1f,#ffe14a,#4cdc5a,#3fb6ff,#4a5cff,#b45cff,#ff3b3b);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent!important;animation:ttgCau 2.4s linear infinite;filter:drop-shadow(0 0 2px rgba(0,0,0,.85))}';(D.head||D.documentElement).appendChild(s);})();
 function dsLoai(z){return (THEO_VUNG[z]||[]).map(loai);}
 /* sách kỹ năng: thú chỉ mang được sách cùng HỆ của nó (mỗi thú 1 hệ; hệ khác không mang được). heSach = khóa hệ như 'bang','vo'. */
 function mangDuocSach(id,heSach){var o=LOAI[id];return !!o&&o.he.indexOf(heSach)>=0;}
 function heVung(z){return HE_VUNG[z]||null;}
 
-root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo,HE_DO_HIEM:HE_DO_HIEM,doHiemHe:doHiemHe});
+root.TTGCS=Object.assign(root.TTGCS||{},{LOAI:LOAI,loai:loai,dsLoai:dsLoai,heVung:heVung,mangDuocSach:mangDuocSach,HE_VUNG:HE_VUNG,DO_HIEM:DO_HIEM,DO_HIEM_THU:DO_HIEM_THU,doHiem:doHiem,hiemInfo:hiemInfo,cauVongCanvas:cauVongCanvas,HE_DO_HIEM:HE_DO_HIEM,doHiemHe:doHiemHe});
 if(typeof module!=='undefined'&&module.exports)module.exports=root.TTGCS;
 })(typeof window!=='undefined'?window:globalThis);
 
