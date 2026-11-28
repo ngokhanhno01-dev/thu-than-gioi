@@ -5,10 +5,10 @@
    NỘI DUNG: mỗi VÙNG ĐÃ MỞ (THU_MOI.zones, xếp theo z) = 1 cặp trang, đúng 10 con: trang trái 6 con (3 Thường + 3 Hiếm), trang phải 4 con (2 Sử Thi trên; Huyền Thoại + Truyền Thuyết dưới), xếp theo độ hiếm (con thứ 10 là boss vùng, viền vàng). Cuối sách: 1 cặp trang Thú Thần (boss thế giới, 3 con ở trang trái; trang phải ghi lịch xuất hiện).
      Vùng chưa mở KHÔNG có trong THU_MOI.zones nên tự ẩn, số trang tự tính; thêm vùng mới vào 51-thu-moi.js là sách tự dài thêm.
      Ô thú: ĐÃ BẮT = ảnh màu + tên; CHƯA BẮT = bóng đen + "???". Cả hai đều hiện ĐỘ HIẾM (TTGCS.hiemInfo). Bảng chi tiết: V1/V2/V3 (ảnh b1..b3), Hệ (TTGCS.loai), Độ hiếm, NƠI GẶP (vùng / boss vùng / lịch boss Thần theo TTGBTG.CFG), trạng thái.
-     "Đã bắt" = có trong kho thú hiện tại (TTGTHU.list) HOẶC từng bắt: nhớ ở khóa localStorage ttg_dg_dabat_v1 (khóa KHÔNG mang tiền tố ttg_moi_ vì 51-thu-moi.js xóa các khóa đó khi mở game), nên thả thú đi vẫn không mất trong Đồ Giám. */
+     "Đã bắt" = có trong kho thú hiện tại (TTGTHU.list) HOẶC từng bắt: nhớ ở khóa localStorage ttg_moi_dg_dabat_v1 (có tiền tố ttg_moi_ nên 51-thu-moi.js xóa cùng kho thú khi XOA_KHI_MO bật = chế độ test offline reset khi thoát game; khi tắt XOA_KHI_MO thì giữ lâu dài), nên thả thú đi vẫn không mất trong Đồ Giám. */
 (function(root){
 'use strict';
-var D=document,IW=1280,IH=718,N=8,DIR='game-moi/do-giam/lat-',KDB='ttg_dg_dabat_v1';
+var D=document,IW=1280,IH=718,N=8,DIR='game-moi/do-giam/lat-',KDB='ttg_moi_dg_dabat_v1';
 var NHIP=[{giu:0,hoa:55},{giu:15,hoa:55},{giu:15,hoa:55},{giu:15,hoa:55},{giu:15,hoa:55},{giu:15,hoa:60},{giu:15,hoa:70},{giu:20,hoa:130}];   /* 8 chặng: gốc->k1, k1->k2, ..., k6->k7, k7->gốc (tổng ~650ms) */
 var XB={x:1197,y:122,r:48};   /* tâm + bán kính chạm của nút X, theo pixel ảnh */
 /* BỐ CỤC (pixel ảnh 1280x718): tâm trang trái/phải, ô thú 140x138, hàng 1 = 3 ô, hàng 2 = 2 ô; mũi tên + số trang ở y=PY */
