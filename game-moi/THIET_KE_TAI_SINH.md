@@ -68,7 +68,8 @@ Boss và thú Thần người chơi nuôi đều giảm khoảng 6,1 lần ở m
 
 - Máu 3 boss Thần: khoảng **1.000.000** (`hsBossHp`: th1 64.85, th2 68.665, th3 44.895).
 - Thua trận chờ **15 giây** (`khoaGiay`).
-- Rơi trứng khi giết boss Thần: **1,5%** (`104-trung-than.js`).
+- Rơi trứng khi giết boss Thần: **1,5%** (`104-trung-than.js`), **tính may mắn** giống sách: tỉ lệ x (1 + may mắn/100), tối đa x3.
+- Dự định sau này (CHƯA làm): vật phẩm trả tiền thật **x2 tỉ lệ rơi**.
 - Rơi sách khi giết boss Thần: **5%** (`TY_LE_ROI_SACH_THAN`), vẫn nhân may mắn như trước. Boss thường giữ 1,5%.
 
 ## 4. Hệ Thần (ĐÃ làm)

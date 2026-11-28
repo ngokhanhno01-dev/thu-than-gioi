@@ -2,7 +2,7 @@
    Boss Thần không bắt bằng châu; giết thì có tỉ lệ rơi TRỨNG. Trứng nằm trong Túi Trữ Vật (Balo), bấm "Mở" thì nở ngay:
    thú non cấp 1, tiến hóa 1 (V1), đúng loài/hệ của boss (phẩm chất Thần theo độ hiếm loài), Rank (E..SR) tung ngẫu nhiên bằng TTGCS.tungBac.
    Thú nở từ trứng KHÔNG có cờ boss nên không bị nhân hsBossLoai.
-   API: TTGTRUNG.CFG, .idTrung(loaiBoss), .roi(loaiBoss[,rng]) (tung tỉ lệ rơi, trúng thì +1 trứng vào Balo, trả id trứng hoặc null), .mo(idTrung) (nở trứng, trả uid thú hoặc null), .lay(n) (TEST).
+   API: TTGTRUNG.CFG, .idTrung(loaiBoss), .roi(loaiBoss[,rng][,mm]) (tung tỉ lệ rơi có tính may mắn mm, trúng thì +1 trứng vào Balo, trả id trứng hoặc null), .mo(idTrung) (nở trứng, trả uid thú hoặc null), .lay(n) (TEST).
    ĐÃ NỐI vào trận (index.html, hàm xong: giết boss Thần -> TTGTRUNG.roi(enemy.id)); trứng vào Balo, thông báo rơi do baoRoi.
    THÔNG BÁO (27/11/2026): trứng rơi = thẻ 106-thong-bao-roi.js (TTGDROP), TÊN TRỨNG 7 MÀU + icon + nháy sáng; dòng chạy ngang báo toàn màn hình. Trứng nở = thẻ màu theo Rank (SR cũng 7 màu).
    NÚT TEST ẨN: menu ẩn (chạm chữ "Danh Vọng") -> "Lấy trứng Đế Giang". Xóa khối cuối file khi ra bản thật. */
@@ -42,9 +42,10 @@
     try { if (root.TTGBAOBTG && TTGBAOBTG.show) TTGBAOBTG.show('<span class="ic"><img src="' + T.img + '" alt=""></span> Bạn đã nhặt được ' + nm(T.ten, 'than') + ' từ boss Thần ' + nm(tenLoai(T.loai), 'than') + '! <b style="color:#ffe066">Cực hiếm!</b>', 'roi'); } catch (e) {}
   }
 
-  function roi(loai, rng) {
+  function roi(loai, rng, mm) {
     var id = idTrung(loai), p = CFG.tiLeRoi[loai];
     if (!id || !p) return null;
+    p *= Math.min(3, 1 + Math.max(0, +mm || 0) / 100);   /* may mắn tăng tỉ lệ, tối đa x3, cùng công thức với rơi sách */
     if (((rng || Math.random)()) < p) { B.add(id, 1); baoRoi(id); return id; }
     return null;
   }
