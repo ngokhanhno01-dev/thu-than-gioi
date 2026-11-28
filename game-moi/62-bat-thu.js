@@ -113,7 +113,7 @@ function giveBeast(){
   var e=enemy();if(!e)return;
   var bac=bacBat(e),tien=Number(txc().bacKhiBat)||1,uid=null;
   try{uid=TTGTHU.add({id:e.id,ten:e.ten,bac:bac,tien:tien,lv:e.lv,chiso:{},kn:[null,null,null,null,null,null]});}catch(x){}
-  S.got={uid:uid,id:e.id,ten:e.ten,bac:bac,tien:tien,lv:e.lv,boss:!!e.boss};
+  S.got={uid:uid,id:e.id,ten:e.ten,bac:bac,tien:tien,lv:e.lv,boss:!!e.boss};try{window.TTGNHIEMVU&&TTGNHIEMVU.sk('bat');}catch(_){}
 }
 function afterFail(){
   if(S.time<=0){hetGio();return;}

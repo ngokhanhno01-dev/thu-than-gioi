@@ -102,7 +102,7 @@ function chDo(){
   if(X.maxed){toast('Món này đã đạt cấp tối đa +'+LT.ENH.MAX+'.');return;}
   var r=LT.cuongHoa(S.sel,{tier:X.tier,rb:X.rb,ticket:X.tk});
   if(r.err){toast(r.err);chRender();return;}
-  S.busyC=true;S.rb=0;var el=W.ch.p.slots.main[0].el,cl=r.ok?'lt-ok':'lt-bad';el.classList.add(cl);
+  S.busyC=true;S.rb=0;try{window.TTGNHIEMVU&&TTGNHIEMVU.sk('cuonghoa');}catch(_){}var el=W.ch.p.slots.main[0].el,cl=r.ok?'lt-ok':'lt-bad';el.classList.add(cl);
   setTimeout(function(){el.classList.remove(cl);S.busyC=false;toast(msgOf(r)+(r.rate<100?' (tỉ lệ '+r.rate+'%)':''));KH.refresh('ch');if(KH.current()==='ch')chRender();},900);}
 function chRbCycle(){var X=chCtx();if(!X||X.maxed)return;if(X.rbHave<1){toast('Chưa có Đá Ngũ Sắc');return;}S.rb=X.rb>=X.rbLim?0:X.rb+1;chRender();}
 function chTkToggle(){var X=chCtx();if(!X||X.maxed)return;if(X.tkHave<1){toast('Chưa có Vé Bảo Hộ');return;}S.tk=!S.tk;chRender();}

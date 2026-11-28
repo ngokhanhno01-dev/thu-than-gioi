@@ -244,7 +244,7 @@ function doEvo(){
  var res=tienHoa(t.uid);if(res.err){toast(res.err);render();return;}
  S.put=[false,false,false];KH.refresh('th');render();
  if(res.that){toast('Tiến hóa thất bại ('+res.tl+'%)! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' vẫn ở V'+res.from+(res.mat?', nguyên liệu đã mất.':', nguyên liệu được giữ lại.'));return;}
- toast('Tiến hóa thành công! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' V'+res.from+' → V'+res.to);}
+ try{window.TTGNHIEMVU&&TTGNHIEMVU.sk('tienhoa');}catch(_){}toast('Tiến hóa thành công! '+(root.TTGTHU&&TTGTHU.ten?TTGTHU.ten(t):'Thú')+' V'+res.from+' → V'+res.to);}
 function auto(){
  var t=ra(),r=yeuCau(t);if(!r){toast('Chưa có thú ra trận để tiến hóa.');return;}
  if(r.max){toast('Thú đã đạt V3, không tiến hóa thêm được.');return;}

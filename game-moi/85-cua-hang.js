@@ -192,7 +192,7 @@ function muaMon(m){
   if(get(m.tien)<m.gia){toast('Không đủ '+tenTien(m.tien));return;}
   var xong=function(){
     if(conLai(m)<=0||get(m.tien)<m.gia||!window.TTGBALO||!window.TTGTIEN)return;
-    TTGTIEN.add(m.tien,-m.gia);TTGBALO.add(m.id,1);mua.n[m.id]=(mua.n[m.id]|0)+1;saveMua();
+    TTGTIEN.add(m.tien,-m.gia);TTGBALO.add(m.id,1);mua.n[m.id]=(mua.n[m.id]|0)+1;saveMua();try{window.TTGNHIEMVU&&TTGNHIEMVU.sk('mua');}catch(_){}try{window.TTGNHIEMVU&&m.tien==='tt'&&TTGNHIEMVU.sk('chi',m.gia);}catch(_){}
     renderList();render();toast('Đã mua '+(it.ten||m.ten));
   };
   if(window.TTGBAO)TTGBAO.confirm('<div>Mua <b>'+esc(it.ten||m.ten)+'</b> với <b>'+fmt(m.gia)+'</b> '+tenTien(m.tien)+'?<br><small>Còn '+cl+'/'+m.toiDa+' lượt mua trong đợt này.</small></div>',[{t:'Mua',cb:xong},{t:'Hủy'}]);
@@ -206,7 +206,7 @@ function muaChau(j){
   var xong=function(){
     var S2=chauSet(),o2=S2.o[j];
     if(S2.a!==a0||!o2||o2.mua||get('tt')<tong||!window.TTGBALO||!window.TTGTIEN)return;   /* đợt đã làm mới / đã mua / hết tiền trong lúc hỏi xác nhận thì thôi */
-    TTGTIEN.add('tt',-tong);TTGBALO.add(idBong(o2.cap),o2.sl);o2.mua=1;saveChau();
+    TTGTIEN.add('tt',-tong);TTGBALO.add(idBong(o2.cap),o2.sl);o2.mua=1;saveChau();try{window.TTGNHIEMVU&&TTGNHIEMVU.sk('mua');}catch(_){}try{window.TTGNHIEMVU&&TTGNHIEMVU.sk('chi',tong);}catch(_){}
     renderList();render();toast('Đã mua '+nm);
   };
   if(window.TTGBAO)TTGBAO.confirm('<div>Mua <b>'+esc(nm)+'</b> với <b>'+fmt(tong)+'</b> '+tenTien('tt')+'?<br><small>('+CFG.chau.gia[o.cap]+' '+tenTien('tt')+' mỗi cái, mỗi ô chỉ mua được 1 lần mỗi đợt)</small></div>',[{t:'Mua',cb:xong},{t:'Hủy'}]);

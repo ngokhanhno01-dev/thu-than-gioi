@@ -144,6 +144,7 @@
   function ketThuc(uid, kq, t) {   /* kq = {kq:'thang'|'thua', hp} */
     t = T(t); var s = cuaToi(uid, t); if (!s) return loi('Không phải trận của bạn');
     kq = kq || {};
+    try { if (root.TTGNHIEMVU) root.TTGNHIEMVU.sk('bosstg'); } catch (_) {}   /* nhiệm vụ tuần: Đánh Boss Thế Giới (thắng hoặc thua đều tính 1 lượt) */
     if (kq.kq === 'thang') { s.hp = 0; s.chet = true; s.nguoiGiet = String(kq.ten == null ? '' : kq.ten).replace(/\s+/g, ' ').trim().slice(0, 40) || 'Một người chơi'; }   /* biệt danh người hạ boss (kq.ten) để thông báo; sau này server tự điền theo tài khoản */
     else { if (kq.hp != null) s.hp = Math.max(0.0001, Math.min(1, +kq.hp)); DB.khoa[kk(uid)] = t + CFG.khoaGiay * 1000; }
     s.dangDanh = null; save();
