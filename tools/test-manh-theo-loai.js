@@ -42,19 +42,19 @@ function nap(inv0, thuRaTran, tinhThach) {
 
 console.log('Test Mảnh theo loài (thả thú = 1 mảnh)');
 
-t('không còn item th-z*-manh trong danh mục; có th-m-<id> cho 10 loài mỗi vùng 0-5 + 3 thú khởi đầu (k1,k2,k3)', function () {
+t('không còn item th-z*-manh trong danh mục; có th-m-<id> cho 10 loài mỗi vùng 0-8 + 3 thú khởi đầu (k1,k2,k3) + 3 thú Thần (th1,th2,th3)', function () {
   var e = nap();
   Object.keys(e.CAT).forEach(function (k) { assert(!/^th-z\d+-manh$/.test(k), 'còn ' + k); });
   var ids = [];
-  [1, 2, 3, 6, 4, 5].forEach(function (v) { 'abcdefghij'.split('').forEach(function (c) { ids.push(v + c); }); });
-  ids.push('k1', 'k2', 'k3');
+  [1, 2, 3, 6, 4, 5, 7, 8, 9].forEach(function (v) { 'abcdefghij'.split('').forEach(function (c) { ids.push(v + c); }); });
+  ids.push('k1', 'k2', 'k3', 'th1', 'th2', 'th3');
   ids.forEach(function (id) {
     assert(e.CAT['th-m-' + id], 'thiếu th-m-' + id);
     assert.strictEqual(e.CAT['th-m-' + id].img, 'game-moi/icon-th/th-m-' + id + '.png');
     assert(/^Mảnh /.test(e.CAT['th-m-' + id].ten));
   });
-  assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-m-/.test(k); }).length, 63);
-  assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-z\d+-(loi|chau|an)$/.test(k); }).length, 27);
+  assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-m-/.test(k); }).length, ids.length);   /* 96 */
+  assert.strictEqual(Object.keys(e.CAT).filter(function (k) { return /^th-z\d+-(loi|chau|an)$/.test(k); }).length, 36);   /* (9 vùng + 3 thú Thần) x 3 món */
 });
 
 t('mô tả Mảnh nói rõ nhận bằng cách THẢ, không còn ghi "rơi khi thắng"', function () {
@@ -122,9 +122,9 @@ t('thả luôn 1 mảnh bất kể Rank (E..SR), bậc (V1-V3) hay vùng/hệ (0
   assert.strictEqual(Object.keys(e.inv).length, n);
 });
 
-t('thả mỗi loài trong 63 loài đều ra 1 Mảnh', function () {
+t('thả mỗi loài trong 96 loài đều ra 1 Mảnh', function () {
   var e = nap(), ids = Object.keys(e.CAT).filter(function (k) { return /^th-m-/.test(k); }).map(function (k) { return k.slice(5); });
-  assert.strictEqual(ids.length, 63);
+  assert.strictEqual(ids.length, 96);
   ids.forEach(function (id) { assert.strictEqual(e.TH.manhKhiTha({ id: id }).q, 1, id); });
   ids.forEach(function (id) { assert.strictEqual(e.inv['th-m-' + id], 1, id); });
 });
