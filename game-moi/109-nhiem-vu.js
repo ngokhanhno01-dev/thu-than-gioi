@@ -44,7 +44,11 @@ function pxUrl(name){
     for(i=0;i<256;i++){ch=d.charAt(i);if(ch!=='.'&&PXP[ch]){g.fillStyle=PXP[ch];g.fillRect(i%16,(i/16)|0,1,1);}}
     return pxCache[name]=c.toDataURL('image/png');}catch(e){return null;}
 }
-function icQ(name){var u=pxUrl(name);return u?'<img class="px" src="'+u+'" alt="">':esc(name);}
+/* ICON THẬT CỦA GAME (thay pixel art): tên icon trong Q() -> ảnh trong game-moi. Tên không có ở đây thì rơi về pixel art PX. */
+var RIC={gio:'icon/cua-hang.webp',kiem:'icon/tham-hiem.webp',bando:'icon/pho-ban.webp',bua:'icon/cuong-hoa.webp',tien:'icon-tien/tt.webp',chan:'img/chau/bac1-closed.png',ngoc:'img/chau/bac3-closed.png',khien:'icon/trang-bi.webp',quy:'icon/boss-the-gioi.webp',vuong:'icon/thu-than.webp',sao:'icon/thu-than.webp',rong:'icon/boss-the-gioi.webp',lich:'icon/diem-danh.webp',catcat:'icon/diem-danh.webp',cup:'icon/dau-truong.webp'};
+function icQ(name){
+  if(RIC[name])return '<img src="'+D+RIC[name]+'" alt="">';
+  var u=pxUrl(name);return u?'<img class="px" src="'+u+'" alt="">':esc(name);}
 /* ===== DỮ LIỆU NHIỆM VỤ (chốt 28/11/2026) =====
    id | ten | mo (dòng mô tả) | ic (tên icon pixel art trong PX) | ev (sự kiện đếm) | need (mục tiêu) | diem (điểm hoạt động khi bấm Nhận) | th (thưởng)
    Điểm: Ngày 15+15+20+25+25 = 100 | Tuần 10 x 10 = 100. Đấu trường KHÔNG thưởng Thú Thần Thạch. Tinh Thạch đã nâng (chợ 50 -> 200). */

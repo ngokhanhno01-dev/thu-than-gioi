@@ -30,3 +30,6 @@ Không còn 5/10 nhiệm vụ cố định. Mỗi **ô** nhiệm vụ có nhiề
 - Bấm vào RƯƠNG: hiện bảng liệt kê sẽ nhận được gì + trạng thái (chưa đủ điểm / đủ điểm có nút Nhận / đã nhận). Rương không còn tự nhận khi chạm, phải bấm Nhận trong bảng.
 - Đóng bảng: nút Đóng, chạm ra ngoài thẻ, hoặc Esc. Test: `TTGNHIEMVU.xemThuong({t:'tt',n:500})`.
 - Test nhanh trong console: `TTGNHIEMVU.sk('thang',{boss:true,vung:1})`, `TTGNHIEMVU.xong('d2')`, `TTGNHIEMVU.setDiem(60)`, `TTGNHIEMVU.reset()`.
+
+## Icon thật của game (28/11/2026)
+Icon nhiệm vụ không còn dùng pixel art: bảng `RIC` trong `109-nhiem-vu.js` ánh xạ tên icon (tham số 3 của `Q()`) sang ảnh thật trong `game-moi/icon`, `icon-tien`, `img/chau`. Đổi icon = sửa 1 dòng trong `RIC`. Tên không có trong `RIC` vẫn rơi về pixel art `PX`.
