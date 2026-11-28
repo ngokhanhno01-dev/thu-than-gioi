@@ -18,11 +18,11 @@
   };
   var TRUNG = {   /* id vật phẩm -> loài boss */
     'trung-de-giang': { loai: 'th1', ten: 'Trứng Đế Giang', img: 'game-moi/icon-item/trung-de-giang.png',
-      mo: 'Trứng của Đế Giang, Thú Thần hệ Không Gian. Bấm Mở: nở ngay thành Đế Giang cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' },
+      mo: 'Trứng của Đế Giang, Thú Đặc Biệt hệ Không Gian. Bấm Mở: nở ngay thành Đế Giang cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' },
     'trung-chuc-long': { loai: 'th2', ten: 'Trứng Chúc Long', img: 'game-moi/icon-item/trung-chuc-long.png',
-      mo: 'Trứng của Chúc Long, Thú Thần hệ Thời Gian. Bấm Mở: nở ngay thành Chúc Long cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' },
+      mo: 'Trứng của Chúc Long, Thú Đặc Biệt hệ Thời Gian. Bấm Mở: nở ngay thành Chúc Long cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' },
     'trung-vo-cuc': { loai: 'th3', ten: 'Trứng Vô Cực', img: 'game-moi/icon-item/trung-vo-cuc.png',
-      mo: 'Trứng của Vô Cực, Thú Thần hệ Vô Cực. Bấm Mở: nở ngay thành Vô Cực cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' }
+      mo: 'Trứng của Vô Cực, Thú Đặc Biệt hệ Vô Cực. Bấm Mở: nở ngay thành Vô Cực cấp 1 (tiến hóa 1), Rank ngẫu nhiên từ E đến SR.' }
   };
   var items = {};
   Object.keys(TRUNG).forEach(function (id) { items[id] = { loai: 'nl', ten: TRUNG[id].ten, img: TRUNG[id].img, mo: TRUNG[id].mo }; });
@@ -37,7 +37,7 @@
   /* THÔNG BÁO TRỨNG RƠI: thẻ 7 màu + dòng chạy ngang */
   function baoRoi(id) {
     var T = TRUNG[id]; if (!T) return;
-    if (root.TTGDROP) TTGDROP.show({ tieude: 'Boss Thần rơi vật phẩm!', ten: T.ten, so: 1, muc: 'than', nhan: 'Thần phẩm', nguon: 'Rơi từ boss ' + tenLoai(T.loai), icon: T.img, fb: '' });
+    if (root.TTGDROP) TTGDROP.show({ tieude: 'Boss Thần rơi vật phẩm!', ten: T.ten, so: 1, muc: 'than', nhan: 'Đặc Biệt', nguon: 'Rơi từ boss ' + tenLoai(T.loai), icon: T.img, fb: '' });
     else toast('Nhận được ' + T.ten + '!');
     try { if (root.TTGBAOBTG && TTGBAOBTG.show) TTGBAOBTG.show('<span class="ic"><img src="' + T.img + '" alt=""></span> Bạn đã nhặt được ' + nm(T.ten, 'than') + ' từ boss Thần ' + nm(tenLoai(T.loai), 'than') + '! <b style="color:#ffe066">Cực hiếm!</b>', 'roi'); } catch (e) {}
   }
@@ -56,7 +56,7 @@
     var bac = (root.TTGCS && TTGCS.tungBac) ? TTGCS.tungBac() : 'E';
     B.add(id, -1);
     var uid = TTGTHU.add({ id: T.loai, ten: tenLoai(T.loai), bac: bac, tien: 1, lv: 1, chiso: {}, kn: [null, null, null, null, null, null] });
-    if (root.TTGDROP) TTGDROP.show({ no: T.loai, tieude: 'Trứng nở!', ten: tenLoai(T.loai), muc: bac, nhan: 'Rank ' + bac, nguon: 'Thú Thần · cấp 1 · tiến hóa 1', icon: (TTGTHU.anh && TTGTHU.anh({ id: T.loai, tien: 1 })) || T.img, fb: '', ms: (bac === 'SR' ? 5200 : 3600) });
+    if (root.TTGDROP) TTGDROP.show({ no: T.loai, tieude: 'Trứng nở!', ten: tenLoai(T.loai), muc: bac, nhan: 'Rank ' + bac, nguon: 'Thú Đặc Biệt · cấp 1 · tiến hóa 1', icon: (TTGTHU.anh && TTGTHU.anh({ id: T.loai, tien: 1 })) || T.img, fb: '', ms: (bac === 'SR' ? 5200 : 3600) });
     else toast('Trứng nở! Nhận ' + tenLoai(T.loai) + ' (Rank ' + bac + ')');
     return uid;
   }

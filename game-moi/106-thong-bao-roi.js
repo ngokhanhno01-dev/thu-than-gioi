@@ -23,7 +23,7 @@
     SS: { nhan: 'Truyền thuyết',c: '#ff1744', rgb: '255,23,68', hi: 1 },
     SR: { nhan: 'Cực phẩm',     c: '#ff4fd8', rgb: '255,64,64', hi: 1, rb: 1 },
     sach: { nhan: 'Sách kỹ năng', c: '#4fd8ff', rgb: '60,200,255', hi: 1 },
-    than: { nhan: 'Thần phẩm',  c: '#ff4fd8', rgb: '255,64,64', hi: 1, rb: 1 }
+    than: { nhan: 'Đặc Biệt',  c: '#ff4fd8', rgb: '255,64,64', hi: 1, rb: 1 }
   };
   M.thuong = M.E; M.hiem = M.C; M.suthi = M.B; M.huyenthoai = M.A; M.truyenthuyet = M.S;
 
