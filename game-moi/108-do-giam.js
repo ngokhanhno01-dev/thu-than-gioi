@@ -18,7 +18,9 @@ var IMG=[],ov=null,cv=null,cx=null,page=0,anim=null,raf=0,down=null,chon=null,th
 var TH_HIEM=['thuong','hiem','suthi','huyenthoai','truyenthuyet','than'];
 function xepHiem(a){var k=function(t){var h=null;try{h=TTGCS.doHiem(t.id);}catch(e){}var i=TH_HIEM.indexOf(h);return i<0?0:i;};return a.map(function(t,i){return[t,i];}).sort(function(x,y){return(k(x[0])-k(y[0]))||(x[1]-y[1]);}).map(function(x){return x[0];});}
 function trangList(){var L=[],zs=(root.THU_MOI&&THU_MOI.zones||[]).slice().sort(function(a,b){return a.z-b.z;});
-  zs.forEach(function(z){L.push({k:'vung',z:z,thu:xepHiem(z.thu)});});
+  var kd=[];zs.forEach(function(z){z.thu.forEach(function(t){if(/^k\d/.test(t.id))kd.push(t);});});kd.sort(function(a,b){return a.id<b.id?-1:1;});   /* 3 thú khởi đầu (k1..k3) nằm trong zones nhưng có trang riêng */
+  if(kd.length)L.push({k:'khoidau',z:{ten:'Khởi Đầu',z:-1,thu:kd},thu:kd});
+  zs.forEach(function(z){L.push({k:'vung',z:z,thu:xepHiem(z.thu.filter(function(t){return !/^k\d/.test(t.id);}))});});
   if(root.THU_MOI&&THU_MOI.than&&THU_MOI.than.thu&&THU_MOI.than.thu.length)L.push({k:'than',z:THU_MOI.than,thu:THU_MOI.than.thu});
   return L;}
 function docDaBat(){var o={};try{var a=JSON.parse(localStorage.getItem(KDB)||'{}');if(Array.isArray(a))a.forEach(function(i){o[i]=1;});else if(a&&typeof a==='object')Object.keys(a).forEach(function(i){o[i]=Math.max(1,Math.min(3,+a[i]||1));});}catch(e){}return o;}
@@ -31,6 +33,7 @@ function heCua(id){var l=null;try{l=root.TTGCS&&TTGCS.loai?TTGCS.loai(id):null;}
 function hiemCua(id){var h=null;try{h=root.TTGCS&&TTGCS.hiemInfo?TTGCS.hiemInfo(id):null;}catch(e){}return h||{ten:'Chưa rõ',mau:'#b9c0c9'};}
 function gioStr(h){return h+'h';}
 function noiGap(t,z,than){
+  if(/^k\d/.test(t.id))return['Thú khởi đầu','Chọn 1 trong 3 con khi bắt đầu game'];
   if(than){var C=(root.TTGBTG&&TTGBTG.CFG)||{},tt=C.thuTu||['th1','th2','th3'],i=tt.indexOf(t.id),kg=C.khungGio||4,ck=kg*tt.length,b=(C.batDauPhut||0),m=C.coMatPhut||30;
     var g=i<0?'':' · '+gioStr(i*kg)+(b?'':'')+' và '+gioStr(i*kg+ck)+' mỗi ngày (giờ VN), '+m+' phút';
     return['Boss thế giới'+g,'Vùng ngẫu nhiên, ai cũng thấy · Chỉ 1 người đánh 1 lúc'];}
@@ -61,7 +64,7 @@ function moc(t,huong){var seq=huong>0?[0,1,2,3,4,5,6,7,0]:[0,7,6,5,4,3,2,1,0],i,
   for(i=0;i<N;i++){n=NHIP[i];if(t<n.giu)return[seq[i],seq[i],0,i];t-=n.giu;if(t<n.hoa){var u=t/n.hoa;return[seq[i],seq[i+1],u*u*(3-2*u),i];}t-=n.hoa;}
   return null;}
 /* ----- Ô THÚ: danh sách ô của trang p = [{t,z,than,x,y,w,h,boss}] ----- */
-function oCua(p){var tr=trangList()[p],o=[];if(!tr)return o;var th=tr.thu,than=tr.k==='than';
+function oCua(p){var tr=trangList()[p],o=[];if(!tr)return o;var th=tr.thu,than=tr.k!=='vung';   /* than = trang 1 hàng ở trái (Thú Thần, Khởi Đầu) */
   for(var i=0;i<th.length;i++){var tp=i<6?0:1,j=tp?i-6:i,hang=tp?(j<2?0:1):(j<3?0:1),vt=tp?j%2:j%3,so=tp?2:3,cxx=tp?CXP:CXT;   /* trái 6 con (3+3: Thường, Hiếm), phải 4 con (2+2: Sử Thi / Huyền Thoại, Truyền Thuyết) */
     if(than){if(tp)continue;so=th.length;vt=i;hang=0;}
     var x0=cxx-(so*CW+(so-1)*GAPX)/2+vt*(CW+GAPX),y=hang?Y2:Y1;
@@ -106,11 +109,12 @@ function veMuiTen(huong,x,ok){cx.save();cx.globalAlpha=ok?1:.28;cx.beginPath();c
 function veTrang(a){
   var L=trangList(),tr=L[page];cx.save();cx.globalAlpha=a;
   if(!tr){chuVe('Chưa có nội dung',640,360,26,'#ffe9a8',true,true);cx.restore();return;}
-  var than=tr.k==='than',z=tr.z,th=tr.thu,nb=0;th.forEach(function(t){if(dabat[t.id])nb++;});
+  var than=tr.k==='than',kd=tr.k==='khoidau',z=tr.z,th=tr.thu,nb=0;th.forEach(function(t){if(dabat[t.id])nb++;});
   chuVe(than?'Thú Thần':z.ten,CXT,196,26,'#ffe9a8',true,true);
   if(than){chuVe('Boss thế giới',CXP,196,24,'#ffe9a8',true,true);
     var C=(root.TTGBTG&&TTGBTG.CFG)||{},m=C.coMatPhut||30,kg=C.khungGio||4,n=(C.thuTu||[1,2,3]).length;
     ['Mỗi boss xuất hiện '+m+' phút, cứ '+kg*n+' tiếng một lần','(giờ Việt Nam, xem giờ từng con khi chạm vào ô).','Vùng xuất hiện ngẫu nhiên, mọi người chơi','thấy giống nhau. Chỉ 1 người đánh 1 lúc.','','Chạm vào ô thú để xem chi tiết.'].forEach(function(s,i){chuVe(s,CXP,262+i*30,17,'#cfe0ff',false,true,440);});}
+  else if(kd){chuVe('Thú khởi đầu',CXP,196,24,'#ffe9a8',true,true);['Ba con đầu tiên của hành trình.','Khi mới vào game bạn chọn 1 trong 3 con.','','Chạm vào ô thú để xem chi tiết.'].forEach(function(s2,i){chuVe(s2,CXP,262+i*30,17,'#cfe0ff',false,true,440);});}
   else{var he=(root.TTGCS&&TTGCS.HE_VUNG&&TTGCS.HE_VUNG[z.z]);chuVe(he?'Hệ chủ đạo: '+heTen(he):'',CXP,196,20,'#9fd0ff',true,true);}
   chuVe('Đã bắt '+nb+'/'+th.length,150,200,14,'#cfe0ff',false,true,170,'left');   /* góc trên trái */
   oCua(page).forEach(veO);
